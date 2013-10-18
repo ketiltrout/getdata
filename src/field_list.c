@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2008-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -360,7 +360,7 @@ const gd_carray_t *gd_carrays(DIRFILE* D, gd_type_t return_type) gd_nothrow
       fl[n].n = D->entry[i]->EN(scalar,array_len);
       fl[n].d = _GD_Alloc(D, return_type, fl[n].n);
       if (D->error || _GD_DoField(D, D->entry[i], 0, 0, fl[n].n, return_type,
-            fl[n].d) != 1)
+            fl[n].d) < 1)
         break;
       n++;
     }
@@ -560,7 +560,7 @@ const gd_carray_t *gd_mcarrays(DIRFILE* D, const char* parent,
       fl[n].n = e->p.meta_entry[i]->EN(scalar,array_len);
       fl[n].d = _GD_Alloc(D, return_type, fl[n].n);
       if (D->error || _GD_DoField(D, e->p.meta_entry[i], 0, 0, fl[n].n,
-            return_type, fl[n].d) != 1)
+            return_type, fl[n].d) < 1)
         break;
       n++;
     }

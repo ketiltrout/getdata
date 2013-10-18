@@ -1,257 +1,271 @@
-140 ...I..m getdata_constants
-  0 F9CIpPm gd_error
-  1 F9CIpPm gd_open
-  2 F9CIpPm gd_getdata (INT8)
-102 .9...P. gd_getdata (INT16)
-103 .9..... gd_getdata (INT32)
-104 .9..p.. gd_getdata (INT64)
-105 .9..... gd_getdata (FLOAT32)
-106 .9..p.. gd_getdata (FLOAT64)
-107 .9..... gd_getdata (COMPLEX64)
-108 .9..pPm gd_getdata (COMPLEX128)
-109 .9..... gd_getdata (NULL)
-  3 F9CIpPm gd_get_constant (INT8)
-110 .9..... gd_get_constant (INT16)
-111 .9..... gd_get_constant (INT32)
-112 .9..p.. gd_get_constant (INT64)
-113 .9..... gd_get_constant (FLOAT32)
-114 .9..p.. gd_get_constant (FLOAT64)
-115 .9..... gd_get_constant (COMPLEX64)
-116 .9..pP. gd_get_constant (COMPLEX128)
-117 .9..... gd_get_constant (NULL)
-  4 F9..... fgd_field_name_max
-  5 F9..... fgd_mfield_name_max
-  6 F9CIpPm gd_nfields
-  7 F...... _GDF_FString
-  8 F9CIpPm gd_field_list
-  9 F9CIpPm gd_nmfields
- 10 F9CIpPm gd_mfield_list
- 11 F9CIpPm gd_nframes
- 12 F9CIpPm gd_spf
- 13 F9CIpP. gd_putdata (INT8)
-118 .9...P. gd_putdata (INT16)
-119 .9..p.. gd_putdata (INT32)
-120 .9..pP. gd_putdata (INT64)
-121 .9..... gd_putdata (FLOAT32)
-122 .9.IpP. gd_putdata (FLOAT64)
-123 .9..... gd_putdata (COMPLEX64)
-124 .9.IpPm gd_putdata (COMPLEX128)
-136 ....p.. gd_putdata (auto type detect)
- 14 F9CIpPm gd_error_string
- 15 F9.I.Pm gd_entry_type
- 16 F9CIpPm gd_entry (RAW)
- 17 F...... gd_entry (LINCOM)
- 18 F9CIpPm gd_entry (CLINCOM)
- 19 F...... gd_entry (POLYNOM)
- 20 F9CIpPm gd_entry (CPOLYNOM)
- 21 F9CIpPm gd_entry (LINTERP)
- 22 F9CIpPm gd_entry (BIT)
- 23 F9CIpPm gd_entry (SBIT)
- 24 F9CIpPm gd_entry (MULTIPLY)
- 25 F9CIpPm gd_entry (PHASE)
- 26 F9CIpPm gd_entry (CONST)
-134 ..CIpPm gd_entry (STRING)
- 27 F9CIpPm gd_fragment_index
- 28 F9CIpPm gd_add_raw
- 29 F9C.p.m gd_add_lincom
- 30 F9CI.P. gd_add_clincom
- 31 F9C.pP. gd_add_polynom
- 32 F9CI..m gd_add_cpolynom
- 33 F9CIpPm gd_add_linterp
- 34 F9CIpPm gd_add_bit
- 35 F9CIpPm gd_add_sbit
- 36 F9CIpPm gd_add_multiply
- 37 F9CIpPm gd_add_phase
- 38 F9CIpPm gd_add_const
-125 .9.I.P. gd_add
- 39 F9CIpPm gd_fragmentname
- 40 F9CIpPm gd_nframgents
-182 .....P. fragments
- 41 F9CIpPm gd_include
- 42 F9CIpPm gd_nfields_by_type
- 43 F9CIpPm gd_field_list_by_type
- 44 F9CIpPm gd_nvectors
- 45 F9CIpPm gd_vector_list
- 46 F9.Ip.m gd_madd_lincom
- 47 F9...P. gd_madd_clincom
- 48 F9.IpP. gd_madd_polynom
- 49 F9....m gd_madd_cpolynom
- 50 F9.IpPm gd_madd_linterp
- 51 F9.IpPm gd_madd_bit
- 52 F9.IpPm gd_madd_sbit
- 53 F9.IpPm gd_madd_multiply
- 54 F9.IpPm gd_madd_phase
- 55 F9.IpPm gd_madd_const
-126 .9CI.P. gd_madd
- 56 F9CIpPm gd_get_string
- 57 F9CIpPm gd_add_string
- 58 F9.I.Pm gd_madd_string
- 59 F9CIpPm gd_add_spec
- 60 F9CIpPm gd_madd_spec
- 61 F9CIpPm gd_put_constant (INT8)
-127 .9..... gd_put_constant (INT16)
-128 .9..p.. gd_put_constant (INT32)
-129 .9..p.. gd_put_constant (INT64)
-130 .9..... gd_put_constant (FLOAT32)
-131 .9..p.. gd_put_constant (FLOAT64)
-132 .9..... gd_put_constant (COMPLEX64)
-133 .9..p.m gd_put_constant (COMPLEX128)
- 62 F9CIpPm gd_put_string
- 63 F9CIpPm gd_nmfields_by_type
- 64 F9CIpPm gd_mfield_list_by_type
- 65 F9CIpPm gd_nmvectors
- 66 F9CIpPm gd_mvector_list
- 67 F9CI.Pm gd_alter_raw
- 68 F9C...m gd_alter_lincom
- 69 F9.I.P. gd_alter_clincom
- 70 F9C...m gd_alter_polynom
- 71 F9.I.P. gd_alter_cpolynom
- 72 F9CI.Pm gd_alter_linterp
- 73 F9CI.Pm gd_alter_bit
- 74 F9CI.Pm gd_alter_sbit
- 75 F9CI.Pm gd_alter_multiply
- 76 F9CI.Pm gd_alter_phase
- 77 F9CI.Pm gd_alter_const
-141 ...IpP. gd_alter_entry
- 78 F9CIpPm gd_encoding
- 79 F9CIpPm gd_endianness
- 80 F9CIpPm gd_dirfilename
- 81 F9CIpPm gd_parent_fragment
- 82 F9CIpPm gd_protect
- 83 F9CIpPm gd_protection
- 84 F9CIpPm gd_raw_filename
- 85 F9CIpPm gd_reference
-135 ..C.... Dirifle::ReferenceFilename
-  (test 86 is placed after test 139)
- 87 F9CIpPm gd_alter_encoding
- 88 F9CIpPm gd_alter_endianness
- 89 F9CIpPm gd_alter_spec
- 90 F9CIpPm gd_delete
- 91 F9CIpPm gd_malter_spec
- 92 F9CIpPm gd_move
- 93 F9CIpPm gd_rename
- 94 F9CIpPm gd_uninclude
- 95 F9CIpPm gd_frameoffset
- 96 F9CIpPm gd_alter_frameoffset
- 97 F9CIpPm gd_native_type
-137 ....p.. gd_native_type_name
- 98 F...... GDCSCL
- 99 F9CIpPm gd_validate
-100 F9....m gd_framenum
-101 F9CIpPm gd_framenum_subset
-  (tests 102 through 109 are placed after test 2)
-  (tests 110 through 117 are placed after test 3)
-  (tests 118 through 124 are placed after test 13)
-  (test 125 is placed after test 38)
-  (test 126 is placed after test 55)
-  (tests 127 through 133 are placed after test 61)
-  (test 134 is placed after test 26)
-  (test 135 is placed after test 85)
-  (test 136 is placed after test 133)
-  (test 137 is placed after test 97)
-138 F...... GDGSCA
-139 F...... GDASCA
-  (test 140 is placed before test 0)
-  (test 141 is placed after test 77)
- 86 F9CIpPm gd_eof
-142 F9CIpPm gd_bof
-143 F9CIpPm gd_entry (DIVIDE)
-144 F...... gd_entry (RECIP)
-145 F9CIpPm gd_entry (CRECIP)
-146 F9CIpPm gd_add_divide
-147 F9C.... gd_add_recip
-148 F9CIpPm gd_add_crecip
-149 F9..pPm gd_madd_divide
-150 F9..... gd_madd_recip
-151 F9..pPm gd_madd_crecip
-152 F9CI.P. gd_alter_divide
-153 F9CI.P. gd_alter_recip
-154 F9..... gd_alter_crecip
-155 F9CIpPm gd_rewrite_fragment
-156 F9CIpPm gd_invalid_dirfile
-157 F9CIpPm gd_dirfile_standards
-158 F9CIpPm gd_get_carray
-159 F9CIp.m gd_get_carray_slice (INT8)
-160 .9..... gd_get_carray_slice (INT16)
-161 .9..... gd_get_carray_slice (INT32)
-162 .9..p.. gd_get_carray_slice (INT64)
-163 .9..... gd_get_carray_slice (FLOAT32)
-164 .9..pP. gd_get_carray_slice (FLOAT64)
-165 .9..... gd_get_carray_slice (COMPLEX64)
-166 .9..p.. gd_get_carray_slice (COMPLEX128)
-167 ..C-pPm gd_carrays
-168 F9CIpPm gd_put_carray
-169 F9CIpPm gd_put_carray_slice (INT8)
-170 .9..... gd_put_carray_slice (INT16)
-171 .9..... gd_put_carray_slice (INT32)
-172 .9..p.. gd_put_carray_slice (INT64)
-173 .9..... gd_put_carray_slice (FLOAT32)
-174 .9..p.. gd_put_carray_slice (FLOAT64)
-175 .9..... gd_put_carray_slice (COMPLEX64)
-176 .9..p.. gd_put_carray_slice (COMPLEX128)
-177 F9CIpPm gd_carray_len
-178 F9CIpPm gd_entry (CARRAY)
-179 F9CIpPm gd_add_carray
-180 F9CIpPm gd_madd_carray
-181 F9CI.Pm gd_alter_carray
-  (test 182 is placed after test 40)
-183 F9CIpPm gd_constants (INT8)
-184 .9..... gd_constants (INT16)
-185 .9..... gd_constants (INT32)
-186 .9..p.. gd_constants (INT64)
-187 .9..... gd_constants (FLOAT32)
-188 .9..p.. gd_constants (FLOAT64)
-189 .9..... gd_constants (COMPLEX64)
-190 .9..p.. gd_constants (COMPLEX128)
-191 F9CIpPm gd_mconstants (INT8)
-192 .9..... gd_mconstants (INT16)
-193 .9..... gd_mconstants (INT32)
-194 .9..p.. gd_mconstants (INT64)
-195 .9..... gd_mconstants (FLOAT32)
-196 .9..p.. gd_mconstants (FLOAT64)
-197 .9..... gd_mconstants (COMPLEX64)
-198 .9..p.. gd_mconstants (COMPLEX128)
-199 F9CIpPm gd_strings
-200 F9CIpPm gd_mstrings
-201 F9..... gd_string_value_max
-202 F9..... gd_mstring_value_max
-203 F9CIpPm gd_seek
-204 F9CIpPm gd_tell
-205 F9CIpPm gd_hide
-206 F9CIpPm gd_hidden
-207 F9CIpPm gd_unhide
-208 F9CIpPm gd_sync
-209 F9CIpPm gd_flush
-210 F9CIpPm gd_metaflush
-211 F9CIpPm gd_entry (WINDOW)
-212 F9CIpPm gd_add_window (INT64)
-213 .9..... gd_add_window (FLOAT64)
-214 F9CIpPm gd_madd_wndow (INT64)
-215 .9..... gd_madd_wndow (FLOAT64)
-216 .9..... gd_alter_window (INT64)
-217 F9CIpPm gd_alter_window (FLOAT64)
-218 F9CIpPm gd_alias_target
-219 F9CIpPm gd_add_alias
-220 F9CIpPm gd_madd_alias
-221 F9CIpPm gd_naliases
-222 F9CIpPm gd_aliases
-223 F9CIpPm gd_include_affix
-224 F9CIpPm gd_move_alias
-225 F9CIpPm gd_delete_alias
-226 F9CIpPm gd_fragment_affixes
-227 F9CIpPm gd_alter_affixes
-228 F9CIpPm gd_entry (MPLEX)
-229 F9CIpPm gd_add_mplex
-230 F9CIpPm gd_madd_mplex
-231 F9CIpPm gd_alter_mplex
-232 F9CIpPm gd_tokenise
-233 F9CIpPm gd_raw_close
-234 F9CIpPm gd_desync
-235 F9CIpPm gd_flags
-236 F9CIpPm gd_verbose_prefix
-237 F9CIpPm gd_nentries
-238 F9..... fgd_entry_name_max
-239 F9CIpPm gd_entry_list
-240 F9CIpPm gd_mplex_lookback
-241 F9CIpPm gd_linterp_tablename
-242 ..C-pP- gd_mcarrays
+  0 ...I..m. getdata_constants
+  1 F9CIpPmh gd_error
+  2 F9CIpPmh gd_open
+  3 F9CIpPmh gd_getdata (INT8)
+  4 .9...P.h gd_getdata (INT16)
+  5 .9...... gd_getdata (INT32)
+  6 .9..p... gd_getdata (INT64)
+  7 .9...... gd_getdata (FLOAT32)
+  8 .9..p... gd_getdata (FLOAT64)
+  9 .9...... gd_getdata (COMPLEX64)
+ 10 .9..pPmh gd_getdata (COMPLEX128)
+ 11 .9...... gd_getdata (NULL)
+ 12 F9CIpPmh gd_get_constant (INT8)
+ 13 .9...... gd_get_constant (INT16)
+ 14 .9...... gd_get_constant (INT32)
+ 15 .9..p... gd_get_constant (INT64)
+ 16 .9...... gd_get_constant (FLOAT32)
+ 17 .9..p... gd_get_constant (FLOAT64)
+ 18 .9...... gd_get_constant (COMPLEX64)
+ 19 .9..pP.h gd_get_constant (COMPLEX128)
+ 20 .9...... gd_get_constant (NULL)
+ 21 F9...... fgd_field_name_max
+ 22 F9...... fgd_mfield_name_max
+ 23 F9CIpPmh gd_nfields
+ 24 F....... _GDF_FString
+ 25 F9CIpPmh gd_field_list
+ 26 F9CIpPmh gd_nmfields
+ 27 F9CIpPmh gd_mfield_list
+ 28 F9CIpPmh gd_nframes
+ 29 F9CIpPmh gd_spf
+ 30 F9CIpP.h gd_putdata (INT8)
+ 31 .9...P.. gd_putdata (INT16)
+ 32 .9..p... gd_putdata (INT32)
+ 33 .9..pP.h gd_putdata (INT64)
+ 34 .9...... gd_putdata (FLOAT32)
+ 35 .9.IpP.h gd_putdata (FLOAT64)
+ 36 .9...... gd_putdata (COMPLEX64)
+ 37 .9.IpPmh gd_putdata (COMPLEX128)
+ 38 F9CIpPmh gd_error_string
+ 39 F9.I.Pmh gd_entry_type
+ 40 F9CIpPmh gd_entry (RAW)
+ 41 F....... gd_entry (LINCOM)
+ 42 F9CIpPmh gd_entry (CLINCOM)
+ 43 F....... gd_entry (POLYNOM)
+ 44 F9CIpPmh gd_entry (CPOLYNOM)
+ 45 F9CIpPmh gd_entry (LINTERP)
+ 46 F9CIpPmh gd_entry (BIT)
+ 47 F9CIpPmh gd_entry (SBIT)
+ 48 F9CIpPmh gd_entry (MULTIPLY)
+ 49 F9CIpPmh gd_entry (PHASE)
+ 50 F9CIpPmh gd_entry (CONST)
+ 51 ..CIpPmh gd_entry (STRING)
+ 52 F9CIpPmh gd_fragment_index
+ 53 F9CIpPmh gd_add_raw
+ 54 F9C.p.m. gd_add_lincom
+ 55 F9CI.P.h gd_add_clincom
+ 56 F9C.pP.h gd_add_polynom
+ 57 F9CI..m. gd_add_cpolynom
+ 58 F9CIpPmh gd_add_linterp
+ 59 F9CIpPmh gd_add_bit
+ 60 F9CIpPmh gd_add_sbit
+ 61 F9CIpPmh gd_add_multiply
+ 62 F9CIpPmh gd_add_phase
+ 63 F9CIpPmh gd_add_const
+ 64 F9CIpPmh gd_fragmentname
+ 65 F9CIpPmh gd_nframgents
+ 66 F9CIpPmh gd_include
+ 67 F9CIpPmh gd_nfields_by_type
+ 68 F9CIpPmh gd_field_list_by_type
+ 69 F9CIpPmh gd_nvectors
+ 70 F9CIpPmh gd_vector_list
+ 71 F9.Ip... gd_madd_lincom
+ 72 F9...Pmh gd_madd_clincom
+ 73 F9.IpP.h gd_madd_polynom
+ 74 F9....m. gd_madd_cpolynom
+ 75 F9.IpPmh gd_madd_linterp
+ 76 F9.IpPmh gd_madd_bit
+ 77 F9.IpPmh gd_madd_sbit
+ 78 F9.IpPmh gd_madd_multiply
+ 79 F9.IpPmh gd_madd_phase
+ 80 F9.IpPmh gd_madd_const
+ 81 F9CIpPmh gd_get_string
+ 82 F9CIpPmh gd_add_string
+ 83 F9.I.Pmh gd_madd_string
+ 84 F9CIpPmh gd_add_spec
+ 85 F9CIpPmh gd_madd_spec
+ 86 F9CIpPmh gd_put_constant (INT8)
+ 87 .9...... gd_put_constant (INT16)
+ 88 .9..p... gd_put_constant (INT32)
+ 89 .9..p... gd_put_constant (INT64)
+ 90 .9...... gd_put_constant (FLOAT32)
+ 91 .9..p..h gd_put_constant (FLOAT64)
+ 92 .9...... gd_put_constant (COMPLEX64)
+ 93 .9..p.mh gd_put_constant (COMPLEX128)
+ 94 F9CIpPmh gd_put_string
+ 95 F9CIpPmh gd_nmfields_by_type
+ 96 F9CIpPmh gd_mfield_list_by_type
+ 97 F9CIpPmh gd_nmvectors
+ 98 F9CIpPmh gd_mvector_list
+ 99 F9CI.Pmh gd_alter_raw
+100 F9C...m. gd_alter_lincom
+101 F9.I.P.h gd_alter_clincom
+102 F9C...m. gd_alter_polynom
+103 F9.I.P.h gd_alter_cpolynom
+104 F9CI.Pmh gd_alter_linterp
+105 F9CI.Pmh gd_alter_bit
+106 F9CI.Pmh gd_alter_sbit
+107 F9CI.Pmh gd_alter_multiply
+108 F9CI.Pmh gd_alter_phase
+109 F9CI.Pmh gd_alter_const
+110 F9CIpPmh gd_encoding
+111 F9CIpPmh gd_endianness
+112 F9CIpPmh gd_dirfilename
+113 F9CIpPmh gd_parent_fragment
+114 F9CIpPmh gd_protect
+115 F9CIpPmh gd_protection
+116 F9CIpPmh gd_raw_filename
+117 F9CIpPmh gd_reference
+118 F9CIpPmh gd_eof
+119 F9CIpPmh gd_alter_encoding
+120 F9CIpPmh gd_alter_endianness
+121 F9CIpPmh gd_alter_spec
+122 F9CIpPmh gd_delete
+123 F9CIpPmh gd_malter_spec
+124 F9CIpPmh gd_move
+125 F9CIpPmh gd_rename
+126 F9CIpPmh gd_uninclude
+127 F9CIpPmh gd_frameoffset
+128 F9CIpPmh gd_alter_frameoffset
+129 F9CIpPmh gd_native_type
+130 F....... GDCSCL
+131 F9CIpPmh gd_validate
+132 F9....m. gd_framenum
+133 F9CIpPmh gd_framenum_subset
+134 F....... GDGSCA
+135 F9.I.P.h gd_add (RAW)
+136 .9CI.P.h gd_madd
+137 ..C..... Dirifle::ReferenceFilename
+138 ....p... gd_putdata (auto type detect)
+139 ....p... gd_native_type_name
+140 F....... GDASCA
+141 F9.I.P.h gd_alter_entry (RAW)
+142 F9CIpPmh gd_bof
+143 F9CIpPmh gd_entry (DIVIDE)
+144 F....... gd_entry (RECIP)
+145 F9CIpPmh gd_entry (CRECIP)
+146 F9CIpPmh gd_add_divide
+147 F9C..... gd_add_recip
+148 F9CIpPmh gd_add_crecip
+149 F9..pPmh gd_madd_divide
+150 F9...... gd_madd_recip
+151 F9..pPmh gd_madd_crecip
+152 F9CI.P-h gd_alter_divide
+153 F9CI.P-. gd_alter_recip
+154 F9.....h gd_alter_crecip
+155 F9CIpPmh gd_rewrite_fragment
+156 F9CIpPmh gd_invalid_dirfile
+157 F9CIpPmh gd_dirfile_standards
+158 F9CIpPmh gd_get_carray
+159 F9CIp.mh gd_get_carray_slice (INT8)
+160 .9...... gd_get_carray_slice (INT16)
+161 .9...... gd_get_carray_slice (INT32)
+162 .9..p... gd_get_carray_slice (INT64)
+163 .9...... gd_get_carray_slice (FLOAT32)
+164 .9..pP.. gd_get_carray_slice (FLOAT64)
+165 .9...... gd_get_carray_slice (COMPLEX64)
+166 .9..p... gd_get_carray_slice (COMPLEX128)
+167 ..C.pPmh gd_carrays
+168 F9CIpPmh gd_put_carray
+169 F9CIpPmh gd_put_carray_slice (INT8)
+170 .9...... gd_put_carray_slice (INT16)
+171 .9...... gd_put_carray_slice (INT32)
+172 .9..p... gd_put_carray_slice (INT64)
+173 .9...... gd_put_carray_slice (FLOAT32)
+174 .9..p... gd_put_carray_slice (FLOAT64)
+175 .9...... gd_put_carray_slice (COMPLEX64)
+176 .9..p... gd_put_carray_slice (COMPLEX128)
+177 F9CIpPmh gd_carray_len
+178 F9CIpPmh gd_entry (CARRAY)
+179 F9CIpPmh gd_add_carray
+180 F9CIpPmh gd_madd_carray
+181 F9CI.Pmh gd_alter_carray
+182 .....P.. fragments
+183 F9CIpPmh gd_constants (INT8)
+184 .9...... gd_constants (INT16)
+185 .9...... gd_constants (INT32)
+186 .9..p... gd_constants (INT64)
+187 .9...... gd_constants (FLOAT32)
+188 .9..p... gd_constants (FLOAT64)
+189 .9...... gd_constants (COMPLEX64)
+190 .9..p... gd_constants (COMPLEX128)
+191 F9CIpPmh gd_mconstants (INT8)
+192 .9...... gd_mconstants (INT16)
+193 .9...... gd_mconstants (INT32)
+194 .9..p... gd_mconstants (INT64)
+195 .9...... gd_mconstants (FLOAT32)
+196 .9..p... gd_mconstants (FLOAT64)
+197 .9...... gd_mconstants (COMPLEX64)
+198 .9..p... gd_mconstants (COMPLEX128)
+199 F9CIpPmh gd_strings
+200 F9CIpPmh gd_mstrings
+201 F9...... gd_string_value_max
+202 F9...... gd_mstring_value_max
+203 F9CIpPmh gd_seek
+204 F9CIpPmh gd_tell
+205 F9CIpPmh gd_hide
+206 F9CIpPmh gd_hidden
+207 F9CIpPmh gd_unhide
+208 F9CIpPmh gd_sync
+209 F9CIpPmh gd_flush
+210 F9CIpPmh gd_metaflush
+211 F9CIpPmh gd_entry (WINDOW)
+212 F9CIpPmh gd_add_window (INT64)
+213 .9...... gd_add_window (FLOAT64)
+214 F9CIpPmh gd_madd_wndow (INT64)
+215 .9...... gd_madd_wndow (FLOAT64)
+216 .9...... gd_alter_window (INT64)
+217 F9CIpPmh gd_alter_window (FLOAT64)
+218 F9CIpPmh gd_alias_target
+219 F9CIpPmh gd_add_alias
+220 F9CIpPmh gd_madd_alias
+221 F9CIpPmh gd_naliases
+222 F9CIpPmh gd_aliases
+223 F9CIpPmh gd_include_affix
+224 F9CIpPmh gd_move_alias
+225 F9CIpPmh gd_delete_alias
+226 F9CIpPmh gd_fragment_affixes
+227 F9CIpPmh gd_alter_affixes
+228 F9CIpPmh gd_entry (MPLEX)
+229 F9CIpPmh gd_add_mplex
+230 F9CIpPmh gd_madd_mplex
+231 F9CIpPmh gd_alter_mplex
+232 F9CIpPmh gd_strtok
+233 F9CIpPmh gd_raw_close
+234 F9CIpPmh gd_desync
+235 F9CIpPmh gd_flags
+236 F9CIpPmh gd_verbose_prefix
+237 F9CIpPmh gd_nentries
+238 F9...... fgd_entry_name_max
+239 F9CIpPmh gd_entry_list
+240 F9CIpPmh gd_mplex_lookback
+241 F9CIpPmh gd_linterp_tablename
+242 ..C.pP-h gd_mcarrays
+243 F9.I.P.h gd_add (LINCOM)
+244 F9.I.P.h gd_add (POLYNOM)
+245 ...I.P.h gd_add (LINTERP)
+246 F9.I.P.h gd_add (BIT)
+247 ...I.P.h gd_add (MULTIPLY)
+248 F9.I.P.h gd_add (PHASE)
+249 ...I.P.h gd_add (CONST)
+250 ...I.P.h gd_add (STRING)
+251 F9.I.P.h gd_add (RECIP)
+252 ...I.P.h gd_add (CARRAY)
+253 F9.I.P.h gd_add (WINDOW)
+254 F9.I.P.h gd_add (MPLEX)
+255 F9...... gd_add (CLINCOM)
+256 F9...... gd_add (CPOLYNOM)
+257 F9...... gd_add (CRECIP)
+258 F9...... gd_add (SBIT)
+259 F9.I.P-h gd_alter_entry (LINCOM; with scalar)
+260 F9...... gd_alter_entry (CLINCOM)
+261 F9...... gd_alter_entry (POLYNOM)
+262 F9...... gd_alter_entry (CPOLYNOM)
+263 F9...... gd_alter_entry (BIT)
+264 F9...... gd_alter_entry (SBIT)
+265 F9...... gd_alter_entry (PHASE)
+266 F9...... gd_alter_entry (RECIP)
+267 F9...... gd_alter_entry (CRECIP)
+268 F9...... gd_alter_entry (WINDOW)
+269 F9...... gd_alter_entry (MPLEX)
+270 .......h gd_dirfilekey

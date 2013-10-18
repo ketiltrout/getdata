@@ -1,4 +1,4 @@
-dnl Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+dnl Copyright (C) 2008-2010, 2013 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -70,7 +70,12 @@ AC_CACHE_CHECK([whether $CC accepts -Wextra], gd_cv_prog_cc_wextra,
 [CFLAGS="-Wextra"
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_cc_wextra=yes],
 [gd_cv_prog_cc_wextra=no])])
-CFLAGS=$gd_saved_CFLAGS])
+CFLAGS=$gd_saved_CFLAGS
+if test "x$gd_cv_prog_cc_wextra" = "xyes"; then
+  GD_CC_WEXTRA=-Wextra
+fi
+AC_SUBST([GD_CC_WEXTRA])
+])
 
 
 dnl GD_PROG_CXX_WEXTRA
@@ -84,7 +89,12 @@ AC_LANG_PUSH([C++])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_cxx_wextra=yes],
 [gd_cv_prog_cxx_wextra=no])
 AC_LANG_POP([C++])])
-CXXFLAGS=$gd_saved_CXXFLAGS])
+CXXFLAGS=$gd_saved_CXXFLAGS
+if test "x$gd_cv_prog_cxx_wextra" = "xyes"; then
+  GD_CXX_WEXTRA=-Wextra
+fi
+AC_SUBST([GD_CXX_WEXTRA])
+])
 
 
 dnl GD_PROG_F77_WEXTRA
@@ -98,7 +108,12 @@ AC_LANG_PUSH([Fortran 77])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_f77_wextra=yes],
 [gd_cv_prog_f77_wextra=no])
 AC_LANG_POP([Fortran 77])])
-FFLAGS=$gd_saved_FFLAGS])
+FFLAGS=$gd_saved_FFLAGS
+if test "x$gd_cv_prog_f77_wextra" = "xyes"; then
+  GD_F77_WEXTRA=-Wextra
+fi
+AC_SUBST([GD_F77_WEXTRA])
+])
 
 
 dnl GD_PROG_F77_FNO_BACKSLASH
@@ -112,7 +127,12 @@ AC_LANG_PUSH([Fortran 77])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_f77_fno_backslash=yes],
 [gd_cv_prog_f77_fno_backslash=no])
 AC_LANG_POP([Fortran 77])])
-FFLAGS=$gd_saved_FFLAGS])
+FFLAGS=$gd_saved_FFLAGS
+if test "x$gd_cv_prog_cc_fno_backslash" = "xyes"; then
+  GD_F77_FNO_BACKSLASH=-fno-backslash
+fi
+AC_SUBST([GD_F77_FNO_BACKSLASH])
+])
 
 
 dnl GD_PROG_FC_WEXTRA
@@ -126,7 +146,12 @@ AC_LANG_PUSH([Fortran 77])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_fc_wextra=yes],
 [gd_cv_prog_fc_wextra=no])
 AC_LANG_POP([Fortran 77])])
-FCFLAGS=$gd_saved_FCFLAGS])
+FCFLAGS=$gd_saved_FCFLAGS
+if test "x$gd_cv_prog_fc_wextra" = "xyes"; then
+  GD_FC_WEXTRA=-Wextra
+fi
+AC_SUBST([GD_FC_WEXTRA])
+])
 
 dnl GD_PROG_CC_WALL
 dnl -------------------------------------------------------------
@@ -137,7 +162,12 @@ AC_CACHE_CHECK([whether $CC accepts -Wall], gd_cv_prog_cc_wall,
 [CFLAGS="-Wall"
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_cc_wall=yes],
 [gd_cv_prog_cc_wall=no])])
-CFLAGS=$gd_saved_CFLAGS])
+CFLAGS=$gd_saved_CFLAGS
+if test "x$gd_cv_prog_cc_wall" = "xyes"; then
+  GD_CC_WALL=-Wall
+fi
+AC_SUBST([GD_CC_WALL])
+])
 
 
 dnl GD_PROG_CXX_WALL
@@ -151,7 +181,12 @@ AC_LANG_PUSH([C++])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_cxx_wall=yes],
 [gd_cv_prog_cxx_wall=no])
 AC_LANG_POP([C++])])
-CXXFLAGS=$gd_saved_CXXFLAGS])
+CXXFLAGS=$gd_saved_CXXFLAGS
+if test "x$gd_cv_prog_cxx_wall" = "xyes"; then
+  GD_CXX_WALL=-Wall
+fi
+AC_SUBST([GD_CXX_WALL])
+])
 
 
 dnl GD_PROG_F77_WALL
@@ -165,7 +200,12 @@ AC_LANG_PUSH([Fortran 77])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_f77_wall=yes],
 [gd_cv_prog_f77_wall=no])
 AC_LANG_POP([Fortran 77])])
-FFLAGS=$gd_saved_FFLAGS])
+FFLAGS=$gd_saved_FFLAGS
+if test "x$gd_cv_prog_f77_wall" = "xyes"; then
+  GD_F77_WALL=-Wall
+fi
+AC_SUBST([GD_F77_WALL])
+])
 
 
 dnl GD_PROG_FC_WALL
@@ -179,7 +219,13 @@ AC_LANG_PUSH([Fortran 77])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_fc_wall=yes],
 [gd_cv_prog_fc_wall=no])
 AC_LANG_POP([Fortran 77])])
-FCFLAGS=$gd_saved_FCFLAGS])
+FCFLAGS=$gd_saved_FCFLAGS
+if test "x$gd_cv_prog_fc_wall" = "xyes"; then
+  GD_FC_WALL=-Wall
+fi
+AC_SUBST([GD_FC_WALL])
+])
+
 
 dnl GD_CHECK_LFS_TYPE
 dnl -----------------------------------------------------------

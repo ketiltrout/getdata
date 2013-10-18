@@ -49,7 +49,8 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
           _GD_ReleaseDir(D, entry->e->u.linterp.table_dirfd);
         free(entry->e->u.linterp.table_file);
         free(entry->e->u.linterp.lut);
-      }
+      } else
+        entry->EN(linterp,table) = NULL;
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
@@ -124,6 +125,10 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
       free(entry->e->p.meta_entry);
     free(entry->e);
     free(entry);
+  } else {
+    entry->field = NULL;
+    memset(entry->in_fields, 0, sizeof(char*) * GD_MAX_LINCOM * 2);
+    memset(entry->scalar, 0, sizeof(char*) * GD_MAX_LINCOM * 2);
   }
 
   dreturnvoid();

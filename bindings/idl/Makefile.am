@@ -1,4 +1,4 @@
-# Copyright (C) 2009, 2011 D. V. Wiebe
+# Copyright (C) 2009, 2011, 2013 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -20,10 +20,6 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-if CC_WALL
-WALL=-Wall
-endif
-
 SUBDIRS=test
 
 if GD_EXTERNAL
@@ -36,7 +32,7 @@ idl_LTLIBRARIES = idl_getdata.la
 nodist_idl_HEADERS = idl_getdata.dlm
 
 # idl makes heavy use of type punning, ergo -fno-strict-aliasing
-AM_CFLAGS = ${WALL} $(IDL_CFLAGS) -fno-strict-aliasing $(GETDATA_CFLAGS)
+AM_CFLAGS = ${GD_CC_WALL} $(IDL_CFLAGS) -fno-strict-aliasing $(GETDATA_CFLAGS)
 BUILT_SOURCES=sublist.c constants.c
 idl_getdata_la_LDFLAGS = -module -avoid-version -export-symbols-regex IDL_Load \
 												 -precious-files-regex 'idl_getdata\.dlm' $(IDL_LIBS)

@@ -51,14 +51,15 @@
 
 /* fake data types to simplify our typemap */
 typedef GD_DCOMPLEXP_t gdp_complex_in;
-typedef GD_DCOMPLEXA(gdpu_complex);
-typedef int gdpu_bitnum_t;
-typedef int gdpu_numbits_t;
-typedef gd_shift_t gdpu_shift_t;
-typedef unsigned int gdpu_uint_t;
-typedef gd_type_t gdpu_type_t;
-typedef int gdpu_int;
-typedef const char gdpu_char;
+typedef GD_DCOMPLEXA(gdp_complex);
+typedef int gdp_bitnum_t;
+typedef int gdp_numbits_t;
+typedef gd_shift_t gdp_shift_t;
+typedef unsigned int gdp_uint_t;
+typedef gd_type_t gdp_type_t;
+typedef int gdp_int;
+typedef const char gdp_char;
+typedef gd_entry_t gdp_pentry_t;
 
 #define GDP_DIRFILE_ALIAS \
   const char *gdp_package = ix ? "GetData::Dirifle" : "GetData";
@@ -154,126 +155,241 @@ static void gdp_convert_cmp(GD_DCOMPLEXP_t val, SV *src, int *ok,
   dreturn("(%g;%g)", crealp(val), cimagp(val));
 }
 
-#define GDP_EHASH_FETCH(key) \
+#define GDP_EHASH_FETCH(part,key) \
   v = gdp_hv_fetchs((HV*)sv, key, 0); \
-  if (v == NULL) \
+  if (!part && v == NULL) \
     croak("%s::%s() - Missing required key '" key "' in entry hash", pkg, func)
 
-#define GDP_EHASH_FETCH_CMP(key,member) do { \
-    GDP_EHASH_FETCH(key); \
-    gdp_convert_cmp(gd_csp_(E->member), *v, NULL, pkg, func); \
+/* handle both "<foo>" and "c<foo>" names */
+#define GDP_EHASH_FETCH_CMP(part,key,member) do { \
+    GDP_EHASH_FETCH(1,"c" key); \
+    if (v == NULL) GDP_EHASH_FETCH(part,key); \
+    if (v) gdp_convert_cmp(gd_csp_(E->member), *v, NULL, pkg, func); \
   } while(0)
 
-#define GDP_EHASH_FETCH_IV(key,member,type) \
-  do { GDP_EHASH_FETCH(key); E->member = (type)SvIV(*v); } while(0)
+#define GDP_EHASH_FETCH_IV(part,key,variable,type) \
+  do { GDP_EHASH_FETCH(part,key); if (v) variable = (type)SvIV(*v); } while(0)
 
-#define GDP_EHASH_FETCH_NV(key,member) \
-  do { GDP_EHASH_FETCH(key); E->member = SvNV(*v); } while(0)
+#define GDP_EHASH_FETCH_NV(part,key,member) \
+  do { GDP_EHASH_FETCH(part,key); if (v) E->member = SvNV(*v); } while(0)
 
-#define GDP_EHASH_FETCH_UV(key,member,type) \
-  do { GDP_EHASH_FETCH(key); E->member = (type)SvUV(*v); } while(0)
+#define GDP_EHASH_FETCH_UV(part,key,member,type) \
+  do { GDP_EHASH_FETCH(part,key); if (v) E->member = (type)SvUV(*v); } while(0)
 
-#define GDP_EHASH_FETCH_UV_REQ(key,member,type) \
-  do { GDP_EHASH_FETCH_REQ(key); E->member = (type)SvUV(*v); } while(0)
-
-#define GDP_EHASH_FETCH_PV(key,member) \
+#define GDP_EHASH_FETCH_PV(part,key,member) \
  do { \
-    GDP_EHASH_FETCH(key); \
-    E->member = (!SvOK(*v)) ? NULL : SvPV_nolen(*v); \
+    GDP_EHASH_FETCH(part,key); \
+    if (v) E->member = (!SvOK(*v)) ? NULL : SvPV_nolen(*v); \
   } while(0)
 
 /* populate a complex double array in gd_entry_t */
-static void gdp_fetch_cmp_list(GD_DCOMPLEXV(c), HV *hv, const char* key,
-  int n, const char *pkg, const char *func)
+static int gdp_fetch_cmp_list(GD_DCOMPLEXV(c), HV *hv, int partial, char key,
+    int min, int max, unsigned mask, const char *pkg, const char *func)
 {
-  dtrace("%p, %p, \"%s\", %i, \"%s\", \"%s\"", c, hv, key, n, pkg, func);
-  int i;
-  SV **v = hv_fetch(hv, key, strlen(key), 0);
+  dtrace("%p, %p, %i, '%c', %i, %i, 0x%X, \"%s\", \"%s\"", c, hv, partial, key,
+      min, max, mask, pkg, func);
 
+  int i, n = 0;
+  char ckey[3] = { 'c', key, 0 };
+  int have[GD_MAX_POLYORD + 1];
+  SV **v, *sv = NULL;
+
+  /* try without the 'c' prefix */
+  v = hv_fetch(hv, ckey + 1, 1, 0);
+
+  /* try with the 'c' prefix */
   if (v == NULL)
-    croak("%s::%s() - Missing required key '%s' in entry hash", pkg, func, key);
+    v = hv_fetch(hv, ckey, 2, 0);
 
-  if (SvTYPE(*v) != SVt_PVAV)
-    croak("%s::%s() - Key '%s' must be list in entry hash", pkg, func, key);
-
-  for (i = 0; i < n; ++i) {
-    v = av_fetch((AV*)*v, i, 0);
-    if (v)
-      gdp_convert_cmp(gd_cap_(c,i), *v, NULL, pkg, func);
+  /* de-reference as needed */
+  if (v) {
+    sv = *v;
+    while (SvROK(sv))
+      sv = SvRV(sv);
   }
 
-  dreturnvoid();
+  if (sv == NULL || SvTYPE(sv) == SVt_NULL) {
+    if (partial) {
+      dreturn("%i", 0);
+      return 0;
+    }
+
+    croak("%s::%s() - Missing required key '%c' in entry hash", pkg, func,
+        key);
+  }
+
+  memset(have, 0, sizeof(int) * (GD_MAX_POLYORD + 1));
+  for (i = 0; i < max; ++i)
+    if (mask & (1 << i))
+      have[i] = 1;
+
+  if (SvTYPE(sv) != SVt_PVAV)
+    croak("%s::%s() - Key '%c' must be list in entry hash (%i)", pkg, func, key,
+    SvTYPE(sv));
+
+  for (i = 0; i < GD_MAX_LINCOM; ++i)
+    if (!have[i]) {
+      v = av_fetch((AV*)sv, i, 0);
+      if (v) {
+        if (i < max)
+          gdp_convert_cmp(gd_cap_(c,i), *v, NULL, pkg, func);
+        have[i] = 1;
+      }
+    }
+
+  /* find n */
+  for (i = 0; i < GD_MAX_POLYORD + 1; ++i)
+    if (i >= n && have[n])
+      n = i + 1;
+
+  if (n < min || n > max)
+    croak("%s::%s() - Bad array length (%i) for key '%c' in entry hash", pkg,
+        func, n, key);
+
+  dreturn("%i", n);
+  return n;
 }
 
 /* populate in_fields in gd_entry_t */
-static void gdp_fetch_in_fields(char **in_fields, SV *sv, int n,
-  const char *pkg, const char *func)
+static int gdp_fetch_in_fields(char **in_fields, SV *sv, int partial, int min,
+    int max, const char *pkg, const char *func)
 {
-  dtrace("%p, %p, %i, \"%s\", \"%s\"", in_fields, sv, n, pkg, func);
-  int i;
-  SV **v;
+  dtrace("%p, %p, %i, %i, %i, \"%s\", \"%s\"", in_fields, sv, partial, min, max,
+      pkg, func);
 
-  GDP_EHASH_FETCH("in_fields");
+  int i, n = 0;
+  SV **v, *vv;
 
-  if (SvTYPE(*v) != SVt_PVAV)
-    croak("%s::%s() - Key 'in_fields' must be list in entry hash", pkg, func);
-
-  for (i = 0; i < n; ++i) {
-    v = av_fetch((AV*)*v, i, 0);
-    if (v)
-      in_fields[i] = SvPV_nolen(*v);
+  GDP_EHASH_FETCH(partial, "in_fields");
+  if (partial && !v) {
+    dreturn("%i", 0);
+    return 0;
   }
 
-  dreturnvoid();
+  /* de-reference as needed */
+  vv = *v;
+  while (SvROK(vv))
+    vv = SvRV(vv);
+
+  if (SvTYPE(vv) == SVt_NULL) { /* undef */
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (SvTYPE(vv) != SVt_PVAV) {
+    if (SvOK(vv)) {
+      n = 1;
+      in_fields[0] = SvPV_nolen(vv);
+    } else
+      croak("%s::%s() - Key 'in_fields' must be list or string in entry hash",
+          pkg, func);
+  } else {
+    int have[GD_MAX_LINCOM];
+
+    memset(have, 0, sizeof(int) * GD_MAX_LINCOM * 2);
+
+    for (i = 0; i < GD_MAX_LINCOM; ++i) {
+      v = av_fetch((AV*)vv, i, 0);
+      if (v) {
+        if (i < max)
+          in_fields[i] = SvPV_nolen(*v);
+        have[i] = 1;
+      }
+    }
+
+    /* find n */
+    for (i = 0; i < GD_MAX_LINCOM; ++i)
+      if (i >= n && have[n])
+        n = i + 1;
+  }
+
+  if (n < min || n > max) {
+    croak("%s::%s() - Bad array length (%i) for key 'in_fields' in entry hash",
+        n, pkg, func);
+  }
+
+  dreturn("%i", n);
+  return n;
 }
 
 /* populate scalar elements of gd_entry_t */
-static void gdp_fetch_scalars(gd_entry_t *E, HV *hv, unsigned int mask,
+static unsigned gdp_fetch_scalars(gd_entry_t *E, HV *hv, unsigned int mask,
   const char *pkg, const char* func)
 {
   dtrace("%p, %p, %06x \"%s\", \"%s\"", E, hv, mask, pkg, func);
   int i;
+  unsigned mask_out = 0;
 
-  SV **scalar = gdp_hv_fetchs(hv, "scalar", 0);
-  SV **scalar_ind = gdp_hv_fetchs(hv, "scalar_ind", 0);
-  SV **v;
+  SV *scalar, *scalar_ind = NULL;
+  SV **v = gdp_hv_fetchs(hv, "scalar", 0);
 
   /* there's no point in recording scalar indicies if we don't have scalars */
-  if (scalar == NULL) {
-    dreturnvoid();
-    return;
+  if (v == NULL) {
+    dreturn("%i", 0);
+    return 0;
   }
 
-  if (SvTYPE(*scalar) != SVt_PVAV)
+  scalar = *v;
+  while (SvROK(scalar))
+    scalar = SvRV(scalar);
+
+  if (SvTYPE(scalar) == SVt_NULL) { /* drop undef */
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  v = gdp_hv_fetchs(hv, "scalar_ind", 0);
+  if (v) {
+    scalar_ind = *v;
+    while (SvROK(scalar_ind))
+      scalar_ind = SvRV(scalar_ind);
+
+    if (SvTYPE(scalar_ind) == SVt_NULL)
+      scalar_ind == NULL;
+  }
+
+  if (SvTYPE(scalar) != SVt_PVAV)
     croak("%s::%s() - Key 'scalar' must be list in entry hash", pkg, func);
-  if (scalar_ind && SvTYPE(*scalar_ind) != SVt_PVAV)
+  if (scalar_ind && SvTYPE(scalar_ind) != SVt_PVAV)
     croak("%s::%s() - Key 'scalar_ind' must be list in entry hash", pkg, func);
 
   for (i = 0; i <= GD_MAX_POLYORD; ++i)
     if (mask & (1 << i)) {
-      v = av_fetch((AV*)*scalar, i, 0);
-      if (v) {
+      v = av_fetch((AV*)scalar, i, 0);
+      if (v == NULL || SvTYPE(*v) == SVt_NULL)
+        E->scalar[i] = NULL; /* skip */
+      else {
         E->scalar[i] = SvPV_nolen(*v);
+        mask_out |= (1 << i);
         if (scalar_ind) {
-          v = av_fetch((AV*)*scalar_ind, i, 0);
-          if (v)
+          v = av_fetch((AV*)scalar_ind, i, 0);
+          if (v && SvTYPE(*v) != SVt_NULL)
             E->scalar_ind[i] = SvIV(*v);
-        }
+          else
+            E->scalar_ind[i] = 0;
+        } else
+          E->scalar_ind[i] = 0;
       }
     }
 
-  dreturnvoid();
+  dreturn("%u", mask_out);
+  return mask_out;
 }
 
 /* convert a Perl hash into a gd_entry_t */
-static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
-  const char *func)
+static void gdp_to_entry(gd_entry_t *E, SV *sv, const gd_entry_t *old_E,
+    const char *pkg, const char *func)
 {
-  dtrace("%p, %p, \"%s\", \"%s\"", E, sv, pkg, func);
+  dtrace("%p, %p, %p, \"%s\", \"%s\"", E, sv, old_E, pkg, func);
   SV **v;
-  int n;
+  int n, min, max;
+  unsigned mask, tmask;
+  const int partial = (old_E != NULL);
 
-  memset(E, 0, sizeof(gd_entry_t));
+  if (partial)
+    memcpy(E, old_E, sizeof(gd_entry_t));
+  else
+    memset(E, 0, sizeof(gd_entry_t));
 
   /* de-reference as needed */
   while (SvROK(sv))
@@ -282,90 +398,161 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
   if (SvTYPE(sv) != SVt_PVHV)
     croak("%s::%s() - Entry must be hash", pkg, func);
 
-  GDP_EHASH_FETCH_UV("field_type", field_type, gd_entype_t);
-  GDP_EHASH_FETCH_PV("field", field);
-  GDP_EHASH_FETCH_UV("fragment_index", fragment_index, int);
+  GDP_EHASH_FETCH_UV(0, "field_type", field_type, gd_entype_t);
+  GDP_EHASH_FETCH_PV(partial, "field", field);
+  GDP_EHASH_FETCH_UV(partial, "fragment_index", fragment_index, int);
 
   switch (E->field_type) {
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      GDP_EHASH_FETCH_PV("in_fields", in_fields[0]);
-      GDP_EHASH_FETCH_UV("bitnum", EN(bit,bitnum), int);
-      GDP_EHASH_FETCH_UV("numbits", EN(bit,numbits), int);
-      gdp_fetch_scalars(E, (HV*)sv, 0x3, pkg, func);
+      gdp_fetch_in_fields(E->in_fields, sv, partial, 1, 1, pkg, func);
+
+      mask = gdp_fetch_scalars(E, (HV*)sv, 0x3, pkg, func);
+
+      if (!(mask & 1))
+        GDP_EHASH_FETCH_UV(partial, "bitnum", EN(bit,bitnum), int);
+
+      if (!(mask & 2)) {
+        GDP_EHASH_FETCH_UV(1, "numbits", EN(bit,numbits), int);
+        if (v == NULL)
+          if (!partial)
+            E->EN(bit,numbits) = 1;
+      }
+
       break;
     case GD_CARRAY_ENTRY:
-      GDP_EHASH_FETCH_IV("array_len", EN(scalar,array_len), size_t);
+      GDP_EHASH_FETCH_IV(partial, "array_len", E->EN(scalar,array_len), size_t);
       /* fallthrough */
     case GD_CONST_ENTRY:
-      GDP_EHASH_FETCH_UV("const_type", EN(scalar,const_type), gd_type_t);
+      GDP_EHASH_FETCH_UV(partial, "const_type", EN(scalar,const_type),
+          gd_type_t);
       break;
     case GD_LINCOM_ENTRY:
-      GDP_EHASH_FETCH_IV("n_fields", EN(lincom,n_fields), int);
-      n = (E->EN(lincom,n_fields) > GD_MAX_LINCOM) ? GD_MAX_LINCOM
-        : E->EN(lincom,n_fields);
-      gdp_fetch_in_fields(E->in_fields, sv, n, pkg, func);
+      GDP_EHASH_FETCH_IV(1, "n_fields", n, int);
+      if (v) {
+        if (n > GD_MAX_LINCOM || n < 1)
+          croak("%s::%s() - n_fields out of range", pkg, func);
+
+        min = max = n;
+      } else {
+        min = 1;
+        max = GD_MAX_LINCOM;
+      }
+
+      E->EN(lincom,n_fields) = gdp_fetch_in_fields(E->in_fields, sv, partial,
+          min, max, pkg, func);
+
+      if (E->EN(lincom,n_fields) != 0)
+        min = max = E->EN(lincom,n_fields);
+
       E->comp_scal = 1;
-      gdp_fetch_cmp_list(E->EN(lincom,cm), (HV*)sv, "cm", n, pkg, func);
-      gdp_fetch_cmp_list(E->EN(lincom,cb), (HV*)sv, "cb", n, pkg, func);
-      gdp_fetch_scalars(E, (HV*)sv, ((1 << n) - 1) * 9, pkg, func);
+      tmask = (1 << max) - 1;
+
+      mask = gdp_fetch_scalars(E, (HV*)sv, ((1 << max) - 1) * 9, pkg, func);
+
+      if ((mask & tmask) != tmask) {
+        E->EN(lincom,n_fields) = gdp_fetch_cmp_list(E->EN(lincom,cm), (HV*)sv,
+            partial, 'm', min, max, mask, pkg, func);
+
+        if (E->EN(lincom,n_fields) != 0)
+          min = max = E->EN(lincom,n_fields);
+      }
+
+      if (((mask >> GD_MAX_LINCOM) & tmask) != tmask)
+        E->EN(lincom,n_fields) = gdp_fetch_cmp_list(E->EN(lincom,cb), (HV*)sv,
+            partial, 'b', min, max, mask >> GD_MAX_LINCOM, pkg, func);
+      else
+        E->EN(lincom,n_fields) = max;
       break;
     case GD_LINTERP_ENTRY:
-      GDP_EHASH_FETCH_PV("in_fields", in_fields[0]);
-      GDP_EHASH_FETCH_PV("table", EN(linterp,table));
+      gdp_fetch_in_fields(E->in_fields, sv, partial, 1, 1, pkg, func);
+      GDP_EHASH_FETCH_PV(partial, "table", EN(linterp,table));
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
-      gdp_fetch_in_fields(E->in_fields, sv, 2, pkg, func);
+      gdp_fetch_in_fields(E->in_fields, sv, partial, 2, 2, pkg, func);
       break;
     case GD_PHASE_ENTRY:
-      GDP_EHASH_FETCH_PV("in_fields", in_fields[0]);
-      GDP_EHASH_FETCH_IV("shift", EN(phase,shift), gd_shift_t);
-      gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
+      gdp_fetch_in_fields(E->in_fields, sv, partial, 1, 1, pkg, func);
+
+      mask = gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
+
+      if (!(mask & 1))
+        GDP_EHASH_FETCH_IV(partial, "shift", E->EN(phase,shift), gd_shift_t);
       break;
     case GD_POLYNOM_ENTRY:
-      GDP_EHASH_FETCH_PV("in_fields", in_fields[0]);
-      GDP_EHASH_FETCH_IV("poly_ord", EN(polynom,poly_ord), int);
-      n = (E->EN(polynom,poly_ord) > GD_MAX_POLYORD) ? GD_MAX_POLYORD
-        : E->EN(polynom,poly_ord);
+      gdp_fetch_in_fields(E->in_fields, sv, partial, 1, 1, pkg, func);
+
+      GDP_EHASH_FETCH_IV(1, "poly_ord", n, int);
+      if (v) {
+        if (n > GD_MAX_POLYORD || n < 1)
+          croak("%s::%s() - poly_ord out of range", pkg, func);
+
+        min = max = n + 1;
+      } else {
+        min = 2;
+        max = GD_MAX_POLYORD + 1;
+      }
+
+      mask = gdp_fetch_scalars(E, (HV*)sv, (1 << (max + 1)) - 1, pkg, func);
+      tmask = (1 << max) - 1;
+
       E->comp_scal = 1;
-      gdp_fetch_cmp_list(E->EN(polynom,ca), (HV*)sv, "ca", n, pkg, func);
-      gdp_fetch_scalars(E, (HV*)sv, (1 << (n + 1)) - 1, pkg, func);
+      if ((mask & tmask) != tmask)
+        E->EN(polynom,poly_ord) = gdp_fetch_cmp_list(E->EN(polynom,ca), (HV*)sv,
+            partial, 'a', min, max, mask, pkg, func) - 1;
+      else
+        E->EN(polynom,poly_ord) = max - 1;
       break;
     case GD_RECIP_ENTRY:
-      GDP_EHASH_FETCH_PV("in_fields", in_fields[0]);
+      gdp_fetch_in_fields(E->in_fields, sv, partial, 1, 1, pkg, func);
+      mask = gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
+
       E->comp_scal = 1;
-      GDP_EHASH_FETCH_CMP("cdividend", EN(recip,cdividend));
-      gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
+      if (!(mask & 1))
+        GDP_EHASH_FETCH_CMP(partial, "dividend", EN(recip,cdividend));
       break;
     case GD_WINDOW_ENTRY:
-      gdp_fetch_in_fields(E->in_fields, sv, 2, pkg, func);
-      GDP_EHASH_FETCH_IV("windop", EN(window,windop), gd_windop_t);
-      switch(E->EN(window,windop)) {
-        case GD_WINDOP_EQ:
-        case GD_WINDOP_NE:
-          GDP_EHASH_FETCH_IV("threshold", EN(window,threshold).i, int64_t);
-          break;
-        case GD_WINDOP_SET:
-        case GD_WINDOP_CLR:
-          GDP_EHASH_FETCH_UV("threshold", EN(window,threshold).u, uint64_t);
-          break;
-        default:
-          GDP_EHASH_FETCH_NV("threshold", EN(window,threshold).r);
-          break;
-      }
-      gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
+      gdp_fetch_in_fields(E->in_fields, sv, partial, 2, 2, pkg, func);
+      GDP_EHASH_FETCH_IV(partial, "windop", E->EN(window,windop), gd_windop_t);
+
+      mask = gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
+
+      if (!(mask & 1))
+        switch(E->EN(window,windop)) {
+          case GD_WINDOP_EQ:
+          case GD_WINDOP_NE:
+            GDP_EHASH_FETCH_IV(partial, "threshold", E->EN(window,threshold).i,
+                int64_t);
+            break;
+          case GD_WINDOP_SET:
+          case GD_WINDOP_CLR:
+            GDP_EHASH_FETCH_UV(partial, "threshold", EN(window,threshold).u,
+                uint64_t);
+            break;
+          default:
+            GDP_EHASH_FETCH_NV(partial, "threshold", EN(window,threshold).r);
+            break;
+        }
       break;
     case GD_MPLEX_ENTRY:
-      gdp_fetch_in_fields(E->in_fields, sv, 2, pkg, func);
-      GDP_EHASH_FETCH_UV("count_val", EN(mplex,count_val), int);
-      GDP_EHASH_FETCH_UV("period", EN(mplex,period), int);
-      gdp_fetch_scalars(E, (HV*)sv, 0x3, pkg, func);
+      gdp_fetch_in_fields(E->in_fields, sv, partial, 2, 2, pkg, func);
+
+      mask = gdp_fetch_scalars(E, (HV*)sv, 0x3, pkg, func);
+
+      if (!(mask & 1))
+        GDP_EHASH_FETCH_UV(partial, "count_val", EN(mplex,count_val), int);
+
+      if (!(mask & 2))
+        GDP_EHASH_FETCH_UV(1, "period", EN(mplex,period), int);
       break;
     case GD_RAW_ENTRY:
-      GDP_EHASH_FETCH_UV("spf", EN(raw,spf), unsigned int);
-      GDP_EHASH_FETCH_UV("data_type", EN(raw,data_type), gd_type_t);
-      gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
+      GDP_EHASH_FETCH_UV(partial, "data_type", EN(raw,data_type), gd_type_t);
+
+      mask = gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
+
+      if (!(mask & 1))
+        GDP_EHASH_FETCH_UV(partial, "spf", EN(raw,spf), unsigned int);
       break;
     case GD_NO_ENTRY:
     case GD_INDEX_ENTRY:
@@ -1535,9 +1722,9 @@ field_list_by_type(dirfile, type)
 void
 entry_list(dirfile, parent, type, flags)
     DIRFILE * dirfile
-    gdpu_char * parent
-    gdpu_int    type
-    gdpu_uint_t flags
+    gdp_char * parent
+    gdp_int    type
+    gdp_uint_t flags
   PREINIT:
     GDP_DIRFILE_ALIAS;
   ALIAS:
@@ -2078,8 +2265,8 @@ include(dirfile, file, fragment_index, flags, prefix=NULL, suffix=NULL)
 	const char * file
 	int fragment_index
 	unsigned long int flags
-	gdpu_char * prefix
-	gdpu_char * suffix
+	gdp_char * prefix
+	gdp_char * suffix
 	PREINIT:
 		GDP_DIRFILE_ALIAS;
 	ALIAS:

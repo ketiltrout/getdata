@@ -3,7 +3,7 @@ IDL BINDINGS FOR GETDATA
 
 This package provides bindings to the GetData library for use with the
 Interactive Data Language (IDL) developed by Research Systems, Incorporated,
-now ITT Visual Information Solutions.
+later ITT Visual Information Solutions, now Exelis Visual Information Solutions.
 
 Building the IDL bindings with this package requires a system with a copy of
 GetData already installed.  If you do not already have the GetData library, you

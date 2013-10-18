@@ -42,10 +42,10 @@ sub printmunge {
 
   return "&$n" if ($t =~ /&$/);
   return "(long long)$n" if ($t eq "off64_t" or $t eq "gd_shift_t" or
-    $t eq "gdpu_shift_t" or $t eq "int64_t");
+    $t eq "gdp_shift_t" or $t eq "int64_t");
   return "(unsigned long long)$n" if ($t eq "uint64_t");
   return "creal($n), cimag($n)" if ($t eq "_Complex double" or
-    $t eq "gdpu_complex");
+    $t eq "gdp_complex");
   return "$n.r, (unsigned long long)$n.u, (long long)$n.i"
   if ($t eq "gd_triplet_t");
   return $n;
@@ -59,23 +59,23 @@ sub printfmt {
     return "\\\"%s\\\"";
   } elsif (/[\*&]$/ or $_ eq "gdp_complex_in") {
     return "%p";
-  } elsif ($_ eq "_Complex double" or $_ eq "gdpu_complex") {
+  } elsif ($_ eq "_Complex double" or $_ eq "gdp_complex") {
     return "%g;%g";
   } elsif ($_ eq "double") {
     return "%g";
-  } elsif ($_ eq "gdpu_bitnum_t" or $_ eq "gdpu_numbits_t"
+  } elsif ($_ eq "gdp_bitnum_t" or $_ eq "gdp_numbits_t"
       or $_ eq "gd_windop_t")
   {
     return "%i";
   } elsif ($_ eq "gd_entype_t") {
     return "%02x";
-  } elsif ($_ eq "gd_shift_t" or $_ eq "gdpu_shift_t") {
+  } elsif ($_ eq "gd_shift_t" or $_ eq "gdp_shift_t") {
     return "%lli";
-  } elsif ($_ eq "gdpu_uint_t") {
+  } elsif ($_ eq "gdp_uint_t") {
     return "%u";
-  } elsif ($_ eq "gd_type_t" or $_ eq "gdpu_type_t") {
+  } elsif ($_ eq "gd_type_t" or $_ eq "gdp_type_t") {
     return "%03x";
-  } elsif ($_ eq "int" or $_ eq "gdpu_int") {
+  } elsif ($_ eq "int" or $_ eq "gdp_int") {
     return "%i";
   } elsif ($_ eq "off64_t") {
     return "%lli";

@@ -170,9 +170,9 @@ typedef gd_off64_t off64_t;
 #  define gd_cp2ca_(a,i,b) do { \
   (a)[2 * i] = (b)[0]; (a)[2 * i + 1] = (b)[1]; \
 } while(0)
-/* assign literal (x;y) to scalar a */
+/* assign complex pair (x;y) to scalar a */
 #  define gd_li2cs_(a,x,y) do { (a)[0] = (x); (a)[1] = (y); } while(0)
-/* assign literal (x;y) to scalar (*a) */
+/* assign complex pair (x;y) to scalar (*a) */
 #  define gd_li2cp_(a,x,y) gd_li2cs_(a,x,y)
 /* assign polar (r,p) to scalar a */
 #  define gd_po2cs_(a,r,p) do { \
@@ -192,7 +192,7 @@ typedef gd_off64_t off64_t;
 #  define gd_rs2ca_(a,i,b,t) do { \
   ((t*)a)[2 * i] = (t)(b); ((t*)a)[2 * i + 1] = 0; \
 } while(0)
-/* compare a to literal (x;y) */
+/* compare a to complex pair (x;y) */
 #  define gd_ccmpl_(a,x,y) ((a)[0] == x && (a)[1] == y)
 /* compare a to b */
 #  define gd_ccmpc_(a,b) ((a)[0] == (b)[0] && (a)[1] == (b)[1])
@@ -758,8 +758,7 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_ENTRY_BITSIZE   7
 #define GD_E_ENTRY_POLYORD   8
 #define GD_E_ENTRY_WINDOP    9
-#define GD_E_ENTRY_CNTVAL   10
-#define GD_E_ENTRY_PERIOD   11
+#define GD_E_ENTRY_PERIOD   10
 
 #define GD_E_SCALAR_CODE        1
 #define GD_E_SCALAR_TYPE        2

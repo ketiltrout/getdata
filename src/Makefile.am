@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2011 D. V. Wiebe
+# Copyright (C) 2008-2011, 2013 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -19,14 +19,6 @@
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 AUTOMAKE_OPTIONS = foreign
-
-if CC_WALL
-WALL=-Wall
-endif
-
-if CC_WEXTRA
-WEXTRA=-Wextra
-endif
 
 if USE_SLIM
 if USE_MODULES
@@ -110,7 +102,7 @@ DEBUG_C = debug.c
 endif
 
 pkgconfigdir = @libdir@/pkgconfig
-AM_CFLAGS = ${WALL} ${WEXTRA} $(DGETDATA_MODULEDIR)
+AM_CFLAGS = ${GD_CC_WALL} ${GD_CC_WEXTRA} $(DGETDATA_MODULEDIR)
 AM_CPPFLAGS = $(LTDLINCL) $(EXTERNAL_CPPFLAGS)
 
 BUILT_SOURCES = getdata.h

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2008-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -29,7 +29,17 @@ static unsigned int gd_max_(unsigned int A, unsigned int B)
 #define GD_AS_NEED_RECALC 2
 #define GD_AS_ERROR       4
 #define GD_AS_MODIFIED    8
-/*  sold snew alit
+/* inputs:
+ *  sin - old scalar name ( == NULL means remove; == "" means keep as-is )
+ *  iin - old scalar index
+ *  lin - old literal value
+ *
+ * outputs:
+ *  sout - new scalar name
+ *  iout - new scalar index
+ *  lout - new literal value
+ *
+ *  sin sout alit
  * 0a N    N0   0     -> do nothing         ()
  * 1  N    N0   1     -> set lout           ()
  * 2  Na   a    01    -> set sout           (free scalar; need recalc)
@@ -787,14 +797,14 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
     case GD_MPLEX_ENTRY:
       j = _GD_AlterScalar(D, N->EN(mplex,period) != -1 &&
           E->EN(mplex,period) != N->EN(mplex,period), GD_INT_TYPE,
-          &Q.EN(mplex,period), &N->EN(mplex,period), Q.scalar,
-          Q.scalar_ind, N->scalar[0], N->scalar_ind[0], E->e->calculated,
+          &Q.EN(mplex,period), &N->EN(mplex,period), Q.scalar + 1,
+          Q.scalar_ind + 1, N->scalar[1], N->scalar_ind[1], E->e->calculated,
           E->fragment_index);
 
       if (j & GD_AS_ERROR)
         break;
       if (j & GD_AS_FREE_SCALAR)
-        scalar_free |= 1;
+        scalar_free |= 2;
       if (j & GD_AS_NEED_RECALC)
         Qe.calculated = 0;
       if (j & GD_AS_MODIFIED)
@@ -802,13 +812,13 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       j = _GD_AlterScalar(D, E->EN(mplex,count_val) != N->EN(mplex,count_val),
           GD_INT_TYPE, &Q.EN(mplex,count_val), &N->EN(mplex,count_val),
-          Q.scalar, Q.scalar_ind, N->scalar[1], N->scalar_ind[1],
+          Q.scalar, Q.scalar_ind, N->scalar[0], N->scalar_ind[0],
           E->e->calculated, E->fragment_index);
 
       if (j & GD_AS_ERROR)
         break;
       if (j & GD_AS_FREE_SCALAR)
-        scalar_free |= 2;
+        scalar_free |= 1;
       if (j & GD_AS_NEED_RECALC)
         Qe.calculated = 0;
       if (j & GD_AS_MODIFIED)
@@ -1320,7 +1330,7 @@ int gd_alter_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
   int ret;
   gd_entry_t N;
 
-  dtrace("%p, \"%s\", \"%s\", [%g, %g]", D, field_code, in_field,
+  dtrace("%p, \"%s\", \"%s\", {%g, %g}", D, field_code, in_field,
       (cdividend == NULL) ? 0 : cdividend[0],
       (cdividend == NULL) ? 0 : cdividend[1]);
 

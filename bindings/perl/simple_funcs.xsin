@@ -7,7 +7,7 @@ int add_cpolynom:add_polynom(DIRFILE *dirfile, const char *field_code,
     int poly_ord, const char *in_field, gdp_complex_in ca,
     int fragment_index=0)
 int add_crecip:add_recip(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, gdpu_complex cdividend, int fragment_index=0)
+    const char *in_field, gdp_complex cdividend, int fragment_index=0)
 int add_divide(DIRFILE *dirfile, const char *field_code, const char *in_field1,
     const char *in_field2, int fragment_index=0)
 int add_linterp(DIRFILE *dirfile, const char *field_code, const char *in_field,
@@ -21,24 +21,24 @@ int add_sbit(DIRFILE *dirfile, const char *field_code, const char *in_field,
 int add_string(DIRFILE *dirfile, const char *field_code, const char *value,
     int fragment_index=0)
 int alter_bit(DIRFILE *dirfile, const char *field_code,
-    gdpu_char *in_field=NULL, gdpu_bitnum_t bitnum=-1, gdpu_numbits_t numbits=0)
+    gdp_char *in_field=NULL, gdp_bitnum_t bitnum=-1, gdp_numbits_t numbits=0)
 int alter_carray(DIRFILE* dirfile, const char* field_code, gd_type_t const_type,
     size_t array_len)
 int alter_clincom:alter_lincom(DIRFILE *dirfile, const char *field_code,
-    gdpu_int n_fields=0, const char **in_fields=NULL, gdp_complex_in m=NULL,
+    gdp_int n_fields=0, const char **in_fields=NULL, gdp_complex_in m=NULL,
     gdp_complex_in b=NULL)
 int alter_cpolynom:alter_polynom(DIRFILE *dirfile, const char *field_code,
-    gdpu_int poly_ord=0, gdpu_char *in_field=NULL, gdp_complex_in a=NULL)
+    gdp_int poly_ord=0, gdp_char *in_field=NULL, gdp_complex_in a=NULL)
 int alter_crecip:alter_recip(DIRFILE *dirfile, const char *field_code,
-    gdpu_char *in_field=NULL, gdpu_complex cdividend)
+    gdp_char *in_field=NULL, gdp_complex cdividend)
 int alter_divide(DIRFILE *dirfile, const char *field_code,
-    gdpu_char *in_field1=NULL, gdpu_char *in_field2=NULL)
+    gdp_char *in_field1=NULL, gdp_char *in_field2=NULL)
 int alter_multiply(DIRFILE *dirfile, const char *field_code,
-    gdpu_char *in_field1=NULL, gdpu_char *in_field2=NULL)
+    gdp_char *in_field1=NULL, gdp_char *in_field2=NULL)
 int alter_phase(DIRFILE *dirfile, const char *field_code,
-    gdpu_char *in_field, gdpu_shift_t shift)
+    gdp_char *in_field, gdp_shift_t shift)
 int alter_sbit(DIRFILE *dirfile, const char *field_code,
-    gdpu_char *in_field=NULL, gdpu_bitnum_t bitnum=-1, gdpu_numbits_t numbits=0)
+    gdp_char *in_field=NULL, gdp_bitnum_t bitnum=-1, gdp_numbits_t numbits=0)
 size_t carray_len(DIRFILE *dirfile, const char *field_code)
 unsigned long int encoding(DIRFILE *dirfile, int fragment)
 unsigned long int endianness(DIRFILE *dirfile, int fragment)
@@ -54,7 +54,7 @@ int madd_cpolynom:madd_polynom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int poly_ord, const char *in_field,
     gdp_complex_in ca)
 int madd_crecip:madd_recip(DIRFILE *dirfile, const char *parent,
-    const char *field_code, const char *in_field, gdpu_complex cdividend)
+    const char *field_code, const char *in_field, gdp_complex cdividend)
 int madd_divide(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *in_field1, const char *in_field2)
 int madd_linterp(DIRFILE *dirfile, const char *parent, const char *field_code,
@@ -75,7 +75,7 @@ int parent_fragment(DIRFILE *dirfile, int fragment_index)
 int alter_protection(DIRFILE *dirfile, int protection_level, int fragment_index)
 int protection(DIRFILE *dirfile, int fragment_index)
 const char *raw_filename(DIRFILE *dirfile, const char *field_code)
-const char *reference(DIRFILE *dirfile, gdpu_char *field_code=NULL)
+const char *reference(DIRFILE *dirfile, gdp_char *field_code=NULL)
 unsigned int spf(DIRFILE *dirfile, const char *field_code)
 size_t put_string(DIRFILE *dirfile, const char *field_code, const char *data)
 int validate(DIRFILE *dirfile, const char *field_code)
@@ -84,17 +84,17 @@ int add_raw(DIRFILE *dirfile, const char *field_code, gd_type_t data_type,
     unsigned int spf, int fragment_index=0)
 int add_spec(DIRFILE *dirfile, const char *line, int fragment_index=0)
 int alter_const(DIRFILE *dirfile, const char *field_code,
-    gdpu_type_t const_type=GD_NULL);
+    gdp_type_t const_type=GD_NULL);
 int alter_encoding(DIRFILE *dirfile, unsigned long int encoding, int fragment=0,
     int recode=0)
 int alter_endianness(DIRFILE *dirfile, unsigned long int byte_sex,
     int fragment=0, int recode=0)
-int alter_entry(DIRFILE *dirfile, const char *field_code, gd_entry_t &entry,
+int alter_entry(DIRFILE *dirfile, const char *field_code, gdp_pentry_t &entry,
     int recode=0)
 int alter_linterp(DIRFILE *dirfile, const char *field_code,
-    gdpu_char *in_field=NULL, gdpu_char *table=NULL, int recode=0)
+    gdp_char *in_field=NULL, gdp_char *table=NULL, int recode=0)
 int alter_raw(DIRFILE *dirfile, const char *field_code,
-    gdpu_type_t data_type=GD_NULL, gdpu_uint_t spf=0, int recode=0)
+    gdp_type_t data_type=GD_NULL, gdp_uint_t spf=0, int recode=0)
 int alter_spec(DIRFILE *dirfile, const char *line, int recode=0)
 int delete(DIRFILE *dirfile, const char *field_code, int flags=0)
 int flush(DIRFILE *dirfile, const char *field_code)
@@ -136,14 +136,14 @@ int add_window(DIRFILE *dirfile, const char *field_code, const char *in_field,
 int madd_window(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *in_field, const char *check_field, gd_windop_t windop,
     gd_triplet_t threshold)
-int alter_window(DIRFILE *dirfile, const char *field_code, gdpu_char *in_field,
-    gdpu_char *check_field, gd_windop_t windop, gd_triplet_t threshold)
-int alter_affixes(DIRFILE *dirfile, int index, gdpu_char *prefix,
-    gdpu_char *suffix=NULL)
+int alter_window(DIRFILE *dirfile, const char *field_code, gdp_char *in_field,
+    gdp_char *check_field, gd_windop_t windop, gd_triplet_t threshold)
+int alter_affixes(DIRFILE *dirfile, int index, gdp_char *prefix,
+    gdp_char *suffix=NULL)
 int add_mplex(DIRFILE *dirfile, const char *field_code, const char *in_field,
     const char *count_field, int count_val, int period, int fragment_index=0)
 int alter_mplex(DIRFILE *dirfile, const char *field_code,
-    gdpu_char *in_field=NULL, gdpu_char *count_field=NULL, int count_val=-1,
+    gdp_char *in_field=NULL, gdp_char *count_field=NULL, int count_val=-1,
     int period=-1)
 int madd_mplex(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *in_field, const char *count_field, int count_val,
@@ -152,6 +152,6 @@ int raw_close(DIRFILE *dirfile, const char *field_code)
 int desync(DIRFILE *dirfile, unsigned int flags=0)
 unsigned long int flags(DIRFILE *dirfile, unsigned long int set=0,
     unsigned long int reset=0)
-int verbose_prefix(DIRFILE *dirfile, gdpu_char *prefix=NULL)
+int verbose_prefix(DIRFILE *dirfile, gdp_char *prefix=NULL)
 void mplex_lookback(DIRFILE *dirfile, int lookback)
 char *linterp_tablename(DIRFILE *dirfile, const char *field_code)

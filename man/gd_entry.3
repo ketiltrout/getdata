@@ -1,6 +1,6 @@
 .\" gd_entry.3.  The gd_entry man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 D. V. Wiebe
+.\" Copyright (C) 2008-2013 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_entry 3 "3 April 2013" "Version 0.8.4" "GETDATA"
+.TH gd_entry 3 "10 October 2013" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -112,6 +112,7 @@ typedef struct {
   const char  *field;          /* field code */
   gd_entype_t  field_type;     /* field type */
   int          fragment_index; /* format fragment index */
+  int          hidden;         /* hidden flag */
 
   ...
 } gd_entry_t;
@@ -171,6 +172,10 @@ primary fragment, the file called
 .B format
 in the root dirfile directory (see 
 .IR dirfile (5)).
+The
+.I hidden
+member is non-zero if the specified field is hidden (see
+.BR gd_hidden (3)).
 .PP
 Remaining fields in the gd_entry_t structure depend on the value of
 .IR field_type .

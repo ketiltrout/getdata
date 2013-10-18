@@ -1,6 +1,6 @@
 .\" gd_get_carray_slice.3.  The gd_get_carray_slice man page.
 .\"
-.\" Copyright (C) 2010, 2011, 2012 D. V. Wiebe
+.\" Copyright (C) 2010-2013 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,9 +13,9 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_get_carray_slice 3 "4 July 2012" "Version 0.8.0" "GETDATA"
+.TH gd_get_carray_slice 3 "1 October 2013" "Version 0.9.0" "GETDATA"
 .SH NAME
-gd_get_carray, gd_get_carray_slice, gd_get_constant \(em retrieve CONST or\CARRAY data from a dirfile database
+gd_get_carray, gd_get_carray_slice, gd_get_constant \(em retrieve CONST or CARRAY data from a dirfile database
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -150,9 +150,10 @@ purely real one is required, only the real portion of the requested vector will
 be returned.
 .SH RETURN VALUE
 On success,
-.BR gd_get_carray ()
+.BR gd_get_carray (),
+.BR gd_get_carray_slice (),
 and
-.BR gd_get_carray_slice ()
+.BR gd_get_constant ()
 return zero.  On error, they return -1 and set the dirfile error to a non-zero
 value.  Possible error values are:
 .TP 8

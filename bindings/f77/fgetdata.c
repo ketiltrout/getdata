@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2008-2013 D. V. Wiebe
  *
  *************************************************************************
  *
@@ -24,6 +24,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+/* convert scalar_ind from C to FORTRAN */
+#define GDF_SCIND_C2F(out,in) do { \
+  (out) = (in); if ((out) >= 0) (out)++; \
+} while (0)
+
+/* convert scalar ind from FORTRAN to C */
+#define GDF_SCIND_F2C(out,in) do { \
+  (out) = (in); if ((out) > 0) (out)--; \
+} while (0)
 
 /* Fortran 77 has no facility to take a pointer to a DIRFILE* object.
  * Instead, we keep a list of them here.  If we ever run out of these,
@@ -65,7 +75,7 @@ static char *_GDF_CString(char **out, const char *in, int l)
   if (l < 0) {
     *out = NULL;
     dreturn("%p", NULL);
-    return *out;
+    return NULL;
   }
 
   *out = (char*)malloc(l + 1);
@@ -1370,24 +1380,17 @@ void F77_FUNC(gdadrc, GDADRC) (const int32_t *dirfile, const char *field_code,
 
 void F77_FUNC(gdadcr, GDADCR) (const int32_t *dirfile, const char *field_code,
     const int32_t *field_code_l, const char *in_field,
-    const int32_t *in_field_l, const GD_DCOMPLEXP(cdividend),
+    const int32_t *in_field_l, const double *cdividend,
     const int32_t *fragment_index)
 {
   char *fc, *in;
 
   dtrace("%i, %p, %i, %p, %i, %g;%g, %i", *dirfile, field_code, *field_code_l,
-      in_field, *in_field_l, crealp(cdividend), cimagp(cdividend),
-      *fragment_index);
+      in_field, *in_field_l, cdividend[0], cdividend[1], *fragment_index);
 
-#ifdef GD_NO_C99_API
   gd_add_crecip89(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
         *field_code_l), _GDF_CString(&in, in_field, *in_field_l), cdividend,
       *fragment_index);
-#else
-  gd_add_crecip(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
-        *field_code_l), _GDF_CString(&in, in_field, *in_field_l), *cdividend,
-      *fragment_index);
-#endif
 
   free(fc);
   free(in);
@@ -3115,7 +3118,7 @@ void F77_FUNC(gdgsca, GDGSCA) (char *scalar, int32_t *scalar_l,
     ok = 0;
 
   _GDF_FString(scalar, scalar_l, (ok) ? E.scalar[*index - 1] : "");
-  *scalar_index = E.scalar_ind[*index - 1];
+  GDF_SCIND_C2F(*scalar_index, E.scalar_ind[*index - 1]);
 
   gd_free_entry_strings(&E);
 
@@ -3189,7 +3192,7 @@ void F77_FUNC(gdasca, GDASCA) (const int32_t *dirfile, const char *field_code,
 
   free(E.scalar[*index - 1]);
   _GDF_CString(E.scalar + *index - 1, scalar, *scalar_l);
-  E.scalar_ind[*index - 1] = *scalar_index;
+  GDF_SCIND_F2C(E.scalar_ind[*index - 1], *scalar_index);
 
   gd_alter_entry(D, fc, &E, *recode);
 
@@ -3478,18 +3481,18 @@ void F77_FUNC(gdmdwd, GDMDWD) (const int32_t *dirfile, const char *parent,
 void F77_FUNC(gdadmx, GDADMX) (const int32_t *dirfile, const char *field_code,
     const int32_t *field_code_l, const char *in_field,
     const int32_t *in_field_l, const char *count_field,
-    const int32_t *count_field_l, const int32_t *val, const int32_t *max,
+    const int32_t *count_field_l, const int32_t *val, const int32_t *period,
     const int32_t *fragment_index)
 {
   char *in, *cf, *fc;
 
   dtrace("%i, %p, %i, %p, %i, %p, %i, %i, %i, %i", *dirfile, field_code,
       *field_code_l, in_field, *in_field_l, count_field, *count_field_l,
-      *val, *max, *fragment_index);
+      *val, *period, *fragment_index);
 
   gd_add_mplex(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
         *field_code_l), _GDF_CString(&in, in_field, *in_field_l),
-      _GDF_CString(&cf, count_field, *count_field_l), *val, *max,
+      _GDF_CString(&cf, count_field, *count_field_l), *val, *period,
       *fragment_index);
 
   free(fc);
@@ -3504,18 +3507,18 @@ void F77_FUNC(gdmdmx, GDMDMX) (const int32_t *dirfile, const char *parent,
     const int32_t *parent_l, const char *field_code,
     const int32_t *field_code_l, const char *in_field,
     const int32_t *in_field_l, const char *count_field,
-    const int32_t *count_field_l, const int32_t *val, const int32_t *max)
+    const int32_t *count_field_l, const int32_t *val, const int32_t *period)
 {
   char *in, *cf, *fc, *pa;
 
   dtrace("%i, %p, %i, %p, %i, %p, %i, %p, %i, %i, %i", *dirfile, parent,
       *parent_l, field_code, *field_code_l, in_field, *in_field_l, count_field,
-      *count_field_l, *val, *max);
+      *count_field_l, *val, *period);
 
   gd_madd_mplex(_GDF_GetDirfile(*dirfile), _GDF_CString(&pa, parent, *parent_l),
       _GDF_CString(&fc, field_code, *field_code_l), _GDF_CString(&in, in_field,
         *in_field_l), _GDF_CString(&cf, count_field, *count_field_l), *val,
-      *max);
+      *period);
 
   free(pa);
   free(fc);
@@ -3665,17 +3668,17 @@ void F77_FUNC(gdalwd, GDALWD) (const int32_t *dirfile, const char *field_code,
 void F77_FUNC(gdalmx, GDALMX) (const int32_t *dirfile, const char *field_code,
     const int32_t *field_code_l, const char *in_field,
     const int32_t *in_field_l, const char *count_field,
-    const int32_t *count_field_l, const int32_t *val, const int32_t *max)
+    const int32_t *count_field_l, const int32_t *val, const int32_t *period)
 {
   char *fc, *in, *cf;
 
   dtrace("%i, %p, %i, %p, %i, %p, %i, %i, %i", *dirfile, field_code,
       *field_code_l, in_field, *in_field_l, count_field, *count_field_l,
-      *val, *max);
+      *val, *period);
 
   gd_alter_mplex(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
         *field_code_l), _GDF_CString(&in, in_field, *in_field_l),
-      _GDF_CString(&cf, count_field, *count_field_l), *val, *max);
+      _GDF_CString(&cf, count_field, *count_field_l), *val, *period);
 
   free(cf);
   free(in);
@@ -4023,4 +4026,1180 @@ void F77_FUNC(gdlttn, GDLTTN) (char *name, int32_t *name_l,
   free(fn);
 
   dreturn("%i", *name_l);
+}
+
+/* gd_add_raw with scalar parameters */
+void F77_FUNC(gdasrw, GDASRW) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *data_type, const int32_t *spf,
+    const char *spf_scalar, const int32_t *spf_scalar_l,
+    const int32_t *spf_scalar_ind, const int32_t *fragment_index)
+{
+  gd_entry_t E;
+
+  dtrace("%i, %p, %i, %i, %i, %p, %i, %i, %i", *dirfile, field_code,
+      *field_code_l, *data_type, *spf, spf_scalar, *spf_scalar_l,
+      *spf_scalar_ind, *fragment_index);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_RAW_ENTRY;
+  E.fragment_index = *fragment_index;
+  E.EN(raw,data_type) = *data_type;
+  E.EN(raw,spf) = *spf;
+  _GDF_CString(&E.field, field_code, *field_code_l);
+  _GDF_CString(E.scalar, spf_scalar, *spf_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[0], *spf_scalar_ind);
+
+  gd_add(_GDF_GetDirfile(*dirfile), &E);
+
+  free(E.field);
+  free(E.scalar[0]);
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdaslc, GDASLC) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const double *m1, const char *m1_scalar,
+    const int32_t *m1_scalar_l, const int32_t *m1_scalar_ind, const double *b1,
+    const char *b1_scalar, const int32_t *b1_scalar_l,
+    const int32_t *b1_scalar_ind, const char *in_field2,
+    const int32_t *in_field2_l, const double *m2, const char *m2_scalar,
+    const int32_t *m2_scalar_l, const int32_t *m2_scalar_ind, const double *b2,
+    const char *b2_scalar, const int32_t *b2_scalar_l,
+    const int32_t *b2_scalar_ind, const char *in_field3,
+    const int32_t *in_field3_l, const double *m3, const char *m3_scalar,
+    const int32_t *m3_scalar_l, const int32_t *m3_scalar_ind, const double *b3,
+    const char *b3_scalar, const int32_t *b3_scalar_l,
+    const int32_t *b3_scalar_ind, const int32_t *fragment_index)
+{
+  gd_entry_t E;
+  int i, n;
+
+  dtrace("%i, %p, %i, %i, %p, %i, %g, %p, %i, %i, %g, %p, %i, %i, %p, %i, "
+      "%g, %p, %i, %i, %g, %p, %i, %i, %p, %i, %g, %p, %i, %i, %g, %p, %i, "
+      "%i, %i", *dirfile, field_code, *field_code_l, *n_fields, in_field1,
+      *in_field1_l, *m1, m1_scalar, *m1_scalar_l, *m1_scalar_ind, *b1,
+      b1_scalar, *b1_scalar_l, *b1_scalar_ind, in_field2, *in_field2_l, *m2,
+      m2_scalar, *m2_scalar_l, *m2_scalar_ind, *b2, b2_scalar, *b2_scalar_l,
+      *b2_scalar_ind, in_field3, *in_field3_l, *m3, m3_scalar, *m3_scalar_l,
+      *m3_scalar_ind, *b3, b3_scalar, *b3_scalar_l, *b3_scalar_ind,
+      *fragment_index);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_LINCOM_ENTRY;
+  E.fragment_index = *fragment_index;
+  n = E.EN(lincom,n_fields) = *n_fields;
+  _GDF_CString(&E.field, field_code, *field_code_l);
+  E.comp_scal = 0;
+
+  _GDF_CString(E.in_fields + 0, in_field1, *in_field1_l);
+  _GDF_CString(E.scalar + 0, m1_scalar, *m1_scalar_l);
+  _GDF_CString(E.scalar + 0 + GD_MAX_LINCOM, b1_scalar, *b1_scalar_l);
+
+  GDF_SCIND_F2C(E.scalar_ind[0], *m1_scalar_ind);
+  GDF_SCIND_F2C(E.scalar_ind[0 + GD_MAX_LINCOM], *b1_scalar_ind);
+  E.m[0] = *m1;
+  E.b[0] = *b1;
+
+  if (n > 1) {
+    _GDF_CString(E.in_fields + 1, in_field2, *in_field2_l);
+    _GDF_CString(E.scalar + 1, m2_scalar, *m2_scalar_l);
+    _GDF_CString(E.scalar + 1 + GD_MAX_LINCOM, b2_scalar, *b2_scalar_l);
+
+    GDF_SCIND_F2C(E.scalar_ind[1], *m2_scalar_ind);
+    GDF_SCIND_F2C(E.scalar_ind[1 + GD_MAX_LINCOM], *b2_scalar_ind);
+    E.m[1] = *m2;
+    E.b[1] = *b2;
+  }
+
+  if (n > 2) {
+    _GDF_CString(E.in_fields + 2, in_field3, *in_field3_l);
+    _GDF_CString(E.scalar + 2, m3_scalar, *m3_scalar_l);
+    _GDF_CString(E.scalar + 2 + GD_MAX_LINCOM, b3_scalar, *b3_scalar_l);
+
+    GDF_SCIND_F2C(E.scalar_ind[2], *m3_scalar_ind);
+    GDF_SCIND_F2C(E.scalar_ind[2 + GD_MAX_LINCOM], *b3_scalar_ind);
+    E.m[2] = *m3;
+    E.b[2] = *b3;
+  }
+
+  gd_add(_GDF_GetDirfile(*dirfile), &E);
+
+  free(E.field);
+  for (i = 0; i < n; ++i) {
+    free(E.in_fields[i]);
+    free(E.scalar[i]);
+    free(E.scalar[i + GD_MAX_LINCOM]);
+  }
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdascl, GDASCL) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const GD_DCOMPLEXP(m1), const char *m1_scalar,
+    const int32_t *m1_scalar_l, const int32_t *m1_scalar_ind,
+    const GD_DCOMPLEXP(b1), const char *b1_scalar, const int32_t *b1_scalar_l,
+    const int32_t *b1_scalar_ind, const char *in_field2,
+    const int32_t *in_field2_l, const GD_DCOMPLEXP(m2), const char *m2_scalar,
+    const int32_t *m2_scalar_l, const int32_t *m2_scalar_ind,
+    const GD_DCOMPLEXP(b2), const char *b2_scalar, const int32_t *b2_scalar_l,
+    const int32_t *b2_scalar_ind, const char *in_field3,
+    const int32_t *in_field3_l, const GD_DCOMPLEXP(m3), const char *m3_scalar,
+    const int32_t *m3_scalar_l, const int32_t *m3_scalar_ind,
+    const GD_DCOMPLEXP(b3), const char *b3_scalar, const int32_t *b3_scalar_l,
+    const int32_t *b3_scalar_ind, const int32_t *fragment_index)
+{
+  gd_entry_t E;
+  int i, n;
+
+  dtrace("%i, %p, %i, %i, %p, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %p, "
+      "%i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %p, %i, %g;%g, %p, %i, %i, "
+      "%g;%g, %p, %i, %i, %i", *dirfile, field_code, *field_code_l, *n_fields,
+      in_field1, *in_field1_l, creal(*m1), cimag(*m1), m1_scalar, *m1_scalar_l,
+      *m1_scalar_ind, creal(*b1), cimag(*b1), b1_scalar, *b1_scalar_l,
+      *b1_scalar_ind, in_field2, *in_field2_l, creal(*m2), cimag(*m2),
+      m2_scalar, *m2_scalar_l, *m2_scalar_ind, creal(*b2), cimag(*b2),
+      b2_scalar, *b2_scalar_l, *b2_scalar_ind, in_field3, *in_field3_l,
+      creal(*m3), cimag(*m3), m3_scalar, *m3_scalar_l, *m3_scalar_ind,
+      creal(*b3), cimag(*b3), b3_scalar, *b3_scalar_l, *b3_scalar_ind,
+      *fragment_index);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_LINCOM_ENTRY;
+  E.fragment_index = *fragment_index;
+  n = E.EN(lincom,n_fields) = *n_fields;
+  _GDF_CString(&E.field, field_code, *field_code_l);
+  E.comp_scal = 1;
+
+  _GDF_CString(E.in_fields + 0, in_field1, *in_field1_l);
+  _GDF_CString(E.scalar + 0, m1_scalar, *m1_scalar_l);
+  _GDF_CString(E.scalar + 0 + GD_MAX_LINCOM, b1_scalar, *b1_scalar_l);
+
+  GDF_SCIND_F2C(E.scalar_ind[0], *m1_scalar_ind);
+  GDF_SCIND_F2C(E.scalar_ind[0 + GD_MAX_LINCOM], *b1_scalar_ind);
+  gd_cp2ca_(E.cm, 0, m1);
+  gd_cp2ca_(E.cb, 0, b1);
+
+  if (n > 1) {
+    _GDF_CString(E.in_fields + 1, in_field2, *in_field2_l);
+    _GDF_CString(E.scalar + 1, m2_scalar, *m2_scalar_l);
+    _GDF_CString(E.scalar + 1 + GD_MAX_LINCOM, b2_scalar, *b2_scalar_l);
+
+    GDF_SCIND_F2C(E.scalar_ind[1], *m2_scalar_ind);
+    GDF_SCIND_F2C(E.scalar_ind[1 + GD_MAX_LINCOM], *b2_scalar_ind);
+    gd_cp2ca_(E.cm, 1, m2);
+    gd_cp2ca_(E.cb, 1, b2);
+  }
+
+  if (n > 2) {
+    _GDF_CString(E.in_fields + 2, in_field3, *in_field3_l);
+    _GDF_CString(E.scalar + 2, m3_scalar, *m3_scalar_l);
+    _GDF_CString(E.scalar + 2 + GD_MAX_LINCOM, b3_scalar, *b3_scalar_l);
+
+    GDF_SCIND_F2C(E.scalar_ind[2], *m3_scalar_ind);
+    GDF_SCIND_F2C(E.scalar_ind[2 + GD_MAX_LINCOM], *b3_scalar_ind);
+    gd_cp2ca_(E.cm, 2, m3);
+    gd_cp2ca_(E.cb, 2, b3);
+  }
+
+  gd_add(_GDF_GetDirfile(*dirfile), &E);
+
+  free(E.field);
+  for (i = 0; i < n; ++i) {
+    free(E.in_fields[i]);
+    free(E.scalar[i]);
+    free(E.scalar[i + GD_MAX_LINCOM]);
+  }
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdaspn, GDASPN) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *poly_ord, const char *in_field,
+    const int32_t *in_field_l, const double *a0, const char *a0_scalar,
+    const int32_t *a0_scalar_l, const int32_t *a0_scalar_ind, const double *a1,
+    const char *a1_scalar, const int32_t *a1_scalar_l,
+    const int32_t *a1_scalar_ind, const double *a2, const char *a2_scalar,
+    const int32_t *a2_scalar_l, const int32_t *a2_scalar_ind, const double *a3,
+    const char *a3_scalar, const int32_t *a3_scalar_l,
+    const int32_t *a3_scalar_ind, const double *a4, const char *a4_scalar,
+    const int32_t *a4_scalar_l, const int32_t *a4_scalar_ind, const double *a5,
+    const char *a5_scalar, const int32_t *a5_scalar_l,
+    const int32_t *a5_scalar_ind, const int32_t *fragment_index)
+{
+  gd_entry_t E;
+  int i, n;
+
+  dtrace("%i, %p, %i, %i, %p, %i, %g, %p, %i, %i, %g, %p, %i, %i, %g, %p, %i, "
+      "%i, %g, %p, %i, %i, %g, %p, %i, %i, %g, %p, %i, %i, %i",
+      *dirfile, field_code, *field_code_l, *poly_ord, in_field, *in_field_l,
+      *a0, a0_scalar, *a0_scalar_l, *a0_scalar_ind, *a1, a1_scalar,
+      *a1_scalar_l, *a1_scalar_ind, *a2, a2_scalar, *a2_scalar_l,
+      *a2_scalar_ind, *a3, a3_scalar, *a3_scalar_l, *a3_scalar_ind, *a4,
+      a4_scalar, *a4_scalar_l, *a4_scalar_ind, *a5, a5_scalar, *a5_scalar_l,
+      *a5_scalar_ind, *fragment_index);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_POLYNOM_ENTRY;
+  _GDF_CString(&E.field, field_code, *field_code_l);
+  _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
+  E.fragment_index = *fragment_index;
+  n = E.EN(polynom,poly_ord) = *poly_ord;
+  E.comp_scal = 0;
+
+  if (n > 5)
+    n = 5;
+  else if (n < 1)
+    n = 1;
+
+  switch (n) {
+    case 5:
+      _GDF_CString(E.scalar + 5, a5_scalar, *a5_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[5], *a5_scalar_ind);
+      E.a[5] = *a5;
+      /* fallthrough */
+    case 4:
+      _GDF_CString(E.scalar + 4, a4_scalar, *a4_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[4], *a4_scalar_ind);
+      E.a[4] = *a4;
+      /* fallthrough */
+    case 3:
+      _GDF_CString(E.scalar + 3, a3_scalar, *a3_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[3], *a3_scalar_ind);
+      E.a[3] = *a3;
+      /* fallthrough */
+    case 2:
+      _GDF_CString(E.scalar + 2, a2_scalar, *a2_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[2], *a2_scalar_ind);
+      E.a[2] = *a2;
+      /* fallthrough */
+    default:
+      _GDF_CString(E.scalar + 1, a1_scalar, *a1_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[1], *a1_scalar_ind);
+      E.a[1] = *a1;
+      _GDF_CString(E.scalar + 0, a0_scalar, *a0_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[0], *a0_scalar_ind);
+      E.a[0] = *a0;
+  }
+
+  gd_add(_GDF_GetDirfile(*dirfile), &E);
+
+  free(E.field);
+  free(E.in_fields[0]);
+  for (i = 0; i <= n; ++i)
+    free(E.scalar[i]);
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdascp, GDASCP) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *poly_ord, const char *in_field,
+    const int32_t *in_field_l, const GD_DCOMPLEXP(a0), const char *a0_scalar,
+    const int32_t *a0_scalar_l, const int32_t *a0_scalar_ind,
+    const GD_DCOMPLEXP(a1), const char *a1_scalar, const int32_t *a1_scalar_l,
+    const int32_t *a1_scalar_ind, const GD_DCOMPLEXP(a2), const char *a2_scalar,
+    const int32_t *a2_scalar_l, const int32_t *a2_scalar_ind,
+    const GD_DCOMPLEXP(a3), const char *a3_scalar, const int32_t *a3_scalar_l,
+    const int32_t *a3_scalar_ind, const GD_DCOMPLEXP(a4), const char *a4_scalar,
+    const int32_t *a4_scalar_l, const int32_t *a4_scalar_ind,
+    const GD_DCOMPLEXP(a5), const char *a5_scalar, const int32_t *a5_scalar_l,
+    const int32_t *a5_scalar_ind, const int32_t *fragment_index)
+{
+  gd_entry_t E;
+  int i, n;
+
+  dtrace("%i, %p, %i, %i, %p, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %g;%g, "
+      "%p, %i, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %i",
+      *dirfile, field_code, *field_code_l, *poly_ord, in_field, *in_field_l,
+      creal(*a0), cimag(*a0), a0_scalar, *a0_scalar_l, *a0_scalar_ind,
+      creal(*a1), cimag(*a1), a1_scalar, *a1_scalar_l, *a1_scalar_ind,
+      creal(*a2), cimag(*a2), a2_scalar, *a2_scalar_l, *a2_scalar_ind,
+      creal(*a3), cimag(*a3), a3_scalar, *a3_scalar_l, *a3_scalar_ind,
+      creal(*a4), cimag(*a4), a4_scalar, *a4_scalar_l, *a4_scalar_ind,
+      creal(*a5), cimag(*a5), a5_scalar, *a5_scalar_l, *a5_scalar_ind,
+      *fragment_index);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_POLYNOM_ENTRY;
+  _GDF_CString(&E.field, field_code, *field_code_l);
+  _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
+  E.fragment_index = *fragment_index;
+  n = E.EN(polynom,poly_ord) = *poly_ord;
+  E.comp_scal = 1;
+
+  if (n > 5)
+    n = 5;
+  else if (n < 1)
+    n = 1;
+
+  switch (n) {
+    case 5:
+      _GDF_CString(E.scalar + 5, a5_scalar, *a5_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[5], *a5_scalar_ind);
+      gd_cp2ca_(E.ca, 5, a5);
+      /* fallthrough */
+    case 4:
+      _GDF_CString(E.scalar + 4, a4_scalar, *a4_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[4], *a4_scalar_ind);
+      gd_cp2ca_(E.ca, 4, a4);
+      /* fallthrough */
+    case 3:
+      _GDF_CString(E.scalar + 3, a3_scalar, *a3_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[3], *a3_scalar_ind);
+      gd_cp2ca_(E.ca, 3, a3);
+      /* fallthrough */
+    case 2:
+      _GDF_CString(E.scalar + 2, a2_scalar, *a2_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[2], *a2_scalar_ind);
+      gd_cp2ca_(E.ca, 2, a2);
+      /* fallthrough */
+    default:
+      _GDF_CString(E.scalar + 1, a1_scalar, *a1_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[1], *a1_scalar_ind);
+      gd_cp2ca_(E.ca, 1, a1);
+      _GDF_CString(E.scalar + 0, a0_scalar, *a0_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[0], *a0_scalar_ind);
+      gd_cp2ca_(E.ca, 0, a0);
+  }
+
+  gd_add(_GDF_GetDirfile(*dirfile), &E);
+
+  free(E.field);
+  free(E.in_fields[0]);
+  for (i = 0; i <= n; ++i)
+    free(E.scalar[i]);
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdasph, GDASPH) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *shift,
+    const char *shift_scalar, const int32_t *shift_scalar_l,
+    const int32_t *shift_scalar_ind, const int32_t *fragment_index)
+{
+  gd_entry_t E;
+
+  dtrace("%i, %p, %i, %p, %i, %i, %p, %i, %i, %i", *dirfile, field_code,
+      *field_code_l, in_field, *in_field_l, *shift, shift_scalar,
+      *shift_scalar_l, *shift_scalar_ind, *fragment_index);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_PHASE_ENTRY;
+  _GDF_CString(&E.field, field_code, *field_code_l);
+  _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
+  E.fragment_index = *fragment_index;
+  E.EN(phase,shift) = *shift;
+  _GDF_CString(E.scalar + 0, shift_scalar, *shift_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[0], *shift_scalar_ind);
+  
+  gd_add(_GDF_GetDirfile(*dirfile), &E);
+
+  free(E.field);
+  free(E.in_fields[0]);
+  free(E.scalar[0]);
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdasrc, GDASRC) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const double *dividend,
+    const char *dividend_scalar, const int32_t *dividend_scalar_l,
+    const int32_t *dividend_scalar_ind, const int32_t *fragment_index)
+{
+  gd_entry_t E;
+
+  dtrace("%i, %p, %i, %p, %i, %g, %p, %i, %i, %i", *dirfile, field_code,
+      *field_code_l, in_field, *in_field_l, *dividend, dividend_scalar,
+      *dividend_scalar_l, *dividend_scalar_ind, *fragment_index);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_RECIP_ENTRY;
+  _GDF_CString(&E.field, field_code, *field_code_l);
+  _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
+  E.fragment_index = *fragment_index;
+  E.EN(recip,dividend) = *dividend;
+  _GDF_CString(E.scalar + 0, dividend_scalar, *dividend_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[0], *dividend_scalar_ind);
+
+  gd_add(_GDF_GetDirfile(*dirfile), &E);
+
+  free(E.field);
+  free(E.in_fields[0]);
+  free(E.scalar[0]);
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdascr, GDASCR) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const double *dividend,
+    const char *dividend_scalar, const int32_t *dividend_scalar_l,
+    const int32_t *dividend_scalar_ind, const int32_t *fragment_index)
+{
+  gd_entry_t E;
+
+  dtrace("%i, %p, %i, %p, %i, %g;%g, %p, %i, %i, %i", *dirfile, field_code,
+      *field_code_l, in_field, *in_field_l, dividend[0], dividend[1],
+      dividend_scalar, *dividend_scalar_l, *dividend_scalar_ind,
+      *fragment_index);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_RECIP_ENTRY;
+  _GDF_CString(&E.field, field_code, *field_code_l);
+  _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
+  E.fragment_index = *fragment_index;
+  gd_li2cs_(E.EN(recip,dividend), dividend[0], dividend[1]);
+  _GDF_CString(E.scalar + 0, dividend_scalar, *dividend_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[0], *dividend_scalar_ind);
+
+  gd_add(_GDF_GetDirfile(*dirfile), &E);
+
+  free(E.field);
+  free(E.in_fields[0]);
+  free(E.scalar[0]);
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdaswd, GDASWD) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *check_field,
+    const int32_t *check_field_l, const int32_t *windop, const void *threshold,
+    const char *threshold_scalar, const int32_t *threshold_scalar_l,
+    const int32_t *threshold_scalar_ind, const int32_t *fragment_index)
+{
+  gd_entry_t E;
+
+  dtrace("%i, %p, %i, %p, %i, %p, %i, %i, %p, %p, %i, %i, %i", *dirfile,
+      field_code, *field_code_l, in_field, *in_field_l, check_field,
+      *check_field_l, *windop, threshold, threshold_scalar, *threshold_scalar_l,
+      *threshold_scalar_ind, *fragment_index);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_WINDOW_ENTRY;
+  _GDF_CString(&E.field, field_code, *field_code_l);
+  _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
+  _GDF_CString(&E.in_fields[1], check_field, *check_field_l);
+  E.fragment_index = *fragment_index;
+  E.windop = *windop;
+  E.threshold = _GDF_SetTriplet(E.windop, threshold);
+  _GDF_CString(E.scalar + 0, threshold_scalar, *threshold_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[0], *threshold_scalar_ind);
+
+  gd_add(_GDF_GetDirfile(*dirfile), &E);
+
+  free(E.field);
+  free(E.in_fields[0]);
+  free(E.in_fields[1]);
+  free(E.scalar[0]);
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdasmx, GDASMX) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *count_field,
+    const int32_t *count_field_l, const int32_t *val, const char *val_scalar,
+    const int32_t *val_scalar_l, const int32_t *val_scalar_ind,
+    const int32_t *period, const char *period_scalar,
+    const int32_t *period_scalar_l, const int32_t *period_scalar_ind,
+    const int32_t *fragment_index)
+{
+  gd_entry_t E;
+
+  dtrace("%i, %p, %i, %p, %i, %p, %i, %i, %p, %i, %i, %i, %p, %i, %i, %i",
+      *dirfile, field_code, *field_code_l, in_field, *in_field_l, count_field,
+      *count_field_l, *val, val_scalar, *val_scalar_l, *val_scalar_ind,
+      *period, period_scalar, *period_scalar_l, *period_scalar_ind,
+      *fragment_index);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_MPLEX_ENTRY;
+  _GDF_CString(&E.field, field_code, *field_code_l);
+  _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
+  _GDF_CString(&E.in_fields[1], count_field, *count_field_l);
+  E.fragment_index = *fragment_index;
+  E.count_val = *val;
+  E.period = *period;
+  _GDF_CString(E.scalar + 0, val_scalar, *val_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[0], *val_scalar_ind);
+  _GDF_CString(E.scalar + 1, period_scalar, *period_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[1], *period_scalar_ind);
+
+  gd_add(_GDF_GetDirfile(*dirfile), &E);
+
+  free(E.field);
+  free(E.in_fields[0]);
+  free(E.in_fields[1]);
+  free(E.scalar[0]);
+  free(E.scalar[1]);
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdlsph, GDLSPH) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *shift,
+    const char *shift_scalar, const int32_t *shift_scalar_l,
+    const int32_t *shift_scalar_ind)
+{
+  gd_entry_t E;
+  char *fc;
+
+  dtrace("%i, %p, %i, %p, %i, %i, %p, %i, %i", *dirfile, field_code,
+      *field_code_l, in_field, *in_field_l, *shift, shift_scalar,
+      *shift_scalar_l, *shift_scalar_ind);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_PHASE_ENTRY;
+  _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
+  E.EN(phase,shift) = *shift;
+  _GDF_CString(E.scalar + 0, shift_scalar, *shift_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[0], *shift_scalar_ind);
+
+  gd_alter_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
+        *field_code_l), &E, 0);
+
+  free(fc);
+  free(E.in_fields[0]);
+  free(E.scalar[0]);
+  dreturnvoid();
+}
+
+void F77_FUNC(gdlspn, GDLSPN) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *poly_ord, const char *in_field,
+    const int32_t *in_field_l, const double *a0, const char *a0_scalar,
+    const int32_t *a0_scalar_l, const int32_t *a0_scalar_ind,
+    const double *a1, const char *a1_scalar, const int32_t *a1_scalar_l,
+    const int32_t *a1_scalar_ind, const double *a2, const char *a2_scalar,
+    const int32_t *a2_scalar_l, const int32_t *a2_scalar_ind,
+    const double *a3, const char *a3_scalar, const int32_t *a3_scalar_l,
+    const int32_t *a3_scalar_ind, const double *a4, const char *a4_scalar,
+    const int32_t *a4_scalar_l, const int32_t *a4_scalar_ind,
+    const double *a5, const char *a5_scalar, const int32_t *a5_scalar_l,
+    const int32_t *a5_scalar_ind)
+{
+  char *fc;
+  gd_entry_t E;
+  int i, n;
+
+  dtrace("%i, %p, %i, %i, %p, %i, %g, %p, %i, %i, %g, %p, %i, %i, %g, "
+      "%p, %i, %i, %g, %p, %i, %i, %g, %p, %i, %i, %g, %p, %i, %i",
+      *dirfile, field_code, *field_code_l, *poly_ord, in_field, *in_field_l,
+      *a0, a0_scalar, *a0_scalar_l, *a0_scalar_ind,
+      *a1, a1_scalar, *a1_scalar_l, *a1_scalar_ind,
+      *a2, a2_scalar, *a2_scalar_l, *a2_scalar_ind,
+      *a3, a3_scalar, *a3_scalar_l, *a3_scalar_ind,
+      *a4, a4_scalar, *a4_scalar_l, *a4_scalar_ind,
+      *a5, a5_scalar, *a5_scalar_l, *a5_scalar_ind);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_POLYNOM_ENTRY;
+  _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
+  n = E.EN(polynom,poly_ord) = *poly_ord;
+  E.comp_scal = 0;
+
+  if (n > 5)
+    n = 5;
+  else if (n < 1)
+    n = 1;
+
+  switch (n) {
+    case 5:
+      _GDF_CString(E.scalar + 5, a5_scalar, *a5_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[5], *a5_scalar_ind);
+      E.EN(polynom,a)[5] = *a5;
+      /* fallthrough */
+    case 4:
+      _GDF_CString(E.scalar + 4, a4_scalar, *a4_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[4], *a4_scalar_ind);
+      E.EN(polynom,a)[4] = *a4;
+      /* fallthrough */
+    case 3:
+      _GDF_CString(E.scalar + 3, a3_scalar, *a3_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[3], *a3_scalar_ind);
+      E.EN(polynom,a)[3] = *a3;
+      /* fallthrough */
+    case 2:
+      _GDF_CString(E.scalar + 2, a2_scalar, *a2_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[2], *a2_scalar_ind);
+      E.EN(polynom,a)[2] = *a2;
+      /* fallthrough */
+    default:
+      _GDF_CString(E.scalar + 1, a1_scalar, *a1_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[1], *a1_scalar_ind);
+      E.EN(polynom,a)[1] = *a1;
+      _GDF_CString(E.scalar + 0, a0_scalar, *a0_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[0], *a0_scalar_ind);
+      E.EN(polynom,a)[0] = *a0;
+  }
+
+  gd_alter_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
+        *field_code_l), &E, 0);
+
+  free(fc);
+  free(E.in_fields[0]);
+  for (i = 0; i <= n; ++i)
+    free(E.scalar[i]);
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdlscp, GDLSCP) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *poly_ord, const char *in_field,
+    const int32_t *in_field_l, const GD_DCOMPLEXP(a0), const char *a0_scalar,
+    const int32_t *a0_scalar_l, const int32_t *a0_scalar_ind,
+    const GD_DCOMPLEXP(a1), const char *a1_scalar, const int32_t *a1_scalar_l,
+    const int32_t *a1_scalar_ind, const GD_DCOMPLEXP(a2), const char *a2_scalar,
+    const int32_t *a2_scalar_l, const int32_t *a2_scalar_ind,
+    const GD_DCOMPLEXP(a3), const char *a3_scalar, const int32_t *a3_scalar_l,
+    const int32_t *a3_scalar_ind, const GD_DCOMPLEXP(a4), const char *a4_scalar,
+    const int32_t *a4_scalar_l, const int32_t *a4_scalar_ind,
+    const GD_DCOMPLEXP(a5), const char *a5_scalar, const int32_t *a5_scalar_l,
+    const int32_t *a5_scalar_ind)
+{
+  char *fc;
+  gd_entry_t E;
+  int i, n;
+
+  dtrace("%i, %p, %i, %i, %p, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %g;%g, "
+      "%p, %i, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i",
+      *dirfile, field_code, *field_code_l, *poly_ord, in_field, *in_field_l,
+      creal(*a0), cimag(*a0), a0_scalar, *a0_scalar_l, *a0_scalar_ind,
+      creal(*a1), cimag(*a1), a1_scalar, *a1_scalar_l, *a1_scalar_ind,
+      creal(*a2), cimag(*a2), a2_scalar, *a2_scalar_l, *a2_scalar_ind,
+      creal(*a3), cimag(*a3), a3_scalar, *a3_scalar_l, *a3_scalar_ind,
+      creal(*a4), cimag(*a4), a4_scalar, *a4_scalar_l, *a4_scalar_ind,
+      creal(*a5), cimag(*a5), a5_scalar, *a5_scalar_l, *a5_scalar_ind);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_POLYNOM_ENTRY;
+  _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
+  n = E.EN(polynom,poly_ord) = *poly_ord;
+  E.comp_scal = 1;
+
+  if (n > 5)
+    n = 5;
+  else if (n < 1)
+    n = 1;
+
+  switch (n) {
+    case 5:
+      _GDF_CString(E.scalar + 5, a5_scalar, *a5_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[5], *a5_scalar_ind);
+      gd_cp2ca_(E.ca, 5, a5);
+      /* fallthrough */
+    case 4:
+      _GDF_CString(E.scalar + 4, a4_scalar, *a4_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[4], *a4_scalar_ind);
+      gd_cp2ca_(E.ca, 4, a4);
+      /* fallthrough */
+    case 3:
+      _GDF_CString(E.scalar + 3, a3_scalar, *a3_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[3], *a3_scalar_ind);
+      gd_cp2ca_(E.ca, 3, a3);
+      /* fallthrough */
+    case 2:
+      _GDF_CString(E.scalar + 2, a2_scalar, *a2_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[2], *a2_scalar_ind);
+      gd_cp2ca_(E.ca, 2, a2);
+      /* fallthrough */
+    default:
+      _GDF_CString(E.scalar + 1, a1_scalar, *a1_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[1], *a1_scalar_ind);
+      gd_cp2ca_(E.ca, 1, a1);
+      _GDF_CString(E.scalar + 0, a0_scalar, *a0_scalar_l);
+      GDF_SCIND_F2C(E.scalar_ind[0], *a0_scalar_ind);
+      gd_cp2ca_(E.ca, 0, a0);
+  }
+
+  gd_alter_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
+        *field_code_l), &E, 0);
+
+  free(fc);
+  free(E.in_fields[0]);
+  for (i = 0; i <= n; ++i)
+    free(E.scalar[i]);
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdlswd, GDLSWD) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *check_field,
+    const int32_t *check_field_l, const int32_t *windop, const void *threshold,
+    const char *threshold_scalar, const int32_t *threshold_scalar_l,
+    const int32_t *threshold_scalar_ind)
+{
+  gd_entry_t E;
+  char *fc;
+
+  dtrace("%i, %p, %i, %p, %i, %p, %i, %i, %p, %p, %i, %i", *dirfile, field_code,
+      *field_code_l, in_field, *in_field_l, check_field, *check_field_l,
+      *windop, threshold, threshold_scalar, *threshold_scalar_l,
+      *threshold_scalar_ind);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_WINDOW_ENTRY;
+  _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
+  _GDF_CString(&E.in_fields[1], check_field, *check_field_l);
+  E.windop = *windop;
+  E.threshold = _GDF_SetTriplet(E.windop, threshold);
+  _GDF_CString(E.scalar + 0, threshold_scalar, *threshold_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[0], *threshold_scalar_ind);
+
+  gd_alter_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
+        *field_code_l), &E, 0);
+
+  free(fc);
+  free(E.in_fields[0]);
+  free(E.in_fields[1]);
+  free(E.scalar[0]);
+
+  dreturnvoid();
+}
+
+/* common code for gdasbt and gdassb */
+static void _GDF_AddBitSBit(int32_t dirfile, const char *field_code,
+    int32_t field_code_l, const char *in_field, int32_t in_field_l,
+    int32_t bitnum, const char *bitnum_scalar, int32_t bitnum_scalar_l,
+    int32_t bitnum_scalar_ind, int32_t numbits, const char *numbits_scalar,
+    int32_t numbits_scalar_l, int32_t numbits_scalar_ind,
+    int32_t fragment_index, int sbit)
+{
+  gd_entry_t E;
+
+  dtrace("%i, %p, %i, %p, %i, %i, %p, %i, %i, %i, %p, %i, %i, %i, %i", dirfile,
+      field_code, field_code_l, in_field, in_field_l, bitnum, bitnum_scalar,
+      bitnum_scalar_l, bitnum_scalar_ind, numbits, numbits_scalar,
+      numbits_scalar_l, numbits_scalar_ind, fragment_index, sbit);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = sbit ? GD_SBIT_ENTRY : GD_BIT_ENTRY;
+  E.fragment_index = fragment_index;
+  E.EN(bit,bitnum) = bitnum;
+  E.EN(bit,numbits) = numbits;
+  _GDF_CString(&E.field, field_code, field_code_l);
+  _GDF_CString(E.in_fields, in_field, in_field_l);
+  _GDF_CString(E.scalar, bitnum_scalar, bitnum_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[0], bitnum_scalar_ind);
+  _GDF_CString(E.scalar + 1, numbits_scalar, numbits_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[1], numbits_scalar_ind);
+
+  gd_add(_GDF_GetDirfile(dirfile), &E);
+
+  free(E.field);
+  free(E.in_fields[0]);
+  free(E.scalar[0]);
+  free(E.scalar[1]);
+
+  dreturnvoid();
+}
+
+/* gd_add_bit with scalar parameters */
+void F77_FUNC(gdasbt, GDASBT) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *bitnum, const char *bitnum_scalar,
+    const int32_t *bitnum_scalar_l, const int32_t *bitnum_scalar_ind,
+    const int32_t *numbits, const char *numbits_scalar,
+    const int32_t *numbits_scalar_l, const int32_t *numbits_scalar_ind,
+    const int32_t *fragment_index)
+{
+  dtrace("%i, %p, %i, %p, %i, %i, %p, %i, %i, %i, %p, %i, %i, %i", *dirfile,
+      field_code, *field_code_l, in_field, *in_field_l, *bitnum, bitnum_scalar,
+      *bitnum_scalar_l, *bitnum_scalar_ind, *numbits, numbits_scalar,
+      *numbits_scalar_l, *numbits_scalar_ind, *fragment_index);
+
+  _GDF_AddBitSBit(*dirfile, field_code, *field_code_l, in_field, *in_field_l,
+      *bitnum, bitnum_scalar, *bitnum_scalar_l, *bitnum_scalar_ind, *numbits,
+      numbits_scalar, *numbits_scalar_l, *numbits_scalar_ind, *fragment_index,
+      0);
+
+  dreturnvoid();
+}
+
+/* gd_add_sbit with scalar parameters */
+void F77_FUNC(gdassb, GDASSB) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *bitnum, const char *bitnum_scalar,
+    const int32_t *bitnum_scalar_l, const int32_t *bitnum_scalar_ind,
+    const int32_t *numbits, const char *numbits_scalar,
+    const int32_t *numbits_scalar_l, const int32_t *numbits_scalar_ind,
+    const int32_t *fragment_index)
+{
+  dtrace("%i, %p, %i, %p, %i, %i, %p, %i, %i, %i, %p, %i, %i, %i", *dirfile,
+      field_code, *field_code_l, in_field, *in_field_l, *bitnum, bitnum_scalar,
+      *bitnum_scalar_l, *bitnum_scalar_ind, *numbits, numbits_scalar,
+      *numbits_scalar_l, *numbits_scalar_ind, *fragment_index);
+
+
+  _GDF_AddBitSBit(*dirfile, field_code, *field_code_l, in_field, *in_field_l,
+      *bitnum, bitnum_scalar, *bitnum_scalar_l, *bitnum_scalar_ind, *numbits,
+      numbits_scalar, *numbits_scalar_l, *numbits_scalar_ind, *fragment_index,
+      1);
+
+  dreturnvoid();
+}
+
+/* common code for gdlsbt and gdlssb */
+static void _GDF_AlterBitSBit(int32_t dirfile, const char *field_code,
+    int32_t field_code_l, const char *in_field, int32_t in_field_l,
+    int32_t bitnum, const char *bitnum_scalar, int32_t bitnum_scalar_l,
+    int32_t bitnum_scalar_ind, int32_t numbits, const char *numbits_scalar,
+    int32_t numbits_scalar_l, int32_t numbits_scalar_ind, int sbit)
+{
+  gd_entry_t E;
+  char *fc;
+
+  dtrace("%i, %p, %i, %p, %i, %i, %p, %i, %i, %i, %p, %i, %i, %i", dirfile,
+      field_code, field_code_l, in_field, in_field_l, bitnum, bitnum_scalar,
+      bitnum_scalar_l, bitnum_scalar_ind, numbits, numbits_scalar,
+      numbits_scalar_l, numbits_scalar_ind, sbit);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = sbit ? GD_SBIT_ENTRY : GD_BIT_ENTRY;
+  E.EN(bit,bitnum) = bitnum;
+  E.EN(bit,numbits) = numbits;
+  _GDF_CString(E.in_fields, in_field, in_field_l);
+  _GDF_CString(E.scalar, bitnum_scalar, bitnum_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[0], bitnum_scalar_ind);
+  _GDF_CString(E.scalar + 1, numbits_scalar, numbits_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[1], numbits_scalar_ind);
+
+  gd_alter_entry(_GDF_GetDirfile(dirfile), _GDF_CString(&fc, field_code,
+        field_code_l), &E, 0);
+
+  free(fc);
+  free(E.in_fields[0]);
+  free(E.scalar[0]);
+  free(E.scalar[1]);
+
+  dreturnvoid();
+}
+
+/* gd_add_bit with scalar parameters */
+void F77_FUNC(gdlsbt, GDLSBT) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *bitnum, const char *bitnum_scalar,
+    const int32_t *bitnum_scalar_l, const int32_t *bitnum_scalar_ind,
+    const int32_t *numbits, const char *numbits_scalar,
+    const int32_t *numbits_scalar_l, const int32_t *numbits_scalar_ind)
+{
+  dtrace("%i, %p, %i, %p, %i, %i, %p, %i, %i, %i, %p, %i, %i", *dirfile,
+      field_code, *field_code_l, in_field, *in_field_l, *bitnum, bitnum_scalar,
+      *bitnum_scalar_l, *bitnum_scalar_ind, *numbits, numbits_scalar,
+      *numbits_scalar_l, *numbits_scalar_ind);
+
+  _GDF_AlterBitSBit(*dirfile, field_code, *field_code_l, in_field, *in_field_l,
+      *bitnum, bitnum_scalar, *bitnum_scalar_l, *bitnum_scalar_ind, *numbits,
+      numbits_scalar, *numbits_scalar_l, *numbits_scalar_ind, 0);
+
+  dreturnvoid();
+}
+
+/* gd_add_sbit with scalar parameters */
+void F77_FUNC(gdlssb, GDLSSB) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *bitnum, const char *bitnum_scalar,
+    const int32_t *bitnum_scalar_l, const int32_t *bitnum_scalar_ind,
+    const int32_t *numbits, const char *numbits_scalar,
+    const int32_t *numbits_scalar_l, const int32_t *numbits_scalar_ind)
+{
+  dtrace("%i, %p, %i, %p, %i, %i, %p, %i, %i, %i, %p, %i, %i", *dirfile,
+      field_code, *field_code_l, in_field, *in_field_l, *bitnum, bitnum_scalar,
+      *bitnum_scalar_l, *bitnum_scalar_ind, *numbits, numbits_scalar,
+      *numbits_scalar_l, *numbits_scalar_ind);
+
+  _GDF_AlterBitSBit(*dirfile, field_code, *field_code_l, in_field, *in_field_l,
+      *bitnum, bitnum_scalar, *bitnum_scalar_l, *bitnum_scalar_ind, *numbits,
+      numbits_scalar, *numbits_scalar_l, *numbits_scalar_ind, 1);
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdlslc, GDLSLC) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const double *m1, const char *m1_scalar,
+    const int32_t *m1_scalar_l, const int32_t *m1_scalar_ind, const double *b1,
+    const char *b1_scalar, const int32_t *b1_scalar_l,
+    const int32_t *b1_scalar_ind, const char *in_field2,
+    const int32_t *in_field2_l, const double *m2, const char *m2_scalar,
+    const int32_t *m2_scalar_l, const int32_t *m2_scalar_ind, const double *b2,
+    const char *b2_scalar, const int32_t *b2_scalar_l,
+    const int32_t *b2_scalar_ind, const char *in_field3,
+    const int32_t *in_field3_l, const double *m3, const char *m3_scalar,
+    const int32_t *m3_scalar_l, const int32_t *m3_scalar_ind, const double *b3,
+    const char *b3_scalar, const int32_t *b3_scalar_l,
+    const int32_t *b3_scalar_ind)
+{
+  gd_entry_t E;
+  int i, n;
+  char *fc;
+
+  dtrace("%i, %p, %i, %i, %p, %i, %g, %p, %i, %i, %g, %p, %i, %i, %p, %i, "
+      "%g, %p, %i, %i, %g, %p, %i, %i, %p, %i, %g, %p, %i, %i, %g, %p, %i, "
+      "%i", *dirfile, field_code, *field_code_l, *n_fields, in_field1,
+      *in_field1_l, *m1, m1_scalar, *m1_scalar_l, *m1_scalar_ind, *b1,
+      b1_scalar, *b1_scalar_l, *b1_scalar_ind, in_field2, *in_field2_l, *m2,
+      m2_scalar, *m2_scalar_l, *m2_scalar_ind, *b2, b2_scalar, *b2_scalar_l,
+      *b2_scalar_ind, in_field3, *in_field3_l, *m3, m3_scalar, *m3_scalar_l,
+      *m3_scalar_ind, *b3, b3_scalar, *b3_scalar_l, *b3_scalar_ind);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_LINCOM_ENTRY;
+  n = E.EN(lincom,n_fields) = *n_fields;
+  E.comp_scal = 0;
+
+  _GDF_CString(E.in_fields + 0, in_field1, *in_field1_l);
+  _GDF_CString(E.scalar + 0, m1_scalar, *m1_scalar_l);
+  _GDF_CString(E.scalar + 0 + GD_MAX_LINCOM, b1_scalar, *b1_scalar_l);
+
+  GDF_SCIND_F2C(E.scalar_ind[0], *m1_scalar_ind);
+  GDF_SCIND_F2C(E.scalar_ind[0 + GD_MAX_LINCOM], *b1_scalar_ind);
+  E.m[0] = *m1;
+  E.b[0] = *b1;
+
+  if (n > 1) {
+    _GDF_CString(E.in_fields + 1, in_field2, *in_field2_l);
+    _GDF_CString(E.scalar + 1, m2_scalar, *m2_scalar_l);
+    _GDF_CString(E.scalar + 1 + GD_MAX_LINCOM, b2_scalar, *b2_scalar_l);
+
+    GDF_SCIND_F2C(E.scalar_ind[1], *m2_scalar_ind);
+    GDF_SCIND_F2C(E.scalar_ind[1 + GD_MAX_LINCOM], *b2_scalar_ind);
+    E.m[1] = *m2;
+    E.b[1] = *b2;
+  }
+
+  if (n > 2) {
+    _GDF_CString(E.in_fields + 2, in_field3, *in_field3_l);
+    _GDF_CString(E.scalar + 2, m3_scalar, *m3_scalar_l);
+    _GDF_CString(E.scalar + 2 + GD_MAX_LINCOM, b3_scalar, *b3_scalar_l);
+
+    GDF_SCIND_F2C(E.scalar_ind[2], *m3_scalar_ind);
+    GDF_SCIND_F2C(E.scalar_ind[2 + GD_MAX_LINCOM], *b3_scalar_ind);
+    E.m[2] = *m3;
+    E.b[2] = *b3;
+  }
+
+  gd_alter_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
+        *field_code_l), &E, 0);
+
+  free(fc);
+  for (i = 0; i < n; ++i) {
+    free(E.in_fields[i]);
+    free(E.scalar[i]);
+    free(E.scalar[i + GD_MAX_LINCOM]);
+  }
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdlscl, GDLSCL) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const GD_DCOMPLEXP(m1), const char *m1_scalar,
+    const int32_t *m1_scalar_l, const int32_t *m1_scalar_ind,
+    const GD_DCOMPLEXP(b1), const char *b1_scalar, const int32_t *b1_scalar_l,
+    const int32_t *b1_scalar_ind, const char *in_field2,
+    const int32_t *in_field2_l, const GD_DCOMPLEXP(m2), const char *m2_scalar,
+    const int32_t *m2_scalar_l, const int32_t *m2_scalar_ind,
+    const GD_DCOMPLEXP(b2), const char *b2_scalar, const int32_t *b2_scalar_l,
+    const int32_t *b2_scalar_ind, const char *in_field3,
+    const int32_t *in_field3_l, const GD_DCOMPLEXP(m3), const char *m3_scalar,
+    const int32_t *m3_scalar_l, const int32_t *m3_scalar_ind,
+    const GD_DCOMPLEXP(b3), const char *b3_scalar, const int32_t *b3_scalar_l,
+    const int32_t *b3_scalar_ind)
+{
+  gd_entry_t E;
+  int i, n;
+  char *fc;
+
+  dtrace("%i, %p, %i, %i, %p, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %p, "
+      "%i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %p, %i, %g;%g, %p, %i, %i, "
+      "%g;%g, %p, %i, %i", *dirfile, field_code, *field_code_l, *n_fields,
+      in_field1, *in_field1_l, creal(*m1), cimag(*m1), m1_scalar, *m1_scalar_l,
+      *m1_scalar_ind, creal(*b1), cimag(*b1), b1_scalar, *b1_scalar_l,
+      *b1_scalar_ind, in_field2, *in_field2_l, creal(*m2), cimag(*m2),
+      m2_scalar, *m2_scalar_l, *m2_scalar_ind, creal(*b2), cimag(*b2),
+      b2_scalar, *b2_scalar_l, *b2_scalar_ind, in_field3, *in_field3_l,
+      creal(*m3), cimag(*m3), m3_scalar, *m3_scalar_l, *m3_scalar_ind,
+      creal(*b3), cimag(*b3), b3_scalar, *b3_scalar_l, *b3_scalar_ind);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_LINCOM_ENTRY;
+  n = E.EN(lincom,n_fields) = *n_fields;
+  E.comp_scal = 1;
+
+  _GDF_CString(E.in_fields + 0, in_field1, *in_field1_l);
+  _GDF_CString(E.scalar + 0, m1_scalar, *m1_scalar_l);
+  _GDF_CString(E.scalar + 0 + GD_MAX_LINCOM, b1_scalar, *b1_scalar_l);
+
+  GDF_SCIND_F2C(E.scalar_ind[0], *m1_scalar_ind);
+  GDF_SCIND_F2C(E.scalar_ind[0 + GD_MAX_LINCOM], *b1_scalar_ind);
+  gd_cp2ca_(E.cm, 0, m1);
+  gd_cp2ca_(E.cb, 0, b1);
+
+  if (n > 1) {
+    _GDF_CString(E.in_fields + 1, in_field2, *in_field2_l);
+    _GDF_CString(E.scalar + 1, m2_scalar, *m2_scalar_l);
+    _GDF_CString(E.scalar + 1 + GD_MAX_LINCOM, b2_scalar, *b2_scalar_l);
+
+    GDF_SCIND_F2C(E.scalar_ind[1], *m2_scalar_ind);
+    GDF_SCIND_F2C(E.scalar_ind[1 + GD_MAX_LINCOM], *b2_scalar_ind);
+    gd_cp2ca_(E.cm, 1, m2);
+    gd_cp2ca_(E.cb, 1, b2);
+  }
+
+  if (n > 2) {
+    _GDF_CString(E.in_fields + 2, in_field3, *in_field3_l);
+    _GDF_CString(E.scalar + 2, m3_scalar, *m3_scalar_l);
+    _GDF_CString(E.scalar + 2 + GD_MAX_LINCOM, b3_scalar, *b3_scalar_l);
+
+    GDF_SCIND_F2C(E.scalar_ind[2], *m3_scalar_ind);
+    GDF_SCIND_F2C(E.scalar_ind[2 + GD_MAX_LINCOM], *b3_scalar_ind);
+    gd_cp2ca_(E.cm, 2, m3);
+    gd_cp2ca_(E.cb, 2, b3);
+  }
+
+  gd_alter_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
+        *field_code_l), &E, 0);
+
+  free(fc);
+  for (i = 0; i < n; ++i) {
+    free(E.in_fields[i]);
+    free(E.scalar[i]);
+    free(E.scalar[i + GD_MAX_LINCOM]);
+  }
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdlsrc, GDLSRC) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const double *dividend,
+    const char *dividend_scalar, const int32_t *dividend_scalar_l,
+    const int32_t *dividend_scalar_ind)
+{
+  gd_entry_t E;
+  char *fc;
+
+  dtrace("%i, %p, %i, %p, %i, %g, %p, %i, %i", *dirfile, field_code,
+      *field_code_l, in_field, *in_field_l, *dividend, dividend_scalar,
+      *dividend_scalar_l, *dividend_scalar_ind);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_RECIP_ENTRY;
+  _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
+  E.EN(recip,dividend) = *dividend;
+  _GDF_CString(E.scalar + 0, dividend_scalar, *dividend_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[0], *dividend_scalar_ind);
+
+  gd_alter_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
+        *field_code_l), &E, 0);
+
+  free(fc);
+  free(E.in_fields[0]);
+  free(E.scalar[0]);
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdlscr, GDLSCR) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const double *dividend,
+    const char *dividend_scalar, const int32_t *dividend_scalar_l,
+    const int32_t *dividend_scalar_ind)
+{
+  gd_entry_t E;
+  char *fc;
+
+  dtrace("%i, %p, %i, %p, %i, %g;%g, %p, %i, %i", *dirfile, field_code,
+      *field_code_l, in_field, *in_field_l, dividend[0], dividend[1],
+      dividend_scalar, *dividend_scalar_l, *dividend_scalar_ind);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_RECIP_ENTRY;
+  E.comp_scal = 1;
+  _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
+  gd_li2cs_(E.EN(recip,cdividend), dividend[0], dividend[1]);
+  _GDF_CString(E.scalar + 0, dividend_scalar, *dividend_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[0], *dividend_scalar_ind);
+
+  gd_alter_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
+        *field_code_l), &E, 0);
+
+  free(fc);
+  free(E.in_fields[0]);
+  free(E.scalar[0]);
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdlsrw, GDLSRW) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *data_type, const int32_t *spf,
+    const char *spf_scalar, const int32_t *spf_scalar_l,
+    const int32_t *spf_scalar_ind, const int32_t *recode)
+{
+  gd_entry_t E;
+  char *fc;
+
+  dtrace("%i, %p, %i, %i, %i, %p, %i, %i, %i", *dirfile, field_code,
+      *field_code_l, *data_type, *spf, spf_scalar, *spf_scalar_l,
+      *spf_scalar_ind, *recode);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_RAW_ENTRY;
+  E.EN(raw,data_type) = *data_type;
+  E.EN(raw,spf) = *spf;
+  _GDF_CString(E.scalar, spf_scalar, *spf_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[0], *spf_scalar_ind);
+
+  gd_alter_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
+        *field_code_l), &E, *recode);
+
+  free(fc);
+  free(E.scalar[0]);
+
+  dreturnvoid();
+}
+
+void F77_FUNC(gdlsmx, GDLSMX) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *count_field,
+    const int32_t *count_field_l, const int32_t *val, const char *val_scalar,
+    const int32_t *val_scalar_l, const int32_t *val_scalar_ind,
+    const int32_t *period, const char *period_scalar,
+    const int32_t *period_scalar_l, const int32_t *period_scalar_ind)
+{
+  gd_entry_t E;
+  char *fc;
+
+  dtrace("%i, %p, %i, %p, %i, %p, %i, %i, %p, %i, %i, %i, %p, %i, %i",
+      *dirfile, field_code, *field_code_l, in_field, *in_field_l, count_field,
+      *count_field_l, *val, val_scalar, *val_scalar_l, *val_scalar_ind,
+      *period, period_scalar, *period_scalar_l, *period_scalar_ind);
+
+  memset(&E, 0, sizeof(E));
+  E.field_type = GD_MPLEX_ENTRY;
+  _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
+  _GDF_CString(&E.in_fields[1], count_field, *count_field_l);
+  E.count_val = *val;
+  E.period = *period;
+  _GDF_CString(E.scalar + 0, val_scalar, *val_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[0], *val_scalar_ind);
+  _GDF_CString(E.scalar + 1, period_scalar, *period_scalar_l);
+  GDF_SCIND_F2C(E.scalar_ind[1], *period_scalar_ind);
+
+  gd_alter_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
+        *field_code_l), &E, 0);
+
+  free(fc);
+  free(E.in_fields[0]);
+  free(E.in_fields[1]);
+  free(E.scalar[0]);
+  free(E.scalar[1]);
+
+  dreturnvoid();
 }

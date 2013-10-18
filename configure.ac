@@ -153,6 +153,7 @@ make_pybindings="yes"
 make_idlbindings="yes"
 make_perlbindings="yes"
 make_matlabbindings="yes"
+make_phpbindings="yes"
 AC_ARG_ENABLE(bindings, AS_HELP_STRING([--disable-bindings],
               [don't build any bindings, just build the C library]),
               [
@@ -163,6 +164,7 @@ AC_ARG_ENABLE(bindings, AS_HELP_STRING([--disable-bindings],
                  make_idlbindings="no"
                  make_perlbindings="no"
                  make_matlabbindings="no"
+                 make_phpbindings="no"
                fi
               ])
 
@@ -244,7 +246,7 @@ AC_MSG_RESULT([$make_idlbindings])
 
 dnl Perl bindings
 AC_ARG_ENABLE(perl, AS_HELP_STRING([--disable-perl],
-              [don't build the Perl bindings (GetData)]),
+              [don't build the Perl bindings (GetData)]),dnl'
               [
                case "${enableval}" in
                  no) make_perlbindings="no" ;;
@@ -257,7 +259,7 @@ AC_MSG_RESULT([$make_perlbindings])
 
 dnl MATLAB bindings
 AC_ARG_ENABLE(matlab, AS_HELP_STRING([--disable-matlab],
-              [don't build the MATLAB bindings]),
+              [don't build the MATLAB bindings]),dnl'
               [
                case "${enableval}" in
                  no) make_matlabbindings="no" ;;
@@ -267,6 +269,19 @@ AC_ARG_ENABLE(matlab, AS_HELP_STRING([--disable-matlab],
 
 AC_MSG_CHECKING([whether to include the MATLAB bindings])
 AC_MSG_RESULT([$make_matlabbindings])
+
+dnl PHP bindings
+AC_ARG_ENABLE(php, AS_HELP_STRING([--disable-php],
+              [don't build the PHP bindings]),dnl'
+              [
+               case "${enableval}" in
+                 no) make_phpbindings="no" ;;
+                 *) make_phpbindings="yes" ;;
+               esac
+              ])
+
+AC_MSG_CHECKING([whether to include the PHP bindings])
+AC_MSG_RESULT([$make_phpbindings])
 
 dnl Modules
 AC_ARG_ENABLE(modules, AS_HELP_STRING([--enable-modules],
@@ -905,6 +920,17 @@ if test "x$make_matlabbindings" = "xyes"; then
   fi
 fi
 
+dnl matlab
+if test "x$make_phpbindings" = "xyes"; then
+  echo
+  echo "*** Configuring PHP bindings"
+  echo
+  GD_PHP
+  if test "x$have_php" = "xno"; then
+    make_phpbindings=no
+  fi
+fi
+
 dnl external encodings
 GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2],[])
 GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip],[])
@@ -1033,6 +1059,9 @@ AC_CONFIG_FILES([bindings/matlab/make_contents.sh])
 AC_CONFIG_FILES([bindings/matlab/test/Makefile])
 AC_CONFIG_FILES([bindings/perl/Makefile])
 AC_CONFIG_FILES([bindings/perl/Build.PL])
+AC_CONFIG_FILES([bindings/php/Makefile])
+AC_CONFIG_FILES([bindings/php/getdata/config.m4])
+AC_CONFIG_FILES([bindings/php/test/Makefile])
 AC_CONFIG_FILES([bindings/python/Makefile])
 AC_CONFIG_FILES([bindings/python/test/Makefile])
 AC_CONFIG_FILES([doc/Makefile])
@@ -1051,16 +1080,7 @@ AC_CONFIG_FILES([util/Makefile])
 
 dnl Automake conditionals
 AM_CONDITIONAL(GETDATA_DEBUG, [test "x$enable_debug" == "xyes"])
-AM_CONDITIONAL(CC_WALL, [test "x$gd_cv_prog_cc_wall" == "xyes"])
-AM_CONDITIONAL(CXX_WALL, [test "x$gd_cv_prog_cxx_wall" == "xyes"])
-AM_CONDITIONAL(F77_WALL, [test "x$gd_cv_prog_f77_wall" == "xyes"])
-AM_CONDITIONAL(FC_WALL, [test "x$gd_cv_prog_fc_wall" == "xyes"])
-AM_CONDITIONAL(CC_WEXTRA, [test "x$gd_cv_prog_cc_wextra" == "xyes"])
-AM_CONDITIONAL(CXX_WEXTRA, [test "x$gd_cv_prog_cxx_wextra" == "xyes"])
-AM_CONDITIONAL(F77_WEXTRA, [test "x$gd_cv_prog_f77_wextra" == "xyes"])
-AM_CONDITIONAL(F77_FNO_BACKSLASH,
-               [test "x$gd_cv_prog_f77_fno_backslash" == "xyes"])
-AM_CONDITIONAL(FC_WEXTRA, [test "x$gd_cv_prog_fc_wextra" == "xyes"])
+AM_CONDITIONAL(HAVE_SED, [ test "x${SED}" != 'x' ])
 AM_CONDITIONAL(INTEL_F77_COMPILER,
                [test "x$gd_cv_f77_compiler_intel" == "xyes"])
 AM_CONDITIONAL(INTEL_FC_COMPILER, [test "x$gd_cv_fc_compiler_intel" == "xyes"])
@@ -1072,11 +1092,13 @@ AM_CONDITIONAL(MAKE_PYBINDINGS, [test "x$make_pybindings" = "xyes"])
 AM_CONDITIONAL(MAKE_IDLBINDINGS, [test "x$make_idlbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_PERLBINDINGS, [test "x$make_perlbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_MATLABBINDINGS, [test "x$make_matlabbindings" = "xyes"])
+AM_CONDITIONAL(MAKE_PHPBINDINGS, [test "x$make_phpbindings" = "xyes"])
 AM_CONDITIONAL(USE_MODULES, [test "x$use_modules" != "xno"])
 AM_CONDITIONAL(TEST_PYTHON, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(TEST_IDL, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(TEST_PERL, [test "x$HAVE_Test__Harness" = "xyes"])
 AM_CONDITIONAL(TEST_MATLAB, [test "x$NO_DLOPEN_TESTS" = "x0"])
+AM_CONDITIONAL(TEST_PHP, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(HAVE_DIFF, [test "x$DIFF" != "x"])
 AM_CONDITIONAL(USE_ZZSLIM, [test "x$use_zzslim" = "xyes"])
 AM_CONDITIONAL(GD_EXTERNAL, [false])
@@ -1116,6 +1138,12 @@ if test "x$make_matlabbindings" != "xno"; then
   BINDINGS_BUILT="${BINDINGS_BUILT} MATLAB"
 else
   BINDINGS_LEFT="${BINDINGS_LEFT} MATLAB"
+fi
+
+if test "x$make_phpbindings" != "xno"; then
+  BINDINGS_BUILT="${BINDINGS_BUILT} PHP"
+else
+  BINDINGS_LEFT="${BINDINGS_LEFT} PHP"
 fi
 
 if test "x$make_perlbindings" != "xno"; then

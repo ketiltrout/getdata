@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2012 D. V. Wiebe
+ * Copyright (C) 2005-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1079,8 +1079,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
       *(end++) = '\0';
 
     if (cur[0] == '\0')
-      /* consecutive /s */
-      ;
+      ; /* discard consecutive DIRSEPs */
     else if (cur[0] == '.' && cur[1] == '\0') {
       /* discard . */
       continue;

@@ -35,14 +35,15 @@ gd_windop_t T_IV
 
 # GetData Perl pseudotypes
 gdp_complex_in T_COMPLEXIN
-gdpu_bitnum_t T_IV_FFFF
-gdpu_char * T_PV_NULL
-gdpu_int T_IV_ZERO
-gdpu_numbits_t T_IV_ZERO
-gdpu_shift_t T_IV_ZERO
-gdpu_uint_t T_UV_ZERO
-gdpu_type_t T_IV_ZERO
-gdpu_complex T_COMPLEX_ZERO
+gdp_bitnum_t T_IV_FFFF
+gdp_char * T_PV_NULL
+gdp_int T_IV_ZERO
+gdp_numbits_t T_IV_ZERO
+gdp_shift_t T_IV_ZERO
+gdp_uint_t T_UV_ZERO
+gdp_type_t T_IV_ZERO
+gdp_complex T_COMPLEX_ZERO
+gdp_pentry_t T_PENTRY
 
 
 INPUT
@@ -99,7 +100,17 @@ T_CONST_AVPV
 T_COMPLEX
   { gdp_convert_cmp(gd_csp_($var), $arg, NULL, gdp_package, \"${func_name}\"); }
 T_ENTRY
-  gdp_to_entry(&$var, $arg, gdp_package, \"${func_name}\");
+  gdp_to_entry(&$var, $arg, NULL, gdp_package, \"${func_name}\");
+T_PENTRY
+  {
+    gd_entry_t old_E;
+    if (gd_entry(dirfile, field_code, &old_E)) {
+      dreturnvoid();
+      XSRETURN_UNDEF;
+    }
+    gd_free_entry_strings(&old_E);
+    gdp_to_entry(&$var, $arg, &old_E, gdp_package, \"${func_name}\");
+  }
 T_IV_FFFF
   if ($arg == undef)
     $var = ($type)-1;

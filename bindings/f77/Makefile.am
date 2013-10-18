@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2010 D. V. Wiebe
+# Copyright (C) 2008-2010, 2013 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -23,28 +23,12 @@ AUTOMAKE_OPTIONS = foreign
 SED = @SED@
 DIFF = @DIFF@
 
-if FC_WEXTRA
-FC_WEXTRA=-Wextra
-endif
-
-if FC_WALL
-FC_WALL=-Wall
-endif
-
-if CC_WEXTRA
-CC_WEXTRA=-Wextra
-endif
-
-if CC_WALL
-CC_WALL=-Wall
-endif
-
 if MAKE_F95BINDINGS
 F95_INC=getdata.mod
 F95_LIB=libf95getdata.la
 endif
 
-FCFLAGS += $(FC_WALL) $(FC_WEXTRA)
+FCFLAGS += $(GD_FC_WALL) $(GD_FC_WEXTRA)
 INCLUDES = -I$(top_srcdir)/src
 EXTRA_DIST=getdata.f.in getdata.f90.in
 
@@ -56,7 +40,7 @@ LIBS=
 nodist_include_HEADERS=getdata.f $(F95_INC)
 
 lib_LTLIBRARIES=libfgetdata.la $(F95_LIB)
-libfgetdata_la_CPPFLAGS = ${CC_WALL} $(CC_WEXTRA)
+libfgetdata_la_CPPFLAGS = ${GD_CC_WALL} $(GD_CC_WEXTRA)
 libfgetdata_la_SOURCES = fgetdata.c fgetdata.h
 libfgetdata_la_LIBADD=../../src/libgetdata.la
 libfgetdata_la_LDFLAGS = -version-info @FGETDATA_VERSION@

@@ -1,4 +1,4 @@
-! Copyright (C) 2008-2012 D. V. Wiebe
+! Copyright (C) 2008-2013 D. V. Wiebe
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -838,7 +838,7 @@ function fgd_entry (dirfile, field_code, ent)
     call gdgsca(ent%scalar(1), len1, ent%scalar_ind(1), dirfile, &
     TRIM(field_code), LEN_TRIM(field_code), 1)
     len1 = GD_FIELD_LEN
-    call gdgsca(ent%scalar(2), len1, ent%scalar_ind(1), dirfile, &
+    call gdgsca(ent%scalar(2), len1, ent%scalar_ind(2), dirfile, &
     TRIM(field_code), LEN_TRIM(field_code), 2)
   else if (fgd_entry .EQ. GD_SBIT_ENTRY) then
     ! sbit
@@ -878,7 +878,7 @@ function fgd_entry (dirfile, field_code, ent)
     end if
     do i=1,6
       len1 = GD_FIELD_LEN
-      call gdgsca(ent%scalar(i), len1, ent%scalar_ind(1), dirfile, &
+      call gdgsca(ent%scalar(i), len1, ent%scalar_ind(i), dirfile, &
       TRIM(field_code), LEN_TRIM(field_code), i)
     end do
   else if (fgd_entry .EQ. GD_RECIP_ENTRY) then
@@ -961,34 +961,52 @@ subroutine fgd_add (dirfile, field_code, ent)
   character (len=1) :: nil = ""
 
   if (ent%field_type .EQ. GD_RAW_ENTRY) then
-    call gdadrw(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    ent%data_type, ent%spf, ent%fragment_index)
+    call gdasrw(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    ent%data_type, ent%spf, TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), &
+    ent%scalar_ind(1), ent%fragment_index)
   else if (ent%field_type .EQ. GD_LINCOM_ENTRY) then
     if (ent%comp_scal .EQ. 0) then
-      call gdadlc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      call gdaslc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%m(1), &
-      ent%b(1), TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%m(2), &
-      ent%b(2), TRIM(ent%field(3)), LEN_TRIM(ent%field(3)), ent%m(3), &
-      ent%b(3), ent%fragment_index)
+      TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), &
+      ent%b(1), TRIM(ent%scalar(4)), LEN_TRIM(ent%scalar(4)), &
+      ent%scalar_ind(4), TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%m(2), &
+      TRIM(ent%scalar(2)), LEN_TRIM(ent%scalar(2)), ent%scalar_ind(2), &
+      ent%b(2), TRIM(ent%scalar(5)), LEN_TRIM(ent%scalar(5)), &
+      ent%scalar_ind(5), TRIM(ent%field(3)), LEN_TRIM(ent%field(3)), ent%m(3), &
+      TRIM(ent%scalar(3)), LEN_TRIM(ent%scalar(3)), ent%scalar_ind(3), &
+      ent%b(3), TRIM(ent%scalar(6)), LEN_TRIM(ent%scalar(6)), &
+      ent%scalar_ind(6), ent%fragment_index)
     else
-      call gdadcl(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      call gdascl(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%cm(1), &
-      ent%cb(1), TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%cm(2), &
-      ent%cb(2), TRIM(ent%field(3)), LEN_TRIM(ent%field(3)), ent%cm(3), &
-      ent%cb(3), ent%fragment_index)
+      TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), &
+      ent%cb(1), TRIM(ent%scalar(4)), LEN_TRIM(ent%scalar(4)), &
+      ent%scalar_ind(4), TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), &
+      ent%cm(2), TRIM(ent%scalar(2)), LEN_TRIM(ent%scalar(2)), &
+      ent%scalar_ind(2), ent%cb(2), TRIM(ent%scalar(5)), &
+      LEN_TRIM(ent%scalar(5)), ent%scalar_ind(5), TRIM(ent%field(3)), &
+      LEN_TRIM(ent%field(3)), ent%cm(3), TRIM(ent%scalar(3)), &
+      LEN_TRIM(ent%scalar(3)), ent%scalar_ind(3), ent%cb(3), &
+      TRIM(ent%scalar(6)), LEN_TRIM(ent%scalar(6)), ent%scalar_ind(6), &
+      ent%fragment_index)
     end if
   else if (ent%field_type .EQ. GD_LINTERP_ENTRY) then
     call gdadlt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
     LEN_TRIM(ent%field(2)), ent%fragment_index)
   else if (ent%field_type .EQ. GD_BIT_ENTRY) then
-    call gdadbt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%bitnum, ent%numbits, &
-    ent%fragment_index)
+    call gdasbt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%bitnum, &
+    TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), &
+    ent%numbits, TRIM(ent%scalar(2)), LEN_TRIM(ent%scalar(2)), &
+    ent%scalar_ind(2), ent%fragment_index)
   else if (ent%field_type .EQ. GD_SBIT_ENTRY) then
-    call gdadsb(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%bitnum, ent%numbits, &
-    ent%fragment_index)
+    call gdassb(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%bitnum, &
+    TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), &
+    ent%numbits, TRIM(ent%scalar(2)), LEN_TRIM(ent%scalar(2)), &
+    ent%scalar_ind(2), ent%fragment_index)
   else if (ent%field_type .EQ. GD_MULTIPLY_ENTRY) then
     call gdadmt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
@@ -998,44 +1016,69 @@ subroutine fgd_add (dirfile, field_code, ent)
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
     LEN_TRIM(ent%field(2)), ent%fragment_index)
   else if (ent%field_type .EQ. GD_PHASE_ENTRY) then
-    call gdadph(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%shift, ent%fragment_index)
+    call gdasph(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%shift, &
+    TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), &
+    ent%fragment_index)
   else if (ent%field_type .EQ. GD_POLYNOM_ENTRY) then
     if (ent%comp_scal .EQ. 0) then
-      call gdadpn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      call gdaspn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       ent%poly_ord, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%a(1), &
-      ent%a(2), ent%a(3), ent%a(4), ent%a(5), ent%a(6), ent%fragment_index)
+      TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), &
+      ent%a(2), TRIM(ent%scalar(2)), LEN_TRIM(ent%scalar(2)), &
+      ent%scalar_ind(2), ent%a(3), TRIM(ent%scalar(3)), &
+      LEN_TRIM(ent%scalar(3)), ent%scalar_ind(3), ent%a(4), &
+      TRIM(ent%scalar(4)), LEN_TRIM(ent%scalar(4)), ent%scalar_ind(4), &
+      ent%a(5), TRIM(ent%scalar(5)), LEN_TRIM(ent%scalar(5)), &
+      ent%scalar_ind(5), ent%a(6), TRIM(ent%scalar(6)), &
+      LEN_TRIM(ent%scalar(6)), ent%scalar_ind(6), ent%fragment_index)
     else
-      call gdadcp(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      call gdascp(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       ent%poly_ord, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%ca(1), &
-      ent%ca(2), ent%ca(3), ent%ca(4), ent%ca(5), ent%ca(6), ent%fragment_index)
+      TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), &
+      ent%ca(2), TRIM(ent%scalar(2)), LEN_TRIM(ent%scalar(2)), &
+      ent%scalar_ind(2), ent%ca(3), TRIM(ent%scalar(3)), &
+      LEN_TRIM(ent%scalar(3)), ent%scalar_ind(3), ent%ca(4), &
+      TRIM(ent%scalar(4)), LEN_TRIM(ent%scalar(4)), ent%scalar_ind(4), &
+      ent%ca(5), TRIM(ent%scalar(5)), LEN_TRIM(ent%scalar(5)), &
+      ent%scalar_ind(5), ent%ca(6), TRIM(ent%scalar(6)), &
+      LEN_TRIM(ent%scalar(6)), ent%scalar_ind(6), ent%fragment_index)
     end if
   else if (ent%field_type .EQ. GD_RECIP_ENTRY) then
     if (ent%comp_scal .EQ. 0) then
-      call gdadcr(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      call gdasrc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%dividend, &
+      TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), &
       ent%fragment_index)
     else
-      call gdadrc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      call gdascr(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%cdividend, &
+      TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), &
       ent%fragment_index)
     end if
   else if (ent%field_type .EQ. GD_WINDOW_ENTRY) then
     if ((ent%windop .EQ. GD_WINDOP_EQ) .OR. (ent%windop .EQ. GD_WINDOP_NE) &
     .OR. (ent%windop .EQ. GD_WINDOP_SET) .OR. (ent%windop .EQ. GD_WINDOP_CLR)) &
     then
-      call gdadwd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      call gdaswd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
-      LEN_TRIM(ent%field(2)), ent%windop, ent%ithreshold, ent%fragment_index)
+      LEN_TRIM(ent%field(2)), ent%windop, ent%ithreshold, &
+      TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), &
+      ent%fragment_index)
     else
-      call gdadwd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      call gdaswd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
-      LEN_TRIM(ent%field(2)), ent%windop, ent%rthreshold, ent%fragment_index)
+      LEN_TRIM(ent%field(2)), ent%windop, ent%rthreshold, &
+      TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), &
+      ent%fragment_index)
     end if
   else if (ent%field_type .EQ. GD_MPLEX_ENTRY) then
-    call gdadmx(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    call gdasmx(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
-    LEN_TRIM(ent%field(2)), ent%count_val, ent%period, ent%fragment_index)
+    LEN_TRIM(ent%field(2)), ent%count_val, TRIM(ent%scalar(1)), &
+    LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), ent%period, &
+    TRIM(ent%scalar(2)), LEN_TRIM(ent%scalar(2)), ent%scalar_ind(2), &
+    ent%fragment_index)
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdadco(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     ent%data_type, GD_INT32, zero, ent%fragment_index)
@@ -1589,82 +1632,194 @@ subroutine fgd_move (dirfile, field_code, new_fragment, move_data)
   move_data)
 end subroutine
 
-subroutine fgd_alter_entry (dirfile, field_code, ent, recode)
-  integer, intent(in) :: dirfile, recode
+! calculate in_fields string lengths
+subroutine fgd__set_field_len (field_len, m, ent)
+  integer, dimension(3), intent(out) :: field_len
+  integer, intent(in) :: m
+  type(gd_entry), intent(in) :: ent
+  
+  integer :: i
+
+  do i=1,m
+    field_len(i) = LEN_TRIM(ent%field(i))
+    if (field_len(i) .eq. 0) then
+      field_len(i) = -1
+    end if
+  end do
+end subroutine
+
+! calculate scalar string lengths
+subroutine fgd__set_scalar_len (scalar_len, remove_scalars, mask, ent)
+  integer, dimension(6), intent(out) :: scalar_len
+  integer, intent(in) :: remove_scalars, mask
+  type(gd_entry), intent(in) :: ent
+  
+  integer :: i
+
+  do i=1,6
+    if (BTEST(IAND(NOT(remove_scalars), mask), i - 1)) then
+      scalar_len(i) = LEN_TRIM(ent%scalar(i))
+    else
+      scalar_len(i) = -1
+    end if
+  end do
+end subroutine
+
+subroutine fgd_alter_entry (dirfile, field_code, ent, remove_scalars, recode)
+  integer, intent(in) :: dirfile, remove_scalars, recode
   character (len=*), intent(in) :: field_code
   type(gd_entry), intent(in) :: ent
 
+  ! lincom scalar bitmasks
+  integer, parameter, dimension(3) :: lincom_mask = (/ 9, 27, 63 /)
+
+  ! polynom scalar bitmasks
+  integer, parameter, dimension(6) :: polynom_mask = (/ 3, 7, 15, 31, 63, 127 /)
+
+  integer, dimension(6) :: scalar_len
+  integer, dimension(3) :: field_len
+  integer :: n
+
   if (ent%field_type .EQ. GD_RAW_ENTRY) then
-    call gdalrw(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    ent%data_type, ent%spf, recode)
+    call fgd__set_scalar_len(scalar_len, remove_scalars, 1, ent)
+
+    call gdlsrw(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    ent%data_type, ent%spf, TRIM(ent%scalar(1)), scalar_len(1), &
+    ent%scalar_ind(1), recode)
   else if (ent%field_type .EQ. GD_LINCOM_ENTRY) then
+    n = ent%n_fields
+    if (n .gt. 3 .or. n .lt. 1) then
+      n = 3
+    end if
+    call fgd__set_scalar_len(scalar_len, remove_scalars, lincom_mask(n), ent)
+    call fgd__set_field_len(field_len, n, ent)
+
     if (ent%comp_scal .NE. 0) then
-      call gdalcl(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-      ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%cm(1), &
-      ent%cb(1), TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%cm(2), &
-      ent%cb(2), TRIM(ent%field(3)), LEN_TRIM(ent%field(3)), ent%cm(3), &
-      ent%cb(3))
+      call gdlscl(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      ent%n_fields, TRIM(ent%field(1)), field_len(1), &
+      ent%cm(1), TRIM(ent%scalar(1)), scalar_len(1), ent%scalar_ind(1), &
+      ent%cb(1), TRIM(ent%scalar(4)), scalar_len(4), ent%scalar_ind(4), &
+      TRIM(ent%field(2)), field_len(2), &
+      ent%cm(2), TRIM(ent%scalar(2)), scalar_len(2), ent%scalar_ind(2), &
+      ent%cb(2), TRIM(ent%scalar(5)), scalar_len(5), ent%scalar_ind(5), &
+      TRIM(ent%field(3)), field_len(3), &
+      ent%cm(3), TRIM(ent%scalar(3)), scalar_len(3), ent%scalar_ind(3), &
+      ent%cb(3), TRIM(ent%scalar(6)), scalar_len(6), ent%scalar_ind(6))
     else
-      call gdallc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-      ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%m(1), &
-      ent%b(1), TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%m(2), &
-      ent%b(2), TRIM(ent%field(3)), LEN_TRIM(ent%field(3)), ent%m(3), ent%b(3))
+      call gdlslc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      ent%n_fields, TRIM(ent%field(1)), field_len(1), &
+      ent%m(1), TRIM(ent%scalar(1)), scalar_len(1), ent%scalar_ind(1), &
+      ent%b(1), TRIM(ent%scalar(4)), scalar_len(4), ent%scalar_ind(4), &
+      TRIM(ent%field(2)), field_len(2), &
+      ent%m(2), TRIM(ent%scalar(2)), scalar_len(2), ent%scalar_ind(2), &
+      ent%b(2), TRIM(ent%scalar(5)), scalar_len(5), ent%scalar_ind(5), &
+      TRIM(ent%field(3)), field_len(3), &
+      ent%m(3), TRIM(ent%scalar(3)), scalar_len(3), ent%scalar_ind(3), &
+      ent%b(3), TRIM(ent%scalar(6)), scalar_len(6), ent%scalar_ind(6))
     end if
   else if (ent%field_type .EQ. GD_LINTERP_ENTRY) then
+    call fgd__set_field_len(field_len, 2, ent)
+
     call gdallt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
-    LEN_TRIM(ent%field(2)), recode)
+    TRIM(ent%field(1)), field_len(1), TRIM(ent%field(2)), field_len(2), recode)
   else if (ent%field_type .EQ. GD_BIT_ENTRY) then
-    call gdalbt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%bitnum, ent%numbits)
+    call fgd__set_scalar_len(scalar_len, remove_scalars, 3, ent)
+    call fgd__set_field_len(field_len, 1, ent)
+
+    call gdlsbt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), field_len(1), &
+    ent%bitnum, TRIM(ent%scalar(1)), scalar_len(1), ent%scalar_ind(1), &
+    ent%numbits, TRIM(ent%scalar(2)), scalar_len(2), ent%scalar_ind(2))
   else if (ent%field_type .EQ. GD_SBIT_ENTRY) then
-    call gdalsb(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%bitnum, ent%numbits)
+    call fgd__set_scalar_len(scalar_len, remove_scalars, 3, ent)
+    call fgd__set_field_len(field_len, 1, ent)
+
+    call gdlssb(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), field_len(1), &
+    ent%bitnum, TRIM(ent%scalar(1)), scalar_len(1), ent%scalar_ind(1), &
+    ent%numbits, TRIM(ent%scalar(2)), scalar_len(2), ent%scalar_ind(2))
   else if (ent%field_type .EQ. GD_MULTIPLY_ENTRY) then
+    call fgd__set_field_len(field_len, 2, ent)
+
     call gdalmt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
-    LEN_TRIM(ent%field(2)))
+    TRIM(ent%field(1)), field_len(1), TRIM(ent%field(2)), field_len(2))
   else if (ent%field_type .EQ. GD_DIVIDE_ENTRY) then
+    call fgd__set_field_len(field_len, 2, ent)
+
     call gdaldv(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
-    LEN_TRIM(ent%field(2)))
+    TRIM(ent%field(1)), field_len(1), TRIM(ent%field(2)), field_len(2))
   else if (ent%field_type .EQ. GD_PHASE_ENTRY) then
-    call gdalph(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%shift)
+    call fgd__set_scalar_len(scalar_len, remove_scalars, 1, ent)
+    call fgd__set_field_len(field_len, 1, ent)
+
+    call gdlsph(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), field_len(1), ent%shift, &
+    TRIM(ent%scalar(1)), scalar_len(1), ent%scalar_ind(1))
   else if (ent%field_type .EQ. GD_POLYNOM_ENTRY) then
+    n = ent%poly_ord
+    if (n .gt. 6 .or. n .lt. 2) then
+      n = 6
+    end if
+    call fgd__set_scalar_len(scalar_len, remove_scalars, polynom_mask(n), ent)
+    call fgd__set_field_len(field_len, 1, ent)
+
     if (ent%comp_scal .NE. 0) then
-      call gdalcp(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-      ent%poly_ord, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%ca(1), &
-      ent%ca(2), ent%ca(3), ent%ca(4), ent%ca(5), ent%ca(6))
+      call gdlscp(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      ent%poly_ord, TRIM(ent%field(1)), field_len(1), &
+      ent%ca(1), TRIM(ent%scalar(1)), scalar_len(1), ent%scalar_ind(1), &
+      ent%ca(2), TRIM(ent%scalar(2)), scalar_len(2), ent%scalar_ind(2), &
+      ent%ca(3), TRIM(ent%scalar(3)), scalar_len(3), ent%scalar_ind(3), &
+      ent%ca(4), TRIM(ent%scalar(4)), scalar_len(4), ent%scalar_ind(4), &
+      ent%ca(5), TRIM(ent%scalar(5)), scalar_len(5), ent%scalar_ind(5), &
+      ent%ca(6), TRIM(ent%scalar(6)), scalar_len(6), ent%scalar_ind(6))
     else
-      call gdalpn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-      ent%poly_ord, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%a(1), &
-      ent%a(2), ent%a(3), ent%a(4), ent%a(5), ent%a(6))
+      call gdlspn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      ent%poly_ord, TRIM(ent%field(1)), field_len(1), &
+      ent%a(1), TRIM(ent%scalar(1)), scalar_len(1), ent%scalar_ind(1), &
+      ent%a(2), TRIM(ent%scalar(2)), scalar_len(2), ent%scalar_ind(2), &
+      ent%a(3), TRIM(ent%scalar(3)), scalar_len(3), ent%scalar_ind(3), &
+      ent%a(4), TRIM(ent%scalar(4)), scalar_len(4), ent%scalar_ind(4), &
+      ent%a(5), TRIM(ent%scalar(5)), scalar_len(5), ent%scalar_ind(5), &
+      ent%a(6), TRIM(ent%scalar(6)), scalar_len(6), ent%scalar_ind(6))
     end if
   else if (ent%field_type .EQ. GD_RECIP_ENTRY) then
+    call fgd__set_scalar_len(scalar_len, remove_scalars, 1, ent)
+    call fgd__set_field_len(field_len, 1, ent)
+
     if (ent%comp_scal .NE. 0) then
-      call gdalcr(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-      TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%cdividend)
+      call gdlscr(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      TRIM(ent%field(1)), field_len(1), ent%cdividend, TRIM(ent%scalar(1)), &
+      scalar_len(1), ent%scalar_ind(1))
     else
-      call gdalrc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-      TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%a(1), ent%dividend)
+      call gdlsrc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      TRIM(ent%field(1)), field_len(1), ent%dividend, TRIM(ent%scalar(1)), &
+      scalar_len(1), ent%scalar_ind(1))
     end if
   else if (ent%field_type .EQ. GD_WINDOW_ENTRY) then
+    call fgd__set_scalar_len(scalar_len, remove_scalars, 1, ent)
+    call fgd__set_field_len(field_len, 2, ent)
+
     if ((ent%windop .EQ. GD_WINDOP_EQ) .OR. (ent%windop .EQ. GD_WINDOP_NE) &
     .OR. (ent%windop .EQ. GD_WINDOP_SET) .OR. (ent%windop .EQ. GD_WINDOP_CLR)) &
     then
-      call gdalwd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-      TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
-      LEN_TRIM(ent%field(2)), ent%windop, ent%ithreshold, ent%fragment_index)
+      call gdlswd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      TRIM(ent%field(1)), field_len(1), TRIM(ent%field(2)), field_len(2), &
+      ent%windop, ent%ithreshold, TRIM(ent%scalar(1)), scalar_len(1), &
+      ent%scalar_ind(1))
     else
-      call gdalwd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-      TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
-      LEN_TRIM(ent%field(2)), ent%windop, ent%rthreshold, ent%fragment_index)
+      call gdlswd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      TRIM(ent%field(1)), field_len(1), TRIM(ent%field(2)), field_len(2), &
+      ent%windop, ent%rthreshold, TRIM(ent%scalar(1)), scalar_len(1), &
+      ent%scalar_ind(1))
     end if
-  else if (ent%field_type .EQ. GD_CONST_ENTRY) then
-    call gdalmx(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
-    LEN_TRIM(ent%field(2)), ent%count_val, ent%period, ent%fragment_index)
+  else if (ent%field_type .EQ. GD_MPLEX_ENTRY) then
+    call fgd__set_scalar_len(scalar_len, remove_scalars, 3, ent)
+    call fgd__set_field_len(field_len, 2, ent)
+
+    call gdlsmx(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), field_len(1), TRIM(ent%field(2)), field_len(2), &
+    ent%count_val, TRIM(ent%scalar(1)), scalar_len(1), ent%scalar_ind(1), &
+    ent%period, TRIM(ent%scalar(2)), scalar_len(2), ent%scalar_ind(2))
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdalco(dirfile, TRIM(field_code), LEN_TRIM(field_code), ent%data_type)
   else if (ent%field_type .EQ. GD_CARRAY_ENTRY) then

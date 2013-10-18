@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2010, 2012-2013 D. V. Wiebe
+# Copyright (C) 2013 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -18,34 +18,30 @@
 # along with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-AUTOMAKE_OPTIONS = foreign
+all-local: getdata/Makefile
+	cd getdata && ${MAKE}
 
-if MAKE_F95BINDINGS
-F95TESTS=big_test95
-endif
+BUILT_SOURCES=getdata/constants.c
 
-BUILT_SOUCES = test_getdata.f
+getdata/constants.c: ../make_parameters ../../src/getdata.h
+	  ../make_parameters h > $@
 
-FFLAGS += -I. -I.. $(GD_F77_WALL) $(GD_F77_WEXTRA) $(GD_F77_FNO_BACKSLASH)
-FCFLAGS += -I. -I.. $(GD_F77_WALL) $(GD_FC_WEXTRA)
-F95LDADD=../libf95getdata.la $(F77LDADD)
-F77LDADD=../libfgetdata.la
-AM_LDFLAGS = -L..
+../make_parameters: ../make_parameters.c ../../src/gd_config.h
+	  cd .. && ${MAKE} make_parameters
 
-TESTS=gdcopn big_test $(F95TESTS)
+getdata/modules: getdata/Makefile
 
-gdcopn_SOURCES=gdcopn.f
-gdcopn_LDADD=$(F77LDADD)
+getdata/Makefile: getdata/configure
+	cd getdata && \
+		./configure --enable-getdata && \
+		${SED} -e "s/make test/make check/" < Makefile > Makefile.temp && \
+		mv -f Makefile.temp Makefile
 
-big_test_SOURCES=big_test.f
-big_test_LDADD=$(F77LDADD)
-
-big_test95_SOURCES=big_test95.f90
-nodist_big_test95_SOURCES=../getdata.mod
-big_test95_LDADD=$(F95LDADD)
-
-check_PROGRAMS=$(TESTS)
+getdata/configure: getdata/config.m4
+	cd getdata && ${PHPIZE}
 
 clean-local:
-	rm -rf test_dirfile
-	rm -rf *~
+	cd getdata && ${PHPIZE} --clean
+	rm -rf *~ getdata/*~ ${BUILT_SOURCES} getdata/Makefile.temp
+
+SUBDIRS=. test

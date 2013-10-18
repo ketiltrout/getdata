@@ -1,8 +1,70 @@
+New in verison 0.9.0a:
+
+  Library Changes:
+
+  * The gd_free_entry_strings() function now NULLs pointers after freeing them.
+
+  * The gd_[m]add() functions now ignore zero-length scalar strings.  Previously
+    they would store these invalid field codes, causing problems later.
+
+  * BUG FIX: Returning complex-valued CARRAYs as purely real now works.
+    Previously only the first element requested would be returned, the remaining
+    output buffer containing uninitialised data.
+
+  * BUG FIX: A scalar field code specified for the last factor in a POLYNOM
+    entry is no longer ignored by gd_[m]add().
+
+  * BUG FIX: Entry members spf, bitnum, numbits, and period are now completely
+    ignored by gd_[m]add() when corresponding named scalars are specified.
+    Previously, an invalid value in these members would result in the entry
+    being rejected, even though the rest of GetData ignored the invalid, unsued
+    value.
+
+  * BUG FIX: gd_[m]add() no longer rejects MPLEX fields with negative count_val.
+
+  * BUG FIX: gd_alter_entry() no longer corrupts the DIRFILE when modifying
+    named scalars of MPLEX fields.
+
+  Bindings Changes:
+
+  * PHP bindings have been added.
+
+  * F77: Functions to add fields with named scalar parameters have been added
+    (GDASBT GDASCL GDASCP GDASCR GDASLC GDASMX GDASPH GDASPN GDASRC GDASRW
+    GDASSB GDASWD), but only for those field types which permit named scalars.
+    Similarly, functions for altering field metatdata with named scalars are
+    also present (GDLSBT GDLSCL GDLSCP GDLSCR GDLSLC GDLSMX GDLSPH GDLSPN GDLSRC
+    GDLSRW GDLSSB GDLSWD).  These are provided as an alternative to using GDASCA
+    after the fact.
+
+  * IDL: The entry structure parser has been rewritten.  It no longer requires
+    members which it doesn't need, and is also a lot more lax about numerical
+    data types.  Notably, it now ignores a supplied COMP_SCAL member.  Floating
+    point parameters can be specified in either the base name (M, B, A,
+    DIVIDEND) or else the member prefixed with 'C' (CM, CB, CA, CDIVIDEND),
+    whatever numerical type.  The bindings will ingest them appropriately.
+    Also, N_FIELDS and POLY_ORD, may be omitted, and will be calculated from the
+    supplied data.  A scalar IN_FIELDS is treated like an single element array.
+
+  * PERL: The entry hash parser has been rewritten.  It no longer requires keys
+    which it doesn't need.
+
+  * PERL: alter_entry() now only updates defined elements in the passed entry
+    hash.
+
+  * F77 and F95 BUG FIX: Named scalar indices are now indexed from one instead
+    of zero, like all other array indices are in the Fortran GetData bindings.
+
+  * F95 BUG FIX: fgd_add and fgd_alter_entry no longer ignore named scalar
+    parameters provided in supplied entry structures.
+
+|==============================================================================|
+
 New in verison 0.8.5:
 
   Library Changes:
 
-  * The zzslim encoding framework, which was inadvertantly rendered
+  * BUG FIX: The zzslim encoding framework, which was inadvertantly rendered
     non-compilable in 0.8.4, should once again work.  Reported by Matthew
     Hasselfield.
 
@@ -51,8 +113,8 @@ New in version 0.8.4:
 
   Library Changes:
 
-  * The count_max member of the gd_entry_t object has been renamed period.  The
-    corresponding dummy argument in various function prototypes has been
+  * The count_max member of the gd_entry_t object has been renamed to period.
+    The corresponding dummy argument in various function prototypes has been
     similarly renamed.
 
   * BUG FIX: The library no longer incorrectly rejects negative count_val MPLEX
@@ -111,7 +173,7 @@ New in version 0.8.3:
 
   * BUG FIX: Adding an entry via gd_[m]add() with a negative CARRAY scalar index
     no longer results in an internal error or worse when the added field is
-    later read.
+    later read.  Instead, a proper error is returned.
 
   * BUG FIX: Changing a CONST field to a real floating point type using
     gd_alter_const() (or similar) no longer results in the value of the field
@@ -660,7 +722,7 @@ New in version 0.7.0:
 
   * GetData, including its bindings, is now supported under MacOS X, Cygwin, and
     Win32 using MinGW.  In the case of MinGW, this includes linking against the
-    Microsoft C Runtime, which isn't POSIX compliant.  Users should excercise
+    Microsoft C Runtime, which isn't POSIX compliant.  Users should exercise
     caution when writing to dirfiles in this case.
 
   * GetData can now be used on ARM processors.  As a side-effect, GetData can
@@ -677,7 +739,7 @@ New in version 0.7.0:
 
   * As a result of the previous change, the Standards compliance of the parser
     in strict mode has been greatly increased.  This affects allowed characters
-    in field names, and field name lengths.  The existance or lack thereof of
+    in field names, and field name lengths.  The existence or lack thereof of
     the implicit FILEFRAM field (an alias for INDEX) is also affected.
 
   * Since Standards Versions 4 and earlier were never codified, we've made some
@@ -804,7 +866,7 @@ New in version 0.7.0:
     ARMs, GD_NOT_ARM_ENDIAN equals zero and may be omitted.
 
   * Where gd_flush() and gd_metaflush() in the past raised GD_E_OPEN_INCLUDE
-    on I/O error, they now raise the new GD_FLUSH.
+    on I/O error, they now raise the new GD_E_FLUSH.
 
   * All functions now raise GD_E_DIMENSION when encountering a scalar field
     when expecting a vector.  In the past, the error value returned was

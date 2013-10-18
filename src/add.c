@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2008-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -90,22 +90,52 @@ static gd_entry_t *_GD_FixName(DIRFILE *restrict D, char **restrict buffer,
   return P;
 }
 
+/* copy scalar entries from the user's entry; returns a mask of
+ * initialised scalars */
+static unsigned _GD_CopyScalars(DIRFILE *restrict D,
+    gd_entry_t *restrict E, const gd_entry_t *restrict entry, unsigned mask)
+{
+  unsigned mask_out = 0;
+  int i;
+
+  dtrace("%p, %p, %p, 0x%X", D, E, entry, mask);
+
+  /* copy scalars */
+  for (i = 0; i <= GD_MAX_POLYORD; ++i) {
+    if (!(mask & (1 << i)) || entry->scalar[i] == NULL ||
+        entry->scalar[i][0] == '\0')
+    {
+      E->scalar[i] = NULL;
+    } else {
+      if (_GD_CheckCodeAffixes(D, NULL, entry->scalar[i],
+            entry->fragment_index))
+      {
+        break;
+      }
+      E->scalar[i] = _GD_Strdup(D, entry->scalar[i]);
+      E->scalar_ind[i] = entry->scalar_ind[i];
+      mask_out |= (1 << i);
+    }
+  }
+
+  dreturn("0x%X", mask_out);
+  return mask_out;
+}
+
 /* add an entry - returns the added entry on success. */
 static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     const gd_entry_t *restrict entry, const char *restrict parent)
 {
   char *temp_buffer;
   int i, is_dot, offset;
-  int copy_scalar[GD_MAX_POLYORD + 1];
   void *new_list;
   void *new_ref = NULL;
   unsigned int u;
+  unsigned mask;
   gd_entry_t *E;
   gd_entry_t *P = NULL;
 
   dtrace("%p, %p, \"%s\"", D, entry, parent);
-
-  memset(copy_scalar, 0, sizeof(int) * (GD_MAX_POLYORD + 1));
 
   _GD_ClearError(D);
 
@@ -263,9 +293,10 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       if (D->error)
         break;
 
-      if ((E->EN(raw,spf) = entry->EN(raw,spf)) == 0)
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_SPF, NULL,
-            entry->EN(raw,spf), NULL);
+      mask = _GD_CopyScalars(D, E, entry, 0x1);
+
+      if (!(mask & 1) && (E->EN(raw,spf) = entry->EN(raw,spf)) == 0)
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_SPF, NULL, 0, NULL);
       else if (E->EN(raw,data_type) & 0x40 || (E->e->u.raw.size =
             GD_SIZE(E->EN(raw,data_type))) == 0)
         _GD_SetError(D, GD_E_BAD_TYPE, entry->EN(raw,data_type), NULL, 0, NULL);
@@ -277,7 +308,6 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
         /* This is the first raw field in this fragment */
         new_ref = _GD_Strdup(D, E->field);
       }
-      copy_scalar[0] = 1;
       break;
     case GD_LINCOM_ENTRY:
       E->EN(lincom,n_fields) = entry->EN(lincom,n_fields);
@@ -286,48 +316,42 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NFIELDS, NULL,
             E->EN(lincom,n_fields), NULL);
       
-      for (i = 0; i < E->EN(lincom,n_fields); ++i) {
+      for (i = 0; i < E->EN(lincom,n_fields); ++i)
         _GD_CheckCodeAffixes(D, NULL, entry->in_fields[i],
             entry->fragment_index);
-        _GD_CheckCodeAffixes(D, NULL, entry->scalar[i], entry->fragment_index);
-        _GD_CheckCodeAffixes(D, NULL, entry->scalar[i + GD_MAX_LINCOM],
-            entry->fragment_index);
-      }
 
       if (D->error)
         break;
 
-      else {
-        if (entry->comp_scal) {
-          int cs = 0;
-          memcpy(E->EN(lincom,cm), entry->EN(lincom,cm), sizeof(double) * 2 *
-              E->EN(lincom,n_fields));
-          memcpy(E->EN(lincom,cb), entry->EN(lincom,cb), sizeof(double) * 2 *
-              E->EN(lincom,n_fields));
-          for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-            E->EN(lincom,m)[i] = creal(E->EN(lincom,cm)[i]);
-            E->EN(lincom,b)[i] = creal(E->EN(lincom,cb)[i]);
-            if (cimag(E->EN(lincom,cm)[i]) || cimag(E->EN(lincom,cb)[i]))
-              cs = 1;
-          }
-          E->comp_scal = cs;
-        } else {
-          memcpy(E->EN(lincom,m), entry->EN(lincom,m), sizeof(double) *
-              E->EN(lincom,n_fields));
-          memcpy(E->EN(lincom,b), entry->EN(lincom,b), sizeof(double) *
-              E->EN(lincom,n_fields));
-          for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-            gd_rs2cs_(E->EN(lincom,cm)[i], E->EN(lincom,m)[i]);
-            gd_rs2cs_(E->EN(lincom,cb)[i], E->EN(lincom,b)[i]);
-          }
-          E->comp_scal = 0;
-        }
+      _GD_CopyScalars(D, E, entry, 9 * ((1 << E->EN(lincom,n_fields)) - 1));
 
+      if (entry->comp_scal) {
+        int cs = 0;
+        memcpy(E->EN(lincom,cm), entry->EN(lincom,cm), sizeof(double) * 2 *
+            E->EN(lincom,n_fields));
+        memcpy(E->EN(lincom,cb), entry->EN(lincom,cb), sizeof(double) * 2 *
+            E->EN(lincom,n_fields));
         for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-          E->in_fields[i] = _GD_Strdup(D, entry->in_fields[i]);
-          copy_scalar[i] = copy_scalar[i + GD_MAX_LINCOM] = 1;
+          E->EN(lincom,m)[i] = creal(E->EN(lincom,cm)[i]);
+          E->EN(lincom,b)[i] = creal(E->EN(lincom,cb)[i]);
+          if (cimag(E->EN(lincom,cm)[i]) || cimag(E->EN(lincom,cb)[i]))
+            cs = 1;
         }
+        E->comp_scal = cs;
+      } else {
+        memcpy(E->EN(lincom,m), entry->EN(lincom,m), sizeof(double) *
+            E->EN(lincom,n_fields));
+        memcpy(E->EN(lincom,b), entry->EN(lincom,b), sizeof(double) *
+            E->EN(lincom,n_fields));
+        for (i = 0; i < E->EN(lincom,n_fields); ++i) {
+          gd_rs2cs_(E->EN(lincom,cm)[i], E->EN(lincom,m)[i]);
+          gd_rs2cs_(E->EN(lincom,cb)[i], E->EN(lincom,b)[i]);
+        }
+        E->comp_scal = 0;
       }
+
+      for (i = 0; i < E->EN(lincom,n_fields); ++i)
+        E->in_fields[i] = _GD_Strdup(D, entry->in_fields[i]);
       break;
     case GD_LINTERP_ENTRY:
       E->e->u.linterp.table_len = -1;
@@ -362,7 +386,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
 
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
 
-      copy_scalar[0] = 1;
+      _GD_CopyScalars(D, E, entry, 0x1);
+
       if (entry->comp_scal) {
         gd_cs2cs_(E->EN(recip,cdividend), entry->EN(recip,cdividend));
         E->EN(recip,dividend) = creal(E->EN(recip,cdividend));
@@ -385,16 +410,18 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       }
 
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
-      if (E->EN(bit,numbits) < 1)
+
+      mask = _GD_CopyScalars(D, E, entry, 0x3);
+
+      if (!(mask & 2) && E->EN(bit,numbits) < 1)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NUMBITS, NULL,
             entry->EN(bit,numbits), NULL);
-      else if (E->EN(bit,bitnum) < 0)
+      else if (!(mask & 1) && E->EN(bit,bitnum) < 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_BITNUM, NULL,
             entry->EN(bit,bitnum), NULL);
-      else if (E->EN(bit,bitnum) + E->EN(bit,numbits) - 1 > 63)
+      else if (!(mask & 3) && E->EN(bit,bitnum) + E->EN(bit,numbits) - 1 > 63)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_BITSIZE, NULL,
             E->EN(bit,bitnum) + E->EN(bit,numbits) - 1, NULL);
-      copy_scalar[0] = copy_scalar[1] = 1;
       break;
     case GD_PHASE_ENTRY:
       E->EN(phase,shift) = entry->EN(phase,shift);
@@ -405,8 +432,9 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
         break;
       }
 
+      _GD_CopyScalars(D, E, entry, 0x1);
+
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
-      copy_scalar[0] = 1;
       break;
     case GD_WINDOW_ENTRY:
       E->EN(window,windop) = entry->EN(window,windop);
@@ -419,12 +447,13 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
         break;
       }
 
+      _GD_CopyScalars(D, E, entry, 0x1);
+
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
       E->in_fields[1] = _GD_Strdup(D, entry->in_fields[1]);
       if (_GD_BadWindop(E->EN(window,windop)))
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_WINDOP, NULL,
             entry->EN(window,windop), NULL);
-      copy_scalar[0] = 1;
       break;
     case GD_MPLEX_ENTRY:
       E->EN(mplex,count_val) = entry->EN(mplex,count_val);
@@ -441,14 +470,11 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       E->in_fields[1] = _GD_Strdup(D, entry->in_fields[1]);
       E->e->u.mplex.type = GD_NULL;
 
-      if (entry->EN(mplex,period) < 0)
+      mask = _GD_CopyScalars(D, E, entry, 0x3);
+
+      if (!(mask & 2) && entry->EN(mplex,period) < 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_PERIOD, NULL,
             entry->EN(mplex,period), NULL);
-      else if (entry->EN(mplex,count_val) < 0)
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_CNTVAL, NULL,
-            entry->EN(mplex,count_val), NULL);
-
-      copy_scalar[0] = copy_scalar[1] = 1;
       break;
     case GD_CONST_ENTRY:
       E->EN(scalar,const_type) = entry->EN(scalar,const_type);
@@ -506,6 +532,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       if (D->error)
         break;
 
+      _GD_CopyScalars(D, E, entry, (1 << (E->EN(polynom,poly_ord) + 1)) - 1);
+
       if (entry->comp_scal) {
         int cs = 0;
         memcpy(E->EN(polynom,ca), entry->EN(polynom,ca), sizeof(double) * 2 *
@@ -525,30 +553,12 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       }
 
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
-
-      for (i = 0; i < E->EN(polynom,poly_ord); ++i)
-        copy_scalar[i] = 1;
       break;
     case GD_ALIAS_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
       _GD_InternalError(D); /* We've already verrified field_type is valid */
       break;
-  }
-
-  /* copy scalars */
-  for (i = 0; i <= GD_MAX_POLYORD; ++i) {
-    if (!copy_scalar[i] || entry->scalar[i] == NULL)
-      E->scalar[i] = NULL;
-    else {
-      if (_GD_CheckCodeAffixes(D, NULL, entry->scalar[i],
-            entry->fragment_index))
-      {
-        break;
-      }
-      E->scalar[i] = _GD_Strdup(D, entry->scalar[i]);
-      E->scalar_ind[i] = entry->scalar_ind[i];
-    }
   }
 
   if (D->error != GD_E_OK) {
@@ -1111,7 +1121,7 @@ int gd_add_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
   gd_entry_t E;
   int error;
 
-  dtrace("%p, \"%s\", \"%s\", [%g, %g], %i", D, field_code, in_field,
+  dtrace("%p, \"%s\", \"%s\", {%g, %g}, %i", D, field_code, in_field,
       cdividend[0], cdividend[1], fragment_index);
 
   if (D->flags & GD_INVALID) {/* don't crash */
@@ -1815,7 +1825,7 @@ int gd_madd_crecip89(DIRFILE* D, const char *parent, const char* field_code,
   gd_entry_t E;
   int error;
 
-  dtrace("%p, \"%s\", \"%s\", \"%s\", [%g, %g]", D, parent, field_code,
+  dtrace("%p, \"%s\", \"%s\", \"%s\", {%g, %g}", D, parent, field_code,
       in_field, cdividend[0], cdividend[1]);
 
   if (D->flags & GD_INVALID) {/* don't crash */

@@ -537,6 +537,26 @@ void MatLab(void)
       "% 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA\n", stdout);
 }
 
+void PHP(void)
+{
+  int i;
+
+  puts(
+      "/* This code is automatically generated.  "
+      "Changes made here will be lost. */\n"
+      "#include \"php_getdata.h\"\n"
+      "void gdphp_register_constants(int module_number) {"
+      "dtrace(\"%i\", module_number); TSRMLS_FETCH();"
+      );
+  
+  for (i = 0; constant_list[i].lname != NULL; ++i)
+    printf("zend_register_long_constant(ZEND_STRS(\"%s\"), %li, CONST_CS, "
+        "module_number TSRMLS_CC);", constant_list[i].lname,
+        constant_list[i].value);
+
+  puts("dreturnvoid();}");
+}
+
 int main(int argc, char* argv[])
 {
   if (argv[1][0] == 'f')
@@ -549,6 +569,8 @@ int main(int argc, char* argv[])
     Perl();
   else if (argv[1][0] == 'm')
     MatLab();
+  else if (argv[1][0] == 'h')
+    PHP();
   else
     return 1;
 

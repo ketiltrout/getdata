@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2012 D. V. Wiebe
+ * Copyright (C) 2005-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -138,7 +138,6 @@ static const struct {
   { GD_E_BAD_ENTRY, GD_E_ENTRY_METARAW, "Invalid metafield type: {3}", 0 },
   { GD_E_BAD_ENTRY, GD_E_ENTRY_POLYORD, "POLYNOM order out of range: {3}", 0 },
   { GD_E_BAD_ENTRY, GD_E_ENTRY_WINDOP, "Unrecognised WINDOW operator: {3}", 0 },
-  { GD_E_BAD_ENTRY, GD_E_ENTRY_CNTVAL, "Count value out of range: {3}", 0 },
   { GD_E_BAD_ENTRY, GD_E_ENTRY_PERIOD, "MPLEX period out of range: {3}", 0 },
   /* GD_E_DUPLICATE: 4 = name */
   { GD_E_DUPLICATE, 0, "Field code already present: {4}", 0 },

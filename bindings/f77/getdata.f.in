@@ -1,4 +1,4 @@
-C     Copyright (C) 2008-2012 D. V. Wiebe
+C     Copyright (C) 2008-2013 D. V. Wiebe
 C
 C     CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C
@@ -117,6 +117,30 @@ C     Corresponding to gd_alter_protection(3)
       EXTERNAL GDAPRT
 C     Alter a scalar parameter
       EXTERNAL GDASCA
+C     Corresponding to gd_add(3) for BIT fields
+      EXTERNAL GDASBT
+C     Corresponding to gd_add(3) for complex-valued LINCOM fields
+      EXTERNAL GDASCL
+C     Corresponding to gd_add(3) for complex-valued POLYNOM fields
+      EXTERNAL GDASCP
+C     Corresponding to gd_add(3) for complex-valued RECIP fields
+      EXTERNAL GDASCR
+C     Corresponding to gd_add(3) for LINCOM fields
+      EXTERNAL GDASLC
+C     Corresponding to gd_add(3) for MPLEX fields
+      EXTERNAL GDASMX
+C     Corresponding to gd_add(3) for PHASE fields
+      EXTERNAL GDASPH
+C     Corresponding to gd_add(3) for POLYNOM fields
+      EXTERNAL GDASPN
+C     Corresponding to gd_add(3) for RECIP fields
+      EXTERNAL GDASRC
+C     Corresponding to gd_add(3) for RAW fields
+      EXTERNAL GDASRW
+C     Corresponding to gd_add(3) for SBIT fields
+      EXTERNAL GDASSB
+C     Corresponding to gd_add(3) for WINDOW fields
+      EXTERNAL GDASWD
 C     Corresponding to gd_alias_target(3)
       EXTERNAL GDATRG
 C     Corresponding to gd_carray_len(3)
@@ -179,13 +203,13 @@ C     Corresponding to gd_entry(3) for BIT fields
       EXTERNAL GDGEBT
 C     Corresponding to gd_entry(3) for CARRAY fields
       EXTERNAL GDGECA
-C     Corresponding to gd_entry(3) for complex valued LINCOM fields
+C     Corresponding to gd_entry(3) for complex-valued LINCOM fields
       EXTERNAL GDGECL
 C     Corresponding to gd_entry(3) for CONST fields
       EXTERNAL GDGECO
-C     Corresponding to gd_entry(3) for complex valued POLYNOM fields
+C     Corresponding to gd_entry(3) for complex-valued POLYNOM fields
       EXTERNAL GDGECP
-C     Corresponding to gd_entry(3) for complex valued RECIP fields
+C     Corresponding to gd_entry(3) for complex-valued RECIP fields
       EXTERNAL GDGECR
 C     Corresponding to gd_entry(3) for LINCOM fields
       EXTERNAL GDGELC
@@ -237,6 +261,30 @@ C     Corresponding to gd_include(3)
       EXTERNAL GDINCL
 C     Corresponding to gd_invalid_dirfile(3)
       EXTERNAL GDINVD
+C     Corresponding to gd_alter_entry(3) for BIT fields
+      EXTERNAL GDLSBT
+C     Corresponding to gd_alter_entry(3) for complex-valued LINCOM fields
+      EXTERNAL GDLSCL
+C     Corresponding to gd_alter_entry(3) for complex-valued POLYNOM fields
+      EXTERNAL GDLSCP
+C     Corresponding to gd_alter_entry(3) for complex-valued RECIP fields
+      EXTERNAL GDLSCR
+C     Corresponding to gd_alter_entry(3) for LINCOM fields
+      EXTERNAL GDLSLC
+C     Corresponding to gd_alter_entry(3) for MPLEX fields
+      EXTERNAL GDLSMX
+C     Corresponding to gd_alter_entry(3) for PHASE fields
+      EXTERNAL GDLSPH
+C     Corresponding to gd_alter_entry(3) for POLYNOM fields
+      EXTERNAL GDLSPN
+C     Corresponding to gd_alter_entry(3) for RECIP fields
+      EXTERNAL GDLSRC
+C     Corresponding to gd_alter_entry(3) for RAW fields
+      EXTERNAL GDLSRW
+C     Corresponding to gd_alter_entry(3) for SBIT fields
+      EXTERNAL GDLSSB
+C     Corresponding to gd_alter_entry(3) for WINDOW fields
+      EXTERNAL GDLSWD
 C     Corresponding to gd_linterp_tablename(3)
       EXTERNAL GDLTTN
 C     Corresponding to gd_mconstants(3) (sort of)
@@ -247,7 +295,7 @@ C     Corresponding to gd_madd_bit(3)
       EXTERNAL GDMDBT
 C     Corresponding to gd_madd_carray(3)
       EXTERNAL GDMDCA
-C     Corresponding to complex valued gd_madd_clincom(3)
+C     Corresponding to gd_madd_clincom(3)
       EXTERNAL GDMDCL
 C     Corresponding to gd_madd_const(3)
       EXTERNAL GDMDCO

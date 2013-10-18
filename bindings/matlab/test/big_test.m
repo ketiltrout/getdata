@@ -72,1223 +72,1223 @@ try
   fwrite(fid, data_data);
   fclose(fid);
 
-  % 140: getdata_constants check
+  % 0: getdata_constants check
   GD = getdata_constants();
-  ne = ne + check_num(140, GD.RDWR, 1);
+  ne = ne + check_num(0, GD.RDWR, 1);
 
-  % 0: gd_error check
+  % 1: gd_error check
   try
     D = gd_open('x');
   catch exc
-    ne = ne + check_exc(exc, 0, 'Open');
+    ne = ne + check_exc(exc, 1, 'Open');
   end
 
-  % 1: gd_open check
+  % 2: gd_open check
   try
     D = gd_open(filedir, GD.RDWR);
-  catch exc
-    ne = ne + check_ok(exc, 1);
-  end
-
-  % 2: getdata check
-  try
-    d = gd_getdata(D, 'data', 5, 0, 1, 0);
-    ne = ne + check_array(2, d, [40:47]);
   catch exc
     ne = ne + check_ok(exc, 2);
   end
 
-  % 108: getdata check (complex128)
+  % 3: getdata check
+  try
+    d = gd_getdata(D, 'data', 5, 0, 1, 0);
+    ne = ne + check_array(3, d, [40:47]);
+  catch exc
+    ne = ne + check_ok(exc, 3);
+  end
+
+  % 10: getdata check (complex128)
   try
     d = gd_getdata(D, 'data', 5, 0, 1, 0, GD.COMPLEX128);
     ne = ne + check_array(2, d, [ complex(40,0), complex(41,0), ...
     complex(42,0), complex(43,0), complex(44,0), complex(45,0), ...
     complex(46,0), complex(47,0) ]);
   catch exc
-    ne = ne + check_ok(exc, 108);
-  end
-
-  % 3: gd_get_constant check
-  try
-    d = gd_get_constant(D, 'const');
-    ne = ne + check_num(3, d, 5.5);
-  catch exc
-    ne = ne + check_ok(exc, 3);
-  end
-
-  % 6: gd_nfields check
-  try
-    d = gd_nfields(D);
-    ne = ne + check_num(6, d, nfields);
-  catch exc
-    ne = ne + check_ok(exc, 6);
-  end
-
-  % 8: gd_field_list check
-  try
-    d = gd_field_list(D);
-    ne = ne + check_sarray(8, d, fields);
-  catch exc
-    ne = ne + check_ok(exc, 8);
-  end
-
-  % 9: gd_nmfields check
-  try
-    d = gd_nmfields(D, 'data');
-    ne = ne + check_num(9, d, 4);
-  catch exc
-    ne = ne + check_ok(exc, 9);
-  end
-
-  % 10: gd_mfield_list check
-  try
-    d = gd_mfield_list(D, 'data');
-    ne = ne + check_sarray(10, d, { 'mstr'; 'mconst'; 'mcarray'; 'mlut' });
-  catch exc
     ne = ne + check_ok(exc, 10);
   end
 
-  % 11: gd_nframes check
+  % 12: gd_get_constant check
   try
-    d = gd_nframes(D);
-    ne = ne + check_num(11, d, 10);
-  catch exc
-    ne = ne + check_ok(exc, 11);
-  end
-
-  % 12: gd_spf check
-  try
-    d = gd_spf(D, 'data');
-    ne = ne + check_num(12, d, 8);
+    d = gd_get_constant(D, 'const');
+    ne = ne + check_num(12, d, 5.5);
   catch exc
     ne = ne + check_ok(exc, 12);
   end
 
-  % 13: gd_putdata check
-  p = [ 13, 14, 15, 16 ];
+  % 23: gd_nfields check
   try
-    d = gd_putdata(D, 'data', 5, 1, p);
-    ne = ne + check_num(13, d, 4);
-  catch exc
-    ne = ne + check_ok2(exc, 13, 1);
-  end
-
-  try
-    d = gd_getdata(D, 'data', 5, 0, 1, 0);
-  catch exc
-    ne = ne + check_ok2(exc, 13, 2);
-  end
-
-  % 124: gd_putdata check (complex)
-  p = [ complex(33,0), complex(34,0), complex(35,0), complex(36,0) ];
-  try
-    d = gd_putdata(D, 'data', 5, 1, p);
-    ne = ne + check_num(124, d, 4);
-  catch exc
-    ne = ne + check_ok2(exc, 124, 1);
-  end
-
-  try
-    d = gd_getdata(D, 'data', 5, 0, 1, 0);
-    ne = ne + check_array(124, d, [40, 33, 34, 35, 36, 45, 46, 47]);
-  catch exc
-    ne = ne + check_ok2(exc, 124, 2);
-  end
-
-  % 14: error_string
-  try
-    gd_getdata(D, 'x', 1, 0, 1, 0);
-  catch exc
-    ne = ne + check_exc(exc, 14, 'BadCode');
-  end
-  ne = ne + check_num(14, gd_error(D), GD.E_BAD_CODE);
-  ne = ne + check_string(14, gd_error_string(D), 'Field not found: x');
-
-  % 15: entry_type
-  try
-    d = gd_entry_type(D, 'data');
-    ne = ne + check_num(15, d, GD.RAW_ENTRY);
-  catch exc
-    ne = ne + check_ok(exc, 15);
-  end
-
-  % 16: entry (raw) check
-  try
-    d = gd_entry(D, 'data');
-    ne = ne + check_string2(16, 1, d.field, 'data');
-    ne = ne + check_num2(16, 2, d.field_type, GD.RAW_ENTRY);
-    ne = ne + check_num2(16, 3, d.fragment_index, 0);
-    ne = ne + check_num2(16, 4, d.data_type, GD.INT8);
-  catch exc
-    ne = ne + check_ok(exc, 16);
-  end
-
-  % 18: entry (lincom) check
-  try
-    d = gd_entry(D, 'lincom');
-    ne = ne + check_string2(18, 1, d.field, 'lincom');
-    ne = ne + check_num2(18, 2, d.field_type, GD.LINCOM_ENTRY);
-    ne = ne + check_num2(18, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(18, 4, d.in_fields, { 'data'; 'INDEX'; 'linterp' });
-    ne = ne + check_array2(18, 5, d.m, [ 1.1, 2.2, 5.5 ]);
-    ne = ne + check_array2(18, 6, d.b, [ 2.2, complex(3.3,4.4), 5.5 ]);
-    ne = ne + check_sarray2(18, 7, d.scalar, {0; 0; 'const'; 0; 0; 'const'});
-    ne = ne + check_array2(18, 8, d.scalar_ind, [0, 0, -1, 0, 0, -1]);
-  catch exc
-    ne = ne + check_ok(exc, 18);
-  end
-
-  % 20: entry (polynom) check
-  try
-    d = gd_entry(D, 'polynom');
-    ne = ne + check_string2(20, 1, d.field, 'polynom');
-    ne = ne + check_num2(20, 2, d.field_type, GD.POLYNOM_ENTRY);
-    ne = ne + check_num2(20, 3, d.fragment_index, 0);
-    ne = ne + check_string2(20, 4, d.in_fields, 'data');
-    ne = ne + check_array2(20, 5, d.a, [ 1.1, 2.2, 2.2, complex(3.3, 4.4), ...
-    5.5, 5.5]);
-    ne = ne + check_sarray2(20, 6, d.scalar, {0; 0; 0; 0; 'const'; 'const'});
-    ne = ne + check_array2(20, 7, d.scalar_ind, [0, 0, 0, 0, -1, -1]);
-  catch exc
-    ne = ne + check_ok(exc, 20);
-  end
-
-  % 21: entry (linterp) check
-  try
-    d = gd_entry(D, 'linterp');
-    ne = ne + check_string2(21, 1, d.field, 'linterp');
-    ne = ne + check_num2(21, 2, d.field_type, GD.LINTERP_ENTRY);
-    ne = ne + check_num2(21, 3, d.fragment_index, 0);
-    ne = ne + check_string2(21, 4, d.in_fields, 'data');
-    ne = ne + check_string2(21, 5, d.table, './lut');
-  catch exc
-    ne = ne + check_ok(exc, 21);
-  end
-
-  % 22: entry (bit) check
-  try
-    d = gd_entry(D, 'bit');
-    ne = ne + check_string2(22, 1, d.field, 'bit');
-    ne = ne + check_num2(22, 2, d.field_type, GD.BIT_ENTRY);
-    ne = ne + check_num2(22, 3, d.fragment_index, 0);
-    ne = ne + check_string2(22, 4, d.in_fields, 'data');
-    ne = ne + check_num2(22, 5, d.bitnum, 3);
-    ne = ne + check_num2(22, 6, d.numbits, 4);
-  catch exc
-    ne = ne + check_ok(exc, 22);
-  end
-
-  % 23: entry (sbit) check
-  try
-    d = gd_entry(D, 'sbit');
-    ne = ne + check_string2(23, 1, d.field, 'sbit');
-    ne = ne + check_num2(23, 2, d.field_type, GD.SBIT_ENTRY);
-    ne = ne + check_num2(23, 3, d.fragment_index, 0);
-    ne = ne + check_string2(23, 4, d.in_fields, 'data');
-    ne = ne + check_num2(23, 5, d.bitnum, 5);
-    ne = ne + check_num2(23, 6, d.numbits, 6);
+    d = gd_nfields(D);
+    ne = ne + check_num(23, d, nfields);
   catch exc
     ne = ne + check_ok(exc, 23);
   end
 
-  % 24: entry (mult) check
+  % 25: gd_field_list check
   try
-    d = gd_entry(D, 'mult');
-    ne = ne + check_string2(24, 1, d.field, 'mult');
-    ne = ne + check_num2(24, 2, d.field_type, GD.MULTIPLY_ENTRY);
-    ne = ne + check_num2(24, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(24, 4, d.in_fields, { 'data'; 'sbit'; });
-  catch exc
-    ne = ne + check_ok(exc, 24);
-  end
-
-  % 25: entry (phase) check
-  try
-    d = gd_entry(D, 'phase');
-    ne = ne + check_string2(25, 1, d.field, 'phase');
-    ne = ne + check_num2(25, 2, d.field_type, GD.PHASE_ENTRY);
-    ne = ne + check_num2(25, 3, d.fragment_index, 0);
-    ne = ne + check_string2(25, 4, d.in_fields, 'data');
-    ne = ne + check_num2(25, 5, d.shift, 11);
+    d = gd_field_list(D);
+    ne = ne + check_sarray(25, d, fields);
   catch exc
     ne = ne + check_ok(exc, 25);
   end
 
-  % 26: entry (const) check
+  % 26: gd_nmfields check
   try
-    d = gd_entry(D, 'const');
-    ne = ne + check_string2(26, 1, d.field, 'const');
-    ne = ne + check_num2(26, 2, d.field_type, GD.CONST_ENTRY);
-    ne = ne + check_num2(26, 3, d.fragment_index, 0);
-    ne = ne + check_num2(26, 5, d.const_type, GD.FLOAT64);
+    d = gd_nmfields(D, 'data');
+    ne = ne + check_num(26, d, 4);
   catch exc
     ne = ne + check_ok(exc, 26);
   end
 
-  % 134: entry (string) check
+  % 27: gd_mfield_list check
   try
-    d = gd_entry(D, 'string');
-    ne = ne + check_string2(134, 1, d.field, 'string');
-    ne = ne + check_num2(134, 2, d.field_type, GD.STRING_ENTRY);
-    ne = ne + check_num2(134, 3, d.fragment_index, 0);
-  catch exc
-    ne = ne + check_ok(exc, 134);
-  end
-
-  % 27: gd_fragment_index check
-  try
-    d = gd_fragment_index(D, 'data');
+    d = gd_mfield_list(D, 'data');
+    ne = ne + check_sarray(27, d, { 'mstr'; 'mconst'; 'mcarray'; 'mlut' });
   catch exc
     ne = ne + check_ok(exc, 27);
   end
-  ne = ne + check_num(27, d, 0);
 
-  % 28: add_raw
+  % 28: gd_nframes check
   try
-    gd_add_raw(D, 'new1', GD.FLOAT64, 3, 0);
+    d = gd_nframes(D);
+    ne = ne + check_num(28, d, 10);
   catch exc
-    ne = ne + check_ok2(exc, 28, 1);
+    ne = ne + check_ok(exc, 28);
+  end
+
+  % 29: gd_spf check
+  try
+    d = gd_spf(D, 'data');
+    ne = ne + check_num(29, d, 8);
+  catch exc
+    ne = ne + check_ok(exc, 29);
+  end
+
+  % 30: gd_putdata check
+  p = [ 13, 14, 15, 16 ];
+  try
+    d = gd_putdata(D, 'data', 5, 1, p);
+    ne = ne + check_num(30, d, 4);
+  catch exc
+    ne = ne + check_ok2(exc, 30, 1);
   end
 
   try
-    d = gd_entry(D, 'new1');
-    ne = ne + check_string2(28, 1, d.field, 'new1');
-    ne = ne + check_num2(28, 2, d.field_type, GD.RAW_ENTRY);
-    ne = ne + check_num2(28, 3, d.fragment_index, 0);
-    ne = ne + check_num2(28, 4, d.data_type, GD.FLOAT64);
-    ne = ne + check_num2(28, 4, d.spf, 3);
+    d = gd_getdata(D, 'data', 5, 0, 1, 0);
   catch exc
-    ne = ne + check_ok2(exc, 28, 2);
+    ne = ne + check_ok2(exc, 30, 2);
   end
 
-  % 29: add entry (lincom) check
+  % 37: gd_putdata check (complex)
+  p = [ complex(33,0), complex(34,0), complex(35,0), complex(36,0) ];
   try
-    gd_add_lincom(D, 'new2', { 'in1'; 'in2' }, [9.9, 7.7], [8.8, 6.6], 0);
-  catch exc
-    ne = ne + check_ok2(exc, 29, 1);
-  end
-
-  try
-    d = gd_entry(D, 'new2');
-    ne = ne + check_string2(29, 1, d.field, 'new2');
-    ne = ne + check_num2(29, 2, d.field_type, GD.LINCOM_ENTRY);
-    ne = ne + check_num2(29, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(29, 4, d.in_fields, { 'in1'; 'in2' });
-    ne = ne + check_array2(29, 5, d.m, [ 9.9, 7.7 ]);
-    ne = ne + check_array2(29, 6, d.b, [ 8.8, 6.6 ]);
-  catch exc
-    ne = ne + check_ok2(exc, 29, 2);
-  end
-
-  % 32: add entry (polynom) check
-  try
-    gd_add_polynom(D, 'new5', 'in1', [3.9, 4.8, 5.7, complex(6.6,7.5)], 0);
-  catch exc
-    ne = ne + check_ok2(exc, 32, 1);
-  end
-
-  try
-    d = gd_entry(D, 'new5');
-    ne = ne + check_string2(32, 1, d.field, 'new5');
-    ne = ne + check_num2(32, 2, d.field_type, GD.POLYNOM_ENTRY);
-    ne = ne + check_num2(32, 3, d.fragment_index, 0);
-    ne = ne + check_string2(32, 4, d.in_fields, 'in1');
-    ne = ne + check_array2(32, 5, d.a, [3.9, 4.8, 5.7, complex(6.6,7.5)]);
-  catch exc
-    ne = ne + check_ok2(exc, 32, 2);
-  end
-
-  % 33: add entry (linterp) check
-  try
-    gd_add_linterp(D, 'new6', 'in', './some/table', 0);
-  catch exc
-    ne = ne + check_ok2(exc, 33, 1);
-  end
-
-  try
-    d = gd_entry(D, 'new6');
-    ne = ne + check_string2(33, 1, d.field, 'new6');
-    ne = ne + check_num2(33, 2, d.field_type, GD.LINTERP_ENTRY);
-    ne = ne + check_num2(33, 3, d.fragment_index, 0);
-    ne = ne + check_string2(33, 4, d.in_fields, 'in');
-    ne = ne + check_string2(33, 5, d.table, './some/table');
-  catch exc
-    ne = ne + check_ok2(exc, 33, 2);
-  end
-
-  % 34: add entry (bit) check
-  try
-    gd_add_bit(D, 'new7', 'in', 13, 12, 0);
-  catch exc
-    ne = ne + check_ok2(exc, 34, 1);
-  end
-
-  try
-    d = gd_entry(D, 'new7');
-    ne = ne + check_string2(34, 1, d.field, 'new7');
-    ne = ne + check_num2(34, 2, d.field_type, GD.BIT_ENTRY);
-    ne = ne + check_num2(34, 3, d.fragment_index, 0);
-    ne = ne + check_string2(34, 4, d.in_fields, 'in');
-    ne = ne + check_num2(34, 5, d.bitnum, 13);
-    ne = ne + check_num2(34, 6, d.numbits, 12);
-  catch exc
-    ne = ne + check_ok2(exc, 34, 2);
-  end
-
-  % 35: add entry (sbit) check
-  try
-    gd_add_sbit(D, 'new8', 'in', 14, 15, 0);
-  catch exc
-    ne = ne + check_ok2(exc, 35, 1);
-  end
-
-  try
-    d = gd_entry(D, 'new8');
-    ne = ne + check_string2(35, 1, d.field, 'new8');
-    ne = ne + check_num2(35, 2, d.field_type, GD.SBIT_ENTRY);
-    ne = ne + check_num2(35, 3, d.fragment_index, 0);
-    ne = ne + check_string2(35, 4, d.in_fields, 'in');
-    ne = ne + check_num2(35, 5, d.bitnum, 14);
-    ne = ne + check_num2(35, 6, d.numbits, 15);
-  catch exc
-    ne = ne + check_ok2(exc, 35, 2);
-  end
-
-  % 36: add entry (mult) check
-  try
-    gd_add_multiply(D, 'new9', 'in1', 'in2', 0);
-  catch exc
-    ne = ne + check_ok2(exc, 36, 1);
-  end
-
-  try
-    d = gd_entry(D, 'new9');
-    ne = ne + check_string2(36, 1, d.field, 'new9');
-    ne = ne + check_num2(36, 2, d.field_type, GD.MULTIPLY_ENTRY);
-    ne = ne + check_num2(36, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(36, 4, d.in_fields, { 'in1'; 'in2'; });
-  catch exc
-    ne = ne + check_ok2(exc, 36, 2);
-  end
-
-  % 37: add entry (phase) check
-  try
-    gd_add_phase(D, 'new10', 'in1', 22, 0);
+    d = gd_putdata(D, 'data', 5, 1, p);
+    ne = ne + check_num(37, d, 4);
   catch exc
     ne = ne + check_ok2(exc, 37, 1);
   end
 
   try
-    d = gd_entry(D, 'new10');
-    ne = ne + check_string2(37, 1, d.field, 'new10');
-    ne = ne + check_num2(37, 2, d.field_type, GD.PHASE_ENTRY);
-    ne = ne + check_num2(37, 3, d.fragment_index, 0);
-    ne = ne + check_string2(37, 4, d.in_fields, 'in1');
-    ne = ne + check_num2(37, 5, d.shift, 22);
+    d = gd_getdata(D, 'data', 5, 0, 1, 0);
+    ne = ne + check_array(37, d, [40, 33, 34, 35, 36, 45, 46, 47]);
   catch exc
     ne = ne + check_ok2(exc, 37, 2);
   end
 
-  % 38: add entry (const) check
+  % 38: error_string
   try
-    gd_add_const(D, 'new11', GD.COMPLEX128, 2.6, 0);
+    gd_getdata(D, 'x', 1, 0, 1, 0);
   catch exc
-    ne = ne + check_ok2(exc, 38, 1);
+    ne = ne + check_exc(exc, 38, 'BadCode');
   end
+  ne = ne + check_num(38, gd_error(D), GD.E_BAD_CODE);
+  ne = ne + check_string(38, gd_error_string(D), 'Field not found: x');
 
+  % 39: entry_type
   try
-    d = gd_entry(D, 'new11');
-    ne = ne + check_string2(38, 1, d.field, 'new11');
-    ne = ne + check_num2(38, 2, d.field_type, GD.CONST_ENTRY);
-    ne = ne + check_num2(38, 3, d.fragment_index, 0);
-    ne = ne + check_num2(38, 5, d.const_type, GD.COMPLEX128);
-  catch exc
-    ne = ne + check_ok2(exc, 38, 2);
-  end
-
-  try
-    d = gd_get_constant(D, 'new11', GD.FLOAT64);
-    ne = ne + check_num2(38, 6, d, 2.6);
-  catch exc
-    ne = ne + check_ok2(exc, 38, 3);
-  end
-
-  % 39: fragmentname
-  try
-    d = gd_fragmentname(D, 0);
-    ne = ne + check_eostring(39, d, 'dirfile/format');
+    d = gd_entry_type(D, 'data');
+    ne = ne + check_num(39, d, GD.RAW_ENTRY);
   catch exc
     ne = ne + check_ok(exc, 39);
   end
 
-  % 40: nfragments
+  % 40: entry (raw) check
   try
-    d = gd_nfragments(D);
-    ne = ne + check_num(40, d, 1);
+    d = gd_entry(D, 'data');
+    ne = ne + check_string2(40, 1, d.field, 'data');
+    ne = ne + check_num2(40, 2, d.field_type, GD.RAW_ENTRY);
+    ne = ne + check_num2(40, 3, d.fragment_index, 0);
+    ne = ne + check_num2(40, 4, d.data_type, GD.INT8);
   catch exc
     ne = ne + check_ok(exc, 40);
   end
 
-  % 41: include
+  % 42: entry (lincom) check
   try
-    d = gd_include(D, 'form2', 0, 0);
-    ne = ne + check_num2(41, 1, d, 1);
-  catch exc
-    ne = ne + check_ok2(exc, 41, 1);
-  end
-
-  try
-    d = gd_get_constant(D, 'const2');
-    ne = ne + check_num2(41, 2, d, -19);
-  catch exc
-    ne = ne + check_ok2(exc, 41, 2);
-  end
-
-  % 42: nfields_by_type
-  try
-    d = gd_nfields_by_type(D, GD.LINCOM_ENTRY);
-    ne = ne + check_num(42, d, 2);
+    d = gd_entry(D, 'lincom');
+    ne = ne + check_string2(42, 1, d.field, 'lincom');
+    ne = ne + check_num2(42, 2, d.field_type, GD.LINCOM_ENTRY);
+    ne = ne + check_num2(42, 3, d.fragment_index, 0);
+    ne = ne + check_sarray2(42, 4, d.in_fields, { 'data'; 'INDEX'; 'linterp' });
+    ne = ne + check_array2(42, 5, d.m, [ 1.1, 2.2, 5.5 ]);
+    ne = ne + check_array2(42, 6, d.b, [ 2.2, complex(3.3,4.4), 5.5 ]);
+    ne = ne + check_sarray2(42, 7, d.scalar, {0; 0; 'const'; 0; 0; 'const'});
+    ne = ne + check_array2(42, 8, d.scalar_ind, [0, 0, -1, 0, 0, -1]);
   catch exc
     ne = ne + check_ok(exc, 42);
   end
 
-  % 43: field_list_by_type
+  % 44: entry (polynom) check
   try
-    d = gd_field_list_by_type(D, GD.LINCOM_ENTRY);
-    ne = ne + check_sarray(43, d, { 'lincom', 'new2' });
-  catch exc
-    ne = ne + check_ok(exc, 43);
-  end
-
-  % 44: nfields_by_type
-  try
-    d = gd_nvectors(D);
-    ne = ne + check_num(44, d, 22);
+    d = gd_entry(D, 'polynom');
+    ne = ne + check_string2(44, 1, d.field, 'polynom');
+    ne = ne + check_num2(44, 2, d.field_type, GD.POLYNOM_ENTRY);
+    ne = ne + check_num2(44, 3, d.fragment_index, 0);
+    ne = ne + check_string2(44, 4, d.in_fields, 'data');
+    ne = ne + check_array2(44, 5, d.a, [ 1.1, 2.2, 2.2, complex(3.3, 4.4), ...
+    5.5, 5.5]);
+    ne = ne + check_sarray2(44, 6, d.scalar, {0; 0; 0; 0; 'const'; 'const'});
+    ne = ne + check_array2(44, 7, d.scalar_ind, [0, 0, 0, 0, -1, -1]);
   catch exc
     ne = ne + check_ok(exc, 44);
   end
 
-  % 45: vector_list check
+  % 45: entry (linterp) check
   try
-    d = gd_vector_list(D);
-    ne = ne + check_sarray(45, d, ...
-    {'INDEX'; 'alias'; 'bit'; 'data'; 'div'; 'lincom'; 'linterp'; 'mplex'; ...
-    'mult'; 'new1'; 'new10'; 'new2'; 'new5'; 'new6'; 'new7'; 'new8'; 'new9'; ...
-    'phase'; 'polynom'; 'recip'; 'sbit'; 'window'});
+    d = gd_entry(D, 'linterp');
+    ne = ne + check_string2(45, 1, d.field, 'linterp');
+    ne = ne + check_num2(45, 2, d.field_type, GD.LINTERP_ENTRY);
+    ne = ne + check_num2(45, 3, d.fragment_index, 0);
+    ne = ne + check_string2(45, 4, d.in_fields, 'data');
+    ne = ne + check_string2(45, 5, d.table, './lut');
   catch exc
     ne = ne + check_ok(exc, 45);
   end
 
-  % 46: madd entry (lincom) check
+  % 46: entry (bit) check
   try
-    gd_madd_lincom(D, 'data', 'mnew1', { 'in1'; 'in2' }, [9.9, 7.7], ...
-    [8.8, 6.6]);
-  catch exc
-    ne = ne + check_ok2(exc, 46, 1);
-  end
-
-  try
-    d = gd_entry(D, 'data/mnew1');
-    ne = ne + check_string2(46, 1, d.field, 'data/mnew1');
-    ne = ne + check_num2(46, 2, d.field_type, GD.LINCOM_ENTRY);
+    d = gd_entry(D, 'bit');
+    ne = ne + check_string2(46, 1, d.field, 'bit');
+    ne = ne + check_num2(46, 2, d.field_type, GD.BIT_ENTRY);
     ne = ne + check_num2(46, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(46, 4, d.in_fields, { 'in1'; 'in2' });
-    ne = ne + check_array2(46, 5, d.m, [ 9.9, 7.7 ]);
-    ne = ne + check_array2(46, 6, d.b, [ 8.8, 6.6 ]);
+    ne = ne + check_string2(46, 4, d.in_fields, 'data');
+    ne = ne + check_num2(46, 5, d.bitnum, 3);
+    ne = ne + check_num2(46, 6, d.numbits, 4);
   catch exc
-    ne = ne + check_ok2(exc, 46, 2);
+    ne = ne + check_ok(exc, 46);
   end
 
-  % 49: madd polynom check
+  % 47: entry (sbit) check
   try
-    gd_madd_polynom(D, 'data', 'mnew4', 'in1', [3.9, 4.8, 5.7, ...
-    complex(6.6,7.5)]);
+    d = gd_entry(D, 'sbit');
+    ne = ne + check_string2(47, 1, d.field, 'sbit');
+    ne = ne + check_num2(47, 2, d.field_type, GD.SBIT_ENTRY);
+    ne = ne + check_num2(47, 3, d.fragment_index, 0);
+    ne = ne + check_string2(47, 4, d.in_fields, 'data');
+    ne = ne + check_num2(47, 5, d.bitnum, 5);
+    ne = ne + check_num2(47, 6, d.numbits, 6);
   catch exc
-    ne = ne + check_ok2(exc, 49, 1);
+    ne = ne + check_ok(exc, 47);
   end
 
+  % 48: entry (mult) check
   try
-    d = gd_entry(D, 'data/mnew4');
-    ne = ne + check_string2(49, 1, d.field, 'data/mnew4');
-    ne = ne + check_num2(49, 2, d.field_type, GD.POLYNOM_ENTRY);
+    d = gd_entry(D, 'mult');
+    ne = ne + check_string2(48, 1, d.field, 'mult');
+    ne = ne + check_num2(48, 2, d.field_type, GD.MULTIPLY_ENTRY);
+    ne = ne + check_num2(48, 3, d.fragment_index, 0);
+    ne = ne + check_sarray2(48, 4, d.in_fields, { 'data'; 'sbit'; });
+  catch exc
+    ne = ne + check_ok(exc, 48);
+  end
+
+  % 49: entry (phase) check
+  try
+    d = gd_entry(D, 'phase');
+    ne = ne + check_string2(49, 1, d.field, 'phase');
+    ne = ne + check_num2(49, 2, d.field_type, GD.PHASE_ENTRY);
     ne = ne + check_num2(49, 3, d.fragment_index, 0);
-    ne = ne + check_string2(49, 4, d.in_fields, 'in1');
-    ne = ne + check_array2(49, 5, d.a, [3.9, 4.8, 5.7, complex(6.6,7.5)]);
+    ne = ne + check_string2(49, 4, d.in_fields, 'data');
+    ne = ne + check_num2(49, 5, d.shift, 11);
   catch exc
-    ne = ne + check_ok2(exc, 49, 2);
+    ne = ne + check_ok(exc, 49);
   end
 
-  % 50: add entry (linterp) check
+  % 50: entry (const) check
   try
-    gd_madd_linterp(D, 'data', 'mnew6', 'in', './some/table');
-  catch exc
-    ne = ne + check_ok2(exc, 50, 1);
-  end
-
-  try
-    d = gd_entry(D, 'data/mnew6');
-    ne = ne + check_string2(50, 1, d.field, 'data/mnew6');
-    ne = ne + check_num2(50, 2, d.field_type, GD.LINTERP_ENTRY);
+    d = gd_entry(D, 'const');
+    ne = ne + check_string2(50, 1, d.field, 'const');
+    ne = ne + check_num2(50, 2, d.field_type, GD.CONST_ENTRY);
     ne = ne + check_num2(50, 3, d.fragment_index, 0);
-    ne = ne + check_string2(50, 4, d.in_fields, 'in');
-    ne = ne + check_string2(50, 5, d.table, './some/table');
+    ne = ne + check_num2(50, 5, d.const_type, GD.FLOAT64);
   catch exc
-    ne = ne + check_ok2(exc, 50, 2);
+    ne = ne + check_ok(exc, 50);
   end
 
-  % 51: add entry (bit) check
+  % 51: entry (string) check
   try
-    gd_madd_bit(D, 'data', 'mnew7', 'in', 13, 12);
-  catch exc
-    ne = ne + check_ok2(exc, 51, 1);
-  end
-
-  try
-    d = gd_entry(D, 'data/mnew7');
-    ne = ne + check_string2(51, 1, d.field, 'data/mnew7');
-    ne = ne + check_num2(51, 2, d.field_type, GD.BIT_ENTRY);
+    d = gd_entry(D, 'string');
+    ne = ne + check_string2(51, 1, d.field, 'string');
+    ne = ne + check_num2(51, 2, d.field_type, GD.STRING_ENTRY);
     ne = ne + check_num2(51, 3, d.fragment_index, 0);
-    ne = ne + check_string2(51, 4, d.in_fields, 'in');
-    ne = ne + check_num2(51, 5, d.bitnum, 13);
-    ne = ne + check_num2(51, 6, d.numbits, 12);
   catch exc
-    ne = ne + check_ok2(exc, 34, 2);
+    ne = ne + check_ok(exc, 51);
   end
 
-  % 52: add entry (sbit) check
+  % 52: gd_fragment_index check
   try
-    gd_madd_sbit(D, 'data', 'mnew8', 'in', 14, 15);
+    d = gd_fragment_index(D, 'data');
   catch exc
-    ne = ne + check_ok2(exc, 52, 1);
+    ne = ne + check_ok(exc, 52);
   end
+  ne = ne + check_num(52, d, 0);
 
+  % 53: add_raw
   try
-    d = gd_entry(D, 'data/mnew8');
-    ne = ne + check_string2(52, 1, d.field, 'data/mnew8');
-    ne = ne + check_num2(52, 2, d.field_type, GD.SBIT_ENTRY);
-    ne = ne + check_num2(52, 3, d.fragment_index, 0);
-    ne = ne + check_string2(52, 4, d.in_fields, 'in');
-    ne = ne + check_num2(52, 5, d.bitnum, 14);
-    ne = ne + check_num2(52, 6, d.numbits, 15);
-  catch exc
-    ne = ne + check_ok2(exc, 52, 2);
-  end
-
-  % 53: add entry (mult) check
-  try
-    gd_madd_multiply(D, 'data', 'mnew9', 'in1', 'in2');
+    gd_add_raw(D, 'new1', GD.FLOAT64, 3, 0);
   catch exc
     ne = ne + check_ok2(exc, 53, 1);
   end
 
   try
-    d = gd_entry(D, 'data/mnew9');
-    ne = ne + check_string2(53, 1, d.field, 'data/mnew9');
-    ne = ne + check_num2(53, 2, d.field_type, GD.MULTIPLY_ENTRY);
+    d = gd_entry(D, 'new1');
+    ne = ne + check_string2(53, 1, d.field, 'new1');
+    ne = ne + check_num2(53, 2, d.field_type, GD.RAW_ENTRY);
     ne = ne + check_num2(53, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(53, 4, d.in_fields, { 'in1'; 'in2'; });
+    ne = ne + check_num2(53, 4, d.data_type, GD.FLOAT64);
+    ne = ne + check_num2(53, 4, d.spf, 3);
   catch exc
     ne = ne + check_ok2(exc, 53, 2);
   end
 
-  % 54: add entry (phase) check
+  % 54: add entry (lincom) check
   try
-    gd_madd_phase(D, 'data', 'mnew10', 'in1', 22);
+    gd_add_lincom(D, 'new2', { 'in1'; 'in2' }, [9.9, 7.7], [8.8, 6.6], 0);
   catch exc
     ne = ne + check_ok2(exc, 54, 1);
   end
 
   try
-    d = gd_entry(D, 'data/mnew10');
-    ne = ne + check_string2(54, 1, d.field, 'data/mnew10');
-    ne = ne + check_num2(54, 2, d.field_type, GD.PHASE_ENTRY);
+    d = gd_entry(D, 'new2');
+    ne = ne + check_string2(54, 1, d.field, 'new2');
+    ne = ne + check_num2(54, 2, d.field_type, GD.LINCOM_ENTRY);
     ne = ne + check_num2(54, 3, d.fragment_index, 0);
-    ne = ne + check_string2(54, 4, d.in_fields, 'in1');
-    ne = ne + check_num2(54, 5, d.shift, 22);
+    ne = ne + check_sarray2(54, 4, d.in_fields, { 'in1'; 'in2' });
+    ne = ne + check_array2(54, 5, d.m, [ 9.9, 7.7 ]);
+    ne = ne + check_array2(54, 6, d.b, [ 8.8, 6.6 ]);
   catch exc
     ne = ne + check_ok2(exc, 54, 2);
   end
 
-  % 55: madd entry (const) check
+  % 57: add entry (polynom) check
   try
-    gd_madd_const(D, 'data', 'mnew11', GD.FLOAT64, 2.6);
-  catch exc
-    ne = ne + check_ok2(exc, 55, 1);
-  end
-
-  try
-    d = gd_entry(D, 'data/mnew11');
-    ne = ne + check_string2(55, 1, d.field, 'data/mnew11');
-    ne = ne + check_num2(55, 2, d.field_type, GD.CONST_ENTRY);
-    ne = ne + check_num2(55, 3, d.fragment_index, 0);
-    ne = ne + check_num2(55, 5, d.const_type, GD.FLOAT64);
-  catch exc
-    ne = ne + check_ok2(exc, 55, 2);
-  end
-
-  try
-    d = gd_get_constant(D, 'data/mnew11');
-    ne = ne + check_num2(55, 6, d, 2.6);
-  catch exc
-    ne = ne + check_ok2(exc, 55, 3);
-  end
-
-  % 56: get_string
-  try
-    d = gd_get_string(D, 'string');
-    ne = ne + check_string(56, d, 'Zaphod Beeblebrox');
-  catch exc
-    ne = ne + check_ok(exc, 56);
-  end
-
-  % 57: add string
-  try
-    gd_add_string(D, 'new12', '---string---', 0);
+    gd_add_polynom(D, 'new5', 'in1', [3.9, 4.8, 5.7, complex(6.6,7.5)], 0);
   catch exc
     ne = ne + check_ok2(exc, 57, 1);
   end
 
   try
-    d = gd_entry(D, 'new12');
-    ne = ne + check_string2(57, 1, d.field, 'new12');
-    ne = ne + check_num2(57, 2, d.field_type, GD.STRING_ENTRY);
+    d = gd_entry(D, 'new5');
+    ne = ne + check_string2(57, 1, d.field, 'new5');
+    ne = ne + check_num2(57, 2, d.field_type, GD.POLYNOM_ENTRY);
     ne = ne + check_num2(57, 3, d.fragment_index, 0);
+    ne = ne + check_string2(57, 4, d.in_fields, 'in1');
+    ne = ne + check_array2(57, 5, d.a, [3.9, 4.8, 5.7, complex(6.6,7.5)]);
   catch exc
     ne = ne + check_ok2(exc, 57, 2);
   end
 
+  % 58: add entry (linterp) check
   try
-    d = gd_get_string(D, 'new12');
-    ne = ne + check_string(57, d, '---string---');
-  catch exc
-    ne = ne + check_ok(exc, 57);
-  end
-
-  % 58: madd string
-  try
-    gd_madd_string(D, 'data', 'mnew12', '---mstring---');
+    gd_add_linterp(D, 'new6', 'in', './some/table', 0);
   catch exc
     ne = ne + check_ok2(exc, 58, 1);
   end
 
   try
-    d = gd_entry(D, 'data/mnew12');
-    ne = ne + check_string2(58, 1, d.field, 'data/mnew12');
-    ne = ne + check_num2(58, 2, d.field_type, GD.STRING_ENTRY);
+    d = gd_entry(D, 'new6');
+    ne = ne + check_string2(58, 1, d.field, 'new6');
+    ne = ne + check_num2(58, 2, d.field_type, GD.LINTERP_ENTRY);
     ne = ne + check_num2(58, 3, d.fragment_index, 0);
+    ne = ne + check_string2(58, 4, d.in_fields, 'in');
+    ne = ne + check_string2(58, 5, d.table, './some/table');
   catch exc
     ne = ne + check_ok2(exc, 58, 2);
   end
 
+  % 59: add entry (bit) check
   try
-    d = gd_get_string(D, 'data/mnew12');
-    ne = ne + check_string(58, d, '---mstring---');
-  catch exc
-    ne = ne + check_ok(exc, 58);
-  end
-
-  % 59: add_spec
-  try
-    gd_add_spec(D, 'lorem STRING "Lorem ipsum"', 0);
+    gd_add_bit(D, 'new7', 'in', 13, 12, 0);
   catch exc
     ne = ne + check_ok2(exc, 59, 1);
   end
 
   try
-    d = gd_get_string(D, 'lorem');
-    ne = ne + check_string(59, d, 'Lorem ipsum');
+    d = gd_entry(D, 'new7');
+    ne = ne + check_string2(59, 1, d.field, 'new7');
+    ne = ne + check_num2(59, 2, d.field_type, GD.BIT_ENTRY);
+    ne = ne + check_num2(59, 3, d.fragment_index, 0);
+    ne = ne + check_string2(59, 4, d.in_fields, 'in');
+    ne = ne + check_num2(59, 5, d.bitnum, 13);
+    ne = ne + check_num2(59, 6, d.numbits, 12);
   catch exc
     ne = ne + check_ok2(exc, 59, 2);
   end
 
-  % 60: madd_spec
+  % 60: add entry (sbit) check
   try
-    gd_madd_spec(D, 'ipsum STRING "dolor sit amet."', 'lorem');
+    gd_add_sbit(D, 'new8', 'in', 14, 15, 0);
   catch exc
     ne = ne + check_ok2(exc, 60, 1);
   end
 
   try
-    d = gd_get_string(D, 'lorem/ipsum');
-    ne = ne + check_string(60, d, 'dolor sit amet.');
+    d = gd_entry(D, 'new8');
+    ne = ne + check_string2(60, 1, d.field, 'new8');
+    ne = ne + check_num2(60, 2, d.field_type, GD.SBIT_ENTRY);
+    ne = ne + check_num2(60, 3, d.fragment_index, 0);
+    ne = ne + check_string2(60, 4, d.in_fields, 'in');
+    ne = ne + check_num2(60, 5, d.bitnum, 14);
+    ne = ne + check_num2(60, 6, d.numbits, 15);
   catch exc
     ne = ne + check_ok2(exc, 60, 2);
   end
 
-  % 61: put_constant
+  % 61: add entry (mult) check
   try
-    gd_put_constant(D, 'const', 61);
+    gd_add_multiply(D, 'new9', 'in1', 'in2', 0);
   catch exc
     ne = ne + check_ok2(exc, 61, 1);
   end
 
   try
-    d = gd_get_constant(D, 'const');
-    ne = ne + check_num2(61, 6, d, 61);
+    d = gd_entry(D, 'new9');
+    ne = ne + check_string2(61, 1, d.field, 'new9');
+    ne = ne + check_num2(61, 2, d.field_type, GD.MULTIPLY_ENTRY);
+    ne = ne + check_num2(61, 3, d.fragment_index, 0);
+    ne = ne + check_sarray2(61, 4, d.in_fields, { 'in1'; 'in2'; });
   catch exc
     ne = ne + check_ok2(exc, 61, 2);
   end
 
-  % 133: put_constant
+  % 62: add entry (phase) check
   try
-    gd_put_constant(D, 'new11', complex(133,134));
-  catch exc
-    ne = ne + check_ok2(exc, 133, 1);
-  end
-
-  try
-    d = gd_get_constant(D, 'new11');
-    ne = ne + check_num2(133, 6, d, complex(133,134));
-  catch exc
-    ne = ne + check_ok2(exc, 133, 2);
-  end
-
-  % 62: put_string
-  try
-    gd_put_string(D, 'string', 'Arthur Dent');
+    gd_add_phase(D, 'new10', 'in1', 22, 0);
   catch exc
     ne = ne + check_ok2(exc, 62, 1);
   end
 
   try
-    d = gd_get_string(D, 'string');
-    ne = ne + check_string(62, d, 'Arthur Dent');
+    d = gd_entry(D, 'new10');
+    ne = ne + check_string2(62, 1, d.field, 'new10');
+    ne = ne + check_num2(62, 2, d.field_type, GD.PHASE_ENTRY);
+    ne = ne + check_num2(62, 3, d.fragment_index, 0);
+    ne = ne + check_string2(62, 4, d.in_fields, 'in1');
+    ne = ne + check_num2(62, 5, d.shift, 22);
   catch exc
     ne = ne + check_ok2(exc, 62, 2);
   end
 
-  % 63: nmfields_by_type
+  % 63: add entry (const) check
   try
-    d = gd_nmfields_by_type(D, 'data', GD.LINCOM_ENTRY);
-    ne = ne + check_num(63, d, 1);
+    gd_add_const(D, 'new11', GD.COMPLEX128, 2.6, 0);
   catch exc
-    ne = ne + check_ok(exc, 63);
+    ne = ne + check_ok2(exc, 63, 1);
   end
 
-  % 64: mfield_list_by_type
   try
-    d = gd_mfield_list_by_type(D, 'data', GD.LINCOM_ENTRY);
-    ne = ne + check_sarray(64, d, {'mnew1'});
+    d = gd_entry(D, 'new11');
+    ne = ne + check_string2(63, 1, d.field, 'new11');
+    ne = ne + check_num2(63, 2, d.field_type, GD.CONST_ENTRY);
+    ne = ne + check_num2(63, 3, d.fragment_index, 0);
+    ne = ne + check_num2(63, 5, d.const_type, GD.COMPLEX128);
+  catch exc
+    ne = ne + check_ok2(exc, 63, 2);
+  end
+
+  try
+    d = gd_get_constant(D, 'new11', GD.FLOAT64);
+    ne = ne + check_num2(63, 6, d, 2.6);
+  catch exc
+    ne = ne + check_ok2(exc, 63, 3);
+  end
+
+  % 64: fragmentname
+  try
+    d = gd_fragmentname(D, 0);
+    ne = ne + check_eostring(64, d, 'dirfile/format');
   catch exc
     ne = ne + check_ok(exc, 64);
   end
 
-  % 65: nmvectors
+  % 65: nfragments
   try
-    d = gd_nmvectors(D, 'data');
-    ne = ne + check_num(65, d, 8);
+    d = gd_nfragments(D);
+    ne = ne + check_num(65, d, 1);
   catch exc
     ne = ne + check_ok(exc, 65);
   end
 
-  % 66: mvector_list
+  % 66: include
   try
-    d = gd_mvector_list(D, 'data');
-    ne = ne + check_sarray(66, d, {'mlut', 'mnew1', 'mnew4', 'mnew6', ...
-    'mnew7', 'mnew8', 'mnew9', 'mnew10'});
+    d = gd_include(D, 'form2', 0, 0);
+    ne = ne + check_num2(66, 1, d, 1);
   catch exc
-    ne = ne + check_ok(exc, 66);
-  end
-
-  % 67: gd_alter_raw
-  try
-    gd_alter_raw(D, 'new1', GD.INT32, 4, 0);
-  catch exc
-    ne = ne + check_ok2(exc, 67, 1);
+    ne = ne + check_ok2(exc, 66, 1);
   end
 
   try
-    d = gd_entry(D, 'new1');
-    ne = ne + check_string2(67, 1, d.field, 'new1');
-    ne = ne + check_num2(67, 2, d.field_type, GD.RAW_ENTRY);
-    ne = ne + check_num2(67, 3, d.fragment_index, 0);
-    ne = ne + check_num2(67, 4, d.data_type, GD.INT32);
-    ne = ne + check_num2(67, 4, d.spf, 4);
+    d = gd_get_constant(D, 'const2');
+    ne = ne + check_num2(66, 2, d, -19);
   catch exc
-    ne = ne + check_ok2(exc, 67, 2);
+    ne = ne + check_ok2(exc, 66, 2);
   end
 
-  % 68: gd_alter_lincom
+  % 67: nfields_by_type
   try
-    gd_alter_lincom(D, 'new2', {'in4'; 0; 'in6'}, [ 0.99, 11, 1.96 ], ...
-    [ 7.8, 0.022, 0 ]);
+    d = gd_nfields_by_type(D, GD.LINCOM_ENTRY);
+    ne = ne + check_num(67, d, 2);
   catch exc
-    ne = ne + check_ok2(exc, 68, 1);
+    ne = ne + check_ok(exc, 67);
   end
 
+  % 68: field_list_by_type
   try
-    d = gd_entry(D, 'new2');
-    ne = ne + check_string2(68, 1, d.field, 'new2');
-    ne = ne + check_num2(68, 2, d.field_type, GD.LINCOM_ENTRY);
-    ne = ne + check_num2(68, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(68, 4, d.in_fields, { 'in4'; 'in2'; 'in6' });
-    ne = ne + check_array2(68, 5, d.m, [ 0.99, 11, 1.96 ]);
-    ne = ne + check_array2(68, 6, d.b, [ 7.8, 0.022, 0 ]);
+    d = gd_field_list_by_type(D, GD.LINCOM_ENTRY);
+    ne = ne + check_sarray(68, d, { 'lincom', 'new2' });
   catch exc
-    ne = ne + check_ok2(exc, 68, 2);
+    ne = ne + check_ok(exc, 68);
   end
 
-  % 70: gd_alter_polynom
+  % 69: nfields_by_type
   try
-    gd_alter_polynom(D, 'new5', 0, [ 1.1, 1.2, 1.3, 1.4, 1.5 ]);
+    d = gd_nvectors(D);
+    ne = ne + check_num(69, d, 22);
   catch exc
-    ne = ne + check_ok2(exc, 70, 1);
+    ne = ne + check_ok(exc, 69);
   end
 
+  % 70: vector_list check
   try
-    d = gd_entry(D, 'new5');
-    ne = ne + check_string2(70, 1, d.field, 'new5');
-    ne = ne + check_num2(70, 2, d.field_type, GD.POLYNOM_ENTRY);
-    ne = ne + check_num2(70, 3, d.fragment_index, 0);
-    ne = ne + check_string2(70, 4, d.in_fields, 'in1');
-    ne = ne + check_array2(70, 5, d.a, [1.1, 1.2, 1.3, 1.4, 1.5]);
+    d = gd_vector_list(D);
+    ne = ne + check_sarray(70, d, ...
+    {'INDEX'; 'alias'; 'bit'; 'data'; 'div'; 'lincom'; 'linterp'; 'mplex'; ...
+    'mult'; 'new1'; 'new10'; 'new2'; 'new5'; 'new6'; 'new7'; 'new8'; 'new9'; ...
+    'phase'; 'polynom'; 'recip'; 'sbit'; 'window'});
   catch exc
-    ne = ne + check_ok2(exc, 70, 2);
+    ne = ne + check_ok(exc, 70);
   end
 
-  % 72: gd_alter_linterp
+  % 71: madd entry (lincom) check
   try
-    gd_alter_linterp(D, 'new6', 'in3', 0, 0);
+    gd_madd_lincom(D, 'data', 'mnew1', { 'in1'; 'in2' }, [9.9, 7.7], ...
+    [8.8, 6.6]);
   catch exc
-    ne = ne + check_ok2(exc, 72, 1);
+    ne = ne + check_ok2(exc, 71, 1);
   end
 
   try
-    d = gd_entry(D, 'new6');
-    ne = ne + check_string2(72, 1, d.field, 'new6');
-    ne = ne + check_num2(72, 2, d.field_type, GD.LINTERP_ENTRY);
-    ne = ne + check_num2(72, 3, d.fragment_index, 0);
-    ne = ne + check_string2(72, 4, d.in_fields, 'in3');
-    ne = ne + check_string2(72, 5, d.table, './some/table');
+    d = gd_entry(D, 'data/mnew1');
+    ne = ne + check_string2(71, 1, d.field, 'data/mnew1');
+    ne = ne + check_num2(71, 2, d.field_type, GD.LINCOM_ENTRY);
+    ne = ne + check_num2(71, 3, d.fragment_index, 0);
+    ne = ne + check_sarray2(71, 4, d.in_fields, { 'in1'; 'in2' });
+    ne = ne + check_array2(71, 5, d.m, [ 9.9, 7.7 ]);
+    ne = ne + check_array2(71, 6, d.b, [ 8.8, 6.6 ]);
   catch exc
-    ne = ne + check_ok2(exc, 72, 2);
+    ne = ne + check_ok2(exc, 71, 2);
   end
 
-  % 73: gd_alter_bit
+  % 74: madd polynom check
   try
-    gd_alter_bit(D, 'new7', 'in3', 3, 0);
-  catch exc
-    ne = ne + check_ok2(exc, 73, 1);
-  end
-
-  try
-    d = gd_entry(D, 'new7');
-    ne = ne + check_string2(73, 1, d.field, 'new7');
-    ne = ne + check_num2(73, 2, d.field_type, GD.BIT_ENTRY);
-    ne = ne + check_num2(73, 3, d.fragment_index, 0);
-    ne = ne + check_string2(73, 4, d.in_fields, 'in3');
-    ne = ne + check_num2(73, 5, d.bitnum, 3);
-    ne = ne + check_num2(73, 6, d.numbits, 12);
-  catch exc
-    ne = ne + check_ok2(exc, 73, 2);
-  end
-
-  % 74: gd_alter_sbit
-  try
-    gd_alter_sbit(D, 'new8', 'in3', 3, 9);
+    gd_madd_polynom(D, 'data', 'mnew4', 'in1', [3.9, 4.8, 5.7, ...
+    complex(6.6,7.5)]);
   catch exc
     ne = ne + check_ok2(exc, 74, 1);
   end
 
   try
-    d = gd_entry(D, 'new8');
-    ne = ne + check_string2(74, 1, d.field, 'new8');
-    ne = ne + check_num2(74, 2, d.field_type, GD.SBIT_ENTRY);
+    d = gd_entry(D, 'data/mnew4');
+    ne = ne + check_string2(74, 1, d.field, 'data/mnew4');
+    ne = ne + check_num2(74, 2, d.field_type, GD.POLYNOM_ENTRY);
     ne = ne + check_num2(74, 3, d.fragment_index, 0);
-    ne = ne + check_string2(74, 4, d.in_fields, 'in3');
-    ne = ne + check_num2(74, 5, d.bitnum, 3);
-    ne = ne + check_num2(74, 6, d.numbits, 9);
+    ne = ne + check_string2(74, 4, d.in_fields, 'in1');
+    ne = ne + check_array2(74, 5, d.a, [3.9, 4.8, 5.7, complex(6.6,7.5)]);
   catch exc
     ne = ne + check_ok2(exc, 74, 2);
   end
 
-  % 75: gd_alter_multiply
+  % 75: add entry (linterp) check
   try
-    gd_alter_multiply(D, 'new9', 'in6', 0);
+    gd_madd_linterp(D, 'data', 'mnew6', 'in', './some/table');
   catch exc
     ne = ne + check_ok2(exc, 75, 1);
   end
 
   try
-    d = gd_entry(D, 'new9');
-    ne = ne + check_string2(75, 1, d.field, 'new9');
-    ne = ne + check_num2(75, 2, d.field_type, GD.MULTIPLY_ENTRY);
+    d = gd_entry(D, 'data/mnew6');
+    ne = ne + check_string2(75, 1, d.field, 'data/mnew6');
+    ne = ne + check_num2(75, 2, d.field_type, GD.LINTERP_ENTRY);
     ne = ne + check_num2(75, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(75, 4, d.in_fields, { 'in6'; 'in2'; });
+    ne = ne + check_string2(75, 4, d.in_fields, 'in');
+    ne = ne + check_string2(75, 5, d.table, './some/table');
   catch exc
     ne = ne + check_ok2(exc, 75, 2);
   end
 
-  % 76: alter phase
+  % 76: add entry (bit) check
   try
-    gd_alter_phase(D, 'new10', 'in2', 23);
+    gd_madd_bit(D, 'data', 'mnew7', 'in', 13, 12);
   catch exc
     ne = ne + check_ok2(exc, 76, 1);
   end
 
   try
-    d = gd_entry(D, 'new10');
-    ne = ne + check_string2(76, 1, d.field, 'new10');
-    ne = ne + check_num2(76, 2, d.field_type, GD.PHASE_ENTRY);
+    d = gd_entry(D, 'data/mnew7');
+    ne = ne + check_string2(76, 1, d.field, 'data/mnew7');
+    ne = ne + check_num2(76, 2, d.field_type, GD.BIT_ENTRY);
     ne = ne + check_num2(76, 3, d.fragment_index, 0);
-    ne = ne + check_string2(76, 4, d.in_fields, 'in2');
-    ne = ne + check_num2(76, 5, d.shift, 23);
+    ne = ne + check_string2(76, 4, d.in_fields, 'in');
+    ne = ne + check_num2(76, 5, d.bitnum, 13);
+    ne = ne + check_num2(76, 6, d.numbits, 12);
   catch exc
     ne = ne + check_ok2(exc, 76, 2);
   end
 
-  % 77: atler const
+  % 77: add entry (sbit) check
   try
-    gd_alter_const(D, 'new11', GD.FLOAT64);
+    gd_madd_sbit(D, 'data', 'mnew8', 'in', 14, 15);
   catch exc
     ne = ne + check_ok2(exc, 77, 1);
   end
 
   try
-    d = gd_entry(D, 'new11');
-    ne = ne + check_string2(77, 1, d.field, 'new11');
-    ne = ne + check_num2(77, 2, d.field_type, GD.CONST_ENTRY);
+    d = gd_entry(D, 'data/mnew8');
+    ne = ne + check_string2(77, 1, d.field, 'data/mnew8');
+    ne = ne + check_num2(77, 2, d.field_type, GD.SBIT_ENTRY);
     ne = ne + check_num2(77, 3, d.fragment_index, 0);
-    ne = ne + check_num2(77, 5, d.const_type, GD.FLOAT64);
+    ne = ne + check_string2(77, 4, d.in_fields, 'in');
+    ne = ne + check_num2(77, 5, d.bitnum, 14);
+    ne = ne + check_num2(77, 6, d.numbits, 15);
   catch exc
     ne = ne + check_ok2(exc, 77, 2);
   end
 
-  % 78: gd_encoding
+  % 78: add entry (mult) check
   try
-    d = gd_encoding(D, 0);
-    ne = ne + check_num(78, d, GD.UNENCODED);
+    gd_madd_multiply(D, 'data', 'mnew9', 'in1', 'in2');
   catch exc
-    ne = ne + check_ok(exc, 78);
+    ne = ne + check_ok2(exc, 78, 1);
   end
 
-  % 79: gd_encoding
   try
-    d = gd_endianness(D, 0);
-    ne = ne + check_num(79, d, GD.LITTLE_ENDIAN + GD.NOT_ARM_ENDIAN);
+    d = gd_entry(D, 'data/mnew9');
+    ne = ne + check_string2(78, 1, d.field, 'data/mnew9');
+    ne = ne + check_num2(78, 2, d.field_type, GD.MULTIPLY_ENTRY);
+    ne = ne + check_num2(78, 3, d.fragment_index, 0);
+    ne = ne + check_sarray2(78, 4, d.in_fields, { 'in1'; 'in2'; });
   catch exc
-    ne = ne + check_ok(exc, 79);
+    ne = ne + check_ok2(exc, 78, 2);
   end
 
-  % 80: dirfilename
+  % 79: add entry (phase) check
   try
-    d = gd_dirfilename(D);
-    ne = ne + check_eostring(80, d, 'dirfile');
+    gd_madd_phase(D, 'data', 'mnew10', 'in1', 22);
   catch exc
-    ne = ne + check_ok(exc, 80);
+    ne = ne + check_ok2(exc, 79, 1);
   end
 
-  % 81: gd_parent_fragment
   try
-    d = gd_parent_fragment(D, 1);
-    ne = ne + check_num(81, d, 0);
+    d = gd_entry(D, 'data/mnew10');
+    ne = ne + check_string2(79, 1, d.field, 'data/mnew10');
+    ne = ne + check_num2(79, 2, d.field_type, GD.PHASE_ENTRY);
+    ne = ne + check_num2(79, 3, d.fragment_index, 0);
+    ne = ne + check_string2(79, 4, d.in_fields, 'in1');
+    ne = ne + check_num2(79, 5, d.shift, 22);
+  catch exc
+    ne = ne + check_ok2(exc, 79, 2);
+  end
+
+  % 80: madd entry (const) check
+  try
+    gd_madd_const(D, 'data', 'mnew11', GD.FLOAT64, 2.6);
+  catch exc
+    ne = ne + check_ok2(exc, 80, 1);
+  end
+
+  try
+    d = gd_entry(D, 'data/mnew11');
+    ne = ne + check_string2(80, 1, d.field, 'data/mnew11');
+    ne = ne + check_num2(80, 2, d.field_type, GD.CONST_ENTRY);
+    ne = ne + check_num2(80, 3, d.fragment_index, 0);
+    ne = ne + check_num2(80, 5, d.const_type, GD.FLOAT64);
+  catch exc
+    ne = ne + check_ok2(exc, 80, 2);
+  end
+
+  try
+    d = gd_get_constant(D, 'data/mnew11');
+    ne = ne + check_num2(80, 6, d, 2.6);
+  catch exc
+    ne = ne + check_ok2(exc, 80, 3);
+  end
+
+  % 81: get_string
+  try
+    d = gd_get_string(D, 'string');
+    ne = ne + check_string(81, d, 'Zaphod Beeblebrox');
   catch exc
     ne = ne + check_ok(exc, 81);
   end
 
-  % 82: gd_alter_protection
+  % 82: add string
   try
-    gd_alter_protection(D, 0, GD.PROTECT_DATA);
+    gd_add_string(D, 'new12', '---string---', 0);
+  catch exc
+    ne = ne + check_ok2(exc, 82, 1);
+  end
+
+  try
+    d = gd_entry(D, 'new12');
+    ne = ne + check_string2(82, 1, d.field, 'new12');
+    ne = ne + check_num2(82, 2, d.field_type, GD.STRING_ENTRY);
+    ne = ne + check_num2(82, 3, d.fragment_index, 0);
+  catch exc
+    ne = ne + check_ok2(exc, 82, 2);
+  end
+
+  try
+    d = gd_get_string(D, 'new12');
+    ne = ne + check_string(82, d, '---string---');
   catch exc
     ne = ne + check_ok(exc, 82);
   end
 
-  % 83: gd_protection
+  % 83: madd string
   try
-    d = gd_protection(D, 0);
-    ne = ne + check_num(83, d, GD.PROTECT_DATA);
+    gd_madd_string(D, 'data', 'mnew12', '---mstring---');
+  catch exc
+    ne = ne + check_ok2(exc, 83, 1);
+  end
+
+  try
+    d = gd_entry(D, 'data/mnew12');
+    ne = ne + check_string2(83, 1, d.field, 'data/mnew12');
+    ne = ne + check_num2(83, 2, d.field_type, GD.STRING_ENTRY);
+    ne = ne + check_num2(83, 3, d.fragment_index, 0);
+  catch exc
+    ne = ne + check_ok2(exc, 83, 2);
+  end
+
+  try
+    d = gd_get_string(D, 'data/mnew12');
+    ne = ne + check_string(83, d, '---mstring---');
   catch exc
     ne = ne + check_ok(exc, 83);
   end
 
-  % 84: gd_raw_filename
+  % 84: add_spec
   try
-    d = gd_raw_filename(D, 'data');
-    ne = ne + check_eostring(84, d, 'dirfile/data');
+    gd_add_spec(D, 'lorem STRING "Lorem ipsum"', 0);
   catch exc
-    ne = ne + check_ok(exc, 84);
+    ne = ne + check_ok2(exc, 84, 1);
   end
 
-  % 85: gd_reference
   try
-    d = gd_reference(D);
-    ne = ne + check_string2(85, 1, d, 'data');
+    d = gd_get_string(D, 'lorem');
+    ne = ne + check_string(84, d, 'Lorem ipsum');
+  catch exc
+    ne = ne + check_ok2(exc, 84, 2);
+  end
+
+  % 85: madd_spec
+  try
+    gd_madd_spec(D, 'ipsum STRING "dolor sit amet."', 'lorem');
   catch exc
     ne = ne + check_ok2(exc, 85, 1);
   end
 
   try
-    d = gd_reference(D, 'new1');
-    ne = ne + check_string2(85, 2, d, 'new1');
+    d = gd_get_string(D, 'lorem/ipsum');
+    ne = ne + check_string(85, d, 'dolor sit amet.');
   catch exc
     ne = ne + check_ok2(exc, 85, 2);
   end
 
-  % 87: gd_alter_encoding
+  % 86: put_constant
   try
-    gd_alter_encoding(D, GD.SLIM_ENCODED, 1, 0);
+    gd_put_constant(D, 'const', 86);
   catch exc
-    ne = ne + check_ok(exc, 87);
-  end
-
-  % 88: gd_alter_endiannness
-  try
-    gd_alter_endianness(D, GD.BIG_ENDIAN, 1, 0);
-  catch exc
-    ne = ne + check_ok(exc, 88);
-  end
-
-  % 89: gd_alter_spec
-  try
-    gd_alter_spec(D, 'new10 PHASE in5 3', 0);
-  catch exc
-    ne = ne + check_ok2(exc, 89, 1);
+    ne = ne + check_ok2(exc, 86, 1);
   end
 
   try
-    d = gd_entry(D, 'new10');
-    ne = ne + check_string2(89, 1, d.field, 'new10');
-    ne = ne + check_num2(89, 2, d.field_type, GD.PHASE_ENTRY);
-    ne = ne + check_num2(89, 3, d.fragment_index, 0);
-    ne = ne + check_string2(89, 4, d.in_fields, 'in5');
-    ne = ne + check_num2(89, 5, d.shift, 3);
+    d = gd_get_constant(D, 'const');
+    ne = ne + check_num2(86, 6, d, 86);
   catch exc
-    ne = ne + check_ok2(exc, 89, 2);
+    ne = ne + check_ok2(exc, 86, 2);
   end
 
-  % 90: gd_delete
+  % 93: put_constant
   try
-    gd_delete(D, 'new10', 0);
-  catch exc
-    ne = ne + check_ok2(exc, 90, 1);
-  end
-
-  try
-    d = gd_entry(D, 'new10');
-  catch exc
-    ne = ne + check_exc2(exc, 90, 2, 'BadCode');
-  end
-
-  % 91: gd_malter_spec
-  try
-    gd_malter_spec(D, 'mnew10 PHASE in4 11', 'data', 0);
-  catch exc
-    ne = ne + check_ok2(exc, 91, 1);
-  end
-
-  try
-    d = gd_entry(D, 'data/mnew10');
-    ne = ne + check_string2(91, 1, d.field, 'data/mnew10');
-    ne = ne + check_num2(91, 2, d.field_type, GD.PHASE_ENTRY);
-    ne = ne + check_num2(91, 3, d.fragment_index, 0);
-    ne = ne + check_string2(91, 4, d.in_fields, 'in4');
-    ne = ne + check_num2(91, 5, d.shift, 11);
-  catch exc
-    ne = ne + check_ok2(exc, 91, 2);
-  end
-
-  % 92: move
-  try
-    gd_move(D, 'new9', 1, 0);
-  catch exc
-    ne = ne + check_ok2(exc, 92, 1);
-  end
-
-  try
-    d = gd_fragment_index(D, 'new9');
-    ne = ne + check_num(92, d, 1);
-  catch exc
-    ne = ne + check_ok2(exc, 92, 2);
-  end
-
-  % 93: rename
-  try
-    gd_rename(D, 'new9', 'newer', 0);
+    gd_put_constant(D, 'new11', complex(93,134));
   catch exc
     ne = ne + check_ok2(exc, 93, 1);
   end
 
   try
-    d = gd_fragment_index(D, 'newer');
-    ne = ne + check_num(93, d, 1);
+    d = gd_get_constant(D, 'new11');
+    ne = ne + check_num2(93, 6, d, complex(93,134));
   catch exc
     ne = ne + check_ok2(exc, 93, 2);
   end
 
-  % 94: unclude
+  % 94: put_string
   try
-    gd_uninclude(D, 1, 0);
+    gd_put_string(D, 'string', 'Arthur Dent');
   catch exc
     ne = ne + check_ok2(exc, 94, 1);
   end
 
   try
-    d = gd_nfragments(D);
-    ne = ne + check_num(94, d, 1);
+    d = gd_get_string(D, 'string');
+    ne = ne + check_string(94, d, 'Arthur Dent');
   catch exc
     ne = ne + check_ok2(exc, 94, 2);
   end
 
-  % 95: frameoffset
+  % 95: nmfields_by_type
   try
-    d = gd_frameoffset(D, 0);
-    ne = ne + check_num(95, d, 0);
+    d = gd_nmfields_by_type(D, 'data', GD.LINCOM_ENTRY);
+    ne = ne + check_num(95, d, 1);
   catch exc
     ne = ne + check_ok(exc, 95);
   end
 
-  % 96: alter_frameoffset
+  % 96: mfield_list_by_type
   try
-    gd_alter_frameoffset(D, 33, 0, 0);
+    d = gd_mfield_list_by_type(D, 'data', GD.LINCOM_ENTRY);
+    ne = ne + check_sarray(96, d, {'mnew1'});
   catch exc
-    ne = ne + check_ok2(exc, 96, 1);
+    ne = ne + check_ok(exc, 96);
   end
 
+  % 97: nmvectors
   try
-    d = gd_frameoffset(D, 0);
-    ne = ne + check_num(96, d, 33);
-  catch exc
-    ne = ne + check_ok2(exc, 96, 2);
-  end
-
-  % 97: native_type
-  try
-    d = gd_native_type(D, 'data');
-    ne = ne + check_num(97, d, GD.INT8);
+    d = gd_nmvectors(D, 'data');
+    ne = ne + check_num(97, d, 8);
   catch exc
     ne = ne + check_ok(exc, 97);
   end
 
-  % 99: validate
+  % 98: mvector_list
+  try
+    d = gd_mvector_list(D, 'data');
+    ne = ne + check_sarray(98, d, {'mlut', 'mnew1', 'mnew4', 'mnew6', ...
+    'mnew7', 'mnew8', 'mnew9', 'mnew10'});
+  catch exc
+    ne = ne + check_ok(exc, 98);
+  end
+
+  % 99: gd_alter_raw
+  try
+    gd_alter_raw(D, 'new1', GD.INT32, 4, 0);
+  catch exc
+    ne = ne + check_ok2(exc, 99, 1);
+  end
+
+  try
+    d = gd_entry(D, 'new1');
+    ne = ne + check_string2(99, 1, d.field, 'new1');
+    ne = ne + check_num2(99, 2, d.field_type, GD.RAW_ENTRY);
+    ne = ne + check_num2(99, 3, d.fragment_index, 0);
+    ne = ne + check_num2(99, 4, d.data_type, GD.INT32);
+    ne = ne + check_num2(99, 4, d.spf, 4);
+  catch exc
+    ne = ne + check_ok2(exc, 99, 2);
+  end
+
+  % 100: gd_alter_lincom
+  try
+    gd_alter_lincom(D, 'new2', {'in4'; 0; 'in6'}, [ 0.99, 11, 1.96 ], ...
+    [ 7.8, 0.022, 0 ]);
+  catch exc
+    ne = ne + check_ok2(exc, 100, 1);
+  end
+
+  try
+    d = gd_entry(D, 'new2');
+    ne = ne + check_string2(100, 1, d.field, 'new2');
+    ne = ne + check_num2(100, 2, d.field_type, GD.LINCOM_ENTRY);
+    ne = ne + check_num2(100, 3, d.fragment_index, 0);
+    ne = ne + check_sarray2(100, 4, d.in_fields, { 'in4'; 'in2'; 'in6' });
+    ne = ne + check_array2(100, 5, d.m, [ 0.99, 11, 1.96 ]);
+    ne = ne + check_array2(100, 6, d.b, [ 7.8, 0.022, 0 ]);
+  catch exc
+    ne = ne + check_ok2(exc, 100, 2);
+  end
+
+  % 102: gd_alter_polynom
+  try
+    gd_alter_polynom(D, 'new5', 0, [ 1.1, 1.2, 1.3, 1.4, 1.5 ]);
+  catch exc
+    ne = ne + check_ok2(exc, 102, 1);
+  end
+
+  try
+    d = gd_entry(D, 'new5');
+    ne = ne + check_string2(102, 1, d.field, 'new5');
+    ne = ne + check_num2(102, 2, d.field_type, GD.POLYNOM_ENTRY);
+    ne = ne + check_num2(102, 3, d.fragment_index, 0);
+    ne = ne + check_string2(102, 4, d.in_fields, 'in1');
+    ne = ne + check_array2(102, 5, d.a, [1.1, 1.2, 1.3, 1.4, 1.5]);
+  catch exc
+    ne = ne + check_ok2(exc, 102, 2);
+  end
+
+  % 104: gd_alter_linterp
+  try
+    gd_alter_linterp(D, 'new6', 'in3', 0, 0);
+  catch exc
+    ne = ne + check_ok2(exc, 104, 1);
+  end
+
+  try
+    d = gd_entry(D, 'new6');
+    ne = ne + check_string2(104, 1, d.field, 'new6');
+    ne = ne + check_num2(104, 2, d.field_type, GD.LINTERP_ENTRY);
+    ne = ne + check_num2(104, 3, d.fragment_index, 0);
+    ne = ne + check_string2(104, 4, d.in_fields, 'in3');
+    ne = ne + check_string2(104, 5, d.table, './some/table');
+  catch exc
+    ne = ne + check_ok2(exc, 104, 2);
+  end
+
+  % 105: gd_alter_bit
+  try
+    gd_alter_bit(D, 'new7', 'in3', 3, 0);
+  catch exc
+    ne = ne + check_ok2(exc, 105, 1);
+  end
+
+  try
+    d = gd_entry(D, 'new7');
+    ne = ne + check_string2(105, 1, d.field, 'new7');
+    ne = ne + check_num2(105, 2, d.field_type, GD.BIT_ENTRY);
+    ne = ne + check_num2(105, 3, d.fragment_index, 0);
+    ne = ne + check_string2(105, 4, d.in_fields, 'in3');
+    ne = ne + check_num2(105, 5, d.bitnum, 3);
+    ne = ne + check_num2(105, 6, d.numbits, 12);
+  catch exc
+    ne = ne + check_ok2(exc, 105, 2);
+  end
+
+  % 106: gd_alter_sbit
+  try
+    gd_alter_sbit(D, 'new8', 'in3', 3, 9);
+  catch exc
+    ne = ne + check_ok2(exc, 106, 1);
+  end
+
+  try
+    d = gd_entry(D, 'new8');
+    ne = ne + check_string2(106, 1, d.field, 'new8');
+    ne = ne + check_num2(106, 2, d.field_type, GD.SBIT_ENTRY);
+    ne = ne + check_num2(106, 3, d.fragment_index, 0);
+    ne = ne + check_string2(106, 4, d.in_fields, 'in3');
+    ne = ne + check_num2(106, 5, d.bitnum, 3);
+    ne = ne + check_num2(106, 6, d.numbits, 9);
+  catch exc
+    ne = ne + check_ok2(exc, 106, 2);
+  end
+
+  % 107: gd_alter_multiply
+  try
+    gd_alter_multiply(D, 'new9', 'in6', 0);
+  catch exc
+    ne = ne + check_ok2(exc, 107, 1);
+  end
+
+  try
+    d = gd_entry(D, 'new9');
+    ne = ne + check_string2(107, 1, d.field, 'new9');
+    ne = ne + check_num2(107, 2, d.field_type, GD.MULTIPLY_ENTRY);
+    ne = ne + check_num2(107, 3, d.fragment_index, 0);
+    ne = ne + check_sarray2(107, 4, d.in_fields, { 'in6'; 'in2'; });
+  catch exc
+    ne = ne + check_ok2(exc, 107, 2);
+  end
+
+  % 108: alter phase
+  try
+    gd_alter_phase(D, 'new10', 'in2', 23);
+  catch exc
+    ne = ne + check_ok2(exc, 108, 1);
+  end
+
+  try
+    d = gd_entry(D, 'new10');
+    ne = ne + check_string2(108, 1, d.field, 'new10');
+    ne = ne + check_num2(108, 2, d.field_type, GD.PHASE_ENTRY);
+    ne = ne + check_num2(108, 3, d.fragment_index, 0);
+    ne = ne + check_string2(108, 4, d.in_fields, 'in2');
+    ne = ne + check_num2(108, 5, d.shift, 23);
+  catch exc
+    ne = ne + check_ok2(exc, 108, 2);
+  end
+
+  % 109: atler const
+  try
+    gd_alter_const(D, 'new11', GD.FLOAT64);
+  catch exc
+    ne = ne + check_ok2(exc, 109, 1);
+  end
+
+  try
+    d = gd_entry(D, 'new11');
+    ne = ne + check_string2(109, 1, d.field, 'new11');
+    ne = ne + check_num2(109, 2, d.field_type, GD.CONST_ENTRY);
+    ne = ne + check_num2(109, 3, d.fragment_index, 0);
+    ne = ne + check_num2(109, 5, d.const_type, GD.FLOAT64);
+  catch exc
+    ne = ne + check_ok2(exc, 109, 2);
+  end
+
+  % 110: gd_encoding
+  try
+    d = gd_encoding(D, 0);
+    ne = ne + check_num(110, d, GD.UNENCODED);
+  catch exc
+    ne = ne + check_ok(exc, 110);
+  end
+
+  % 111: gd_encoding
+  try
+    d = gd_endianness(D, 0);
+    ne = ne + check_num(111, d, GD.LITTLE_ENDIAN + GD.NOT_ARM_ENDIAN);
+  catch exc
+    ne = ne + check_ok(exc, 111);
+  end
+
+  % 112: dirfilename
+  try
+    d = gd_dirfilename(D);
+    ne = ne + check_eostring(112, d, 'dirfile');
+  catch exc
+    ne = ne + check_ok(exc, 112);
+  end
+
+  % 113: gd_parent_fragment
+  try
+    d = gd_parent_fragment(D, 1);
+    ne = ne + check_num(113, d, 0);
+  catch exc
+    ne = ne + check_ok(exc, 113);
+  end
+
+  % 114: gd_alter_protection
+  try
+    gd_alter_protection(D, 0, GD.PROTECT_DATA);
+  catch exc
+    ne = ne + check_ok(exc, 114);
+  end
+
+  % 115: gd_protection
+  try
+    d = gd_protection(D, 0);
+    ne = ne + check_num(115, d, GD.PROTECT_DATA);
+  catch exc
+    ne = ne + check_ok(exc, 115);
+  end
+
+  % 116: gd_raw_filename
+  try
+    d = gd_raw_filename(D, 'data');
+    ne = ne + check_eostring(116, d, 'dirfile/data');
+  catch exc
+    ne = ne + check_ok(exc, 116);
+  end
+
+  % 117: gd_reference
+  try
+    d = gd_reference(D);
+    ne = ne + check_string2(117, 1, d, 'data');
+  catch exc
+    ne = ne + check_ok2(exc, 117, 1);
+  end
+
+  try
+    d = gd_reference(D, 'new1');
+    ne = ne + check_string2(117, 2, d, 'new1');
+  catch exc
+    ne = ne + check_ok2(exc, 117, 2);
+  end
+
+  % 118: gd_eof
+  try
+    d = gd_eof(D, 'lincom');
+    ne = ne + check_num(118, d, 81);
+  catch exc
+    ne = ne + check_ok(exc, 118);
+  end
+
+  % 119: gd_alter_encoding
+  try
+    gd_alter_encoding(D, GD.SLIM_ENCODED, 1, 0);
+  catch exc
+    ne = ne + check_ok(exc, 119);
+  end
+
+  % 120: gd_alter_endiannness
+  try
+    gd_alter_endianness(D, GD.BIG_ENDIAN, 1, 0);
+  catch exc
+    ne = ne + check_ok(exc, 120);
+  end
+
+  % 121: gd_alter_spec
+  try
+    gd_alter_spec(D, 'new10 PHASE in5 3', 0);
+  catch exc
+    ne = ne + check_ok2(exc, 121, 1);
+  end
+
+  try
+    d = gd_entry(D, 'new10');
+    ne = ne + check_string2(121, 1, d.field, 'new10');
+    ne = ne + check_num2(121, 2, d.field_type, GD.PHASE_ENTRY);
+    ne = ne + check_num2(121, 3, d.fragment_index, 0);
+    ne = ne + check_string2(121, 4, d.in_fields, 'in5');
+    ne = ne + check_num2(121, 5, d.shift, 3);
+  catch exc
+    ne = ne + check_ok2(exc, 121, 2);
+  end
+
+  % 122: gd_delete
+  try
+    gd_delete(D, 'new10', 0);
+  catch exc
+    ne = ne + check_ok2(exc, 122, 1);
+  end
+
+  try
+    d = gd_entry(D, 'new10');
+  catch exc
+    ne = ne + check_exc2(exc, 122, 2, 'BadCode');
+  end
+
+  % 123: gd_malter_spec
+  try
+    gd_malter_spec(D, 'mnew10 PHASE in4 11', 'data', 0);
+  catch exc
+    ne = ne + check_ok2(exc, 123, 1);
+  end
+
+  try
+    d = gd_entry(D, 'data/mnew10');
+    ne = ne + check_string2(123, 1, d.field, 'data/mnew10');
+    ne = ne + check_num2(123, 2, d.field_type, GD.PHASE_ENTRY);
+    ne = ne + check_num2(123, 3, d.fragment_index, 0);
+    ne = ne + check_string2(123, 4, d.in_fields, 'in4');
+    ne = ne + check_num2(123, 5, d.shift, 11);
+  catch exc
+    ne = ne + check_ok2(exc, 123, 2);
+  end
+
+  % 124: move
+  try
+    gd_move(D, 'new9', 1, 0);
+  catch exc
+    ne = ne + check_ok2(exc, 124, 1);
+  end
+
+  try
+    d = gd_fragment_index(D, 'new9');
+    ne = ne + check_num(124, d, 1);
+  catch exc
+    ne = ne + check_ok2(exc, 124, 2);
+  end
+
+  % 125: rename
+  try
+    gd_rename(D, 'new9', 'newer', 0);
+  catch exc
+    ne = ne + check_ok2(exc, 125, 1);
+  end
+
+  try
+    d = gd_fragment_index(D, 'newer');
+    ne = ne + check_num(125, d, 1);
+  catch exc
+    ne = ne + check_ok2(exc, 125, 2);
+  end
+
+  % 126: unclude
+  try
+    gd_uninclude(D, 1, 0);
+  catch exc
+    ne = ne + check_ok2(exc, 126, 1);
+  end
+
+  try
+    d = gd_nfragments(D);
+    ne = ne + check_num(126, d, 1);
+  catch exc
+    ne = ne + check_ok2(exc, 126, 2);
+  end
+
+  % 127: frameoffset
+  try
+    d = gd_frameoffset(D, 0);
+    ne = ne + check_num(127, d, 0);
+  catch exc
+    ne = ne + check_ok(exc, 127);
+  end
+
+  % 128: alter_frameoffset
+  try
+    gd_alter_frameoffset(D, 33, 0, 0);
+  catch exc
+    ne = ne + check_ok2(exc, 128, 1);
+  end
+
+  try
+    d = gd_frameoffset(D, 0);
+    ne = ne + check_num(128, d, 33);
+  catch exc
+    ne = ne + check_ok2(exc, 128, 2);
+  end
+
+  % 129: native_type
+  try
+    d = gd_native_type(D, 'data');
+    ne = ne + check_num(129, d, GD.INT8);
+  catch exc
+    ne = ne + check_ok(exc, 129);
+  end
+
+  % 131: validate
   try
     d = gd_validate(D, 'new7');
   catch exc
-    ne = ne + check_exc(exc, 99, 'BadCode');
+    ne = ne + check_exc(exc, 131, 'BadCode');
   end
 
-  % 100: framenum
+  % 132: framenum
   try
     gd_reference(D, 'data');
     d = gd_framenum(D, 'data', 33.3);
-    ne = ne + check_num(100, d, 37.1625);
+    ne = ne + check_num(132, d, 37.1625);
   catch exc
-    ne = ne + check_ok(exc, 100);
+    ne = ne + check_ok(exc, 132);
   end
 
-  % 101: framenum_subset
+  % 133: framenum_subset
   try
     d = gd_framenum(D, 'data', 33.3, 6);
-    ne = ne + check_num(101, d, 37.1625);
+    ne = ne + check_num(133, d, 37.1625);
   catch exc
-    ne = ne + check_ok(exc, 101);
-  end
-
-  % 86: gd_eof
-  try
-    d = gd_eof(D, 'lincom');
-    ne = ne + check_num(86, d, 345);
-  catch exc
-    ne = ne + check_ok(exc, 86);
+    ne = ne + check_ok(exc, 133);
   end
 
   % 142: gd_bof
@@ -1576,7 +1576,7 @@ try
   % 183: gd_constants
   try
     d = gd_constants(D);
-    ne = ne + check_array(183, d, [61, 133]);
+    ne = ne + check_array(183, d, [86, 93]);
   catch exc
     ne = ne + check_ok(exc, 183);
   end

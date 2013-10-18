@@ -1,4 +1,4 @@
-# Copyright (C) 2009 D. V. Wiebe
+# Copyright (C) 2009, 2013 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -20,10 +20,6 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-if CC_WALL
-WALL=-Wall
-endif
-
 if GETDATA_DEBUG
 DEBUG_C = ../../src/debug.c
 endif
@@ -34,7 +30,7 @@ python_LTLIBRARIES = pygetdata.la
 LIBS=
 
 BUILT_SOURCES = pyconstants.c
-AM_CFLAGS = ${WALL} -fno-strict-aliasing
+AM_CFLAGS = ${GD_CC_WALL} -fno-strict-aliasing
 AM_CPPFLAGS = $(CPPFLAGS) $(PYTHON_CPPFLAGS) $(NUMPY_CPPFLAGS)
 pygetdata_la_LDFLAGS = -module -avoid-version \
 											 -export-symbols-regex initpygetdata

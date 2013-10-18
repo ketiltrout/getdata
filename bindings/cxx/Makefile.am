@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2012 D. V. Wiebe
+# Copyright (C) 2008-2013 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -21,15 +21,7 @@
 AUTOMAKE_OPTIONS = foreign
 getdata_includedir = ${includedir}/getdata
 
-if CXX_WALL
-WALL=-Wall
-endif
-
-if CXX_WEXTRA
-WEXTRA=-Wextra
-endif
-
-INCLUDES = ${WALL} $(WEXTRA) -I$(top_srcdir)/src
+INCLUDES = ${GD_CXX_WALL} $(GD_CXX_WEXTRA) -I$(top_srcdir)/src
 LIBS=
 
 SUBDIRS=test

@@ -1,7 +1,63 @@
+2013-10-18   D. V. Wiebe <getdata@ketiltrout.net> svn:848
+
+	* bindings/f77/fgetdata.c (GDASRW GDASLC GDASCL GDASPN GDASCP GDASPH GDASRC
+	GDASCR GDASWD GDASMX GDLSPH GDLSPN GDLSCP GDLSWD _GDF_AddBitSBit GDASBT
+	GDASSB _GDF_AlterBitSBit GDLSBT GDLSSB GDLSLC GDLSCL GDLSRC GDLSCR GDLSRW):
+	Added.
+	* bindings/f77/getdata.f90.in (fgd_add): Call GDAS.. instead of GDAD.. where
+	possible.
+	* bindings/f77/getdata.f90.in (fgd_alter_entry): Call GDLS.. instead of
+	GDAL.. where possible.
+	* bindings/f77/getdata.f90.in (fgd__set_field_len fgd__set_scalar_len):
+	Added.
+
+	* bindings/cxx/test/big_test.cpp bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro
+	bindings/matlab/test/big_test.m bindings/perl/t/big_test.t
+	bindings/python/test/big_test.py: Reorganize, renumber tests.  Add tests
+	243-269 where appropriate.
+
+	* bindings/idl/getdata.c (gdidl_convert_entry_num gdidl_get_entry_num
+	gdidl_get_entry_scalars gdidl_get_in_fields gdidl_get_entry_cmparr): Added.
+	* bindings/idl/getdata.c (gdidl_read_idl_entry): Be less pedantic about
+	numerical types.
+	* bindings/idl/getdata.c (gdidl_make_idl_entry: Initialise both complex and
+	real floating point parameters.
+
+	* bindings/perl/GetData.xs (gdp_fetch_cmp_list gdp_fetch_in_fields
+	gdp_fetch_scalars gdp_to_entry): Be less pedantic about numerical types and
+	array sizes.
+	* bindings/perl/typemap (T_PENTRY): Added.
+
+	* bindings/php m4/php.m4: Added.
+	* bindings/make_parameters.c (PHP): Added.
+
+	* src/mod.c (_GD_Change): Fix MPLEX scalar modifying.
+
+	* src/add.c (_GD_CopyScalars): Added.
+	* src/add.c (_GD_Change): Fix scalar copying for GD_POLYNOM_ENTRY.  Don't
+	throw errors for passed members which will be ignored due to scalars (spf,
+	numbits, bitnum).
+	* test/add_bit_scalars.c test/add_mplex_scalars.c test/add_raw_spf_scalar.c
+	* test/add_polynom_scalar.c: Added.
+
+	* src/add.c (_GD_Change): Don't throw an error on mplex.count_val < 0.
+	* src/errors.c src/internal.h: Remove unused GD_E_ENTRY_CNTVAL.
+	* test/add_mplex_val.c: Deleted.
+	
+	* src/getdata.c (_GD_DoConst): Return len instead of 1.
+	* src/field_list.c (gd_carrays gd_mcarrays): Update _GD_DoField calls to
+	deal with the above.
+	* test/get_carray_c2r.c: Added.
+
+	* src/entry.c (_GD_FreeE): When priv == 0, zero free'd pointers.
+
+	* bindings/perl/t/big_test.t: Added test 181.
+
 2013-09-05   D. V. Wiebe <getdata@ketiltrout.net> svn:845
 	GetData-0.8.5 released.
 
-	* src/zzslim.c: 
+	* src/zzslim.c: Fix for rename of gd_raw_file_.
 
 2013-07-17   D. V. Wiebe <getdata@ketiltrout.net> svn:835
 	

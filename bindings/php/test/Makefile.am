@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2010 D. V. Wiebe
+# Copyright (C) 2013 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -20,21 +20,31 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-INCLUDES = ${GD_CXX_WALL} $(GD_CXX_WEXTRA) -I$(srcdir)/.. -I$(top_srcdir)/src
-LDADD=../libgetdata++.la
-TESTS=big_test
+if TEST_PHP
+TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../../src/.libs \
+	${PHP} -n -d "output_handler=" -d "open_basedir=" -d "safe_mode=0" \
+	-d "disable_functions=" -d "output_buffering=Off" -d "error_reporting=32767" \
+	-d "display_errors=1" -d "display_startup_errors=1" -d "log_errors=0" \
+	-d "html_errors=0" -d "track_errors=1" -d "report_memleaks=1" \
+	-d "report_zend_debug=0" -d "docref_root=" -d "docref_ext=.html" \
+	-d "error_prepend_string=" -d "error_append_string=" -d "auto_prepend_file=" \
+	-d "auto_append_file=" -d "magic_quotes_runtime=0" \
+	-d "ignore_repeated_errors=0" -d "precision=14" -d "memory_limit=128M" \
+	-d "extension_dir=@top_builddir@/bindings/php/getdata/modules/" \
+	-d "extension=getdata.so" -d "session.auto_start=0" -f
+phpTESTS=big_test.php
+TESTS=$(addprefix ${srcdir}/,$(phpTESTS))
+endif
 
-big_test_SOURCES=big_test.cpp
-
-check_PROGRAMS=${TESTS}
+EXTRA_DIST=${phpTESTS}
 
 # clean up after the tests
 check-local: check-TESTS
 	$(MAKE) getdata-clean-dirs
 
 getdata-clean-dirs:
-	rm -rf *odirfile
+	echo rm -rf dirfile
 
 clean-local:
 	$(MAKE) getdata-clean-dirs
-	rm -rf *~
+	rm -rf *~ 

@@ -1,4 +1,4 @@
-dnl Copyright (C) 2008-2012 D. V. Wiebe
+dnl Copyright (C) 2008-2013 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -157,6 +157,8 @@ GD_CHECK_LFS_TYPE([off64_t],[
 #include <unistd.h>
 #endif
 ])
+AC_CHECK_SIZEOF([int])
+AC_CHECK_SIZEOF([unsigned int])
 
 if test "x$gd_cv_c_need_lfs_defined" = "xyes"; then
   AC_DEFINE([_LARGEFILE64_SOURCE], [1],

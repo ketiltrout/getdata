@@ -1,4 +1,4 @@
-# (C) 2008-2012 D. V. Wiebe
+# (C) 2008-2013 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -20,32 +20,25 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-if CC_WALL
-WALL=-Wall
-endif
-
-if CC_WEXTRA
-WEXTRA=-Wextra
-endif
-
 LDADD=../src/libgetdata.la
-INCLUDES=${WALL} $(WEXTRA) -I$(top_srcdir)/src
+INCLUDES=${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
 
 EXTRA_DIST=test.h
 
 ADD_TESTS=add add_affix add_alias add_alias_affix add_alias_meta add_bit \
 					add_bit_bitnum add_bit_bitsize add_bit_invalid add_bit_numbits \
-					add_carray add_clincom add_code add_const add_cpolynom add_crecip \
-					add_crecip89 add_divide add_divide_invalid add_duplicate add_format \
-					add_invalid add_lincom add_lincom_affix add_lincom_invalid \
+					add_bit_scalars add_carray add_clincom add_code add_const add_cpolynom \
+					add_crecip add_crecip89 add_divide add_divide_invalid add_duplicate \
+					add_format add_invalid add_lincom add_lincom_affix add_lincom_invalid \
 					add_lincom_nfields add_linterp add_linterp_invalid add_meta \
-					add_meta_alias add_mplex add_mplex_val add_multiply \
+					add_meta_alias add_mplex add_mplex_scalars add_multiply \
 					add_multiply_invalid add_phase add_phase_invalid add_polynom \
-					add_protect add_raw add_raw_include add_raw_invalid add_raw_spf \
-					add_raw_type add_rdonly add_recip add_resolv add_sbit add_scalar \
-					add_scalar_carray add_scalar_carray_bad add_sort add_spec \
-					add_spec_directive add_spec_invalid add_spec_meta add_spec_resolv \
-					add_string add_string_affix add_type add_window add_window_op
+					add_polynom_scalar add_protect add_raw add_raw_include add_raw_invalid \
+					add_raw_spf add_raw_spf_scalar add_raw_type add_rdonly add_recip \
+					add_resolv add_sbit add_scalar add_scalar_carray add_scalar_carray_bad \
+					add_sort add_spec add_spec_directive add_spec_invalid add_spec_meta \
+					add_spec_resolv add_string add_string_affix add_type add_window \
+					add_window_op
 
 ALIAS_TESTS=alias_list alias_list_alias alias_list_missing alias_num \
 						alias_num_alias alias_num_missing alias_target alias_target_alias \
@@ -173,17 +166,16 @@ FRAGMENT_TESTS=fragment_affix fragment_affix_alter fragment_affix_alter2 \
 							 fragment_name fragment_name_oor fragment_num fragment_parent
 
 GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
-					get_carray_slice get_char get_clincom get_complex128 \
-					get_complex64 get_const get_const_complex get_const_repr \
-					get_cpolynom get_divide get_endian8 get_endian16 get_endian32 \
-					get_endian64 get_endian_complex128_arm get_endian_complex128_big \
+					get_carray_c2r get_carray_slice get_char get_clincom get_complex128 \
+					get_complex64 get_const get_const_complex get_const_repr get_cpolynom \
+					get_divide get_endian8 get_endian16 get_endian32 get_endian64 \
+					get_endian_complex128_arm get_endian_complex128_big \
 					get_endian_complex128_little get_endian_complex64_arm \
 					get_endian_complex64_big get_endian_complex64_little \
-					get_endian_float32_arm get_endian_float32_big \
-					get_endian_float32_little get_endian_float64_arm \
-					get_endian_float64_big get_endian_float64_little get_ff get_float32 \
-					get_float64 get_foffs get_fs get_here get_here_foffs get_heres \
-					get_int8 get_int16 get_int32 get_int64 get_invalid get_lincom1 \
+					get_endian_float32_arm get_endian_float32_big get_endian_float32_little \
+					get_endian_float64_arm get_endian_float64_big get_endian_float64_little \
+					get_ff get_float32 get_float64 get_foffs get_fs get_here get_here_foffs \
+					get_heres get_int8 get_int16 get_int32 get_int64 get_invalid get_lincom1 \
 					get_lincom2 get_lincom3 get_lincom_noin get_lincom_non \
 					get_lincom_null get_lincom_spf get_linterp get_linterp_noin \
 					get_linterp_notab get_linterp_sort get_mplex get_mplex_bof \

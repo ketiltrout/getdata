@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2008-2013 D. V. Wiebe
  *
  *************************************************************************
  *
@@ -535,7 +535,7 @@ void F77_FUNC(gdadrc, GDADRC) (const int32_t *dirfile, const char *field_code,
 
 void F77_FUNC(gdadcr, GDADCR) (const int32_t *dirfile, const char *field_code,
     const int32_t *field_code_l, const char *in_field,
-    const int32_t *in_field_l, const GD_DCOMPLEXP(cdividend),
+    const int32_t *in_field_l, const double *cdividend,
     const int32_t *fragment_index);
 
 void F77_FUNC(gdmddv, GDMDDV) (const int32_t *dirfile, const char *parent,
@@ -635,19 +635,19 @@ void F77_FUNC(gdalwd, GDALWD) (const int32_t *dirfile, const char *field_code,
 void F77_FUNC(gdadmx, GDADMX) (const int32_t *dirfile, const char *field_code,
     const int32_t *field_code_l, const char *in_field,
     const int32_t *in_field_l, const char *count_field,
-    const int32_t *count_field_l, const int32_t *val, const int32_t *max,
+    const int32_t *count_field_l, const int32_t *val, const int32_t *period,
     const int32_t *fragment_index);
 
 void F77_FUNC(gdmdmx, GDMDMX) (const int32_t *dirfile, const char *parent,
     const int32_t *parent_l, const char *field_code,
     const int32_t *field_code_l, const char *in_field,
     const int32_t *in_field_l, const char *count_field,
-    const int32_t *count_field_l, const int32_t *val, const int32_t *max);
+    const int32_t *count_field_l, const int32_t *val, const int32_t *period);
 
 void F77_FUNC(gdalmx, GDALMX) (const int32_t *dirfile, const char *field_code,
     const int32_t *field_code_l, const char *in_field,
     const int32_t *in_field_l, const char *count_field,
-    const int32_t *count_field_l, const int32_t *val, const int32_t *max);
+    const int32_t *count_field_l, const int32_t *val, const int32_t *period);
 
 void F77_FUNC(gdsync, GDSYNC) (const int32_t *dirfile, const char *field_code,
     const int32_t *field_code_l);
@@ -741,13 +741,196 @@ void F77_FUNC(gdtoke, GDTOKE) (char *toke, int32_t *toke_l,
     const int32_t *dirfile, const char *string, const int32_t *string_l);
 
 void F77_FUNC(gdgemx, GDGEMX) (char *in_field, int32_t *in_field_l,
-    char *count_field, int32_t *count_field_l, int32_t *val, int32_t *max,
+    char *count_field, int32_t *count_field_l, int32_t *val, int32_t *period,
     int32_t *fragment_index, const int32_t *dirfile, const char *field_code,
     const int32_t *field_code_l);
 
 void F77_FUNC(gdlttn, GDLTTN) (char *name, int32_t *name_l,
     const int32_t *dirfile, const char *field_code,
     const int32_t *field_code_l);
+
+void F77_FUNC(gdasrw, GDASRW) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *data_type, const int32_t *spf,
+    const char *spf_scalar, const int32_t *spf_scalar_l,
+    const int32_t *spf_scalar_ind, const int32_t *fragment_index);
+
+void F77_FUNC(gdasbt, GDASBT) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *bitnum, const char *bitnum_scalar,
+    const int32_t *bitnum_scalar_l, const int32_t *bitnum_scalar_ind,
+    const int32_t *numbits, const char *numbits_scalar,
+    const int32_t *numbits_scalar_l, const int32_t *numbits_scalar_ind,
+    const int32_t *fragment_index);
+
+void F77_FUNC(gdaslc, GDASLC) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const double *m1, const char *m1_scalar,
+    const int32_t *m1_scalar_l, const int32_t *m1_scalar_ind, const double *b1,
+    const char *b1_scalar, const int32_t *b1_scalar_l,
+    const int32_t *b1_scalar_ind, const char *in_field2,
+    const int32_t *in_field2_l, const double *m2, const char *m2_scalar,
+    const int32_t *m2_scalar_l, const int32_t *m2_scalar_ind, const double *b2,
+    const char *b2_scalar, const int32_t *b2_scalar_l,
+    const int32_t *b2_scalar_ind, const char *in_field3,
+    const int32_t *in_field3_l, const double *m3, const char *m3_scalar,
+    const int32_t *m3_scalar_l, const int32_t *m3_scalar_ind, const double *b3,
+    const char *b3_scalar, const int32_t *b3_scalar_l,
+    const int32_t *b3_scalar_ind, const int32_t *fragment_index);
+
+void F77_FUNC(gdascl, GDASCL) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const GD_DCOMPLEXP(m1), const char *m1_scalar,
+    const int32_t *m1_scalar_l, const int32_t *m1_scalar_ind,
+    const GD_DCOMPLEXP(b1), const char *b1_scalar, const int32_t *b1_scalar_l,
+    const int32_t *b1_scalar_ind, const char *in_field2,
+    const int32_t *in_field2_l, const GD_DCOMPLEXP(m2), const char *m2_scalar,
+    const int32_t *m2_scalar_l, const int32_t *m2_scalar_ind,
+    const GD_DCOMPLEXP(b2), const char *b2_scalar, const int32_t *b2_scalar_l,
+    const int32_t *b2_scalar_ind, const char *in_field3,
+    const int32_t *in_field3_l, const GD_DCOMPLEXP(m3), const char *m3_scalar,
+    const int32_t *m3_scalar_l, const int32_t *m3_scalar_ind,
+    const GD_DCOMPLEXP(b3), const char *b3_scalar, const int32_t *b3_scalar_l,
+    const int32_t *b3_scalar_ind, const int32_t *fragment_index);
+
+void F77_FUNC(gdascl, GDASCL) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const GD_DCOMPLEXP(m1), const char *m1_scalar,
+    const int32_t *m1_scalar_l, const int32_t *m1_scalar_ind,
+    const GD_DCOMPLEXP(b1), const char *b1_scalar, const int32_t *b1_scalar_l,
+    const int32_t *b1_scalar_ind, const char *in_field2,
+    const int32_t *in_field2_l, const GD_DCOMPLEXP(m2), const char *m2_scalar,
+    const int32_t *m2_scalar_l, const int32_t *m2_scalar_ind,
+    const GD_DCOMPLEXP(b2), const char *b2_scalar, const int32_t *b2_scalar_l,
+    const int32_t *b2_scalar_ind, const char *in_field3,
+    const int32_t *in_field3_l, const GD_DCOMPLEXP(m3), const char *m3_scalar,
+    const int32_t *m3_scalar_l, const int32_t *m3_scalar_ind,
+    const GD_DCOMPLEXP(b3), const char *b3_scalar, const int32_t *b3_scalar_l,
+    const int32_t *b3_scalar_ind, const int32_t *fragment_index);
+
+void F77_FUNC(gdasph, GDASPH) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *shift,
+    const char *shift_scalar, const int32_t *shift_scalar_l,
+    const int32_t *shift_scalar_ind, const int32_t *fragment_index);
+
+void F77_FUNC(gdaswd, GDASWD) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *check_field,
+    const int32_t *check_field_l, const int32_t *windop, const void *threshold,
+    const char *threshold_scalar, const int32_t *threshold_scalar_l,
+    const int32_t *threshold_scalar_ind, const int32_t *fragment_index);
+
+void F77_FUNC(gdasmx, GDASMX) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *count_field,
+    const int32_t *count_field_l, const int32_t *val, const char *val_scalar,
+    const int32_t *val_scalar_l, const int32_t *val_scalar_ind,
+    const int32_t *period, const char *period_scalar,
+    const int32_t *period_scalar_l, const int32_t *period_scalar_ind,
+    const int32_t *fragment_index);
+
+void F77_FUNC(gdasrc, GDASCR) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const double *dividend,
+    const char *dividend_scalar, const int32_t *dividend_scalar_l,
+    const int32_t *dividend_scalar_ind, const int32_t *fragment_index);
+
+void F77_FUNC(gdascr, GDASCR) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const double *dividend,
+    const char *dividend_scalar, const int32_t *dividend_scalar_l,
+    const int32_t *dividend_scalar_ind, const int32_t *fragment_index);
+
+void F77_FUNC(gdlsrw, GDLSRW) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *data_type, const int32_t *spf,
+    const char *spf_scalar, const int32_t *spf_scalar_l,
+    const int32_t *spf_scalar_ind, const int32_t *recode);
+
+void F77_FUNC(gdlsbt, GDLSBT) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *bitnum, const char *bitnum_scalar,
+    const int32_t *bitnum_scalar_l, const int32_t *bitnum_scalar_ind,
+    const int32_t *numbits, const char *numbits_scalar,
+    const int32_t *numbits_scalar_l, const int32_t *numbits_scalar_ind);
+
+void F77_FUNC(gdlslc, GDLSLC) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const double *m1, const char *m1_scalar,
+    const int32_t *m1_scalar_l, const int32_t *m1_scalar_ind, const double *b1,
+    const char *b1_scalar, const int32_t *b1_scalar_l,
+    const int32_t *b1_scalar_ind, const char *in_field2,
+    const int32_t *in_field2_l, const double *m2, const char *m2_scalar,
+    const int32_t *m2_scalar_l, const int32_t *m2_scalar_ind, const double *b2,
+    const char *b2_scalar, const int32_t *b2_scalar_l,
+    const int32_t *b2_scalar_ind, const char *in_field3,
+    const int32_t *in_field3_l, const double *m3, const char *m3_scalar,
+    const int32_t *m3_scalar_l, const int32_t *m3_scalar_ind, const double *b3,
+    const char *b3_scalar, const int32_t *b3_scalar_l,
+    const int32_t *b3_scalar_ind);
+
+void F77_FUNC(gdlscl, GDLSCL) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const GD_DCOMPLEXP(m1), const char *m1_scalar,
+    const int32_t *m1_scalar_l, const int32_t *m1_scalar_ind,
+    const GD_DCOMPLEXP(b1), const char *b1_scalar, const int32_t *b1_scalar_l,
+    const int32_t *b1_scalar_ind, const char *in_field2,
+    const int32_t *in_field2_l, const GD_DCOMPLEXP(m2), const char *m2_scalar,
+    const int32_t *m2_scalar_l, const int32_t *m2_scalar_ind,
+    const GD_DCOMPLEXP(b2), const char *b2_scalar, const int32_t *b2_scalar_l,
+    const int32_t *b2_scalar_ind, const char *in_field3,
+    const int32_t *in_field3_l, const GD_DCOMPLEXP(m3), const char *m3_scalar,
+    const int32_t *m3_scalar_l, const int32_t *m3_scalar_ind,
+    const GD_DCOMPLEXP(b3), const char *b3_scalar, const int32_t *b3_scalar_l,
+    const int32_t *b3_scalar_ind);
+
+void F77_FUNC(gdlscl, GDLSCL) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const GD_DCOMPLEXP(m1), const char *m1_scalar,
+    const int32_t *m1_scalar_l, const int32_t *m1_scalar_ind,
+    const GD_DCOMPLEXP(b1), const char *b1_scalar, const int32_t *b1_scalar_l,
+    const int32_t *b1_scalar_ind, const char *in_field2,
+    const int32_t *in_field2_l, const GD_DCOMPLEXP(m2), const char *m2_scalar,
+    const int32_t *m2_scalar_l, const int32_t *m2_scalar_ind,
+    const GD_DCOMPLEXP(b2), const char *b2_scalar, const int32_t *b2_scalar_l,
+    const int32_t *b2_scalar_ind, const char *in_field3,
+    const int32_t *in_field3_l, const GD_DCOMPLEXP(m3), const char *m3_scalar,
+    const int32_t *m3_scalar_l, const int32_t *m3_scalar_ind,
+    const GD_DCOMPLEXP(b3), const char *b3_scalar, const int32_t *b3_scalar_l,
+    const int32_t *b3_scalar_ind);
+
+void F77_FUNC(gdlsph, GDLSPH) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *shift,
+    const char *shift_scalar, const int32_t *shift_scalar_l,
+    const int32_t *shift_scalar_ind);
+
+void F77_FUNC(gdlswd, GDLSWD) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *check_field,
+    const int32_t *check_field_l, const int32_t *windop, const void *threshold,
+    const char *threshold_scalar, const int32_t *threshold_scalar_l,
+    const int32_t *threshold_scalar_ind);
+
+void F77_FUNC(gdlsmx, GDLSMX) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *count_field,
+    const int32_t *count_field_l, const int32_t *val, const char *val_scalar,
+    const int32_t *val_scalar_l, const int32_t *val_scalar_ind,
+    const int32_t *period, const char *period_scalar,
+    const int32_t *period_scalar_l, const int32_t *period_scalar_ind);
+
+void F77_FUNC(gdlsrc, GDLSCR) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const double *dividend,
+    const char *dividend_scalar, const int32_t *dividend_scalar_l,
+    const int32_t *dividend_scalar_ind);
+
+void F77_FUNC(gdlscr, GDLSCR) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const double *dividend,
+    const char *dividend_scalar, const int32_t *dividend_scalar_l,
+    const int32_t *dividend_scalar_ind);
+
 #ifdef __cplusplus
 }
 #endif

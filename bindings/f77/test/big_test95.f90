@@ -1,4 +1,4 @@
-! Copyright (C) 2009-2012 D. V. Wiebe
+! Copyright (C) 2009-2013 D. V. Wiebe
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -28,32 +28,6 @@
 ! (although this last one is used)
 
 ! check functions
-subroutine check_err(ne, t, d, v)
-  use getdata
-  integer, intent(inout) :: ne
-  integer, intent(in) :: t, d, v
-  integer :: e
-
-  e = fgd_error(d)
-
-  if (e .ne. v) then
-    ne = ne + 1
-    write(*, 9001), t, e, v
-  end if
-9001 format('e[', i0, '] = ', i0, ', expected ', i0)
-end subroutine 
-
-subroutine check_int(ne, t, n, v)
-  integer, intent(inout) :: ne
-  integer, intent(in) :: t, n, v
-
-  if (n .ne. v) then
-    ne = ne + 1
-    write(*, 9002), t, n, v
-  end if
-9002 format('n[', i0, '] = ', i0, ', expected ', i0)
-end subroutine 
-
 subroutine check_err2(ne, t, i, d, v)
   use getdata
   integer, intent(inout) :: ne
@@ -69,6 +43,12 @@ subroutine check_err2(ne, t, i, d, v)
 9006 format('e(', i0, ')[', i0, '] = ', i0, ', expected ', i0)
 end subroutine 
 
+subroutine check_err(ne, t, d, v)
+  integer, intent(inout) :: ne
+  integer, intent(in) :: t, d, v
+  call check_err2(ne, t, 0, d, v)
+end subroutine 
+
 subroutine check_int2(ne, t, i, n, v)
   integer, intent(inout) :: ne
   integer, intent(in) :: t, i, n, v
@@ -78,6 +58,12 @@ subroutine check_int2(ne, t, i, n, v)
     write(*, 9007), i, t, n, v
   end if
 9007 format('n(', i0, ')[', i0, '] = ', i0, ', expected ', i0)
+end subroutine 
+
+subroutine check_int(ne, t, n, v)
+  integer, intent(inout) :: ne
+  integer, intent(in) :: t, n, v
+  call check_int2(ne, t, 0, n, v)
 end subroutine 
 
 subroutine check_str2(ne, t, i, n, v)
@@ -96,12 +82,7 @@ subroutine check_str(ne, t, n, v)
   integer, intent(inout) :: ne
   integer, intent(in) :: t
   character (len=*), intent(in) :: n, v
-
-  if (n .ne. v) then
-    ne = ne + 1
-    write(*, 9009), t, n, v
-  end if
-9009 format('s[', i0, '] = "', a, '", expected "', a, '"')
+  call check_str2(ne, t, 0, n, v)
 end subroutine 
 
 subroutine check_dbl2(ne, t, i, n, v)
@@ -109,11 +90,19 @@ subroutine check_dbl2(ne, t, i, n, v)
   integer, intent(in) :: t, i
   double precision, intent(in) :: n, v
 
-  if (abs(n - v) .gt. 1e-5) then
+  ! this is good to single precision
+  if (abs(n - v) .gt. 1e-7) then
     ne = ne + 1
     write(*, 9010), i, t, n, v
   end if
 9010 format('r(', i0, ')[', i0, '] = ', d16.10, ', expected ', d16.10)
+end subroutine 
+
+subroutine check_dbl(ne, t, n, v)
+  integer, intent(inout) :: ne
+  integer, intent(in) :: t
+  double precision, intent(in) :: n, v
+  call check_dbl2(ne, t, 0, n, v)
 end subroutine 
 
 subroutine check_cpx2(ne, t, i, n, v)
@@ -121,7 +110,8 @@ subroutine check_cpx2(ne, t, i, n, v)
   integer, intent(in) :: t, i
   double complex, intent(in) :: n, v
 
-  if (abs(n - v) .gt. 1e-5) then
+  ! this is good to single precision
+  if (abs(n - v) .gt. 1e-7) then
     ne = ne + 1
     write(*, 9011), i, t, real(real(n)), real(aimag(n)), &
     real(real(v)), real(aimag(v))
@@ -130,43 +120,24 @@ subroutine check_cpx2(ne, t, i, n, v)
 d16.10, ';', d16.10)
 end subroutine 
 
-subroutine check_dbl(ne, t, n, v)
-  integer, intent(inout) :: ne
-  integer, intent(in) :: t
-  double precision, intent(in) :: n, v
-
-  if (abs(n - v) .gt. 1e-5) then
-    ne = ne + 1
-    write(*, 9012), t, n, d
-  end if
-9012 format('r[', i0, '] = ', d16.10, ', expected ', d16.10)
-end subroutine 
-
 subroutine check_cpx(ne, t, n, v)
   integer, intent(inout) :: ne
   integer, intent(in) :: t
   double complex, intent(in) :: n, v
-
-  if (abs(n - v) .gt. 1e-5) then
-    ne = ne + 1
-    write(*, 9013), t, n, d
-  end if
-9013 format('x[', i0, '] = ', d16.10, ';', d16.10, ', expected ', d16.10, &
-';', d16.10)
+  call check_cpx2(ne, t, 0, n, v)
 end subroutine 
-
-subroutine check_ok(ne, t, d)
-  use getdata
-  integer, intent(inout) :: ne
-  integer, intent(in) :: t, d
-  call check_err(ne, t, d, GD_E_OK)
-end subroutine
 
 subroutine check_ok2(ne, t, i, d)
   use getdata
   integer, intent(inout) :: ne
-  integer, intent(in) :: t, d
+  integer, intent(in) :: t, d, i
   call check_err2(ne, t, i, d, GD_E_OK)
+end subroutine
+
+subroutine check_ok(ne, t, d)
+  integer, intent(inout) :: ne
+  integer, intent(in) :: t, d
+  call check_ok2(ne, t, 0, d)
 end subroutine
 
 subroutine check_eos(ne, t, n, v)
@@ -271,195 +242,195 @@ program big_test
 
   ne = 0
 
-! fgd_error check
+! 1: fgd_error check
   d = fgd_open('x', GD_RDONLY)
-  call check_err(ne, 0, d, GD_E_OPEN)
+  call check_err(ne, 1, d, GD_E_OPEN)
   call fgd_discard(d)
 
-! 1: fgd_open check
+! 2: fgd_open check
   d = fgd_open(fildir, GD_RDWR)
-  call check_ok(ne, 1, d)
-
-! 2: fgd_getdata_i1 check
-  n = fgd_getdata_i1(d, 'data', 5, 0, 1, 0, ci1)
   call check_ok(ne, 2, d)
-  call check_int(ne, 2, n, 8)
 
-  do i=1,8
-  call check_int2(ne, 2, i, int(ci1(i)), 40 + i)
-  end do 
-
-! 102: fgd_getdata_i2 check
-  n = fgd_getdata_i2(d, 'data', 5, 0, 1, 0, ci2)
-  call check_ok(ne, 102, d)
-  call check_int(ne, 102, n, 8)
-
-  do i=1,8
-  call check_int2(ne, 102, i, int(ci2(i)), 40 + i)
-  end do 
-
-! 103: fgd_getdata_i4 check
-  n = fgd_getdata_i4(d, 'data', 5, 0, 1, 0, ci4)
-  call check_ok(ne, 103, d)
-  call check_int(ne, 103, n, 8)
-
-  do i=1,8
-  call check_int2(ne, 103, i, int(ci4(i)), 40 + i)
-  end do 
-
-! 104: fgd_getdata_i8 check
-  n = fgd_getdata_i8(d, 'data', 5, 0, 1, 0, ci8)
-  call check_ok(ne, 104, d)
-  call check_int(ne, 104, n, 8)
-
-  do i=1,8
-  call check_int2(ne, 104, i, int(ci8(i)), 40 + i)
-  end do 
-
-! 105: fgd_getdata_r4 check
-  n = fgd_getdata_r4(d, 'data', 5, 0, 1, 0, cr4)
-  call check_ok(ne, 105, d)
-  call check_int(ne, 105, n, 8)
-
-  do i=1,8
-  call check_dbl2(ne, 105, i, 1d0 * cr4(i), 40d0 + i)
-  end do 
-
-! 106: fgd_getdata_r8 check
-  n = fgd_getdata_r8(d, 'data', 5, 0, 1, 0, cr8)
-  call check_ok(ne, 106, d)
-  call check_int(ne, 106, n, 8)
-
-  do i=1,8
-  call check_dbl2(ne, 106, i, cr8(i), 40d0 + i)
-  end do 
-
-! 107: fgd_getdata_c8 check
-  n = fgd_getdata_c8(d, 'data', 5, 0, 1, 0, cc8)
-  call check_ok(ne, 107, d)
-  call check_int(ne, 107, n, 8)
-
-  do i=1,8
-  call check_cpx2(ne, 107, i, 1d0 * cc8(i), dcmplx(40 + i, 0))
-  end do 
-
-! 108: fgd_getdata_c16 check
-  n = fgd_getdata_c16(d, 'data', 5, 0, 1, 0, cc16)
-  call check_ok(ne, 108, d)
-  call check_int(ne, 108, n, 8)
-
-  do i=1,8
-  call check_cpx2(ne, 108, i, cc16(i), dcmplx(40 + i, 0))
-  end do 
-
-! 109: fgd_getdata_n check
-  n = fgd_getdata_n(d, 'data', 5, 0, 1, 0)
-  call check_ok(ne, 109, d)
-  call check_int(ne, 109, n, 8)
-
-! 3: fgd_get_constant_i1 check
-  call fgd_get_constant_i1(d, 'const', ci1(1))
+! 3: fgd_getdata_i1 check
+  n = fgd_getdata_i1(d, 'data', 5, 0, 1, 0, ci1)
   call check_ok(ne, 3, d)
-  call check_int(ne, 3, int(ci1(1)), 5)
+  call check_int(ne, 3, n, 8)
 
-! 110: fgd_get_constant_i2 check
-  call fgd_get_constant_i2(d, 'const', ci2(1))
-  call check_ok(ne, 110, d)
-  call check_int(ne, 110, int(ci2(1)), 5)
+  do i=1,8
+  call check_int2(ne, 3, i, int(ci1(i)), 40 + i)
+  end do 
 
-! 111: fgd_get_constant_i4 check
-  call fgd_get_constant_i4(d, 'const', ci4(1))
-  call check_ok(ne, 111, d)
-  call check_int(ne, 111, ci4(1), 5)
-
-! 112: fgd_get_constant_i8 check
-  call fgd_get_constant_i8(d, 'const', ci8(1))
-  call check_ok(ne, 112, d)
-  call check_int(ne, 112, int(ci8(1)), 5)
-
-! 113: fgd_get_constant_r4 check
-  call fgd_get_constant_r4(d, 'const', cr4(1))
-  call check_ok(ne, 113, d)
-  call check_dbl(ne, 113, 1d0 * cr4(1), 5.5d0)
-
-! 114: fgd_get_constant_r8 check
-  call fgd_get_constant_r8(d, 'const', cr8(1))
-  call check_ok(ne, 114, d)
-  call check_dbl(ne, 114, cr8(1), 5.5d0)
-
-! 115: fgd_get_constant_c8 check
-  call fgd_get_constant_c8(d, 'const', cc8(1))
-  call check_ok(ne, 115, d)
-  call check_cpx(ne, 115, 1d0 * cc8(1), dcmplx(5.5, 0))
-
-! 116: fgd_get_constant_c16 check
-  call fgd_get_constant_c16(d, 'const', cc16(1))
-  call check_ok(ne, 116, d)
-  call check_cpx(ne, 116, cc16(1), dcmplx(5.5, 0))
-
-! 117: fgd_get_constant_n check
-  call fgd_get_constant_n(d, 'const')
-  call check_ok(ne, 117, d)
-
-! 4: fgd_field_name_max check
-  i = fgd_field_name_max(d)
+! 4: fgd_getdata_i2 check
+  n = fgd_getdata_i2(d, 'data', 5, 0, 1, 0, ci2)
   call check_ok(ne, 4, d)
-  call check_int(ne, 4, i, 7)
+  call check_int(ne, 4, n, 8)
 
-! 5: fgd_mfield_name_max check
-  i = fgd_mfield_name_max(d, 'data')
+  do i=1,8
+  call check_int2(ne, 4, i, int(ci2(i)), 40 + i)
+  end do 
+
+! 5: fgd_getdata_i4 check
+  n = fgd_getdata_i4(d, 'data', 5, 0, 1, 0, ci4)
   call check_ok(ne, 5, d)
-  call check_int(ne, 5, i, 6)
+  call check_int(ne, 5, n, 8)
 
-! 6: fgd_nfields check
-  n = fgd_nfields(d)
+  do i=1,8
+  call check_int2(ne, 5, i, int(ci4(i)), 40 + i)
+  end do 
+
+! 6: fgd_getdata_i8 check
+  n = fgd_getdata_i8(d, 'data', 5, 0, 1, 0, ci8)
   call check_ok(ne, 6, d)
-  call check_int(ne, 6, n, nfields)
+  call check_int(ne, 6, n, 8)
 
-! 8: fgd_field_list check
+  do i=1,8
+  call check_int2(ne, 6, i, int(ci8(i)), 40 + i)
+  end do 
+
+! 7: fgd_getdata_r4 check
+  n = fgd_getdata_r4(d, 'data', 5, 0, 1, 0, cr4)
+  call check_ok(ne, 7, d)
+  call check_int(ne, 7, n, 8)
+
+  do i=1,8
+  call check_dbl2(ne, 7, i, 1d0 * cr4(i), 40d0 + i)
+  end do 
+
+! 8: fgd_getdata_r8 check
+  n = fgd_getdata_r8(d, 'data', 5, 0, 1, 0, cr8)
+  call check_ok(ne, 8, d)
+  call check_int(ne, 8, n, 8)
+
+  do i=1,8
+  call check_dbl2(ne, 8, i, cr8(i), 40d0 + i)
+  end do 
+
+! 9: fgd_getdata_c8 check
+  n = fgd_getdata_c8(d, 'data', 5, 0, 1, 0, cc8)
+  call check_ok(ne, 9, d)
+  call check_int(ne, 9, n, 8)
+
+  do i=1,8
+  call check_cpx2(ne, 9, i, 1d0 * cc8(i), dcmplx(40 + i, 0))
+  end do 
+
+! 10: fgd_getdata_c16 check
+  n = fgd_getdata_c16(d, 'data', 5, 0, 1, 0, cc16)
+  call check_ok(ne, 10, d)
+  call check_int(ne, 10, n, 8)
+
+  do i=1,8
+  call check_cpx2(ne, 10, i, cc16(i), dcmplx(40 + i, 0))
+  end do 
+
+! 11: fgd_getdata_n check
+  n = fgd_getdata_n(d, 'data', 5, 0, 1, 0)
+  call check_ok(ne, 11, d)
+  call check_int(ne, 11, n, 8)
+
+! 12: fgd_get_constant_i1 check
+  call fgd_get_constant_i1(d, 'const', ci1(1))
+  call check_ok(ne, 12, d)
+  call check_int(ne, 12, int(ci1(1)), 5)
+
+! 13: fgd_get_constant_i2 check
+  call fgd_get_constant_i2(d, 'const', ci2(1))
+  call check_ok(ne, 13, d)
+  call check_int(ne, 13, int(ci2(1)), 5)
+
+! 14: fgd_get_constant_i4 check
+  call fgd_get_constant_i4(d, 'const', ci4(1))
+  call check_ok(ne, 14, d)
+  call check_int(ne, 14, ci4(1), 5)
+
+! 15: fgd_get_constant_i8 check
+  call fgd_get_constant_i8(d, 'const', ci8(1))
+  call check_ok(ne, 15, d)
+  call check_int(ne, 15, int(ci8(1)), 5)
+
+! 16: fgd_get_constant_r4 check
+  call fgd_get_constant_r4(d, 'const', cr4(1))
+  call check_ok(ne, 16, d)
+  call check_dbl(ne, 16, 1d0 * cr4(1), 5.5d0)
+
+! 17: fgd_get_constant_r8 check
+  call fgd_get_constant_r8(d, 'const', cr8(1))
+  call check_ok(ne, 17, d)
+  call check_dbl(ne, 17, cr8(1), 5.5d0)
+
+! 18: fgd_get_constant_c8 check
+  call fgd_get_constant_c8(d, 'const', cc8(1))
+  call check_ok(ne, 18, d)
+  call check_cpx(ne, 18, 1d0 * cc8(1), dcmplx(5.5, 0))
+
+! 19: fgd_get_constant_c16 check
+  call fgd_get_constant_c16(d, 'const', cc16(1))
+  call check_ok(ne, 19, d)
+  call check_cpx(ne, 19, cc16(1), dcmplx(5.5, 0))
+
+! 20: fgd_get_constant_n check
+  call fgd_get_constant_n(d, 'const')
+  call check_ok(ne, 20, d)
+
+! 21: fgd_field_name_max check
+  i = fgd_field_name_max(d)
+  call check_ok(ne, 21, d)
+  call check_int(ne, 21, i, 7)
+
+! 22: fgd_mfield_name_max check
+  i = fgd_mfield_name_max(d, 'data')
+  call check_ok(ne, 22, d)
+  call check_int(ne, 22, i, 6)
+
+! 23: fgd_nfields check
+  n = fgd_nfields(d)
+  call check_ok(ne, 23, d)
+  call check_int(ne, 23, n, nfields)
+
+! 25: fgd_field_list check
   l = flen
   call fgd_field_list(flist, d, l)
-  call check_ok(ne, 8, d)
-  call check_int(ne, 8, l, flen)
+  call check_ok(ne, 25, d)
+  call check_int(ne, 25, l, flen)
 
   do i = 1, n
-  call check_str2(ne, 8, i, flist(i), fields(i))
+  call check_str2(ne, 25, i, flist(i), fields(i))
   end do
 
-! 9: fgd_nmfields check
+! 26: fgd_nmfields check
   n = fgd_nmfields(d, 'data')
-  call check_ok(ne, 9, d)
-  call check_int(ne, 9, n, 3)
+  call check_ok(ne, 26, d)
+  call check_int(ne, 26, n, 3)
 
-! 10: fgd_mfield_list check
+! 27: fgd_mfield_list check
   fields(1) = 'mstr'
   fields(2) = 'mconst'
   fields(3) = 'mlut'
 
   l = flen
   call fgd_mfield_list(flist, d, 'data', l)
-  call check_ok2(ne, 10, i, d)
-  call check_int2(ne, 10, i, l, flen)
+  call check_ok2(ne, 27, i, d)
+  call check_int2(ne, 27, i, l, flen)
 
   DO i = 1, n
-  call check_str2(ne, 10, i, flist(i), fields(i))
+  call check_str2(ne, 27, i, flist(i), fields(i))
   end do
 
-! 11: fgd_nframes check
+! 28: fgd_nframes check
   n = fgd_nframes(d)
-  call check_ok(ne, 11, d)
-  call check_int(ne, 11, n, 10)
+  call check_ok(ne, 28, d)
+  call check_int(ne, 28, n, 10)
 
-! 12: fgd_spf check
+! 29: fgd_spf check
   n = fgd_spf(d, 'data')
-  call check_ok(ne, 12, d)
-  call check_int(ne, 12, n, 8)
+  call check_ok(ne, 29, d)
+  call check_int(ne, 29, n, 8)
 
-! 13: fgd_putdata_i1 check
+! 30: fgd_putdata_i1 check
   ci1 = (/ 13_1, 14_1, 15_1, 16_1, 17_1, 18_1, 19_1, 90_1 /)
   n = fgd_putdata_i1(d, 'data', 5, 1, 0, 4, ci1)
-  call check_ok(ne, 13, d)
-  call check_int(ne, 13, n, 4)
+  call check_ok(ne, 30, d)
+  call check_int(ne, 30, n, 4)
 
   n = fgd_getdata_i1(d, 'data', 5, 0, 1, 0, ci1)
 
@@ -469,14 +440,14 @@ program big_test
   else
     n = 11 + i
   endif
-  call check_int2(ne, 13, i, int(ci1(i)), n)
+  call check_int2(ne, 30, i, int(ci1(i)), n)
   end do
 
-! 118: fgd_putdata_i2 check
+! 31: fgd_putdata_i2 check
   ci2 = (/ 23_2, 24_2, 25_2, 26_2, 27_2, 28_2, 29_2, 30_2 /)
   n = fgd_putdata_i2(d, 'data', 5, 1, 0, 4, ci2)
-  call check_ok(ne, 118, d)
-  call check_int(ne, 118, n, 4)
+  call check_ok(ne, 31, d)
+  call check_int(ne, 31, n, 4)
 
   n = fgd_getdata_i2(d, 'data', 5, 0, 1, 0, ci2)
 
@@ -486,14 +457,14 @@ program big_test
   else
     n = 21 + i
   endif
-  call check_int2(ne, 118, i, int(ci2(i)), n)
+  call check_int2(ne, 31, i, int(ci2(i)), n)
   end do
 
-! 119: fgd_putdata_i4 check
+! 32: fgd_putdata_i4 check
   ci4 = (/ 33, 34, 35, 36, 37, 38, 39, 40 /)
   n = fgd_putdata_i4(d, 'data', 5, 1, 0, 4, ci4)
-  call check_ok(ne, 119, d)
-  call check_int(ne, 119, n, 4)
+  call check_ok(ne, 32, d)
+  call check_int(ne, 32, n, 4)
 
   n = fgd_getdata_i4(d, 'data', 5, 0, 1, 0, ci4)
 
@@ -503,14 +474,14 @@ program big_test
   else
     n = 31 + i
   endif
-  call check_int2(ne, 119, i, int(ci4(i)), n)
+  call check_int2(ne, 32, i, int(ci4(i)), n)
   end do
 
-! 120: fgd_putdata_i8 check
+! 33: fgd_putdata_i8 check
   ci8 = (/ 43, 44, 45, 46, 47, 48, 49, 50 /)
   n = fgd_putdata_i8(d, 'data', 5, 1, 0, 4, ci8)
-  call check_ok(ne, 120, d)
-  call check_int(ne, 120, n, 4)
+  call check_ok(ne, 33, d)
+  call check_int(ne, 33, n, 4)
 
   n = fgd_getdata_i8(d, 'data', 5, 0, 1, 0, ci8)
 
@@ -520,14 +491,14 @@ program big_test
   else
     n = 41 + i
   endif
-  call check_int2(ne, 120, i, int(ci8(i)), n)
+  call check_int2(ne, 33, i, int(ci8(i)), n)
   end do
 
-! 121: fgd_putdata_r4 check
+! 34: fgd_putdata_r4 check
   cr4 = (/ 33, 34, 35, 36, 37, 38, 39, 40 /)
   n = fgd_putdata_r4(d, 'data', 5, 1, 0, 4, cr4)
-  call check_ok(ne, 121, d)
-  call check_int(ne, 121, n, 4)
+  call check_ok(ne, 34, d)
+  call check_int(ne, 34, n, 4)
 
   n = fgd_getdata_r4(d, 'data', 5, 0, 1, 0, cr4)
 
@@ -537,14 +508,14 @@ program big_test
   else
     dp = 31. + i
   end if
-  call check_dbl2(ne, 121, i, 1d0 * cr4(i), dp)
+  call check_dbl2(ne, 34, i, 1d0 * cr4(i), dp)
   end do
 
-! 122: fgd_putdata_r8 check
+! 35: fgd_putdata_r8 check
   cr8 = (/ 43, 44, 45, 46, 47, 48, 49, 50 /)
   n = fgd_putdata_r8(d, 'data', 5, 1, 0, 4, cr8)
-  call check_ok(ne, 122, d)
-  call check_int(ne, 122, n, 4)
+  call check_ok(ne, 35, d)
+  call check_int(ne, 35, n, 4)
 
   n = fgd_getdata_r8(d, 'data', 5, 0, 1, 0, cr8)
 
@@ -554,14 +525,14 @@ program big_test
   else
     dp = 41. + i
   end if
-  call check_dbl2(ne, 122, i, cr8(i), dp)
+  call check_dbl2(ne, 35, i, cr8(i), dp)
   end do
 
-! 123: fgd_putdata_c8 check
+! 36: fgd_putdata_c8 check
   cc8 = (/ 53, 54, 55, 56, 57, 58, 59, 60 /)
   n = fgd_putdata_c8(d, 'data', 5, 1, 0, 4, cc8)
-  call check_ok(ne, 123, d)
-  call check_int(ne, 123, n, 4)
+  call check_ok(ne, 36, d)
+  call check_int(ne, 36, n, 4)
 
   n = fgd_getdata_c8(d, 'data', 5, 0, 1, 0, cc8)
 
@@ -571,14 +542,14 @@ program big_test
   else
     dc = dcmplx(51d0 + i, 0d0)
   end if
-  call check_cpx2(ne, 123, i, 1d0 * cc8(i), dc)
+  call check_cpx2(ne, 36, i, 1d0 * cc8(i), dc)
   end do
 
-! 124: fgd_putdata_c16 check
+! 37: fgd_putdata_c16 check
   cc16 = (/ 63, 64, 65, 66, 67, 68, 69, 70 /)
   n = fgd_putdata_c16(d, 'data', 5, 1, 0, 4, cc16)
-  call check_ok(ne, 124, d)
-  call check_int(ne, 124, n, 4)
+  call check_ok(ne, 37, d)
+  call check_int(ne, 37, n, 4)
 
   n = fgd_getdata_c16(d, 'data', 5, 0, 1, 0, cc16)
 
@@ -588,1025 +559,1054 @@ program big_test
   else
     dc = dcmplx(61d0 + i, 0d0)
   end if
-  call check_cpx2(ne, 124, i, cc16(i), dc)
+  call check_cpx2(ne, 37, i, cc16(i), dc)
   end do
 
-! 14: fgd_error_string check
+! 38: fgd_error_string check
   n = fgd_getdata_n(d, 'x', 5, 0, 1, 0)
   call fgd_error_string(d, str, GD_FIELD_LEN)
-  call check_str(ne, 14, str, 'Field not found: x')
+  call check_str(ne, 38, str, 'Field not found: x')
 
-! 15: fgd_entry_type check
+! 39: fgd_entry_type check
   n = fgd_entry_type(d, 'data')
-  call check_ok(ne, 15, d)
-  call check_int(ne, 15, n, GD_RAW_ENTRY)
+  call check_ok(ne, 39, d)
+  call check_int(ne, 39, n, GD_RAW_ENTRY)
 
-! 16: fgd_entry (raw) check
+! 40: fgd_entry (raw) check
   n = fgd_entry(d, 'data', ent)
-  call check_ok(ne, 16, d)
-  call check_int2(ne, 16, 1, n, GD_RAW_ENTRY)
-  call check_int2(ne, 16, 2, ent%fragment_index, 0)
-  call check_int2(ne, 16, 3, ent%spf, 8)
-  call check_int2(ne, 16, 4, ent%data_type, GD_INT8)
+  call check_ok(ne, 40, d)
+  call check_int2(ne, 40, 1, n, GD_RAW_ENTRY)
+  call check_int2(ne, 40, 2, ent%fragment_index, 0)
+  call check_int2(ne, 40, 3, ent%spf, 8)
+  call check_int2(ne, 40, 4, ent%data_type, GD_INT8)
 
-! 18: fgd_entry (lincom) check
+! 42: fgd_entry (lincom) check
   n = fgd_entry(d, 'lincom', ent)
-  call check_ok(ne, 18, d)
-  call check_int2(ne, 18, 1, n, GD_LINCOM_ENTRY)
-  call check_int2(ne, 18, 2, ent%n_fields, 3)
-  call check_int2(ne, 18, 3, ent%fragment_index, 0)
-  call check_str2(ne, 18, 4, ent%field(1), 'data')
-  call check_str2(ne, 18, 5, ent%field(2), 'INDEX')
-  call check_str2(ne, 18, 6, ent%field(3), 'linterp')
-  call check_int2(ne, 18, 7, ent%comp_scal, 1)
-  call check_str2(ne, 18, 8, ent%scalar(3), 'const')
-  call check_str2(ne, 18, 9, ent%scalar(6), 'const')
+  call check_ok(ne, 42, d)
+  call check_int2(ne, 42,  1, n, GD_LINCOM_ENTRY)
+  call check_int2(ne, 42,  2, ent%n_fields, 3)
+  call check_int2(ne, 42,  3, ent%fragment_index, 0)
+  call check_str2(ne, 42,  4, ent%field(1), 'data')
+  call check_str2(ne, 42,  5 , ent%field(2), 'INDEX')
+  call check_str2(ne, 42,  6, ent%field(3), 'linterp')
+  call check_int2(ne, 42,  7, ent%comp_scal, 1)
+  call check_str2(ne, 42,  8, ent%scalar(1), '')
+  call check_str2(ne, 42,  9, ent%scalar(2), '')
+  call check_str2(ne, 42, 10, ent%scalar(3), 'const')
+  call check_str2(ne, 42, 11, ent%scalar(4), '')
+  call check_str2(ne, 42, 12, ent%scalar(5), '')
+  call check_str2(ne, 42, 13, ent%scalar(6), 'const')
+  call check_int2(ne, 42, 14, ent%scalar_ind(1), 1)
+  call check_int2(ne, 42, 15, ent%scalar_ind(2), 1)
+  call check_int2(ne, 42, 16, ent%scalar_ind(3), -1)
+  call check_int2(ne, 42, 17, ent%scalar_ind(4), 1)
+  call check_int2(ne, 42, 18, ent%scalar_ind(5), 1)
+  call check_int2(ne, 42, 19, ent%scalar_ind(6), -1)
 
-  cq(1) = dcmplx(1.1, 0.0)
-  cq(2) = dcmplx(2.2, 0.0)
-  cq(3) = dcmplx(2.2, 0.0)
-  cq(4) = dcmplx(3.3, 4.4)
-  cq(5) = dcmplx(5.5, 0.0)
-  cq(6) = dcmplx(5.5, 0.0)
+  cq(1) = dcmplx(1.1d0, 0.0d0)
+  cq(2) = dcmplx(2.2d0, 0.0d0)
+  cq(3) = dcmplx(2.2d0, 0.0d0)
+  cq(4) = dcmplx(3.3d0, 4.4d0)
+  cq(5) = dcmplx(5.5d0, 0.0d0)
+  cq(6) = dcmplx(5.5d0, 0.0d0)
   DO i=1,3
-  call check_cpx2(ne, 18, i * 2 - 1, ent%cm(i), cq(i * 2 - 1))
-  call check_cpx2(ne, 18, i * 2, ent%cb(i), cq(i * 2))
+  call check_cpx2(ne, 42, i * 2 + 18, ent%cm(i), cq(i * 2 - 1))
+  call check_cpx2(ne, 42, i * 2 + 19, ent%cb(i), cq(i * 2))
   end do
 
-! 20: fgd_entry (polynom) check
+! 44: fgd_entry (polynom) check
   n = fgd_entry(d, 'polynom', ent)
-  call check_ok(ne, 20, d)
-  call check_int2(ne, 20, 1, n, GD_POLYNOM_ENTRY)
-  call check_int2(ne, 20, 2, ent%poly_ord, 5)
-  call check_int2(ne, 20, 3, ent%fragment_index, 0)
-  call check_str2(ne, 20, 4, ent%field(1), 'data')
+  call check_ok(ne, 44, d)
+  call check_int2(ne, 44, 1, n, GD_POLYNOM_ENTRY)
+  call check_int2(ne, 44, 2, ent%poly_ord, 5)
+  call check_int2(ne, 44, 3, ent%fragment_index, 0)
+  call check_str2(ne, 44, 4, ent%field(1), 'data')
 
-  cq(1) = dcmplx(1.1, 0.0)
-  cq(2) = dcmplx(2.2, 0.0)
-  cq(3) = dcmplx(2.2, 0.0)
-  cq(4) = dcmplx(3.3, 4.4)
-  cq(5) = dcmplx(5.5, 0.0)
-  cq(6) = dcmplx(5.5, 0.0)
+  cq(1) = dcmplx(1.1d0, 0.0d0)
+  cq(2) = dcmplx(2.2d0, 0.0d0)
+  cq(3) = dcmplx(2.2d0, 0.0d0)
+  cq(4) = dcmplx(3.3d0, 4.4d0)
+  cq(5) = dcmplx(5.5d0, 0.0d0)
+  cq(6) = dcmplx(5.5d0, 0.0d0)
   DO i=1,6
-  call check_cpx2(ne, 30, i, ent%ca(i), cq(i))
+  call check_cpx2(ne, 44, i, ent%ca(i), cq(i))
   end do
 
-! 21: fgd_entry (linterp) check
+! 45: fgd_entry (linterp) check
   n = fgd_entry(d, 'linterp', ent)
-  call check_ok(ne, 21, d)
-  call check_int2(ne, 21, 1, n, GD_LINTERP_ENTRY)
-  call check_int2(ne, 21, 2, ent%fragment_index, 0)
-  call check_str2(ne, 21, 3, ent%field(1), 'data')
-  call check_str2(ne, 21, 4, ent%field(2), './lut')
+  call check_ok(ne, 45, d)
+  call check_int2(ne, 45, 1, n, GD_LINTERP_ENTRY)
+  call check_int2(ne, 45, 2, ent%fragment_index, 0)
+  call check_str2(ne, 45, 3, ent%field(1), 'data')
+  call check_str2(ne, 45, 4, ent%field(2), './lut')
 
-! 22: fgd_entry (bit) check
+! 46: fgd_entry (bit) check
   n = fgd_entry(d, 'bit', ent)
-  call check_ok(ne, 22, d)
-  call check_int2(ne, 22, 1, n, GD_BIT_ENTRY)
-  call check_int2(ne, 22, 2, ent%fragment_index, 0)
-  call check_int2(ne, 22, 3, ent%bitnum, 3)
-  call check_int2(ne, 22, 4, ent%numbits, 4)
-  call check_str2(ne, 22, 5, ent%field(1), 'data')
+  call check_ok(ne, 46, d)
+  call check_int2(ne, 46, 1, n, GD_BIT_ENTRY)
+  call check_int2(ne, 46, 2, ent%fragment_index, 0)
+  call check_int2(ne, 46, 3, ent%bitnum, 3)
+  call check_int2(ne, 46, 4, ent%numbits, 4)
+  call check_str2(ne, 46, 5, ent%field(1), 'data')
 
-! 23: fgd_entry (Sbit) check
+! 47: fgd_entry (Sbit) check
   n = fgd_entry(d, 'sbit', ent)
-  call check_ok(ne, 23, d)
-  call check_int2(ne, 23, 1, n, GD_SBIT_ENTRY)
-  call check_int2(ne, 23, 2, ent%fragment_index, 0)
-  call check_int2(ne, 23, 3, ent%numbits, 6)
-  call check_int2(ne, 23, 4, ent%bitnum, 5)
-  call check_str2(ne, 23, 5, ent%field(1), 'data')
+  call check_ok(ne, 47, d)
+  call check_int2(ne, 47, 1, n, GD_SBIT_ENTRY)
+  call check_int2(ne, 47, 2, ent%fragment_index, 0)
+  call check_int2(ne, 47, 3, ent%numbits, 6)
+  call check_int2(ne, 47, 4, ent%bitnum, 5)
+  call check_str2(ne, 47, 5, ent%field(1), 'data')
 
-! 24: fgd_entry (multiply) check
+! 48: fgd_entry (multiply) check
   n = fgd_entry(d, 'mult', ent)
-  call check_ok(ne, 24, d)
-  call check_int2(ne, 24, 1, n, GD_MULTIPLY_ENTRY)
-  call check_int2(ne, 24, 2, ent%fragment_index, 0)
-  call check_str2(ne, 24, 3, ent%field(1), 'data')
-  call check_str2(ne, 24, 4, ent%field(2), 'sbit')
+  call check_ok(ne, 48, d)
+  call check_int2(ne, 48, 1, n, GD_MULTIPLY_ENTRY)
+  call check_int2(ne, 48, 2, ent%fragment_index, 0)
+  call check_str2(ne, 48, 3, ent%field(1), 'data')
+  call check_str2(ne, 48, 4, ent%field(2), 'sbit')
 
-! 25: fgd_entry (phase) check
+! 49: fgd_entry (phase) check
   n = fgd_entry(d, 'phase', ent)
-  call check_ok(ne, 25, d)
-  call check_int2(ne, 25, 1, n, GD_PHASE_ENTRY)
-  call check_int2(ne, 25, 2, ent%fragment_index, 0)
-  call check_int2(ne, 25, 3, ent%shift, 11)
-  call check_str2(ne, 25, 4, ent%field(1), 'data')
+  call check_ok(ne, 49, d)
+  call check_int2(ne, 49, 1, n, GD_PHASE_ENTRY)
+  call check_int2(ne, 49, 2, ent%fragment_index, 0)
+  call check_int2(ne, 49, 3, ent%shift, 11)
+  call check_str2(ne, 49, 4, ent%field(1), 'data')
 
-! 26: fgd_entry (const) check
+! 50: fgd_entry (const) check
   n = fgd_entry(d, 'const', ent)
-  call check_ok(ne, 26, d)
-  call check_int2(ne, 26, 1, n, GD_CONST_ENTRY)
-  call check_int2(ne, 26, 2, ent%fragment_index, 0)
-  call check_int2(ne, 26, 3, ent%data_type, GD_FLOAT64)
+  call check_ok(ne, 50, d)
+  call check_int2(ne, 50, 1, n, GD_CONST_ENTRY)
+  call check_int2(ne, 50, 2, ent%fragment_index, 0)
+  call check_int2(ne, 50, 3, ent%data_type, GD_FLOAT64)
 
-! 27: fgd_fragment_index check
+! 52: fgd_fragment_index check
   n = fgd_fragment_index(d, 'const')
-  call check_ok(ne, 27, d)
-  call check_int(ne, 27, n, 0)
+  call check_ok(ne, 52, d)
+  call check_int(ne, 52, n, 0)
 
-! 28: fgd_add_raw check
+! 53: fgd_add_raw check
   call fgd_add_raw(d, 'new1', GD_FLOAT64, 3, 0)
-  call check_ok2(ne, 28, 1, d)
+  call check_ok2(ne, 53, 1, d)
 
   n = fgd_entry(d, 'new1', ent)
-  call check_ok2(ne, 28, 2, d)
-  call check_int2(ne, 28, 3, ent%fragment_index, 0)
-  call check_int2(ne, 28, 4, ent%spf, 3)
-  call check_int2(ne, 28, 5, ent%data_type, GD_FLOAT64)
-  call check_int2(ne, 28, 6, n, GD_RAW_ENTRY)
+  call check_ok2(ne, 53, 2, d)
+  call check_int2(ne, 53, 3, ent%fragment_index, 0)
+  call check_int2(ne, 53, 4, ent%spf, 3)
+  call check_int2(ne, 53, 5, ent%data_type, GD_FLOAT64)
+  call check_int2(ne, 53, 6, n, GD_RAW_ENTRY)
 
-! 29: fgd_add_lincom check
+! 54: fgd_add_lincom check
   call fgd_add_lincom(d, 'new2', 2, 'in1', 9.9d0, 8.8d0, &
   'in2', 7.7d0, 6.6d0, '', 0d0, 0d0, 0)
-  call check_ok2(ne, 29, 1, d)
+  call check_ok2(ne, 54, 1, d)
 
   n = fgd_entry(d, 'new2', ent)
-  call check_ok2(ne, 29, 2, d)
-  call check_int2(ne, 29, 3, n, GD_LINCOM_ENTRY)
-  call check_int2(ne, 29, 4, ent%n_fields, 2)
-  call check_int2(ne, 29, 5, ent%fragment_index, 0)
-  call check_str2(ne, 29, 6, ent%field(1), 'in1')
-  call check_str2(ne, 29, 7, ent%field(2), 'in2')
-  call check_int2(ne, 29, 8, ent%comp_scal, 0)
+  call check_ok2(ne, 54, 2, d)
+  call check_int2(ne, 54, 3, n, GD_LINCOM_ENTRY)
+  call check_int2(ne, 54, 4, ent%n_fields, 2)
+  call check_int2(ne, 54, 5, ent%fragment_index, 0)
+  call check_str2(ne, 54, 6, ent%field(1), 'in1')
+  call check_str2(ne, 54, 7, ent%field(2), 'in2')
+  call check_int2(ne, 54, 8, ent%comp_scal, 0)
 
-  q = (/ 9.9, 8.8, 7.7, 6.6, 5.5, 5.5 /)
+  q = (/ 9.9d0, 8.8d0, 7.7d0, 6.6d0, 5.5d0, 5.5d0 /)
   do i=1,2
-  call check_dbl2(ne, 29, i * 2 - 1, ent%m(i), q(i * 2 - 1))
-  call check_dbl2(ne, 29, i * 2, ent%b(i), q(i * 2))
+  call check_dbl2(ne, 54, i * 2 - 1, ent%m(i), q(i * 2 - 1))
+  call check_dbl2(ne, 54, i * 2, ent%b(i), q(i * 2))
   end do
 
-! 30: fgd_add_clincom check
+! 55: fgd_add_clincom check
   cq(1) = dcmplx(1.1, 1.2)
   cq(2) = dcmplx(1.3, 1.4)
   cq(3) = dcmplx(1.4, 1.5)
   cq(4) = dcmplx(1.6, 1.7)
   call fgd_add_clincom(d, 'new3', 2, 'in1', cq(1), cq(2), &
   'in2', cq(3), cq(4), '', cq(5), cq(6), 0)
-  call check_ok2(ne, 30, 1, d)
+  call check_ok2(ne, 55, 1, d)
 
   n = fgd_entry(d, 'new3', ent)
-  call check_ok2(ne, 30, 2, d)
-  call check_int2(ne, 30, 1, ent%n_fields, 2)
-  call check_int2(ne, 30, 2, n, GD_LINCOM_ENTRY)
-  call check_int2(ne, 30, 3, ent%fragment_index, 0)
-  call check_str2(ne, 30, 4, ent%field(1), 'in1')
-  call check_str2(ne, 30, 5, ent%field(2), 'in2')
-  call check_int2(ne, 30, 6, ent%comp_scal, 1)
+  call check_ok2(ne, 55, 2, d)
+  call check_int2(ne, 55, 3, ent%n_fields, 2)
+  call check_int2(ne, 55, 4, n, GD_LINCOM_ENTRY)
+  call check_int2(ne, 55, 5, ent%fragment_index, 0)
+  call check_str2(ne, 55, 6, ent%field(1), 'in1')
+  call check_str2(ne, 55, 7, ent%field(2), 'in2')
+  call check_int2(ne, 55, 8, ent%comp_scal, 1)
 
   cq(1) = dcmplx(1.1, 1.2)
   cq(2) = dcmplx(1.3, 1.4)
   cq(3) = dcmplx(1.4, 1.5)
   cq(4) = dcmplx(1.6, 1.7)
   do i=1,2
-  call check_cpx2(ne, 30, i * 2 - 1, ent%cm(i), cq(i * 2 - 1))
-  call check_cpx2(ne, 30, i * 2, ent%cb(i), cq(i * 2))
+  call check_cpx2(ne, 55, i * 2 + 7, ent%cm(i), cq(i * 2 - 1))
+  call check_cpx2(ne, 55, i * 2 + 8, ent%cb(i), cq(i * 2))
   end do
 
-! 31: fgd_add_polynom check
+! 56: fgd_add_polynom check
   call fgd_add_polynom(d, 'new4', 3, 'in1', 3d3, 4d4, 5d5, 6d6, 0d0, 0d0, &
   0)
-  call check_ok2(ne, 31, 1, d)
+  call check_ok2(ne, 56, 1, d)
 
   n = fgd_entry(d, 'new4', ent)
-  call check_ok2(ne, 31, 2, d)
-  call check_int2(ne, 31, 1, n, GD_POLYNOM_ENTRY)
-  call check_int2(ne, 31, 2, ent%poly_ord, 3)
-  call check_int2(ne, 31, 3, ent%fragment_index, 0)
-  call check_str2(ne, 31, 4, ent%field(1), 'in1')
-  call check_int2(ne, 31, 5, ent%comp_scal, 0)
+  call check_ok2(ne, 56, 2, d)
+  call check_int2(ne, 56, 1, n, GD_POLYNOM_ENTRY)
+  call check_int2(ne, 56, 2, ent%poly_ord, 3)
+  call check_int2(ne, 56, 3, ent%fragment_index, 0)
+  call check_str2(ne, 56, 4, ent%field(1), 'in1')
+  call check_int2(ne, 56, 5, ent%comp_scal, 0)
 
   q = (/ 3d3, 4d4, 5d5, 6d6, 5.5d0, 5.5d0 /)
   DO i=1,4
-  call check_dbl2(ne, 31, i, ent%a(i), q(i))
+  call check_dbl2(ne, 56, i, ent%a(i), q(i))
   end do
 
-! 32: fgd_add_cpolynom check
+! 57: fgd_add_cpolynom check
   cq(1) = dcmplx(3.1, 7.0)
   cq(2) = dcmplx(4.2, 8.0)
   cq(3) = dcmplx(5.2, 9.0)
   cq(4) = dcmplx(6.3, 4.4)
   call fgd_add_cpolynom(d, 'new5', 3, 'in1', cq(1), cq(2), cq(3), cq(4), &
   dcmplx(0d0,0d0), dcmplx(0d0,0d0), 0)
-  call check_ok2(ne, 32, 1, d)
+  call check_ok2(ne, 57, 1, d)
 
   n = fgd_entry(d, 'new5', ent)
-  call check_ok2(ne, 32, 2, d)
-  call check_int2(ne, 32, 1, n, GD_POLYNOM_ENTRY)
-  call check_int2(ne, 32, 2, ent%poly_ord, 3)
-  call check_int2(ne, 32, 3, ent%fragment_index, 0)
-  call check_str2(ne, 32, 4, ent%field(1), 'in1')
-  call check_int2(ne, 31, 5, ent%comp_scal, 1)
+  call check_ok2(ne, 57, 2, d)
+  call check_int2(ne, 57, 1, n, GD_POLYNOM_ENTRY)
+  call check_int2(ne, 57, 2, ent%poly_ord, 3)
+  call check_int2(ne, 57, 3, ent%fragment_index, 0)
+  call check_str2(ne, 57, 4, ent%field(1), 'in1')
+  call check_int2(ne, 57, 5, ent%comp_scal, 1)
 
   cq(1) = dcmplx(3.1, 7.0)
   cq(2) = dcmplx(4.2, 8.0)
   cq(3) = dcmplx(5.2, 9.0)
   cq(4) = dcmplx(6.3, 4.4)
   DO i=1,4
-  call check_cpx2(ne, 32, i, ent%ca(i), cq(i))
+  call check_cpx2(ne, 57, i, ent%ca(i), cq(i))
   end do
 
-! 33: fgd_add_linterp check
+! 58: fgd_add_linterp check
   call fgd_add_linterp(d, "new6", "in", "./some/table", 0)
-  call check_ok2(ne, 33, 1, d)
+  call check_ok2(ne, 58, 1, d)
 
   n = fgd_entry(d, 'new6', ent)
-  call check_ok2(ne, 33, 2, d)
-  call check_int2(ne, 33, 1, n, GD_LINTERP_ENTRY)
-  call check_int2(ne, 33, 2, ent%fragment_index, 0)
-  call check_str2(ne, 33, 3, ent%field(1), 'in')
-  call check_str2(ne, 33, 4, ent%field(2), './some/table')
+  call check_ok2(ne, 58, 2, d)
+  call check_int2(ne, 58, 1, n, GD_LINTERP_ENTRY)
+  call check_int2(ne, 58, 2, ent%fragment_index, 0)
+  call check_str2(ne, 58, 3, ent%field(1), 'in')
+  call check_str2(ne, 58, 4, ent%field(2), './some/table')
 
-! 34: fgd_add_bit check
+! 59: fgd_add_bit check
   call fgd_add_bit(d, "new7", "in", 13, 12, 0)
-  call check_ok2(ne, 34, 1, d)
+  call check_ok2(ne, 59, 1, d)
 
   n = fgd_entry(d, 'new7', ent)
-  call check_ok2(ne, 34, 2, d)
-  call check_int2(ne, 34, 1, n, GD_BIT_ENTRY)
-  call check_int2(ne, 34, 2, ent%fragment_index, 0)
-  call check_int2(ne, 34, 3, ent%numbits, 12)
-  call check_int2(ne, 34, 4, ent%bitnum, 13)
-  call check_str2(ne, 34, 5, ent%field(1), 'in')
+  call check_ok2(ne, 59, 2, d)
+  call check_int2(ne, 59, 1, n, GD_BIT_ENTRY)
+  call check_int2(ne, 59, 2, ent%fragment_index, 0)
+  call check_int2(ne, 59, 3, ent%numbits, 12)
+  call check_int2(ne, 59, 4, ent%bitnum, 13)
+  call check_str2(ne, 59, 5, ent%field(1), 'in')
 
-! 35: fgd_add_sbit check
+! 60: fgd_add_sbit check
   call fgd_add_sbit(d, "new8", "in", 13, 12, 0)
-  call check_ok2(ne, 35, 1, d)
+  call check_ok2(ne, 60, 1, d)
 
   n = fgd_entry(d, "new8", ent)
-  call check_ok2(ne, 35, 2, d)
-  call check_int2(ne, 35, 1, n, GD_SBIT_ENTRY)
-  call check_int2(ne, 35, 2, ent%fragment_index, 0)
-  call check_int2(ne, 35, 3, ent%numbits, 12)
-  call check_int2(ne, 35, 4, ent%bitnum, 13)
-  call check_str2(ne, 35, 5, ent%field(1), 'in')
+  call check_ok2(ne, 60, 2, d)
+  call check_int2(ne, 60, 1, n, GD_SBIT_ENTRY)
+  call check_int2(ne, 60, 2, ent%fragment_index, 0)
+  call check_int2(ne, 60, 3, ent%numbits, 12)
+  call check_int2(ne, 60, 4, ent%bitnum, 13)
+  call check_str2(ne, 60, 5, ent%field(1), 'in')
 
-! 36: fgd_add_multiply check
+! 61: fgd_add_multiply check
   call fgd_add_multiply(d, 'new9', 'in1', 'in2', 0)
-  call check_ok2(ne, 36, 1, d)
+  call check_ok2(ne, 61, 1, d)
 
   n = fgd_entry(d, 'new9', ent)
-  call check_ok2(ne, 36, 2, d)
-  call check_int2(ne, 36, 1, n, GD_MULTIPLY_ENTRY)
-  call check_int2(ne, 36, 2, ent%fragment_index, 0)
-  call check_str2(ne, 36, 3, ent%field(1), 'in1')
-  call check_str2(ne, 36, 4, ent%field(2), 'in2')
+  call check_ok2(ne, 61, 2, d)
+  call check_int2(ne, 61, 1, n, GD_MULTIPLY_ENTRY)
+  call check_int2(ne, 61, 2, ent%fragment_index, 0)
+  call check_str2(ne, 61, 3, ent%field(1), 'in1')
+  call check_str2(ne, 61, 4, ent%field(2), 'in2')
 
-! 37: fgd_add_phase check
+! 62: fgd_add_phase check
   call fgd_add_phase(d, 'new10', 'in1', 22, 0)
-  call check_ok2(ne, 37, 1, d)
+  call check_ok2(ne, 62, 1, d)
 
   n = fgd_entry(d, 'new10', ent)
-  call check_ok2(ne, 37, 2, d)
-  call check_int2(ne, 37, 1, n, GD_PHASE_ENTRY)
-  call check_int2(ne, 37, 2, ent%fragment_index, 0)
-  call check_int2(ne, 37, 3, ent%shift, 22)
-  call check_str2(ne, 37, 4, ent%field(1), 'in1')
+  call check_ok2(ne, 62, 2, d)
+  call check_int2(ne, 62, 1, n, GD_PHASE_ENTRY)
+  call check_int2(ne, 62, 2, ent%fragment_index, 0)
+  call check_int2(ne, 62, 3, ent%shift, 22)
+  call check_str2(ne, 62, 4, ent%field(1), 'in1')
 
-! 38: fgd_add_const check
+! 63: fgd_add_const check
   call fgd_add_const(d, 'new11', GD_FLOAT64, 0)
-  call check_ok2(ne, 38, 1, d)
+  call check_ok2(ne, 63, 1, d)
 
   n = fgd_entry(d, 'new11', ent)
-  call check_ok2(ne, 38, 2, d)
-  call check_int2(ne, 38, 1, n, GD_CONST_ENTRY)
-  call check_int2(ne, 38, 2, ent%fragment_index, 0)
-  call check_int2(ne, 38, 3, ent%data_type, GD_FLOAT64)
+  call check_ok2(ne, 63, 2, d)
+  call check_int2(ne, 63, 1, n, GD_CONST_ENTRY)
+  call check_int2(ne, 63, 2, ent%fragment_index, 0)
+  call check_int2(ne, 63, 3, ent%data_type, GD_FLOAT64)
 
   call fgd_get_constant_r4(d, 'new11', fl)
-  call check_ok2(ne, 38, 3, d)
-  call check_dbl(ne, 38, 1d0 * fl, 0d0)
+  call check_ok2(ne, 63, 3, d)
+  call check_dbl(ne, 63, 1d0 * fl, 0d0)
 
-! 125: fgd_add check
-  ent%shift = 33
-  ent%field(1) = 'new9'
-  ent%fragment_index = 0
-  ent%field_type = GD_PHASE_ENTRY
-  call fgd_add(d, 'new13', ent)
-  call check_ok2(ne, 125, 1, d)
-
-  n = fgd_entry(d, 'new13', ent)
-  call check_ok2(ne, 125, 2, d)
-  call check_int2(ne, 125, 1, n, GD_PHASE_ENTRY)
-  call check_int2(ne, 125, 2, ent%fragment_index, 0)
-  call check_int2(ne, 125, 3, ent%shift, 33)
-  call check_str2(ne, 125, 4, ent%field(1), 'new9')
-
-! 39: fgd_fragmentname check
+! 64: fgd_fragmentname check
   str = fgd_fragmentname(d, 0)
-  call check_ok(ne, 39, d)
-  call check_eos(ne, 39, str, 'test95_dirfile'//DIRSEP//'format')
+  call check_ok(ne, 64, d)
+  call check_eos(ne, 64, str, 'test95_dirfile'//DIRSEP//'format')
 
-! 40: fgd_nfragments check
+! 65: fgd_nfragments check
   n = fgd_nfragments(d)
-  call check_ok(ne, 40, d)
-  call check_int(ne, 40, n, 1)
+  call check_ok(ne, 65, d)
+  call check_int(ne, 65, n, 1)
 
-! 41: fgd_include check
+! 66: fgd_include check
   call fgd_include(d, 'form2', 0, 0)
-  call check_ok2(ne, 41, 3, d)
+  call check_ok2(ne, 66, 3, d)
 
   call fgd_get_constant_i1(d, 'const2', ci1(1))
-  call check_ok2(ne, 41, 3, d)
-  call check_int2(ne, 1, 41, int(ci1(1)), -19)
+  call check_ok2(ne, 66, 3, d)
+  call check_int2(ne, 1, 66, int(ci1(1)), -19)
 
-! 42: fgd_nfields_by_type check
+! 67: fgd_nfields_by_type check
   n = fgd_nfields_by_type(d, GD_LINCOM_ENTRY)
-  call check_ok(ne, 42, d)
-  call check_int(ne, 42, n, 3)
+  call check_ok(ne, 67, d)
+  call check_int(ne, 67, n, 3)
 
-! 43: fgd_field_list_by_type check
+! 68: fgd_field_list_by_type check
   fields(1) = 'lincom'
   fields(2) = 'new2'
   fields(3) = 'new3'
   l = flen
   call fgd_field_list_by_type(flist, d, GD_LINCOM_ENTRY, l)
-  call check_ok(ne, 43, d)
-  call check_int(ne, 43, l, flen)
+  call check_ok(ne, 68, d)
+  call check_int(ne, 68, l, flen)
 
   do i = 1, n
-  call check_str2(ne, 43, i, flist(i), fields(i))
+  call check_str2(ne, 68, i, flist(i), fields(i))
   end do
 
-! 44: fgd_nvectors check
+! 69: fgd_nvectors check
   n = fgd_nvectors(d)
-  call check_ok(ne, 44, d)
-  call check_int(ne, 44, n, 25)
+  call check_ok(ne, 69, d)
+  call check_int(ne, 69, n, 24)
 
-! 45: fgd_vector_list check
+! 70: fgd_vector_list check
   fields = (/    'INDEX      ', 'alias      ', 'bit        ', 'data       ', &
   'div        ', 'lincom     ', 'linterp    ', 'mplex      ', 'mult       ', &
-  'new1       ', 'new10      ', 'new13      ', 'new2       ', 'new3       ', &
-  'new4       ', 'new5       ', 'new6       ', 'new7       ', 'new8       ', &
-  'new9       ', 'phase      ', 'polynom    ', 'recip      ', 'sbit       ', &
-  'window     ', '           ', '           ', '           ' /)
+  'new1       ', 'new10      ', 'new2       ', 'new3       ', 'new4       ', &
+  'new5       ', 'new6       ', 'new7       ', 'new8       ', 'new9       ', &
+  'phase      ', 'polynom    ', 'recip      ', 'sbit       ', 'window     ', &
+  '           ', '           ', '           ', '           ' /)
   l = flen
   call fgd_vector_list(flist, d, l)
-  call check_ok(ne, 45, d)
-  call check_int(ne, 45, l, flen)
+  call check_ok(ne, 70, d)
+  call check_int(ne, 70, l, flen)
  
   do i=1,n
-  call check_str2(ne, 45, i, flist(i), fields(i))
+  call check_str2(ne, 70, i, flist(i), fields(i))
   end do
 
-! 46: fgd_madd_lincom check
+! 71: fgd_madd_lincom check
   call fgd_madd_lincom(d, 'data', 'mnew1', 2, 'in1', 9.9d0, 8.8d0, &
   'in2', 7.7d0, 6.6d0, '', 0d0, 0d0)
-  call check_ok2(ne, 46, 1, d)
+  call check_ok2(ne, 71, 1, d)
 
   n = fgd_entry(d, 'data/mnew1', ent)
-  call check_ok2(ne, 46, 2, d)
-  call check_int2(ne, 46, 3, n, GD_LINCOM_ENTRY)
-  call check_int2(ne, 46, 4, ent%n_fields, 2)
-  call check_int2(ne, 46, 5, ent%fragment_index, 0)
-  call check_str2(ne, 46, 6, ent%field(1), 'in1')
-  call check_str2(ne, 46, 7, ent%field(2), 'in2')
-  call check_int2(ne, 46, 8, ent%comp_scal, 0)
+  call check_ok2(ne, 71, 2, d)
+  call check_int2(ne, 71, 3, n, GD_LINCOM_ENTRY)
+  call check_int2(ne, 71, 4, ent%n_fields, 2)
+  call check_int2(ne, 71, 5, ent%fragment_index, 0)
+  call check_str2(ne, 71, 6, ent%field(1), 'in1')
+  call check_str2(ne, 71, 7, ent%field(2), 'in2')
+  call check_int2(ne, 71, 8, ent%comp_scal, 0)
 
-  q = (/ 9.9, 8.8, 7.7, 6.6, 5.5, 5.5 /)
+  q = (/ 9.9d0, 8.8d0, 7.7d0, 6.6d0, 5.5d0, 5.5d0 /)
   DO i=1,2
-  call check_dbl2(ne, 46, i * 2 - 1, ent%m(i), q(i *  2 - 1))
-  call check_dbl2(ne, 46, i * 2, ent%b(i), q(i * 2))
+  call check_dbl2(ne, 71, i * 2 - 1, ent%m(i), q(i *  2 - 1))
+  call check_dbl2(ne, 71, i * 2, ent%b(i), q(i * 2))
   end do
 
-! 47: fgd_madd_clincom check
+! 72: fgd_madd_clincom check
   cq(1) = dcmplx(1.1, 1.2)
   cq(2) = dcmplx(1.3, 1.4)
   cq(3) = dcmplx(1.4, 1.5)
   cq(4) = dcmplx(1.6, 1.7)
   call fgd_madd_clincom(d, 'data', 'mnew2', 2, 'in1', cq(1), cq(2), &
   'in2', cq(3), cq(4), '', cq(5), cq(6))
-  call check_ok2(ne, 47, 1, d)
+  call check_ok2(ne, 72, 1, d)
 
   n = fgd_entry(d, 'data/mnew2', ent)
-  call check_ok(ne, 47, d)
-  call check_int2(ne, 47, 1, n, GD_LINCOM_ENTRY)
-  call check_int2(ne, 47, 2, ent%n_fields, 2)
-  call check_int2(ne, 47, 3, ent%fragment_index, 0)
-  call check_str2(ne, 47, 4, ent%field(1), 'in1')
-  call check_str2(ne, 47, 5, ent%field(2), 'in2')
-  call check_int2(ne, 47, 6, ent%comp_scal, 1)
+  call check_ok(ne, 72, d)
+  call check_int2(ne, 72, 1, n, GD_LINCOM_ENTRY)
+  call check_int2(ne, 72, 2, ent%n_fields, 2)
+  call check_int2(ne, 72, 3, ent%fragment_index, 0)
+  call check_str2(ne, 72, 4, ent%field(1), 'in1')
+  call check_str2(ne, 72, 5, ent%field(2), 'in2')
+  call check_int2(ne, 72, 6, ent%comp_scal, 1)
 
   cq(1) = dcmplx(1.1, 1.2)
   cq(2) = dcmplx(1.3, 1.4)
   cq(3) = dcmplx(1.4, 1.5)
   cq(4) = dcmplx(1.6, 1.7)
   DO i=1,2
-  call check_cpx2(ne, 47, i * 2 - 1, ent%cm(i), cq(i * 2 - 1))
-  call check_cpx2(ne, 47, i * 2, ent%cb(i), cq(i * 2))
+  call check_cpx2(ne, 72, i * 2 - 1, ent%cm(i), cq(i * 2 - 1))
+  call check_cpx2(ne, 72, i * 2, ent%cb(i), cq(i * 2))
   end do
 
-! 48: fgd_madd_polynom check
+! 73: fgd_madd_polynom check
   call fgd_madd_polynom(d, 'data', 'mnew3', 3, 'in1', 3d3, 4d4, 5d5, &
      6d6, 0d0, 0d0)
-  call check_ok2(ne, 48, 1, d)
+  call check_ok2(ne, 73, 1, d)
 
   n = fgd_entry(d, 'data/mnew3', ent)
-  call check_ok2(ne, 48, 2, d)
-  call check_int2(ne, 48, 1, n, GD_POLYNOM_ENTRY)
-  call check_int2(ne, 48, 2, ent%poly_ord, 3)
-  call check_int2(ne, 48, 3, ent%fragment_index, 0)
-  call check_str2(ne, 48, 4, ent%field(1), 'in1')
+  call check_ok2(ne, 73, 2, d)
+  call check_int2(ne, 73, 1, n, GD_POLYNOM_ENTRY)
+  call check_int2(ne, 73, 2, ent%poly_ord, 3)
+  call check_int2(ne, 73, 3, ent%fragment_index, 0)
+  call check_str2(ne, 73, 4, ent%field(1), 'in1')
 
   q = (/ 3d3, 4d4, 5d5, 6d6, 5.5d0, 5.5d0 /)
   DO i=1,4
-  call check_dbl2(ne, 48, i, ent%a(i), q(i))
+  call check_dbl2(ne, 73, i, ent%a(i), q(i))
   end do
 
-! 49: fgd_madd_cpolynom check
+! 74: fgd_madd_cpolynom check
   cq(1) = dcmplx(1.1, 0.0)
   cq(2) = dcmplx(2.2, 0.0)
   cq(3) = dcmplx(2.2, 0.0)
   cq(4) = dcmplx(3.3, 4.4)
   call fgd_madd_cpolynom(d, 'data', 'mnew5', 3, 'in1', cq(1), cq(2), &
      cq(3), cq(4), dcmplx(0d0,0d0), dcmplx(0d0,0d0))
-  call check_ok2(ne, 49, 1, d)
+  call check_ok2(ne, 74, 1, d)
 
   n = fgd_entry(d, 'data/mnew5', ent)
-  call check_ok2(ne, 49, 2, d)
-  call check_int2(ne, 49, 1, n, GD_POLYNOM_ENTRY)
-  call check_int2(ne, 49, 2, ent%poly_ord, 3)
-  call check_int2(ne, 49, 3, ent%fragment_index, 0)
-  call check_str2(ne, 49, 4, ent%field(1), 'in1')
+  call check_ok2(ne, 74, 2, d)
+  call check_int2(ne, 74, 1, n, GD_POLYNOM_ENTRY)
+  call check_int2(ne, 74, 2, ent%poly_ord, 3)
+  call check_int2(ne, 74, 3, ent%fragment_index, 0)
+  call check_str2(ne, 74, 4, ent%field(1), 'in1')
 
   cq(1) = dcmplx(1.1, 0.0)
   cq(2) = dcmplx(2.2, 0.0)
   cq(3) = dcmplx(2.2, 0.0)
   cq(4) = dcmplx(3.3, 4.4)
   DO i=1,4
-  call check_cpx2(ne, 49, i, ent%ca(i), cq(i))
+  call check_cpx2(ne, 74, i, ent%ca(i), cq(i))
   end do
 
-! 50: fgd_madd_linterp check
+! 75: fgd_madd_linterp check
   call fgd_madd_linterp(d, "data", "mnew6", "in", "./more/table")
-  call check_ok2(ne, 50, 1, d)
+  call check_ok2(ne, 75, 1, d)
 
   n = fgd_entry(d, 'data/mnew6', ent)
-  call check_ok2(ne, 50, 2, d)
-  call check_int2(ne, 50, 1, n, GD_LINTERP_ENTRY)
-  call check_int2(ne, 50, 2, ent%fragment_index, 0)
-  call check_str2(ne, 50, 3, ent%field(1), 'in')
-  call check_str2(ne, 50, 4, ent%field(2), './more/table')
+  call check_ok2(ne, 75, 2, d)
+  call check_int2(ne, 75, 1, n, GD_LINTERP_ENTRY)
+  call check_int2(ne, 75, 2, ent%fragment_index, 0)
+  call check_str2(ne, 75, 3, ent%field(1), 'in')
+  call check_str2(ne, 75, 4, ent%field(2), './more/table')
 
-! 51: fgd_madd_bit check
+! 76: fgd_madd_bit check
   call fgd_madd_bit(d, "data", "mnew7", "in", 13, 12)
-  call check_ok2(ne, 51, 1, d)
+  call check_ok2(ne, 76, 1, d)
 
   n = fgd_entry(d, 'data/mnew7', ent)
-  call check_ok2(ne, 51, 2, d)
-  call check_int2(ne, 51, 1, n, GD_BIT_ENTRY)
-  call check_int2(ne, 51, 2, ent%fragment_index, 0)
-  call check_int2(ne, 51, 3, ent%numbits, 12)
-  call check_int2(ne, 51, 4, ent%bitnum, 13)
-  call check_str2(ne, 51, 5, ent%field(1), 'in')
+  call check_ok2(ne, 76, 2, d)
+  call check_int2(ne, 76, 1, n, GD_BIT_ENTRY)
+  call check_int2(ne, 76, 2, ent%fragment_index, 0)
+  call check_int2(ne, 76, 3, ent%numbits, 12)
+  call check_int2(ne, 76, 4, ent%bitnum, 13)
+  call check_str2(ne, 76, 5, ent%field(1), 'in')
 
-! 52: fgd_madd_sbit check
+! 77: fgd_madd_sbit check
   call fgd_madd_sbit(d, "data", "mnew8", "in", 13, 12)
-  call check_ok2(ne, 52, 1, d)
+  call check_ok2(ne, 77, 1, d)
 
   n = fgd_entry(d, 'data/mnew8', ent)
-  call check_ok2(ne, 52, 2, d)
-  call check_int2(ne, 52, 1, n, GD_SBIT_ENTRY)
-  call check_int2(ne, 52, 2, ent%fragment_index, 0)
-  call check_int2(ne, 52, 3, ent%numbits, 12)
-  call check_int2(ne, 52, 4, ent%bitnum, 13)
-  call check_str2(ne, 52, 5, ent%field(1), 'in')
+  call check_ok2(ne, 77, 2, d)
+  call check_int2(ne, 77, 1, n, GD_SBIT_ENTRY)
+  call check_int2(ne, 77, 2, ent%fragment_index, 0)
+  call check_int2(ne, 77, 3, ent%numbits, 12)
+  call check_int2(ne, 77, 4, ent%bitnum, 13)
+  call check_str2(ne, 77, 5, ent%field(1), 'in')
 
-! 53: fgd_madd_multiply check
+! 78: fgd_madd_multiply check
   call fgd_madd_multiply(d, 'data', 'mnew9', 'in1', 'in2')
-  call check_ok2(ne, 53, 1, d)
+  call check_ok2(ne, 78, 1, d)
 
   n = fgd_entry(d, 'data/mnew9', ent)
-  call check_ok2(ne, 53, 2, d)
-  call check_int2(ne, 53, 1, n, GD_MULTIPLY_ENTRY)
-  call check_int2(ne, 53, 2, ent%fragment_index, 0)
-  call check_str2(ne, 53, 3, ent%field(1), 'in1')
-  call check_str2(ne, 53, 4, ent%field(2), 'in2')
+  call check_ok2(ne, 78, 2, d)
+  call check_int2(ne, 78, 1, n, GD_MULTIPLY_ENTRY)
+  call check_int2(ne, 78, 2, ent%fragment_index, 0)
+  call check_str2(ne, 78, 3, ent%field(1), 'in1')
+  call check_str2(ne, 78, 4, ent%field(2), 'in2')
 
-! 54: fgd_madd_phase check
+! 79: fgd_madd_phase check
   call fgd_madd_phase(d, 'data', 'mnew10', 'in1', 22)
-  call check_ok2(ne, 54, 1, d)
+  call check_ok2(ne, 79, 1, d)
 
   n = fgd_entry(d, 'data/mnew10', ent)
-  call check_ok2(ne, 54, 2, d)
-  call check_int2(ne, 54, 1, n, GD_PHASE_ENTRY)
-  call check_int2(ne, 54, 2, ent%fragment_index, 0)
-  call check_int2(ne, 54, 3, ent%shift, 22)
-  call check_str2(ne, 54, 4, ent%field(1), 'in1')
+  call check_ok2(ne, 79, 2, d)
+  call check_int2(ne, 79, 1, n, GD_PHASE_ENTRY)
+  call check_int2(ne, 79, 2, ent%fragment_index, 0)
+  call check_int2(ne, 79, 3, ent%shift, 22)
+  call check_str2(ne, 79, 4, ent%field(1), 'in1')
 
-! 55: fgd_madd_const check
+! 80: fgd_madd_const check
   call fgd_madd_const(d, 'data', 'mnew11', GD_FLOAT64)
-  call check_ok2(ne, 55, 1, d)
+  call check_ok2(ne, 80, 1, d)
 
   n = fgd_entry(d, 'data/mnew11', ent)
-  call check_ok2(ne, 55, 2, d)
-  call check_int2(ne, 55, 1, n, GD_CONST_ENTRY)
-  call check_int2(ne, 55, 2, ent%fragment_index, 0)
-  call check_int2(ne, 55, 3, ent%data_type, GD_FLOAT64)
+  call check_ok2(ne, 80, 2, d)
+  call check_int2(ne, 80, 1, n, GD_CONST_ENTRY)
+  call check_int2(ne, 80, 2, ent%fragment_index, 0)
+  call check_int2(ne, 80, 3, ent%data_type, GD_FLOAT64)
 
   call fgd_get_constant_r4(d, 'data/mnew11', fl)
-  call check_ok2(ne, 55, 3, d)
-  call check_dbl(ne, 55, 1d0 * fl, 0d0)
+  call check_ok2(ne, 80, 3, d)
+  call check_dbl(ne, 80, 1d0 * fl, 0d0)
 
-! 126: fgd_madd check
-  ent%shift = 33
-  ent%field(1) = 'data/mnew10'
-  ent%fragment_index = 0
-  ent%field_type = GD_PHASE_ENTRY
-  call fgd_madd(d, 'data', 'mnew4', ent)
-  call check_ok2(ne, 126, 1, d)
-
-  n = fgd_entry(d, 'data/mnew4', ent)
-  call check_ok2(ne, 126, 2, d)
-  call check_int2(ne, 126, 1, n, GD_PHASE_ENTRY)
-  call check_int2(ne, 126, 2, ent%fragment_index, 0)
-  call check_int2(ne, 126, 3, ent%shift, 33)
-  call check_str2(ne, 126, 4, ent%field(1), 'data/mnew10')
-
-! 56: fgd_get_string check
+! 81: fgd_get_string check
   n = fgd_get_string(d, 'string', GD_FIELD_LEN, str)
-  call check_ok(ne, 56, d)
-  call check_int(ne, 56, n, 17)
-  call check_str(ne, 56, str, "Zaphod Beeblebrox")
+  call check_ok(ne, 81, d)
+  call check_int(ne, 81, n, 17)
+  call check_str(ne, 81, str, "Zaphod Beeblebrox")
 
-! 57: fgd_add_string check
+! 82: fgd_add_string check
   call fgd_add_string(d, 'new12', 0)
-  call check_ok2(ne, 57, 1, d)
+  call check_ok2(ne, 82, 1, d)
 
   n = fgd_get_string(d, 'new12', GD_FIELD_LEN, str)
-  call check_ok2(ne, 57, 2, d)
-  call check_str(ne, 57, str, "")
+  call check_ok2(ne, 82, 2, d)
+  call check_str(ne, 82, str, "")
 
-! 58: fgd_madd_string check
+! 83: fgd_madd_string check
   call fgd_madd_string(d, "data", 'mnew12')
-  call check_ok2(ne, 58, 1, d)
+  call check_ok2(ne, 83, 1, d)
 
   n = fgd_get_string(d, 'data/mnew12', GD_FIELD_LEN, str)
-  call check_ok2(ne, 58, 2, d)
-  call check_str(ne, 58, str, "")
+  call check_ok2(ne, 83, 2, d)
+  call check_str(ne, 83, str, "")
 
-! 59: fgd_add_spec check
+! 84: fgd_add_spec check
   call fgd_add_spec(d, 'lorem STRING "Lorem ipsum"', 0)
-  call check_ok2(ne, 59, 1, d)
+  call check_ok2(ne, 84, 1, d)
 
   n = fgd_get_string(d, 'lorem', GD_FIELD_LEN, str)
-  call check_ok2(ne, 59, 2, d)
-  call check_str(ne, 59, str, "Lorem ipsum")
+  call check_ok2(ne, 84, 2, d)
+  call check_str(ne, 84, str, "Lorem ipsum")
 
-! 60: fgd_madd_spec check
+! 85: fgd_madd_spec check
   call fgd_madd_spec(d, 'ipsum STRING "dolor sit amet."', 'lorem')
-  call check_ok2(ne, 60, 1, d)
+  call check_ok2(ne, 85, 1, d)
 
   n = fgd_get_string(d, 'lorem/ipsum', GD_FIELD_LEN, str)
-  call check_ok2(ne, 60, 2, d)
-  call check_str(ne, 60, str, "dolor sit amet.")
+  call check_ok2(ne, 85, 2, d)
+  call check_str(ne, 85, str, "dolor sit amet.")
 
-! 61: fgd_put_constant_i1 check
-  ci1(1) = 61
+! 86: fgd_put_constant_i1 check
+  ci1(1) = 86
   call fgd_put_constant_i1(d, 'const', ci1(1))
-  call check_ok2(ne, 61, 1, d)
+  call check_ok2(ne, 86, 1, d)
 
   call fgd_get_constant_r4(d, 'const', fl)
-  call check_ok2(ne, 61, 2, d)
-  call check_dbl(ne, 61, 1d0 * fl, 61d0)
+  call check_ok2(ne, 86, 2, d)
+  call check_dbl(ne, 86, 1d0 * fl, 86d0)
 
-! 127: fgd_put_constant_i2 check
-  ci2(1) = 127
+! 87: fgd_put_constant_i2 check
+  ci2(1) = 87
   call fgd_put_constant_i2(d, 'const', ci2(1))
-  call check_ok2(ne, 127, 1, d)
+  call check_ok2(ne, 87, 1, d)
 
   call fgd_get_constant_r4(d, 'const', fl)
-  call check_ok2(ne, 127, 2, d)
-  call check_dbl(ne, 127, 1d0 * fl, 127d0)
+  call check_ok2(ne, 87, 2, d)
+  call check_dbl(ne, 87, 1d0 * fl, 87d0)
 
-! 128: fgd_put_constant_i4 check
-  ci4(1) = 128
+! 88: fgd_put_constant_i4 check
+  ci4(1) = 88
   call fgd_put_constant_i4(d, 'const', ci4(1))
-  call check_ok2(ne, 128, 1, d)
+  call check_ok2(ne, 88, 1, d)
 
   call fgd_get_constant_r4(d, 'const', fl)
-  call check_ok2(ne, 128, 2, d)
-  call check_dbl(ne, 128, 1d0 * fl, 128d0)
+  call check_ok2(ne, 88, 2, d)
+  call check_dbl(ne, 88, 1d0 * fl, 88d0)
 
-! 129: fgd_put_constant_i8 check
-  ci8(1) = 129
+! 89: fgd_put_constant_i8 check
+  ci8(1) = 89
   call fgd_put_constant_i8(d, 'const', ci8(1))
-  call check_ok2(ne, 129, 1, d)
+  call check_ok2(ne, 89, 1, d)
 
   call fgd_get_constant_r4(d, 'const', fl)
-  call check_ok2(ne, 129, 2, d)
-  call check_dbl(ne, 129, 1d0 * fl, 129d0)
+  call check_ok2(ne, 89, 2, d)
+  call check_dbl(ne, 89, 1d0 * fl, 89d0)
 
-! 130: fgd_put_constant_r4 check
+! 90: fgd_put_constant_r4 check
   cr4(1) = -8.1
   call fgd_put_constant_r4(d, 'new11', cr4(1))
-  call check_ok2(ne, 130, 1, d)
+  call check_ok2(ne, 90, 1, d)
 
   call fgd_get_constant_r4(d, 'new11', fl)
-  call check_ok2(ne, 130, 2, d)
-  call check_dbl(ne, 130, 1d0 * fl, -8.1d0)
+  call check_ok2(ne, 90, 2, d)
+  call check_dbl(ne, 90, 1d0 * fl, 1d0 * (-8.1))
 
-! 131: fgd_put_constant_r8 check
-  cr8(1) = 131
+! 91: fgd_put_constant_r8 check
+  cr8(1) = 91
   call fgd_put_constant_r8(d, 'const', cr8(1))
-  call check_ok2(ne, 131, 1, d)
+  call check_ok2(ne, 91, 1, d)
 
   call fgd_get_constant_r4(d, 'const', fl)
-  call check_ok2(ne, 131, 2, d)
-  call check_dbl(ne, 131, 1d0 * fl, 131d0)
+  call check_ok2(ne, 91, 2, d)
+  call check_dbl(ne, 91, 1d0 * fl, 1d0 * 91.)
 
-! 132: fgd_put_constant_c8 check
-  cc8(1) = 132
+! 92: fgd_put_constant_c8 check
+  cc8(1) = 92
   call fgd_put_constant_c8(d, 'const', cc8(1))
-  call check_ok2(ne, 132, 1, d)
+  call check_ok2(ne, 92, 1, d)
 
   call fgd_get_constant_r4(d, 'const', fl)
-  call check_ok2(ne, 132, 2, d)
-  call check_dbl(ne, 132, 1d0 * fl, 132d0)
+  call check_ok2(ne, 92, 2, d)
+  call check_dbl(ne, 92, 1d0 * fl, 92d0)
 
-! 133: fgd_put_constant_c16 check
-  cc16(1) = 133
+! 93: fgd_put_constant_c16 check
+  cc16(1) = 93
   call fgd_put_constant_c16(d, 'const', cc16(1))
-  call check_ok2(ne, 133, 1, d)
+  call check_ok2(ne, 93, 1, d)
 
   call fgd_get_constant_r4(d, 'const', fl)
-  call check_ok2(ne, 133, 2, d)
-  call check_dbl(ne, 133, 1d0 * fl, 133d0)
+  call check_ok2(ne, 93, 2, d)
+  call check_dbl(ne, 93, 1d0 * fl, 93d0)
 
-! 62: fgd_put_string check
+! 94: fgd_put_string check
   n = fgd_put_string(d, 'string', "Arthur Dent")
-  call check_ok2(ne, 62, 1, d)
-  call check_int(ne, 62, n, 11)
+  call check_ok2(ne, 94, 1, d)
+  call check_int(ne, 94, n, 11)
 
   n = fgd_get_string(d, 'string', GD_FIELD_LEN, str)
-  call check_ok2(ne, 62, 2, d)
-  call check_str(ne, 62, str, "Arthur Dent")
+  call check_ok2(ne, 94, 2, d)
+  call check_str(ne, 94, str, "Arthur Dent")
 
-! 63: fgd_nmfields_by_type check
+! 95: fgd_nmfields_by_type check
   n = fgd_nmfields_by_type(d, "data", GD_LINCOM_ENTRY)
-  call check_ok(ne, 63, d)
-  call check_int(ne, 63, n, 2)
+  call check_ok(ne, 95, d)
+  call check_int(ne, 95, n, 2)
 
-! 64: fgd_mfield_list_by_type check
+! 96: fgd_mfield_list_by_type check
   fields(1) = 'mnew1'
   fields(2) = 'mnew2'
   l = flen
   call fgd_mfield_list_by_type(flist, d, "data", GD_LINCOM_ENTRY, l)
-  call check_ok2(ne, 64, i, d)
-  call check_int2(ne, 64, i, l, flen)
+  call check_ok2(ne, 96, i, d)
+  call check_int2(ne, 96, i, l, flen)
 
   do i = 1, n
-  call check_str2(ne, 64, i, flist(i), fields(i))
+  call check_str2(ne, 96, i, flist(i), fields(i))
   end do
 
-! 65: fgd_nmvectors check
+! 97: fgd_nmvectors check
   n = fgd_nmvectors(d, "data")
-  call check_ok(ne, 65, d)
-  call check_int(ne, 65, n, 11)
+  call check_ok(ne, 97, d)
+  call check_int(ne, 97, n, 10)
 
-! 66: fgd_mvector_list check
+! 98: fgd_mvector_list check
   fields = (/    'mlut       ', 'mnew1      ', 'mnew2      ', 'mnew3      ', &
   'mnew5      ', 'mnew6      ', 'mnew7      ', 'mnew8      ', 'mnew9      ', &
-  'mnew10     ', 'mnew4      ', '           ', '           ', '           ', &
+  'mnew10     ', '           ', '           ', '           ', '           ', &
   '           ', '           ', '           ', '           ', '           ', &
   '           ', '           ', '           ', '           ', '           ', &
   '           ', '           ', '           ', '           ' /)
   l = flen
   call fgd_mvector_list(flist, d, "data", l)
-  call check_ok2(ne, 66, i, d)
-  call check_int2(ne, 66, i, l, flen)
+  call check_ok2(ne, 98, i, d)
+  call check_int2(ne, 98, i, l, flen)
 
   do i=1,n
-  call check_str2(ne, 66, i, flist(i), fields(i))
+  call check_str2(ne, 98, i, flist(i), fields(i))
   end do
 
-! 67: fgd_alter_raw check
+! 99: fgd_alter_raw check
   call fgd_alter_raw(d, 'new1', GD_INT32, 4, 0)
-  call check_ok2(ne, 67, 1, d)
+  call check_ok2(ne, 99, 1, d)
 
   n = fgd_entry(d, 'new1', ent)
-  call check_ok2(ne, 67, 2, d)
-  call check_int2(ne, 67, 3, ent%fragment_index, 0)
-  call check_int2(ne, 67, 4, ent%spf, 4)
-  call check_int2(ne, 67, 5, ent%data_type, GD_INT32)
-  call check_int2(ne, 67, 6, n, GD_RAW_ENTRY)
+  call check_ok2(ne, 99, 2, d)
+  call check_int2(ne, 99, 3, ent%fragment_index, 0)
+  call check_int2(ne, 99, 4, ent%spf, 4)
+  call check_int2(ne, 99, 5, ent%data_type, GD_INT32)
+  call check_int2(ne, 99, 6, n, GD_RAW_ENTRY)
 
-! 68: fgd_alter_lincom check
+! 100: fgd_alter_lincom check
   call fgd_alter_lincom(d, 'new2', 3, 'in4', 9.9d-1, 7.8d0, 'in5', &
      1.1d1, 2.2d-2, 'in6', 1.96d0, 0d0)
-  call check_ok2(ne, 68, 1, d)
+  call check_ok2(ne, 100, 1, d)
 
   n = fgd_entry(d, 'new2', ent)
-  call check_ok2(ne, 68, 2, d)
-  call check_int2(ne, 68, 3, n, GD_LINCOM_ENTRY)
-  call check_int2(ne, 68, 4, ent%n_fields, 3)
-  call check_int2(ne, 68, 5, ent%fragment_index, 0)
-  call check_str2(ne, 68, 6, ent%field(1), 'in4')
-  call check_str2(ne, 68, 7, ent%field(2), 'in5')
-  call check_str2(ne, 68, 8, ent%field(3), 'in6')
-  call check_int2(ne, 68, 5, ent%comp_scal, 0)
+  call check_ok2(ne, 100, 2, d)
+  call check_int2(ne, 100, 3, n, GD_LINCOM_ENTRY)
+  call check_int2(ne, 100, 4, ent%n_fields, 3)
+  call check_int2(ne, 100, 5, ent%fragment_index, 0)
+  call check_str2(ne, 100, 6, ent%field(1), 'in4')
+  call check_str2(ne, 100, 7, ent%field(2), 'in5')
+  call check_str2(ne, 100, 8, ent%field(3), 'in6')
+  call check_int2(ne, 100, 5, ent%comp_scal, 0)
 
   q = (/ 9.9d-1, 7.8d0, 1.1d1, 2.2d-2, 1.96d0, 0d0 /)
   DO i=1,3
-  call check_dbl2(ne, 68, i * 2 - 1, ent%m(i), q(i * 2 - 1))
-  call check_dbl2(ne, 68, i * 2, ent%b(i), q(i * 2))
+  call check_dbl2(ne, 100, i * 2 - 1, ent%m(i), q(i * 2 - 1))
+  call check_dbl2(ne, 100, i * 2, ent%b(i), q(i * 2))
   end do
 
-! 69: fgd_alter_clincom check
+! 101: fgd_alter_clincom check
   cq(1) = dcmplx(0.1, 0.2)
   cq(2) = dcmplx(0.3, 0.4)
   cq(3) = dcmplx(0.4, 0.5)
   cq(4) = dcmplx(0.6, 0.7)
   call fgd_alter_clincom(d, 'new3', 2, 'in4', cq(1), cq(2), 'in3', &
      cq(3), cq(4), '', cq(5), cq(6))
-  call check_ok2(ne, 69, 1, d)
+  call check_ok2(ne, 101, 1, d)
 
   n = fgd_entry(d, 'new3', ent)
-  call check_ok(ne, 69, d)
-  call check_int2(ne, 69, 1, n, GD_LINCOM_ENTRY)
-  call check_int2(ne, 69, 2, ent%n_fields, 2)
-  call check_int2(ne, 69, 3, ent%fragment_index, 0)
-  call check_str2(ne, 69, 4, ent%field(1), 'in4')
-  call check_str2(ne, 69, 5, ent%field(2), 'in3')
-  call check_int2(ne, 69, 6, ent%comp_scal, 1)
+  call check_ok(ne, 101, d)
+  call check_int2(ne, 101, 1, n, GD_LINCOM_ENTRY)
+  call check_int2(ne, 101, 2, ent%n_fields, 2)
+  call check_int2(ne, 101, 3, ent%fragment_index, 0)
+  call check_str2(ne, 101, 4, ent%field(1), 'in4')
+  call check_str2(ne, 101, 5, ent%field(2), 'in3')
+  call check_int2(ne, 101, 6, ent%comp_scal, 1)
 
   cq(1) = dcmplx(0.1, 0.2)
   cq(2) = dcmplx(0.3, 0.4)
   cq(3) = dcmplx(0.4, 0.5)
   cq(4) = dcmplx(0.6, 0.7)
   DO i=1,2
-  call check_cpx2(ne, 69, i * 2 - 1, ent%cm(i), cq(i * 2 - 1))
-  call check_cpx2(ne, 69, i * 2, ent%cb(i), cq(i * 2))
+  call check_cpx2(ne, 101, i * 2 - 1, ent%cm(i), cq(i * 2 - 1))
+  call check_cpx2(ne, 101, i * 2, ent%cb(i), cq(i * 2))
   end do
 
-! 70: fgd_alter_polynom check
+! 102: fgd_alter_polynom check
   call fgd_alter_polynom(d, 'new4', 4, 'in1', 3d0, 4d0, 5d0, 6d0, 7d0, 0d0)
-  call check_ok2(ne, 70, 1, d)
+  call check_ok2(ne, 102, 1, d)
 
   n = fgd_entry(d, 'new4', ent)
-  call check_ok2(ne, 70, 2, d)
-  call check_int2(ne, 70, 1, n, GD_POLYNOM_ENTRY)
-  call check_int2(ne, 70, 2, ent%poly_ord, 4)
-  call check_int2(ne, 70, 3, ent%fragment_index, 0)
-  call check_str2(ne, 70, 4, ent%field(1), 'in1')
+  call check_ok2(ne, 102, 2, d)
+  call check_int2(ne, 102, 1, n, GD_POLYNOM_ENTRY)
+  call check_int2(ne, 102, 2, ent%poly_ord, 4)
+  call check_int2(ne, 102, 3, ent%fragment_index, 0)
+  call check_str2(ne, 102, 4, ent%field(1), 'in1')
 
   q = (/ 3d0, 4d0, 5d0, 6d0, 7d0, 0d0 /)
   DO i=1,5
-  call check_dbl2(ne, 70, i, ent%a(i), q(i))
+  call check_dbl2(ne, 102, i, ent%a(i), q(i))
   end do
 
-! 71: fgd_alter_cpolynom check
+! 103: fgd_alter_cpolynom check
   cq(1) = dcmplx(1.1, 5.0)
   cq(2) = dcmplx(1.2, 4.0)
   cq(3) = dcmplx(1.2, 3.0)
   cq(4) = dcmplx(1.3, 2.4)
   call fgd_alter_cpolynom(d, 'new5', 3, 'in1', cq(1), cq(2), cq(3), &
   cq(4), dcmplx(0d0,0d0), dcmplx(0d0,0d0))
-  call check_ok2(ne, 71, 1, d)
+  call check_ok2(ne, 103, 1, d)
 
   n = fgd_entry(d, 'new5', ent)
-  call check_ok2(ne, 71, 2, d)
-  call check_int2(ne, 71, 1, n, GD_POLYNOM_ENTRY)
-  call check_int2(ne, 71, 2, ent%poly_ord, 3)
-  call check_int2(ne, 71, 3, ent%fragment_index, 0)
-  call check_str2(ne, 71, 4, ent%field(1), 'in1')
-  call check_int2(ne, 71, 5, ent%comp_scal, 1)
+  call check_ok2(ne, 103, 2, d)
+  call check_int2(ne, 103, 1, n, GD_POLYNOM_ENTRY)
+  call check_int2(ne, 103, 2, ent%poly_ord, 3)
+  call check_int2(ne, 103, 3, ent%fragment_index, 0)
+  call check_str2(ne, 103, 4, ent%field(1), 'in1')
+  call check_int2(ne, 103, 5, ent%comp_scal, 1)
 
   cq(1) = dcmplx(1.1, 5.0)
   cq(2) = dcmplx(1.2, 4.0)
   cq(3) = dcmplx(1.2, 3.0)
   cq(4) = dcmplx(1.3, 2.4)
-  DO 710 i=1,4
-  call check_cpx2(ne, 71, i, ent%ca(i), cq(i))
-  710 CONTINUE
+  do i=1,4
+  call check_cpx2(ne, 103, i, ent%ca(i), cq(i))
+  end do
 
-! 72: fgd_alter_linterp check
+! 104: fgd_alter_linterp check
   call fgd_alter_linterp(d, "new6", "in3", "./other/table", 0)
-  call check_ok2(ne, 72, 1, d)
+  call check_ok2(ne, 104, 1, d)
 
   n = fgd_entry(d, 'new6', ent)
-  call check_ok2(ne, 72, 2, d)
-  call check_int2(ne, 72, 1, n, GD_LINTERP_ENTRY)
-  call check_int2(ne, 72, 2, ent%fragment_index, 0)
-  call check_str2(ne, 72, 3, ent%field(1), 'in3')
-  call check_str2(ne, 72, 4, ent%field(2), './other/table')
+  call check_ok2(ne, 104, 2, d)
+  call check_int2(ne, 104, 1, n, GD_LINTERP_ENTRY)
+  call check_int2(ne, 104, 2, ent%fragment_index, 0)
+  call check_str2(ne, 104, 3, ent%field(1), 'in3')
+  call check_str2(ne, 104, 4, ent%field(2), './other/table')
 
-! 73: fgd_alter_bit check
+! 105: fgd_alter_bit check
   call fgd_alter_bit(d, "new7", "in3", 3, 2)
-  call check_ok2(ne, 73, 1, d)
+  call check_ok2(ne, 105, 1, d)
 
   n = fgd_entry(d, 'new7', ent)
-  call check_ok2(ne, 73, 2, d)
-  call check_int2(ne, 73, 1, n, GD_BIT_ENTRY)
-  call check_int2(ne, 73, 2, ent%fragment_index, 0)
-  call check_int2(ne, 73, 3, ent%numbits, 2)
-  call check_int2(ne, 73, 4, ent%bitnum, 3)
-  call check_str2(ne, 73, 5, ent%field(1), 'in3')
+  call check_ok2(ne, 105, 2, d)
+  call check_int2(ne, 105, 1, n, GD_BIT_ENTRY)
+  call check_int2(ne, 105, 2, ent%fragment_index, 0)
+  call check_int2(ne, 105, 3, ent%numbits, 2)
+  call check_int2(ne, 105, 4, ent%bitnum, 3)
+  call check_str2(ne, 105, 5, ent%field(1), 'in3')
 
-! 74: fgd_alter_sbit check
+! 106: fgd_alter_sbit check
   call fgd_alter_sbit(d, "new8", "out", 1, 22)
-  call check_ok2(ne, 74, 1, d)
+  call check_ok2(ne, 106, 1, d)
 
   n = fgd_entry(d, 'new8', ent)
-  call check_ok2(ne, 74, 2, d)
-  call check_int2(ne, 74, 1, n, GD_SBIT_ENTRY)
-  call check_int2(ne, 74, 2, ent%fragment_index, 0)
-  call check_int2(ne, 74, 3, ent%numbits, 22)
-  call check_int2(ne, 74, 4, ent%bitnum, 1)
-  call check_str2(ne, 74, 5, ent%field(1), 'out')
+  call check_ok2(ne, 106, 2, d)
+  call check_int2(ne, 106, 1, n, GD_SBIT_ENTRY)
+  call check_int2(ne, 106, 2, ent%fragment_index, 0)
+  call check_int2(ne, 106, 3, ent%numbits, 22)
+  call check_int2(ne, 106, 4, ent%bitnum, 1)
+  call check_str2(ne, 106, 5, ent%field(1), 'out')
 
-! 75: fgd_alter_multiply check
+! 107: fgd_alter_multiply check
   call fgd_alter_multiply(d, 'new9', 'in6', 'in4')
-  call check_ok2(ne, 75, 1, d)
+  call check_ok2(ne, 107, 1, d)
 
   n = fgd_entry(d, 'new9', ent)
-  call check_ok2(ne, 75, 2, d)
-  call check_int2(ne, 75, 1, n, GD_MULTIPLY_ENTRY)
-  call check_int2(ne, 75, 2, ent%fragment_index, 0)
-  call check_str2(ne, 75, 3, ent%field(1), 'in6')
-  call check_str2(ne, 75, 4, ent%field(2), 'in4')
+  call check_ok2(ne, 107, 2, d)
+  call check_int2(ne, 107, 1, n, GD_MULTIPLY_ENTRY)
+  call check_int2(ne, 107, 2, ent%fragment_index, 0)
+  call check_str2(ne, 107, 3, ent%field(1), 'in6')
+  call check_str2(ne, 107, 4, ent%field(2), 'in4')
 
-! 76: fgd_alter_phase check
+! 108: fgd_alter_phase check
   call fgd_alter_phase(d, 'new10', 'in2', 8)
-  call check_ok2(ne, 76, 1, d)
+  call check_ok2(ne, 108, 1, d)
 
   n = fgd_entry(d, 'new10', ent)
-  call check_ok2(ne, 76, 2, d)
-  call check_int2(ne, 76, 1, n, GD_PHASE_ENTRY)
-  call check_int2(ne, 76, 2, ent%fragment_index, 0)
-  call check_int2(ne, 76, 3, ent%shift, 8)
-  call check_str2(ne, 76, 4, ent%field(1), 'in2')
+  call check_ok2(ne, 108, 2, d)
+  call check_int2(ne, 108, 1, n, GD_PHASE_ENTRY)
+  call check_int2(ne, 108, 2, ent%fragment_index, 0)
+  call check_int2(ne, 108, 3, ent%shift, 8)
+  call check_str2(ne, 108, 4, ent%field(1), 'in2')
 
-! 77: fgd_alter_const check
+! 109: fgd_alter_const check
   call fgd_alter_const(d, 'new11', GD_FLOAT32)
-  call check_ok2(ne, 77, 1, d)
+  call check_ok2(ne, 109, 1, d)
 
   n = fgd_entry(d, 'new11', ent)
-  call check_ok2(ne, 77, 2, d)
-  call check_int2(ne, 77, 1, n, GD_CONST_ENTRY)
-  call check_int2(ne, 77, 2, ent%fragment_index, 0)
-  call check_int2(ne, 77, 3, ent%data_type, GD_FLOAT32)
+  call check_ok2(ne, 109, 2, d)
+  call check_int2(ne, 109, 1, n, GD_CONST_ENTRY)
+  call check_int2(ne, 109, 2, ent%fragment_index, 0)
+  call check_int2(ne, 109, 3, ent%data_type, GD_FLOAT32)
 
   call fgd_get_constant_r4(d, 'new11', fl)
-  call check_ok2(ne, 77, 3, d)
-  call check_dbl(ne, 77, 1d0 * fl, -8.1d0)
+  call check_ok2(ne, 109, 3, d)
+  call check_dbl(ne, 109, 1d0 * fl, 1d0 * (-8.1))
 
-! 78: fgd_encoding check
+! 110: fgd_encoding check
   n = fgd_encoding(d, 0)
-  call check_ok(ne, 78, d)
-  call check_int(ne, 78, n, GD_UNENCODED)
+  call check_ok(ne, 110, d)
+  call check_int(ne, 110, n, GD_UNENCODED)
 
-! 79: fgd_endianness check
+! 111: fgd_endianness check
   n = fgd_endianness(d, 0)
-  call check_ok(ne, 79, d)
-  call check_int(ne, 79, n, (GD_LITTLE_ENDIAN + GD_NOT_ARM_ENDIAN))
+  call check_ok(ne, 111, d)
+  call check_int(ne, 111, n, (GD_LITTLE_ENDIAN + GD_NOT_ARM_ENDIAN))
 
-! 80: fgd_dirfilename check
+! 112: fgd_dirfilename check
   l = 4096
   call fgd_dirfilename(path, l, d, 0)
-  call check_ok(ne, 80, d)
-  call check_int(ne, 80, l, 4096)
-  call check_eos(ne, 80, path, 'test95_dirfile')
+  call check_ok(ne, 112, d)
+  call check_int(ne, 112, l, 4096)
+  call check_eos(ne, 112, path, 'test95_dirfile')
 
-! 81: fgd_parent_fragment check
+! 113: fgd_parent_fragment check
   n = fgd_parent_fragment(d, 1)
-  call check_ok(ne, 81, d)
-  call check_int(ne, 81, n, 0)
+  call check_ok(ne, 113, d)
+  call check_int(ne, 113, n, 0)
 
-! 82: fgd_alter_protection check
+! 114: fgd_alter_protection check
   call fgd_alter_protection(d, GD_PROTECT_DATA, 1)
-  call check_ok(ne, 82, d)
+  call check_ok(ne, 114, d)
 
-! 83: fgd_protection check
+! 115: fgd_protection check
   n = fgd_protection(d, 1)
-  call check_ok(ne, 83, d)
-  call check_int(ne, 83, n, GD_PROTECT_DATA)
+  call check_ok(ne, 115, d)
+  call check_int(ne, 115, n, GD_PROTECT_DATA)
 
-! 84: fgd_raw_filename check
+! 116: fgd_raw_filename check
   str = fgd_raw_filename(d, "data")
-  call check_ok(ne, 84, d)
-  call check_eos(ne, 84, str, 'test95_dirfile'//DIRSEP//'data')
+  call check_ok(ne, 116, d)
+  call check_eos(ne, 116, str, 'test95_dirfile'//DIRSEP//'data')
 
-! 85: fgd_reference check
+! 117: fgd_reference check
   str = fgd_reference(d, "new1")
-  call check_ok(ne, 85, d)
-  call check_str(ne, 85, str, 'new1')
+  call check_ok(ne, 117, d)
+  call check_str(ne, 117, str, 'new1')
 
-! 87: fgd_alter_encoding check
+! 118: fgd_eof check
+  n = fgd_eof(d, 'lincom')
+  call check_ok(ne, 118, d)
+  call check_int(ne, 118, n, 80)
+
+! 119: fgd_alter_encoding check
   call fgd_alter_encoding(d, GD_SLIM_ENCODED, 1, 0)
-  call check_ok2(ne, 87, 1, d)
+  call check_ok2(ne, 119, 1, d)
 
   n = fgd_encoding(d, 1)
-  call check_ok2(ne, 87, 2, d)
-  call check_int(ne, 87, n, GD_SLIM_ENCODED)
+  call check_ok2(ne, 119, 2, d)
+  call check_int(ne, 119, n, GD_SLIM_ENCODED)
 
-! 88: fgd_alter_endianness check
+! 120: fgd_alter_endianness check
   call fgd_alter_endianness(d, GD_BIG_ENDIAN, 1, 0)
-  call check_ok2(ne, 88, 1, d)
+  call check_ok2(ne, 120, 1, d)
 
   n = fgd_endianness(d, 1)
-  call check_ok2(ne, 88, 2, d)
-  call check_int(ne, 88, n, GD_BIG_ENDIAN)
+  call check_ok2(ne, 120, 2, d)
+  call check_int(ne, 120, n, GD_BIG_ENDIAN)
 
-! 89: fgd_alter_spec check
+! 121: fgd_alter_spec check
   call fgd_alter_spec(d, 'new10 PHASE in1 3', 0)
-  call check_ok2(ne, 89, 1, d)
+  call check_ok2(ne, 121, 1, d)
 
   n = fgd_entry(d, 'new10', ent)
-  call check_ok2(ne, 89, 2, d)
-  call check_int2(ne, 89, 1, n, GD_PHASE_ENTRY)
-  call check_int2(ne, 89, 2, ent%fragment_index, 0)
-  call check_int2(ne, 89, 3, ent%shift, 3)
-  call check_str2(ne, 89, 4, ent%field(1), 'in1')
+  call check_ok2(ne, 121, 2, d)
+  call check_int2(ne, 121, 1, n, GD_PHASE_ENTRY)
+  call check_int2(ne, 121, 2, ent%fragment_index, 0)
+  call check_int2(ne, 121, 3, ent%shift, 3)
+  call check_str2(ne, 121, 4, ent%field(1), 'in1')
 
-! 90: fgd_delete check
+! 122: fgd_delete check
   call fgd_delete(d, 'new10', 0)
-  call check_ok2(ne, 90, 1, d)
+  call check_ok2(ne, 122, 1, d)
 
   n = fgd_entry(d, 'new10', ent)
-  call check_err2(ne, 90, 2, d, GD_E_BAD_CODE)
+  call check_err2(ne, 122, 2, d, GD_E_BAD_CODE)
 
-! 91: fgd_malter_spec check
+! 123: fgd_malter_spec check
   call fgd_malter_spec(d, 'mnew10 PHASE in4 11', 'data', 0)
-  call check_ok2(ne, 91, 1, d)
+  call check_ok2(ne, 123, 1, d)
 
   n = fgd_entry(d, 'data/mnew10', ent)
-  call check_ok2(ne, 91, 2, d)
-  call check_int2(ne, 91, 1, n, GD_PHASE_ENTRY)
-  call check_int2(ne, 91, 2, ent%fragment_index, 0)
-  call check_int2(ne, 91, 3, ent%shift, 11)
-  call check_str2(ne, 91, 4, ent%field(1), 'in4')
+  call check_ok2(ne, 123, 2, d)
+  call check_int2(ne, 123, 1, n, GD_PHASE_ENTRY)
+  call check_int2(ne, 123, 2, ent%fragment_index, 0)
+  call check_int2(ne, 123, 3, ent%shift, 11)
+  call check_str2(ne, 123, 4, ent%field(1), 'in4')
 
-! 92: fgd_move check
+! 124: fgd_move check
   call fgd_move(d, 'new9', 1, 0)
-  call check_ok2(ne, 92, 1, d)
+  call check_ok2(ne, 124, 1, d)
 
   n = fgd_entry(d, 'new9', ent)
-  call check_ok2(ne, 92, 2, d)
-  call check_int2(ne, 92, 1, n, GD_MULTIPLY_ENTRY)
-  call check_int2(ne, 92, 2, ent%fragment_index, 1)
-  call check_str2(ne, 92, 3, ent%field(1), 'in6')
-  call check_str2(ne, 92, 4, ent%field(2), 'in4')
+  call check_ok2(ne, 124, 2, d)
+  call check_int2(ne, 124, 1, n, GD_MULTIPLY_ENTRY)
+  call check_int2(ne, 124, 2, ent%fragment_index, 1)
+  call check_str2(ne, 124, 3, ent%field(1), 'in6')
+  call check_str2(ne, 124, 4, ent%field(2), 'in4')
 
-! 93: fgd_rename check
+! 125: fgd_rename check
   call fgd_rename(d, 'new9', 'newer', 0)
-  call check_ok2(ne, 93, 1, d)
+  call check_ok2(ne, 125, 1, d)
 
   n = fgd_entry(d, 'new9', ent)
-  call check_err2(ne, 93, 2, d, GD_E_BAD_CODE)
+  call check_err2(ne, 125, 2, d, GD_E_BAD_CODE)
 
   n = fgd_entry(d, 'newer', ent)
-  call check_ok2(ne, 93, 3, d)
-  call check_int2(ne, 93, 1, n, GD_MULTIPLY_ENTRY)
-  call check_int2(ne, 92, 2, ent%fragment_index, 1)
-  call check_str2(ne, 92, 3, ent%field(1), 'in6')
-  call check_str2(ne, 92, 4, ent%field(2), 'in4')
+  call check_ok2(ne, 125, 3, d)
+  call check_int2(ne, 125, 1, n, GD_MULTIPLY_ENTRY)
+  call check_int2(ne, 125, 2, ent%fragment_index, 1)
+  call check_str2(ne, 125, 3, ent%field(1), 'in6')
+  call check_str2(ne, 125, 4, ent%field(2), 'in4')
 
-! 94: fgd_uninclude check
+! 126: fgd_uninclude check
   call fgd_uninclude(d, 1, 0)
-  call check_ok2(ne, 94, 1, d)
+  call check_ok2(ne, 126, 1, d)
 
   n = fgd_entry(d, 'newer', ent)
-  call check_err2(ne, 94, 2, d, GD_E_BAD_CODE)
+  call check_err2(ne, 126, 2, d, GD_E_BAD_CODE)
 
-! 95: fgd_frameoffset check
+! 127: fgd_frameoffset check
   n = fgd_frameoffset(d, 0)
-  call check_ok(ne, 95, d)
-  call check_int(ne, 95, n, 0)
+  call check_ok(ne, 127, d)
+  call check_int(ne, 127, n, 0)
 
-! 96: fgd_alter_frameoffset check
+! 128: fgd_alter_frameoffset check
   call fgd_alter_frameoffset(d, 33, 0, 0)
-  call check_ok2(ne, 96, 1, d)
+  call check_ok2(ne, 128, 1, d)
 
   n = fgd_frameoffset(d, 0)
-  call check_ok2(ne, 96, 2, d)
-  call check_int(ne, 96, n, 33)
+  call check_ok2(ne, 128, 2, d)
+  call check_int(ne, 128, n, 33)
 
-! 97: fgd_native_type check
+! 129: fgd_native_type check
   n = fgd_native_type(d, 'data')
-  call check_ok(ne, 97, d)
-  call check_int(ne, 97, n, GD_INT8)
+  call check_ok(ne, 129, d)
+  call check_int(ne, 129, n, GD_INT8)
 
-! 99: fgd_validate check
+! 131: fgd_validate check
   n = fgd_validate(d, 'new7')
-  call check_err(ne, 99, d, GD_E_BAD_CODE)
-  call check_int(ne, 99, n, -1)
+  call check_err(ne, 131, d, GD_E_BAD_CODE)
+  call check_int(ne, 131, n, -1)
 
-! 100: fgd_framenum check
+! 132: fgd_framenum check
   str = fgd_reference(d, "data")
   dp = fgd_framenum(d, 'INDEX', 33.3d0)
-  call check_ok(ne, 100, d)
-  call check_dbl(ne, 100, dp, 33.3d0)
+  call check_ok(ne, 132, d)
+  call check_dbl(ne, 132, dp, 33.3d0)
 
-! 101: fgd_framenum_subset check
+! 133: fgd_framenum_subset check
   dp = fgd_framenum_subset(d, 'data', 33.3d0, 6, 0)
-  call check_ok(ne, 101, d)
-  call check_dbl(ne, 101, dp, 37.0375d0)
+  call check_ok(ne, 133, d)
+  call check_dbl(ne, 133, dp, 37.0375d0)
 
-! 86: fgd_eof check
-  n = fgd_eof(d, 'lincom')
-  call check_ok(ne, 86, d)
-  call check_int(ne, 86, n, 344)
+! 135: fgd_add raw
+  ent%data_type = GD_FLOAT32
+  ent%fragment_index = 0
+  ent%spf = 0;
+  ent%field_type = GD_RAW_ENTRY
+  ent%scalar(1) = 'carray'
+  ent%scalar_ind(1) = 2
+  call fgd_add(d, 'new135', ent)
+  call check_ok2(ne, 135, 1, d)
+
+  n = fgd_entry(d, 'new135', ent)
+  call check_ok2(ne, 135, 2, d)
+  call check_int2(ne, 135, 3, n, GD_RAW_ENTRY)
+  call check_int2(ne, 135, 4, ent%fragment_index, 0)
+  call check_int2(ne, 135, 5, ent%spf, 2)
+  call check_int2(ne, 135, 6, ent%data_type, GD_FLOAT32)
+
+! 136: fgd_madd check
+  ent%shift = 33
+  ent%field(1) = 'data/mnew4'
+  ent%fragment_index = 0
+  ent%field_type = GD_PHASE_ENTRY
+  call fgd_madd(d, 'data', 'mnew136', ent)
+  call check_ok2(ne, 136, 1, d)
+
+  n = fgd_entry(d, 'data/mnew136', ent)
+  call check_ok2(ne, 136, 2, d)
+  call check_int2(ne, 136, 1, n, GD_PHASE_ENTRY)
+  call check_int2(ne, 136, 2, ent%fragment_index, 0)
+  call check_int2(ne, 136, 3, ent%shift, 33)
+  call check_str2(ne, 136, 4, ent%field(1), 'data/mnew4')
+
+! 141: fgd_alter_entry RAW
+  ent%field_type = GD_RAW_ENTRY
+  ent%data_type = GD_FLOAT64
+  ent%scalar(1) = 'const'
+  ent%scalar_ind(1) = -1
+  call fgd_alter_entry(d, 'new135', ent, 0, 0)
+  call check_ok2(ne, 141, 1, d)
+
+  n = fgd_entry(d, 'new135', ent)
+  call check_ok2(ne, 141, 2, d)
+  call check_int2(ne, 141, 3, n, GD_RAW_ENTRY)
+  call check_int2(ne, 141, 4, ent%fragment_index, 0)
+  call check_int2(ne, 141, 5, ent%spf, 93)
+  call check_int2(ne, 141, 6, ent%data_type, GD_FLOAT64)
+  call check_str2(ne, 141, 7, ent%scalar(1), 'const')
+  call check_int2(ne, 141, 8, ent%scalar_ind(1), -1)
 
 ! 142: fgd_bof check
   n = fgd_bof(d, 'lincom')
@@ -1628,7 +1628,7 @@ program big_test
   call check_int2(ne, 145, 2, ent%fragment_index, 0)
   call check_int2(ne, 145, 3, ent%comp_scal, 1)
   call check_str2(ne, 145, 4, ent%field(1), 'div')
-  call check_cpx2(ne, 145, 5, ent%cdividend, dcmplx(6.5, 4.3))
+  call check_cpx2(ne, 145, 5, ent%cdividend, dcmplx(6.5d0, 4.3d0))
 
 ! 146: fgd_add_divide check
   call fgd_add_divide(d, 'new14', 'in1', 'in2', 0)
@@ -1663,7 +1663,7 @@ program big_test
   call check_int2(ne, 148, 2, ent%fragment_index, 0)
   call check_str2(ne, 148, 3, ent%field(1), 'in1')
   call check_int2(ne, 148, 4, ent%comp_scal, 1)
-  call check_cpx2(ne, 148, 5, ent%cdividend, dcmplx(31.9, 38.2))
+  call check_cpx2(ne, 148, 5, ent%cdividend, dcmplx(31.9d0, 38.2d0))
 
 ! 149: fgd_madd_divide check
   call fgd_madd_divide(d, 'data', 'new14', 'in3', 'in4')
@@ -1698,7 +1698,7 @@ program big_test
   call check_int2(ne, 151, 2, ent%fragment_index, 0)
   call check_str2(ne, 151, 3, ent%field(1), 'in3')
   call check_int2(ne, 151, 4, ent%comp_scal, 1)
-  call check_cpx2(ne, 151, 5, ent%cdividend, dcmplx(8.47, 6.22))
+  call check_cpx2(ne, 151, 5, ent%cdividend, dcmplx(8.47d0, 6.22d0))
 
 ! 152: fgd_alter_divide check
   call fgd_alter_divide(d, 'new14', 'in6', 'in4')
@@ -1815,7 +1815,7 @@ program big_test
   call check_ok(ne, 165, d)
 
   do i=1,2
-  call check_cpx2(ne, 165, i, 1d0 * cc8(i), dcmplx((2 + i) * 1.1, 0))
+  call check_cpx2(ne, 165, i, 1d0 * cc8(i), dcmplx((2 + i) * 1.1d0, 0))
   end do
 
 ! 166: gd_get_carray_slice (COMPLEX128)
@@ -1823,7 +1823,7 @@ program big_test
   call check_ok(ne, 166, d)
 
   do i=1,2
-  call check_cpx2(ne, 166, i, cc16(i), dcmplx((2 + i) * 1.1, 0))
+  call check_cpx2(ne, 166, i, cc16(i), dcmplx((2 + i) * 1.1d0, 0))
   end do
 
 ! 168: gd_put_carray
@@ -2042,7 +2042,7 @@ program big_test
   end do
 
 ! 183: fgd_constants_i1 check
-  iq(1) = -123
+  iq(1) = 93
   iq(2) = -8
   n = fgd_nfields_by_type(d, GD_CONST_ENTRY)
   call fgd_constants_i1(ci1, d)
@@ -2053,7 +2053,7 @@ program big_test
   end do
 
 ! 184: fgd_constants_i2 check
-  iq(1) = 133
+  iq(1) = 93
   call fgd_constants_i2(ci2, d)
   call check_ok(ne, 184, d)
 
@@ -2078,7 +2078,7 @@ program big_test
   end do
 
 ! 187: fgd_constants_r4 check
-  q(1) = 133.
+  q(1) = 93.
   q(2) = -8.1
   call fgd_constants_r4(cr4, d)
   call check_ok(ne, 187, d)
@@ -2097,7 +2097,7 @@ program big_test
 
 
 ! 189: fgd_constants_c8 check
-  cq(1) = 133.
+  cq(1) = 93.
   cq(2) = -8.1
   call fgd_constants_c8(cc8, d)
   call check_ok(ne, 189, d)
@@ -2182,6 +2182,7 @@ program big_test
   call fgd_mconstants_c16(cc16, d, 'data')
   call check_ok(ne, 198, d)
 
+  cq(1) = dcmplx(3.3d0, 4.4d0)
   do i = 1, n
   call check_cpx2(ne, 198, i, cc16(i), cq(i))
   end do
@@ -2542,7 +2543,7 @@ program big_test
 ! 239: fgd_field_list check
   fields = (/    'INDEX      ', 'bit        ', 'data       ', 'div        ', &
   'lincom     ', 'linterp    ', 'mplex      ', 'mult       ', 'new1       ', &
-  'new13      ', 'new14      ', 'new15      ', 'new16      ', 'new18      ', &
+  'new135     ', 'new14      ', 'new15      ', 'new16      ', 'new18      ', &
   'new19      ', 'new2       ', 'new21      ', 'new3       ', 'new4       ', &
   'new5       ', 'new6       ', 'new7       ', 'new8       ', 'phase      ', &
   'polynom    ', 'recip      ', 'sbit       ', 'window     ' /)
@@ -2565,8 +2566,585 @@ program big_test
   call check_ok(ne, 241, d)
   call check_eos(ne, 241, str, 'test95_dirfile'//DIRSEP//'lut')
 
+! 243: fgd_add lincom
+  ent%field_type = GD_LINCOM_ENTRY
+  ent%fragment_index = 0
+  ent%n_fields = 3
+  ent%comp_scal = 0
+  ent%field(1) = 'in1'
+  ent%field(2) = 'in2'
+  ent%field(3) = 'in3'
+  ent%m(1) = 1.1d0
+  ent%m(3) = 1.4d0
+  ent%scalar(1) = ''
+  ent%scalar(2) = 'const'
+  ent%scalar_ind(2) = -1
+  ent%scalar(3) = ''
+  ent%scalar(4) = 'carray'
+  ent%scalar_ind(4) = 3
+  ent%scalar(5) = 'carray'
+  ent%scalar_ind(5) = 4
+  ent%scalar(6) = 'carray'
+  ent%scalar_ind(6) = 5
+  call fgd_add(d, 'new243', ent)
+  call check_ok2(ne, 243, 1, d)
+  
+  n = fgd_entry(d, 'new243', ent)
+  call check_ok2(ne, 243, 2, d)
+  call check_int2(ne, 243,  3, n, GD_LINCOM_ENTRY)
+  call check_int2(ne, 243,  4, ent%n_fields, 3)
+  call check_int2(ne, 243,  5, ent%fragment_index, 0)
+  call check_str2(ne, 243,  6, ent%field(1), 'in1')
+  call check_str2(ne, 243,  7, ent%field(2), 'in2')
+  call check_str2(ne, 243,  8, ent%field(3), 'in3')
+  call check_int2(ne, 243,  9, ent%comp_scal, 0)
+  call check_str2(ne, 243, 10, ent%scalar(1), '')
+  call check_str2(ne, 243, 11, ent%scalar(2), 'const')
+  call check_str2(ne, 243, 12, ent%scalar(3), '')
+  call check_str2(ne, 243, 13, ent%scalar(4), 'carray')
+  call check_str2(ne, 243, 14, ent%scalar(5), 'carray')
+  call check_str2(ne, 243, 15, ent%scalar(6), 'carray')
+  call check_int2(ne, 243, 16, ent%scalar_ind(2), -1)
+  call check_int2(ne, 243, 17, ent%scalar_ind(4), 3)
+  call check_int2(ne, 243, 18, ent%scalar_ind(5), 4)
+  call check_int2(ne, 243, 19, ent%scalar_ind(6), 5)
+  call check_dbl2(ne, 243, 20, ent%m(1), 1.1d0)
+  call check_dbl2(ne, 243, 21, ent%m(2), 93d0)
+  call check_dbl2(ne, 243, 22, ent%m(3), 1.4d0)
+  call check_dbl2(ne, 243, 23, ent%b(1), 179d0)
+  call check_dbl2(ne, 243, 24, ent%b(2), 180d0)
+  call check_dbl2(ne, 243, 25, ent%b(3), 15d0)
 
+! 244: fgd_add polynom
+  ent%field_type = GD_POLYNOM_ENTRY
+  ent%fragment_index = 0
+  ent%field(1) = 'in1'
+  ent%comp_scal = 0
+  ent%a(1) = 33d0
+  ent%a(2) = 44d0
+  ent%a(3) = 66d0
+  ent%poly_ord = 3
+  ent%scalar(1) = ''
+  ent%scalar(2) = ''
+  ent%scalar(3) = ''
+  ent%scalar(4) = 'carray'
+  ent%scalar_ind(4) = 1
+  call fgd_add(d, 'new244', ent)
+  call check_ok2(ne, 244, 1, d)
+  
+  n = fgd_entry(d, 'new244', ent)
+  call check_ok2(ne,  244,  2, d)
+  call check_int2(ne, 244,  3, n, GD_POLYNOM_ENTRY)
+  call check_int2(ne, 244,  4, ent%poly_ord, 3)
+  call check_int2(ne, 244,  5, ent%fragment_index, 0)
+  call check_str2(ne, 244,  6, ent%field(1), 'in1')
+  call check_int2(ne, 244,  7, ent%comp_scal, 0)
+  call check_dbl2(ne, 244,  8, ent%a(1), 33d0)
+  call check_dbl2(ne, 244,  9, ent%a(2), 44d0)
+  call check_dbl2(ne, 244, 10, ent%a(3), 66d0)
+  call check_dbl2(ne, 244, 11, ent%a(4), 11d0)
+  call check_str2(ne, 244, 12, ent%scalar(1), '')
+  call check_str2(ne, 244, 13, ent%scalar(2), '')
+  call check_str2(ne, 244, 14, ent%scalar(3), '')
+  call check_str2(ne, 244, 15, ent%scalar(4), 'carray')
+  call check_int2(ne, 244, 16, ent%scalar_ind(4), 1)
+
+! 246: fgd_add bit
+  ent%field_type = GD_BIT_ENTRY
+  ent%fragment_index = 0
+  ent%field(1) = 'in1'
+  ent%bitnum = 11
+  ent%scalar(1) = ''
+  ent%scalar(2) = 'const'
+  ent%scalar_ind(2) = 0
+  call fgd_add(d, 'new246', ent)
+  call check_ok2(ne, 246, 1, d)
+
+  n = fgd_entry(d, 'new246', ent)
+  call check_ok2(ne, 246, 2, d)
+  call check_int2(ne, 246,  3, n, GD_BIT_ENTRY)
+  call check_int2(ne, 246,  4, ent%fragment_index, 0)
+  call check_int2(ne, 246,  5, ent%numbits, 93)
+  call check_int2(ne, 246,  6, ent%bitnum, 11)
+  call check_str2(ne, 246,  7, ent%field(1), 'in1')
+  call check_str2(ne, 246,  8, ent%scalar(1), '')
+  call check_str2(ne, 246,  9, ent%scalar(2), 'const')
+  call check_int2(ne, 246, 10, ent%scalar_ind(2), -1)
+
+! 248: fgd_add phase
+  ent%field(1) = 'new9'
+  ent%fragment_index = 0
+  ent%field_type = GD_PHASE_ENTRY
+  ent%scalar(1) = 'carray'
+  ent%scalar_ind(1) = 2
+  call fgd_add(d, 'new248', ent)
+  call check_ok2(ne, 248, 1, d)
+
+  n = fgd_entry(d, 'new248', ent)
+  call check_ok2(ne, 248, 2, d)
+  call check_int2(ne, 248, 1, n, GD_PHASE_ENTRY)
+  call check_int2(ne, 248, 2, ent%fragment_index, 0)
+  call check_int2(ne, 248, 3, ent%shift, 12)
+  call check_str2(ne, 248, 4, ent%field(1), 'new9')
+  call check_str2(ne, 248, 5, ent%scalar(1), 'carray')
+  call check_int2(ne, 248, 6, ent%scalar_ind(1), 2)
+
+! 251: fgd_add recip
+  ent%field(1) = 'in1'
+  ent%field_type = GD_RECIP_ENTRY
+  ent%fragment_index = 0
+  ent%scalar(1) = 'carray'
+  ent%comp_scal = 0
+  ent%scalar_ind = 4
+  call fgd_add(d, 'new251', ent)
+  call check_ok2(ne, 251, 1, d)
+
+  n = fgd_entry(d, 'new251', ent)
+  call check_ok2(ne, 251, 2, d)
+  call check_int2(ne, 251, 3, n, GD_RECIP_ENTRY)
+  call check_int2(ne, 251, 4, ent%fragment_index, 0)
+  call check_int2(ne, 251, 5, ent%comp_scal, 0)
+  call check_str2(ne, 251, 6, ent%field(1), 'in1')
+  call check_dbl2(ne, 251, 7, ent%dividend, 180d0)
+  call check_str2(ne, 251, 8, ent%scalar(1), 'carray')
+  call check_int2(ne, 251, 9, ent%scalar_ind(1), 4)
+
+! 253: fgd_add window
+  ent%field(1) = 'in2'
+  ent%field(2) = 'in3'
+  ent%field_type = GD_WINDOW_ENTRY
+  ent%windop = GD_WINDOP_NE
+  ent%fragment_index = 0
+  ent%scalar(1) = 'const'
+  ent%scalar_ind(1) = -1
+  call fgd_add(d, 'new253', ent)
+  call check_ok2(ne, 253, 1, d)
+
+  n = fgd_entry(d, 'new253', ent)
+  call check_ok2(ne, 253, 2, d)
+  call check_int2(ne, 253, 1, n, GD_WINDOW_ENTRY)
+  call check_int2(ne, 253, 2, ent%fragment_index, 0)
+  call check_int2(ne, 253, 3, ent%windop, GD_WINDOP_NE)
+  call check_str2(ne, 253, 4, ent%field(1), 'in2')
+  call check_str2(ne, 253, 5, ent%field(2), 'in3')
+  call check_int2(ne, 253, 6, ent%ithreshold, 93)
+  call check_str2(ne, 253, 7, ent%scalar(1), 'const')
+  call check_int2(ne, 253, 8, ent%scalar_ind(1), -1)
+
+! 254: fgd_add mplex
+  ent%field(1) = 'in1'
+  ent%field(2) = 'in2'
+  ent%field_type = GD_MPLEX_ENTRY
+  ent%scalar(1) = 'carray'
+  ent%scalar(2) = 'carray'
+  ent%scalar_ind(1) = 3
+  ent%scalar_ind(2) = 4
+  call fgd_add(d, 'new254', ent)
+  call check_ok2(ne, 254, 1, d)
+
+  n = fgd_entry(d, 'new254', ent)
+  call check_ok2(ne,  254,  1, d)
+  call check_int2(ne, 254,  1, n, GD_MPLEX_ENTRY)
+  call check_int2(ne, 254,  2, ent%fragment_index, 0)
+  call check_int2(ne, 254,  3, ent%count_val, 179)
+  call check_int2(ne, 254,  4, ent%period, 180)
+  call check_str2(ne, 254,  5, ent%field(1), 'in1')
+  call check_str2(ne, 254,  6, ent%field(2), 'in2')
+  call check_str2(ne, 254,  7, ent%scalar(1), 'carray')
+  call check_int2(ne, 254,  8, ent%scalar_ind(1), 3)
+  call check_str2(ne, 254,  9, ent%scalar(2), 'carray')
+  call check_int2(ne, 254, 10, ent%scalar_ind(2), 4)
+
+! 255: fgd_add complex lincom
+  ent%field_type = GD_LINCOM_ENTRY
+  ent%fragment_index = 0
+  ent%n_fields = 3
+  ent%comp_scal = 1
+  ent%field(1) = 'in1'
+  ent%field(2) = 'in2'
+  ent%field(3) = 'in3'
+  ent%cm(1) = dcmplx(1.1d0, 1.2d0)
+  ent%cm(3) = dcmplx(1.3d0, 1.4d0)
+  ent%scalar(1) = ''
+  ent%scalar(2) = 'const'
+  ent%scalar_ind(2) = -1
+  ent%scalar(3) = ''
+  ent%scalar(4) = 'carray'
+  ent%scalar_ind(4) = 3
+  ent%scalar(5) = 'carray'
+  ent%scalar_ind(5) = 4
+  ent%scalar(6) = 'carray'
+  ent%scalar_ind(6) = 5
+  call fgd_add(d, 'new255', ent)
+  call check_ok2(ne, 255, 1, d)
+  
+  n = fgd_entry(d, 'new255', ent)
+  call check_ok2(ne, 255, 2, d)
+  call check_int2(ne, 255,  3, n, GD_LINCOM_ENTRY)
+  call check_int2(ne, 255,  4, ent%n_fields, 3)
+  call check_int2(ne, 255,  5, ent%fragment_index, 0)
+  call check_str2(ne, 255,  6, ent%field(1), 'in1')
+  call check_str2(ne, 255,  7, ent%field(2), 'in2')
+  call check_str2(ne, 255,  8, ent%field(3), 'in3')
+  call check_int2(ne, 255,  9, ent%comp_scal, 1)
+  call check_str2(ne, 255, 10, ent%scalar(1), '')
+  call check_str2(ne, 255, 11, ent%scalar(2), 'const')
+  call check_str2(ne, 255, 12, ent%scalar(3), '')
+  call check_str2(ne, 255, 13, ent%scalar(4), 'carray')
+  call check_str2(ne, 255, 14, ent%scalar(5), 'carray')
+  call check_str2(ne, 255, 15, ent%scalar(6), 'carray')
+  call check_int2(ne, 255, 16, ent%scalar_ind(2), -1)
+  call check_int2(ne, 255, 17, ent%scalar_ind(4), 3)
+  call check_int2(ne, 255, 18, ent%scalar_ind(5), 4)
+  call check_int2(ne, 255, 19, ent%scalar_ind(6), 5)
+  call check_cpx2(ne, 255, 20, ent%cm(1), dcmplx(1.1d0, 1.2d0))
+  call check_cpx2(ne, 255, 21, ent%cm(2), dcmplx(93d0, 0))
+  call check_cpx2(ne, 255, 22, ent%cm(3), dcmplx(1.3d0, 1.4d0))
+  call check_cpx2(ne, 255, 23, ent%cb(1), dcmplx(179d0, 0))
+  call check_cpx2(ne, 255, 24, ent%cb(2), dcmplx(180d0, 0))
+
+! 256: fgd_add polynom
+  ent%field_type = GD_POLYNOM_ENTRY
+  ent%fragment_index = 0
+  ent%field(1) = 'in1'
+  ent%comp_scal = 1
+  ent%ca(1) = dcmplx(22d0, 33d0)
+  ent%ca(2) = dcmplx(44d0, 55d0)
+  ent%ca(3) = dcmplx(66d0, 77d0)
+  ent%poly_ord = 3
+  ent%scalar(1) = ''
+  ent%scalar(2) = ''
+  ent%scalar(3) = ''
+  ent%scalar(4) = 'carray'
+  ent%scalar_ind(4) = 1
+  call fgd_add(d, 'new256', ent)
+  call check_ok2(ne, 256, 1, d)
+  
+  n = fgd_entry(d, 'new256', ent)
+  call check_ok2(ne,  256,  2, d)
+  call check_int2(ne, 256,  3, n, GD_POLYNOM_ENTRY)
+  call check_int2(ne, 256,  4, ent%poly_ord, 3)
+  call check_int2(ne, 256,  5, ent%fragment_index, 0)
+  call check_str2(ne, 256,  6, ent%field(1), 'in1')
+  call check_int2(ne, 256,  7, ent%comp_scal, 1)
+  call check_cpx2(ne, 256,  8, ent%ca(1), dcmplx(22d0, 33d0))
+  call check_cpx2(ne, 256,  9, ent%ca(2), dcmplx(44d0, 55d0))
+  call check_cpx2(ne, 256, 10, ent%ca(3), dcmplx(66d0, 77d0))
+  call check_cpx2(ne, 256, 11, ent%ca(4), dcmplx(11d0, 0))
+  call check_str2(ne, 256, 12, ent%scalar(1), '')
+  call check_str2(ne, 256, 13, ent%scalar(2), '')
+  call check_str2(ne, 256, 14, ent%scalar(3), '')
+  call check_str2(ne, 256, 15, ent%scalar(4), 'carray')
+  call check_int2(ne, 256, 16, ent%scalar_ind(4), 1)
+
+! 257: fgd_add recip
+  ent%field(1) = 'in1'
+  ent%field_type = GD_RECIP_ENTRY
+  ent%fragment_index = 0
+  ent%scalar(1) = 'carray'
+  ent%comp_scal = 1
+  ent%scalar_ind = 4
+  call fgd_add(d, 'new257', ent)
+  call check_ok2(ne, 257, 1, d)
+
+  n = fgd_entry(d, 'new257', ent)
+  call check_ok2(ne, 257, 2, d)
+  call check_int2(ne, 257, 3, n, GD_RECIP_ENTRY)
+  call check_int2(ne, 257, 4, ent%fragment_index, 0)
+  call check_int2(ne, 257, 5, ent%comp_scal, 0)
+  call check_str2(ne, 257, 6, ent%field(1), 'in1')
+  call check_dbl2(ne, 257, 7, ent%dividend, 180d0)
+  call check_str2(ne, 257, 8, ent%scalar(1), 'carray')
+
+! 258: fgd_add sbit
+  ent%field_type = GD_SBIT_ENTRY
+  ent%fragment_index = 0
+  ent%field(1) = 'in1'
+  ent%bitnum = 11
+  ent%scalar(1) = ''
+  ent%scalar(2) = 'const'
+  ent%scalar_ind(2) = 0
+  call fgd_add(d, 'new258', ent)
+  call check_ok2(ne, 258, 1, d)
+
+  n = fgd_entry(d, 'new258', ent)
+  call check_ok2(ne, 258, 2, d)
+  call check_int2(ne, 258,  3, n, GD_SBIT_ENTRY)
+  call check_int2(ne, 258,  4, ent%fragment_index, 0)
+  call check_int2(ne, 258,  5, ent%numbits, 93)
+  call check_int2(ne, 258,  6, ent%bitnum, 11)
+  call check_str2(ne, 258,  7, ent%field(1), 'in1')
+  call check_str2(ne, 258,  8, ent%scalar(1), '')
+  call check_str2(ne, 258,  9, ent%scalar(2), 'const')
+
+! 259: fgd_alter_entry lincom
+  ent%field_type = GD_LINCOM_ENTRY
+  ent%field(2) = 'in4'
+  ent%comp_scal = 0;
+  ent%m(1) = 2.2d0;
+  ent%scalar(2) = ''
+  ent%scalar(3) = 'const'
+  ent%scalar(4) = 'carray'
+  ent%scalar(6) = 'const'
+  ent%scalar_ind(3) = -1
+  ent%scalar_ind(4) =  4
+  call fgd_alter_entry(d, 'new243', ent, 17, 0)
+  call check_ok2(ne, 259, 1, d)
+  
+  n = fgd_entry(d, 'new243', ent)
+  call check_ok2(ne, 259, 2, d)
+  call check_int2(ne, 259,  3, n, GD_LINCOM_ENTRY)
+  call check_int2(ne, 259,  4, ent%n_fields, 3)
+  call check_int2(ne, 259,  5, ent%fragment_index, 0)
+  call check_str2(ne, 259,  6, ent%field(1), 'in1')
+  call check_str2(ne, 259,  7, ent%field(2), 'in4')
+  call check_str2(ne, 259,  8, ent%field(3), 'in3')
+  call check_int2(ne, 259,  9, ent%comp_scal, 0)
+  call check_str2(ne, 259, 10, ent%scalar(1), '')
+  call check_str2(ne, 259, 11, ent%scalar(2), 'const')
+  call check_str2(ne, 259, 12, ent%scalar(3), 'const')
+  call check_str2(ne, 259, 13, ent%scalar(4), 'carray')
+  call check_str2(ne, 259, 14, ent%scalar(5), '')
+  call check_str2(ne, 259, 15, ent%scalar(6), 'const')
+  call check_int2(ne, 259, 16, ent%scalar_ind(2), -1)
+  call check_int2(ne, 259, 16, ent%scalar_ind(3), -1)
+  call check_int2(ne, 259, 17, ent%scalar_ind(4), 4)
+  call check_int2(ne, 259, 19, ent%scalar_ind(6), -1)
+  call check_dbl2(ne, 259, 20, ent%m(1), 2.2d0)
+  call check_dbl2(ne, 259, 21, ent%m(2), 93d0)
+  call check_dbl2(ne, 259, 22, ent%m(3), 93d0)
+  call check_dbl2(ne, 259, 23, ent%b(1), 180d0)
+  call check_dbl2(ne, 259, 24, ent%b(2), 180d0)
+  call check_dbl2(ne, 259, 25, ent%b(3), 93d0)
+
+! 260: fgd_alter_entry CLINCOM
+  ent%field(1) = 'in1'
+  ent%field(2) = 'in4'
+  ent%field(3) = 'in3'
+  ent%field_type = GD_LINCOM_ENTRY
+  ent%comp_scal = 1
+  ent%cm(1) = dcmplx(9d0, 8d0)
+  ent%scalar(2) = ''
+  ent%scalar(3) = ''
+  ent%scalar(4) = 'carray'
+  ent%scalar(6) = ''
+  ent%scalar_ind(4) =  3
+  call fgd_alter_entry(d, 'new243', ent, 17, 0)
+  call check_ok2(ne, 260, 1, d)
+  
+  n = fgd_entry(d, 'new243', ent)
+  call check_ok2(ne, 260, 2, d)
+  call check_int2(ne, 260,  3, n, GD_LINCOM_ENTRY)
+  call check_int2(ne, 260,  4, ent%n_fields, 3)
+  call check_int2(ne, 260,  5, ent%fragment_index, 0)
+  call check_str2(ne, 260,  6, ent%field(1), 'in1')
+  call check_str2(ne, 260,  7, ent%field(2), 'in4')
+  call check_str2(ne, 260,  8, ent%field(3), 'in3')
+  call check_int2(ne, 260,  9, ent%comp_scal, 1)
+  call check_str2(ne, 260, 10, ent%scalar(1), '')
+  call check_str2(ne, 260, 11, ent%scalar(2), 'const')
+  call check_str2(ne, 260, 12, ent%scalar(3), 'const')
+  call check_str2(ne, 260, 13, ent%scalar(4), 'carray')
+  call check_str2(ne, 260, 14, ent%scalar(5), '')
+  call check_str2(ne, 260, 15, ent%scalar(6), 'const')
+  call check_int2(ne, 260, 16, ent%scalar_ind(2), -1)
+  call check_int2(ne, 260, 16, ent%scalar_ind(3), -1)
+  call check_int2(ne, 260, 17, ent%scalar_ind(4), 3)
+  call check_int2(ne, 260, 19, ent%scalar_ind(6), -1)
+  call check_cpx2(ne, 260, 20, ent%cm(1), dcmplx(9d0, 8d0))
+  call check_cpx2(ne, 260, 21, ent%cm(2), dcmplx(93d0, 0))
+  call check_cpx2(ne, 260, 22, ent%cm(3), dcmplx(93d0, 0))
+  call check_cpx2(ne, 260, 23, ent%cb(1), dcmplx(179d0, 0))
+  call check_cpx2(ne, 260, 24, ent%cb(2), dcmplx(180d0, 0))
+  call check_cpx2(ne, 260, 25, ent%cb(3), dcmplx(93d0, 0))
+
+! 261: fgd_alter_entry POLYNOM
+  ent%field(1) = 'in3'
+  ent%field_type = GD_POLYNOM_ENTRY
+  ent%comp_scal = 0
+  ent%a(1) = 2d0
+  ent%a(2) = 6d0
+  ent%scalar(1) = ''
+  ent%scalar(2) = ''
+  ent%scalar(3) = 'carray'
+  ent%scalar_ind(3) = 5
+  call fgd_alter_entry(d, 'new244', ent, 8, 0)
+  call check_ok2(ne, 261, 1, d)
+
+  n = fgd_entry(d, 'new244', ent)
+  call check_ok2(ne,  261,  2, d)
+  call check_int2(ne, 261,  3, n, GD_POLYNOM_ENTRY)
+  call check_int2(ne, 261,  4, ent%poly_ord, 3)
+  call check_int2(ne, 261,  5, ent%fragment_index, 0)
+  call check_str2(ne, 261,  6, ent%field(1), 'in3')
+  call check_int2(ne, 261,  7, ent%comp_scal, 0)
+  call check_dbl2(ne, 261,  8, ent%a(1), 2d0)
+  call check_dbl2(ne, 261,  9, ent%a(2), 6d0)
+  call check_dbl2(ne, 261, 10, ent%a(3), 15d0)
+  call check_dbl2(ne, 261, 11, ent%a(4), 11d0)
+  call check_str2(ne, 261, 12, ent%scalar(1), '')
+  call check_str2(ne, 261, 13, ent%scalar(2), '')
+  call check_str2(ne, 261, 14, ent%scalar(3), 'carray')
+  call check_str2(ne, 261, 15, ent%scalar(4), '')
+  call check_int2(ne, 261, 16, ent%scalar_ind(3), 5)
+
+! 262: fgd_alter_entry CPOLYNOM
+  ent%field_type = GD_POLYNOM_ENTRY
+  ent%comp_scal = 1
+  ent%ca(3) = dcmplx(26d0, 2d0)
+  ent%scalar(1) = 'const'
+  ent%scalar(2) = 'const'
+  ent%scalar_ind(1) = -1
+  ent%scalar_ind(2) = -1
+  call fgd_alter_entry(d, 'new244', ent, 4, 0)
+  call check_ok2(ne, 262, 1, d)
+
+  n = fgd_entry(d, 'new244', ent)
+  call check_ok2(ne,  262,  2, d)
+  call check_int2(ne, 262,  3, n, GD_POLYNOM_ENTRY)
+  call check_int2(ne, 262,  4, ent%poly_ord, 3)
+  call check_int2(ne, 262,  5, ent%fragment_index, 0)
+  call check_str2(ne, 262,  6, ent%field(1), 'in3')
+  call check_int2(ne, 262,  7, ent%comp_scal, 1)
+  call check_cpx2(ne, 262,  8, ent%ca(1), dcmplx(93d0, 0))
+  call check_cpx2(ne, 262,  9, ent%ca(2), dcmplx(93d0, 0))
+  call check_cpx2(ne, 262, 10, ent%ca(3), dcmplx(26d0, 2d0))
+  call check_cpx2(ne, 262, 11, ent%ca(4), dcmplx(11d0, 0))
+  call check_str2(ne, 262, 12, ent%scalar(1), 'const')
+  call check_str2(ne, 262, 13, ent%scalar(2), 'const')
+  call check_str2(ne, 262, 14, ent%scalar(3), '')
+  call check_str2(ne, 262, 15, ent%scalar(4), '')
+  call check_int2(ne, 262, 16, ent%scalar_ind(1), -1)
+
+! 263: fgd_alter_entry BIT
+  ent%field_type = GD_BIT_ENTRY
+  ent%scalar(1) = 'carray'
+  ent%scalar_ind(1) = 6
+  call fgd_alter_entry(d, 'new246', ent, 2, 0)
+  call check_ok2(ne, 263, 1, d)
+
+  n = fgd_entry(d, 'new246', ent)
+  call check_ok2(ne, 263, 2, d)
+  call check_int2(ne, 263,  3, n, GD_BIT_ENTRY)
+  call check_int2(ne, 263,  4, ent%fragment_index, 0)
+  call check_int2(ne, 263,  5, ent%numbits, 93)
+  call check_int2(ne, 263,  6, ent%bitnum, 16)
+  call check_str2(ne, 263,  7, ent%field(1), 'in3')
+  call check_str2(ne, 263,  8, ent%scalar(1), 'carray')
+  call check_str2(ne, 263,  9, ent%scalar(2), '')
+
+! 264: fgd_alter_entry SBIT
+  ent%field_type = GD_SBIT_ENTRY
+  ent%scalar(1) = 'carray'
+  ent%scalar_ind(1) = 5
+  ent%numbits = 0
+  call fgd_alter_entry(d, 'new258', ent, 1, 0)
+  call check_ok2(ne, 264, 1, d)
+
+  n = fgd_entry(d, 'new258', ent)
+  call check_ok2(ne, 264, 2, d)
+  call check_int2(ne, 264,  3, n, GD_SBIT_ENTRY)
+  call check_int2(ne, 264,  4, ent%fragment_index, 0)
+  call check_int2(ne, 264,  5, ent%numbits, 93)
+  call check_int2(ne, 264,  6, ent%bitnum, 16)
+  call check_str2(ne, 264,  7, ent%field(1), 'in3')
+  call check_str2(ne, 264,  8, ent%scalar(1), '')
+  call check_str2(ne, 264,  9, ent%scalar(2), 'const')
+  call check_int2(ne, 264, 10, ent%scalar_ind(2), -1)
+
+! 265: fgd_alter_entry PHASE
+  ent%field_type = GD_PHASE_ENTRY
+  ent%field(1) = 'in2'
+  ent%shift = -265
+  call fgd_alter_entry(d, 'new248', ent, 1, 0)
+  call check_ok2(ne,  265, 1, d)
+
+  n = fgd_entry(d, 'new248', ent)
+  call check_ok2(ne,  265, 2, d)
+  call check_int2(ne, 265, 1, n, GD_PHASE_ENTRY)
+  call check_int2(ne, 265, 2, ent%fragment_index, 0)
+  call check_int2(ne, 265, 3, ent%shift, -265)
+  call check_str2(ne, 265, 4, ent%field(1), 'in2')
+  call check_str2(ne, 265, 5, ent%scalar(1), '')
  
+! 266: fgd_alter_entry RECIP
+  ent%field_type = GD_RECIP_ENTRY
+  ent%comp_scal = 0
+  ent%field(1) = 'in5'
+  ent%scalar(1) = 'carray'
+  ent%scalar_ind(1) = 2
+  call fgd_alter_entry(d, 'new251', ent, 0, 0)
+  call check_ok2(ne, 266, 1, d)
+
+  n = fgd_entry(d, 'new251', ent)
+  call check_ok2(ne, 266, 2, d)
+  call check_int2(ne, 266, 3, n, GD_RECIP_ENTRY)
+  call check_int2(ne, 266, 4, ent%fragment_index, 0)
+  call check_int2(ne, 266, 5, ent%comp_scal, 0)
+  call check_str2(ne, 266, 6, ent%field(1), 'in5')
+  call check_dbl2(ne, 266, 7, ent%dividend, 12d0)
+  call check_str2(ne, 266, 8, ent%scalar(1), 'carray')
+  call check_int2(ne, 266, 9, ent%scalar_ind(1), 2)
+
+! 267: fgd_alter_entry CRECIP
+  ent%field_type = GD_RECIP_ENTRY
+  ent%field(1) = 'in4'
+  ent%comp_scal = 1
+  ent%cdividend = dcmplx(12d0, 14d0)
+  call fgd_alter_entry(d, 'new251', ent, 15, 0)
+  call check_ok2(ne, 267, 1, d)
+
+  n = fgd_entry(d, 'new251', ent)
+  call check_ok2(ne, 267, 2, d)
+  call check_int2(ne, 267, 3, n, GD_RECIP_ENTRY)
+  call check_int2(ne, 267, 4, ent%fragment_index, 0)
+  call check_int2(ne, 267, 5, ent%comp_scal, 1)
+  call check_str2(ne, 267, 6, ent%field(1), 'in4')
+  call check_cpx2(ne, 267, 7, ent%cdividend, dcmplx(12d0, 14d0))
+  call check_str2(ne, 267, 8, ent%scalar(1), '')
+
+! 268: fgd_alter_entry WINDOW
+  ent%field_type = GD_WINDOW_ENTRY
+  ent%field(1) = ''
+  ent%field(2) = 'in4'
+  ent%windop = GD_WINDOP_LT
+  ent%scalar(1) = 'carray'
+  ent%scalar_ind(1) = 3
+  call fgd_alter_entry(d, 'new253', ent, 0, 0)
+  call check_ok2(ne, 268, 1, d)
+
+  n = fgd_entry(d, 'new253', ent)
+  call check_ok2(ne,  268,  2, d)
+  call check_int2(ne, 268,  3, n, GD_WINDOW_ENTRY)
+  call check_int2(ne, 268,  4, ent%fragment_index, 0)
+  call check_int2(ne, 268,  5, ent%windop, GD_WINDOP_LT)
+  call check_str2(ne, 268,  6, ent%field(1), 'in2')
+  call check_str2(ne, 268,  7, ent%field(2), 'in4')
+  call check_dbl2(ne, 268,  8, ent%rthreshold, 179d0)
+  call check_str2(ne, 268,  9, ent%scalar(1), 'carray')
+  call check_int2(ne, 268, 10, ent%scalar_ind(1), 3)
+
+! 269: fgd_alter MPLEX
+  ent%field_type = GD_MPLEX_ENTRY
+  ent%field(1) = 'in0'
+  ent%field(2) = ''
+  ent%scalar(1) = ''
+  ent%period = -1
+  call fgd_alter_entry(d, 'new254', ent, 2, 0)
+  call check_ok2(ne, 269, 1, d)
+
+  n = fgd_entry(d, 'new254', ent)
+  call check_ok2(ne,  269,  2, d)
+  call check_int2(ne, 269,  3, n, GD_MPLEX_ENTRY)
+  call check_int2(ne, 269,  4, ent%fragment_index, 0)
+  call check_int2(ne, 269,  5, ent%count_val, 179)
+  call check_int2(ne, 269,  6, ent%period, 180)
+  call check_str2(ne, 269,  7, ent%field(1), 'in0')
+  call check_str2(ne, 269,  8, ent%field(2), 'in2')
+  call check_str2(ne, 269,  9, ent%scalar(1), 'carray')
+  call check_int2(ne, 269, 10, ent%scalar_ind(1), 3)
+  call check_str2(ne, 269, 11, ent%scalar(2), '')
+
 
 
   
