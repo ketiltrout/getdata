@@ -41,6 +41,7 @@ int main(void)
   rmdirfile();
   E.field = "data";
   E.field_type = GD_RAW_ENTRY;
+  E.fragment_index = 0;
   E.EN(raw,spf) = 0;
   E.EN(raw,data_type) = GD_UINT8;
   E.scalar[0] = "const";

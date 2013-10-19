@@ -1162,6 +1162,11 @@ char *_GD_MakeFullPath(DIRFILE *restrict, int, const char *restrict, int);
 #define gd_MakeFullPathOnly _GD_MakeFullPathOnly
 #endif
 char *_GD_MakeFullPathOnly(const DIRFILE *D, int dirfd, const char *name);
+#ifdef USE_MODULES
+#define _GD_MakeTempFile gd_MakeTempFile
+#else
+#define gd_MakeTempFile _GD_MakeTempFile
+#endif
 int _GD_MakeTempFile(const DIRFILE*, int, char*);
 void *_GD_Malloc(DIRFILE *D, size_t size);
 int _GD_MissingFramework(int encoding, unsigned int funcs);
