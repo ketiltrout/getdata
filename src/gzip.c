@@ -51,6 +51,8 @@ int _GD_GzipOpen(int fd, struct gd_raw_file_* file, int swap gd_unused_,
       return 1;
     }
     gzmode = "r";
+  } else if (mode & GD_FILE_TEMP) {
+    file->idata = _GD_MakeTempFile(file->D, fd, file->name);
   } else
     file->idata = fd;
 

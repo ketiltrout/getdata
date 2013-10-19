@@ -1,3 +1,13 @@
+2013-10-19   D. V. Wiebe <getdata@ketiltrout.net> svn:852
+	
+	_GD_MakeTempFile patch from Seth:
+
+	* src/encoding.c (_GD_InitRawIO): Let the encoding framework deal with
+	creating temporary files.
+	* src/ascii.c (_GD_AsciiOpen)	src/gzip.c (_GD_GzipOpen) src/raw.c
+	(_GD_RawOpen) src/sie.c (_GD_SampIndDoOpen): Call _GD_MakeTempFile when
+	necessary.
+
 2013-10-19   D. V. Wiebe <getdata@ketiltrout.net> svn:850
 
 	Merge in getdata-distutils branch:

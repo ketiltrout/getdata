@@ -40,14 +40,14 @@ static int _GD_SampIndDoOpen(int fdin, struct gd_raw_file_ *file,
   if (!(mode & GD_FILE_TEMP)) {
     fd = gd_OpenAt(file->D, fdin, file->name, ((mode & GD_FILE_WRITE) ?
           (O_RDWR | O_CREAT) : O_RDONLY) | O_BINARY, 0666);
+  } else {
+    fd = _GD_MakeTempFile(file->D, fdin, file->name);
+  }
 
-    if (fd < 0) {
-      dreturn("%i", -1);
-      return -1;
-    }
-  } else
-    fd = fdin;
-
+  if (fd < 0) {
+    dreturn("%i", -1);
+    return -1;
+  }
   stream = fdopen(fd, (mode & GD_FILE_WRITE) ? "rb+" : "rb");
 
   if (stream == NULL) {

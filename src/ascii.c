@@ -37,12 +37,13 @@ int _GD_AsciiOpen(int fd, struct gd_raw_file_* file, int swap gd_unused_,
     file->idata = gd_OpenAt(file->D, fd, file->name, ((mode & GD_FILE_WRITE)
           ? (O_RDWR | O_CREAT) : O_RDONLY) | O_BINARY, 0666);
 
-    if (file->idata < 0) {
-      dreturn("%i", -1);
-      return -1;
-    }
   } else
-    file->idata = fd;
+    file->idata = _GD_MakeTempFile(file->D, fd, file->name);
+
+  if (file->idata < 0) {
+    dreturn("%i", -1);
+    return -1;
+  }
 
   file->edata = fdopen(file->idata, (mode & GD_FILE_WRITE) ? "rb+" : "rb");
 

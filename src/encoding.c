@@ -544,11 +544,7 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
           E->e->u.raw.file + 1, filebase, 1, 0))
     {
       ; /* error already set */
-    } else if ((temp_fd = _GD_MakeTempFile(D, D->fragment[fragment].dirfd,
-            E->e->u.raw.file[1].name)) < 0)
-    {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
-    } else if ((*enc->open)(temp_fd, E->e->u.raw.file + 1, swap,
+    } else if ((*enc->open)(D->fragment[fragment].dirfd, E->e->u.raw.file + 1, swap,
           GD_FILE_WRITE | GD_FILE_TEMP))
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);

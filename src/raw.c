@@ -34,8 +34,10 @@ int _GD_RawOpen(int fd, struct gd_raw_file_* file, int swap gd_unused_,
 
     file->idata = gd_OpenAt(file->D, fd, file->name, ((mode & GD_FILE_WRITE) ?
           (O_RDWR | O_CREAT) : O_RDONLY) | O_BINARY, 0666);
-  } else
-    file->idata = fd;
+
+  } else {
+    file->idata = _GD_MakeTempFile(file->D, fd, file->name);
+  }
 
   file->pos = 0;
   file->mode = mode | GD_FILE_READ;
