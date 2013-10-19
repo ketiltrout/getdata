@@ -2871,13 +2871,13 @@ PHP_FUNCTION(gd_discard)
 
 PHP_FUNCTION(gd_encoding)
 {
-  long i;
+  long i = 0;
 
   DIRFILE *D;
 
   dtracephp();
 
-  GDPHP_PARSED("l", &i);
+  GDPHP_PARSED("|l", &i);
 
   i = gd_encoding(D, i);
 
@@ -2890,13 +2890,13 @@ PHP_FUNCTION(gd_encoding)
 
 PHP_FUNCTION(gd_endianness)
 {
-  long i;
+  long i = 0;
 
   DIRFILE *D;
 
   dtracephp();
 
-  GDPHP_PARSED("l", &i);
+  GDPHP_PARSED("|l", &i);
 
   i = gd_endianness(D, i);
 
@@ -3158,13 +3158,13 @@ PHP_FUNCTION(gd_fragmentname)
 
 PHP_FUNCTION(gd_frameoffset)
 {
-  long i;
+  long i = 0;
   
   DIRFILE *D;
 
   dtracephp();
 
-  GDPHP_PARSED("l", &i);
+  GDPHP_PARSED("|l", &i);
 
   i = gd_frameoffset64(D, i);
 
@@ -3218,7 +3218,7 @@ PHP_FUNCTION(gd_get_carray)
   unpack = gdphp_unpack(zunpack);
 
   if (len == -1) {
-    len = gd_carray_len(D, field_code);
+    len = gd_carray_len(D, field_code) - start;
     if (len == 0) /* error */
       GDPHP_RETURN_F;
   }
@@ -4485,13 +4485,17 @@ PHP_FUNCTION(gd_rename)
 
 PHP_FUNCTION(gd_rewrite_fragment)
 {
-  long i = GD_ALL_FRAGMENTS;
+  zval *zi;
+
+  long i;
 
   DIRFILE *D;
 
   dtracephp();
   
-  GDPHP_PARSED("|l", &i);
+  GDPHP_PARSED("|z", &zi);
+
+  i = gdphp_long_from_zval_null(zi, GD_ALL_FRAGMENTS);
 
   GDPHP_RETURN_BOOL(gd_rewrite_fragment(D, i));
 }
