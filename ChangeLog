@@ -1,3 +1,12 @@
+2013-10-19   D. V. Wiebe <getdata@ketiltrout.net> svn:850
+
+	Merge in getdata-distutils branch:
+
+	* m4/python.m4 bindings/python/test/Makefile.am bindings/python/Makefile.am
+	configure.ac: Use distutils to build Python bindings rather than rolling our
+	own.
+	* bindings/python/setup.py.in: Added.
+
 2013-10-18   D. V. Wiebe <getdata@ketiltrout.net> svn:848
 
 	* bindings/f77/fgetdata.c (GDASRW GDASLC GDASCL GDASPN GDASCP GDASPH GDASRC
