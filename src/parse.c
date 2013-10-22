@@ -1545,7 +1545,8 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D, int n_cols, char **in_cols,
         /* If the encoding scheme is unsupported, we can't add the field */
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
       else
-        _GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_WRITE | GD_FILE_TOUCH, 0);
+        _GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_WRITE | GD_FILE_TOUCH,
+            _GD_FileSwapBytes(D, E->fragment_index));
     }
 
     /* Is this the first raw field ever defined? */

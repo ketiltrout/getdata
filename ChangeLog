@@ -1,3 +1,12 @@
+2013-10-19   D. V. Wiebe <getdata@ketiltrout.net> svn:854
+	* src/add.c (_GD_Add) src/fpos.c (_GD_GetFilePos _GD_WriteSeek _GD_Seek)
+	src/getdata.c (_GD_DoRaw) src/mod.c (_GD_Change) src/move.c
+	(_GD_MogrifyFile) src/parse.c (_GD_ParseFieldSpec) src/putdata.c
+	(_GD_DoRawOut): Compute the swap argument correctly in _GD_InitRawIO calls.
+	* src/encoding.c (_GD_InitRawIO): Merge oop_write and temp file creation
+	code; also, assume that the caller has figured out the swap parameter.
+	* test/gzip_put_endian.c: Added.
+
 2013-10-19   D. V. Wiebe <getdata@ketiltrout.net> svn:852
 	
 	_GD_MakeTempFile patch from Seth:

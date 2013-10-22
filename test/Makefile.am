@@ -190,7 +190,8 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 GLOBAL_TESTS=global_flags global_name global_ref global_ref_empty global_ref_set
 
 GZIP_TESTS=gzip_add gzip_get gzip_get_get gzip_get_get2 gzip_get_put \
-					 gzip_move_from gzip_move_to gzip_nframes gzip_put gzip_put_get
+					 gzip_move_from gzip_move_to gzip_nframes gzip_put gzip_put_endian \
+					 gzip_put_get
 
 HEADER_TESTS=header_complex
 

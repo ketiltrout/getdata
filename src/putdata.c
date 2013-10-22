@@ -1,6 +1,6 @@
 /* Copyright (C) 2003-2005 C. Barth Netterfield
  * Copyright (C) 2003-2005 Theodore Kisner
- * Copyright (C) 2005-2012 D. V. Wiebe
+ * Copyright (C) 2005-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -93,7 +93,9 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   }
   /* write data to file. */
 
-  if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_WRITE, 0)) {
+  if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_WRITE,
+        _GD_FileSwapBytes(D, E->fragment_index)))
+  {
     free(databuffer);
     dreturn("%i", 0);
     return 0;

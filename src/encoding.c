@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2008-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -486,7 +486,6 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
     int fragment, const struct encoding_t *enc, unsigned int funcs,
     unsigned int mode, int swap)
 {
-  int temp_fd = -1;
   const int touch = mode & GD_FILE_TOUCH;
   int oop_write = 0;
 
@@ -538,59 +537,41 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
   if (fragment == -1)
     fragment = E->fragment_index;
 
-  if (mode & GD_FILE_TEMP) {
+  if (oop_write || mode & GD_FILE_TEMP) {
     /* create temporary file in file[1] */
-    if ((*enc->name)(D, (const char*)D->fragment[E->fragment_index].enc_data,
+    if ((*enc->name)(D, (const char*)D->fragment[fragment].enc_data,
           E->e->u.raw.file + 1, filebase, 1, 0))
     {
       ; /* error already set */
-    } else if ((*enc->open)(D->fragment[fragment].dirfd, E->e->u.raw.file + 1, swap,
-          GD_FILE_WRITE | GD_FILE_TEMP))
+      dreturn("%i", 1);
+      return 1;
+    } else if ((*enc->open)(D->fragment[fragment].dirfd, E->e->u.raw.file + 1,
+          swap, GD_FILE_WRITE | GD_FILE_TEMP))
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
+      dreturn("%i", 1);
+      return 1;
     }
 
-    if (D->error) {
-      dreturn("%i", 1);
-      return 1;
+    if (oop_write) {
+      /* The read file in OOP mode is flagged as RW. */
+      mode = GD_FILE_RDWR;
+    } else {
+      /* Temp file creation complete */
+      dreturn("%i", 0);
+      return 0;
     }
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  if (oop_write) {
-    /* an out-of-place write requires us to open a temporary file and pass
-     * in its fd */
-    if ((*enc->name)(D, (const char*)D->fragment[E->fragment_index].enc_data,
-          E->e->u.raw.file + 1, filebase, 1, 0))
-    {
-      dreturn("%i", 1);
-      return 1;
-    } else if ((temp_fd = _GD_MakeTempFile(D,
-            D->fragment[E->fragment_index].dirfd, E->e->u.raw.file[1].name))
-          < 0)
-    {
-      dreturn("%i", 1);
-      return 1;
-    } else if ((*enc->open)(temp_fd, E->e->u.raw.file + 1, _GD_FileSwapBytes(D,
-            E->fragment_index), GD_FILE_WRITE)) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
-      dreturn("%i", 1);
-      return 1;
-    }
-    /* The read file in OOP mode is flagged as RW. */
-    mode = GD_FILE_RDWR;
   }
 
   /* open a regular file, if necessary */
   if (E->e->u.raw.file[0].idata < 0) {
-    if ((*enc->name)(D, (const char*)D->fragment[E->fragment_index].enc_data,
+    if ((*enc->name)(D, (const char*)D->fragment[fragment].enc_data,
           E->e->u.raw.file, filebase, 0, 0))
     {
       dreturn("%i", 1);
       return 1;
-    } else if ((*enc->open)(D->fragment[E->fragment_index].dirfd,
-          E->e->u.raw.file, _GD_FileSwapBytes(D, E->fragment_index), mode))
+    } else if ((*enc->open)(D->fragment[fragment].dirfd, E->e->u.raw.file, swap,
+          mode))
     {
       /* In oop_write mode, it doesn't matter if the old file doesn't exist */
       if (!oop_write || errno != ENOENT) {
@@ -603,7 +584,7 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
   }
 
   if (touch)
-    _GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP);
+    _GD_FiniRawIO(D, E, fragment, GD_FINIRAW_KEEP);
 
   dreturn("%i", 0);
   return 0;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2012 D. V. Wiebe
+/* Copyright (C) 2011-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -38,8 +38,11 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
     case GD_RAW_ENTRY:
       /* We must open the file to know its starting offset */
       if (E->e->u.raw.file[0].idata < 0)
-        if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_READ, 0))
+        if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_READ,
+              _GD_FileSwapBytes(D, E->fragment_index)))
+        {
           break;
+        }
       pos = E->e->u.raw.file[0].pos + E->EN(raw,spf) *
         D->fragment[E->fragment_index].frame_offset;
       break;
@@ -171,7 +174,8 @@ off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
     if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP)) {
       dreturn("%i", -1);
       return -1;
-    } else if (_GD_InitRawIO(D, E, NULL, 0, NULL, GD_EF_SEEK, GD_FILE_WRITE, 0))
+    } else if (_GD_InitRawIO(D, E, NULL, 0, NULL, GD_EF_SEEK, GD_FILE_WRITE,
+          _GD_FileSwapBytes(D, E->fragment_index)))
     {
       dreturn("%i", -1);
       return -1;
@@ -250,8 +254,11 @@ int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode)
   switch (E->field_type) {
     case GD_RAW_ENTRY:
       /* open/create the file, if necessary */
-      if (_GD_InitRawIO(D, E, NULL, 0, NULL, GD_EF_SEEK, mode, 0))
+      if (_GD_InitRawIO(D, E, NULL, 0, NULL, GD_EF_SEEK, mode,
+            _GD_FileSwapBytes(D, E->fragment_index)))
+      {
         break;
+      }
 
       /* The requested offset is before the start of the file, so I guess
        * pretend we've repositioned it...

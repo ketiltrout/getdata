@@ -323,9 +323,11 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         enc = gd_ef_ + E->e->u.raw.file[0].subenc;
 
         /* open the old file */
-        if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_READ, 0))
+        if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_READ,
+              _GD_FileSwapBytes(D, E->fragment_index)))
+        {
           break;
-        else if ((*enc->seek)(E->e->u.raw.file, 0, E->EN(raw,data_type),
+        } else if ((*enc->seek)(E->e->u.raw.file, 0, E->EN(raw,data_type),
               GD_FILE_READ) == -1)
         {
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,

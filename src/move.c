@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -138,7 +138,9 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   }
 
   /* Open the input file, if necessary */
-  if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_READ, 0)) {
+  if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_READ,
+        _GD_FileSwapBytes(D, E->fragment_index)))
+  {
     free(new_filebase);
     dreturn("%i", -1);
     return -1;
