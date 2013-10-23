@@ -40,6 +40,8 @@ pyconstants.c: ../make_parameters
 	cd .. && ${MAKE} make_parameters
 
 clean-local:
+if MAKE_PYBINDINGS
 	if [ -e setup.py ]; then ${PYTHON} setup.py clean; fi
+endif
 	rm -rf build pygetdata.so ${BUILT_SOURCES} debug.c *~ 
 

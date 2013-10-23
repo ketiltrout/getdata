@@ -41,7 +41,9 @@ getdata/configure: getdata/config.m4
 	cd getdata && ${PHPIZE}
 
 clean-local:
+if MAKE_PHPBINDINGS
 	cd getdata && ${PHPIZE} --clean
+endif
 	rm -rf *~ getdata/*~ ${BUILT_SOURCES} getdata/Makefile.temp
 
 SUBDIRS=. test
