@@ -4,7 +4,9 @@ PHP BINDINGS FOR GETDATA
 The PHP bindings for GetData provide PHP5 bindings to the C GetData Library.
 The bindings are provided in a PHP extension (called "getdata") which also
 defines all the GetData constants (GD_RDONLY, GD_E_OK, &c.).  The bindings
-are built using phpize(1) and the standard PHP extension build system.
+are configured using php-config(1), which should provide all necessary
+configuration.  The install path can be changed by passing --with-php-dir to
+./configure.
 
 In PHP, the C API's DIRFILE object is represented by a Dirfile resource,
 allocated by gd_open().  The DIRFILE associated with a Dirfile resource is
