@@ -21,7 +21,7 @@
 php_LTLIBRARIES = getdata.la
 AM_CFLAGS = ${WALL} ${WEXTRA}
 AM_CPPFLAGS = ${CPPFLAGS} ${PHP_CPPFLAGS}
-getdata_la_LDFLAGS = -module -avoid-version ${PHP_LDFLAGS}
+getdata_la_LDFLAGS = -module -avoid-version -shared ${PHP_LDFLAGS}
 getdata_la_LIBADD = ${PHP_LIBS} ../../src/libgetdata.la
 getdata_la_SOURCES = getdata.c php_getdata.h
 nodist_getdata_la_SOURCES = constants.c
