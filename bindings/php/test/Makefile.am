@@ -30,7 +30,7 @@ TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../../src/.libs \
 	-d "error_prepend_string=" -d "error_append_string=" -d "auto_prepend_file=" \
 	-d "auto_append_file=" -d "magic_quotes_runtime=0" \
 	-d "ignore_repeated_errors=0" -d "precision=14" -d "memory_limit=128M" \
-	-d "extension_dir=@top_builddir@/bindings/php/getdata/modules/" \
+	-d "extension_dir=@top_builddir@/bindings/php/.libs" \
 	-d "extension=getdata.so" -d "session.auto_start=0" -f
 phpTESTS=big_test.php
 TESTS=$(addprefix ${srcdir}/,$(phpTESTS))

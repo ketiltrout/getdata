@@ -50,7 +50,8 @@ AC_CONFIG_MACRO_DIR([m4])
 LT_PREREQ([2.2.6b])
 
 AC_ARG_VAR([BUILDCC],
-           [C compiler command on the build system (only needed if cross-compiling)])
+           [C compiler command targetting the build system ]
+           [(only needed if cross-compiling)])
 
 dnl export version information from m4/version.m4
 AC_SUBST(GETDATA_IFACE_VERSION, [getdata_iface_version])
@@ -1059,7 +1060,6 @@ AC_CONFIG_FILES([bindings/matlab/test/Makefile])
 AC_CONFIG_FILES([bindings/perl/Makefile])
 AC_CONFIG_FILES([bindings/perl/Build.PL])
 AC_CONFIG_FILES([bindings/php/Makefile])
-AC_CONFIG_FILES([bindings/php/getdata/config.m4])
 AC_CONFIG_FILES([bindings/php/test/Makefile])
 AC_CONFIG_FILES([bindings/python/Makefile])
 AC_CONFIG_FILES([bindings/python/setup.py])

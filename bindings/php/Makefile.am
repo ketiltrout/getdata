@@ -18,32 +18,23 @@
 # along with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-all-local: getdata/Makefile
-	cd getdata && ${MAKE}
+php_LTLIBRARIES = getdata.la
+AM_CFLAGS = ${WALL} ${WEXTRA}
+AM_CPPFLAGS = ${CPPFLAGS} ${PHP_CPPFLAGS}
+getdata_la_LDFLAGS = -module -avoid-version ${PHP_LDFLAGS}
+getdata_la_LIBADD = ${PHP_LIBS} ../../src/libgetdata.la
+getdata_la_SOURCES = getdata.c php_getdata.h
+nodist_getdata_la_SOURCES = constants.c
 
-BUILT_SOURCES=getdata/constants.c
+BUILT_SOURCES=constants.c
 
-getdata/constants.c: ../make_parameters ../../src/getdata.h
+constants.c: ../make_parameters ../../src/getdata.h
 	  ../make_parameters h > $@
 
 ../make_parameters: ../make_parameters.c ../../src/gd_config.h
 	  cd .. && ${MAKE} make_parameters
 
-getdata/modules: getdata/Makefile
-
-getdata/Makefile: getdata/configure
-	cd getdata && \
-		./configure --enable-getdata && \
-		${SED} -e "s/make test/make check/" < Makefile > Makefile.temp && \
-		mv -f Makefile.temp Makefile
-
-getdata/configure: getdata/config.m4
-	cd getdata && ${PHPIZE}
-
 clean-local:
-if MAKE_PHPBINDINGS
-	cd getdata && ${PHPIZE} --clean
-endif
-	rm -rf *~ getdata/*~ ${BUILT_SOURCES} getdata/Makefile.temp
+	rm -rf *~ ${BUILT_SOURCES}
 
 SUBDIRS=. test

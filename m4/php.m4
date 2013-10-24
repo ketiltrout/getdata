@@ -18,13 +18,13 @@ dnl You should have received a copy of the GNU Lesser General Public License
 dnl along with GetData; if not, write to the Free Software Foundation, Inc.,
 dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-dnl GD_PHP_INI_GET
+dnl GD_PHP_CONFIG
 dnl ---------------------------------------------------------------
 dnl Get a PHP configuration option and store it in the supplied local
 dnl variable.
-AC_DEFUN([GD_PHP_INI_GET],
+AC_DEFUN([GD_PHP_CONFIG],
 [
-  $1=`${PHP} -r 'echo ini_get("$2");'`
+  $1=`${PHP_CONFIG} --$2`
   if test "x${$1}" = "x"; then
     $1="$3";
     have_php="no";
@@ -38,44 +38,26 @@ AC_DEFUN([GD_PHP],
 [
 
 have_php="yes"
-AC_ARG_WITH([php], AS_HELP_STRING([--with-php=PATH],
-            [use the php interpreter at PATH.  [default: autodetect]]),
+AC_ARG_WITH([php-config], AS_HELP_STRING([--with-php-config=PATH],
+            [use PATH as php-config.  [default: autodetect]]),
             [
               case "${withval}" in
                 no) have_php="no" ;;
-                yes) user_php= ;;
-                *) user_php="${withval}" ;;
+                yes) user_php_config= ;;
+                *) user_php_config="${withval}" ;;
               esac
-            ], [ user_php= ])
-
-AC_ARG_WITH([phpize], AS_HELP_STRING([--with-phpize=PATH],
-            [use the phpize script at PATH.  [default: autodetect]]),
-            [
-              case "${withval}" in
-                no) have_php="no" ;;
-                yes) user_phpize= ;;
-                *) user_phpize="${withval}" ;;
-              esac
-            ], [ user_phpize= ])
+            ], [ user_php_config= ])
 
 if test "x${have_php}" != "xno"; then
   dnl try to find php
-  AC_PATH_PROGS(PHP, [$user_php php5 php], [not found])
+  AC_PATH_PROGS(PHP_CONFIG, [$user_php_config php5-config php-config],
+  [not found])
 
-  if test "x$PHPIZE" = "xnot found"; then
+  if test "x$PHP_CONFIG" = "xnot found"; then
     have_php="no"
-    PHPIZE=
+    PHP_CONFIG=
   fi
-  AC_SUBST([PHPIZE])
-
-  dnl try to find phpize
-  AC_PATH_PROGS(PHPIZE, [$user_phpize phpize5 phpize], [not found])
-
-  if test "x$PHPIZE" = "xnot found"; then
-    have_php="no"
-    PHPIZE=
-  fi
-  AC_SUBST([PHPIZE])
+  AC_SUBST([PHP_CONFIG])
 fi
 
 dnl extension dir
@@ -89,12 +71,38 @@ AC_ARG_WITH([php-dir], AS_HELP_STRING([--with-php-dir=DIR],
       fi
       ], [phpdir=UNKNOWN])
 
+dnl php CLI
+if test "x${have_php}" != "xno"; then
+  AC_MSG_CHECKING([PHP interpreter path])
+  GD_PHP_CONFIG([PHP], [php-binary], [UNKNOWN])
+  AC_MSG_RESULT([$PHP])
+  AC_SUBST([PHP])
+fi
+
 if test "x${have_php}" != "xno"; then
   AC_MSG_CHECKING([the PHP extension directory])
   if test "x${phpdir}" = "xUNKNOWN"; then
-    GD_PHP_INI_GET([phpdir], [extension_dir], [UNKNOWN])
+    GD_PHP_CONFIG([phpdir], [extension-dir], [UNKNOWN])
   fi
   AC_MSG_RESULT([$phpdir])
+  if test "x${phpdir}" = "xUNKNOWN"; then
+    have_php=no
+  fi
   AC_SUBST([phpdir])
+
+  AC_MSG_CHECKING([PHP CPPFLAGS])
+  GD_PHP_CONFIG([PHP_CPPFLAGS], [includes], [])
+  AC_MSG_RESULT([$PHP_CPPFLAGS])
+  AC_SUBST([PHP_CPPFLAGS])
+
+  AC_MSG_CHECKING([PHP LDFLAGS])
+  GD_PHP_CONFIG([PHP_LDFLAGS], [ldflags], [])
+  AC_MSG_RESULT([$PHP_LDFLAGS])
+  AC_SUBST([PHP_ldflags])
+
+  AC_MSG_CHECKING([PHP LIBS])
+  GD_PHP_CONFIG([PHP_LIBS], [libs], [])
+  AC_MSG_RESULT([$PHP_LIBS])
+  AC_SUBST([PHP_libs])
 fi
 ])

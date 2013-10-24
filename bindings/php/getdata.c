@@ -18,9 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include "php_getdata.h"
 #include "php_ini.h"
@@ -4865,6 +4862,4 @@ zend_module_entry getdata_module_entry = {
   STANDARD_MODULE_PROPERTIES
 };
 
-#ifdef COMPILE_DL_GETDATA
 ZEND_GET_MODULE(getdata);
-#endif
