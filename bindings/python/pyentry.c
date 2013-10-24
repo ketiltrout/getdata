@@ -1066,7 +1066,7 @@ static PyObject *gdpy_entry_getspf(struct gdpy_entry_t *self, void *closure)
 static int gdpy_entry_setspf(struct gdpy_entry_t *self, PyObject *value,
     void *closure)
 {
-  unsigned int spf;
+  unsigned int spf = 0;
   char *scalar;
 
   dtrace("%p, %p, %p", self, value, closure);
@@ -1457,7 +1457,7 @@ static PyObject *gdpy_entry_getbitnum(struct gdpy_entry_t *self, void *closure)
 static int gdpy_entry_setbitnum(struct gdpy_entry_t *self, PyObject *value,
     void *closure)
 {
-  int bitnum;
+  int bitnum = 0;
   char *scalar;
   dtrace("%p, %p, %p", self, value, closure);
 
@@ -1511,7 +1511,7 @@ static PyObject *gdpy_entry_getnumbits(struct gdpy_entry_t *self, void *closure)
 static int gdpy_entry_setnumbits(struct gdpy_entry_t *self, PyObject *value,
     void *closure)
 {
-  int numbits;
+  int numbits = 0;
   char *scalar;
 
   dtrace("%p, %p, %p", self, value, closure);
@@ -1633,7 +1633,7 @@ static PyObject *gdpy_entry_getshift(struct gdpy_entry_t *self, void *closure)
 static int gdpy_entry_setshift(struct gdpy_entry_t *self, PyObject *value,
     void *closure)
 {
-  int64_t shift;
+  int64_t shift = 0;
   char *scalar;
 
   dtrace("%p, %p, %p", self, value, closure);
@@ -1685,7 +1685,7 @@ static PyObject *gdpy_entry_getcountval(struct gdpy_entry_t *self,
 static int gdpy_entry_setcountval(struct gdpy_entry_t *self, PyObject *value,
     void *closure)
 {
-  int count_val;
+  int count_val = 0;
   char *scalar;
 
   dtrace("%p, %p, %p", self, value, closure);
@@ -1737,7 +1737,7 @@ static PyObject *gdpy_entry_getperiod(struct gdpy_entry_t *self,
 static int gdpy_entry_setperiod(struct gdpy_entry_t *self, PyObject *value,
     void *closure)
 {
-  int period;
+  int period = 0;
   char *scalar;
 
   dtrace("%p, %p, %p", self, value, closure);
