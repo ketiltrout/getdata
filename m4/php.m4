@@ -25,10 +25,12 @@ dnl variable.
 AC_DEFUN([GD_PHP_CONFIG],
 [
   $1=`${PHP_CONFIG} --$2`
+ifelse(`x$3', `x',,[
   if test "x${$1}" = "x"; then
     $1="$3";
     have_php="no";
   fi
+])
 ])
 
 dnl GD_PHP
@@ -91,17 +93,17 @@ if test "x${have_php}" != "xno"; then
   AC_SUBST([phpdir])
 
   AC_MSG_CHECKING([PHP CPPFLAGS])
-  GD_PHP_CONFIG([PHP_CPPFLAGS], [includes], [])
+  GD_PHP_CONFIG([PHP_CPPFLAGS], [includes])
   AC_MSG_RESULT([$PHP_CPPFLAGS])
   AC_SUBST([PHP_CPPFLAGS])
 
   AC_MSG_CHECKING([PHP LDFLAGS])
-  GD_PHP_CONFIG([PHP_LDFLAGS], [ldflags], [])
+  GD_PHP_CONFIG([PHP_LDFLAGS], [ldflags])
   AC_MSG_RESULT([$PHP_LDFLAGS])
   AC_SUBST([PHP_ldflags])
 
   AC_MSG_CHECKING([PHP LIBS])
-  GD_PHP_CONFIG([PHP_LIBS], [libs], [])
+  GD_PHP_CONFIG([PHP_LIBS], [libs])
   AC_MSG_RESULT([$PHP_LIBS])
   AC_SUBST([PHP_libs])
 fi
