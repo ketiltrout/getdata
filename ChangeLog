@@ -1,3 +1,8 @@
+2013-10-26   D. V. Wiebe <getdata@ketiltrout.net> svn:862
+	* src/getdata.h.in: Add GD_GETDATA_VERSION and GD_GETDATA_INT_VERSION
+	* configure.ac cmake/CMakeLists.txt: Calculate GD_GETDATA_VERSION and
+	GD_GETDATA_INT_VERSION.
+
 2013-10-19   D. V. Wiebe <getdata@ketiltrout.net> svn:854
 	* src/add.c (_GD_Add) src/fpos.c (_GD_GetFilePos _GD_WriteSeek _GD_Seek)
 	src/getdata.c (_GD_DoRaw) src/mod.c (_GD_Change) src/move.c

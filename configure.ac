@@ -362,6 +362,15 @@ AC_CHECK_PROGS([SEQ], [seq], [not found])
 
 GD_MSYS_SHELL
 
+dnl verion info
+AC_SUBST([DEFINE_GD_GETDATA_VERSION], ["#define GD_GETDATA_VERSION \"]dnl"
+getdata_version[\""])
+[DEFINE_GD_GETDATA_INT_VERSION="#define GD_GETDATA_INT_VERSION `${PRINTF} ]dnl
+ifelse(`getdata_major', `0',dnl"
+[%i%02i getdata_minor getdata_revision`"],dnl`
+[%i%02i%02i getdata_major getdata_minor getdata_revision`"])dnl`
+AC_SUBST([DEFINE_GD_GETDATA_INT_VERSION])
+
 echo
 echo "*** Checking host environment"
 echo

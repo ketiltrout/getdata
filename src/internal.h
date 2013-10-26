@@ -388,6 +388,7 @@ void gd_colclear(void);
     __FUNCTION__, ##__VA_ARGS__)
 #define dwatch(fmt, v) printf("%s %s = " fmt "\n", gd_colnil(), #v, v)
 #else
+#define gd_colclear()
 #define dtracevoid()
 #define dtrace(...)
 #define dprintf(...)

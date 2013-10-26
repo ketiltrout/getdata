@@ -1155,6 +1155,12 @@ gd_nonnull ((1,2));
 #  endif
 #endif
 
+/* Library version information */
+@DEFINE_GD_GETDATA_VERSION@
+
+/* This is (major * 10000) + (minor * 100) + revision */
+@DEFINE_GD_GETDATA_INT_VERSION@
+
 /* function aliases */
 #ifdef GD_FUNCTION_ALIASES
 #  warning "Using deprecated function aliases."

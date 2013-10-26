@@ -26,13 +26,17 @@ endmacro()
 #TODO add configure
 add_definitions(
   -DPACKAGE_NAME=\"GetData\"
-  -DPACKAGE_VERSION=\"0.8.x\"
+  -DPACKAGE_VERSION=\"0.9.x\"
   -DPACKAGE_BUGREPORT=\"getdata-devel@lists.sourceforge.net\"
   -DUNALIGNED_ACCESS_OK
   )
 
 # kst2 doesn't need the legacy API
 set(DEFINE_GD_LEGACY_API "/* #undef GD_LEGACY_API */")
+
+# Version macros
+set(DEFINE_GD_GETDATA_VERSION  "#define GD_GETDATA_VERSION \"0.9.x\"")
+set(DEFINE_GD_GETDATA_INT_VERSION  "#define GD_GETDATA_INT_VERSION 900")
 
 if(MSVC)
   ## Substitutions needed to build getdata.h
