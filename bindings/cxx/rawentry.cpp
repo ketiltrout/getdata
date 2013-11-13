@@ -30,6 +30,7 @@ RawEntry::RawEntry(const char* field_code, DataType data_type, unsigned int spf,
   E.u.raw.spf = spf;
   E.u.raw.data_type = (gd_type_t)data_type;
   E.fragment_index = fragment_index;
+  filename = NULL;
 }
 
 RawEntry::~RawEntry()

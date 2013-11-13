@@ -58,6 +58,9 @@ New in verison 0.9.0a:
   * F95 BUG FIX: fgd_add and fgd_alter_entry no longer ignore named scalar
     parameters provided in supplied entry structures.
 
+  * C++ BUG FIX: Fixed segfault in RawEntry distructor.  Reported by S. J.
+    Benton.
+
 |==============================================================================|
 
 New in verison 0.8.5:

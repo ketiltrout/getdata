@@ -1,3 +1,7 @@
+2013-11-13   D. V. Wiebe <getdata@ketiltrout.net> svn:863
+	* bindings/cxx/rawentry.cpp (RawEntry::RawEntry): Initialise filename.
+	Patch from S. J. Benton.
+
 2013-10-26   D. V. Wiebe <getdata@ketiltrout.net> svn:862
 	* src/getdata.h.in: Add GD_GETDATA_VERSION and GD_GETDATA_INT_VERSION
 	* configure.ac cmake/CMakeLists.txt: Calculate GD_GETDATA_VERSION and
