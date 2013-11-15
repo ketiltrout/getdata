@@ -4,8 +4,9 @@ New in verison 0.9.0a:
 
   * The gd_free_entry_strings() function now NULLs pointers after freeing them.
 
-  * The gd_[m]add() functions now ignore zero-length scalar strings.  Previously
-    they would store these invalid field codes, causing problems later.
+  * BUG FIX: The gd_[m]add() functions now ignore zero-length scalar strings.
+    Previously they would store these invalid field codes, causing problems
+    later.
 
   * BUG FIX: Returning complex-valued CARRAYs as purely real now works.
     Previously only the first element requested would be returned, the remaining
@@ -58,7 +59,7 @@ New in verison 0.9.0a:
   * F95 BUG FIX: fgd_add and fgd_alter_entry no longer ignore named scalar
     parameters provided in supplied entry structures.
 
-  * C++ BUG FIX: Fixed segfault in RawEntry distructor.  Reported by S. J.
+  * C++ BUG FIX: Fixed segfault in RawEntry destructor.  Reported by S. J.
     Benton.
 
 |==============================================================================|
