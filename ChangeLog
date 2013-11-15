@@ -1,3 +1,9 @@
+2013-11-15   D. V. Wiebe <getdata@ketiltrout.net> svn:867
+	* test/add_add.c test/close_close.c test/del_del.c test/flush_flush.c
+	test/include_include.c test/index_index.c test/move_move.c test/name_name.c
+	test/nfields_nfields.c test/nframes_nframes.c test/open_open.c
+	test/spf_raw.c: Renamed.
+
 2013-11-13   D. V. Wiebe <getdata@ketiltrout.net> svn:863
 	* bindings/cxx/rawentry.cpp (RawEntry::RawEntry): Initialise filename.
 	Patch from S. J. Benton.
