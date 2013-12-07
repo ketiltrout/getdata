@@ -3355,19 +3355,20 @@ void gdidl_move(int argc, IDL_VPTR argv[], char *argk)
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
-    int move_data;
-    int alias;
+    int dangle, force, move_data, updatedb;
   } KW_RESULT;
   KW_RESULT kw;
 
-  kw.move_data = kw.alias = 0;
+  kw.dangle = kw.force = kw.move_data = kw.updatedb = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
-    { "ALIAS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(alias) },
+    { "DANGLE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(dangle) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
+    { "FORCE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force) },
     { "MOVE_DATA", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(move_data) },
+    { "UPDATEDB", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(updatedb) },
     { NULL }
   };
 
@@ -3376,10 +3377,11 @@ void gdidl_move(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  if (kw.alias)
-    gd_move_alias(D, field_code, IDL_LongScalar(argv[2]));
-  else
-    gd_move(D, field_code, IDL_LongScalar(argv[2]), kw.move_data);
+  gd_move(D, field_code, IDL_LongScalar(argv[2]),
+      (kw.dangle ? GD_REN_DANGLE : 0) |
+      (kw.force ? GD_REN_FORCE : 0) |
+      (kw.move_data ? GD_REN_DATA : 0) |
+      (kw.updatedb ? GD_REN_UPDB : 0));
 
   GDIDL_SET_ERROR(D);
 
@@ -3550,17 +3552,18 @@ void gdidl_rename(int argc, IDL_VPTR argv[], char *argk)
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
-    int updatedb;
-    int move_data;
+    int dangle, force, move_data, updatedb;
   } KW_RESULT;
   KW_RESULT kw;
 
-  kw.move_data = kw.updatedb = 0;
+  kw.dangle = kw.force = kw.move_data = kw.updatedb = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
+    { "DANGLE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(dangle) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
+    { "FORCE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force) },
     { "MOVE_DATA", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(move_data) },
     { "UPDATEDB", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(updatedb) },
     { NULL }
@@ -3572,8 +3575,11 @@ void gdidl_rename(int argc, IDL_VPTR argv[], char *argk)
   const char* field_code = IDL_VarGetString(argv[1]);
   const char* new_code = IDL_VarGetString(argv[2]);
 
-  gd_rename(D, field_code, new_code, (kw.move_data ? GD_REN_DATA : 0) |
-      (kw.move_data ? GD_REN_UPDB : 0));
+  gd_rename(D, field_code, new_code,
+      (kw.dangle ? GD_REN_DANGLE : 0) |
+      (kw.force ? GD_REN_FORCE : 0) |
+      (kw.move_data ? GD_REN_DATA : 0) |
+      (kw.updatedb ? GD_REN_UPDB : 0));
 
   GDIDL_SET_ERROR(D);
 

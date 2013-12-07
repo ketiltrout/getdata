@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 D. V. Wiebe
+/* Copyright (C) 2012, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -47,8 +47,14 @@ int main(void)
   unsigned char data_data[256];
   int fd, ret, e0, e1, e2, e3, e4, e5, e6, unlink_data, unlink_zata, r = 0;
   const char **fl;
-  char *field_list[9];
-  char *s1, *s2, *s3, *s4, *s5, *s6;
+#define NFIELDS 10
+  const char *field_list[NFIELDS] = {
+    "INDEX", "aata", "bata", "cata", "early", "earlya", "eata", "late", "latea",
+    "zata"
+  };
+  char *s1, *s2, *s3, *s4;
+  const char *s5, *s6;
+  unsigned nf, i;
   DIRFILE *D;
   gd_entry_t E;
 
@@ -69,105 +75,80 @@ int main(void)
   D = gd_open(filedir, GD_RDWR);
   gd_validate(D, "early");
   gd_validate(D, "earlya");
+
   ret = gd_rename(D, "data", "zata", 0);
   e0 = gd_error(D);
+  CHECKI(ret, 0);
+  CHECKI(e0, 0);
+
   gd_spf(D, "early");
   e1 = gd_error(D);
+  CHECKI(e1, 0);
+
   gd_spf(D, "late");
   e2 = gd_error(D);
+  CHECKI(e2, 0);
+
   gd_spf(D, "earlya");
   e3 = gd_error(D);
+  CHECKI(e3, GD_E_BAD_CODE);
+
   gd_spf(D, "latea");
   e4 = gd_error(D);
-  fl = gd_field_list(D);
+  CHECKI(e4, GD_E_BAD_CODE);
 
-  field_list[0] = strdup(fl[0]);
-  field_list[1] = strdup(fl[1]);
-  field_list[2] = strdup(fl[2]);
-  field_list[3] = strdup(fl[3]);
-  field_list[4] = strdup(fl[4]);
-  field_list[5] = strdup(fl[5]);
-  field_list[6] = strdup(fl[6]);
-  field_list[7] = strdup(fl[7]);
-  field_list[8] = strdup(fl[8]);
+  nf = gd_nfields(D);
+  CHECKU(nf, NFIELDS);
+
+  if (nf > NFIELDS)
+    nf = NFIELDS;
+
+  fl = gd_field_list(D);
+  for (i = 0; i < nf; ++i)
+    CHECKSi(i, fl[i], field_list[i]);
 
   gd_entry(D, "early", &E);
   s1 = E.in_fields[0];
-  E.in_fields[0] = NULL;
+  CHECKS(s1, "cata");
   gd_free_entry_strings(&E);
 
   gd_entry(D, "earlya", &E);
   s2 = E.in_fields[0];
-  E.in_fields[0] = NULL;
+  CHECKS(s2, "data");
   gd_free_entry_strings(&E);
 
   gd_entry(D, "late", &E);
   s3 = E.in_fields[0];
-  E.in_fields[0] = NULL;
+  CHECKS(s3, "cata");
   gd_free_entry_strings(&E);
 
   gd_entry(D, "latea", &E);
   s4 = E.in_fields[0];
-  E.in_fields[0] = NULL;
+  CHECKS(s4, "data");
   gd_free_entry_strings(&E);
 
   gd_entry(D, "aata", &E);
   e5 = gd_error(D);
-  s5 = strdup(gd_alias_target(D, "aata"));
+  s5 = gd_alias_target(D, "aata");
+  CHECKI(e5, 0);
+  CHECKS(s5, "cata");
   gd_free_entry_strings(&E);
 
   gd_entry(D, "bata", &E);
   e6 = gd_error(D);
-  s6 = strdup(gd_alias_target(D, "bata"));
+  s6 = gd_alias_target(D, "bata");
+  CHECKS(s6, "zata");
+  CHECKI(e6, 0);
+  gd_free_entry_strings(&E);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink_data = unlink(data);
   unlink_zata = unlink(zata);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(e0,0);
-  CHECKI(e1,0);
-  CHECKI(e2,0);
-  CHECKI(e3,GD_E_BAD_CODE);
-  CHECKI(e4,GD_E_BAD_CODE);
-  CHECKI(e5,0);
-  CHECKI(e6,GD_E_BAD_CODE);
-  CHECKI(ret,0);
-  CHECKS(field_list[0], "INDEX");
-  CHECKS(field_list[1], "aata");
-  CHECKS(field_list[2], "cata");
-  CHECKS(field_list[3], "early");
-  CHECKS(field_list[4], "earlya");
-  CHECKS(field_list[5], "eata");
-  CHECKS(field_list[6], "late");
-  CHECKS(field_list[7], "latea");
-  CHECKS(field_list[8], "zata");
   CHECKI(unlink_data, 0);
   CHECKI(unlink_zata, -1);
-  CHECKS(s1, "cata");
-  CHECKS(s2, "data");
-  CHECKS(s3, "cata");
-  CHECKS(s4, "data");
-  CHECKS(s5, "cata");
-  CHECKS(s6, "data");
-
-  free(field_list[0]);
-  free(field_list[1]);
-  free(field_list[2]);
-  free(field_list[3]);
-  free(field_list[4]);
-  free(field_list[5]);
-  free(field_list[6]);
-  free(field_list[7]);
-  free(field_list[8]);
-  free(s1);
-  free(s2);
-  free(s3);
-  free(s4);
-  free(s5);
-  free(s6);
 
   return r;
 }

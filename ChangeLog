@@ -1,4 +1,181 @@
-2013-11-15   D. V. Wiebe <getdata@ketiltrout.net> svn:867
+2013-12-06   D. V. Wiebe <getdata@ketiltrout.net> svn:867
+	* test/add_dot.c test/alter_clincom.c test/alter_const_r2c.c test/sie_sync.c
+	test/alter_const_r2r.c test/alter_cpolynom_null.c test/alter_crecip89_null.c
+	test/alter_entry_lincom.c test/alter_entry_recode_recalc.c test/get_divide_s.c
+	test/alter_entry_scalar1.c test/alter_entry_scalar3c.c test/alter_index.c
+	test/alter_spec_polynom.c test/ascii_get_complex.c test/ascii_sync.c
+	test/bof_bit.c test/bof_index.c test/bof_phase_neg.c test/cvlist_array0.c
+	test/cvlist_array_free.c test/cvlist_array_meta0.c test/native_polynom_cmpin.c
+	test/cvlist_array_meta_free.c test/cvlist_meta0.c test/del_alias.c
+	test/del_data_enoent.c test/del_data_open.c test/del_ref.c test/desync_path.c
+	test/encode_alter_all.c test/encode_alter_open.c test/svlist_meta0.c
+	test/encode_recode_open.c test/endian_alter_all.c test/eof_bit.c test/flist2.c
+	test/eof_phase_neg.c test/flist0.c test/flist_meta2.c test/flush_lincom.c
+	test/flush_lincom1.c test/flush_mult.c test/sie_put_back.c test/put_cpolynom.c
+	test/flush_raw_close.c test/flush_string.c test/flush_sync.c test/svlist2.c
+	test/foffs_alter_all.c test/fragment_affix_alter_code.c test/native_recip.c
+	test/fragment_affix_alter_nop.c test/get_cpolynom1.c test/get_cpolynom_int.c
+	test/get_dim.c test/get_divide_ccin.c test/get_divide_crin.c test/native_raw.c
+	test/get_divide_crinr.c test/get_divide_rcin.c test/get_index_complex.c
+	test/get_lincom2s.c test/get_lincom3s.c test/get_lincom_mdt.c test/parse_hex.c
+	test/get_linterp1.c test/get_linterp_abs.c test/get_linterp_complex.c
+	test/get_linterp_empty.c test/get_mplex_complex.c test/get_mplex_s.c
+	test/get_mplex_saved.c test/get_multiply_ccin.c test/get_multiply_crin.c
+	test/get_multiply_crinr.c test/get_multiply_rcin.c test/get_multiply_s.c
+	test/get_neg.c test/get_polynom_cmpin.c test/get_window_complex.c
+	test/get_window_s.c test/get_zero_complex.c test/get_zero_float.c
+	test/gzip_del.c test/gzip_put_back.c test/gzip_sync.c test/index_s.c
+	test/index_subset.c test/legacy_error.c test/legacy_estring.c test/seek_mult.c
+	test/legacy_format.c test/move_affix_meta.c test/move_affix_updb.c
+	test/move_data_foffs_neg.c test/name_dangle.c test/name_dot.c test/name_meta.c
+	test/name_updb_affix.c test/native_bit.c test/native_const.c test/repr_bad.c
+	test/native_index.c test/native_lincom.c test/native_lincom_cmpin.c
+	test/native_lincom_cmpscal.c test/native_linterp.c test/native_linterp_cmp.c
+	test/native_mult.c test/native_mult1.c test/native_mult2.c test/native_phase.c
+	test/native_polynom.c test/native_polynom_cmpscal.c test/native_recip_cmpin.c
+	test/native_recip_cmpscal.c test/native_sbit.c test/native_string.c
+	test/open_cb_rescan_alloc.c test/open_invalid.c test/open_sym_as.c
+	test/open_sym_d.c test/open_sym_l.c test/parse_include_affix_bad.c
+	test/parse_literal_cmpbad.c test/parse_literal_fltcmp.c test/parse_meta_frag.c
+	test/parse_literal_fltcmp0.c test/parse_literal_intcmp.c test/sie_put_append.c
+	test/parse_literal_intcmp0.c test/parse_literal_uintcmp.c test/sie_put_trunc.c
+	test/parse_literal_uintcmp0.c test/parse_octal_zero.c test/protect_alter_all.c
+	test/parse_raw_char_bad.c test/parse_utf8.c test/parse_utf8_invalid.c
+	test/parse_utf8_zero.c test/put_carray_client.c test/put_clincom1.c
+	test/put_crecip.c test/put_mplex_complex.c test/svlist0.c test/seek_index.c
+	test/seek_lincom.c test/seek_phase.c test/sie_put_append2.c test/sie_put_pad.c
+	test/sie_put_trunc2.c test/sie_put_pad0.c test/unclude_open.c: Added.
+
+	* test/encode_recode.c: Renamed.
+
+	* src/add.c (_GD_Add): Set the right suberror (GD_E_ENTRY_POLYORD) for
+	poly_ord out of range.
+
+	* src/add.c (gd_add_alias) src/field_list.c (_GD_EntryList): Remove
+	duplicate check for invalid dirfile.
+
+	* src/ascii.c (_GD_ScanFormat): Append a newline.
+
+	* src/ascii.c (_GD_AsciiRead): Use ferror instead of feof to check for stdio
+	errors.
+
+	* src/common.c (_GD_ReadLinterpFile): Zero the LUT pointer on error.
+	* src/mod.c (_GD_Change): reset the LUT length to force table re-read.
+	Also, release the LUT directory.
+
+	* src/common.c (_GD_CanonicalPath): Set errno to ELOOP late.
+
+	* src/constant.c (_GD_PutCarraySlice): Added.
+	* src/constant.c (gd_put_carray_slice gd_put_carray): Call
+	_GD_PutCarraySlice.
+
+	* src/del.c (_GD_Delete): Always close an open raw file, even when
+	deleting it.
+
+	* src/encoding.c (_GD_RecodeFragment): Use _GD_FiniRawIO to close raw files.
+	Clear the internal cache of raw filenames.
+
+	* src/entry.c (_GD_GetScalar): Return non-zero on error.  Always call
+	_GD_DoField.
+	* src/entry.c (gd_entry): Return uncalculable entries rather than failing.
+
+	* src/flimits.c (_GD_GetBOF): Also zero *ds if we're before sample zero.
+
+	* src/flush.c (_GD_Flush): Validate input fields before trying to flush
+	them.  Don't flush the second lincom field if it's not used.
+
+	* src/flush.c (_GD_StringEscapeise): Remove duplicate check for ".
+
+	* src/fpos.c (_GD_Seek): Fix sign on PHASE shift.
+
+	* src/fpos.c (gd_seek64): Pass index_pos=-1 to _GD_GetFilePos.
+
+	* src/getdata.c (_GD_CPolynomData _GD_CMultiplyData _GD_CDivideData):
+	Delete unused code: type is guaranteed to be complex in these calls.
+	* src/getdata.c (_GD_CDivideData): Fix computation of complex division.
+
+	* src/getdata.c (_GD_DoLinterp): Delete check for uninitialised LUT: the
+	native type check done in DoField has already initialised the LUT.
+
+	* src/index.c (_GD_GetIndex): Fix extrapolations performed when required to
+	search for the EOF.
+	* src/index.c (gd_framenum_subset64): Fix conversion of field_end from
+	frames to samples.
+
+	* src/legacy.c (GetFormat): Allocate Format.mplexEntries.
+
+	* src/mod.c (_GD_Change): Ensure a RAW entry is calculated before trying to
+	modify the data file.
+
+	* src/mod.c (gd_alter_spec gd_malter_spec): Set move flags for POLYNOM
+	entries to ensure co-efficients are updated.
+
+	* src/getdata.h.in: Added struct gd_rename_data_.  Added GD_REN_DANGLE,
+	GD_REN_FORCE.
+	* src/move.c (_GD_Move) src/name.c (_GD_Rename): Call _GD_PrepareRename and
+	_GD_PerformRename to handle metadata updates resulting from name changes.
+	* src/move.c (gd_move): Replace move_data with flags argument, which accepts
+	the GD_REN_* flags.
+	* src/name.c (_GD_MatchCode _GD_MakeNewCode _GD_SetNewCode _GD_UpdateInputs
+	_GD_CleanUpRename _GD_PerformRename _GD_PrepareRename): Added.
+	* src/name.c (_GD_InvalidateConst _GD_InvalidateVect): Deleted. (Combined into
+	_GD_UpdateInputs).
+	* src/name.c (_GD_UpdateScalar _GD_UpdateInField): Call _GD_MatchCode
+	_GD_MakeNewCode _GD_SetNewCode for common code.  Return non-zero on failure.
+	Update gd_rename_data_ struct in-place.
+	* src/name.c (_GD_MungeCode): If err_ok is 2, dont' worry at all about
+	errors.
+	* src/name.c (_GD_CheckCodeAffixes): Add set_error argument.  Remember
+	success or failure separately from the DIRFILE error.
+
+	* src/move.c (gd_move_alias): Deleted.
+	* src/move.c (gd_move): Don't delalias the provided field code.
+	* bindings/cxx/dirfile.cpp (Dirfile::MoveAlias) bindings/f77/fgetdata.c
+	(GDMOVA) bindings/f77/getdata.f90.in (fgd_move_alias)
+	bindings/perl/simple_funcs.xsin (move_alias) bindings/php/getdata.c
+	(gd_move_alias) bindings/python/pydirfile.c (gdpy_dirfile_movealias):
+	Deleted.
+	* bindings/idl/getdata.c (gdidl_move gdidl_rename): Remove keyword ALIAS;
+	add keywords DANGLE, FORCE, UPDATEDB.
+	* bindings/cxx/test/big_test.cpp bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro
+	bindings/perl/t/big_test.t bindings/php/test/big_test.php
+	bindings/python/test/big_test.py: Delete test 224.
+
+	* src/native.c (_GD_NativeType): Don't always return GD_FLOAT64 for LINCOMs.
+
+	* src/errors.c: Added GD_E_OPEN_IO.
+	* src/open.c (_GD_Open): Throw GD_E_OPEN instead of GD_E_RAW_IO if resolving
+	the supplied path fails.
+
+	* src/parse.c (_GD_SetScalar): Allow literals in semicolon (complex) form in
+	all cases but require a zero imaginary part for non-complex data.
+
+	* src/parse.c (_GD_Tokenise): Fix parsing of \x and \u.  Don't unnecessarily
+	overwrite earlier errors with GD_E_FORMAT_UNTERM.
+
+	* src/putdata.c (_GD_MplexOutData): Fix computation of complex data.
+
+	* src/sie.c: Added l, have_l and bof to struct gd_siedata.  Also, f->d[0]
+	is no longer endianness corrected (ie. f->d is now simply the raw record),
+	which means we use f->s in most places where we used f->d[0] previously.
+
+	* src/sie.c (_GD_Advance): remember the previous record in f->l.  Also set
+	f->bof.
+
+	* src/sie.c (_GD_SampIndSeek): check stdio calls for failure.  Correctly
+	format a padding record when write seeking past the EOF.
+
+	* src/sie.c (_GD_SampIndWrite): Correctly deal with appending data,
+	including backing up a record when necessary to check whether we need to
+	combine the start of the new data with that record.  Compose p with the
+	output endianness.
+
+	* bindings/idl/getdata.c (gdidl_rename): Fix handling of UPDATEDB.
+
+	* bindings/php/getdata.c (gd_rewrite_fragment): Initalise zi.
+
+2013-11-15   D. V. Wiebe <getdata@ketiltrout.net> svn:866
 	* test/add_add.c test/close_close.c test/del_del.c test/flush_flush.c
 	test/include_include.c test/index_index.c test/move_move.c test/name_name.c
 	test/nfields_nfields.c test/nframes_nframes.c test/open_open.c

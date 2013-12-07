@@ -520,8 +520,8 @@ static size_t _GD_DoPolynomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   do { \
     for (i = 0; i < n; i++) \
       if (B[i] == val) { \
-        ((t*)A)[i * 2] = ((t*)C)[i * spfB / spfA]; \
-        ((t*)A)[i * 2 + 1] = ((t*)C)[i * spfB / spfA + 1]; \
+        ((t*)A)[i * 2] = ((t*)C)[i * 2 * spfB / spfA]; \
+        ((t*)A)[i * 2 + 1] = ((t*)C)[i * 2 * spfB / spfA + 1]; \
       } \
   } while (0)
 

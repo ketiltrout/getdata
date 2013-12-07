@@ -30,13 +30,16 @@
 #include <math.h>
 #include <errno.h>
 
+#define F(x) sqrt(((x) + 600.) / 500.)
+/* inverse of F(x) via linear interpolation between x and x+1 */
+#define G(x,y) (x + ((y - F(x)) / (F(x+1) - F(x))))
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *format_data = "data RAW FLOAT64 1\n";
-  double d[1000], f1, f2, f3;
+  double d[1000], f1, f2, f3, f4;
   int i, error, r = 0;
   DIRFILE *D;
 
@@ -44,7 +47,7 @@ int main(void)
   mkdir(filedir, 0777);
 
   for (i = 0; i < 1000; ++i)
-    d[i] = sqrt((i+600) / 500.);
+    d[i] = F(i);
 
   i = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(i, format_data, strlen(format_data));
@@ -58,6 +61,7 @@ int main(void)
   f1 = gd_framenum(D, "data", 1.09);
   f2 = gd_framenum(D, "data", 1.49);
   f3 = gd_framenum(D, "data", 1.79);
+  f4 = gd_framenum(D, "data", F(128));
   error = gd_error(D);
 
   gd_close(D);
@@ -67,9 +71,10 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(error, 0);
-  CHECKF(f1, -5.96730894763915);
-  CHECKF(f2, 510.050010695549);
-  CHECKF(f3, 1002.04807025292);
+  CHECKF(f1, G(   0, 1.09)); /* =   -5.96730894763915 */
+  CHECKF(f2, G( 510, 1.49)); /* =  510.050010695549 */
+  CHECKF(f3, G( 998, 1.79)); /* = 1002.04807025292 */
+  CHECKF(f4, 128.); /* exact */
 
   return r;
 }

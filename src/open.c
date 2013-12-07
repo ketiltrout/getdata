@@ -434,23 +434,24 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   /* canonicalise the path to protect us against the caller chdir'ing away */
   dirfile = _GD_CanonicalPath(NULL, filedir);
 
+  if (dirfile) {
 #ifdef GD_NO_DIR_OPEN
   /* if we can't cache directory descriptors, we just have to remember paths.
    * so stat the path to see if it exists (and is a directory) */
-  if (dirfile) {
     if (gd_stat64(dirfile, &statbuf))
       dirfd_error = errno;
     else if (!S_ISDIR(statbuf.st_mode))
       dirfd_error = ENOTDIR;
     else
       dirfd = 0;
-  }
 #else
-  /* quickly, before it goes away, grab the directory (if it exists) */
-  if (dirfd == -1)
-    dirfd = open(dirfile, O_RDONLY);
-  dirfd_error = errno;
+    /* quickly, before it goes away, grab the directory (if it exists) */
+    if (dirfd == -1)
+      dirfd = open(dirfile, O_RDONLY);
+    dirfd_error = errno;
 #endif
+  } else
+    dirfd_error = errno;
   _GD_InitialiseFramework();
 
   if (D == NULL)
@@ -479,7 +480,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   D->lookback = GD_DEFAULT_LOOKBACK;
 
   if (dirfile == NULL) {
-    _GD_SetError(D, GD_E_RAW_IO, 0, filedir, errno, NULL);
+    _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_IO, filedir, dirfd_error, NULL);
 #ifndef GD_NO_DIR_OPEN
     close(dirfd);
 #endif

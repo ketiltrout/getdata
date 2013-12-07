@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write little-endian SIE data */
 #include "test.h"
 
 #include <stdlib.h>
@@ -38,15 +37,17 @@ int main(void)
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x22,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, 0x32
   };
+#define NREC 4
   const uint8_t data_out[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x12,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x13, 0x23,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x34,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, 0x32
   };
-  uint8_t check[4 * 9];
+  uint8_t check[(NREC + 1) * 9];
   DIRFILE *D;
   int fd, i, n, error, r = 0;
+  ssize_t s;
 
   rmdirfile();
   mkdir(filedir, 0777); 
@@ -63,21 +64,22 @@ int main(void)
   n = gd_putdata(D, "data", 0, 0x11, 2, 0, GD_UINT8, c);
   error = gd_error(D);
 
+  CHECKI(error, 0);
+  CHECKI(n, 16);
+
   gd_close(D);
 
   fd = open(data, O_RDONLY | O_BINARY);
-  read(fd, check, 4 * 9);
+  s = read(fd, check, (NREC + 1) * 9);
   close(fd);
+  CHECKI(s, NREC * 9);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, 0);
-  CHECKI(n, 16);
-
-  for (i = 0; i < 4 * 9; ++i)
-    CHECKIi(i, check[i], data_out[i]);
+  for (i = 0; i < NREC * 9; ++i)
+    CHECKXi(i, check[i], data_out[i]);
 
   return r;
 }

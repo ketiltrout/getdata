@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -69,13 +69,14 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  gd_getdata(D, "lut", 5, 0, 1, 0, GD_NULL, NULL);
   ret = gd_alter_linterp(D, "lut", NULL, "table1", 0);
   error = gd_error(D);
   gd_entry(D, "lut", &e);
   error2 = gd_error(D);
   n = gd_getdata(D, "lut", 5, 0, 1, 0, GD_INT32, c);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink_table = unlink(table);

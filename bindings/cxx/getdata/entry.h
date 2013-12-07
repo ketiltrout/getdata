@@ -89,9 +89,9 @@ namespace GetData {
 
       int FragmentIndex() const { return E.fragment_index; };
 
-      int Move(int new_fragment, int move_data = 0);
+      int Move(int new_fragment, unsigned flags = 0);
 
-      int Rename(const char* new_name, int move_data = 0);
+      int Rename(const char* new_name, unsigned flags = 0);
 
       /* Specific data */
       virtual const char *Input(int index = 0) const {

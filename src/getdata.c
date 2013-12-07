@@ -442,42 +442,7 @@ static void _GD_PolynomData(DIRFILE *restrict D, void *restrict data,
 }
 
 #ifdef GD_NO_C99_API
-#undef POLYNOM5
-#undef POLYNOM4
-#undef POLYNOM3
-#undef POLYNOM2
 #undef POLYNOMC
-
-#define POLYNOM5(t,npts) \
-  for (i = 0; i < npts; i++) ((t*)data)[i] = (t)( \
-      ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] \
-      * ((t*)data)[i] * ((t*)data)[i] * a[5][0] \
-      + ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[4][0]\
-      + ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[3][0] \
-      + ((t*)data)[i] * ((t*)data)[i] * a[2][0] \
-      + ((t*)data)[i] * a[1][0] + a[0][0] \
-      )
-
-#define POLYNOM4(t,npts) \
-  for (i = 0; i < npts; i++) ((t*)data)[i] = (t)( \
-      ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[4][0] \
-      + ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[3][0] \
-      + ((t*)data)[i] * ((t*)data)[i] * a[2][0] \
-      + ((t*)data)[i] * a[1][0] + a[0][0] \
-      )
-
-#define POLYNOM3(t,npts) \
-  for (i = 0; i < npts; i++) ((t*)data)[i] = (t)( \
-      ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[3][0] \
-      + ((t*)data)[i] * ((t*)data)[i] * a[2][0] \
-      + ((t*)data)[i] * a[1][0] + a[0][0] \
-      )
-
-#define POLYNOM2(t,npts) \
-  for (i = 0; i < npts; i++) ((t*)data)[i] = (t)( \
-      ((t*)data)[i] * ((t*)data)[i] * a[2][0] \
-      + ((t*)data)[i] * a[1][0] + a[0][0] \
-      )
 
 #define POLYNOMC5(t,npts) \
   do { \
@@ -608,16 +573,16 @@ static void _GD_CPolynomData(DIRFILE *restrict D, void *restrict data,
   } else {
     switch (type) {
       case GD_NULL:                          break;
-      case GD_INT8:       POLYNOM(  int8_t); break;
-      case GD_UINT8:      POLYNOM( uint8_t); break;
-      case GD_INT16:      POLYNOM( int16_t); break;
-      case GD_UINT16:     POLYNOM(uint16_t); break;
-      case GD_INT32:      POLYNOM( int32_t); break;
-      case GD_UINT32:     POLYNOM(uint32_t); break;
-      case GD_INT64:      POLYNOM( int64_t); break;
-      case GD_UINT64:     POLYNOM(uint64_t); break;
-      case GD_FLOAT32:    POLYNOM(   float); break;
-      case GD_FLOAT64:    POLYNOM(  double); break;
+      case GD_INT8:
+      case GD_UINT8:
+      case GD_INT16:
+      case GD_UINT16:
+      case GD_INT32:
+      case GD_UINT32:
+      case GD_INT64:
+      case GD_UINT64:
+      case GD_FLOAT32:
+      case GD_FLOAT64: _GD_InternalError(D); break;
       case GD_COMPLEX64:  POLYNOMC(  float); break;
       case GD_COMPLEX128: POLYNOMC( double); break;
       default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
@@ -643,61 +608,10 @@ static void _GD_CPolynomData(DIRFILE *restrict D, void *restrict data,
 #define MULTIPLY(t) \
   for (i = 0; i < n; i++) ((t*)A)[i] = (t)(((t*)A)[i] * B[i * spfB / spfA])
 
-/* MultiplyData: Multiply A by B.  B is unchanged.
+/* MultiplyData: Multiply A by purely real B.  B is unchanged.
 */
 static void _GD_MultiplyData(DIRFILE *restrict D, void *restrict A,
-    unsigned int spfA, double *B, unsigned int spfB, gd_type_t type, size_t n)
-{
-  size_t i;
-
-  dtrace("%p, %p, %u, %p, %u, 0x%X, %" PRNsize_t, D, A, spfA, B, spfB, type, n);
-
-  switch (type) {
-    case GD_NULL:                           break;
-    case GD_UINT8:      MULTIPLY( uint8_t); break;
-    case GD_INT8:       MULTIPLY(  int8_t); break;
-    case GD_UINT16:     MULTIPLY(uint16_t); break;
-    case GD_INT16:      MULTIPLY( int16_t); break;
-    case GD_UINT32:     MULTIPLY(uint32_t); break;
-    case GD_INT32:      MULTIPLY( int32_t); break;
-    case GD_UINT64:     MULTIPLY(uint64_t); break;
-    case GD_INT64:      MULTIPLY( int64_t); break;
-    case GD_FLOAT32:    MULTIPLY(   float); break;
-    case GD_FLOAT64:    MULTIPLY(  double); break;
-    case GD_COMPLEX64:  MULTIPLYC(  float); break;
-    case GD_COMPLEX128: MULTIPLYC( double); break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
-                        break;
-  }
-
-  dreturnvoid();
-}
-
-#ifdef GD_NO_C99_API
-#undef MULTIPLY
-#undef MULTIPLYC
-
-#define MULTIPLYC(t) \
-  do { \
-    for (i = 0; i < n; i++) { \
-      const int i2 = 2 * (i * spfB / spfA); \
-      const t x = ((t*)A)[2 * i]; \
-      const t y = ((t*)A)[2 * i + 1]; \
-      ((t*)A)[2 * i] = (t)(x * B[i2] - y * B[i2 + 1]); \
-      ((t*)A)[2 * i + 1] = (t)(y * B[i2] + x * B[i2 + 1]); \
-    } \
-  } while (0)
-
-#define MULTIPLY(t) \
-  for (i = 0; i < n; i++) ((t*)A)[i] = (t)(((t*)A)[i] * \
-      B[2 * (i * spfB / spfA)])
-
-#endif
-
-/* CMultiplyData: Multiply A by B.  B is complex.
-*/
-static void _GD_CMultiplyData(DIRFILE *restrict D, void *restrict A,
-    unsigned int spfA, GD_DCOMPLEXP(B), unsigned int spfB, gd_type_t type,
+    unsigned int spfA, const double *B, unsigned int spfB, gd_type_t type,
     size_t n)
 {
   size_t i;
@@ -726,6 +640,54 @@ static void _GD_CMultiplyData(DIRFILE *restrict D, void *restrict A,
 }
 
 #ifdef GD_NO_C99_API
+#undef MULTIPLYC
+
+#define MULTIPLYC(t) \
+  do { \
+    for (i = 0; i < n; i++) { \
+      const int i2 = 2 * (i * spfB / spfA); \
+      const t x = ((t*)A)[2 * i]; \
+      const t y = ((t*)A)[2 * i + 1]; \
+      ((t*)A)[2 * i] = (t)(x * B[i2] - y * B[i2 + 1]); \
+      ((t*)A)[2 * i + 1] = (t)(y * B[i2] + x * B[i2 + 1]); \
+    } \
+  } while (0)
+
+#endif
+
+/* CMultiplyData: Multiply A by B.  B is complex -- as it happens A is also
+ * complex due to the way we deal with complex valued derived fields
+*/
+static void _GD_CMultiplyData(DIRFILE *restrict D, void *restrict A,
+    unsigned int spfA, GD_DCOMPLEXP(B), unsigned int spfB, gd_type_t type,
+    size_t n)
+{
+  size_t i;
+
+  dtrace("%p, %p, %u, %p, %u, 0x%X, %" PRNsize_t, D, A, spfA, B, spfB, type, n);
+
+  switch (type) {
+    case GD_NULL:                           break;
+    case GD_UINT8:
+    case GD_INT8:
+    case GD_UINT16:
+    case GD_INT16:
+    case GD_UINT32:
+    case GD_INT32:
+    case GD_UINT64:
+    case GD_INT64:
+    case GD_FLOAT32:
+    case GD_FLOAT64: _GD_InternalError(D);  break;
+    case GD_COMPLEX64:  MULTIPLYC(  float); break;
+    case GD_COMPLEX128: MULTIPLYC( double); break;
+    default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+                        break;
+  }
+
+  dreturnvoid();
+}
+
+#ifdef GD_NO_C99_API
 #define DIVIDEC(t) \
   do { \
     for (i = 0; i < n; i++) { \
@@ -738,7 +700,8 @@ static void _GD_CMultiplyData(DIRFILE *restrict D, void *restrict A,
 #endif
 
 #define DIVIDE(t) \
-  for (i = 0; i < n; i++) ((t*)A)[i] = (t)(((t*)A)[i] / B[i * spfB / spfA])
+  for (i = 0; i < n; i++) \
+    ((t*)A)[i] = (t)(((t*)A)[i] / B[i * spfB / spfA])
 
 /* DivideData: Divide B by A.  B is unchanged.
 */
@@ -772,7 +735,6 @@ static void _GD_DivideData(DIRFILE *restrict D, void *restrict A,
 }
 
 #ifdef GD_NO_C99_API
-#undef DIVIDE
 #undef DIVIDEC
 
 #define DIVIDEC(t) \
@@ -781,19 +743,16 @@ static void _GD_DivideData(DIRFILE *restrict D, void *restrict A,
       const int i2 = 2 * (i * spfB / spfA); \
       const t x = ((t*)A)[2 * i]; \
       const t y = ((t*)A)[2 * i + 1]; \
-      const double d = B[i2] * B[i2] + B[i2 + 1] * B[i2 + 1]; \
+      const double d = B[i2] * B[i2] - B[i2 + 1] * B[i2 + 1]; \
       ((t*)A)[2 * i] = (t)((x * B[i2] + y * B[i2 + 1]) / d); \
-      ((t*)A)[2 * i + 1] = (t)((x * B[i2] + y * B[i2 + 1]) / d); \
+      ((t*)A)[2 * i + 1] = (t)((x * B[i2] - y * B[i2 + 1]) / d); \
     } \
   } while (0)
 
-#define DIVIDE(t) \
-  for (i = 0; i < n; i++) ((t*)A)[i] = (t)(((t*)A)[i] / \
-      B[2 * (i * spfB / spfA)])
-
 #endif
 
-/* CDivideData: Divide A by B.  B is complex.
+/* CDivideData: Divide A by B.  B is complex.  (See remarks on CMultiplyData
+ * about A.)
 */
 static void _GD_CDivideData(DIRFILE *restrict D, void *restrict A,
     unsigned int spfA, GD_DCOMPLEXP(B), unsigned int spfB, gd_type_t type,
@@ -805,16 +764,16 @@ static void _GD_CDivideData(DIRFILE *restrict D, void *restrict A,
 
   switch (type) {
     case GD_NULL:                         break;
-    case GD_UINT8:      DIVIDE( uint8_t); break;
-    case GD_INT8:       DIVIDE(  int8_t); break;
-    case GD_UINT16:     DIVIDE(uint16_t); break;
-    case GD_INT16:      DIVIDE( int16_t); break;
-    case GD_UINT32:     DIVIDE(uint32_t); break;
-    case GD_INT32:      DIVIDE( int32_t); break;
-    case GD_UINT64:     DIVIDE(uint64_t); break;
-    case GD_INT64:      DIVIDE( int64_t); break;
-    case GD_FLOAT32:    DIVIDE(   float); break;
-    case GD_FLOAT64:    DIVIDE(  double); break;
+    case GD_UINT8:
+    case GD_INT8:
+    case GD_UINT16:
+    case GD_INT16:
+    case GD_UINT32:
+    case GD_INT32:
+    case GD_UINT64:
+    case GD_INT64:
+    case GD_FLOAT32:
+    case GD_FLOAT64: _GD_InternalError(D); break;
     case GD_COMPLEX64:  DIVIDEC(  float); break;
     case GD_COMPLEX128: DIVIDEC( double); break;
     default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
@@ -1176,11 +1135,9 @@ static size_t _GD_DoMultiply(DIRFILE *restrict D, gd_entry_t *restrict E,
     n_read = n_read2 * spf1 / spf2;
 
   if (type2 & GD_COMPLEX)
-    _GD_CMultiplyData(D, data_out, spf1, (GD_DCOMPLEXP_t)tmpbuf, spf2,
-        return_type, n_read);
+    _GD_CMultiplyData(D, data_out, spf1, tmpbuf, spf2, return_type, n_read);
   else
-    _GD_MultiplyData(D, data_out, spf1, (double *)tmpbuf, spf2, return_type,
-        n_read);
+    _GD_MultiplyData(D, data_out, spf1, tmpbuf, spf2, return_type, n_read);
 
   free(tmpbuf);
 
@@ -1417,14 +1374,6 @@ static size_t _GD_DoLinterp(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
       num_samp, return_type, data_out);
-
-  if (E->e->u.linterp.table_len < 0) {
-    _GD_ReadLinterpFile(D, E);
-    if (D->error != GD_E_OK) {
-      dreturn("%i", 0);
-      return 0;
-    }
-  }
 
   if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);

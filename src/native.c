@@ -47,6 +47,7 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
         break;
       }
 
+      type = GD_FLOAT64;
       for (i = 0; i < E->EN(lincom,n_fields); ++i) {
         if (_GD_BadInput(D, E, i, 1))
           break;
@@ -56,7 +57,6 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
           break;
         }
       }
-      type = GD_FLOAT64;
       break;
     case GD_LINTERP_ENTRY:
       /* initialise the table, if necessary */

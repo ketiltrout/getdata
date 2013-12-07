@@ -46,7 +46,7 @@ static gd_entry_t *_GD_FixName(DIRFILE *restrict D, char **restrict buffer,
   dtrace("%p, %p, \"%s\", %i, %p", D, buffer, name, frag, offset);
 
   /* Check prefix and suffix */
-  if (_GD_CheckCodeAffixes(D, NULL, name, frag)) {
+  if (_GD_CheckCodeAffixes(D, NULL, name, frag, 1)) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -108,7 +108,7 @@ static unsigned _GD_CopyScalars(DIRFILE *restrict D,
       E->scalar[i] = NULL;
     } else {
       if (_GD_CheckCodeAffixes(D, NULL, entry->scalar[i],
-            entry->fragment_index))
+            entry->fragment_index, 1))
       {
         break;
       }
@@ -319,7 +319,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       
       for (i = 0; i < E->EN(lincom,n_fields); ++i)
         _GD_CheckCodeAffixes(D, NULL, entry->in_fields[i],
-            entry->fragment_index);
+            entry->fragment_index, 1);
 
       if (D->error)
         break;
@@ -358,7 +358,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       E->e->u.linterp.table_len = -1;
 
       if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index))
+            entry->fragment_index, 1))
       {
         break;
       }
@@ -369,8 +369,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
       if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index) || _GD_CheckCodeAffixes(D, NULL,
-              entry->in_fields[1], entry->fragment_index))
+            entry->fragment_index, 1) || _GD_CheckCodeAffixes(D, NULL,
+              entry->in_fields[1], entry->fragment_index, 1))
       {
         break;
       }
@@ -380,7 +380,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       break;
     case GD_RECIP_ENTRY:
       if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index))
+            entry->fragment_index, 1))
       {
         break;
       }
@@ -405,7 +405,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       E->EN(bit,bitnum) = entry->EN(bit,bitnum);
 
       if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index))
+            entry->fragment_index, 1))
       {
         break;
       }
@@ -428,7 +428,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       E->EN(phase,shift) = entry->EN(phase,shift);
 
       if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index))
+            entry->fragment_index, 1))
       {
         break;
       }
@@ -442,8 +442,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       E->EN(window,threshold) = entry->EN(window,threshold);
 
       if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index) || _GD_CheckCodeAffixes(D, NULL,
-              entry->in_fields[1], entry->fragment_index))
+            entry->fragment_index, 1) || _GD_CheckCodeAffixes(D, NULL,
+              entry->in_fields[1], entry->fragment_index, 1))
       {
         break;
       }
@@ -461,8 +461,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       E->EN(mplex,period) = entry->EN(mplex,period);
 
       if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index) || _GD_CheckCodeAffixes(D, NULL,
-              entry->in_fields[1], entry->fragment_index))
+            entry->fragment_index, 1) || _GD_CheckCodeAffixes(D, NULL,
+              entry->in_fields[1], entry->fragment_index, 1))
       {
         break;
       }
@@ -521,13 +521,13 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       if (E->EN(polynom,poly_ord) < 1 || E->EN(polynom,poly_ord) >
           GD_MAX_POLYORD)
       {
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NFIELDS, NULL,
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_POLYORD, NULL,
             E->EN(polynom,poly_ord), NULL);
       } else {
         _GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index);
+            entry->fragment_index, 1);
         _GD_CheckCodeAffixes(D, NULL, entry->in_fields[1],
-            entry->fragment_index);
+            entry->fragment_index, 1);
       }
 
       if (D->error)
@@ -2070,7 +2070,7 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
   } else if (_GD_FindField(D, munged_code, D->entry, D->n_entries, 1, &u))
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, munged_code);
   else
-    _GD_CheckCodeAffixes(D, NULL, target, fragment_index); /* check target */
+    _GD_CheckCodeAffixes(D, NULL, target, fragment_index, 1); /* check target */
 
   if (D->error)
     goto add_alias_error;
@@ -2139,12 +2139,6 @@ int gd_add_alias(DIRFILE *D, const char *alias_name, const char *target_code,
   int ret;
 
   dtrace("%p, \"%s\", \"%s\", %i", D, alias_name, target_code, fragment_index);
-
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
 
   _GD_ClearError(D);
 

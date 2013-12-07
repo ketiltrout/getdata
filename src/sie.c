@@ -20,14 +20,36 @@
  */
 #include "internal.h"
 
+/* define to debug this unit */
+#undef DEBUG_SIE
+
+#ifdef DEBUG_SIE
+#define dprintf_sie dprintf
+#else
+#define dprintf_sie(...)
+#endif
+
+#define DPRINTF dprintf_sie("F  r:%zi p:0x%llX s:%i,0x%llX " \
+    "d:0x%llX,0x%llX l:%i/0x%llX,0x%llX @%li", f->r, f->p, f->bof, f->s, \
+    f->d[0], f->d[1], f->have_l, f->l[0], f->l[1], ftell(f->fp));
+
 struct gd_siedata {
-  int swap;
-  ssize_t r;
-  int64_t p;
-  int64_t s;
-  FILE *fp;
-  int64_t d[3];
+  int swap; /* byte swapping required */
+  FILE *fp; /* stream */
+
+  ssize_t r; /* current record number */
+  int64_t p; /* I/O pointer in samples */
+  int64_t s; /* record ending sample */
+  int64_t d[3]; /* the raw record:
+                   d[0] is the sample number in storage order 
+                   d[1] and d[2] are space for the data */
+  int64_t l[3]; /* the previous record */
+  int have_l; /* a flag to indicate that l is initialised */
+  int bof;    /* this is the first record */
 };
+
+/* correct for byte sex */
+#define FIXSEX(swap,v) ((swap) ? (int64_t)gd_swap64(v) : (v))
 
 static int _GD_SampIndDoOpen(int fdin, struct gd_raw_file_ *file,
     struct gd_siedata *f, int swap, unsigned int mode)
@@ -101,32 +123,43 @@ int _GD_SampIndOpen(int fd, struct gd_raw_file_ *file, int swap,
  * -2 on error */
 static int _GD_Advance(struct gd_siedata *f, size_t size)
 {
-  int64_t p[3];
   size_t n;
+  int64_t p = f->s + 1;
+  int64_t l[3];
   dtrace("%p, %" PRNsize_t, f, size);
 
   /* save the current record */
-  memcpy(p, f->d, 3 * sizeof(int64_t));
+  if (p > 0)
+    memcpy(l, f->d, size);
 
   /* read the next record */
   n = fread(f->d, size, 1, f->fp);
-  if (f->swap)
-    f->d[0] = gd_swap64(f->d[0]);
 
   if (n != 1) {
     if (ferror(f->fp)) {
       dreturn("%i", -2);
       return -2;
     } else {
-      f->s = f->d[0];
-      f->p = f->d[0] + 1;
+      /* we're past the end of the last record */
+      f->p = f->s + 1;
       dreturn("%i", -1);
       return -1;
     }
   }
 
-  f->s = f->p = p[0] + 1;
+  /* handle newly read record */
+  f->s = FIXSEX(f->swap, f->d[0]);
+  f->p = p;
   f->r++;
+
+  if (p > 0) {
+    memcpy(f->l, l, size);
+    f->have_l = 1;
+    f->bof = 0;
+  } else {
+    f->have_l = 0;
+    f->bof = 1;
+  }
 
   dreturn("%i", 0);
   return 0;
@@ -139,10 +172,10 @@ off64_t _GD_SampIndSeek(struct gd_raw_file_ *file, off64_t sample,
   const size_t size = sizeof(int64_t) + GD_SIZE(data_type);
   struct gd_siedata *f = (struct gd_siedata*)(file->edata);
 
-  dtrace("%p, %llx, 0x%X, 0x%X", file, (long long)sample, data_type, mode);
+  dtrace("%p, 0x%llx, 0x%X, 0x%X", file, (long long)sample, data_type, mode);
 
   if (file->pos == sample && f->p >= 0) {
-    dreturn("%lli", (long long)sample);
+    dreturn("0x%llX", (long long)sample);
     return sample;
   }
 
@@ -151,10 +184,14 @@ off64_t _GD_SampIndSeek(struct gd_raw_file_ *file, off64_t sample,
      * that well.  So, let's just rewind to the beginning and try again. */
     rewind(f->fp);
     file->idata = 0;
-    f->r = f->p = f->d[0] = -1;
+    f->r = f->s = f->p = f->d[0] = -1;
+    f->bof = 1;
+    f->have_l = 0;
   }
 
-  while (sample > f->d[0]) {
+  while (sample > f->s) {
+    DPRINTF;
+
     /* seek ahead ... */
     r = _GD_Advance(f, size);
     if (r == -2) {
@@ -163,31 +200,52 @@ off64_t _GD_SampIndSeek(struct gd_raw_file_ *file, off64_t sample,
     } else if (r == -1)
       break;
   }
+  DPRINTF;
 
-  if ((mode & GD_FILE_WRITE) && sample > f->d[0]) {
-    GD_DCOMPLEXM(p);
-    gd_li2cs_(p, 0, 0);
-    if (memcmp(f->d + 1, &p, GD_SIZE(data_type)) == 0) {
+  if ((mode & GD_FILE_WRITE) && sample > f->s && sample > 0) {
+    char zero[16];
+    memset(zero, 0, 16);
+
+    /* does the last record have a value of zero? */
+    if (memcmp(f->d + 1, &zero, GD_SIZE(data_type)) == 0) {
       /* in this case, just increase the current record's end */
-      f->d[0] = sample;
+      f->s = sample;
+      f->d[0] = FIXSEX(f->swap, sample);
+
       /* back up and update the file */
-      fseek(f->fp, -size, SEEK_CUR);
-      fwrite(f->d, size, 1, f->fp);
+      if (fseek(f->fp, -size, SEEK_CUR) || fwrite(f->d, size, 1, f->fp) < 1)
+      {
+        dreturn("%i", -1);
+        return -1;
+      }
       /* The MSVCRT's stdio seems to screw up without the following: */
       fflush(f->fp);
+
+      DPRINTF;
     } else {
       /* add a new record */
-      f->d[0] = sample;
+      f->r++;
+      f->bof = 0;
+      f->s = sample;
+      memcpy(f->l, f->d, size);
+      f->have_l = 1;
+      f->d[0] = FIXSEX(f->swap, sample);
       f->d[1] = f->d[2] = 0;
-      fwrite(f->d, size, 1, f->fp);
+      if (fwrite(f->d, size, 1, f->fp) < 1) {
+        dreturn("%i", -1);
+        return -1;
+      }
       fflush(f->fp);
+
+      DPRINTF;
     }
-    f->s = sample;
   }
   file->pos = f->p = sample;
 
-  dreturn("%" PRIi64 , f->p);
-  return (off64_t)(f->p);
+  DPRINTF;
+
+  dreturn("0x%llX", (unsigned long long)sample);
+  return (off64_t)(sample);
 }
 
 /* store n copies of s, which is of length l, in d */
@@ -254,10 +312,12 @@ ssize_t _GD_SampIndRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
   dtrace("%p, %p, 0x%03x, %" PRNsize_t, file, ptr, data_type, nelem);
 
   /* not enough data in the current run */
-  while (f->d[0] - f->p < (int64_t)(nelem - count)) {
+  while (f->s - f->p < (int64_t)(nelem - count)) {
     /* copy what we've got */
-    cur = _GD_Duplicate(cur, f->d + 1, GD_SIZE(data_type), f->d[0] - f->p + 1);
-    count += f->d[0] - f->p + 1;
+    cur = _GD_Duplicate(cur, f->d + 1, GD_SIZE(data_type), f->s - f->p + 1);
+    count += f->s - f->p + 1;
+
+    DPRINTF;
 
     /* advance */
     r = _GD_Advance(f, sizeof(int64_t) + GD_SIZE(data_type));
@@ -267,17 +327,20 @@ ssize_t _GD_SampIndRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
     } else if (r == -1)
       break;
   }
+  DPRINTF;
 
   /* copy the remnant */
-  if (f->d[0] - f->p >= (int64_t)(nelem - count)) {
+  if (f->s - f->p >= (int64_t)(nelem - count)) {
     _GD_Duplicate(cur, f->d + 1, GD_SIZE(data_type), nelem - count);
     f->p += nelem - count;
     count = nelem;
   } else {
-    cur = _GD_Duplicate(cur, f->d + 1, GD_SIZE(data_type), f->d[0] - f->p + 1);
-    count += f->d[0] - f->p + 1;
-    f->p = f->d[0] + 1;
+    cur = _GD_Duplicate(cur, f->d + 1, GD_SIZE(data_type), f->s - f->p + 1);
+    count += f->s - f->p + 1;
+    f->p = f->s + 1;
   }
+
+  DPRINTF;
 
   file->pos = f->p;
 
@@ -310,6 +373,7 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
   int64_t fr;
   int r;
   int64_t *cur_end;
+  int64_t end;
   void *cur_datum, *buffer;
   struct gd_siedata *f = (struct gd_siedata*)(file->edata);
   const size_t dlen = GD_SIZE(data_type);
@@ -326,13 +390,82 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
   memcpy(p, f->d, size);
   cur_end = (int64_t*)p;
   cur_datum = ((int64_t*)p) + 1;
+  DPRINTF;
 
-  /* to prevent weirdness... */
-  if (f->p == f->s)
+  if ((f->r == -1 || f->bof) && f->p == 0) {
+    /* we're overwriting everything from the start */
     memcpy(cur_datum, ptr, dlen);
+  } else if (!f->bof) {
+    int64_t ls;
+    int need_advance = 0;
+
+    /* need to check the previous record to see if we're overwriting this whole
+     * record and we need to combine with the previous one */
+    if (!f->have_l) {
+      /* forced to back up to read the previous record */
+      if (fseek(f->fp, -2 * size, SEEK_CUR) ||
+          (fread(f->l, size, 1, f->fp) < 1))
+      {
+        free(p);
+        dreturn("%i", -1);
+        return -1;
+      }
+      need_advance = 1;
+
+      DPRINTF;
+    }
+
+    /* the ending sample of the previous record */
+    ls = FIXSEX(f->swap, f->l[0]);
+
+    /* if we're not at the start of the current record, we don't need to
+     * do anything fancy */
+    if (f->p == ls + 1) {
+      /* we're completely overwriting the current record, so update the value */
+      memcpy(cur_datum, ptr, dlen);
+      
+      /* then check whether that's the same as the value of the old record; if
+       * it is, combine them
+       */
+      if (memcmp(f->l + 1, ptr, dlen) == 0) {
+        dprintf_sie("combine: 0x%llX", f->l[1]);
+        /* the new value is the same as the value of the previous record, so
+         * back up a record and combine */
+
+        /* rewind if we haven't already done so */
+        if (f->have_l) {
+          if (fseek(f->fp, -size, SEEK_CUR)) {
+            free(p);
+            dreturn("%i", -1);
+            return -1;
+          }
+        }
+        need_advance = 0;
+
+        f->r--;
+        memcpy(f->d, f->l, size);
+        memcpy(p, f->d, size);
+        f->s = FIXSEX(f->swap, f->l[0]);
+        f->have_l = 0;
+      }
+    }
+
+    /* reset the file pointer if we didn't have to rewind but were forced to */
+    if (need_advance) {
+      if (fseek(f->fp, size, SEEK_CUR)) {
+        free(p);
+        dreturn("%i", -1);
+        return -1;
+      }
+      f->have_l = 1;
+    }
+
+    DPRINTF;
+  }
 
   for (i = 0; i < nelem; ++i) {
     if (memcmp(((const char*)ptr) + i * dlen, cur_datum, dlen)) {
+      dprintf_sie("mismatch on sample %zu:", i);
       if (++rin == plen) {
         void *p2;
         plen += 10;
@@ -344,14 +477,31 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
         }
         p = p2;
       }
-      gd_put_unaligned64(f->p + i - 1, cur_end);
+      end = f->p + i - 1;
+      dprintf_sie("*cur_end:   %llX -> %llX", FIXSEX(f->swap, *cur_end), end);
+      gd_put_unaligned64(FIXSEX(f->swap, end), cur_end);
+      dprintf_sie(" cur_end:   %p -> %p", cur_end, (char*)p + size * rin);
       cur_end = (int64_t*)((char*)p + size * rin);
+      dprintf_sie(" cur_datum: %p -> %p", cur_datum, cur_end + 1);
       cur_datum = cur_end + 1;
-      memcpy(cur_datum, ((const char*)ptr) + i * dlen, dlen);
+      dprintf_sie("*cur_datum: %X -> %X", *((char*)cur_datum),
+          *(((const char*)ptr) + (i + 1) * dlen));
+      memcpy(cur_datum, ((const char*)ptr) + (i + 1) * dlen, dlen);
     }
   }
-  gd_put_unaligned64(f->p + nelem - 1, cur_end);
+  end = f->p + nelem - 1;
+  dprintf_sie("*cur_end:   %llX -> %llX", FIXSEX(f->swap, *cur_end), end);
+  gd_put_unaligned64(FIXSEX(f->swap, end), cur_end);
   rin++;
+
+  for (i = 0; i < (size_t)rin; ++i) {
+    dprintf_sie("%i: 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X",
+        i, ((char*)p)[size * i + 0], ((char*)p)[size * i + 1],
+        ((char*)p)[size * i + 2], ((char*)p)[size * i + 3],
+        ((char*)p)[size * i + 4], ((char*)p)[size * i + 5],
+        ((char*)p)[size * i + 6], ((char*)p)[size * i + 7],
+        ((char*)p)[size * i + 8]);
+  }
 
   /* determine how many records we have to replace */
   fr = f->r;
@@ -360,8 +510,10 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
     rout--;
   }
 
-  while (f->d[0] <= gd_get_unaligned64(cur_end)) {
+  while (f->s <= end) {
     ++rout;
+
+    DPRINTF;
 
     r = _GD_Advance(f, sizeof(int64_t) + GD_SIZE(data_type));
     if (r == -2) {
@@ -371,13 +523,9 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
     } else if (r == -1)
       break;
   }
+  DPRINTF;
 
-  /* fix the endianness */
-  if (f->swap)
-    for (i = 0; i < (size_t)rin; ++i) {
-      int64_t v = gd_get_unaligned64((int64_t*)(((char*)p) + size * i));
-      gd_put_unaligned64(gd_swap64(v), (int64_t*)(((char*)p) + size * i));
-    }
+  dprintf_sie("nrec:%zi rin:%zi rout:%zi fr:%lli", nrec, rin, rout, fr);
 
   /* now, do some moving: first, move the trailing records, forward by
    * (rin - rout) records */
@@ -428,9 +576,16 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
 
   /* update the current record */
   memcpy(f->d, (char *)p + (rin - 1) * size, size);
-  f->s = f->d[0];
-  f->p = f->d[0] + 1;
+  if (rin > 1) 
+    f->bof = 0;
+  else
+    f->bof = 1;
+
+  f->p = f->s = FIXSEX(f->swap, f->d[0]);
   f->r = fr + rin - 1;
+  f->have_l = 0;
+
+  DPRINTF;
 
   free(p);
 

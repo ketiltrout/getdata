@@ -1794,26 +1794,14 @@ try:
 except:
   CheckOK(223)
 
-# 224: gd_move_alias check
-try:
-  d.move_alias('new20', 1)
-except:
-  CheckOK2(224, 1)
-
-try:
-  n = d.fragment_index('Anew20Z')
-except:
-  CheckOK2(224, 2)
-CheckSimple(224, n, 1)
-
 # 225: gd_delete_alias check
 try:
-  d.delete_alias('Anew20Z', 0)
+  d.delete_alias('new20', 0)
 except:
   CheckOK2(225, 1)
 
 try:
-  n = d.fragment_index('Anew20Z')
+  n = d.fragment_index('new20')
 except:
   CheckException2(255, 2, pygetdata.BadCodeError)
 

@@ -496,11 +496,6 @@ int Dirfile::MAddAlias(const char* parent, const char* name, const char* target)
   return gd_madd_alias(D, parent, name, target);
 }
 
-int Dirfile::MoveAlias(const char* field_code, int new_fragment) const
-{
-  return gd_move_alias(D, field_code, new_fragment);
-}
-
 int Dirfile::NAliases(const char* field_code) const
 {
   return gd_naliases(D, field_code);

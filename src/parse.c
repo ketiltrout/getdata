@@ -120,20 +120,20 @@ static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
   char *ptr = NULL;
   char *lt;
   int dummy;
+  const char *semicolon;
 
   dtrace("%p, \"%s\", %p, 0x%X, \"%s\", %i, %p, %p, %i, %i", D, token, data,
       type, format_file, line, index, comp_scal, standards, pedantic);
 
+  /* check for a complex value -- look for the semicolon */
+  for (semicolon = token; *semicolon; ++semicolon)
+    if (*semicolon == ';')
+      break;
+
   if (type & (GD_COMPLEX | GD_IEEE754)) {
     /* try to convert to double */
-    const char *semicolon;
     double i = 0;
     double d = gd_strtod(token, &ptr);
-
-    /* check for a complex value -- look for the semicolon */
-    for (semicolon = token; *semicolon; ++semicolon)
-      if (*semicolon == ';')
-        break;
 
     /* there were trailing characters in the double or real part of complex */
     if (ptr != semicolon) {
@@ -147,14 +147,6 @@ static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
 
     /* If there was a semicolon, try to extract the imaginary part */
     if (*semicolon == ';') {
-      /* if a complex value is not permitted, complain */
-      if (!(type & GD_COMPLEX)) {
-        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
-            token);
-        dreturn("%p", NULL);
-        return NULL;
-      }
-
       i = gd_strtod(semicolon + 1, &ptr);
 
       /* there were trailing characters in the imaginary part of complex -- this
@@ -166,7 +158,16 @@ static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
         return NULL;
       }
 
-      *comp_scal = 1;
+      /* if a complex value is not permitted, complain */
+      if (i && !(type & GD_COMPLEX)) {
+        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
+            token);
+        dreturn("%p", NULL);
+        return NULL;
+      }
+
+      if (i)
+        *comp_scal = 1;
     }
 
     if (type == GD_COMPLEX128) {
@@ -187,13 +188,26 @@ static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
         (!pedantic || standards >= 9) ? 0 : 10);
 
     /* there were trailing characters in the long long int */
-    if (*ptr != '\0') {
+    if (ptr != semicolon) {
       ptr = _GD_MungeFromFrag(D, NULL, me, token, &dummy);
       if (D->error) {
         dreturn("%p", NULL);
         return NULL;
       }
       goto carray_check;
+    }
+
+    /* if this is a complex number, a zero imaginary part is permitted */
+    if (*semicolon == ';') {
+      long long int i = gd_strtoll(semicolon + 1, &ptr,
+          (!pedantic || standards >= 9) ? 0 : 10);
+
+      if (i || *ptr != '\0') {
+        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
+            token);
+        dreturn("%p", NULL);
+        return NULL;
+      }
     }
 
     if (type == GD_INT64)
@@ -212,13 +226,26 @@ static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
         (!pedantic || standards >= 9) ? 0 : 10);
 
     /* there were trailing characters in the unsigned long long int */
-    if (*ptr != '\0') {
+    if (ptr != semicolon) {
       ptr = _GD_MungeFromFrag(D, NULL, me, token, &dummy);
       if (D->error) {
         dreturn("%p", NULL);
         return NULL;
       }
       goto carray_check;
+    }
+
+    /* if this is a complex number, a zero imaginary part is permitted */
+    if (*semicolon == ';') {
+      long long unsigned i = gd_strtoull(semicolon + 1, &ptr,
+          (!pedantic || standards >= 9) ? 0 : 10);
+
+      if (i || *ptr != '\0') {
+        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
+            token);
+        dreturn("%p", NULL);
+        return NULL;
+      }
     }
 
     if (type == GD_UINT64)
@@ -1727,9 +1754,9 @@ int _GD_Tokenise(DIRFILE *restrict D, const char *restrict instring,
           if (*ip >= '0' && *ip <= '9')
             accumulator = accumulator * 16 + *ip - '0';
           else if (*ip >= 'A' && *ip <= 'F')
-            accumulator = accumulator * 16 + *ip - 'A';
+            accumulator = accumulator * 16 + *ip - 'A' + 10;
           else
-            accumulator = accumulator * 16 + *ip - 'a';
+            accumulator = accumulator * 16 + *ip - 'a' + 10;
         }
 
         if (acc_mode == ACC_MODE_HEX && (n_acc == 2 || !isxdigit(*ip))) {
@@ -1746,7 +1773,7 @@ int _GD_Tokenise(DIRFILE *restrict D, const char *restrict instring,
           escaped_char = 0;
           acc_mode = ACC_MODE_NONE;
         } else if (acc_mode == ACC_MODE_UTF8 && (n_acc == 7 ||
-              accumulator > 0x10FF || !isxdigit(*ip)))
+              accumulator > 0x10FFFF || !isxdigit(*ip)))
         {
           if (_GD_UTF8Encode(D, format_file, linenum, &op, accumulator))
             break; /* syntax error */
@@ -1858,8 +1885,9 @@ int _GD_Tokenise(DIRFILE *restrict D, const char *restrict instring,
   if (quotated || escaped_char) {
     if (*ip == 0 || *ip == '\n') {
       /* Unterminated token */
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_UNTERM, format_file, linenum,
-          NULL);
+      if (D->error == 0)
+        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_UNTERM, format_file, linenum,
+            NULL);
     } else {
       /* a partial tokenisation where we've landed on top of " or \ when
        * finishing up; back up a space */

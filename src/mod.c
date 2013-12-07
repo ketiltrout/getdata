@@ -89,7 +89,7 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
     /* 2: set a new CONST field from sout; if this is a RAW field, and we've
      *    been asked to move the raw file, _GD_Change is going to need to
      *    recalculate the entry; no need to change lout: it's ignored. */
-    if (!_GD_CheckCodeAffixes(D, NULL, sin, fragment_index)) {
+    if (!_GD_CheckCodeAffixes(D, NULL, sin, fragment_index, 1)) {
       r = GD_AS_FREE_SCALAR | GD_AS_NEED_RECALC | GD_AS_MODIFIED;
       *sout = _GD_Strdup(D, sin);
       *iout = iin;
@@ -206,7 +206,7 @@ static int _GD_AlterInField(DIRFILE *D, int i, char **Q, char *const *N,
   dtrace("%p, %i, %p, %p, %p, %i, %i", D, i, Q, N, E, fragment_index, force);
 
   if (force || (N[i] != NULL && strcmp(E[i], N[i]))) {
-    if (_GD_CheckCodeAffixes(D, NULL, N[i], fragment_index)) {
+    if (_GD_CheckCodeAffixes(D, NULL, N[i], fragment_index, 1)) {
       dreturn("%i", -1);
       return -1;
     } else if ((Q[i] = _GD_Strdup(D, N[i])) == NULL) {
@@ -302,8 +302,12 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         void *buffer2;
         struct encoding_t *enc;
 
-        if (j & GD_AS_NEED_RECALC)
+        if (!Qe.calculated)
           if (gd_get_constant(D, Q.scalar[0], GD_UINT_TYPE, &Q.EN(raw,spf)))
+            break;
+        
+        if (!E->e->calculated)
+          if (!_GD_CalculateEntry(D, E, 1))
             break;
 
         nf = BUFFER_SIZE / gd_max_(E->e->u.raw.size,
@@ -530,6 +534,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       {
         Q.EN(linterp,table) = _GD_Strdup(D, N->EN(linterp,table));
         Qe.u.linterp.table_file = NULL;
+        Qe.u.linterp.table_len = -1; /* not read yet */
 
         if (Q.EN(linterp,table) == NULL)
           break;
@@ -556,6 +561,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         modified = 1;
         free(E->EN(linterp,table));
         free(E->e->u.linterp.table_file);
+        if (E->e->u.linterp.table_dirfd > 0)
+          _GD_ReleaseDir(D, E->e->u.linterp.table_dirfd);
+        free(E->e->u.linterp.lut);
       }
 
       break;
@@ -701,9 +709,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (Q.EN(polynom,poly_ord) != E->EN(polynom,poly_ord))
         modified = 1;
 
-      Q.comp_scal = 0;
+      if (flags & 0x1) {
+        Q.comp_scal = 0;
 
-      if (flags & 0x1)
         for (i = 0; i <= Q.EN(polynom,poly_ord); ++i) {
           if (N->comp_scal) {
             j = _GD_AlterScalar(D, !gd_ccmpc_(E->EN(polynom,ca)[i],
@@ -722,8 +730,6 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
           if (j & GD_AS_FREE_SCALAR)
             scalar_free |= 1 << i;
-          if (j & GD_AS_MODIFIED)
-            modified = 1;
           if (j & GD_AS_NEED_RECALC)
             Qe.calculated = 0;
           if (j & GD_AS_MODIFIED)
@@ -733,8 +739,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             Q.comp_scal = 1;
         }
 
-      if ((Q.comp_scal && !E->comp_scal) || (!Q.comp_scal && E->comp_scal))
-        modified = 1;
+        if ((Q.comp_scal && !E->comp_scal) || (!Q.comp_scal && E->comp_scal))
+          modified = 1;
+      }
 
       break;
     case GD_WINDOW_ENTRY:
@@ -1750,7 +1757,7 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
   free(N->field);
   N->field = new_code;
 
-  if (N->field_type == GD_LINCOM_ENTRY)
+  if (N->field_type == GD_LINCOM_ENTRY || N->field_type == GD_POLYNOM_ENTRY)
     move = 7;
 
   /* Change the entry */
@@ -1826,7 +1833,7 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
     return -1;
   }
 
-  if (N->field_type == GD_LINCOM_ENTRY)
+  if (N->field_type == GD_LINCOM_ENTRY || N->field_type == GD_POLYNOM_ENTRY)
     move = 7;
 
   /* Change the entry */

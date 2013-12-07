@@ -61,6 +61,9 @@ by the caller once they are no longer needed.  The
 .BR gd_free_entry_strings (3)
 function is provided as a convenience to do this.
 
+If the entry's metadata contains scalar field codes which cannot be dereferenced,
+the associated numerical field parameter will be initialised to zero.
+
 The returned
 .I entry
 structure, including strings and their pointers may be freely modified by the
@@ -90,9 +93,6 @@ The supplied dirfile was invalid.
 The representation suffix specified in
 .I field_code
 was not recognised.
-.TP
-.B GD_E_BAD_SCALAR
-A scalar parameter used in the definition of the field was invalid.
 .PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).

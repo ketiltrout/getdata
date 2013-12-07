@@ -205,8 +205,6 @@ namespace GetData {
 
       const char **MStrings(const char *parent) const;
 
-      int MoveAlias(const char* field_code, int new_fragment) const;
-
       const char **MVectorList(const char *parent) const;
 
       int NAliases(const char* field_code) const;

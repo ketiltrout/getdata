@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2008-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -44,10 +44,12 @@ char *_GD_MungeCode(DIRFILE *D, const gd_entry_t *P, const char *old_prefix,
     oplen = strlen(old_prefix);
     if (strncmp(old_prefix, code, oplen)) {
       /* prefix missing */
-      if (err_ok)
-        _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, code);
-      else
-        _GD_InternalError(D);
+      if (err_ok != 2) {
+        if (err_ok)
+          _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, code);
+        else
+          _GD_InternalError(D);
+      }
       dreturn("%p", NULL);
       return NULL;
     }
@@ -70,10 +72,12 @@ char *_GD_MungeCode(DIRFILE *D, const gd_entry_t *P, const char *old_prefix,
     oslen = strlen(old_suffix);
     if (strncmp(old_suffix, ptr + len - oslen, oslen)) {
       /* suffix missing */
-      if (err_ok)
-        _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, code);
-      else
-        _GD_InternalError(D);
+      if (err_ok != 2) {
+        if (err_ok)
+          _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, code);
+        else
+          _GD_InternalError(D);
+      }
       dreturn("%p", NULL);
       return NULL;
     }
@@ -140,22 +144,28 @@ char *_GD_MungeFromFrag(DIRFILE *D, const gd_entry_t *P, int me,
 
 /* Return non-zero if the a field codes doesn't contain the correct affixes. */
 int _GD_CheckCodeAffixes(DIRFILE *D, const gd_entry_t *P,
-    const char *field_code, int fragment)
+    const char *field_code, int fragment, int set_error)
 {
-  int dummy;
+  int dummy, r = 1;
+  void *ptr;
 
-  dtrace("%p, %p, \"%s\", %i", D, P, field_code, fragment);
+  dtrace("%p, %p, \"%s\", %i, %i", D, P, field_code, fragment, set_error);
 
   if (field_code == NULL) {
     dreturn("%i", 0);
     return 0;
   }
 
-  free(_GD_MungeCode(D, P, D->fragment[fragment].prefix,
-        D->fragment[fragment].suffix, NULL, NULL, field_code, &dummy, 1));
+  ptr = _GD_MungeCode(D, P, D->fragment[fragment].prefix,
+        D->fragment[fragment].suffix, NULL, NULL, field_code, &dummy,
+        set_error ? 1 : 2);
+  if (ptr) { /* success */
+    r = 0;
+    free(ptr);
+  }
 
-  dreturn("%i", D->error);
-  return D->error;
+  dreturn("%i", r);
+  return r;
 }
 
 /* Check for a valid field name -- returns 1 on error */
@@ -222,163 +232,299 @@ int _GD_ValidateField(const char* field_code, int standards, int strict,
   return 0;
 }
 
-#define GD_UPDI 0x1
-#define GD_UPDU 0x2
-/* pass == 0: finalise clear
- * pass == 1: initialise clear
- * pass == 2: finalise update
- * pass == 3: initialise update
+/* Compare field codes candidate and code. Returns:
+ * 0    if they're identical
+ * '.'  if they're the same code, but candidate has a representation suffix
+ * '/'  if candidate is a subfield of code
+ * -1   otherwise
  */
-static char **_GD_UpdateScalar(DIRFILE *D, gd_entry_t *T, const gd_entry_t *E,
-    const char *old_name, char **list, size_t len, int n, int pass, int *nl)
+static int _GD_MatchCode(const char *candidate, const char *code, size_t len,
+    int meta_ok)
 {
-  char **ptr;
-  size_t old_len;
+  int c;
 
-  dtrace("%p, %p, %p, \"%s\", %p, %" PRNsize_t ", %i, %i, %i", D, T, E,
-      old_name, list, len, n, pass, *nl);
+  dtrace("\"%s\", \"%s\", %" PRNsize_t ", %i", candidate, code, len,
+      meta_ok);
 
-  old_len = strlen(old_name);
-  if (strncmp(T->scalar[n], old_name, old_len) ||
-      !(T->scalar[n][old_len] == 0 || T->scalar[n][old_len] == '.'))
+  if (strncmp(candidate, code, len)) {
+    /* field not matched */
+    dreturn("%i (m)", -1);
+    return -1;
+  }
+
+  /* partial match only */
+  c = candidate[len];
+  if (c && c != '.' && (!meta_ok || c != '/')) {
+    dreturn("%i (p)", -1);
+    return -1;
+  }
+
+  dreturn("%i", c);
+  return c;
+}
+
+int _GD_MakeNewCode(DIRFILE *D, const char *old_code, int frag,
+    const gd_entry_t *E, int repr, int c, struct gd_rename_data_ *rdat)
+{
+  char **ptr, *base_code;
+  int ret = 0;
+
+  dtrace("%p, \"%s\", %i, %p, %i, %i, %p", D, old_code, frag, E, repr, c, rdat);
+
+  if ((ptr = (char**)_GD_Realloc(D, rdat->code_list, sizeof(char *) *
+          (rdat->n_code + 1))) == NULL)
   {
-    dreturn("%p (-)", list);
-    return list;
+    dreturn("%i", -1);
+    return -1;
+  }
+  rdat->code_list = ptr;
+
+  /* extract representation suffix, if necessary (if c is nil, we already
+   * know there's no representation) */
+  if (E == NULL && (c == '.' || c == '/'))
+    repr = _GD_GetRepr(D, old_code, &base_code, 0);
+  else
+    base_code = (char*)old_code;
+
+  if (c == '/') { /* a meta subfield of the field we're renaming */
+    size_t base_len = strlen(base_code);
+    rdat->code_list[rdat->n_code] = (char*)_GD_Malloc(D, base_len +
+        rdat->new_len - rdat->old_len + ((repr == GD_REPR_NONE) ? 1 : 4));
+    sprintf(rdat->code_list[rdat->n_code], "%s%s%s", rdat->new_code,
+        base_code + rdat->old_len,
+        (repr == GD_REPR_NONE) ? "" : (repr == GD_REPR_REAL) ? ".r" :
+        (repr == GD_REPR_IMAG) ? ".i" : (repr == GD_REPR_MOD) ? ".m" : ".a");
+  } else {
+    rdat->code_list[rdat->n_code] = (char*)_GD_Malloc(D, rdat->new_len +
+        ((repr == GD_REPR_NONE) ? 1 : 4));
+    sprintf(rdat->code_list[rdat->n_code], "%s%s", rdat->new_code,
+        (repr == GD_REPR_NONE) ? "" : (repr == GD_REPR_REAL) ? ".r" :
+        (repr == GD_REPR_IMAG) ? ".i" : (repr == GD_REPR_MOD) ? ".m" : ".a");
+  }
+  /* check that we haven't made a code that's invalid in the destination
+   * fragment
+   */
+  if (_GD_CheckCodeAffixes(D, NULL, rdat->code_list[rdat->n_code], frag,
+        !(rdat->flags & GD_REN_FORCE)))
+  {
+    free(rdat->code_list[rdat->n_code]);
+    if (rdat->flags & GD_REN_FORCE) {
+      rdat->code_list[rdat->n_code] = NULL;
+      rdat->n_code++;
+    } else
+      ret = -1;
+  } else
+    rdat->n_code++;
+
+  /* clean up after GetRepr */
+  if (base_code != old_code)
+    free(base_code);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+static void _GD_SetNewCode(DIRFILE *D, char **code, int frag,
+    struct gd_rename_data_ *rdat)
+{
+  dtrace("%p, %p, %i, %p", D, code, frag, rdat);
+
+  /* a NULL here is a field we couldn't update but the rename was forced via
+   * GD_REN_FORCE
+   */
+  if (rdat->code_list[rdat->n_code]) {
+    D->fragment[frag].modified = 1;
+    dprintf("%s -> %s", *code, rdat->code_list[rdat->n_code]);
+    free(*code);
+    *code = rdat->code_list[rdat->n_code];
+  }
+  rdat->n_code++;
+
+  dreturnvoid();
+}
+
+/* internal update flags */
+#define GD_UPDI 0x1 /* initialise */
+#define GD_UPDU 0x2 /* update */
+
+#define GD_UP_DO_CL 0
+#define GD_UP_IN_CL (GD_UPDI)
+#define GD_UP_DO_UP (GD_UPDU)
+#define GD_UP_IN_UP (GD_UPDI | GD_UPDU)
+static int _GD_UpdateScalar(DIRFILE *D, gd_entry_t *T,
+    struct gd_rename_data_ *rdat, int n, int search_meta, unsigned mode)
+{
+  int c;
+
+  dtrace("%p, %p, %p, %i, %i, %u", D, T, rdat, n, search_meta, mode);
+
+  /* nothing to do */
+  if (T->scalar[n] == NULL) {
+    dreturn("%i (-)", 0);
+    return 0;
   }
 
-  if (pass & GD_UPDI) { /* pass 1 or 3 */
-    if ((ptr = (char**)_GD_Realloc(D, list, sizeof(char *) * (*nl + 1)))
-        == NULL)
-    {
-      *nl = -1;
-      dreturn("%p", list);
-      return list;
-    }
-    list = ptr;
-    list[(*nl)++] = (char*)_GD_Malloc(D, len + 3);
-  } else if (pass == 0) {
-    if (!T->e->calculated)
-      _GD_CalculateEntry(D, T, 0);
-  } else if (pass == 2) {
+  c = _GD_MatchCode(T->scalar[n], rdat->old_code, rdat->old_len, search_meta);
+  if (c < 0) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (!(mode & GD_UPDI)) /* clear the cache */
     T->e->calculated = 0;
-    D->fragment[T->fragment_index].modified = 1;
-    free(T->scalar[n]);
-    T->scalar[n] = list[(*nl)++];
 
-    sprintf(T->scalar[n], "%s%s", E->field,
-        (T->e->repr[n] == GD_REPR_NONE) ? "" :
-        (T->e->repr[n] == GD_REPR_REAL) ? ".r" :
-        (T->e->repr[n] == GD_REPR_IMAG) ? ".i" :
-        (T->e->repr[n] == GD_REPR_MOD) ? ".m" : ".a");
-  }
+  if (mode == GD_UP_IN_UP) { /* create new field codes */
+    if (_GD_MakeNewCode(D, T->scalar[n], T->fragment_index, NULL, 0, c, rdat)) {
+      dreturn("%i", -1);
+      return -1;
+    }
+  } else if (mode == GD_UP_DO_UP) /* move the new field codes into place */
+    _GD_SetNewCode(D, T->scalar + n, T->fragment_index, rdat);
 
-  dreturn("%p (%i)", list, *nl);
-  return list;
+  dreturn("%i (%i)", 0, rdat->n_code);
+  return 0;
 }
 
-/* pass == 0: clear cached derived entries
- * pass == 1: unused
- * pass == 2: finalise re-writen derivd channels
- * pass == 3: initialise re-writen derived channels
- */
-static char **_GD_UpdateInField(DIRFILE *D, gd_entry_t *T, const gd_entry_t *E,
-    const char *old_name, char **list, size_t len, int n, int pass, int *nl)
+static int _GD_UpdateInField(DIRFILE *D, gd_entry_t *T,
+    struct gd_rename_data_ *rdat, int n, int search_meta, unsigned mode)
 {
-  char **ptr;
-  int m = n;
-  dtrace("%p, %p, %p, \"%s\", %p, %" PRNsize_t ", %i, %i, %i", D, T, E,
-      old_name, list, len, n, pass, *nl);
+  int c;
 
-  if (T->field_type == GD_ALIAS_ENTRY)
-    m = 1;
-  else if (pass != 0 && T->e->entry[n] == NULL)
-    _GD_BadInput(D, T, n, 0);
+  dtrace("%p, %p, %p, %i, %i, %u", D, T, rdat, n, search_meta, mode);
 
-  if (E->field_type == GD_ALIAS_ENTRY) {
-    /* it's hard to detect the use of an alias other than by inspecting the
-     * name itself */
-    size_t len = strlen(old_name);
-    if (strncmp(T->in_fields[n], old_name, len) ||
-        !(T->in_fields[n][len] == 0 || T->in_fields[n][len] == '.'))
-    {
-        dreturn("%p (a-)", list);
-        return list;
-    }
-  } else if (T->e->entry[m] != E) {
-    dreturn("%p (-)", list);
-    return list;
+  c = _GD_MatchCode(T->in_fields[n], rdat->old_code, rdat->old_len,
+      search_meta);
+  if (c < 0) {
+    dreturn("%i", 0);
+    return 0;
   }
 
-  if (pass == 0)
-    T->e->entry[m] = NULL;
-  else if (pass == 3) {
-    if ((ptr = (char**)_GD_Realloc(D, list, sizeof(char *) * (*nl + 1)))
-        == NULL)
-    {
-      *nl = -1;
-      dreturn("%p", list);
-      return list;
-    }
-    list = ptr;
-    list[(*nl)++] = (char*)_GD_Malloc(D, len + 3);
-  } else if (pass == 2) {
-    D->fragment[T->fragment_index].modified = 1;
-    free(T->in_fields[n]);
-    T->in_fields[n] = list[(*nl)++];
-
-    sprintf(T->in_fields[n], "%s%s", E->field,
-        (T->e->repr[n] == GD_REPR_NONE) ? "" :
-        (T->e->repr[n] == GD_REPR_REAL) ? ".r" :
-        (T->e->repr[n] == GD_REPR_IMAG) ? ".i" :
-        (T->e->repr[n] == GD_REPR_MOD) ? ".m" : ".a");
+  if (!(mode & GD_UPDI)) { /* clear the cache */
+    T->e->entry[n] = NULL;
+    if (T->field_type == GD_ALIAS_ENTRY)
+      T->e->entry[1] = NULL;
   }
 
-  dreturn("%p (%i)", list, *nl);
-  return list;
+  if (mode == GD_UP_IN_UP) { /* create new field codes */
+    if (_GD_MakeNewCode(D, T->in_fields[n], T->fragment_index, T->e->entry[n],
+          T->e->repr[n], c, rdat))
+    {
+      dreturn("%i", -1);
+      return -1;
+    }
+  } else if (mode == GD_UP_DO_UP) /* move the new field codes into place */
+    _GD_SetNewCode(D, T->in_fields + n, T->fragment_index, rdat);
+
+
+  dreturn("%i (%i)", 0, rdat->n_code);
+  return 0;
 }
 
-static char **_GD_InvalidateConst(DIRFILE *D, const gd_entry_t *E,
-    const char *old_name, char **list, size_t len, int pass, int *nl)
+/* search for and update field metadata to account for a renamed field -- this
+ * is a combination of the old _GD_InvalidateVect and _GD_InvalidateConst */
+static int _GD_UpdateInputs(DIRFILE *D, struct gd_rename_data_ *rdat,
+    int perform)
 {
-  int i;
   unsigned u;
+  int i;
 
-  dtrace("%p, %p, \"%s\", %p, %" PRNsize_t ", %i, %p", D, E, old_name, list,
-      len, pass, nl);
+  dtrace("%p, %p, %i", D, rdat, perform);
 
-  /* aliases prevent us from just running over this field's client list */
-  for (u = 0; u < D->n_entries; ++u)
-    if (D->entry[u] != E) {
+  /* look for meta fields */
+  const int search_meta = (rdat->E->e->n_meta != -1);
+
+  /* classes of things to update */
+  const int update_scalars = (search_meta ||
+      (rdat->E->field_type & GD_SCALAR_ENTRY_BIT));
+  const int update_vectors = (search_meta ||
+      !(rdat->E->field_type & GD_SCALAR_ENTRY_BIT));
+  const int update_aliases = !(rdat->flags & GD_REN_DANGLE);
+
+  /* update mode for scalars and vectors */
+  const int mode = ((rdat->flags & GD_REN_UPDB) ? GD_UPDU : 0) |
+    (perform ? 0 : GD_UPDI);
+  /* update mode for aliases */
+  const int amode = (update_aliases ? GD_UPDU : 0) |
+    (perform ? 0 : GD_UPDI);
+
+  /* reset the code count */
+  rdat->n_code = 0;
+
+  for (u = 0; u < D->n_entries; ++u) {
+    if (update_vectors)
       switch (D->entry[u]->field_type) {
         case GD_LINCOM_ENTRY:
-          for (i = 0; i < D->entry[u]->EN(lincom,n_fields); ++i) {
-            list = _GD_UpdateScalar(D, D->entry[u], E, old_name, list, len, i,
-                pass, nl);
-            list = _GD_UpdateScalar(D, D->entry[u], E, old_name, list, len,
-                i + GD_MAX_LINCOM, pass, nl);
+          for (i = 0; i < D->entry[u]->n_fields; ++i) {
+            if (_GD_UpdateInField(D, D->entry[u], rdat, i, search_meta, mode)) {
+              dreturn("%i", -1);
+              return -1;
+            }
           }
+          break;
+        case GD_MULTIPLY_ENTRY:
+        case GD_DIVIDE_ENTRY:
+        case GD_WINDOW_ENTRY:
+        case GD_MPLEX_ENTRY:
+          if (_GD_UpdateInField(D, D->entry[u], rdat, 1, search_meta, mode)) {
+            dreturn("%i", -1);
+            return -1;
+          }
+          /* Fallthrough */
+        case GD_LINTERP_ENTRY:
+        case GD_BIT_ENTRY:
+        case GD_PHASE_ENTRY:
+        case GD_POLYNOM_ENTRY:
+        case GD_RECIP_ENTRY:
+        case GD_SBIT_ENTRY:
+          if (_GD_UpdateInField(D, D->entry[u], rdat, 0, search_meta, mode)) {
+            dreturn("%i", -1);
+            return -1;
+          }
+          break;
+        case GD_INDEX_ENTRY:
+        case GD_RAW_ENTRY:
+        case GD_NO_ENTRY:
+        case GD_CONST_ENTRY:
+        case GD_CARRAY_ENTRY:
+        case GD_STRING_ENTRY:
+        case GD_ALIAS_ENTRY:
+          break;
+      }
+    if (update_scalars)
+      switch (D->entry[u]->field_type) {
+        case GD_LINCOM_ENTRY:
+          for (i = 0; i < D->entry[u]->EN(lincom,n_fields); ++i)
+            if (_GD_UpdateScalar(D, D->entry[u], rdat, i, search_meta, mode) ||
+                _GD_UpdateScalar(D, D->entry[u], rdat, i + GD_MAX_LINCOM,
+                  search_meta, mode))
+            {
+              dreturn("%i", -1);
+              return -1;
+            }
           break;
         case GD_POLYNOM_ENTRY:
           for (i = 0; i <= D->entry[u]->EN(polynom,poly_ord); ++i)
-            list = _GD_UpdateScalar(D, D->entry[u], E, old_name, list, len, i,
-                pass, nl);
+            if (_GD_UpdateScalar(D, D->entry[u], rdat, i, search_meta, mode)) {
+              dreturn("%i", -1);
+              return -1;
+            }
           break;
         case GD_BIT_ENTRY:
         case GD_SBIT_ENTRY:
         case GD_MPLEX_ENTRY:
-          list = _GD_UpdateScalar(D, D->entry[u], E, old_name, list, len, 1,
-              pass, nl);
+          if (_GD_UpdateScalar(D,D->entry[u], rdat, 1, search_meta, mode)) {
+              dreturn("%i", -1);
+              return -1;
+          }
           /* Fallthrough */
         case GD_PHASE_ENTRY:
         case GD_RAW_ENTRY:
         case GD_RECIP_ENTRY:
         case GD_WINDOW_ENTRY:
-          list = _GD_UpdateScalar(D, D->entry[u], E, old_name, list, len, 0,
-              pass, nl);
-          break;
-        case GD_ALIAS_ENTRY:
-          list = _GD_UpdateInField(D, D->entry[u], E, old_name, list, len, 0,
-              pass, nl);
+          if (_GD_UpdateScalar(D,D->entry[u], rdat, 0, search_meta, mode)) {
+              dreturn("%i", -1);
+              return -1;
+          }
           break;
         case GD_NO_ENTRY:
         case GD_LINTERP_ENTRY:
@@ -388,59 +534,190 @@ static char **_GD_InvalidateConst(DIRFILE *D, const gd_entry_t *E,
         case GD_STRING_ENTRY:
         case GD_CONST_ENTRY:
         case GD_CARRAY_ENTRY:
-          break;
-      }
-    }
-
-  dreturn("%p", list);
-  return list;
-}
-
-static char **_GD_InvalidateVect(DIRFILE *D, const gd_entry_t *E,
-    const char *old_name, char **list, size_t len, int pass, int *nl)
-{
-  unsigned u;
-
-  dtrace("%p, %p, %p, %" PRNsize_t ", %i, %p", D, E, list, len, pass, nl);
-
-  for (u = 0; u < D->n_entries; ++u) {
-    if (D->entry[u] != E)
-      switch (D->entry[u]->field_type) {
-        case GD_LINCOM_ENTRY:
-          list = _GD_UpdateInField(D, D->entry[u], E, old_name, list, len, 2,
-              pass, nl);
-          /* Fallthrough */
-        case GD_MULTIPLY_ENTRY:
-        case GD_DIVIDE_ENTRY:
-        case GD_WINDOW_ENTRY:
-        case GD_MPLEX_ENTRY:
-          list = _GD_UpdateInField(D, D->entry[u], E, old_name, list, len, 1,
-              pass, nl);
-          /* Fallthrough */
         case GD_ALIAS_ENTRY:
-        case GD_LINTERP_ENTRY:
-        case GD_BIT_ENTRY:
-        case GD_PHASE_ENTRY:
-        case GD_POLYNOM_ENTRY:
-        case GD_RECIP_ENTRY:
-        case GD_SBIT_ENTRY:
-          list = _GD_UpdateInField(D, D->entry[u], E, old_name, list, len, 0,
-              pass, nl);
-          break;
-        case GD_INDEX_ENTRY:
-        case GD_RAW_ENTRY:
-        case GD_NO_ENTRY:
-        case GD_CONST_ENTRY:
-        case GD_CARRAY_ENTRY:
-        case GD_STRING_ENTRY:
           break;
       }
-    if (*nl == -1)
-      break;
+    if (update_aliases && D->entry[u]->field_type == GD_ALIAS_ENTRY)
+      if (_GD_UpdateInField(D, D->entry[u], rdat, 0, search_meta, amode)) {
+        dreturn("%i", -1);
+        return -1;
+      }
   }
 
-  dreturn("%p", list);
-  return list;
+  dreturn("%i", 0);
+  return 0;
+}
+
+/* delete rename data */
+void _GD_CleanUpRename(struct gd_rename_data_ *rdat, int abort)
+{
+  int i;
+
+  dtrace("%p, %i", rdat, abort);
+
+  if (rdat) {
+    if (abort) {
+      if (rdat->meta_name)
+        for (i = 0; i < rdat->n_meta; ++i)
+          free(rdat->meta_name[i]);
+      if (rdat->code_list)
+        for (i = 0; i < rdat->n_code; ++i)
+          free(rdat->code_list[i]);
+    }
+    free(rdat->code_list);
+    free(rdat->meta_name);
+    free(rdat->old_code);
+    free(rdat);
+  }
+
+  dreturnvoid();
+}
+
+/* perform a database update due to a renamed field */
+void _GD_PerformRename(DIRFILE *restrict D,
+    struct gd_rename_data_ *restrict rdat)
+{
+  int i;
+
+  dtrace("%p, %p", D, rdat);
+
+  if (rdat == NULL) {
+    dreturnvoid();
+    return;
+  }
+
+  /* update meta field names */
+  for (i = 0; i < rdat->n_meta; ++i) {
+    free(rdat->meta_entry[i]->field);
+    rdat->meta_entry[i]->field = rdat->meta_name[i];
+  }
+
+  /* rename the field */
+  free(rdat->E->field);
+  rdat->E->field = rdat->new_code;
+
+  /* update derived/client fields/aliases */
+  _GD_UpdateInputs(D, rdat, 1);
+
+  /* Update the dot list */
+  if (rdat->old_dot && !rdat->new_dot)
+    memmove(D->dot_list + rdat->dot_ind, D->dot_list + rdat->dot_ind + 1,
+        sizeof(gd_entry_t*) * (--D->n_dot - rdat->dot_ind));
+  else if (rdat->new_dot && !rdat->old_dot)
+    D->dot_list[D->n_dot++] = rdat->E;
+
+  /* re-sort the lists */
+  qsort(D->entry, D->n_entries, sizeof(gd_entry_t*), _GD_EntryCmp);
+  if (D->dot_list && rdat->new_dot)
+    qsort(D->dot_list, D->n_dot, sizeof(gd_entry_t*), _GD_EntryCmp);
+
+  /* Invalidate the field lists */
+  if (rdat->E->e->n_meta == -1) {
+    rdat->E->e->p.parent->e->value_list_validity = 0;
+    rdat->E->e->p.parent->e->entry_list_validity = 0;
+  } else {
+    D->value_list_validity = 0;
+    D->entry_list_validity = 0;
+  }
+
+  /* rehash the aliases */
+  _GD_UpdateAliases(D, 1);
+
+  /* done */
+  _GD_CleanUpRename(rdat, 0);
+
+  dreturnvoid();
+}
+
+/* prepare for a database update due to a renamed field */
+struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict D,
+    char *restrict new_code, gd_entry_t *restrict E, int old_dot,
+    unsigned dot_ind, int new_dot, unsigned flags)
+{
+  int i;
+  struct gd_rename_data_ *rdat;
+
+  dtrace("%p, \"%s\", %p, %i, %u, %i, 0x%X", D, new_code, E, old_dot,
+      dot_ind, new_dot, flags);
+
+  /* Resize the dot list; this must be done early in case it fails; it's
+   * not a big deal if something else fails later: it will just be slightly too
+   * big */
+  if (new_dot && !old_dot) {
+    gd_entry_t** ptr = (gd_entry_t **)_GD_Realloc(D, D->dot_list,
+        sizeof(gd_entry_t*) * (D->n_dot + 1));
+
+    if (ptr == NULL) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    D->dot_list = ptr;
+  }
+
+  rdat = (struct gd_rename_data_ *)_GD_Malloc(D,
+      sizeof(struct gd_rename_data_));
+  if (rdat == NULL) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+  memset(rdat, 0, sizeof(*rdat));
+
+  rdat->n_meta = E->e->n_meta;
+  rdat->meta_entry = E->e->p.meta_entry;
+  rdat->flags = flags;
+  rdat->E = E;
+  rdat->old_code = _GD_Strdup(D, E->field);
+  rdat->old_len = strlen(E->field);
+  rdat->new_code = new_code;
+  rdat->new_len = strlen(new_code);
+  rdat->new_dot = new_dot;
+  rdat->old_dot = old_dot;
+  rdat->dot_ind = dot_ind;
+
+  /* resolve field type */
+  if (E->field_type == GD_ALIAS_ENTRY && E->e->entry[0])
+    rdat->type = E->e->entry[0]->field_type;
+  else
+    rdat->type = E->field_type;
+
+  /* update other fields' metadata */
+  if (_GD_UpdateInputs(D, rdat, 0)) {
+    _GD_CleanUpRename(rdat, 1);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  if (rdat->n_meta > 0) {
+    /* compose all the new meta field names under a top-level field.  We must do
+     * this now in a temporary location in case it fails and/or subsequent stuff
+     * fails */
+    rdat->meta_name = (char**)_GD_Malloc(D, sizeof(char *) * rdat->n_meta);
+    if (!rdat->meta_name) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    memset(rdat->meta_name, 0, sizeof(char *) * rdat->n_meta);
+    for (i = 0; i < rdat->n_meta; ++i) {
+      rdat->meta_name[i] = (char*)_GD_Malloc(D,
+          strlen(rdat->meta_entry[i]->field) + rdat->new_len - rdat->old_len
+          + 1);
+      if (rdat->meta_name[i] == NULL)
+        break;
+      sprintf(rdat->meta_name[i], "%s/%s", new_code, rdat->meta_entry[i]->field
+          + rdat->old_len + 1);
+    }
+  }
+
+  if (D->error) {
+    _GD_CleanUpRename(rdat, 1);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  dreturn("%p", rdat);
+  return rdat;
 }
 
 static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
@@ -448,25 +725,11 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
 {
   gd_entry_t *Q;
   char *name;
-  int dummy, new_dot;
+  int new_dot;
+  struct gd_rename_data_ *rdat = NULL;
 
   dtrace("%p, %p, \"%s\", %i, %u, 0x%X", D, E, new_name, old_dot, dot_ind,
       flags);
-
-  /* check access mode */
-  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
-    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  /* check metadata protection */
-  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
-    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
-        D->fragment[E->fragment_index].cname);
-    dreturn("%i", -1);
-    return -1;
-  }
 
   if (_GD_ValidateField(new_name, D->standards, 1, 0, &new_dot)) {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, new_name);
@@ -484,20 +747,16 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
     sprintf(name, "%s/%s", E->e->p.parent->field, new_name);
   } else {
     /* Verify prefix and suffix */
-    name = _GD_MungeCode(D, NULL, D->fragment[E->fragment_index].prefix,
-        D->fragment[E->fragment_index].suffix, NULL, NULL, new_name, &dummy, 1);
-    if (name == NULL || name[0] == '\0') {
-      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, new_name);
+    if (_GD_CheckCodeAffixes(D, NULL, new_name, E->fragment_index, 1)) {
       dreturn("%i", -1);
       return -1;
     }
-    free(name);
-    name = _GD_Strdup(D, new_name);
-  }
 
-  if (D->error) {
-    dreturn("%i", -1);
-    return -1;
+    name = _GD_Strdup(D, new_name);
+    if (name == NULL) {
+      dreturn("%i", -1);
+      return -1;
+    }
   }
 
   /* Duplicate check */
@@ -511,6 +770,15 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
 
   if (Q != NULL) {
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, name);
+    free(name);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* prep for metadata update */
+  rdat = _GD_PrepareRename(D, name, E, old_dot, dot_ind, new_dot, flags);
+
+  if (rdat == NULL) {
     free(name);
     dreturn("%i", -1);
     return -1;
@@ -532,20 +800,6 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
       free(filebase);
       dreturn("%i", -1);
       return -1;
-    }
-
-    /* Resize the dot list; this must be done early in case it fails */
-    if (new_dot && !old_dot) {
-      gd_entry_t** ptr = (gd_entry_t **)_GD_Realloc(D, D->dot_list,
-          sizeof(gd_entry_t*) * (D->n_dot + 1));
-
-      if (ptr == NULL) {
-        free(name);
-        dreturn("%i", -1);
-        return -1;
-      }
-
-      D->dot_list = ptr;
     }
 
     if (flags & GD_REN_DATA) {
@@ -611,31 +865,10 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
     E->e->u.raw.filebase = filebase;
   }
 
-  free(E->field);
-  E->field = name;
-
   D->fragment[E->fragment_index].modified = 1;
 
-  /* Update the dot list */
-  if (old_dot && !new_dot)
-    memmove(D->dot_list + dot_ind, D->dot_list + dot_ind + 1,
-        sizeof(gd_entry_t*) * (--D->n_dot - dot_ind));
-  else if (new_dot && !old_dot)
-    D->dot_list[D->n_dot++] = E;
-
-  /* re-sort the lists */
-  qsort(D->entry, D->n_entries, sizeof(gd_entry_t*), _GD_EntryCmp);
-  if (new_dot)
-    qsort(D->dot_list, D->n_dot, sizeof(gd_entry_t*), _GD_EntryCmp);
-
-  /* Invalidate the field lists */
-  if (E->e->n_meta == -1) {
-    E->e->p.parent->e->value_list_validity = 0;
-    E->e->p.parent->e->entry_list_validity = 0;
-  } else {
-    D->value_list_validity = 0;
-    D->entry_list_validity = 0;
-  }
+  /* Update database metadata */
+  _GD_PerformRename(D, rdat);
 
   dreturn("%i", 0);
   return 0;
@@ -645,11 +878,8 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
     unsigned flags)
 {
   gd_entry_t *E = NULL;
-  int ret, i, nl = 0, old_dot = 0;
-  size_t len;
-  gd_entype_t type;
+  int ret, old_dot = 0;
   unsigned dot_ind = 0;
-  char **code_list = NULL;
 
   dtrace("%p, \"%s\", \"%s\", 0x%X", D, old_code, new_name, flags);
 
@@ -661,7 +891,12 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
 
   _GD_ClearError(D);
 
-  len = strlen(new_name);
+  /* check access mode */
+  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   /* check for a dotted field name */
   if (D->n_dot > 0)
@@ -678,59 +913,21 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
     return -1;
   }
 
-  type = E->field_type;
-
-  if (type == GD_INDEX_ENTRY) {
+  if (E->field_type == GD_INDEX_ENTRY) {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, "INDEX");
     dreturn("%i", -1);
     return -1;
   }
 
-  /* resolve field type */
-  if (type == GD_ALIAS_ENTRY && E->e->entry[0])
-    type = E->e->entry[0]->field_type;
-
-  /* check derived/client fields */
-  if (type == GD_CARRAY_ENTRY || type == GD_CONST_ENTRY)
-    code_list = _GD_InvalidateConst(D, E, old_code, code_list, len,
-        GD_UPDI | (flags & GD_REN_UPDB ? GD_UPDU : 0), &nl);
-  else if (type != GD_STRING_ENTRY)
-    if (flags & GD_REN_UPDB)
-      code_list = _GD_InvalidateVect(D, E, old_code, code_list, len,
-          GD_UPDI | GD_UPDU, &nl);
-
-  if (D->error) {
-    if (code_list) {
-      for (i = 0; i < nl; ++i)
-        free(code_list[i]);
-      free(code_list);
-    }
+  /* check metadata protection */
+  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+        D->fragment[E->fragment_index].cname);
     dreturn("%i", -1);
     return -1;
   }
 
   ret = _GD_Rename(D, E, new_name, old_dot, dot_ind, flags);
-
-  if (!ret) {
-    nl = 0;
-    /* update derived/client fields */
-    if (type == GD_CARRAY_ENTRY || type == GD_CONST_ENTRY)
-      _GD_InvalidateConst(D, E, old_code, code_list, 0,
-          flags & GD_REN_UPDB ? GD_UPDU : 0, &nl);
-    else if (type != GD_STRING_ENTRY)
-      _GD_InvalidateVect(D, E, old_code, code_list, 0,
-          flags & GD_REN_UPDB ? GD_UPDU : 0, &nl);
-  }
-
-  /* rehash the aliases */
-  _GD_UpdateAliases(D, 1);
-
-  if (code_list) {
-    if (D->error)
-      for (i = 0; i < nl; ++i)
-        free(code_list[i]);
-    free(code_list);
-  }
 
   dreturn("%i", ret);
   return ret;

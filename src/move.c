@@ -313,13 +313,13 @@ int _GD_StrCmpNull(const char *s1, const char *s2)
   return r;
 }
 
-int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, int move_data)
+int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
 {
   char *new_filebase, *new_code;
-  char **new_meta = NULL;
+  struct gd_rename_data_ *rdat = NULL;
   int i, dummy;
 
-  dtrace("%p, %p, %i, %i", D, E, new_fragment, move_data);
+  dtrace("%p, %p, %i, 0x%X", D, E, new_fragment, flags);
 
   /* check access mode */
   if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
@@ -360,45 +360,22 @@ int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, int move_data)
       return -1;
     }
 
-    /* compose all the new meta field names.  We must do this now in 
-     * a temporary location in case it fails and/or subsequent stuff fails */
-    if (E->e->n_meta > 0) {
-      int nlen = strlen(new_code);
-      int olen = strlen(E->field);
-      new_meta = (char**)_GD_Malloc(D, sizeof(char *) * E->e->n_meta);
-      if (!new_meta) {
-        free(new_filebase);
-        free(new_code);
-        dreturn("%i", -1);
-        return -1;
-      }
-
-      memset(new_meta, 0, sizeof(char *) * E->e->n_meta);
-      for (i = 0; i < E->e->n_meta; ++i) {
-        new_meta[i] = (char*)_GD_Malloc(D,
-            strlen(E->e->p.meta_entry[i]->field) + nlen - olen + 1);
-        if (new_meta[i] == NULL)
-          break;
-        sprintf(new_meta[i], "%s/%s", new_code,
-            E->e->p.meta_entry[i]->field + olen + 1);
-      }
-
-      if (D->error) {
-        for (i = 0; i < E->e->n_meta; ++i)
-          free(new_meta[i]);
-        free(new_meta);
-        free(new_filebase);
-        free(new_code);
-        dreturn("%i", -1);
-        return -1;
-      }
+    /* moving a field can't add or remove a field from the dot list, so
+     * we just set both old_dot and new_dot to one to ensure that the
+     * dot_list is resorted, if necessary */
+    rdat = _GD_PrepareRename(D, new_code, E, 1, 0, 1, flags);
+    if (rdat == NULL) {
+      free(new_filebase);
+      free(new_code);
+      dreturn("%i", -1);
+      return -1;
     }
   } else {
     free(new_code);
     new_code = NULL;
   }
 
-  if (move_data && E->field_type == GD_RAW_ENTRY &&
+  if ((flags & GD_REN_DATA) && E->field_type == GD_RAW_ENTRY &&
       (D->fragment[E->fragment_index].encoding !=
        D->fragment[new_fragment].encoding ||
        D->fragment[E->fragment_index].byte_sex !=
@@ -413,11 +390,7 @@ int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, int move_data)
           D->fragment[new_fragment].frame_offset, 1, new_fragment,
           new_filebase))
     {
-      if (new_meta) {
-        for (i = 0; i < E->e->n_meta; ++i)
-          free(new_meta[i]);
-        free(new_meta);
-      }
+      _GD_CleanUpRename(rdat, 1);
       free(new_code);
       dreturn("%i", -1);
       return -1;
@@ -431,20 +404,13 @@ int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, int move_data)
   D->flags &= ~GD_HAVE_VERSION;
   E->fragment_index = new_fragment;
 
-  /* update meta fields */
-  for (i = 0; i < E->e->n_meta; ++i) {
+  /* update metadata */
+  for (i = 0; i < E->e->n_meta; ++i)
     E->e->p.meta_entry[i]->fragment_index = new_fragment;
-    if (new_meta) {
-      free(E->e->p.meta_entry[i]->field);
-      E->e->p.meta_entry[i]->field = new_meta[i];
-    }
-  }
+
+  _GD_PerformRename(D, rdat);
 
   if (new_code) {
-    free(new_meta);
-    free(E->field);
-    E->field = new_code;
-
     /* resort */
     qsort(D->entry, D->n_entries, sizeof(gd_entry_t*), _GD_EntryCmp);
     qsort(D->dot_list, D->n_dot, sizeof(gd_entry_t*), _GD_EntryCmp);
@@ -454,12 +420,13 @@ int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, int move_data)
   return 0;
 }
 
-int gd_move(DIRFILE *D, const char *field_code, int new_fragment, int move_data)
+int gd_move(DIRFILE *D, const char *field_code, int new_fragment,
+    unsigned flags)
 {
   gd_entry_t *E;
   int ret;
 
-  dtrace("%p, \"%s\", %i, %i", D, field_code, new_fragment, move_data);
+  dtrace("%p, \"%s\", %i, 0x%X", D, field_code, new_fragment, flags);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -469,7 +436,7 @@ int gd_move(DIRFILE *D, const char *field_code, int new_fragment, int move_data)
 
   _GD_ClearError(D);
 
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
 
   if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
@@ -492,52 +459,7 @@ int gd_move(DIRFILE *D, const char *field_code, int new_fragment, int move_data)
     return 0;
   }
 
-  ret = _GD_Move(D, E, new_fragment, move_data);
-
-  dreturn("%i", ret);
-  return ret;
-}
-
-int gd_move_alias(DIRFILE *D, const char *field_code, int new_fragment)
-  gd_nothrow
-{
-  gd_entry_t *E;
-  int ret;
-
-  dtrace("%p, \"%s\", %i", D, field_code, new_fragment);
-
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  _GD_ClearError(D);
-
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
-
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (E->field_type != GD_ALIAS_ENTRY) {
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (new_fragment < 0 || new_fragment >= D->n_fragment) {
-    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, new_fragment, NULL);
-    dreturn("%i", -1);
-    return -1;
-  } else if (E->fragment_index == new_fragment) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  ret = _GD_Move(D, E, new_fragment, 0);
+  ret = _GD_Move(D, E, new_fragment, flags);
 
   dreturn("%i", ret);
   return ret;

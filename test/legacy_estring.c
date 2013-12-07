@@ -18,7 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test endianness */
+/* Attempt to read UINT8 via the legacy interface */
 #include "test.h"
 
 #include <stdlib.h>
@@ -27,27 +27,26 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
-#include <inttypes.h>
-#include <stdio.h>
 
 int main(void)
 {
+#ifndef GD_LEGACY_API
+  return 77; /* skipped */
+#else
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *txtdata = "dirfile/data.txt";
-  const char *format_data = "data RAW UINT16 8\nENCODING none\n";
-  uint16_t data_data[128];
-  uint16_t c[8];
-  int fd, i, ret, error, n, unlink_txtdata, unlink_data, r = 0;
-  DIRFILE *D;
+  const char *format_data = "data RAW UINT8 8\n";
+  unsigned char c[8];
+  unsigned char data_data[256];
+  int fd, i, n, error, r = 0;
 
   memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0777);
 
-  for (fd = 0; fd < 128; ++fd)
-    data_data[fd] = 0x201 * fd;
+  for (fd = 0; fd < 256; ++fd)
+    data_data[fd] = (unsigned char)fd;
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
@@ -57,26 +56,17 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  ret = gd_alter_encoding(D, GD_TEXT_ENCODED, 0, 1);
-  error = gd_error(D);
-  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
+  n = GetData(filedir, "data", 5, 0, 1, 0, 'c', c, &error);
 
-  gd_close(D);
+  CHECKI(error, 0);
+  CHECKI(n, 8);
+  for (i = 0; i < 8; ++i)
+    CHECKUi(i, c[i], 40 + i);
 
-  unlink_txtdata = unlink(txtdata);
-  unlink_data = unlink(data);
+  unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  for (i = 0; i < 8; ++i)
-    CHECKXi(i,c[i], (40 + i) * 0x201);
-
-  CHECKI(error, 0);
-  CHECKI(ret, 0);
-  CHECKI(n, 8);
-  CHECKI(unlink_txtdata, 0);
-  CHECKI(unlink_data, -1);
-
   return r;
+#endif
 }

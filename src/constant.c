@@ -22,7 +22,7 @@
 
 int gd_get_carray_slice(DIRFILE* D, const char *field_code_in,
     unsigned int start, size_t n, gd_type_t return_type, void *data_out)
-gd_nothrow
+  gd_nothrow
 {
   gd_entry_t *entry;
   char* field_code;
@@ -165,26 +165,59 @@ size_t gd_carray_len(DIRFILE *D, const char *field_code_in) gd_nothrow
     entry->EN(scalar,array_len);
 }
 
-int gd_put_carray_slice(DIRFILE* D, const char *field_code_in,
+static int _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, int repr,
     unsigned int first, size_t n, gd_type_t data_type, const void *data_in)
-gd_nothrow
+  gd_nothrow
 {
   int i;
-  gd_entry_t *entry;
-  int repr;
-  char* field_code;
 
-  dtrace("%p, \"%s\", %i, %" PRNsize_t ", 0x%x, %p", D, field_code_in, first, n,
+  dtrace("%p, %p, %i, %u, %" PRNsize_t ", 0x%X, %p", D, E, repr, first, n,
       data_type, data_in);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+  if ((D->flags & GD_ACCMODE) != GD_RDWR) {
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
 
-  if ((D->flags & GD_ACCMODE) != GD_RDWR) {
-    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+  if (first + n > ((E->field_type == GD_CONST_ENTRY) ? 1 :
+        E->EN(scalar,array_len)))
+  {
+    _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
+  } else
+    _GD_DoFieldOut(D, E, repr, first, n, data_type, data_in);
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* Flag all clients as needing recalculation */
+  for (i = 0; i < E->e->u.scalar.n_client; ++i)
+    E->e->u.scalar.client[i]->e->calculated = 0;
+
+  /* Clear the client list */
+  free(E->e->u.scalar.client);
+  E->e->u.scalar.client = NULL;
+  E->e->u.scalar.n_client = 0;
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+int gd_put_carray_slice(DIRFILE* D, const char *field_code_in,
+    unsigned int first, size_t n, gd_type_t data_type, const void *data_in)
+gd_nothrow
+{
+  gd_entry_t *entry;
+  int repr, r = 1;
+  char* field_code;
+
+  dtrace("%p, \"%s\", %u, %" PRNsize_t ", 0x%X, %p", D, field_code_in, first, n,
+      data_type, data_in);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -203,40 +236,21 @@ gd_nothrow
       entry->field_type != GD_CONST_ENTRY)
   {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-  } else if (first + n > ((entry->field_type == GD_CONST_ENTRY) ? 1 :
-        entry->EN(scalar,array_len)))
-  {
-    _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
   } else
-    _GD_DoFieldOut(D, entry, repr, first, n, data_type, data_in);
+    r = _GD_PutCarraySlice(D, entry, repr, first, n, data_type, data_in);
 
   if (field_code != field_code_in)
     free(field_code);
 
-  if (D->error) {
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  /* Flag all clients as needing recalculation */
-  for (i = 0; i < entry->e->u.scalar.n_client; ++i)
-    entry->e->u.scalar.client[i]->e->calculated = 0;
-
-  /* Clear the client list */
-  free(entry->e->u.scalar.client);
-  entry->e->u.scalar.client = NULL;
-  entry->e->u.scalar.n_client = 0;
-
-  dreturn("%i", 0);
-  return 0;
+  dreturn("%i", r);
+  return r;
 }
 
 int gd_put_carray(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
     const void *data_in) gd_nothrow
 {
-  int i;
   gd_entry_t *entry;
-  int repr;
+  int repr, r = 1;
   char* field_code;
 
   dtrace("%p, \"%s\", 0x%x, %p", D, field_code_in, data_type, data_in);
@@ -247,12 +261,6 @@ int gd_put_carray(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
     return -1;
   }
 
-  if ((D->flags & GD_ACCMODE) != GD_RDWR) {
-    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
   _GD_ClearError(D);
 
   entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
@@ -268,29 +276,15 @@ int gd_put_carray(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
   {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   } else
-    _GD_DoFieldOut(D, entry, repr, 0,
+    r = _GD_PutCarraySlice(D, entry, repr, 0,
         (entry->field_type == GD_CONST_ENTRY) ? 1 : entry->EN(scalar,array_len),
         data_type, data_in);
 
   if (field_code != field_code_in)
     free(field_code);
 
-  if (D->error) {
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  /* Flag all clients as needing recalculation */
-  for (i = 0; i < entry->e->u.scalar.n_client; ++i)
-    entry->e->u.scalar.client[i]->e->calculated = 0;
-
-  /* Clear the client list */
-  free(entry->e->u.scalar.client);
-  entry->e->u.scalar.client = NULL;
-  entry->e->u.scalar.n_client = 0;
-
-  dreturn("%i", 0);
-  return 0;
+  dreturn("%i", r);
+  return r;
 }
 
 int gd_put_constant(DIRFILE* D, const char *field_code_in, gd_type_t data_type,

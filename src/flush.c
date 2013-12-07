@@ -57,14 +57,17 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
       }
       break;
     case GD_LINCOM_ENTRY:
-      for (i = 2; i < E->EN(lincom,n_fields); ++i)
-        _GD_Flush(D, E->e->entry[i], syn, clo);
-      /* fallthrough */
+      for (i = 0; i < E->EN(lincom,n_fields); ++i) {
+        if (!_GD_BadInput(D, E, i, 0))
+            _GD_Flush(D, E->e->entry[i], syn, clo);
+      }
+      break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
-      _GD_Flush(D, E->e->entry[1], syn, clo);
+      if (!_GD_BadInput(D, E, 1, 0))
+        _GD_Flush(D, E->e->entry[1], syn, clo);
       /* fallthrough */
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
@@ -72,7 +75,8 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
-      _GD_Flush(D, E->e->entry[0], syn, clo);
+      if (!_GD_BadInput(D, E, 0, 0))
+        _GD_Flush(D, E->e->entry[0], syn, clo);
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
@@ -239,11 +243,7 @@ static size_t _GD_StringEscapeise(FILE *stream, const char *in, int meta,
   }
 
   for (; *in != '\0'; ++in) {
-    if (*in == '"') {
-      fputs("\\\"", stream);
-      len += 2;
-      fputc('\\', stream);
-    } else if (*in == '\\' || *in == '#' || *in == '"' || *in == ' ') {
+    if (*in == '\\' || *in == '#' || *in == '"' || *in == ' ') {
       fputc('\\', stream);
       fputc(*in, stream);
       len += 2;

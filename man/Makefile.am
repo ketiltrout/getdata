@@ -86,7 +86,6 @@ MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
 	gd_put_carray_slice.3:gd_put_carray.3 \
 	gd_put_carray_slice.3:gd_put_constant.3 \
 	gd_delete.3:gd_delete_alias.3 \
-	gd_move.3:gd_move_alias.3 \
 	gd_hide.3:gd_unhide.3 \
 	gd_add_alias.3:gd_madd_alias.3 \
 	gd_flush.3:gd_sync.3 gd_flush.3:gd_raw_close.3 \

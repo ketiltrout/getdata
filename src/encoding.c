@@ -806,16 +806,14 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
           D->entry[i]->field_type == GD_RAW_ENTRY)
       {
         /* close the old file */
-        if (D->entry[i]->e->u.raw.file[0].idata != -1 &&
-            (*gd_ef_[D->entry[i]->e->u.raw.file[0].subenc].close)(
-              D->entry[i]->e->u.raw.file))
-        {
-          _GD_SetError(D, GD_E_RAW_IO, 0, D->entry[i]->e->u.raw.file[1].name,
-              errno, NULL);
-          break;
-        }
+        _GD_FiniRawIO(D, D->entry[i], fragment, GD_FINIRAW_KEEP);
+
         /* reset encoding subscheme. */
         D->entry[i]->e->u.raw.file[0].subenc = GD_ENC_UNKNOWN;
+
+        /* delete name */
+        free(D->entry[i]->e->u.raw.file[0].name);
+        D->entry[i]->e->u.raw.file[0].name = NULL;
       }
   }
 

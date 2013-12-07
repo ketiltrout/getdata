@@ -1624,12 +1624,12 @@ function fgd_raw_filename (dirfile, field_code)
   LEN_TRIM(field_code))
 end function
 
-subroutine fgd_move (dirfile, field_code, new_fragment, move_data)
-  integer, intent(in) :: dirfile, new_fragment, move_data
+subroutine fgd_move (dirfile, field_code, new_fragment, flags)
+  integer, intent(in) :: dirfile, new_fragment, flags
   character (len=*), intent(in) :: field_code
 
   call gdmove (dirfile, TRIM(field_code), LEN_TRIM(field_code), new_fragment, &
-  move_data)
+  flags)
 end subroutine
 
 ! calculate in_fields string lengths
@@ -1966,12 +1966,12 @@ subroutine fgd_malter_spec (dirfile, spec, parent, recode)
   LEN_TRIM(parent), recode)
 end subroutine
 
-subroutine fgd_rename (dirfile, field_code, new_name, move_data)
-  integer, intent(in) :: dirfile, move_data
+subroutine fgd_rename (dirfile, field_code, new_name, flags)
+  integer, intent(in) :: dirfile, flags
   character (len=*), intent(in) :: field_code, new_name
 
   call gdrenm(dirfile, TRIM(field_code), LEN_TRIM(field_code), TRIM(new_name), &
-  LEN_TRIM(new_name), move_data)
+  LEN_TRIM(new_name), flags)
 end subroutine
 
 subroutine fgd_delete (dirfile, field_code, flags)
@@ -2863,13 +2863,6 @@ subroutine fgd_madd_alias (dirfile, parent, field_code, targ)
 
   call gdmdal(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
   LEN_TRIM(field_code), TRIM(targ), LEN_TRIM(targ))
-end subroutine
-
-subroutine fgd_move_alias (dirfile, field_code, new_fragment)
-  integer, intent(in) :: dirfile, new_fragment
-  character (len=*), intent(in) :: field_code
-
-  call gdmova (dirfile, TRIM(field_code), LEN_TRIM(field_code), new_fragment)
 end subroutine
 
 subroutine fgd_include_affix (dirfile, fragmentname, fragment_index, prefix, &

@@ -1,6 +1,6 @@
 .\" gd_move.3.  The gd_move man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2012 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,25 +13,22 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_move 3 "1 January 2012" "Version 0.8.0" "GETDATA"
+.TH gd_move 3 "7 Decmeber 2013" "Version 0.9.0" "GETDATA"
 .SH NAME
-gd_move, gd_move_alias \(em move a dirfile entry between format specification fragments
+gd_move \(em move a dirfile entry between format specification fragments
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
 .BI "int gd_move(DIRFILE *" dirfile ", const char"
-.BI * field_code ", int " new_fragment ", int " move_data );
-.HP
-.BI "int gd_move_alias(DIRFILE *" dirfile ", const char"
-.BI * alias_name ", int " new_fragment );
+.BI * field_code ", int " new_fragment ", unsigned int " flags );
 .hy
 .ad n
 .SH DESCRIPTION
 The
 .BR gd_move ()
-function transfers the field specified by
+function transfers the field or alias specified by
 .IR field_code ,
 which should not have a representation suffix, defined in the dirfile
 specified by
@@ -42,22 +39,25 @@ If the field is already defined in the fragment index by
 .IR new_fragment ,
 this function does nothing.
 
-The
-.BR gd_move_alias ()
-function behaves similarly, but moves the alias named
-.I alias_name
-to the new fragment.  (Passing
-.I alias_name
-to
-.BR gd_move ()
-as
-.I field_code
-will result in the field ultimately pointed to be the alias being moved, and
-not the alias itself.)
+If the new fragment has different affixes, the field will be renamed as part of
+the move.  See
+.BR gd_rename (3)
+for details on field renaming.
 
-If the flag
-.I move_data
-is one, and
+The
+.I flags
+parameter should be zero or more of the following flags, bitwise or'd together:
+.TP
+.B GD_REN_DANGLE
+By default, if the move results in a change of name for the field due to
+differing fragment affixes,
+.B ALIAS
+entries pointing to this field will be updated with the field's new name.
+Specifying this flag prohibits this behaviour, turning these aliases into
+dangling aliases.  If moving the field doesn't rename it, this flag is ignored.
+.TP
+.B GD_REN_DATA
+If
 .I field_code
 specifies a
 .B RAW
@@ -70,15 +70,25 @@ is zero, no changes will be made to the binary file.  If
 .I field_code
 specifies a field of type other than
 .BR RAW ,
-the
-.I move_data
-flag is ignored.
+this flag is ignored.
 
 If the binary file is translated, and the frame offset of the destination
 fragment is larger than that of the source fragment, this will result in
 permanent deletion of data from the database.  If the new frame offset is
 smaller than the old frame offset, the binary file will be padded at the front
 with zeroes.
+.TP
+.B GD_REN_FORCE
+Skip updating entries which would be invalid (see
+.BR gd_rename (3)
+for details).  By default, an invalid field causes the move to fail.  If moving
+the field doesn't rename it, this flag is ignored.
+.TP
+.B GD_REN_UPDB
+If moving the field renames it, update entries which use this field as an input
+to account for the new name (see
+.BR gd_rename (3)).
+If moving the field doesn't rename it, this flag is ignored.
 
 .SH RETURN VALUE
 On success,
@@ -95,7 +105,9 @@ The library was unable to allocate memory.
 .B GD_E_BAD_CODE
 The field specified by
 .I field_code
-was not found.
+was not found, or else the move resulted in the field being renamed and
+the resultant metadata update tried to change a field code into something
+prohibited by a fragment's affixes.
 .TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.

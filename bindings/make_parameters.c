@@ -166,6 +166,8 @@ static struct {
   CONSTANT(DEL_FORCE,        "GDD_FO", 5),
   CONSTANT(REN_DATA,         "GDR_DT", 5),
   CONSTANT(REN_UPDB,         "GDR_UP", 5),
+  CONSTANT(REN_DANGLE,       "GDR_DL", 5),
+  CONSTANT(REN_FORCE,        "GDR_FO", 5),
 
   CONSTANT(PROTECT_NONE,     "GDPR_N", 6),
   CONSTANT(PROTECT_FORMAT,   "GDPR_F", 6),

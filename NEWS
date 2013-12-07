@@ -2,7 +2,25 @@ New in verison 0.9.0a:
 
   Library Changes:
 
-  * The gd_free_entry_strings() function now NULLs pointers after freeing them.
+  * Literals in format metadata may now have complex form (i.e. include a
+    semicolon) when the parameter is purely real.  However, a non-zero imaginary
+    part is still an error.
+
+  * BUG FIX: The parsing of the \x and \u escape sequences are now correct.
+
+  * BUG FIX: Computation of LINCOMs with complex valued input fields now
+    correctly happens in the complex plane.  As a side effect, gd_native_type()
+    now also correctly reports such LINCOM fields to be complex valued.
+
+  * BUG FIX: If performing a metadata update due to renaming fields (perhaps
+    by passing GD_REN_UPDB to gd_rename()) results in an invalid field code
+    due to affix restrictions, the update now fails (but see GD_REN_FORCE).
+    Previously the invalid field code would be stored, leading to errors when
+    flushing the modified metadata to disk.
+
+  * BUG FIX: When performing a metadata update due to a renamed field, the field
+    codes containing subfields of the renamed field are now also updated,
+    including field codes specifying meta subfield which do not exist.
 
   * BUG FIX: The gd_[m]add() functions now ignore zero-length scalar strings.
     Previously they would store these invalid field codes, causing problems
@@ -25,6 +43,88 @@ New in verison 0.9.0a:
 
   * BUG FIX: gd_alter_entry() no longer corrupts the DIRFILE when modifying
     named scalars of MPLEX fields.
+
+  * BUG FIX: reading a LINTERP table with fewer than two lines no longer results
+    in a segfault on close/discard.
+  
+  * BUG FIX: DIVIDE fields with complex valued divisors are now properly
+    computed.
+
+  * BUG FIX: Writing complex MPLEX fields no longer corrupts the stored data.
+
+  * BUG FIX: Several fixes have been made to the sample index encoding (SIE)
+    engine, which should now produce properly encoded data when performing
+    random writes.
+
+  API Changes:
+
+  * gd_free_entry_strings() now NULLs pointers after freeing them.
+
+  * gd_entry() now returns entry metadata when they contain scalar field codes
+    which do not exist.  Previously, it would fail with the error
+    GD_E_BAD_SCALAR and return nothing.
+
+  * Two new rename flags have been added:
+    - GD_REN_DANGLE which indicates the library shouldn't update ALIASes whose
+      target has been renamed (turning them into dangling aliases)
+    - GD_REN_FORCE which causes the library to skip updating field codes which
+      would be invalid due to affixes instead of failing.
+
+  * gd_rename() now by default updates the target of ALIASes pointing to a
+    renamed field to point to the new field instead of leaving them dangle.
+    (But see GD_REN_DANGLE).
+
+  * The move_data argument of gd_move() has been replaced with a flags argument
+    which accepts the GD_REN_* flags, which have the same meaning as they do
+    with gd_rename().
+
+  * gd_move_alias() has been deleted: its function is now performed by
+    gd_move().  If gd_move() is passed the field code of an alias, the alias is
+    now moved, instead of moving the field the alias points to.
+
+  * BUG FIX: If the dirfile path provided cannot be resolved (due to, for
+    instance, a symbolic link pointing to a non-existent path), gd_open() and
+    friends now return GD_E_OPEN, as documented, instead of GD_E_RAW_IO.
+  
+  * BUG FIX: gd_bof() now returns the correct number (i.e.: zero) when reporting
+    the beginning of field of derived fields shifted to before the start of the
+    dirfile.  Previously, this function incorrectly returned values ranging from
+    zero to one less than the samples-per-frame of the requested field.
+
+  * BUG FIX: gd_flush(), gd_sync(), gd_raw_close() no longer segfault when
+    operating on a LINCOM with only one input field.
+  
+  * BUG FIX: gd_seek() now works correctly on PHASE fields; previously, the
+    sign of the PHASE shift was flipped.
+
+  * BUG FIX: gd_seek() now correctly positions the virtual I/O pointer of the
+    INDEX field.
+
+  * BUG FIX: gd_framenum_subset() now returns the correct value when passed a
+    field_end which is beyond the end of field, and then is required to
+    extrapolate outside of the specified frame range.
+
+  * BUG FIX: gd_add_polynom() and similar now produce the correct error string
+    when encountering a poly_ord out of range.
+
+  * BUG FIX: gd_alter_raw() and similar no longer fail when asked to re-encode
+    the data file of a RAW field which has not been previously accessed.
+
+  * BUG FIX: A previously-read LINTERP table is now always deleted when changing
+    table paths with gd_alter_linterp() or similar.  Previously these obsolete,
+    cached LUTs would sometimes linger, causing incorrect LINTERP computation.
+
+  * BUG FIX: gd_[m]alter_spec() no longer ignore co-efficients specified for
+    POLYNOM entries.
+
+  * BUG FIX: gd_alter_encoding() now deletes the internal cache of RAW filenames
+    of the affected fragment; previously, these old, cached filenames could lead
+    to I/O errors when reading and writing the re-encoded RAW data files.
+
+  Legacy API Changes:
+
+  * BUG FIX: Calling GetFormat on a Dirfile with MPLEX or WINDOW fields no
+    longer results in a segmentation fault.
 
   Bindings Changes:
 
@@ -53,14 +153,17 @@ New in verison 0.9.0a:
   * PERL: alter_entry() now only updates defined elements in the passed entry
     hash.
 
+  * C++ BUG FIX: Fixed segfault in RawEntry destructor.  Reported by S. J.
+    Benton.
+
   * F77 and F95 BUG FIX: Named scalar indices are now indexed from one instead
     of zero, like all other array indices are in the Fortran GetData bindings.
 
   * F95 BUG FIX: fgd_add and fgd_alter_entry no longer ignore named scalar
     parameters provided in supplied entry structures.
 
-  * C++ BUG FIX: Fixed segfault in RawEntry destructor.  Reported by S. J.
-    Benton.
+  * IDL BUG FIX: the /UPDATEDB flag to gd_rename now operates as expected.
+    Previously it would act like /MOVE_DATA.
 
 |==============================================================================|
 

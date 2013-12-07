@@ -28,12 +28,13 @@ static const struct {
   const char* format; /* 1 = suberror, 2 = file, 3 = line, 4 = string */
   int adderr; /* 1 = append strerror(line), 2 = append sterror(suberror) */
 } error_string[] = {
-  /* GD_E_OPEN: 1 = suberror, 2 = filename */
+  /* GD_E_OPEN: 1 = suberror, 2 = filename, 3 = errno */
   { GD_E_OPEN, GD_E_OPEN_NOT_DIRFILE, "Not a dirfile: {2}", 0 },
   { GD_E_OPEN, GD_E_OPEN_NO_ACCESS,
     "Cannot open dirfile {2}: permission denied", 0 },
   { GD_E_OPEN, GD_E_OPEN_NOT_EXIST, "Dirfile does not exist: {2}", 0 },
   { GD_E_OPEN, GD_E_OPEN_PATH, "Bad path: {2}", 0 },
+  { GD_E_OPEN, GD_E_OPEN_IO, "Error accessing {2}: ", 1 },
   /* GD_E_FORMAT: 1 = suberror, 2 = formatfile, 3 = line number, 4 = token */
   { GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, "Bad data type on line {3} of {2}: {4}",
     0 },

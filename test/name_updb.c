@@ -28,9 +28,11 @@ int main(void)
     "early PHASE data 0\n"
     "late PHASE data 0\n"
     "/ALIAS bata data\n"
-    "data RAW UINT8 8\n";
-  int fd, e1, e2, e3, e4, r = 0;
-  char *s1, *s2, *s3;
+    "data RAW UINT8 8\n"
+    "phase PHASE data2 0\n";
+  int fd, e1, e2, e3, e4, e5, r = 0;
+  char *s1, *s2, *s4;
+  const char *s3;
   DIRFILE *D;
   gd_entry_t E;
 
@@ -43,44 +45,46 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR);
   gd_validate(D, "early");
+
   gd_rename(D, "data", "zata", GD_REN_UPDB);
   e1 = gd_error(D);
+  CHECKI(e1, 0);
+
   gd_spf(D, "early");
   e2 = gd_error(D);
+  CHECKI(e2, 0);
+
   gd_spf(D, "late");
   e3 = gd_error(D);
+  CHECKI(e3, 0);
 
   gd_entry(D, "early", &E);
   s1 = E.in_fields[0];
-  E.in_fields[0] = NULL;
+  CHECKS(s1, "zata");
   gd_free_entry_strings(&E);
 
   gd_entry(D, "late", &E);
   s2 = E.in_fields[0];
-  E.in_fields[0] = NULL;
+  CHECKS(s2, "zata");
   gd_free_entry_strings(&E);
 
-  gd_entry(D, "bata", &E);
+  gd_validate(D, "bata");
   e4 = gd_error(D);
-  s3 = strdup(gd_alias_target(D, "bata"));
+  s3 = gd_alias_target(D, "bata");
+  CHECKS(s3, "zata");
+  CHECKI(e4, 0);
+
+  gd_entry(D, "phase", &E);
+  s4 = E.in_fields[0];
+  e5 = gd_error(D);
+  CHECKI(e5, 0);
+  CHECKS(s4, "data2");
   gd_free_entry_strings(&E);
 
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(e1,0);
-  CHECKI(e2,0);
-  CHECKI(e3,0);
-  CHECKI(e4,0);
-  CHECKS(s1, "zata");
-  CHECKS(s2, "zata");
-  CHECKS(s3, "zata");
-
-  free(s1);
-  free(s2);
-  free(s3);
 
   return r;
 }

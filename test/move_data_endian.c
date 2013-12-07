@@ -66,7 +66,7 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  ret = gd_move(D, "data", 1, 1);
+  ret = gd_move(D, "data", 1, GD_REN_DATA);
   error = gd_error(D);
   ge_ret =  gd_entry(D, "data", &E);
   gd_close(D);

@@ -728,6 +728,7 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_OPEN_NOT_DIRFILE  2
 #define GD_E_OPEN_NO_ACCESS    3
 #define GD_E_OPEN_PATH         4
+#define GD_E_OPEN_IO           5
 
 #define GD_E_TRUNC_STAT        1
 #define GD_E_TRUNC_UNLINK      2
@@ -815,6 +816,17 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_N_ENTRY_LISTS (GD_N_ENTYPES + 4)
 
 #define GD_LIST_VALID_STRING_VALUE 0x01
+
+/* database metadata update data for a field rename */
+struct gd_rename_data_ {
+  int n_meta, n_code, old_dot, new_dot;
+  gd_entype_t type;
+  unsigned flags, dot_ind;
+  size_t old_len, new_len;
+
+  char **meta_name, **code_list, *old_code, *new_code;
+  gd_entry_t *E, **meta_entry;
+};
 
 struct gd_raw_file_ {
   char* name;
@@ -917,6 +929,8 @@ struct gd_private_entry_ {
 #define GD_FINIRAW_CLOTEMP   0x4
 
 #define BUFFER_SIZE 9000000
+
+#define GD_LUT_CHUNK 100
 
 /* helper macro */
 #if defined ARM_ENDIAN_FLOATS || \
@@ -1089,9 +1103,10 @@ char *_GD_CanonicalPath(const char *restrict, const char *restrict);
 gd_entry_t *_GD_CheckParent(DIRFILE *restrict D, char **restrict name, int me,
     int linenum);
 int _GD_CheckCodeAffixes(DIRFILE *D, const gd_entry_t *P,
-    const char *field_code, int fragment);
-void _GD_CInvertData(DIRFILE *restrict, void *restrict, gd_type_t return_type,
+    const char *field_code, int fragment, int set_error);
+void _GD_CInvertData(DIRFILE *restrict, void *restrict, gd_type_t,
     GD_DCOMPLEXA(dividend), size_t);
+void _GD_CleanUpRename(struct gd_rename_data_*, int);
 
 /* _GD_ClearError: Everything's A-OK; clear the last error. */
 #define _GD_ClearError(D) (D)->error = 0
@@ -1188,6 +1203,9 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict, int, char**,
     unsigned long, int, char**, const char*);
 char *_GD_ParseFragment(FILE *restrict, DIRFILE *, int, int *restrict,
     unsigned long int *, int);
+void _GD_PerformRename(DIRFILE *restrict, struct gd_rename_data_ *restrict);
+struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict, char *restrict,
+    gd_entry_t *restrict, int, unsigned, int, unsigned);
 void _GD_ReadLinterpFile(DIRFILE *restrict, gd_entry_t *restrict);
 void *_GD_Realloc(DIRFILE *restrict, void *restrict, size_t size);
 void _GD_ReleaseDir(DIRFILE *D, int dirfd);

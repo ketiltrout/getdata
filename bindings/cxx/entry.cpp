@@ -76,12 +76,12 @@ int Entry::CheckIndex(gd_entype_t field_type, int n_fields, int index)
   return 1;
 }
 
-int Entry::Move(int new_fragment, int move_data)
+int Entry::Move(int new_fragment, unsigned flags)
 {
   int ret = -1;
 
   if (D != NULL)
-    ret = gd_move(D->D, E.field, new_fragment, move_data);
+    ret = gd_move(D->D, E.field, new_fragment, flags);
 
   if (!ret)
     E.fragment_index = new_fragment;
@@ -89,13 +89,13 @@ int Entry::Move(int new_fragment, int move_data)
   return ret;
 }
 
-int Entry::Rename(const char* new_name, int move_data)
+int Entry::Rename(const char* new_name, unsigned flags)
 {
   char* ptr;
   int ret = -1;
 
   if (D != NULL)
-    ret = gd_rename(D->D, E.field, new_name, move_data);
+    ret = gd_rename(D->D, E.field, new_name, flags);
 
   if (ret) {
     if (E.field == NULL) {

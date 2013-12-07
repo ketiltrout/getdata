@@ -483,9 +483,11 @@ typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 #define GD_DEL_DEREF 0x4
 #define GD_DEL_FORCE 0x8
 
-/* move flags */
-#define GD_REN_DATA  0x1
-#define GD_REN_UPDB  0x2
+/* move/rename flags */
+#define GD_REN_DATA   0x1
+#define GD_REN_UPDB   0x2
+#define GD_REN_DANGLE 0x4
+#define GD_REN_FORCE  0x8
 
 /* seek flags */
 #define GD_SEEK_SET   0x0
@@ -838,9 +840,6 @@ extern const char **gd_mfield_list(DIRFILE *dirfile,
 extern const char **gd_mfield_list_by_type(DIRFILE *dirfile,
     const char *parent, gd_entype_t type) gd_nothrow gd_nonnull((1,2));
 
-extern int gd_move_alias(DIRFILE *dirfile, const char *field_code,
-    int new_fragment) gd_nothrow gd_nonnull ((1,2));
-
 extern void gd_mplex_lookback(DIRFILE *dirfile, int lookback) gd_nothrow
 gd_nonnull((1));
 
@@ -982,7 +981,7 @@ extern int gd_malter_spec(DIRFILE *dirfile, const char *line,
 extern int gd_metaflush(DIRFILE *dirfile) gd_nonnull ((1));
 
 extern int gd_move(DIRFILE *dirfile, const char *field_code, int new_fragment,
-    int move_data) gd_nonnull ((1,2));
+    unsigned flags) gd_nonnull ((1,2));
 
 extern DIRFILE *gd_open(const char *dirfilename,
     unsigned long int flags) gd_nonnull ((1));

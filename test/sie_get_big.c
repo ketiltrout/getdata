@@ -62,7 +62,7 @@ int main(void)
   CHECKI(error, 0);
   CHECKI(n, 16);
   for (i = 0; i < 16; ++i)
-    CHECKIi(i,c[i], (i <= 8) ? 0x22 : 0x32);
+    CHECKXi(i,c[i], (i <= 8) ? 0x22 : 0x32);
 
   return r;
 }

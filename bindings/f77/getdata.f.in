@@ -337,8 +337,6 @@ C     Returns the maximum field name length for a meta field list
       EXTERNAL GDMFNX
 C     Correpsonding to gd_malter_spec(3)
       EXTERNAL GDMLSP
-C     Correpsonding to gd_move_alias(3)
-      EXTERNAL GDMOVA
 C     Correpsonding to gd_move(3)
       EXTERNAL GDMOVE
 C     Corresponding to gd_mstrings(3) (sort of)

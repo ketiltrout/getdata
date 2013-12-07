@@ -174,14 +174,6 @@ static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
 
   dtrace("%p, %p, %" PRNsize_t ", 0x%X, 0x%X", D, p, offs, type, flags);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  _GD_ClearError(D);
-
   index = _GD_EntryIndex(type);
   if (index < 0) {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_TYPE, NULL, type, NULL);

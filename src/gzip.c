@@ -53,8 +53,11 @@ int _GD_GzipOpen(int fd, struct gd_raw_file_* file, int swap gd_unused_,
     gzmode = "r";
   } else if (mode & GD_FILE_TEMP) {
     file->idata = _GD_MakeTempFile(file->D, fd, file->name);
-  } else
-    file->idata = fd;
+  } else { /* internal error */
+    dreturn("%i", 1);
+    errno = EINVAL; /* I guess ... ? */
+    return 1;
+  }
 
   file->edata = gzdopen(file->idata, gzmode);
 

@@ -45,7 +45,7 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  ret = gd_move_alias(D, "alias", 1);
+  ret = gd_move(D, "alias", 1, 0);
   error = gd_error(D);
   fa =  gd_fragment_index(D, "alias");
   fd =  gd_fragment_index(D, "data");

@@ -319,44 +319,50 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
       }
 
   /* If this is a raw field, and we were asked to delete the data, do so */
-  if (E->field_type == GD_RAW_ENTRY && flags & GD_DEL_DATA) {
-    /* check protection */
-    if (D->fragment[E->fragment_index].protection & GD_PROTECT_DATA) {
-      _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
-          D->fragment[E->fragment_index].cname);
-      free(del_list);
-      dreturn("%i", -1);
-      return -1;
-    }
-
-    if (!_GD_Supports(D, E, GD_EF_NAME | GD_EF_UNLINK)) {
-      free(del_list);
-      dreturn("%i", -1);
-      return -1;
-    }
-
-    if ((*gd_ef_[E->e->u.raw.file[0].subenc].name)(D,
-          (const char*)D->fragment[E->fragment_index].enc_data,
-          E->e->u.raw.file, E->e->u.raw.filebase, 0, 0))
-    {
-      free(del_list);
-      dreturn("%i", -1);
-      return -1;
-    }
-
-    if ((*gd_ef_[E->e->u.raw.file[0].subenc].unlink)(
-          D->fragment[E->fragment_index].dirfd, E->e->u.raw.file))
-    {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
-      free(del_list);
-      dreturn("%i", -1);
-      return -1;
-    }
-  } else if (E->field_type == GD_RAW_ENTRY && E->e->u.raw.file->idata >= 0) {
+  if (E->field_type == GD_RAW_ENTRY) {
+    /* close data file, if open */
     if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_DISCARD)) {
       free(del_list);
       dreturn("%i", -1);
       return -1;
+    }
+
+    if (flags & GD_DEL_DATA) {
+      /* check protection */
+      if (D->fragment[E->fragment_index].protection & GD_PROTECT_DATA) {
+        _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
+            D->fragment[E->fragment_index].cname);
+        free(del_list);
+        dreturn("%i", -1);
+        return -1;
+      }
+
+      if (!_GD_Supports(D, E, GD_EF_NAME | GD_EF_UNLINK)) {
+        free(del_list);
+        dreturn("%i", -1);
+        return -1;
+      }
+
+      if ((*gd_ef_[E->e->u.raw.file[0].subenc].name)(D,
+            (const char*)D->fragment[E->fragment_index].enc_data,
+            E->e->u.raw.file, E->e->u.raw.filebase, 0, 0))
+      {
+        free(del_list);
+        dreturn("%i", -1);
+        return -1;
+      }
+
+      if ((*gd_ef_[E->e->u.raw.file[0].subenc].unlink)(
+            D->fragment[E->fragment_index].dirfd, E->e->u.raw.file))
+      {
+        if (errno != ENOENT) {
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
+              NULL);
+          free(del_list);
+          dreturn("%i", -1);
+          return -1;
+        }
+      }
     }
   }
 

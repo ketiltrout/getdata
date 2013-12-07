@@ -136,6 +136,9 @@ static void _GD_ScanFormat(char* fmt, gd_type_t data_type)
       break;
   }
 
+  if (fmt[0])
+    strcat(fmt, "\n");
+
   dreturn("[\"%s\"]", fmt);
 }
 
@@ -160,7 +163,7 @@ ssize_t _GD_AsciiRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
       if (fscanf((FILE *)file->edata, fmt, (char *)ptr + GD_SIZE(data_type) * n,
             (char *)ptr + GD_SIZE(data_type) * n + GD_SIZE(data_type) / 2) < 2)
       {
-        if (!feof((FILE *)file->edata))
+        if (ferror((FILE *)file->edata))
           ret = -1;
         break;
       }
@@ -168,14 +171,14 @@ ssize_t _GD_AsciiRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
     }
   } else {
     for (n = 0; n < nmemb; ++n) {
-      if (feof((FILE *)file->edata))
+      if (ferror((FILE *)file->edata))
         break;
 
 
 #ifdef NO_8BIT_INT_PREFIX
       if (GD_SIZE(data_type) == 1) {
         if (fscanf((FILE *)file->edata, fmt, &i16) < 1) {
-          if (!feof((FILE *)file->edata))
+          if (ferror((FILE *)file->edata))
             ret = -1;
           break;
         }
@@ -189,7 +192,7 @@ ssize_t _GD_AsciiRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
         if (fscanf((FILE *)file->edata, fmt, (char *)ptr + GD_SIZE(data_type) *
               n) < 1)
         {
-          if (!feof((FILE *)file->edata))
+          if (ferror((FILE *)file->edata))
             ret = -1;
           break;
         }

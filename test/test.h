@@ -96,7 +96,7 @@ int gd_system(const char* command)
       fprintf(stderr, "out of memory for cwd!\n"); \
       exit(1); \
     } \
-  } while (!getcwd(cwd = ptr, cwd_size));
+  } while (!getcwd(cwd = ptr, cwd_size))
 #else
 # define GD_NO_GETCWD
 #endif
@@ -144,7 +144,7 @@ int gd_system(const char* command)
 #define CHECKPN(n)     CHECK((n) == NULL,n,"%p","%s",n,"non-NULL")
 #define CHECKPNi(i,n)  CHECKi(i,(n) == NULL,n,"%p","%s",n,"non-NULL")
 #define CHECKS(n,v)    CHECK(strcmpn((n),(v)),n,"\"%s\"","\"%s\"",(n),(v));
-#define CHECKSi(n,v)   CHECKi(i,strcmpn((n),(v)),n,"\"%s\"","\"%s\"",(n),(v));
+#define CHECKSi(i,n,v) CHECKi(i,strcmpn((n),(v)),n,"\"%s\"","\"%s\"",(n),(v));
 #define CHECKSp(n,v)   CHECK(strncmp((n),(v), sizeof(v) - 1),n,"\"%s\"",\
     "\"%s\"",(n),(v));
 #define CHECKBOS(n,v)  CHECK(strncmp((n),(v),strlen(v)-1),n,"\"%s\"","\"%s\"",\

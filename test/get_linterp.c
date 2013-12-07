@@ -57,7 +57,7 @@ int main(void)
   close(fd);
 
   t = fopen(table, "wt");
-  for (i = 0; i < 10; ++i)
+  for (i = 0; i < 2 * GD_LUT_CHUNK; ++i)
     fprintf(t, "%i %i\n", i * 6, i * 12);
   fclose(t);
 
@@ -65,7 +65,7 @@ int main(void)
   n = gd_getdata(D, "linterp", 5, 0, 1, 0, GD_UINT8, &c);
   error = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(table);
   unlink(data);

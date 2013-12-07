@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Try to read RAW entry */
 #include "test.h"
 
 #include <stdlib.h>
@@ -48,13 +47,12 @@ int main(void)
 
   n = gd_entry(D, "data", &E);
   error = gd_error(D);
+  CHECKI(error, 0);
+  CHECKI(n, 0);
 
-  gd_close(D);
+  gd_discard(D);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, GD_E_BAD_SCALAR);
-  CHECKI(n, -1);
 
   return r;
 }

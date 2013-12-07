@@ -145,12 +145,12 @@ gd_entry_t* gd_free_entry_strings(gd_entry_t* entry) gd_nothrow
   return entry;
 }
 
-static void _GD_GetScalar(DIRFILE *restrict D, gd_entry_t *restrict E, int i,
+static int _GD_GetScalar(DIRFILE *restrict D, gd_entry_t *restrict E, int i,
     gd_type_t type, void *restrict data, int err)
 {
   void *ptr = NULL;
   gd_entry_t* C = NULL;
-  int repr;
+  int repr, e = 0;
   char* field_code;
   const char* scalar = E->scalar[i];
   int index = E->scalar_ind[i];
@@ -161,20 +161,22 @@ static void _GD_GetScalar(DIRFILE *restrict D, gd_entry_t *restrict E, int i,
     C = _GD_FindFieldAndRepr(D, scalar, &field_code, &repr, NULL, 0, 1);
 
     if (D->error) {
-      dreturnvoid();
-      return;
+      dreturn("%i", 1);
+      return 1;
     }
 
     if (C == NULL) {
       if (err)
         _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_CODE, E->field, 0,
             field_code);
+      e = 1;
     } else if (C->field_type != GD_CONST_ENTRY &&
         C->field_type != GD_CARRAY_ENTRY)
     {
       if (err)
         _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_TYPE, E->field, 0,
             field_code);
+      e = 1;
     } else {
       if (C->field_type == GD_CONST_ENTRY) {
         index = 0;
@@ -188,9 +190,7 @@ static void _GD_GetScalar(DIRFILE *restrict D, gd_entry_t *restrict E, int i,
         ptr = _GD_Realloc(D, C->e->u.scalar.client,
             (C->e->u.scalar.n_client + 1) * sizeof(gd_entry_t*));
 
-      /* err = 0 means we're only interested in initialising the client list */
-      if (err)
-        _GD_DoField(D, C, repr, index, 1, type, data);
+      _GD_DoField(D, C, repr, index, 1, type, data);
 
       if (ptr) {
         C->e->u.scalar.client = (gd_entry_t **)ptr;
@@ -202,7 +202,8 @@ static void _GD_GetScalar(DIRFILE *restrict D, gd_entry_t *restrict E, int i,
       free(field_code);
   }
 
-  dreturnvoid();
+  dreturn("%i", e);
+  return e;
 }
 
 /* resolve non-literal scalars */
@@ -390,12 +391,7 @@ int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
 
   /* Calculate the entry, if necessary */
   if (!E->e->calculated)
-    _GD_CalculateEntry(D, E, 1);
-
-  if (D->error) {
-    dreturn("%i", -1);
-    return -1;
-  }
+    _GD_CalculateEntry(D, E, 0);
 
   /* now copy to the user supplied buffer */
   memcpy(entry, E, sizeof(gd_entry_t));

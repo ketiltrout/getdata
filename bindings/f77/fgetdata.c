@@ -2910,15 +2910,15 @@ void F77_FUNC(gdmlsp, GDMLSP) (const int32_t *dirfile, const char *spec,
 /* gd_move wrapper */
 void F77_FUNC(gdmove, GDMOVE) (const int32_t *dirfile, const char *field_code,
     const int32_t *field_code_l, const int32_t *new_fragment,
-    const int32_t *move_data)
+    const int32_t *flags)
 {
   char *fc;
 
   dtrace("%i, %p, %i, %i, %i", *dirfile, field_code, *field_code_l,
-      *new_fragment, *move_data);
+      *new_fragment, *flags);
 
   gd_move(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
-        *field_code_l), *new_fragment, *move_data);
+        *field_code_l), *new_fragment, *flags);
 
   free(fc);
   dreturnvoid();
@@ -2927,15 +2927,15 @@ void F77_FUNC(gdmove, GDMOVE) (const int32_t *dirfile, const char *field_code,
 /* gd_rename wrapper */
 void F77_FUNC(gdrenm, GDRENM) (const int32_t *dirfile, const char *field_code,
     const int32_t *field_code_l, const char *new_name,
-    const int32_t *new_name_l, const int32_t *move_data)
+    const int32_t *new_name_l, const int32_t *flags)
 {
   char *fc, *nn;
 
   dtrace("%i, %p, %i, %p, %i, %i", *dirfile, field_code, *field_code_l,
-      new_name, *new_name_l, *move_data);
+      new_name, *new_name_l, *flags);
 
   gd_rename(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
-        *field_code_l), _GDF_CString(&nn, new_name, *new_name_l), *move_data);
+        *field_code_l), _GDF_CString(&nn, new_name, *new_name_l), *flags);
 
   free(nn);
   free(fc);
@@ -3784,21 +3784,6 @@ void F77_FUNC(gdmdal, GDMDAL) (const int32_t *dirfile, const char *parent,
   free(tg);
   free(pa);
 
-  dreturnvoid();
-}
-
-/* gd_move_alias wrapper */
-void F77_FUNC(gdmova, GDMOVA) (const int32_t *dirfile, const char *field_code,
-    const int32_t *field_code_l, const int32_t *new_fragment)
-{
-  char *fc;
-
-  dtrace("%i, %p, %i, %i", *dirfile, field_code, *field_code_l, *new_fragment);
-
-  gd_move_alias(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
-        *field_code_l), *new_fragment);
-
-  free(fc);
   dreturnvoid();
 }
 

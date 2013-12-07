@@ -258,7 +258,7 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
   size_t n = 0;
   int linenum = 0;
   double yr, yi;
-  int buf_len = 100;
+  int buf_len = GD_LUT_CHUNK;
 
   dtrace("%p, %p", D, E);
 
@@ -334,12 +334,13 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
 
     i++;
     if (i >= buf_len) {
-      buf_len += 100;
+      buf_len += GD_LUT_CHUNK;
       ptr = (struct gd_lut_ *)_GD_Realloc(D, E->e->u.linterp.lut, buf_len *
           sizeof(struct gd_lut_));
 
       if (ptr == NULL) {
         free(E->e->u.linterp.lut);
+        E->e->u.linterp.lut = NULL;
         fclose(fp);
         dreturnvoid();
         return;
@@ -352,6 +353,7 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
 
   if (i < 2) {
     free(E->e->u.linterp.lut);
+    E->e->u.linterp.lut = NULL;
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0,
         E->EN(linterp,table));
     fclose(fp);
@@ -365,6 +367,7 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
 
   if (ptr == NULL) {
     free(E->e->u.linterp.lut);
+    E->e->u.linterp.lut = NULL;
     fclose(fp);
     dreturnvoid();
     return;
@@ -1120,7 +1123,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
         if (lstat64(res, &statbuf)) {
           if (errno == ENOENT) {
             /* the thing doesn't exist.  I guess that means we're done;
-             * copy the rest of the work buffer onto the resul and call it a
+             * copy the rest of the work buffer onto the result and call it a
              * day. */
             if (*end) {
               len = strlen(end) + 1;
@@ -1153,10 +1156,10 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
 
           /* check for symlink loop */
           if (loop_count++ > MAXSYMLINKS) {
-            errno = ELOOP;
             free(res);
             free(work);
             dreturn("%p", NULL);
+            errno = ELOOP;
             return NULL;
           }
 

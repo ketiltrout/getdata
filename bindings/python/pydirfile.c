@@ -2157,20 +2157,20 @@ static PyObject *gdpy_dirfile_uninclude(struct gdpy_dirfile_t *self,
 static PyObject *gdpy_dirfile_move(struct gdpy_dirfile_t *self, PyObject *args,
     PyObject *keys)
 {
-  char *keywords[] = { "field_code", "new_fragment", "move_data", NULL };
+  char *keywords[] = { "field_code", "new_fragment", "flags", NULL };
   const char *field_code;
   int new_fragment;
-  int move_data = 0;
+  unsigned flags = 0;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "si|i:pygetdata.dirfile.move",
-        keywords, &field_code, &new_fragment, &move_data)) {
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "si|I:pygetdata.dirfile.move",
+        keywords, &field_code, &new_fragment, &flags)) {
     dreturn ("%p", NULL);
     return NULL;
   }
 
-  gd_move(self->D, field_code, new_fragment, move_data);
+  gd_move(self->D, field_code, new_fragment, flags);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -2427,32 +2427,6 @@ static PyObject *gdpy_dirfile_hidden(struct gdpy_dirfile_t *self,
 
   dreturn("%p", pyobj);
   return pyobj;
-}
-
-static PyObject *gdpy_dirfile_movealias(struct gdpy_dirfile_t *self,
-    PyObject *args, PyObject *keys)
-{
-  char *keywords[] = { "field_code", "new_fragment", NULL };
-  const char *field_code;
-  int new_fragment;
-
-  dtrace("%p, %p, %p", self, args, keys);
-
-  if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "si:pygetdata.dirfile.move_alias", keywords, &field_code,
-        &new_fragment))
-  {
-    dreturn ("%p", NULL);
-    return NULL;
-  }
-
-  gd_move_alias(self->D, field_code, new_fragment);
-
-  PYGD_CHECK_ERROR(self->D, NULL);
-
-  Py_INCREF(Py_None);
-  dreturn("%p", Py_None);
-  return Py_None;
 }
 
 static PyObject *gdpy_dirfile_deletealias(struct gdpy_dirfile_t *self,
@@ -3081,7 +3055,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     METH_VARARGS | METH_KEYWORDS,
     "linterp_tablename(field_code)\n\n"
       "Return the pathname of the look-up table (LUT) on disk used by the\n"
-      /* ------- handy ruler ---------------------------------------------| */
       "LINTERP field specified by 'field_code'.  See\n"
       "gd_linterp_tablename(3)."
   },
@@ -3273,12 +3246,12 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "Flush all pending metadata changes to disk.  See gd_metaflush(3)."
   },
   {"move", (PyCFunction)gdpy_dirfile_move, METH_VARARGS | METH_KEYWORDS,
-    "move(field_code, new_fragment [, move_data])\n\n"
+    "move(field_code, new_fragment [, flags])\n\n"
       "Move the specification of the field given by 'field_code' to the\n"
-      "format file fragment indexed by 'new_fragment'.  If 'move_data' is\n"
-      "given and is non-zero, and 'field_code' specifies a RAW field, the\n"
-      "associated file on disk will also be moved, if necessary.  See\n"
-      "gd_move(3)."
+      /* ------- handy ruler ---------------------------------------------| */
+      "format file fragment indexed by 'new_fragment'.  If 'flags' is given\n"
+      "and is non-zero, it should be a bitwise or'd collection of the\n"
+      "pygetdat.REN_* symbols.  See gd_move(3)."
   },
   {"put_carray", (PyCFunction)gdpy_dirfile_putcarray,
     METH_VARARGS | METH_KEYWORDS,
@@ -3393,12 +3366,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "This function returns the number of aliases defined for the specified\n"
       "field.  If field_code is valid, this will be at least one.  See\n"
       "gd_naliases(3)."
-  },
-  {"move_alias", (PyCFunction)gdpy_dirfile_movealias,
-    METH_VARARGS | METH_KEYWORDS,
-    "move_alias(field_code, new_fragment)\n\n"
-      "This moves the alias specified by 'field_code' to the fragment\n"
-      "indexed by 'new_fragment'.  See gd_move_alias(3)."
   },
   {"delete_alias", (PyCFunction)gdpy_dirfile_deletealias,
     METH_VARARGS | METH_KEYWORDS,

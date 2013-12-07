@@ -222,7 +222,7 @@
 221 F9CIpPmh gd_naliases
 222 F9CIpPmh gd_aliases
 223 F9CIpPmh gd_include_affix
-224 F9CIpPmh gd_move_alias
+224 ........ (unused)
 225 F9CIpPmh gd_delete_alias
 226 F9CIpPmh gd_fragment_affixes
 227 F9CIpPmh gd_alter_affixes

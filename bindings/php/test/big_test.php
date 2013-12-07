@@ -1357,21 +1357,12 @@ $v = gd_include($D, 'format1', 0, GD_CREAT | GD_EXCL, 'A', 'Z');
 check_ok2(223, 0, $D);
 check_var2(223, 1, $v, 1);
 
-# 224: move alias 
-$v = gd_move_alias($D, 'new20', 1);
-check_ok2(224, 0, $D);
-check_var2(224, 1, $v, TRUE);
-
-$v = gd_fragment_index($D, 'Anew20Z');
-check_ok2(224, 2, $D);
-check_var2(224, 3, $v, 1);
-
 # 225: delete alias
-$v = gd_delete_alias($D, 'Anew20Z');
+$v = gd_delete_alias($D, 'new20');
 check_ok2(225, 0, $D);
 check_var2(225, 1, $v, TRUE);
 
-$v = gd_fragment_index($D, 'Anew20Z');
+$v = gd_fragment_index($D, 'new20');
 check_error2(225, 2, $D, GD_E_BAD_CODE);
 check_var2(225, 3, $v, FALSE);
 

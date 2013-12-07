@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1521;
+use Test::More tests => 1518;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -1601,19 +1601,11 @@ CheckSArray(222, \@a, "data", "alias", "data/mnew20", "new20");
 $s = $_->include('format1', 0, $GetData::CREAT | $GetData::EXCL, 'A', 'Z');
 CheckOK(223);
 
-# 224: GDMOVA check
-$s = $_->move_alias('new20', 1);
-CheckOK2(224, 1);
-
-$s = $_->fragment_index('Anew20Z');
-CheckOK2(224, 2);
-CheckNum(224, $s, 1);
-
 # 225: gd_delete_alias check
-$s = $_->delete_alias('Anew20Z', 0);
+$s = $_->delete_alias('new20', 0);
 CheckOK2(225, 1);
 
-$_->fragment_index('Anew20Z');
+$_->fragment_index('new20');
 CheckError2(225, 2, $GetData::E_BAD_CODE);
 
 # 226: gd_fragment_affixes check

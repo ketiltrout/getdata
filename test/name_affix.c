@@ -27,7 +27,7 @@ int main(void)
   const char *format1 = "dirfile/format1";
   const char *format_data = "/INCLUDE format1 A Z\n";
   const char *format1_data = "data RAW UINT8 8\n";
-  int fd, ret, e1, e2, r = 0;
+  int fd, r1, r2, e1, e2, e3, r = 0;
   gd_entype_t type;
   DIRFILE *D;
 
@@ -42,22 +42,28 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  ret = gd_rename(D, "AdataZ", "AzataZ", 0);
+  D = gd_open(filedir, GD_RDWR);
+  r1 = gd_rename(D, "AdataZ", "BdataY", 0);
   e1 = gd_error(D);
-  type = gd_entry_type(D, "AzataZ");
-  e2 = gd_error(D);
+  CHECKI(r1, -1);
+  CHECKI(e1, GD_E_BAD_CODE);
 
-  gd_close(D);
+  r2 = gd_rename(D, "AdataZ", "AzataZ", 0);
+  e2 = gd_error(D);
+  CHECKI(r2, 0);
+  CHECKI(e2, 0);
+
+  type = gd_entry_type(D, "AzataZ");
+  e3 = gd_error(D);
+  CHECKI(type, GD_RAW_ENTRY);
+  CHECKI(e3, 0);
+
+  gd_discard(D);
 
   unlink(format);
   unlink(format1);
   rmdir(filedir);
 
-  CHECKI(e1,0);
-  CHECKI(e2,0);
-  CHECKI(ret,0);
-  CHECKI(type,GD_RAW_ENTRY);
 
   return r;
 }

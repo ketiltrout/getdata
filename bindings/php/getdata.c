@@ -3900,30 +3900,15 @@ PHP_FUNCTION(gd_move)
   char *field_code;
   int field_code_len;
   long new_fragment;
-  zend_bool move_data = 0;
+  long flags = 0;
 
   DIRFILE *D;
 
   dtracephp();
 
-  GDPHP_PARSED("sl|b", &field_code, &field_code_len, &new_fragment, &move_data);
+  GDPHP_PARSED("sl|l", &field_code, &field_code_len, &new_fragment, &flags);
 
-  GDPHP_RETURN_BOOL(gd_move(D, field_code, new_fragment, move_data));
-}
-
-PHP_FUNCTION(gd_move_alias)
-{
-  char *field_code;
-  int field_code_len;
-  long new_fragment;
-
-  DIRFILE *D;
-
-  dtracephp();
-
-  GDPHP_PARSED("sl", &field_code, &field_code_len, &new_fragment);
-
-  GDPHP_RETURN_BOOL(gd_move_alias(D, field_code, new_fragment));
+  GDPHP_RETURN_BOOL(gd_move(D, field_code, new_fragment, flags));
 }
 
 PHP_FUNCTION(gd_mplex_lookback)
@@ -4482,7 +4467,7 @@ PHP_FUNCTION(gd_rename)
 
 PHP_FUNCTION(gd_rewrite_fragment)
 {
-  zval *zi;
+  zval *zi = NULL;
 
   long i;
 
@@ -4803,7 +4788,6 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_mfield_list, NULL)
     PHP_FE(gd_mfield_list_by_type, NULL)
     PHP_FE(gd_move, NULL)
-    PHP_FE(gd_move_alias, NULL)
     PHP_FE(gd_mplex_lookback, NULL)
     PHP_FE(gd_mstrings, NULL)
     PHP_FE(gd_mvector_list, NULL)

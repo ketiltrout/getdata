@@ -26,14 +26,15 @@ int main(void)
   const char *format = "dirfile/format";
   const char *format_data = 
     "early RAW UINT8 c\n"
-    "late RAW UINT8 c\n"
+    "late LINCOM early c 0\n"
     "/ALIAS b c\n"
     "c CONST UINT8 2\n";
-  int fd, e1, e2, e3, e4, r = 0;
+  int fd, e1, e2, e3, r = 0;
   char *s1, *s2, *s3;
   DIRFILE *D;
   gd_entry_t E;
 
+  memset(&E, 0, sizeof(E));
   rmdirfile();
   mkdir(filedir, 0777);
 
@@ -47,8 +48,6 @@ int main(void)
   e1 = gd_error(D);
   gd_spf(D, "early");
   e2 = gd_error(D);
-  gd_spf(D, "late");
-  e3 = gd_error(D);
 
   gd_entry(D, "early", &E);
   s1 = E.scalar[0];
@@ -61,7 +60,7 @@ int main(void)
   gd_free_entry_strings(&E);
 
   gd_entry(D, "b", &E);
-  e4 = gd_error(D);
+  e3 = gd_error(D);
   s3 = strdup(gd_alias_target(D, "b"));
   gd_free_entry_strings(&E);
 
@@ -73,7 +72,6 @@ int main(void)
   CHECKI(e1,0);
   CHECKI(e2,0);
   CHECKI(e3,0);
-  CHECKI(e4,0);
   CHECKS(s1, "d");
   CHECKS(s2, "d");
   CHECKS(s3, "d");

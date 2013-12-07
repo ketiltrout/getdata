@@ -1573,19 +1573,11 @@ int main(void)
   d->IncludeAffix("format1", 0, "A", "Z", GD_CREAT | GD_EXCL);
   CHECK_OK(223);
 
-  // 224: gd_move_alias check
-  d->MoveAlias("new20", 1);
-  CHECK_OK2(224, 1);
-
-  n = d->FragmentIndex("Anew20Z");
-  CHECK_OK2(224, 2);
-  CHECK_INT(224, n, 1);
-
   // 225: gd_delete_alias check
-  d->DeleteAlias("Anew20Z", 0);
+  d->DeleteAlias("new20", 0);
   CHECK_OK2(225, 1);
 
-  n = d->FragmentIndex("Anew20Z");
+  n = d->FragmentIndex("new20");
   CHECK_ERROR2(225, 2, GD_E_BAD_CODE);
   CHECK_INT(225, n, -1);
 
