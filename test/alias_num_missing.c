@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -48,7 +48,7 @@ int main(void)
   CHECKI(e, GD_E_BAD_CODE);
   CHECKI(n, -1);
 
-  gd_close(D);
+  gd_discard(D);
   unlink(format);
   rmdir(filedir);
 

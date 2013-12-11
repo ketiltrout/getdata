@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -62,7 +62,7 @@ int main(void)
   gd_parser_callback(D, NULL, NULL);
   gd_include(D, "format1", 0, 0);
   error = gd_error(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format1);
   unlink(format);

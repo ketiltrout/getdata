@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -35,7 +35,7 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   uint8_t val[] = {0, 0, 0, 0, 0, 0, 0, 0};
-  int r = 0, error, i;
+  int r = 0, e1, e2, i;
   DIRFILE *D;
 
   rmdirfile();
@@ -44,14 +44,17 @@ int main(void)
   for (i = 0; i < 8; ++i)
     val[i] = i * (i + 1);
   gd_put_carray_slice(D, "data", 2, 3, GD_UINT8, &val);
-  error = gd_error(D);
-  gd_close(D);
+  e1 = gd_error(D);
+  CHECKI(e1, GD_E_OK);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   /* check */
   memset(val, 0, 8);
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   gd_get_carray(D, "data", GD_UINT8, &val);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
@@ -61,6 +64,5 @@ int main(void)
       CHECKIi(i, val[i], (i - 2) * (i - 1));
     } else
       CHECKIi(i, val[i], 0);
-  CHECKI(error,GD_E_OK);
   return r;
 }

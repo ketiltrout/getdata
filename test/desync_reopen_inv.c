@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 D. V. Wiebe
+/* Copyright (C) 2012-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -54,7 +54,7 @@ int main(void)
   n2 = gd_validate(D, "data");
   e3 = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

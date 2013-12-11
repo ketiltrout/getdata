@@ -58,7 +58,7 @@ int main(void)
   n = gd_getdata(D, "div", 0, 0, 1000, 0, GD_NULL, NULL);
   error = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

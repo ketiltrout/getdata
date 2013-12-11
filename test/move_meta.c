@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -56,7 +56,7 @@ int main(void)
   ret = gd_move(D, "data", 1, 0);
   error = gd_error(D);
   ge_ret =  gd_entry(D, "data/meta", &E);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format1);
   unlink(format);

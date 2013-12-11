@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -49,7 +49,7 @@ int main(void)
   n = gd_carray_len(D, "carray");
   error = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

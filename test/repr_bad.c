@@ -58,7 +58,7 @@ int main(void)
   n = gd_getdata(D, "data.3", 5, 0, 1, 0, GD_UINT8, c);
   error = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

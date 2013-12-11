@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -58,7 +58,7 @@ int main(void)
     gd_add_spec(D, spec[i], 0);
   error = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   stream = fopen(format, "rt");
   i = 0;

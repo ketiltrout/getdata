@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -88,7 +88,7 @@ int main(void)
   else if (field_list[11][0] != 'k')
     r = 1;
 
-  gd_close(D);
+  gd_discard(D);
   unlink(format);
   rmdir(filedir);
 

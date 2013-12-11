@@ -64,7 +64,7 @@ int main(void)
   D = gd_cbopen(filedir, GD_RDONLY, callback, le);
   error = gd_error(D);
   gd_get_string(D, "good", 100, s);
-  gd_close(D);
+  gd_discard(D);
 
   CHECKI(le[0], 0);
   CHECKI(le[1], 1);

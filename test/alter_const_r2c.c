@@ -50,7 +50,7 @@ int main(void)
   error = gd_error(D);
   n = gd_get_constant(D, "const", GD_FLOAT64, &d);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

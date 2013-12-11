@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -50,7 +50,7 @@ int main(void)
   e2 = gd_error(D);
   gd_spf(D, "CdataZ");
   e3 = gd_error(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format1);
   unlink(format);

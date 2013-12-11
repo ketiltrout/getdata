@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test field modifying */
 #include "test.h"
 
 #include <stdlib.h>
@@ -42,7 +41,7 @@ int main(void)
   const char *table1data = "0 0\n1000 10000\n";
   int32_t data_data[256];
   int32_t c[8];
-  int fd, i, ret, error, n, unlink_table, r = 0;
+  int fd, i, ret, e1, e2, n, unlink_table, r = 0;
   DIRFILE *D;
 
   rmdirfile();
@@ -69,10 +68,15 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   ret = gd_alter_linterp(D, "lut", NULL, "table1", 1);
-  error = gd_error(D);
-  n = gd_getdata(D, "lut", 5, 0, 1, 0, GD_INT32, c);
+  e1 = gd_error(D);
+  CHECKI(e1,0);
+  CHECKI(ret,0);
 
-  gd_close(D);
+  n = gd_getdata(D, "lut", 5, 0, 1, 0, GD_INT32, c);
+  CHECKI(n,8);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   for (i = 0; i < 8; ++i)
     CHECKIi(i,c[i], (i + 40) * 5);
@@ -83,9 +87,6 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error,0);
-  CHECKI(n,8);
-  CHECKI(ret,0);
   CHECKI(unlink_table,-1);
 
   return r;

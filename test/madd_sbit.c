@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -56,7 +56,7 @@ int main(void)
     gd_free_entry_strings(&e);
   }
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

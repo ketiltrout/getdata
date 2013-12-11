@@ -67,7 +67,7 @@ int main(void)
   ret = gd_move(D, "data", 1, GD_REN_DATA);
   error = gd_error(D);
   ge_ret =  gd_entry(D, "data", &E);
-  gd_close(D);
+  gd_discard(D);
 
   fd = open(data, O_RDONLY | O_BINARY);
   i = 0;

@@ -39,8 +39,8 @@ int main(void)
     "/REFERENCE data\n";
   unsigned char c[8];
   unsigned char data_data[256];
-  int fd, ret, error, r = 0;
-  char *ref1, *ref2;
+  int fd, ret, e1, e2, r = 0;
+  const char *ref1, *ref2;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -59,21 +59,24 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDWR);
-  ref1 = strdup(gd_reference(D, NULL));
+  ref1 = gd_reference(D, NULL);
+  CHECKS(ref1, "data");
+
   ret = gd_delete(D, "data", 0);
-  error = gd_error(D);
-  ref2 = strdup(gd_reference(D, NULL));
-  gd_close(D);
+  e1 = gd_error(D);
+  CHECKI(ret, 0);
+  CHECKI(e1, GD_E_OK);
+
+  ref2 = gd_reference(D, NULL);
+  CHECKS(ref2, "cata");
+
+  e2 = gd_discard(D);
+  CHECKI(e2, 0);
 
   fd = unlink(data);
   unlink(format);
   rmdir(filedir);
-
   CHECKI(fd, 0);
-  CHECKI(error, GD_E_OK);
-  CHECKI(ret, 0);
-  CHECKS(ref1, "data");
-  CHECKS(ref2, "cata");
 
   return r;
 }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to flush meta data */
 #include "test.h"
 
 #include <inttypes.h>
@@ -35,7 +34,7 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/new";
   struct stat buf;
-  int error, stat_format, r = 0;
+  int e1, e2, stat_format, r = 0;
   DIRFILE *D;
 
   rmdirfile();
@@ -43,18 +42,18 @@ int main(void)
       GD_VERBOSE);
   gd_add_raw(D, "new", GD_UINT8, 2, 0);
   gd_metaflush(D);
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(e1, GD_E_OK);
 
-  gd_close(D);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   stat_format = stat(format, &buf);
+  CHECKI(stat_format, 0);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(stat_format, 0);
-  CHECKI(error, GD_E_OK);
 
   return r;
 }

@@ -62,7 +62,7 @@ int main(void)
   n2 = gd_getdata(D, "mplex", 6, 0, 1, 0, GD_UINT8, &d);
   e2 = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(count);
   unlink(data);

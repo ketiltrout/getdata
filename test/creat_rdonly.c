@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Creating a read-only dirfile should fail cleanly */
 #include "test.h"
 
 #include <stdlib.h>
@@ -32,20 +31,22 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int error, unlink_ret, rmdir_ret, r = 0;
+  int e1, e2, unlink_ret, rmdir_ret, r = 0;
   DIRFILE *D;
 
   rmdirfile();
   D = gd_open(filedir, GD_RDONLY | GD_CREAT);
-  error = gd_error(D);
-  gd_close(D);
+  e1 = gd_error(D);
+  CHECKI(e1, GD_E_ACCMODE);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   unlink_ret = unlink(format);
   rmdir_ret = rmdir(filedir);
 
   CHECKI(unlink_ret, -1);
   CHECKI(rmdir_ret, -1);
-  CHECKI(error, GD_E_ACCMODE);
 
   return r;
 }

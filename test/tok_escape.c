@@ -51,7 +51,7 @@ int main(void)
   tok4 = gd_strtok(D, NULL);
   e5 = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

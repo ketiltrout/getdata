@@ -55,7 +55,7 @@ int main(void)
   D = gd_open(filedir, GD_RDONLY);
   error = gd_error(D);
   ptr = gd_error_string(D, NULL, 0);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(link);
   rmdir("dirfile");

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -31,7 +31,7 @@ int main(void)
   D = gd_open(filedir, GD_RDONLY);
   n = gd_nvectors(D);
   error = gd_error(D);
-  gd_close(D);
+  gd_discard(D);
 
   CHECKI(n, 0);
   CHECKI(error, GD_E_BAD_DIRFILE);

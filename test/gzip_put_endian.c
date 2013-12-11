@@ -50,7 +50,7 @@ int main(void)
   uint16_t d;
 #endif
   struct stat buf;
-  int fd, i, n, error, stat_data, unlink_data, r = 0;
+  int fd, i, n, e1, e2, stat_data, unlink_data, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -70,9 +70,10 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_GZIP_ENCODED);
 #endif
   n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
-  error = gd_error(D);
+  e1 = gd_error(D);
 
-  gd_discard(D);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   stat_data = stat(data_gz, &buf);
 #ifdef USE_GZIP
@@ -112,11 +113,11 @@ int main(void)
 
 #ifdef USE_GZIP
   CHECKI(unlink_data, 0);
-  CHECKI(error, GD_E_OK);
+  CHECKI(e1, GD_E_OK);
   CHECKI(n, 8);
 #else
   CHECKI(unlink_data, -1);
-  CHECKI(error, GD_E_UNSUPPORTED);
+  CHECKI(e1, GD_E_UNSUPPORTED);
   CHECKI(n, 0);
 #endif
 

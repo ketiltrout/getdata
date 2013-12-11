@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 D. V. Wiebe
+/* Copyright (C) 2012-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -56,7 +56,7 @@ int main(void)
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   ref = gd_reference(D, NULL);
   CHECKS(ref, "zata");
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format1);
   unlink(format);

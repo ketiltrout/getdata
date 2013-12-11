@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -44,7 +44,7 @@ int main(void)
   e1 = gd_error(D);
   n = gd_getdata(D, "lincom", 0, 0, 0, 1, GD_FLOAT64, &c);
   e2 = gd_error(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

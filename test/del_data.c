@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to delete a field */
 #include "test.h"
 
 #include <stdlib.h>
@@ -36,7 +35,7 @@ int main(void)
   const char *data = "dirfile/data";
   const char *format_data = "data RAW UINT8 8\n";
   unsigned char data_data[256];
-  int fd, ret, error1, n, error2, unlink_data, r = 0;
+  int fd, ret, e1, n, e2, e3, unlink_data, r = 0;
   DIRFILE *D;
 
   rmdirfile();
@@ -55,20 +54,23 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR);
   ret = gd_delete(D, "data", GD_DEL_DATA);
-  error1 = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(ret, 0);
+  CHECKI(e1, GD_E_OK);
+
   n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, data_data);
-  error2 = gd_error(D);
-  gd_close(D);
+  e2 = gd_error(D);
+  CHECKI(n, 0);
+  CHECKI(e2, GD_E_BAD_CODE);
+
+  e3 = gd_close(D);
+  CHECKI(e3, 0);
 
   unlink_data = unlink(data);
   unlink(format);
   rmdir(filedir);
 
   CHECKI(unlink_data, -1);
-  CHECKI(error1, GD_E_OK);
-  CHECKI(n, 0);
-  CHECKI(ret, 0);
-  CHECKI(error2, GD_E_BAD_CODE);
 
   return r;
 }

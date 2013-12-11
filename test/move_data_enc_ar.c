@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -42,7 +42,7 @@ int main(void)
   const char *format1_data = "ENCODING none\n";
   int r = 0;
   uint16_t d;
-  int fd, i, ret, error, ge_ret, unlink_data, unlink_txtdata;
+  int fd, i, ret, e1, e2, ge_ret, unlink_data, unlink_txtdata;
   FILE* stream;
   gd_entry_t E;
   DIRFILE *D;
@@ -65,9 +65,17 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
   ret = gd_move(D, "data", 1, GD_REN_DATA);
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(ret, 0);
+  CHECKI(e1, GD_E_OK);
+
   ge_ret =  gd_entry(D, "data", &E);
-  gd_close(D);
+  CHECKI(ge_ret, 0);
+  CHECKI(E.fragment_index, 1);
+  gd_free_entry_strings(&E);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   fd = open(data, O_RDONLY | O_BINARY);
   i = 0;
@@ -89,13 +97,8 @@ int main(void)
   unlink_txtdata = unlink(txtdata);
   rmdir(filedir);
 
-  CHECKI(ret, 0);
-  CHECKI(error, GD_E_OK);
-  CHECKI(ge_ret, 0);
-  CHECKI(E.fragment_index, 1);
   CHECKI(unlink_data, 0);
   CHECKI(unlink_txtdata, -1);
-  gd_free_entry_strings(&E);
 
   return r;
 }

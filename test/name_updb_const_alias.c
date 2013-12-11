@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 D. V. Wiebe
+/* Copyright (C) 2012-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -31,7 +31,7 @@ int main(void)
     "e CONST UINT8 2\n"
     "/ALIAS c e\n";
   int fd, e1, e2, e3, e4, r = 0;
-  char *s1, *s2, *s3;
+  const char *s1, *s2, *s3;
   DIRFILE *D;
   gd_entry_t E;
 
@@ -46,42 +46,37 @@ int main(void)
   gd_validate(D, "early");
   gd_rename(D, "c", "d", GD_REN_UPDB);
   e1 = gd_error(D);
+  CHECKI(e1,0);
+
   gd_spf(D, "early");
   e2 = gd_error(D);
+  CHECKI(e2,0);
+
   gd_spf(D, "late");
   e3 = gd_error(D);
+  CHECKI(e3,0);
 
   gd_entry(D, "early", &E);
   s1 = E.scalar[0];
-  E.scalar[0] = NULL;
+  CHECKS(s1, "d");
   gd_free_entry_strings(&E);
 
   gd_entry(D, "late", &E);
   s2 = E.scalar[0];
-  E.scalar[0] = NULL;
+  CHECKS(s2, "d");
   gd_free_entry_strings(&E);
 
   gd_entry(D, "b", &E);
   e4 = gd_error(D);
-  s3 = strdup(gd_alias_target(D, "b"));
+  s3 = gd_alias_target(D, "b");
+  CHECKI(e4,0);
+  CHECKS(s3, "d");
   gd_free_entry_strings(&E);
 
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(e1,0);
-  CHECKI(e2,0);
-  CHECKI(e3,0);
-  CHECKI(e4,0);
-  CHECKS(s1, "d");
-  CHECKS(s2, "d");
-  CHECKS(s3, "d");
-
-  free(s1);
-  free(s2);
-  free(s3);
 
   return r;
 }

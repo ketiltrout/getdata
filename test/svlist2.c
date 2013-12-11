@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Retreiving the number of fields of a field should succeed cleanly */
 #include "test.h"
 
 #include <stdlib.h>
@@ -75,7 +74,7 @@ int main(void)
     CHECKIi(z, i,3);
   }
 
-  gd_close(D);
+  gd_discard(D);
   unlink(format);
   rmdir(filedir);
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test include */
 #include "test.h"
 
 #include <stdlib.h>
@@ -38,7 +37,7 @@ int main(void)
   const char *format_data = "/INCLUDE format1\na CONST UINT8 1\n";
   const char *format1_data = "b CONST UINT8 11\n/INCLUDE format2\n";
   const char *format2_data = "c CONST UINT8 11\n";
-  int fd, ret, error, unlink_format1, unlink_format2, r = 0;
+  int fd, ret, e1, e2, unlink_format1, unlink_format2, r = 0;
   unsigned int nfields, nfragments;
   DIRFILE *D;
 
@@ -59,20 +58,24 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   ret = gd_uninclude(D, 1, 0);
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(ret,0);
+  CHECKI(e1,0);
+
   nfields = gd_nfields(D);
+  CHECKI(nfields,2);
+
   nfragments = gd_nfragments(D);
-  gd_close(D);
+  CHECKI(nfragments,1);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   unlink_format2 = unlink(format2);
   unlink_format1 = unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error,0);
-  CHECKI(ret,0);
-  CHECKI(nfields,2);
-  CHECKI(nfragments,1);
   CHECKI(unlink_format2,0);
   CHECKI(unlink_format1,0);
 

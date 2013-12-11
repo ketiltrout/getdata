@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write UINT8 */
 #include "test.h"
 
 #include <inttypes.h>
@@ -44,7 +43,7 @@ int main(void)
   char command[4096];
   uint8_t d;
   struct stat buf;
-  int fd, i, n, error, stat_data, r = 0;
+  int fd, i, n, e1, e2, stat_data, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -61,9 +60,12 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_GZIP_ENCODED | GD_VERBOSE);
   gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
   n = gd_flush(D, "data");
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(e1, GD_E_OK);
+  CHECKI(n, 0);
 
-  gd_discard(D);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   stat_data = stat(data_gz, &buf);
   if (stat_data) {
@@ -94,9 +96,6 @@ int main(void)
   unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, GD_E_OK);
-  CHECKI(n, 0);
 
   return r;
 #endif

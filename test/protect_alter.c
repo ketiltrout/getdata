@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -58,7 +58,7 @@ int main(void)
   error = gd_error(D);
   p = gd_protection(D, 0);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

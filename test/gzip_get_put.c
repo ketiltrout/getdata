@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -79,7 +79,7 @@ int main(void)
   };
   uint8_t b, c[8], d[8];
   char command[4096];
-  int fd, i, m, n, e1, e2, unlink_data, unlink_datagz, r = 0;
+  int fd, i, m, n, e1, e2, e3, unlink_data, unlink_datagz, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -107,7 +107,8 @@ int main(void)
   m = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, d);
   e2 = gd_error(D);
 
-  gd_close(D);
+  e3 = gd_close(D);
+  CHECKI(e3, 0);
 
 #ifdef USE_GZIP
   /* uncompress */

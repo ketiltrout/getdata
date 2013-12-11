@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test move */
 #include "test.h"
 
 #include <stdlib.h>
@@ -64,7 +63,7 @@ int main(void)
   ret = gd_move(D, "data", 1, GD_REN_DATA);
   error = gd_error(D);
   ge_ret =  gd_entry(D, "data", &E);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format1);
   unlink(format);

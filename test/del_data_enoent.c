@@ -46,7 +46,7 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   ret = gd_delete(D, "data", GD_DEL_DATA);
   error = gd_error(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

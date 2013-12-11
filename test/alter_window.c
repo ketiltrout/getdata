@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -62,7 +62,7 @@ int main(void)
   error = gd_error(D);
   n = gd_getdata(D, "window", 5, 0, 1, 0, GD_UINT8, c);
 
-  gd_close(D);
+  gd_discard(D);
 
   for (i = 0; i < 8; ++i)
     CHECKIi(i,c[i], (i > 3) ? i + 40 : 0);

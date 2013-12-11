@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 D. V. Wiebe
+/* Copyright (C) 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -69,7 +69,7 @@ int main(void)
   error = gd_error(D);
   m = gd_getdata(D, "data", 5, 0, 1, 0, GD_COMPLEX128, &c);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(count);
   unlink(data);

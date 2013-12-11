@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -64,7 +64,7 @@ int main(void)
   gd_free_entry_strings(&E);
   n = gd_entry(D, "data", &E);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

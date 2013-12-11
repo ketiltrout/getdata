@@ -64,7 +64,7 @@ int main(void)
     gd_free_entry_strings(&e);
   }
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

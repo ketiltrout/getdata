@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -53,7 +53,7 @@ int main(void)
   };
   uint16_t c[8];
   unsigned char data_data[256];
-  int fd, i, error, n, v, h1, h2, r = 0;
+  int fd, i, e1, e2, n, v, h1, h2, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 16);
@@ -75,30 +75,32 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   h1 = gd_hidden(D, "AdYZ");
+  CHECKI(h1,1);
+
   gd_rewrite_fragment(D, GD_ALL_FRAGMENTS);
-  error = gd_error(D);
-  gd_close(D);
+  e1 = gd_error(D);
+  CHECKI(e1,0);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   v = gd_dirfile_standards(D, GD_VERSION_CURRENT);
   n = gd_getdata(D, "ar", 4, 0, 8, 0, GD_UINT16, c);
   h2 = gd_hidden(D, "AdYZ");
-
-  gd_close(D);
-
-  unlink(data);
-  for (i = 0; i < 5; ++i)
-    unlink(format[i]);
-  rmdir(filedir);
-
-  CHECKI(error,0);
-  CHECKI(h1,1);
   CHECKI(h2,1);
   CHECKI(n,8);
   CHECKI(v,9);
 
   for (i = 0; i < n; ++i)
     CHECKUi(i,c[i], (i & 1) ? 4 + i : 0);
+
+  gd_discard(D);
+
+  unlink(data);
+  for (i = 0; i < 5; ++i)
+    unlink(format[i]);
+  rmdir(filedir);
 
   return r;
 }

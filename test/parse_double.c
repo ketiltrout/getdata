@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -66,7 +66,7 @@ int main(void)
   gd_get_constant(D, "hex", GD_FLOAT64, &h);
   e6 = gd_error(D);
   
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

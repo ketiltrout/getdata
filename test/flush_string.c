@@ -32,7 +32,7 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int error, r = 0;
+  int e1, e0, r = 0;
   char s[100] = {0};
   DIRFILE *D;
 
@@ -40,11 +40,15 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_TRUNC |
       GD_VERBOSE);
   gd_add_string(D, "s", S, 0);
-  gd_close(D);
+
+  e0 = gd_close(D);
+  CHECKI(e0, 0);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   gd_get_string(D, "s", 100, s);
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(e1, GD_E_OK);
+
   gd_discard(D);
 
   CHECKS(s, S);
@@ -52,7 +56,6 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, GD_E_OK);
 
   return r;
 }

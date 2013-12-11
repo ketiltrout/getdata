@@ -53,7 +53,7 @@ int main(void)
   error2 = gd_error(D);
   t2 = gd_entry_type(D, "alias");
   error3 = gd_error(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

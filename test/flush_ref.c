@@ -37,7 +37,7 @@ int main(void)
   const char *format1 = "dirfile/sub/format";
   const char *format_data = "data RAW UINT8 1\nREFERENCE data\n";
   const char *format1_data = "mata RAW UINT8 11\nREFERENCE mata\n";
-  int fd, e1, r = 0;
+  int fd, e1, e2, r = 0;
   const char *r1;
   DIRFILE *D;
 
@@ -56,7 +56,10 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_include_affix(D, "sub/format", 0, "prefix_", NULL, GD_IGNORE_REFS);
   gd_rewrite_fragment(D, GD_ALL_FRAGMENTS);
-  gd_close(D);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
+
   D = gd_open(subdir, GD_RDONLY | GD_VERBOSE);
   r1 = gd_reference(D, NULL);
   CHECKS(r1, "mata");

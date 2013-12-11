@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test include */
 #include "test.h"
 
 #include <stdlib.h>
@@ -37,7 +36,7 @@ int main(void)
   const char *format_data = "data1 RAW UINT8 1\n";
   const char *format1_data = "data RAW UINT8 11\nREFERENCE data\n";
   int fd, error1, error2, r = 0;
-  char *reference;
+  const char *reference;
   unsigned int spf;
   DIRFILE *D;
 
@@ -55,20 +54,20 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_include(D, "format1", 0, GD_VERBOSE);
   error1 = gd_error(D);
-  reference = strdup(gd_reference(D, NULL));
+  CHECKI(error1, 0);
+
+  reference = gd_reference(D, NULL);
   error2 = gd_error(D);
+  CHECKI(error2, 0);
+  CHECKS(reference, "data");
+
   spf = gd_spf(D, "data");
-  gd_close(D);
+  CHECKU(spf, 11);
+  gd_discard(D);
 
   unlink(format1);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error1, 0);
-  CHECKI(error2, 0);
-  CHECKS(reference, "data");
-  CHECKU(spf, 11);
-  free(reference);
 
   return r;
 }

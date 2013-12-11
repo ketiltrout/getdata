@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Truncating a dirfile should succeed cleanly */
 #include "test.h"
 
 #include <stdlib.h>
@@ -34,7 +33,7 @@ int main(void)
   const char *subdir = "dirfile/sub";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  int fd, error, unlink_data, rmdir_sub, stat_format, r = 0;
+  int fd, e1, e2, unlink_data, rmdir_sub, stat_format, r = 0;
   struct stat buf;
   DIRFILE *D;
 
@@ -49,8 +48,11 @@ int main(void)
   close(open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666));
 
   D = gd_open(filedir, GD_RDWR | GD_TRUNC | GD_VERBOSE);
-  error = gd_error(D);
-  gd_close(D);
+  e1 = gd_error(D);
+  CHECKI(e1, GD_E_OK);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   unlink_data = unlink(data);
   CHECKI(unlink_data, -1);
@@ -65,6 +67,5 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error,GD_E_OK);
   return r;
 }

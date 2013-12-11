@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2013 D. V. Wiebe
+/* Copyright (C) 2012-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -45,7 +45,7 @@ int main(void)
     "/ALIAS data cata\n"
     "eata RAW UINT8 8\n";
   unsigned char data_data[256];
-  int fd, ret, e0, e1, e2, e3, e4, e5, e6, unlink_data, unlink_zata, r = 0;
+  int fd, ret, e0, e1, e2, e3, e4, e5, e6, e7, unlink_data, unlink_zata, r = 0;
   const char **fl;
 #define NFIELDS 10
   const char *field_list[NFIELDS] = {
@@ -141,7 +141,8 @@ int main(void)
   CHECKI(e6, 0);
   gd_free_entry_strings(&E);
 
-  gd_discard(D);
+  e7 = gd_close(D);
+  CHECKI(e7, 0);
 
   unlink_data = unlink(data);
   unlink_zata = unlink(zata);

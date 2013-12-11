@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -48,7 +48,7 @@ int main(void)
   e1 = gd_error(D);
   gd_fragment_affixes(D, 1, &prefix, &suffix);
   e2 = gd_error(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format1);
   unlink(format);

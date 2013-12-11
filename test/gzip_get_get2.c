@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -72,7 +72,7 @@ int main(void)
   error1 = gd_error(D);
   n2 = gd_getdata(D, "data", 0, 0, 1, 0, GD_UINT16, c2);
   error2 = gd_error(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(gzipdata);
   unlink(format);

@@ -39,7 +39,7 @@ int main(void)
     "data RAW UINT8 8\n"
     "mult MULTIPLY cata data\n";
   uint8_t c[8], d;
-  int fd, i, n, error, r = 0;
+  int fd, i, n, e1, e2, r = 0;
   struct stat buf;
   DIRFILE *D;
 
@@ -56,15 +56,18 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
   n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
   gd_flush(D, "mult");
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(e1, 0);
+  CHECKI(n, 8);
 
-  gd_close(D);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   if (stat(data, &buf)) {
     perror("stat(data)");
     r = 1;
   } else
-    CHECKIi(0, buf.st_size, 40 + 8 * sizeof(uint8_t));
+    CHECKI(buf.st_size, 40 + 8 * sizeof(uint8_t));
 
   if (!stat(cata, &buf)) {
     perror("stat(cata)");
@@ -82,9 +85,6 @@ int main(void)
   unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, 0);
-  CHECKI(n, 8);
 
   return r;
 }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -50,7 +50,7 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   parent = gd_parent_fragment(D, 2);
   error = gd_error(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format2);
   unlink(format1);

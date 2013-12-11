@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -35,7 +35,7 @@ int main(void)
   const char *format1 = "dirfile/RAW";
   const char *format_data = "ENDIAN RAW c 8\nINCLUDE RAW\n";
   const char *format_data1 = "m MULTIPLY ENDIAN ENDIAN\na&b RAW c 8\n";
-  int fd, e, q, c, r = 0;
+  int fd, e, e2, q, c, r = 0;
   DIRFILE *D;
 
   rmdirfile();
@@ -52,19 +52,21 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   e = gd_dirfile_standards(D, 3);
   q = gd_rewrite_fragment(D, GD_ALL_FRAGMENTS);
-  gd_close(D);
+  CHECKI(e,3);
+  CHECKI(q,0);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   c = gd_dirfile_standards(D, GD_VERSION_EARLIEST);
-  gd_close(D);
+  CHECKI(c,3);
+
+  gd_discard(D);
 
   unlink(format);
   unlink(format1);
   rmdir(filedir);
-
-  CHECKI(e,3);
-  CHECKI(q,0);
-  CHECKI(c,3);
 
   return r;
 }

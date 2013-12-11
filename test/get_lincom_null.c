@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -55,7 +55,7 @@ int main(void)
   n = gd_getdata(D, "lincom", 5, 0, 10, 0, GD_NULL, NULL);
   error = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

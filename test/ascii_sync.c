@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write UINT8 */
 #include "test.h"
 
 #include <inttypes.h>
@@ -37,7 +36,7 @@ int main(void)
   const char *data = "dirfile/data.txt";
   const char *format_data = "data RAW UINT8 8\n";
   uint8_t c[8];
-  int d, n, error;
+  int d, n, e1, e2;
   int fd, i, r = 0;
   struct stat buf;
   FILE* stream;
@@ -57,9 +56,12 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_TEXT_ENCODED | GD_VERBOSE);
   gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
   n = gd_flush(D, "data");
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(e1,0);
+  CHECKI(n,0);
 
-  gd_discard(D);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   if (stat(data, &buf))
     return 1;
@@ -81,9 +83,6 @@ int main(void)
   unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error,0);
-  CHECKI(n,0);
 
   return r;
 }

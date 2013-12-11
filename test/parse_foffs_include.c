@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -88,7 +88,7 @@ int main(void)
   CHECKI(error3, 0);
   CHECKU(data_data[0], 1);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   unlink(format1);

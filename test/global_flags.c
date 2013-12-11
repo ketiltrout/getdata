@@ -1,4 +1,4 @@
-/* Copyright (C) :e2008-2011 D. V. Wiebe
+/* Copyright (C) :e2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -74,7 +74,7 @@ int main(void)
   n[6] = gd_flags(D, GD_VERBOSE, GD_VERBOSE | GD_PRETTY_PRINT);
   e[6] = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

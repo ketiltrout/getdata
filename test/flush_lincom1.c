@@ -37,7 +37,7 @@ int main(void)
     "data RAW UINT8 8\n"
     "lincom LINCOM data 1 0\n";
   uint8_t c[8], d;
-  int fd, i, n, error, r = 0;
+  int fd, i, n, e1, e2, r = 0;
   struct stat buf;
   DIRFILE *D;
 
@@ -54,15 +54,18 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
   n = gd_putdata(D, "lincom", 5, 0, 1, 0, GD_UINT8, c);
   gd_flush(D, "lincom");
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(n, 8);
+  CHECKI(e1, 0);
 
-  gd_close(D);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   if (stat(data, &buf)) {
     perror("stat(data)");
     r = 1;
   } else
-    CHECKIi(0, buf.st_size, 40 + 8 * sizeof(uint8_t));
+    CHECKI(buf.st_size, 40 + 8 * sizeof(uint8_t));
 
   fd = open(data, O_RDONLY | O_BINARY);
   i = 0;
@@ -75,9 +78,6 @@ int main(void)
   unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, 0);
-  CHECKI(n, 8);
 
   return r;
 }

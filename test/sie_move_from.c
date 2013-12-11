@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -45,7 +45,7 @@ int main(void)
     0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32, 0x32
   };
   DIRFILE *D;
-  int fd, i, error, r = 0, unlink_data_sie, unlink_data_raw;
+  int fd, i, e1, e2, r = 0, unlink_data_sie, unlink_data_raw;
 
   rmdirfile();
   mkdir(filedir, 0777); 
@@ -60,25 +60,31 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_alter_encoding(D, GD_UNENCODED, 0, 1);
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(e1, 0);
 
-  gd_close(D);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   fd = open(data_raw, O_RDONLY | O_BINARY);
-  read(fd, check, 0x31);
-  close(fd);
+  if (fd < 0) {
+    perror("open");
+    r = 1;
+  } else {
+    read(fd, check, 0x31);
+    close(fd);
+
+    for (i = 0; i < 0x31; ++i)
+      CHECKUi(i, check[i], data_out[i]);
+  }
 
   unlink_data_sie = unlink(data_sie);
   unlink_data_raw = unlink(data_raw);
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, 0);
   CHECKI(unlink_data_sie, -1);
   CHECKI(unlink_data_raw, 0);
-
-  for (i = 0; i < 0x31; ++i)
-    CHECKUi(i, check[i], data_out[i]);
 
   return r;
 }

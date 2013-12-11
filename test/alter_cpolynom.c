@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -68,7 +68,7 @@ int main(void)
   error = gd_error(D);
   n = gd_getdata(D, "polynom", 5, 0, 1, 0, GD_COMPLEX128, c);
 
-  gd_close(D);
+  gd_discard(D);
 
   for (i = 0; i < 8; ++i) {
     int x = i + 40;

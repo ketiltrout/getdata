@@ -39,7 +39,7 @@ int main(void)
   const char *data = "dirfile/data.gz";
   const char *format_data = "data RAW UINT8 8\n";
   uint8_t c[8];
-  int fd, i, n, error1, error2, unlink_data, ret, r = 0;
+  int fd, i, n, e1, e2, e3, unlink_data, ret, r = 0;
   int rmdir_filedir;
   DIRFILE *D;
 
@@ -56,11 +56,17 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_GZIP_ENCODED | GD_VERBOSE);
   n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  error1 = gd_error(D);
-  ret = gd_delete(D, "data", GD_DEL_DATA);
-  error2 = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(n, 8);
+  CHECKI(e1, GD_E_OK);
 
-  gd_discard(D);
+  ret = gd_delete(D, "data", GD_DEL_DATA);
+  e2 = gd_error(D);
+  CHECKI(ret, 0);
+  CHECKI(e2, GD_E_OK);
+
+  e3 = gd_close(D);
+  CHECKI(e3, 0);
 
   unlink_data = unlink(data);
   unlink(format);
@@ -68,10 +74,6 @@ int main(void)
 
   CHECKI(unlink_data, -1);
   CHECKI(rmdir_filedir, 0);
-  CHECKI(error1, GD_E_OK);
-  CHECKI(error2, GD_E_OK);
-  CHECKI(n, 8);
-  CHECKI(ret, 0);
 
   return r;
 #endif

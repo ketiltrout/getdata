@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -66,7 +66,7 @@ int main(void)
     CHECKIi(i,c[i], (0x5000000000000028 + i * 0x0200000000000001)
         * (2 * (i % 2) - 1));
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

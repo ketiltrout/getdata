@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -93,7 +93,7 @@ int main(void)
   v = gd_dirfile_standards(D, GD_VERSION_CURRENT);
   n = gd_getdata(D, "ar", 4, 0, 8, 0, GD_UINT16, c);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

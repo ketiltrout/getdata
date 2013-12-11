@@ -59,7 +59,7 @@ int main(void)
 
   D = gd_cbopen(filedir, GD_RDONLY, callback, NULL);
   error = gd_error(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

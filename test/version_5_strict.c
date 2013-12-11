@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -77,7 +77,7 @@ int main(void)
   m = gd_getdata(D, "FILEFRAM", 5, 0, 8, 0, GD_UINT16, d);
   error2 = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

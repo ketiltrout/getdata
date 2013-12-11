@@ -52,7 +52,7 @@ int main(void)
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   n = gd_eof(D, "phase");
   error = gd_error(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

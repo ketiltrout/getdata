@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -35,8 +35,8 @@ int main(void)
   const char *format1 = "dirfile/format1";
   const char *format_data = "INCLUDE format1\n";
   const char *format1_data = "data RAW UINT8 11\n";
-  char *form0 = NULL;
-  char *form1 = NULL;
+  const char *form0;
+  const char *form1;
   int fd, r = 0;
   DIRFILE *D;
 
@@ -52,14 +52,8 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  form0 = strdup(gd_fragmentname(D, 0));
-  form1 = strdup(gd_fragmentname(D, 1));
-  gd_close(D);
-
-  unlink(format1);
-  unlink(format);
-  rmdir(filedir);
-
+  form0 = gd_fragmentname(D, 0);
+  form1 = gd_fragmentname(D, 1);
   /* This only checks whether the end of the returned path is what we expect.
    * This should work, since we can guarantee that both "dirfile" and "format*"
    * aren't symlinks. */
@@ -70,8 +64,12 @@ int main(void)
   CHECKEOS(form0,"dirfile\\format");
   CHECKEOS(form1,"dirfile\\format1");
 #endif
-  free(form0);
-  free(form1);
+
+  gd_discard(D);
+
+  unlink(format1);
+  unlink(format);
+  rmdir(filedir);
 
   return r;
 }

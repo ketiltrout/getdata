@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 D. V. Wiebe
+/* Copyright (C) 2012-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -72,7 +72,7 @@ int main(void)
     gd_free_entry_strings(&e);
   }
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format1);
   unlink(format);

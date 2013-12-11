@@ -53,7 +53,7 @@ int main(void)
   CHECKI(error, 0);
   CHECKU(field_list[0].n, 0);
 
-  gd_close(D);
+  gd_discard(D);
   unlink(format);
   rmdir(filedir);
 

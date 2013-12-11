@@ -38,7 +38,7 @@ int main(void)
   const char *format_data = "data RAW UINT16 8\nENCODING none\n";
   uint16_t data_data[128];
   uint16_t c1, c2;
-  int fd, ret, error, unlink_txtdata, unlink_data, r = 0;
+  int fd, ret, e1, e2, unlink_txtdata, unlink_data, r = 0;
   DIRFILE *D;
   off_t n1, n2;
 
@@ -58,25 +58,28 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   n1 = gd_getdata(D, "data", 0, 3, 0, 1, GD_UINT16, &c1);
-  ret = gd_alter_encoding(D, GD_TEXT_ENCODED, 0, 1);
-  error = gd_error(D);
-  n2 = gd_getdata(D, "data", 0, 3, 0, 1, GD_UINT16, &c2);
+  CHECKI(n1, 1);
+  CHECKI(c1, 0x603);
 
-  gd_discard(D);
+  ret = gd_alter_encoding(D, GD_TEXT_ENCODED, 0, 1);
+  e1 = gd_error(D);
+  CHECKI(ret, 0);
+  CHECKI(e1, 0);
+
+  n2 = gd_getdata(D, "data", 0, 3, 0, 1, GD_UINT16, &c2);
+  CHECKI(n2, 1);
+  CHECKI(c2, 0x603);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   unlink_txtdata = unlink(txtdata);
   unlink_data = unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, 0);
-  CHECKI(ret, 0);
-  CHECKI(n1, 1);
-  CHECKI(n2, 1);
   CHECKI(unlink_txtdata, 0);
   CHECKI(unlink_data, -1);
-  CHECKI(c1, 0x603);
-  CHECKI(c2, 0x603);
 
   return r;
 }

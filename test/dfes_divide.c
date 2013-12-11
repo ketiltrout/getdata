@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -48,7 +48,7 @@ int main(void)
   gd_entry(D, "data", &E);
   gd_free_entry_strings(&E);
 
-  gd_close(D);
+  gd_discard(D);
   unlink(format);
   rmdir(filedir);
 

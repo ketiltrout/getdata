@@ -54,7 +54,7 @@ int main(void)
   /* this tests whether _GD_CanonicalPath can deal with symlink loops */
   D = gd_open(filedir, GD_RDONLY);
   error = gd_error(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(link);
   rmdir("dirfile");

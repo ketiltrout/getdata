@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -66,7 +66,7 @@ int main(void)
   CHECKI(n, E.fragment_index);
 
   gd_free_entry_strings(&E);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format2);
   unlink(format1);

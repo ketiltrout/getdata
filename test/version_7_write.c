@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -33,7 +33,7 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format_data = "/VERSION 7\nar RAW UINT8 8\nar/q SBIT ar 0 10\n";
-  int fd, e, q, c, r = 0;
+  int fd, e, e2, q, c, r = 0;
   DIRFILE *D;
 
   rmdirfile();
@@ -45,19 +45,22 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   e = gd_dirfile_standards(D, 7);
+  CHECKI(e,7);
+
   q = gd_rewrite_fragment(D, 0);
-  gd_close(D);
+  CHECKI(q,0);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   c = gd_dirfile_standards(D, GD_VERSION_CURRENT);
-  gd_close(D);
+  CHECKI(c,7);
+
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(e,7);
-  CHECKI(q,0);
-  CHECKI(c,7);
 
   return r;
 }

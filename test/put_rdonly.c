@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write to a read only dirfile */
 #include "test.h"
 
 #include <stdlib.h>
@@ -35,7 +34,7 @@ int main(void)
   const char *data = "dirfile/data";
   const char *format_data = "data RAW UINT8 8\n";
   unsigned char c[8];
-  int fd, n, error, unlink_data, r = 0;
+  int fd, n, e1, e2, unlink_data, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -48,16 +47,17 @@ int main(void)
 
   D = gd_open(filedir, GD_RDONLY | GD_UNENCODED);
   n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(n,0);
+  CHECKI(e1,GD_E_ACCMODE);
 
-  gd_close(D);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   unlink_data = unlink(data);
   unlink(format);
   rmdir(filedir);
 
   CHECKI(unlink_data, -1);
-  CHECKI(n,0);
-  CHECKI(error,GD_E_ACCMODE);
   return r;
 }

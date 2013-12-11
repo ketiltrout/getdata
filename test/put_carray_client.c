@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -38,7 +38,7 @@ int main(void)
   gd_getdata(D, "phase", 0, 0, 0, 1, GD_UINT8, val);
   gd_put_carray(D, "data", GD_UINT8, &val);
   gd_getdata(D, "phase", 0, 0, 0, 1, GD_UINT8, val + 1);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

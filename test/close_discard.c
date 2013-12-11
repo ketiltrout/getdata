@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -45,7 +45,7 @@ int main(void)
   ret = gd_discard(D);
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   n = gd_nfields(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

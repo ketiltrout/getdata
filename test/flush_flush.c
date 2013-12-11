@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to flush */
 #include "test.h"
 
 #include <inttypes.h>
@@ -36,7 +35,7 @@ int main(void)
   const char *data = "dirfile/data";
   const char *format_data = "data RAW UINT8 8\n";
   uint8_t c[8], d;
-  int fd, i, n, error;
+  int fd, i, n, e1, e2, r = 0;
   struct stat buf;
   DIRFILE *D;
 
@@ -54,23 +53,23 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
   n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
   gd_flush(D, "data");
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(e1, 0);
+  CHECKI(n, 8);
 
-  gd_close(D);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
-  if (stat(data, &buf))
-    return 1;
-  if (buf.st_size != 40 + 8 * sizeof(uint8_t))
-    return 1;
+  if (stat(data, &buf)) {
+    perror("stat");
+    r = 1;
+  }
+  CHECKI(buf.st_size, 40 + 8 * sizeof(uint8_t));
 
   fd = open(data, O_RDONLY | O_BINARY);
   i = 0;
   while (read(fd, &d, sizeof(uint8_t))) {
-    if (i < 40 || i > 48) {
-      if (d != 0)
-        return 1;
-    } else if (d != i)
-      return 1;
+    CHECKIi(i, d, (i < 40 || i > 48) ? 0 : i);
     i++;
   }
   close(fd);
@@ -79,10 +78,5 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-  if (n != 8)
-    return 1;
-
-  return 0;
+  return r;
 }

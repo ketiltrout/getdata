@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2008-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Global metadata check */
 #include "test.h"
 
 #include <inttypes.h>
@@ -37,7 +36,7 @@ int main(void)
   const char *format_data = "data1 CONST UINT8 1\n";
   int fd, error, r = 0;
   DIRFILE *D;
-  char *name;
+  const char *name;
 
   rmdirfile();
   mkdir(filedir, 0777);
@@ -47,16 +46,15 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  name = strdup(gd_dirfilename(D));
+  name = gd_dirfilename(D);
   error = gd_error(D);
-  gd_close(D);
+  CHECKI(error, GD_E_OK);
+  CHECKEOS(name, "dirfile");
+
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, GD_E_OK);
-  CHECKEOS(name, "dirfile");
-  free(name);
 
   return r;
 }

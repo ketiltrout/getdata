@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -36,7 +36,7 @@ int main(void)
     "INCLUDE RAW c 8\n"
     "a&b RAW c 8\n"
     "m MULTIPLY INCLUDE INCLUDE\n";
-  int fd, e, q, c, r = 0;
+  int fd, e, e2, q, c, r = 0;
   DIRFILE *D;
 
   rmdirfile();
@@ -49,18 +49,20 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   e = gd_dirfile_standards(D, 2);
   q = gd_rewrite_fragment(D, 0);
-  gd_close(D);
+  CHECKI(e,2);
+  CHECKI(q,0);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   c = gd_dirfile_standards(D, GD_VERSION_EARLIEST);
-  gd_close(D);
+  CHECKI(c,2);
+
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(e,2);
-  CHECKI(q,0);
-  CHECKI(c,2);
 
   return r;
 }

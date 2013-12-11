@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2012 D. V. Wiebe
+/* Copyright (C) 2011-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -30,7 +30,7 @@ int main(void)
     "/ALIAS b c\n"
     "c CONST UINT8 2\n";
   int fd, e1, e2, e3, r = 0;
-  char *s1, *s2, *s3;
+  const char *s1, *s2, *s3;
   DIRFILE *D;
   gd_entry_t E;
 
@@ -51,34 +51,27 @@ int main(void)
 
   gd_entry(D, "early", &E);
   s1 = E.scalar[0];
-  E.scalar[0] = NULL;
+  CHECKI(e1,0);
+  CHECKS(s1, "d");
   gd_free_entry_strings(&E);
 
   gd_entry(D, "late", &E);
   s2 = E.scalar[0];
-  E.scalar[0] = NULL;
+  CHECKI(e2,0);
+  CHECKS(s2, "d");
   gd_free_entry_strings(&E);
 
   gd_entry(D, "b", &E);
   e3 = gd_error(D);
-  s3 = strdup(gd_alias_target(D, "b"));
+  s3 = gd_alias_target(D, "b");
+  CHECKI(e3,0);
+  CHECKS(s3, "d");
   gd_free_entry_strings(&E);
 
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(e1,0);
-  CHECKI(e2,0);
-  CHECKI(e3,0);
-  CHECKS(s1, "d");
-  CHECKS(s2, "d");
-  CHECKS(s3, "d");
-
-  free(s1);
-  free(s2);
-  free(s3);
 
   return r;
 }

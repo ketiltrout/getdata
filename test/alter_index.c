@@ -47,7 +47,7 @@ int main(void)
   ret = gd_alter_entry(D, "INDEX", &E, 0);
   error = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

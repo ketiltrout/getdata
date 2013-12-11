@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write POLYNOM */
 #include "test.h"
 
 #include <inttypes.h>
@@ -37,7 +36,7 @@ int main(void)
   const char *format_data = "polynom POLYNOM data 3.0 2.0 1.0 0.5\ndata RAW INT8 8\n";
   int8_t c[8];
   struct stat buf;
-  int fd, i, n, error, r = 0;
+  int fd, i, n, e1, e2, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -53,9 +52,12 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
   n = gd_putdata(D, "polynom", 5, 0, 1, 0, GD_INT8, c);
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(n,0);
+  CHECKI(e1,GD_E_BAD_FIELD_TYPE);
 
-  gd_close(D);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   if (!stat(data, &buf)) {
     perror("stat");
@@ -64,8 +66,5 @@ int main(void)
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(n,0);
-  CHECKI(error,GD_E_BAD_FIELD_TYPE);
   return r;
 }

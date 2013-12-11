@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write COMPLEX64 */
 #include "test.h"
 
 #include <inttypes.h>
@@ -45,7 +44,7 @@ int main(void)
   const float complex zero = 0;
 #endif
   struct stat buf;
-  int fd, i, n, error, r = 0;
+  int fd, i, n, e1, e2, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -67,9 +66,12 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
   n = gd_putdata(D, "data", 5, 0, 1, 0, GD_COMPLEX64, c);
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(e1,0);
+  CHECKI(n,8);
 
-  gd_close(D);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   if (stat(data, &buf)) {
     perror("stat");
@@ -103,9 +105,6 @@ int main(void)
   unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error,0);
-  CHECKI(n,8);
 
   return r;
 }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test move */
 #include "test.h"
 
 #include <stdlib.h>
@@ -44,7 +43,7 @@ int main(void)
     "/INCLUDE format1\ndata RAW UINT16 11\nENCODING bzip2\n";
   const char *format1_data = "ENCODING none\n";
   uint16_t data_data[128];
-  int fd, ret, error, ge_ret, unlink_data, unlink_bz2data, r = 0, i = 0;
+  int fd, ret, e1, e2, ge_ret, unlink_data, unlink_bz2data, r = 0, i = 0;
   char command[4096];
   gd_entry_t E;
   DIRFILE *D;
@@ -79,9 +78,12 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
 #endif
   ret = gd_move(D, "data", 1, 1);
-  error = gd_error(D);
+  e1 = gd_error(D);
   ge_ret =  gd_entry(D, "data", &E);
-  gd_close(D);
+  CHECKI(ge_ret, 0);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
 #ifdef USE_BZIP2
   fd = open(data, O_RDONLY | O_BINARY);
@@ -106,15 +108,13 @@ int main(void)
 
 #ifdef USE_BZIP2
   CHECKI(ret, 0);
-  CHECKI(error, GD_E_OK);
-  CHECKI(ge_ret, 0);
+  CHECKI(e1, GD_E_OK);
   CHECKI(E.fragment_index, 1);
   CHECKI(unlink_data, 0);
   CHECKI(unlink_bz2data, -1);
 #else
   CHECKI(ret, -1);
-  CHECKI(error, GD_E_UNSUPPORTED);
-  CHECKI(ge_ret, 0);
+  CHECKI(e1, GD_E_UNSUPPORTED);
   CHECKI(E.fragment_index, 0);
   CHECKI(unlink_data, -1);
   CHECKI(unlink_bz2data, 0);

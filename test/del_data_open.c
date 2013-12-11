@@ -36,7 +36,7 @@ int main(void)
   const char *data = "dirfile/data";
   const char *format_data = "data RAW UINT8 8\n";
   unsigned char data_data[256];
-  int fd, ret, error0, error1, n, error2, unlink_data, r = 0;
+  int fd, ret, e0, e1, n, e2, e3, unlink_data, r = 0;
   DIRFILE *D;
 
   rmdirfile();
@@ -55,23 +55,26 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR);
   gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, data_data);
-  error0 = gd_error(D);
+  e0 = gd_error(D);
+  CHECKI(e0, GD_E_OK);
+
   ret = gd_delete(D, "data", GD_DEL_DATA);
-  error1 = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(ret, 0);
+  CHECKI(e1, GD_E_OK);
+
   n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, data_data);
-  error2 = gd_error(D);
-  gd_close(D);
+  e2 = gd_error(D);
+  CHECKI(e2, GD_E_BAD_CODE);
+  CHECKI(n, 0);
+
+  e3 = gd_close(D);
+  CHECKI(e3, 0);
 
   unlink_data = unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error0, GD_E_OK);
   CHECKI(unlink_data, -1);
-  CHECKI(error1, GD_E_OK);
-  CHECKI(n, 0);
-  CHECKI(ret, 0);
-  CHECKI(error2, GD_E_BAD_CODE);
 
   return r;
 }

@@ -81,7 +81,7 @@ int main(void)
   CHECKC(E.EN(lincom,cb)[1], b[1]);
 #endif
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

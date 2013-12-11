@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -66,7 +66,7 @@ int main(void)
   error3 = gd_error(D);
   bof_mult2 = gd_bof(D, "mult2");
   error4 = gd_error(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format1);
   unlink(format);

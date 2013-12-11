@@ -63,7 +63,7 @@ int main(void)
   n2 = gd_getdata(D, "linterp", 5, 0, 1, 0, GD_UINT8, &c);
   error2 = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

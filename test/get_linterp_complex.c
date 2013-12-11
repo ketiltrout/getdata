@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read LINTERP */
 #include "test.h"
 
 #include <stdlib.h>
@@ -65,7 +64,7 @@ int main(void)
   n = gd_getdata(D, "linterp", 5, 0, 1, 0, GD_COMPLEX128, &c);
   error = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(table);
   unlink(data);

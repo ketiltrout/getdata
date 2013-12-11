@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -56,7 +56,7 @@ int main(void)
   form0 = gd_fragmentname(D, -3000);
   form1 = gd_fragmentname(D, 1000);
   error = gd_error(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format1);
   unlink(format);

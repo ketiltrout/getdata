@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -33,7 +33,7 @@ int main(void)
   uint16_t c1[8], c2[8];
   char command[4096];
   uint16_t data_data[256];
-  int fd, i, n1, error1, n2, error2, r = 0;
+  int fd, i, n1, e1, e2, n2, e3, r = 0;
   DIRFILE *D;
 
   memset(c1, 0, 16);
@@ -59,26 +59,28 @@ int main(void)
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   n1 = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c1);
-  error1 = gd_error(D);
-  gd_close(D);
+  CHECKI(n1, 8);
+  e1 = gd_error(D);
+  CHECKI(e1, 0);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   n2 = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c2);
-  error2 = gd_error(D);
-  gd_close(D);
-
-  unlink(gzipdata);
-  unlink(format);
-  rmdir(filedir);
-
-  CHECKI(error1, 0);
-  CHECKI(error2, 0);
-  CHECKI(n1, 8);
+  e3 = gd_error(D);
+  CHECKI(e3, 0);
   CHECKI(n2, 8);
   for (i = 0; i < 8; ++i) {
     CHECKIi(i,c1[i], 40 + i);
     CHECKIi(i,c2[i], 40 + i);
   }
+
+  gd_discard(D);
+
+  unlink(gzipdata);
+  unlink(format);
+  rmdir(filedir);
 
   return r;
 #endif

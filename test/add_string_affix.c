@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -47,7 +47,7 @@ int main(void)
   /* check */
   gd_get_string(D, "AdataZ", 1000, val);
   e2 = gd_error(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

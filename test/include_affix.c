@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -46,7 +46,7 @@ int main(void)
   gd_include_affix(D, "format1", 0, "A", "Z", 0);
   error = gd_error(D);
   spf = gd_spf(D, "AdataZ");
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format1);
   unlink(format);

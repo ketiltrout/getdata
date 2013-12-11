@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write LINCOM 1 */
 #include "test.h"
 
 #include <inttypes.h>
@@ -37,7 +36,7 @@ int main(void)
   const char *format_data = "lincom LINCOM 1 data 1;1 0;-1\ndata RAW INT8 8\n";
   int8_t c[8], d;
   struct stat buf;
-  int fd, q, n, error, r = 0;
+  int fd, q, n, e1, e2, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -53,9 +52,12 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
   n = gd_putdata(D, "lincom", 5, 0, 1, 0, GD_INT8, c);
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(e1, 0);
+  CHECKI(n,8);
 
-  gd_close(D);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   if (stat(data, &buf)) {
     perror("stat");
@@ -92,9 +94,6 @@ int main(void)
   unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(n,8);
-  CHECKI(error, 0);
 
   return r;
 }

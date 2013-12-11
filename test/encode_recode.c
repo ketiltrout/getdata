@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test endianness */
 #include "test.h"
 
 #include <stdlib.h>
@@ -39,7 +38,7 @@ int main(void)
   const char *format_data = "data RAW UINT16 8\nENCODING none\n";
   uint16_t data_data[128];
   uint16_t c[8];
-  int fd, i, ret, error, n, unlink_txtdata, unlink_data, r = 0;
+  int fd, i, ret, e1, e2, n, unlink_txtdata, unlink_data, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -59,22 +58,25 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   ret = gd_alter_encoding(D, GD_TEXT_ENCODED, 0, 1);
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(ret, 0);
+  CHECKI(e1, 0);
+
   n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
 
-  gd_discard(D);
+  CHECKI(n, 8);
+
+  for (i = 0; i < 8; ++i)
+    CHECKXi(i,c[i], (40 + i) * 0x201);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   unlink_txtdata = unlink(txtdata);
   unlink_data = unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  for (i = 0; i < 8; ++i)
-    CHECKXi(i,c[i], (40 + i) * 0x201);
-
-  CHECKI(error, 0);
-  CHECKI(ret, 0);
-  CHECKI(n, 8);
   CHECKI(unlink_txtdata, 0);
   CHECKI(unlink_data, -1);
 

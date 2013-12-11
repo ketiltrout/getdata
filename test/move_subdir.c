@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test move */
 #include "test.h"
 
 #include <stdlib.h>
@@ -39,7 +38,7 @@ int main(void)
   const char *new_data = "dirfile/subdir/data";
   const char *format_data = "INCLUDE subdir/format1\ndata RAW UINT8 11\n";
   const char *format1_data = "#\n";
-  int fd, ret, error, ge_ret, unlink_data, unlink_new_data, r = 0;
+  int fd, ret, e1, e2, ge_ret, unlink_data, unlink_new_data, r = 0;
   gd_entry_t E;
   DIRFILE *D;
 
@@ -61,9 +60,17 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
   ret = gd_move(D, "data", 1, GD_REN_DATA);
-  error = gd_error(D);
-  ge_ret =  gd_entry(D, "data", &E);
-  gd_close(D);
+  e1 = gd_error(D);
+  CHECKI(ret, 0);
+  CHECKI(e1, GD_E_OK);
+
+  ge_ret = gd_entry(D, "data", &E);
+  CHECKI(ge_ret, 0);
+  CHECKI(E.fragment_index, 1);
+  gd_free_entry_strings(&E);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   unlink_data = unlink(data);
   unlink_new_data = unlink(new_data);
@@ -72,13 +79,8 @@ int main(void)
   rmdir(subdir);
   rmdir(filedir);
 
-  CHECKI(ret, 0);
-  CHECKI(error, GD_E_OK);
-  CHECKI(ge_ret, 0);
-  CHECKI(E.fragment_index, 1);
   CHECKI(unlink_data, -1);
   CHECKI(unlink_new_data, 0);
-  gd_free_entry_strings(&E);
 
   return r;
 }

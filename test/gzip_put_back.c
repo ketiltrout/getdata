@@ -43,7 +43,7 @@ int main(void)
   char command[4096];
   uint8_t d;
   struct stat buf;
-  int fd, i, n1, n2, e1, e2, stat_data, unlink_data, r = 0;
+  int fd, i, n1, n2, e1, e2, e3, stat_data, unlink_data, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -60,10 +60,16 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_GZIP_ENCODED | GD_VERBOSE);
   n1 = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
   e1 = gd_error(D);
+  CHECKI(e1, GD_E_OK);
+  CHECKI(n1, 8);
+
   n2 = gd_putdata(D, "data", 0, 0, 1, 0, GD_UINT8, c);
   e2 = gd_error(D);
+  CHECKI(e2, GD_E_OK);
+  CHECKI(n2, 8);
 
-  gd_discard(D);
+  e3 = gd_close(D);
+  CHECKI(e3, 0);
 
   stat_data = stat(data_gz, &buf);
   if (stat_data) {
@@ -98,10 +104,6 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(unlink_data, 0);
-  CHECKI(e1, GD_E_OK);
-  CHECKI(n1, 8);
-  CHECKI(e2, GD_E_OK);
-  CHECKI(n2, 8);
 
   return r;
 #endif

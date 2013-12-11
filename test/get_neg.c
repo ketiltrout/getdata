@@ -47,7 +47,7 @@ int main(void)
   n = gd_getdata(D, "data", -5, 0, 1, 0, GD_NULL, NULL);
   error = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

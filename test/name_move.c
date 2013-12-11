@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -29,9 +29,13 @@ int main(void)
   const char *format_data = "cata RAW UINT8 8\ndata RAW UINT8 8\n"
     "eata RAW UINT8 8\n";
   unsigned char data_data[256];
-  int fd, ret, error, unlink_data, unlink_zata, r = 0;
+  int fd, ret, e1, e2, unlink_data, unlink_zata, r = 0;
   const char **fl;
-  char *field_list[4];
+#define NFIELDS 4
+  const char *field_list[NFIELDS] = {
+    "INDEX", "cata", "eata", "zata"
+  };
+  unsigned i, nf;
   DIRFILE *D;
 
   rmdirfile();
@@ -50,33 +54,29 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   ret = gd_rename(D, "data", "zata", GD_REN_DATA);
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(e1, 0);
+  CHECKI(ret, 0);
+
+  nf = gd_nfields(D);
+  CHECKI(nf, NFIELDS);
+  if (nf > NFIELDS)
+    nf = NFIELDS;
+
   fl = gd_field_list(D);
+  for (i = 0; i < nf; ++i)
+    CHECKSi(i, fl[i], field_list[i]);
 
-  field_list[0] = strdup(fl[0]);
-  field_list[1] = strdup(fl[1]);
-  field_list[2] = strdup(fl[2]);
-  field_list[3] = strdup(fl[3]);
-
-  gd_close(D);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   unlink_data = unlink(data);
   unlink_zata = unlink(zata);
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, 0);
-  CHECKI(ret, 0);
-  CHECKS(field_list[0], "INDEX");
-  CHECKS(field_list[1], "cata");
-  CHECKS(field_list[2], "eata");
-  CHECKS(field_list[3], "zata");
   CHECKI(unlink_data, -1);
   CHECKI(unlink_zata, 0);
-  free(field_list[0]);
-  free(field_list[1]);
-  free(field_list[2]);
-  free(field_list[3]);
 
   return r;
 }

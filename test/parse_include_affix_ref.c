@@ -55,7 +55,7 @@ int main(void)
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   ref = gd_reference(D, NULL);
   CHECKS(ref, "AzataB");
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format1);
   unlink(format);

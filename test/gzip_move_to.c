@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to gzip compress a file */
 #include "test.h"
 
 #include <stdlib.h>
@@ -40,7 +39,7 @@ int main(void)
   char command[4096];
   int i;
 #endif
-  int fd, error, unlink_raw, r = 0;
+  int fd, e1, e2, unlink_raw, r = 0;
   struct stat buf;
 
   rmdirfile();
@@ -63,9 +62,10 @@ int main(void)
   D = gd_open(filedir, GD_RDWR);
 #endif
   gd_alter_encoding(D, GD_GZIP_ENCODED, 0, 1);
-  error = gd_error(D);
+  e1 = gd_error(D);
 
-  gd_discard(D);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
 #ifdef USE_GZIP
   if (stat(data_gz, &buf)) {
@@ -107,9 +107,9 @@ int main(void)
 
   CHECKI(unlink_raw, 0);
 #ifdef USE_GZIP
-  CHECKI(error, GD_E_OK);
+  CHECKI(e1, GD_E_OK);
 #else
-  CHECKI(error, GD_E_UNSUPPORTED);
+  CHECKI(e1, GD_E_UNSUPPORTED);
 #endif
 
   return r;

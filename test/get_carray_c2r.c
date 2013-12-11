@@ -48,7 +48,7 @@ int main(void)
   n = gd_get_carray(D, "carray", GD_FLOAT64, c);
   error = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

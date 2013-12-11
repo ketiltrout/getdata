@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -66,7 +66,7 @@ int main(void)
   error = gd_error(D);
   n = gd_getdata(D, "div", 5, 0, 1, 0, GD_FLOAT64, c);
 
-  gd_close(D);
+  gd_discard(D);
 
   for (i = 0; i < 8; ++i)
     CHECKFi(i,c[i], creal(v) / (i + 41.));

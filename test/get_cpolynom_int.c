@@ -57,7 +57,7 @@ int main(void)
   n = gd_getdata(D, "polynom.r", 5, 0, 8, 0, GD_INT32, &c);
   error = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

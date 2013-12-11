@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -65,7 +65,7 @@ int main(void)
   n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT32, &c);
   error = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   fd = open(data, O_RDONLY | O_BINARY);
   lseek(fd, 5 * sizeof(uint32_t), SEEK_SET);

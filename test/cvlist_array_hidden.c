@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -59,7 +59,7 @@ int main(void)
         CHECKUi(fd * 1000 + i,field_list[fd].d[i], (2 * fd + 1) * (i + 1));
     }
 
-  gd_close(D);
+  gd_discard(D);
   unlink(format);
   rmdir(filedir);
 

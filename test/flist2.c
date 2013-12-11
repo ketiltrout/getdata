@@ -76,7 +76,7 @@ int main(void)
     CHECKIi(z, i, 4);
   }
 
-  gd_close(D);
+  gd_discard(D);
   unlink(format);
   rmdir(filedir);
 

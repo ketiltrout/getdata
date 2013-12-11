@@ -61,7 +61,7 @@ int main(void)
   error = gd_error(D);
   n = gd_entry(D, "div", &E);
 
-  gd_close(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

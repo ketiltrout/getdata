@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -29,7 +29,7 @@ int main(void)
     "b\\ c CONST UINT8 8\n"
     "\"a \\#r\" RAW UINT8 b\\ c\n"
     "/META \"a \\#r\" \\x64\\c\\157 PHASE \"a \\#r\" 0\n";
-  int fd, e, q, c, r = 0;
+  int fd, e, e2, q, c, r = 0;
   DIRFILE *D;
   unsigned int s;
 
@@ -43,20 +43,22 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   e = gd_dirfile_standards(D, 6);
   q = gd_rewrite_fragment(D, 0);
-  gd_close(D);
+  CHECKI(e,6);
+  CHECKI(q,0);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   c = gd_dirfile_standards(D, GD_VERSION_CURRENT);
   s = gd_spf(D, "a #r/dco");
-  gd_close(D);
+  CHECKI(c,6);
+  CHECKU(s,8);
+
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(e,6);
-  CHECKI(q,0);
-  CHECKI(c,6);
-  CHECKU(s,8);
 
   return r;
 }

@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to rename a field */
 #include "test.h"
 
 #include <stdlib.h>
@@ -44,7 +43,7 @@ int main(void)
     "data RAW UINT8 8\n"
     "eata RAW UINT8 8\n";
   unsigned char data_data[256];
-  int fd, ret, e1, e2, e3, e4, e5, unlink_data, unlink_zata, r = 0;
+  int fd, ret, e1, e2, e3, e4, e5, e6, unlink_data, unlink_zata, r = 0;
   const char **fl;
 #define NFIELDS 8
   const char *field_list[NFIELDS] = {
@@ -126,7 +125,8 @@ int main(void)
   CHECKS(s6, "zata");
   gd_free_entry_strings(&E);
 
-  gd_discard(D);
+  e6 = gd_close(D);
+  CHECKI(e6, 0);
 
   unlink_data = unlink(data);
   unlink_zata = unlink(zata);

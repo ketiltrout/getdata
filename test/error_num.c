@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -42,7 +42,7 @@ int main(void)
   gd_validate(D, "3");
   ne1 = gd_error_count(D);
   ne2 = gd_error_count(D);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -37,7 +37,7 @@ int main(void)
   const char *format_data = "phase PHASE data -2\ndata RAW INT8 8\n";
   int8_t c[8], d;
   struct stat buf;
-  int fd, i, n, error, r = 0;
+  int fd, i, n, e1, e2, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -53,9 +53,12 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
   n = gd_putdata(D, "phase", 5, 0, 1, 0, GD_INT8, c);
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(n,8);
+  CHECKI(e1, 0);
 
-  gd_close(D);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   if (stat(data, &buf)) {
     perror("stat");
@@ -78,9 +81,6 @@ int main(void)
   unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(n,8);
-  CHECKI(error, 0);
 
   return r;
 }

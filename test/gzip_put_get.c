@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write UINT8 */
 #include "test.h"
 
 #include <inttypes.h>
@@ -40,7 +39,7 @@ int main(void)
   const char *data = "dirfile/data.gz";
   const char *format_data = "data RAW UINT8 8\n";
   uint8_t c[8], d[8];
-  int fd, i, m, n, e1, e2, unlink_data, r = 0;
+  int fd, i, m, n, e1, e2, e3, unlink_data, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -64,7 +63,11 @@ int main(void)
   m = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, d);
   e2 = gd_error(D);
 
-  gd_close(D);
+  for (i = 0; i < m; ++i)
+    CHECKIi(i, d[i], c[i]);
+
+  e3 = gd_close(D);
+  CHECKI(e3, 0);
 
   unlink_data = unlink(data);
   unlink(format);
@@ -84,9 +87,6 @@ int main(void)
   CHECKI(m, 0);
 #endif
   
-  for (i = 0; i < m; ++i)
-    CHECKIi(i, d[i], c[i]);
-
   return r;
 #endif
 }

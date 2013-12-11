@@ -43,7 +43,7 @@ int main(void)
   int32_t data_data[256];
   int32_t c[8];
   gd_entry_t e;
-  int fd, i, ret, error, error2, n, unlink_table, r = 0;
+  int fd, i, ret, e1, e2, e3, n, unlink_table, r = 0;
   DIRFILE *D;
 
   rmdirfile();
@@ -71,12 +71,25 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_getdata(D, "lut", 5, 0, 1, 0, GD_NULL, NULL);
   ret = gd_alter_linterp(D, "lut", NULL, "table1", 0);
-  error = gd_error(D);
-  gd_entry(D, "lut", &e);
-  error2 = gd_error(D);
-  n = gd_getdata(D, "lut", 5, 0, 1, 0, GD_INT32, c);
+  e1 = gd_error(D);
+  CHECKI(ret, 0);
+  CHECKI(e1, 0);
 
-  gd_discard(D);
+  gd_entry(D, "lut", &e);
+  e2 = gd_error(D);
+  CHECKI(e2, 0);
+  CHECKS(e.in_fields[0], "data");
+  CHECKS(e.EN(linterp,table), "table1");
+  gd_free_entry_strings(&e);
+
+  n = gd_getdata(D, "lut", 5, 0, 1, 0, GD_INT32, c);
+  CHECKI(n, 8);
+
+  for (i = 0; i < 8; ++i)
+    CHECKIi(i,c[i], (i + 40) * 10);
+
+  e3 = gd_close(D);
+  CHECKI(e3, 0);
 
   unlink(data);
   unlink_table = unlink(table);
@@ -84,17 +97,7 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  for (i = 0; i < 8; ++i)
-    CHECKIi(i,c[i], (i + 40) * 10);
-
-  CHECKI(error, 0);
-  CHECKI(n, 8);
-  CHECKI(ret, 0);
   CHECKI(unlink_table, 0);
-  CHECKI(error2, 0);
-  CHECKS(e.in_fields[0], "data");
-  CHECKS(e.EN(linterp,table), "table1");
-  gd_free_entry_strings(&e);
 
   return r;
 }

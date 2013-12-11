@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Add a RAW field */
 #include "test.h"
 
 #include <stdlib.h>
@@ -38,7 +37,7 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data.gz";
   gd_entry_t e;
-  int e1, e2, unlink_data, r = 0;
+  int e1, e2, e3, unlink_data, r = 0;
   DIRFILE *D;
 
   rmdirfile();
@@ -65,7 +64,9 @@ int main(void)
   CHECKI(e2, -1);
 #endif
 
-  gd_close(D);
+  e3 = gd_close(D);
+  CHECKI(e3, 0);
+
   unlink_data = unlink(data);
 
 #ifdef USE_GZIP

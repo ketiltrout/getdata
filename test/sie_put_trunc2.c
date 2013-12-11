@@ -62,7 +62,7 @@ int main(void)
   CHECKI(error, 0);
   CHECKI(n, 0x32);
 
-  gd_close(D);
+  gd_discard(D);
 
   fd = open(data, O_RDONLY | O_BINARY);
   l = read(fd, check, (NREC + 1) * 9);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test include */
 #include "test.h"
 
 #include <stdlib.h>
@@ -33,7 +32,7 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
-  int fd, error, unlink_format1, r = 0;
+  int fd, e1, e2, unlink_format1, r = 0;
   DIRFILE *D;
 
   rmdirfile();
@@ -44,14 +43,16 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_include(D, "format1", 0, GD_CREAT);
-  error = gd_error(D);
-  gd_close(D);
+  e1 = gd_error(D);
+  CHECKI(e1,0);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   unlink_format1 = unlink(format1);
   unlink(format);
   rmdir(filedir);
   
-  CHECKI(error,0);
   CHECKI(unlink_format1, 0);
 
   return r;

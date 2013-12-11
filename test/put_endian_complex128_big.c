@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -65,7 +65,7 @@ int main(void)
 #endif
   error = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   fd = open(data, O_RDONLY);
   lseek(fd, 5 * 2 * sizeof(double), SEEK_SET);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -35,7 +35,7 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   uint8_t val = 0;
-  int error, r = 0;
+  int e1, e2, r = 0;
   DIRFILE *D;
 
   rmdirfile();
@@ -43,19 +43,21 @@ int main(void)
   gd_add_const(D, "data", GD_UINT8, GD_UINT8, &val, 0);
   val = 23;
   gd_put_constant(D, "data", GD_UINT8, &val);
-  error = gd_error(D);
-  gd_close(D);
+  e1 = gd_error(D);
+  CHECKI(e1, GD_E_OK);
+
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
   /* check */
   val = 0;
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   gd_get_constant(D, "data", GD_UINT8, &val);
-  gd_close(D);
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
 
   CHECKU(val, 23);
-  CHECKI(error,GD_E_OK);
   return r;
 }

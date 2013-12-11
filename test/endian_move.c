@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -61,7 +61,7 @@ int main(void)
   error = gd_error(D);
   n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
 
-  gd_close(D);
+  gd_discard(D);
 
   fd = open(data, O_RDONLY | O_BINARY);
 
