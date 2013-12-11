@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test field modifying */
 #include "test.h"
 
 int main(void)
@@ -49,7 +48,7 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_entry(D, "data", &E);
-  E.hidden = 1;
+  E.flags = GD_EN_HIDDEN;
   ret = gd_alter_entry(D, "data", &E, 0);
   error = gd_error(D);
   n = gd_nfields(D);
@@ -61,7 +60,7 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(error, 0);
-  CHECKI(n, 2);
+  CHECKI(n, 1);
   CHECKI(ret, 0);
   gd_free_entry_strings(&E);
 

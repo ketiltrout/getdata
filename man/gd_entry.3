@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_entry 3 "10 October 2013" "Version 0.9.0" "GETDATA"
+.TH gd_entry 3 "10 December 2013" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -61,8 +61,13 @@ by the caller once they are no longer needed.  The
 .BR gd_free_entry_strings (3)
 function is provided as a convenience to do this.
 
-If the entry's metadata contains scalar field codes which cannot be dereferenced,
-the associated numerical field parameter will be initialised to zero.
+If the entry's metadata contains scalar field codes which cannot be
+dereferenced, the associated numerical field parameter will be initialised to
+zero.  In this case, the
+.B GD_EN_CALC
+flag in the returned entry object will
+.I NOT
+be set.
 
 The returned
 .I entry
@@ -112,7 +117,7 @@ typedef struct {
   const char  *field;          /* field code */
   gd_entype_t  field_type;     /* field type */
   int          fragment_index; /* format fragment index */
-  int          hidden;         /* hidden flag */
+  unsigned     flags;          /* entry flags */
 
   ...
 } gd_entry_t;
@@ -172,9 +177,47 @@ primary fragment, the file called
 .B format
 in the root dirfile directory (see 
 .IR dirfile (5)).
+.PP
 The
-.I hidden
-member is non-zero if the specified field is hidden (see
+.I flags
+member is a bitwise or'd collection of the following entry flags:
+.TP
+.B GD_EN_CALC
+This bit is set only when the non-literal scalar parameter field codes specified
+in the
+.I scalar
+member have been resolved, and the corresponding numerical parameter have
+been initialised with these data.  When one or more field code does not exist,
+or is invalid (ie. when
+.BR gd_validate (3)
+would fail on the specified
+.I field_code
+with the error
+.BR GD_E_BAD_SCALAR ),
+then the unresolved numerical parameters are initialised to zero, and this flag
+is not be set.  If the requested field does not allow non-literal scalar
+parameters
+.RB ( CARRAY ,
+.BR CONST ,
+.BR DIVIDE ,
+.BR INDEX ,
+.BR LINTERP ,
+.BR MULTIPLY ,
+.BR STRING ),
+the value of this bit is unspecified.
+.TP
+.B GD_EN_COMPSCAL
+For fields which permit complex valued parameters
+.RB ( LINCOM ,
+.BR POLYNOM ,
+.BR RECIP ),
+this bit is set only when at least one parameter is complex valued.  For
+other field types, the value of this bit is unspecified.
+.TP
+.B GD_EN_HIDDEN
+This bit is set only when the field has been hidden by the
+.B /HIDDEN
+directive (see
 .BR gd_hidden (3)).
 .PP
 Remaining fields in the gd_entry_t structure depend on the value of
@@ -426,7 +469,6 @@ typedef struct {
   ...
 
   int            n_fields;                  /* # of input fields */
-  int            comp_scal;                 /* complex scalar flag */
   const char    *in_fields[GD_MAX_LINCOM];  /* input field code(s) */
   double complex cm[GD_MAX_LINCOM];         /* scale factor(s) */
   double         m[GD_MAX_LINCOM];          /* scale factor(s) */
@@ -447,15 +489,6 @@ inclusive.
 .B GD_MAX_LINCOM
 is defined in getdata.h as the maximum number of input fields permitted by a
 .BR LINCOM .
-.PP
-The
-.I comp_scal
-member is non-zero if any of the scale factors or offset terms have a non-zero
-imaginary part.  (That is, if comp_scal is zero, the elements of
-.IR cm \~and\~ cb
-equal the corresponding elements of
-.IR m \~and\~ b .)
-members.)
 .PP
 The
 .I in_fields
@@ -650,7 +683,6 @@ typedef struct {
   ...
 
   int            poly_ord;                  /* polynomial order */
-  int            comp_scal;                 /* complex scalar flag */
   const char    *in_fields[1];              /* input field code(s) */
   double complex ca[GD_MAX_POLY_ORD + 1];   /* co-efficients(s) */
   double         a[GD_MAX_POLY_ORD + 1];    /* co-efficients(s) */
@@ -669,14 +701,6 @@ inclusive.
 .B GD_MAX_POLY_ORD
 is defined in getdata.h as the maximum order of polynomial permitted by a
 .BR POLYNOM .
-.PP
-The
-.I comp_scal
-member is non-zero if any of the co-efficients have a non-zero imaginary part.
-(That is, if comp_scal is zero, the elements of
-.I ca
-equal the corresponding elements of
-.IR a .)
 .PP
 The
 .I in_fields
@@ -756,7 +780,6 @@ entry, will also provide:
 typedef struct {
   ...
 
-  int            comp_scal;            /* complex scalar flag */
   const char    *in_fields[1];         /* input field code */
   double complex cdividend;            /* scalar dividend */
   double         dividend;             /* scalar dividend */
@@ -766,14 +789,6 @@ typedef struct {
 .fam
 .fi
 .in
-.PP
-The
-.I comp_scal
-member is non-zero if any of the co-efficients have a non-zero imaginary part.
-(That is, if comp_scal is zero,
-.I cdividend
-equals
-.IR dividend .)
 .PP
 The
 .I in_fields
@@ -955,4 +970,5 @@ element is the imaginary part.
 .BR gd_fragmentname (3),
 .BR gd_linterp_tablename (3)
 .BR gd_mplex_lookback (3),
-.BR gd_raw_filename (3)
+.BR gd_raw_filename (3),
+.BR gd_validate (3)

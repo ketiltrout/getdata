@@ -445,7 +445,7 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const gd_entry_t *old_E,
       if (E->EN(lincom,n_fields) != 0)
         min = max = E->EN(lincom,n_fields);
 
-      E->comp_scal = 1;
+      E->flags |= GD_EN_COMPSCAL;
       tmask = (1 << max) - 1;
 
       mask = gdp_fetch_scalars(E, (HV*)sv, ((1 << max) - 1) * 9, pkg, func);
@@ -497,7 +497,7 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const gd_entry_t *old_E,
       mask = gdp_fetch_scalars(E, (HV*)sv, (1 << (max + 1)) - 1, pkg, func);
       tmask = (1 << max) - 1;
 
-      E->comp_scal = 1;
+      E->flags |= GD_EN_COMPSCAL;
       if ((mask & tmask) != tmask)
         E->EN(polynom,poly_ord) = gdp_fetch_cmp_list(E->EN(polynom,ca), (HV*)sv,
             partial, 'a', min, max, mask, pkg, func) - 1;
@@ -508,7 +508,7 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const gd_entry_t *old_E,
       gdp_fetch_in_fields(E->in_fields, sv, partial, 1, 1, pkg, func);
       mask = gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
 
-      E->comp_scal = 1;
+      E->flags |= GD_EN_COMPSCAL;
       if (!(mask & 1))
         GDP_EHASH_FETCH_CMP(partial, "dividend", EN(recip,cdividend));
       break;

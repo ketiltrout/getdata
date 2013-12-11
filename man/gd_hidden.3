@@ -1,6 +1,6 @@
 .\" gd_hidden.3.  The gd_hidden man page.
 .\"
-.\" Copyright (C) 2012 D. V. Wiebe
+.\" Copyright (C) 2012, 2013 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_hidden 3 "1 January 2012" "Version 0.8.0" "GETDATA"
+.TH gd_hidden 3 "10 December 2013" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_hidden \(em retrieve the fragment containing a dirfile field
 .SH SYNOPSIS
@@ -32,7 +32,9 @@ function queries a dirfile(5) database specified by
 .I dirfile
 and indicates whether the field or alias called
 .IR entry_name
-is hidden or not.
+is hidden or not.  This information is also available in the entry object
+proved by
+.BR gd_entry (3).
 
 A hidden entry does not appear in the field lists returned by the functions
 .BR gd_field_list (3),

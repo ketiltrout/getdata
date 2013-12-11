@@ -29,7 +29,7 @@ integer, parameter :: GD_FIELD_LEN=@GD_MAX_LINE_LENGTH@
 
 type gd_entry
   integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
-  integer :: fragment_index, comp_scal, poly_ord, array_len, windop, ithreshold
+  integer :: fragment_index, flags, poly_ord, array_len, windop, ithreshold
   integer :: count_val, period
   character (len=GD_FIELD_LEN), dimension(3) :: field
   character (len=GD_FIELD_LEN), dimension(6) :: scalar
@@ -801,6 +801,9 @@ function fgd_entry (dirfile, field_code, ent)
   ! get field type from f77 library
   call gdenty(fgd_entry, dirfile, TRIM(field_code), LEN_TRIM(field_code))
 
+  ! flags
+  call gdenfl(ent%flags, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+
   if (fgd_entry .EQ. GD_RAW_ENTRY) then
     ! raw
     call gdgerw(ent%spf, ent%data_type, ent%fragment_index, dirfile, &
@@ -809,8 +812,7 @@ function fgd_entry (dirfile, field_code, ent)
     TRIM(field_code), LEN_TRIM(field_code), 1)
   else if (fgd_entry .EQ. GD_LINCOM_ENTRY) then
     ! lincom
-    call gdcscl(ent%comp_scal, dirfile, TRIM(field_code), LEN_TRIM(field_code))
-    if (ent%comp_scal .NE. 0) then
+    if (IAND(GD_EN_COMPSCAL, ent%flags) .NE. 0) then
       call gdgecl(ent%n_fields, ent%field(1), len1, ent%cm(1), ent%cb(1), &
       ent%field(2), len2, ent%cm(2), ent%cb(2), ent%field(3), len3, ent%cm(3), &
       ent%cb(3), ent%fragment_index, dirfile, TRIM(field_code), &
@@ -866,8 +868,7 @@ function fgd_entry (dirfile, field_code, ent)
     TRIM(field_code), LEN_TRIM(field_code), 1)
   else if (fgd_entry .EQ. GD_POLYNOM_ENTRY) then
     ! polynom
-    call gdcscl(ent%comp_scal, dirfile, TRIM(field_code), LEN_TRIM(field_code))
-    if (ent%comp_scal .NE. 0) then
+    if (IAND(GD_EN_COMPSCAL, ent%flags) .NE. 0) then
       call gdgecp(ent%poly_ord, ent%field(1), len1, ent%ca(1), ent%ca(2), &
       ent%ca(3), ent%ca(4), ent%ca(5), ent%ca(6), ent%fragment_index, dirfile, &
       TRIM(field_code), LEN_TRIM(field_code))
@@ -883,8 +884,7 @@ function fgd_entry (dirfile, field_code, ent)
     end do
   else if (fgd_entry .EQ. GD_RECIP_ENTRY) then
     ! recip
-    call gdcscl(ent%comp_scal, dirfile, TRIM(field_code), LEN_TRIM(field_code))
-    if (ent%comp_scal .NE. 0) then
+    if (IAND(GD_EN_COMPSCAL, ent%flags) .NE. 0) then
       call gdgecr(ent%field(1), len1, ent%cdividend, ent%fragment_index, &
       dirfile, TRIM(field_code), LEN_TRIM(field_code))
     else
@@ -965,7 +965,7 @@ subroutine fgd_add (dirfile, field_code, ent)
     ent%data_type, ent%spf, TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), &
     ent%scalar_ind(1), ent%fragment_index)
   else if (ent%field_type .EQ. GD_LINCOM_ENTRY) then
-    if (ent%comp_scal .EQ. 0) then
+    if (IAND(GD_EN_COMPSCAL, ent%flags) .EQ. 0) then
       call gdaslc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%m(1), &
       TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), &
@@ -1021,7 +1021,7 @@ subroutine fgd_add (dirfile, field_code, ent)
     TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), &
     ent%fragment_index)
   else if (ent%field_type .EQ. GD_POLYNOM_ENTRY) then
-    if (ent%comp_scal .EQ. 0) then
+    if (IAND(GD_EN_COMPSCAL, ent%flags) .EQ. 0) then
       call gdaspn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       ent%poly_ord, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%a(1), &
       TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), &
@@ -1045,7 +1045,7 @@ subroutine fgd_add (dirfile, field_code, ent)
       LEN_TRIM(ent%scalar(6)), ent%scalar_ind(6), ent%fragment_index)
     end if
   else if (ent%field_type .EQ. GD_RECIP_ENTRY) then
-    if (ent%comp_scal .EQ. 0) then
+    if (IAND(GD_EN_COMPSCAL, ent%flags) .EQ. 0) then
       call gdasrc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%dividend, &
       TRIM(ent%scalar(1)), LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), &
@@ -1247,7 +1247,7 @@ subroutine fgd_madd (dirfile, parent, field_code, ent)
   character (len=1) :: nil = ""
 
   if (ent%field_type .EQ. GD_LINCOM_ENTRY) then
-    if (ent%comp_scal .NE. 0) then
+    if (IAND(GD_EN_COMPSCAL, ent%flags) .NE. 0) then
       call gdmdcl(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
       LEN_TRIM(field_code), ent%n_fields, TRIM(ent%field(1)), &
       LEN_TRIM(ent%field(1)), ent%cm(1), ent%cb(1), TRIM(ent%field(2)), &
@@ -1281,7 +1281,7 @@ subroutine fgd_madd (dirfile, parent, field_code, ent)
     LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
     TRIM(ent%field(2)), LEN_TRIM(ent%field(2)))
   else if (ent%field_type .EQ. GD_POLYNOM_ENTRY) then
-    if (ent%comp_scal .NE. 0) then
+    if (IAND(GD_EN_COMPSCAL, ent%flags) .NE. 0) then
       call gdmdcp(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
       LEN_TRIM(field_code), ent%poly_ord, TRIM(ent%field(1)), &
       LEN_TRIM(ent%field(1)), ent%ca(1), ent%ca(2), ent%ca(3), ent%ca(4), &
@@ -1293,7 +1293,7 @@ subroutine fgd_madd (dirfile, parent, field_code, ent)
       ent%a(5), ent%a(6))
     end if
   else if (ent%field_type .EQ. GD_RECIP_ENTRY) then
-    if (ent%comp_scal .NE. 0) then
+    if (IAND(GD_EN_COMPSCAL, ent%flags) .NE. 0) then
       call gdmdcr(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
       LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
       ent%cdividend)
@@ -1694,7 +1694,7 @@ subroutine fgd_alter_entry (dirfile, field_code, ent, remove_scalars, recode)
     call fgd__set_scalar_len(scalar_len, remove_scalars, lincom_mask(n), ent)
     call fgd__set_field_len(field_len, n, ent)
 
-    if (ent%comp_scal .NE. 0) then
+    if (IAND(GD_EN_COMPSCAL, ent%flags) .NE. 0) then
       call gdlscl(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       ent%n_fields, TRIM(ent%field(1)), field_len(1), &
       ent%cm(1), TRIM(ent%scalar(1)), scalar_len(1), ent%scalar_ind(1), &
@@ -1763,7 +1763,7 @@ subroutine fgd_alter_entry (dirfile, field_code, ent, remove_scalars, recode)
     call fgd__set_scalar_len(scalar_len, remove_scalars, polynom_mask(n), ent)
     call fgd__set_field_len(field_len, 1, ent)
 
-    if (ent%comp_scal .NE. 0) then
+    if (IAND(GD_EN_COMPSCAL, ent%flags) .NE. 0) then
       call gdlscp(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       ent%poly_ord, TRIM(ent%field(1)), field_len(1), &
       ent%ca(1), TRIM(ent%scalar(1)), scalar_len(1), ent%scalar_ind(1), &
@@ -1786,7 +1786,7 @@ subroutine fgd_alter_entry (dirfile, field_code, ent, remove_scalars, recode)
     call fgd__set_scalar_len(scalar_len, remove_scalars, 1, ent)
     call fgd__set_field_len(field_len, 1, ent)
 
-    if (ent%comp_scal .NE. 0) then
+    if (IAND(GD_EN_COMPSCAL, ent%flags) .NE. 0) then
       call gdlscr(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       TRIM(ent%field(1)), field_len(1), ent%cdividend, TRIM(ent%scalar(1)), &
       scalar_len(1), ent%scalar_ind(1))

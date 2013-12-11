@@ -39,7 +39,7 @@ int main(void)
     0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x32
   };
   DIRFILE *D;
-  int fd, i, n, error, r = 0;
+  int fd, n, error, r = 0;
 
   rmdirfile();
   mkdir(filedir, 0777); 

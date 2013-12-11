@@ -48,9 +48,10 @@ int main(void)
     "good STRING " GOOD "\n"
     "bad0 STRING " BAD0 "\n"
     "bad1 STRING " BAD1 "\n";
-  int i, fd, error, r = 0;
+  int fd, error, r = 0;
   int le[3] = {0, 0, 0};
   char s[100];
+  size_t i;
   DIRFILE *D;
 
   rmdirfile();

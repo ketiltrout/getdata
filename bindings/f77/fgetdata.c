@@ -2979,30 +2979,27 @@ void F77_FUNC(gdntyp, GDNTYP) (int32_t *type, const int32_t *dirfile,
   dreturn("%i", *type);
 }
 
-/* returns the value of the comp_scal member */
-void F77_FUNC(gdcscl, GDCSCL) (int32_t *comp_scal, const int32_t *dirfile,
+/* returns the entry flags */
+void F77_FUNC(gdenfl, GDENFL) (int32_t *flags, const int32_t *dirfile,
     const char *field_code, const int32_t *field_code_l)
 {
   char *fc;
   gd_entry_t E;
   DIRFILE *D;
 
-  dtrace("%p, %i, %p, %i", comp_scal, *dirfile, field_code, *field_code_l);
+  dtrace("%p, %i, %p, %i", flags, *dirfile, field_code, *field_code_l);
 
   D = _GDF_GetDirfile(*dirfile);
 
-  *comp_scal = 0;
+  if (gd_entry(D, _GDF_CString(&fc, field_code, *field_code_l), &E) == 0) {
+    *flags = E.flags;
 
-  gd_entry(D, _GDF_CString(&fc, field_code, *field_code_l), &E);
-
-  if (!gd_error(D) && (E.field_type == GD_LINCOM_ENTRY ||
-        E.field_type == GD_POLYNOM_ENTRY || E.field_type == GD_RECIP_ENTRY))
-    *comp_scal = E.comp_scal;
-
-  gd_free_entry_strings(&E);
+    gd_free_entry_strings(&E);
+  } else
+    *flags = -1;
   free(fc);
 
-  dreturn("%i", *comp_scal);
+  dreturn("%i", *flags);
 }
 
 /* gd_validate wrapper */
@@ -4075,7 +4072,6 @@ void F77_FUNC(gdaslc, GDASLC) (const int32_t *dirfile, const char *field_code,
   E.fragment_index = *fragment_index;
   n = E.EN(lincom,n_fields) = *n_fields;
   _GDF_CString(&E.field, field_code, *field_code_l);
-  E.comp_scal = 0;
 
   _GDF_CString(E.in_fields + 0, in_field1, *in_field1_l);
   _GDF_CString(E.scalar + 0, m1_scalar, *m1_scalar_l);
@@ -4155,7 +4151,7 @@ void F77_FUNC(gdascl, GDASCL) (const int32_t *dirfile, const char *field_code,
   E.fragment_index = *fragment_index;
   n = E.EN(lincom,n_fields) = *n_fields;
   _GDF_CString(&E.field, field_code, *field_code_l);
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
 
   _GDF_CString(E.in_fields + 0, in_field1, *in_field1_l);
   _GDF_CString(E.scalar + 0, m1_scalar, *m1_scalar_l);
@@ -4231,7 +4227,6 @@ void F77_FUNC(gdaspn, GDASPN) (const int32_t *dirfile, const char *field_code,
   _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
   E.fragment_index = *fragment_index;
   n = E.EN(polynom,poly_ord) = *poly_ord;
-  E.comp_scal = 0;
 
   if (n > 5)
     n = 5;
@@ -4311,7 +4306,7 @@ void F77_FUNC(gdascp, GDASCP) (const int32_t *dirfile, const char *field_code,
   _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
   E.fragment_index = *fragment_index;
   n = E.EN(polynom,poly_ord) = *poly_ord;
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
 
   if (n > 5)
     n = 5;
@@ -4585,7 +4580,6 @@ void F77_FUNC(gdlspn, GDLSPN) (const int32_t *dirfile, const char *field_code,
   E.field_type = GD_POLYNOM_ENTRY;
   _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
   n = E.EN(polynom,poly_ord) = *poly_ord;
-  E.comp_scal = 0;
 
   if (n > 5)
     n = 5;
@@ -4664,7 +4658,7 @@ void F77_FUNC(gdlscp, GDLSCP) (const int32_t *dirfile, const char *field_code,
   E.field_type = GD_POLYNOM_ENTRY;
   _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
   n = E.EN(polynom,poly_ord) = *poly_ord;
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
 
   if (n > 5)
     n = 5;
@@ -4936,7 +4930,6 @@ void F77_FUNC(gdlslc, GDLSLC) (const int32_t *dirfile, const char *field_code,
   memset(&E, 0, sizeof(E));
   E.field_type = GD_LINCOM_ENTRY;
   n = E.EN(lincom,n_fields) = *n_fields;
-  E.comp_scal = 0;
 
   _GDF_CString(E.in_fields + 0, in_field1, *in_field1_l);
   _GDF_CString(E.scalar + 0, m1_scalar, *m1_scalar_l);
@@ -5015,7 +5008,7 @@ void F77_FUNC(gdlscl, GDLSCL) (const int32_t *dirfile, const char *field_code,
   memset(&E, 0, sizeof(E));
   E.field_type = GD_LINCOM_ENTRY;
   n = E.EN(lincom,n_fields) = *n_fields;
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
 
   _GDF_CString(E.in_fields + 0, in_field1, *in_field1_l);
   _GDF_CString(E.scalar + 0, m1_scalar, *m1_scalar_l);
@@ -5106,7 +5099,7 @@ void F77_FUNC(gdlscr, GDLSCR) (const int32_t *dirfile, const char *field_code,
 
   memset(&E, 0, sizeof(E));
   E.field_type = GD_RECIP_ENTRY;
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
   _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
   gd_li2cs_(E.EN(recip,cdividend), dividend[0], dividend[1]);
   _GDF_CString(E.scalar + 0, dividend_scalar, *dividend_scalar_l);

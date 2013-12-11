@@ -1320,7 +1320,7 @@ static void gdphp_to_entry(gd_entry_t *E, zval *z, const gd_entry_t *old_E,
       mask = gdphp_entry_scalars(E->scalar, E->scalar_ind, a, lincom_mask[max],
           ctx);
 
-      E->comp_scal = 1;
+      E->flags |= GD_EN_COMPSCAL;
       tmask = (1 << max) - 1;
 
       if ((mask & tmask) != tmask)
@@ -1382,7 +1382,7 @@ static void gdphp_to_entry(gd_entry_t *E, zval *z, const gd_entry_t *old_E,
       mask = gdphp_entry_scalars(E->scalar, E->scalar_ind, a, (1 << max) - 1,
           ctx);
 
-      E->comp_scal = 1;
+      E->flags |= GD_EN_COMPSCAL;
       tmask = (1 << max) - 1;
       if ((mask & tmask) != tmask)
         E->EN(polynom,poly_ord) =
@@ -1400,7 +1400,7 @@ static void gdphp_to_entry(gd_entry_t *E, zval *z, const gd_entry_t *old_E,
     case GD_RECIP_ENTRY:
       gdphp_entry_infields((char**)E->in_fields, a, 1, 1, partial, ctx);
       mask = gdphp_entry_scalars(E->scalar, E->scalar_ind, a, 1, ctx);
-      E->comp_scal = 1;
+      E->flags |= GD_EN_COMPSCAL;
       if (!(mask & 1))
         gdphp_entry_complex((double*)gd_csp_(E->EN(recip,cdividend)), a,
             "dividend", sizeof("dividend"), partial, ctx);

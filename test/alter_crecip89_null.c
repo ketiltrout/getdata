@@ -70,7 +70,7 @@ int main(void)
   CHECKI(error,0);
   CHECKI(n,0);
   CHECKI(ret,0);
-  CHECKI(E.comp_scal, 0);
+  CHECKX(E.flags, GD_EN_CALC);
   CHECKF(E.EN(recip,dividend), 230.);
   CHECKS(E.in_fields[0], "phase");
   gd_free_entry_strings(&E);

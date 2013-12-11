@@ -1,3 +1,24 @@
+2013-12-10   D. V. Wiebe <getdata@ketiltrout.net> svn:868
+	* src/getdata.h.in src/internal.h: Merge gd_entry_t members 'comp_scal' and
+	'hidden', plus private member 'calculated' into (public) member 'flags', and
+	add GD_EN_CALC, GD_EN_COMPSCAL and GD_EN_HIDDEN flags.
+	* bindings/make_parameters.c: Add entry flags.
+	* bindings/cxx/getdata/entry.h (Entry::Flags) bindings/f77/fgetdata.c
+	(GDENFL): Added.
+	* bindings/f77/fgetdata.c (GDCSCL): Deleted.
+	* bindings/f77/getdata.f90.in: Replaced comp_scal with flags in gd_entry
+	type.
+	* bindings/idl/getdata.c: Replaced COMP_SCAL with FLAGS member in gd_entry
+	struct.
+
+	* src/mod.c (_GD_Change): Allow hiddenness modification.
+	* test/alter_entry_hidden.c: Update test: hiddenness should change.
+
+	* test/cvlist_meta0.c: Check error.
+
+	* bindings/cxx/ getdata/entry.h (Entry::CompScal): Allow non-zero for
+		RECIP, too.
+
 2013-12-06   D. V. Wiebe <getdata@ketiltrout.net> svn:867
 	* test/add_dot.c test/alter_clincom.c test/alter_const_r2c.c test/sie_sync.c
 	test/alter_const_r2r.c test/alter_cpolynom_null.c test/alter_crecip89_null.c

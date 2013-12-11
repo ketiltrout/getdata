@@ -58,6 +58,20 @@ field, use
 To change the name of a field, use
 .BR gd_rename (3).
 
+The only flags in the
+.IR entry -> flags
+member which are honoured are
+.BR GD_EN_HIDDEN ,
+which should be set or cleared to set the hiddenness of the entry (see
+.BR gd_hidden (3)),
+and
+.BR GD_EN_COMPSCAL ,
+which indicates whether scalar parameters are initialised from the complex
+valued or purely real member, which both are present
+.RB ( LINCOM ,
+.BR POLYNOM ,
+.BR RECIP ).
+
 If
 .I field_code
 specifies a
@@ -270,6 +284,7 @@ a call to
 .BR gd_delete (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
+.BR gd_hidden (3),
 .BR gd_malter_spec (3),
 .BR gd_metaflush (3),
 .BR gd_move (3),

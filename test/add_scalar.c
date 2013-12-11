@@ -33,7 +33,6 @@ int main(void)
   E.field_type = GD_LINCOM_ENTRY;
   E.fragment_index = 0;
   E.EN(lincom,n_fields) = 1;
-  E.comp_scal = 0;
   E.in_fields[0] = "INDEX";
   E.EN(lincom,m)[0] = 1.;
   E.scalar[0] = NULL;

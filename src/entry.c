@@ -209,7 +209,7 @@ static int _GD_GetScalar(DIRFILE *restrict D, gd_entry_t *restrict E, int i,
 /* resolve non-literal scalars */
 int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
 {
-  int i;
+  int i, cs = 0;
 
   dtrace("%p, %p, %i", D, E, err);
 
@@ -218,33 +218,31 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
       _GD_GetScalar(D, E, 0, GD_UINT_TYPE, &E->EN(raw,spf), err);
       break;
     case GD_POLYNOM_ENTRY:
-      E->comp_scal = 0;
       for (i = 0; i <= E->EN(polynom,poly_ord); ++i) {
         _GD_GetScalar(D, E, i, GD_COMPLEX128, &E->EN(polynom,ca)[i], err);
         E->EN(polynom,a)[i] = creal(E->EN(polynom,ca)[i]);
 
-        if (cimag(E->EN(polynom,ca)[i]))
-          E->comp_scal = 1;
+        if (!cs && cimag(E->EN(polynom,ca)[i]))
+          cs = 1;
 
         if (D->error)
           break;
       }
       break;
     case GD_LINCOM_ENTRY:
-      E->comp_scal = 0;
       for (i = 0; i < E->EN(lincom,n_fields); ++i) {
         _GD_GetScalar(D, E, i, GD_COMPLEX128, &E->EN(lincom,cm)[i], err);
         E->EN(lincom,m)[i] = creal(E->EN(lincom,cm)[i]);
 
-        if (cimag(E->EN(lincom,cm)[i]))
-          E->comp_scal = 1;
+        if (!cs && cimag(E->EN(lincom,cm)[i]))
+          cs = 1;
 
         _GD_GetScalar(D, E, i + GD_MAX_LINCOM, GD_COMPLEX128,
             &E->EN(lincom,cb)[i], err);
         E->EN(lincom,b)[i] = creal(E->EN(lincom,cb)[i]);
 
-        if (cimag(E->EN(lincom,cb)[i]))
-          E->comp_scal = 1;
+        if (!cs && cimag(E->EN(lincom,cb)[i]))
+          cs = 1;
 
         if (D->error)
           break;
@@ -253,7 +251,8 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
     case GD_RECIP_ENTRY:
       _GD_GetScalar(D, E, 0, GD_COMPLEX128, &E->EN(recip,cdividend), err);
       E->EN(recip,dividend) = creal(E->EN(recip,cdividend));
-      E->comp_scal = (cimag(E->EN(recip,cdividend)) == 0) ? 0 : 1;
+      if (cimag(E->EN(recip,cdividend)))
+        cs = 1;
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
@@ -295,10 +294,15 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
   }
 
   if (!D->error)
-    E->e->calculated = 1;
+    E->flags |= GD_EN_CALC;
 
-  dreturn("%i", E->e->calculated);
-  return E->e->calculated;
+  if (cs)
+    E->flags |= GD_EN_COMPSCAL;
+  else
+    E->flags &= ~GD_EN_COMPSCAL;
+
+  dreturn("%i", (E->flags & GD_EN_CALC) ? 1 : 0);
+  return (E->flags & GD_EN_CALC) ? 1 : 0;
 }
 
 char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
@@ -390,7 +394,7 @@ int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
     free(field_code);
 
   /* Calculate the entry, if necessary */
-  if (!E->e->calculated)
+  if (!(E->flags & GD_EN_CALC))
     _GD_CalculateEntry(D, E, 0);
 
   /* now copy to the user supplied buffer */
@@ -677,8 +681,8 @@ int gd_hide(DIRFILE *D, const char *field_code) gd_nothrow
     return -1;
   }
 
-  if (!E->hidden) {
-    E->hidden = 1;
+  if (!(E->flags & GD_EN_HIDDEN)) {
+    E->flags |= GD_EN_HIDDEN;
     D->fragment[E->fragment_index].modified = 1;
   }
 
@@ -708,8 +712,8 @@ int gd_hidden(DIRFILE *D, const char *field_code) gd_nothrow
     return -1;
   }
 
-  dreturn("%i", E->hidden);
-  return E->hidden;
+  dreturn("%i", (E->flags & GD_EN_HIDDEN) ? 1 : 0);
+  return (E->flags & GD_EN_HIDDEN) ? 1 : 0;
 }
 
 int gd_unhide(DIRFILE *D, const char *field_code) gd_nothrow
@@ -745,8 +749,8 @@ int gd_unhide(DIRFILE *D, const char *field_code) gd_nothrow
     return -1;
   }
 
-  if (E->hidden) {
-    E->hidden = 0;
+  if (E->flags & GD_EN_HIDDEN) {
+    E->flags &= ~GD_EN_HIDDEN;
     D->fragment[E->fragment_index].modified = 1;
   }
 
@@ -782,7 +786,7 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
     free(field_code);
 
   /* calculate scalars */
-  if (!E->e->calculated)
+  if (!(E->flags & GD_EN_CALC))
     _GD_CalculateEntry(D, E, 1);
 
   /* check input fields */

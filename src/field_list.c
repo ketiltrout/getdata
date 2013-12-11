@@ -107,7 +107,7 @@ int _GD_ListEntry(const gd_entry_t *E, int meta, int hidden, int noalias,
       special, type);
 
   /* check hidden */
-  if (!hidden && E->hidden) {
+  if (!hidden && (E->flags & GD_EN_HIDDEN)) {
     dreturn("%i (hidden)", 0);
     return 0;
   }

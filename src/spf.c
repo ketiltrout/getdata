@@ -38,7 +38,7 @@ unsigned int _GD_GetSPF(DIRFILE *D, gd_entry_t *E)
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      if (!E->e->calculated)
+      if (!(E->flags & GD_EN_CALC))
         _GD_CalculateEntry(D, E, 1);
       if (!D->error)
         spf = E->EN(raw,spf);

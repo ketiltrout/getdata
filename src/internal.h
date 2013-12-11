@@ -851,8 +851,6 @@ struct gd_private_entry_ {
   gd_entry_t* entry[GD_MAX_LINCOM];
   int repr[GD_MAX_LINCOM];
 
-  int calculated;
-
   int n_meta;
   union {
     gd_entry_t** meta_entry;

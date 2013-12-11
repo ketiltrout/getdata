@@ -61,7 +61,7 @@ int main(void)
     CHECKF(e.EN(lincom,m)[1], m[1]);
     CHECKF(e.EN(lincom,b)[0], b[0]);
     CHECKF(e.EN(lincom,b)[1], b[1]);
-    CHECKI(e.comp_scal, 0);
+    CHECKX(e.flags, GD_EN_CALC);
     gd_free_entry_strings(&e);
   }
 

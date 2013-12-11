@@ -31,7 +31,7 @@ int main(void)
     "count RAW UINT8 8\n"
     "data RAW UINT8 8\n";
   unsigned char data_data[256];
-  int fd, n, i, error, r = 0;
+  int fd, n, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();

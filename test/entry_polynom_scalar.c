@@ -65,7 +65,7 @@ int main(void)
   CHECKI(n, 0);
   CHECKS(E.field, "data");
   CHECKX(E.field_type, GD_POLYNOM_ENTRY);
-  CHECKI(E.comp_scal, 0);
+  CHECKX(E.flags, GD_EN_CALC);
   CHECKI(E.EN(polynom,poly_ord), 4);
   CHECKS(E.in_fields[0], "in");
   CHECKS(E.scalar[0], "a0");

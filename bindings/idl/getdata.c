@@ -446,6 +446,9 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
             "IN_FIELDS", IDL_MSG_LONGJMP, NULL)), E->in_fields[0]);
   }
 
+  *(IDL_UINT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+        "FLAGS", IDL_MSG_LONGJMP, NULL)) = E->flags;
+
   switch (E->field_type)
   {
     case GD_RAW_ENTRY:
@@ -461,8 +464,6 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
     case GD_LINCOM_ENTRY:
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
             "N_FIELDS", IDL_MSG_LONGJMP, NULL)) = E->n_fields;
-      *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
-            "COMP_SCAL", IDL_MSG_LONGJMP, NULL)) = E->comp_scal;
       for (i = 0; i < E->n_fields; ++i) {
         IDL_StrStore((IDL_STRING*)(data +
               IDL_StructTagInfoByName(gdidl_entry_def, "IN_FIELDS",
@@ -519,8 +520,6 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
               "IN_FIELDS", IDL_MSG_LONGJMP, NULL)) + 1, E->in_fields[1]);
       break;
     case GD_RECIP_ENTRY:
-      *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
-            "COMP_SCAL", IDL_MSG_LONGJMP, NULL)) = E->comp_scal;
       IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
               "SCALAR", IDL_MSG_LONGJMP, NULL)), E->scalar[0]);
       ((int16_t*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
@@ -541,8 +540,6 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
           "SCALAR_IND", IDL_MSG_LONGJMP, NULL)))[0] = (int16_t)E->scalar_ind[0];
       break;
     case GD_POLYNOM_ENTRY:
-      *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
-            "COMP_SCAL", IDL_MSG_LONGJMP, NULL)) = E->comp_scal;
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
             "POLY_ORD", IDL_MSG_LONGJMP, NULL)) = E->poly_ord;
 
@@ -960,7 +957,7 @@ static void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int no_fragment,
       if (E->n_fields > 0)
         min = max = E->n_fields;
 
-      E->comp_scal = 1;
+      E->flags |= GD_EN_COMPSCAL;
 
       tmask = (1 << max) - 1;
       mask = gdidl_get_entry_scalars(E, 9 * tmask, v);
@@ -1010,7 +1007,7 @@ static void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int no_fragment,
       break;
     case GD_RECIP_ENTRY:
       gdidl_get_in_fields((char**)E->in_fields, v, 1, 1, miss_ok);
-      E->comp_scal = 1;
+      E->flags |= GD_EN_COMPSCAL;
 
       mask = gdidl_get_entry_scalars(E, 0x1, v);
 
@@ -1043,7 +1040,7 @@ static void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int no_fragment,
       tmask = (1 << max) - 1;
       mask = gdidl_get_entry_scalars(E, tmask, v);
 
-      E->comp_scal = 1;
+      E->flags |= GD_EN_COMPSCAL;
 
       if ((mask & tmask) != tmask)
         E->poly_ord = gdidl_get_entry_cmparr(E->ca, v, 'A', min, max, mask,
@@ -5947,6 +5944,7 @@ static IDL_MEMINT polynom_dims[] = { 1, GD_MAX_POLYORD + 1 };
 static IDL_STRUCT_TAG_DEF gdidl_entry[] = {
   { "FIELD",      0, (void*)IDL_TYP_STRING },
   { "FIELD_TYPE", 0, (void*)IDL_TYP_INT },
+  { "FLAGS",      0, (void*)IDL_TYP_UINT },
   { "FRAGMENT",   0, (void*)IDL_TYP_INT },
 
   { "IN_FIELDS",  lincom_dims, (void*)IDL_TYP_STRING },
@@ -5956,7 +5954,6 @@ static IDL_STRUCT_TAG_DEF gdidl_entry[] = {
   { "B",          lincom_dims, (void*)IDL_TYP_DOUBLE }, /* LINCOM */
   { "CB",         lincom_dims, (void*)IDL_TYP_DCOMPLEX }, /* LINCOM */
   { "BITNUM",     0, (void*)IDL_TYP_INT }, /* (S)BIT */
-  { "COMP_SCAL",  0, (void*)IDL_TYP_INT }, /* LINCOM / POLYNOM */
   { "COUNT_VAL",  0, (void*)IDL_TYP_INT }, /* MPLEX */
   { "DATA_TYPE",  0, (void*)IDL_TYP_INT }, /* RAW / CONST / CARRAY */
   { "DIVIDEND",   0, (void*)IDL_TYP_DOUBLE }, /* RECIP */

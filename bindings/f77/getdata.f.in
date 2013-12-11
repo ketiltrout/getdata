@@ -153,8 +153,6 @@ C     Corresponding to gd_constants(3) (sort of)
       EXTERNAL GDCONS
 C     Corresponding to gd_copen(3)
       EXTERNAL GDCOPN
-C     Check whether an entry contains complex scalars
-      EXTERNAL GDCSCL
 C     Correpsonding to gd_delete_alias(3)
       EXTERNAL GDDELA
 C     Correpsonding to gd_delete(3)
@@ -165,6 +163,8 @@ C     Corresponding to gd_desync(3)
       EXTERNAL GDDSYN
 C     Corresponding to gd_error_count(3)
       EXTERNAL GDECNT
+C     Returns entry flags
+      EXTERNAL GDENFL
 C     Corresponding to gd_entry_list(3) (sort of)
       EXTERNAL GDENTN
 C     Returns the maximum entry name length

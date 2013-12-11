@@ -67,7 +67,7 @@ int main(void)
   error = gd_error(D);
   gd_entry(D, "lincom", &E);
 
-  CHECKI(E.comp_scal, 1);
+  CHECKX(E.flags, GD_EN_COMPSCAL | GD_EN_CALC);
   CHECKI(E.n_fields, 2);
 #ifdef GD_NO_C99_API
   CHECKC(E.EN(lincom,cm)[0], m);

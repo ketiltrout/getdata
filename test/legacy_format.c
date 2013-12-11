@@ -53,6 +53,7 @@ int main(void)
     "/FRAMEOFFSET 12\n";
   int fd, i, error = 0, r = 0;
   double three = 3.;
+  int *three_ptr = (void*)(&three);
   struct FormatType *f;
 
   rmdirfile();
@@ -146,7 +147,7 @@ int main(void)
   CHECKS(f->mplexEntries[1].data_field, "raw");
   CHECKS(f->mplexEntries[1].cnt_field, "phase");
   CHECKI(f->mplexEntries[1].i, GD_WINDOP_LE);
-  CHECKI(f->mplexEntries[1].max_i, *(int*)&three);
+  CHECKI(f->mplexEntries[1].max_i, *three_ptr);
 
   unlink(format);
   rmdir(filedir);

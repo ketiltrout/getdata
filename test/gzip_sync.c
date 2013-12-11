@@ -44,7 +44,7 @@ int main(void)
   char command[4096];
   uint8_t d;
   struct stat buf;
-  int fd, i, n, error, stat_data, unlink_data, r = 0;
+  int fd, i, n, error, stat_data, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);

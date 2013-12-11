@@ -72,7 +72,7 @@ int main(void)
   CHECKS(E.field, "polynom");
   CHECKI(E.field_type, GD_POLYNOM_ENTRY);
   CHECKI(E.EN(polynom,poly_ord), 2);
-  CHECKI(E.comp_scal, 0);
+  CHECKX(E.flags, GD_EN_CALC);
   CHECKS(E.in_fields[0], "data"); 
 
   for (i = 0; i < 3; ++i) 

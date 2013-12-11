@@ -243,10 +243,11 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     return NULL;
   }
   memset(E->e, 0, sizeof(struct gd_private_entry_));
-  E->e->calculated = 0;
-  E->field_type = entry->field_type;
 
+  E->field_type = entry->field_type;
   E->field = temp_buffer;
+  E->flags = entry->flags & GD_EN_HIDDEN; /* it's possible to hide a newly
+                                             added field this way */
 
   /* Check */
   if (_GD_ValidateField(E->field + offset, D->standards, 1, 0, &is_dot)) {
@@ -259,10 +260,6 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   /* Set meta indices */
   if (P != NULL)
     E->e->n_meta = -1;
-
-  /* Hidden */
-  if (entry->hidden)
-    E->hidden = 1;
 
   /* Validate entry and add auxiliary data */
   switch(entry->field_type)
@@ -326,8 +323,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
 
       _GD_CopyScalars(D, E, entry, 9 * ((1 << E->EN(lincom,n_fields)) - 1));
 
-      if (entry->comp_scal) {
-        int cs = 0;
+      if (entry->flags & GD_EN_COMPSCAL) {
+        unsigned cs = 0;
         memcpy(E->EN(lincom,cm), entry->EN(lincom,cm), sizeof(double) * 2 *
             E->EN(lincom,n_fields));
         memcpy(E->EN(lincom,cb), entry->EN(lincom,cb), sizeof(double) * 2 *
@@ -336,9 +333,9 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
           E->EN(lincom,m)[i] = creal(E->EN(lincom,cm)[i]);
           E->EN(lincom,b)[i] = creal(E->EN(lincom,cb)[i]);
           if (cimag(E->EN(lincom,cm)[i]) || cimag(E->EN(lincom,cb)[i]))
-            cs = 1;
+            cs = GD_EN_COMPSCAL;
         }
-        E->comp_scal = cs;
+        E->flags |= cs;
       } else {
         memcpy(E->EN(lincom,m), entry->EN(lincom,m), sizeof(double) *
             E->EN(lincom,n_fields));
@@ -348,7 +345,6 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
           gd_rs2cs_(E->EN(lincom,cm)[i], E->EN(lincom,m)[i]);
           gd_rs2cs_(E->EN(lincom,cb)[i], E->EN(lincom,b)[i]);
         }
-        E->comp_scal = 0;
       }
 
       for (i = 0; i < E->EN(lincom,n_fields); ++i)
@@ -389,14 +385,14 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
 
       _GD_CopyScalars(D, E, entry, 0x1);
 
-      if (entry->comp_scal) {
+      if (entry->flags & GD_EN_COMPSCAL) {
         gd_cs2cs_(E->EN(recip,cdividend), entry->EN(recip,cdividend));
         E->EN(recip,dividend) = creal(E->EN(recip,cdividend));
-        E->comp_scal = (cimag(E->EN(recip,cdividend)) == 0) ? 0 : 1;
+        if (cimag(E->EN(recip,cdividend)) != 0)
+          E->flags |= GD_EN_COMPSCAL;
       } else {
         E->EN(recip,dividend) = entry->EN(recip,dividend);
         gd_rs2cs_(E->EN(recip,cdividend), E->EN(recip,dividend));
-        E->comp_scal = 0;
       }
       break;
     case GD_BIT_ENTRY:
@@ -535,22 +531,21 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
 
       _GD_CopyScalars(D, E, entry, (1 << (E->EN(polynom,poly_ord) + 1)) - 1);
 
-      if (entry->comp_scal) {
-        int cs = 0;
+      if (entry->flags & GD_EN_COMPSCAL) {
+        unsigned cs = 0;
         memcpy(E->EN(polynom,ca), entry->EN(polynom,ca), sizeof(double) * 2 *
             (E->EN(polynom,poly_ord) + 1));
         for (i = 0; i <= E->EN(polynom,poly_ord); ++i) {
           E->EN(polynom,a)[i] = creal(E->EN(polynom,ca)[i]);
           if (cimag(E->EN(polynom,ca)[i]))
-            cs = 1;
+            cs = GD_EN_COMPSCAL;
         }
-        E->comp_scal = cs;
+        E->flags |= cs;
       } else {
         memcpy(E->EN(polynom,a), entry->EN(polynom,a), sizeof(double) *
             (E->EN(polynom,poly_ord) + 1));
         for (i = 0; i <= E->EN(polynom,poly_ord); ++i)
           gd_rs2cs_(E->EN(polynom,ca)[i], E->EN(polynom,a)[i]);
-        E->comp_scal = 0;
       }
 
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
@@ -860,7 +855,6 @@ int gd_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
   L.field = (char *)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.EN(lincom,n_fields) = n_fields;
-  L.comp_scal = 0;
   L.fragment_index = fragment_index;
 
   for (i = 0; i < n_fields; ++i) {
@@ -901,7 +895,7 @@ int gd_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
   L.field = (char *)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.EN(lincom,n_fields) = n_fields;
-  L.comp_scal = 1;
+  L.flags = GD_EN_COMPSCAL;
   L.fragment_index = fragment_index;
 
   for (i = 0; i < n_fields; ++i) {
@@ -1077,7 +1071,6 @@ int gd_add_recip(DIRFILE* D, const char* field_code, const char* in_field,
   E.field = (char *)field_code;
   E.field_type = GD_RECIP_ENTRY;
   E.EN(recip,dividend) = dividend;
-  E.comp_scal = 0;
   E.in_fields[0] = (char *)in_field;
   E.fragment_index = fragment_index;
   error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
@@ -1106,7 +1099,7 @@ int gd_add_crecip(DIRFILE* D, const char* field_code, const char* in_field,
   E.field = (char *)field_code;
   E.field_type = GD_RECIP_ENTRY;
   E.EN(recip,cdividend) = cdividend;
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
   E.in_fields[0] = (char *)in_field;
   E.fragment_index = fragment_index;
   error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
@@ -1135,7 +1128,7 @@ int gd_add_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
   E.field = (char *)field_code;
   E.field_type = GD_RECIP_ENTRY;
   gd_ra2cs_(E.EN(recip,cdividend), cdividend);
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
   E.in_fields[0] = (char *)in_field;
   E.fragment_index = fragment_index;
   error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
@@ -1171,7 +1164,6 @@ int gd_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   E.field_type = GD_POLYNOM_ENTRY;
   E.EN(polynom,poly_ord) = poly_ord;
   E.fragment_index = fragment_index;
-  E.comp_scal = 0;
   E.in_fields[0] = (char *)in_field;
 
   for (i = 0; i <= poly_ord; ++i)
@@ -1209,7 +1201,7 @@ int gd_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
   E.field_type = GD_POLYNOM_ENTRY;
   E.EN(polynom,poly_ord) = poly_ord;
   E.fragment_index = fragment_index;
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
   E.in_fields[0] = (char *)in_field;
 
   for (i = 0; i <= poly_ord; ++i)
@@ -1450,7 +1442,6 @@ int gd_madd_lincom(DIRFILE* D, const char* parent, const char* field_code,
   L.field = (char *)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.EN(lincom,n_fields) = n_fields;
-  L.comp_scal = 0;
   L.fragment_index = 0;
 
   for (i = 0; i < n_fields; ++i) {
@@ -1493,7 +1484,7 @@ int gd_madd_clincom(DIRFILE* D, const char* parent, const char* field_code,
   L.field = (char *)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.EN(lincom,n_fields) = n_fields;
-  L.comp_scal = 1;
+  L.flags = GD_EN_COMPSCAL;
   L.fragment_index = 0;
 
   for (i = 0; i < n_fields; ++i) {
@@ -1681,7 +1672,6 @@ int gd_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
   E.field_type = GD_POLYNOM_ENTRY;
   E.EN(polynom,poly_ord) = poly_ord;
   E.fragment_index = 0;
-  E.comp_scal = 0;
   E.in_fields[0] = (char *)in_field;
 
   for (i = 0; i <= poly_ord; ++i) {
@@ -1722,7 +1712,7 @@ int gd_madd_cpolynom(DIRFILE* D, const char* parent, const char* field_code,
   E.field_type = GD_POLYNOM_ENTRY;
   E.EN(polynom,poly_ord) = poly_ord;
   E.fragment_index = 0;
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
   E.in_fields[0] = (char *)in_field;
 
   for (i = 0; i <= poly_ord; ++i) {
@@ -1783,7 +1773,6 @@ int gd_madd_recip(DIRFILE* D, const char *parent, const char* field_code,
   E.field = (char *)field_code;
   E.field_type = GD_RECIP_ENTRY;
   E.EN(recip,dividend) = dividend;
-  E.comp_scal = 0;
   E.in_fields[0] = (char *)in_field;
   error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
 
@@ -1811,7 +1800,7 @@ int gd_madd_crecip(DIRFILE* D, const char *parent, const char* field_code, const
   E.field = (char *)field_code;
   E.field_type = GD_RECIP_ENTRY;
   E.EN(recip,cdividend) = cdividend;
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
   E.in_fields[0] = (char *)in_field;
   error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
 
@@ -1839,7 +1828,7 @@ int gd_madd_crecip89(DIRFILE* D, const char *parent, const char* field_code,
   E.field = (char *)field_code;
   E.field_type = GD_RECIP_ENTRY;
   gd_ra2cs_(E.EN(recip,cdividend), cdividend);
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
   E.in_fields[0] = (char *)in_field;
   error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
 
@@ -2097,7 +2086,7 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
   E->fragment_index = fragment_index;
   E->in_fields[0] = _GD_Strdup(D, target);
   E->field_type = GD_ALIAS_ENTRY;
-  E->e->calculated = 1;
+  E->flags |= GD_EN_CALC;
 
   if (D->error) {
     _GD_FreeE(D, E, 1);

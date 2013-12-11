@@ -45,6 +45,7 @@
  *  12: window operations
  *  13: desynced flags (not in IDL)
  *  14: entry_list constants (not in IDL)
+ *  15: entry flags
  *  98: miscellaneous constants not in IDL
  *  99: miscellaneous constants
  */
@@ -232,6 +233,10 @@ static struct {
   CONSTANT(ENTRIES_HIDDEN,   "GDEN_H", 14),
   CONSTANT(ENTRIES_NOALIAS,  "GDEN_N", 14),
 
+  CONSTANT(EN_CALC,          "GDE_CA", 15),
+  CONSTANT(EN_HIDDEN,        "GDE_HI", 15),
+  CONSTANT(EN_COMPSCAL,      "GDE_CS", 15),
+
   CONSTANT(ALL_FRAGMENTS,    "GD_ALL", 99),
   CONSTANT(DEFAULT_LOOKBACK, "GDLB_D", 99),
   CONSTANT(DIRFILE_STANDARDS_VERSION, "GD_DSV", 99),
@@ -355,6 +360,13 @@ void Fortran(void)
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
       if (constant_list[j].type == 14)
+        parameter(constant_list[j].lname, constant_list[j].fname,
+            constant_list[j].value, i);
+
+    printf("\\\n%c Entry object flags\\\n", c);
+
+    for (j = 0; constant_list[j].lname != NULL; ++j)
+      if (constant_list[j].type == 15)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 

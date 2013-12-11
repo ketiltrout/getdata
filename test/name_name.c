@@ -50,8 +50,8 @@ int main(void)
   const char *field_list[NFIELDS] = {
     "INDEX", "cata", "early", "earlya", "eata", "late", "latea", "zata"
   };
-  char *s1, *s2, *s3, *s5;
-  const char *s4, *s6;
+  char *s1, *s2, *s5;
+  const char *s3, *s4, *s6;
   unsigned nf, i;
   DIRFILE *D;
   gd_entry_t E;

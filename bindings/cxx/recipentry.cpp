@@ -31,7 +31,7 @@ RecipEntry::RecipEntry(const char* field_code, const char* in_field1,
   E.scalar[0] = 0;
   E.u.recip.cdividend[0] = E.u.recip.dividend = dividend;
   E.u.recip.cdividend[1] = 0;
-  E.comp_scal = 0;
+  E.flags = 0;
   E.fragment_index = fragment_index;
 }
 
@@ -44,7 +44,7 @@ RecipEntry::RecipEntry(const char* field_code, const char* in_field1,
   E.scalar[0] = 0;
   E.u.recip.cdividend[0] = E.u.recip.dividend = dividend.real();
   E.u.recip.cdividend[1] = dividend.imag();
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
   E.fragment_index = fragment_index;
 }
 
@@ -97,7 +97,7 @@ int RecipEntry::SetDividend(std::complex<double> dividend)
 {
   E.u.recip.dividend = E.u.recip.cdividend[0] = dividend.real();
   E.u.recip.cdividend[1] = dividend.imag();
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, 0);

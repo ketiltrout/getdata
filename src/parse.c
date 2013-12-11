@@ -114,7 +114,7 @@ static gd_windop_t _GD_WindOp(const char *op)
  * numeric literal or error */
 static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
     void *restrict data, int type, int me, const char *restrict format_file,
-    int line, int *restrict index, int *restrict comp_scal, int standards,
+    int line, int *restrict index, unsigned *restrict flags, int standards,
     int pedantic)
 {
   char *ptr = NULL;
@@ -123,7 +123,7 @@ static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
   const char *semicolon;
 
   dtrace("%p, \"%s\", %p, 0x%X, \"%s\", %i, %p, %p, %i, %i", D, token, data,
-      type, format_file, line, index, comp_scal, standards, pedantic);
+      type, format_file, line, index, flags, standards, pedantic);
 
   /* check for a complex value -- look for the semicolon */
   for (semicolon = token; *semicolon; ++semicolon)
@@ -167,7 +167,7 @@ static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
       }
 
       if (i)
-        *comp_scal = 1;
+        *flags |= GD_EN_COMPSCAL;
     }
 
     if (type == GD_COMPLEX128) {
@@ -346,7 +346,7 @@ static gd_entry_t *_GD_ParseRaw(DIRFILE *restrict D,
           GD_UINT_TYPE, me, format_file, line, E->scalar_ind, NULL, standards,
           pedantic)) == NULL)
   {
-    E->e->calculated = 1;
+    E->flags |= GD_EN_CALC;
     if (E->EN(raw,spf) <= 0)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_SPF, format_file, line,
           in_cols[3]);
@@ -410,7 +410,7 @@ static gd_entry_t *_GD_ParseLincom(DIRFILE *restrict D,
     return NULL;
   }
 
-  E->e->calculated = 1;
+  E->flags |= GD_EN_CALC;
   E->EN(lincom,n_fields) = (int)(strtol(in_cols[2], &ptr, 10));
   if (*ptr != '\0') {
     E->EN(lincom,n_fields) = (n_cols - 2) / 3;
@@ -439,17 +439,16 @@ static gd_entry_t *_GD_ParseLincom(DIRFILE *restrict D,
       E->in_fields[i] = _GD_MungeFromFrag(D, NULL, me, in_cols[i * 3 + 3],
           &offset);
       E->scalar[i] = _GD_SetScalar(D, in_cols[i * 3 + 4], &E->EN(lincom,cm)[i],
-          GD_COMPLEX128, me, format_file, line, E->scalar_ind + i,
-          &E->comp_scal, standards, pedantic);
+          GD_COMPLEX128, me, format_file, line, E->scalar_ind + i, &E->flags,
+          standards, pedantic);
       E->EN(lincom,m)[i] = creal(E->EN(lincom,cm)[i]);
       E->scalar[i + GD_MAX_LINCOM] = _GD_SetScalar(D, in_cols[i * 3 + 5],
           &E->EN(lincom,cb)[i], GD_COMPLEX128, me, format_file, line,
-          E->scalar_ind + i + GD_MAX_LINCOM, &E->comp_scal, standards,
-          pedantic);
+          E->scalar_ind + i + GD_MAX_LINCOM, &E->flags, standards, pedantic);
       E->EN(lincom,b)[i] = creal(E->EN(lincom,cb)[i]);
 
       if (E->scalar[i] != NULL || E->scalar[i + GD_MAX_LINCOM] != NULL)
-        E->e->calculated = 0;
+        E->flags &= ~GD_EN_CALC;
     }
 
   if (D->error != GD_E_OK) {
@@ -499,7 +498,7 @@ static gd_entry_t *_GD_ParseLinterp(DIRFILE *restrict D,
   E->field_type = GD_LINTERP_ENTRY;
   E->in_fields[0] = NULL;
   E->e->entry[0] = NULL;
-  E->e->calculated = 1;
+  E->flags |= GD_EN_CALC;
   E->EN(linterp,table) = NULL;
 
   E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
@@ -565,7 +564,7 @@ static gd_entry_t *_GD_ParseMultiply(DIRFILE *restrict D,
   E->field_type = GD_MULTIPLY_ENTRY;
   E->in_fields[0] = E->in_fields[1] = NULL;
   E->e->entry[0] = E->e->entry[1] = NULL;
-  E->e->calculated = 1;
+  E->flags |= GD_EN_CALC;
 
   E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
@@ -628,7 +627,6 @@ static gd_entry_t *_GD_ParseRecip(DIRFILE *restrict D,
   E->field_type = GD_RECIP_ENTRY;
   E->in_fields[0] = NULL;
   E->e->entry[0] = NULL;
-  E->e->calculated = 0;
 
   E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
@@ -644,10 +642,9 @@ static gd_entry_t *_GD_ParseRecip(DIRFILE *restrict D,
   E->in_fields[0] = _GD_MungeFromFrag(D, NULL, me, in_cols[2], &offset);
 
   E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(recip,cdividend),
-      GD_COMPLEX128, me, format_file, line, E->scalar_ind, &E->comp_scal,
-      standards, pedantic);
+      GD_COMPLEX128, me, format_file, line, E->scalar_ind, &E->flags, standards,
+      pedantic);
   E->EN(recip,dividend) = creal(E->EN(recip,cdividend));
-  E->comp_scal = (cimag(E->EN(recip,cdividend)) == 0) ? 0 : 1;
 
   if (D->error != GD_E_OK) {
     _GD_FreeE(D, E, 1);
@@ -859,7 +856,6 @@ static gd_entry_t *_GD_ParseDivide(DIRFILE *restrict D,
   E->field_type = GD_DIVIDE_ENTRY;
   E->in_fields[0] = E->in_fields[1] = NULL;
   E->e->entry[0] = E->e->entry[1] = NULL;
-  E->e->calculated = 0;
 
   E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
@@ -924,7 +920,7 @@ static gd_entry_t *_GD_ParseBit(DIRFILE *restrict D, int is_signed,
   E->field_type = (is_signed) ? GD_SBIT_ENTRY : GD_BIT_ENTRY;
   E->in_fields[0] = NULL;
   E->e->entry[0] = NULL;
-  E->e->calculated = 1;
+  E->flags |= GD_EN_CALC;
 
   E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
@@ -949,14 +945,17 @@ static gd_entry_t *_GD_ParseBit(DIRFILE *restrict D, int is_signed,
     E->EN(bit,numbits) = 1;
 
   if (E->scalar[0] != NULL || E->scalar[1] != NULL)
-    E->e->calculated = 0;
+    E->flags &= ~GD_EN_CALC;
 
   if (E->scalar[1] == NULL && E->EN(bit,numbits) < 1)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NUMBITS, format_file, line, NULL);
   else if (E->scalar[0] == NULL && E->EN(bit,bitnum) < 0)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITNUM, format_file, line, NULL);
-  else if (E->e->calculated && E->EN(bit,bitnum) + E->EN(bit,numbits) - 1 > 63)
+  else if ((E->flags & GD_EN_CALC) &&
+      E->EN(bit,bitnum) + E->EN(bit,numbits) - 1 > 63)
+  {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITSIZE, format_file, line, NULL);
+  }
 
   if (D->error != GD_E_OK) {
     _GD_FreeE(D, E, 1);
@@ -1023,7 +1022,7 @@ static gd_entry_t *_GD_ParsePhase(DIRFILE *restrict D,
           GD_INT64, me, format_file, line, E->scalar_ind, NULL, standards,
           pedantic)) == NULL)
   {
-    E->e->calculated = 1;
+    E->flags |= GD_EN_CALC;
   }
 
   if (D->error != GD_E_OK) {
@@ -1088,18 +1087,18 @@ static gd_entry_t *_GD_ParsePolynom(DIRFILE *restrict D,
   if (E->EN(polynom,poly_ord) > GD_MAX_POLYORD)
     E->EN(polynom,poly_ord) = GD_MAX_POLYORD;
 
-  E->e->calculated = 1;
+  E->flags |= GD_EN_CALC;
 
   E->in_fields[0] = _GD_MungeFromFrag(D, NULL, me, in_cols[2], &offset);
 
   for (i = 0; i <= E->EN(polynom,poly_ord); i++) {
     E->scalar[i] = _GD_SetScalar(D, in_cols[i + 3], &E->EN(polynom,ca)[i],
-        GD_COMPLEX128, me, format_file, line, E->scalar_ind + i, &E->comp_scal,
+        GD_COMPLEX128, me, format_file, line, E->scalar_ind + i, &E->flags,
         standards, pedantic);
     E->EN(polynom,a)[i] = creal(E->EN(polynom,ca)[i]);
 
     if (E->scalar[i] != NULL)
-      E->e->calculated = 0;
+      E->flags &= ~GD_EN_CALC;
   }
 
   if (D->error != GD_E_OK) {
@@ -1153,6 +1152,7 @@ static gd_entry_t *_GD_ParseConst(DIRFILE *restrict D,
     int line, int me, int standards, int pedantic, int *restrict is_dot)
 {
   int offset;
+  unsigned dummy;
   char* ptr;
   gd_type_t type;
   gd_entry_t *E;
@@ -1183,7 +1183,7 @@ static gd_entry_t *_GD_ParseConst(DIRFILE *restrict D,
   memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_CONST_ENTRY;
-  E->e->calculated = 1;
+  E->flags |= GD_EN_CALC;
 
   E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
@@ -1218,7 +1218,7 @@ static gd_entry_t *_GD_ParseConst(DIRFILE *restrict D,
   }
 
   ptr = _GD_SetScalar(D, in_cols[3], E->e->u.scalar.d, type, me, format_file,
-      line, &offset, &offset, standards, pedantic);
+      line, &offset, &dummy, standards, pedantic);
   if (ptr) {
     free(ptr);
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
@@ -1241,8 +1241,8 @@ static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
     const char *restrict format_file, int line, int me, int standards,
     int pedantic, int *restrict is_dot, char **outstring, const char *tok_pos)
 {
-  int offset;
-  int c, first, n, new_z, s, z;
+  unsigned dummy;
+  int offset, c, first, n, new_z, s, z;
   gd_type_t t;
   char* ptr;
   void *data;
@@ -1275,7 +1275,7 @@ static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
   memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_CARRAY_ENTRY;
-  E->e->calculated = 1;
+  E->flags |= GD_EN_CALC;
 
   E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
@@ -1325,7 +1325,7 @@ static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
 
     for (c = first; c < n_cols; ++c) {
       ptr = _GD_SetScalar(D, in_cols[c], (char *)data + s * n++, t, me,
-          format_file, line, &offset, &offset, standards, pedantic);
+          format_file, line, &offset, &dummy, standards, pedantic);
       if (n == GD_MAX_CARRAY_LENGTH)
         break;
 
@@ -1400,7 +1400,7 @@ static gd_entry_t *_GD_ParseString(DIRFILE *restrict D,
 
   E->field_type = GD_STRING_ENTRY;
   E->e->u.string = _GD_Strdup(D, in_cols[2]);
-  E->e->calculated = 1;
+  E->flags |= GD_EN_CALC;
 
   E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
@@ -2126,7 +2126,7 @@ static int _GD_ParseDirective(DIRFILE *D, char **in_cols, int n_cols,
           _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION,
               D->fragment[me].cname, linenum, in_cols[1]);
         else
-          E->hidden = 1;
+          E->flags |= GD_EN_HIDDEN;
       }
       break;
     case 'I':

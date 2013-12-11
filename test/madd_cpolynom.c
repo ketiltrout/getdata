@@ -63,7 +63,7 @@ int main(void)
     CHECKS(e.in_fields[0], "in");
     CHECKI(e.fragment_index, 0);
     CHECKI(e.EN(polynom,poly_ord), 3);
-    CHECKI(e.comp_scal, 1);
+    CHECKX(e.flags, GD_EN_COMPSCAL | GD_EN_CALC);
     for (j = 0; j < 4; ++j)
       CHECKCi(j,e.EN(polynom,ca)[j], a[j]);
     gd_free_entry_strings(&e);

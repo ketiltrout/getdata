@@ -50,7 +50,7 @@ int main(void)
     CHECKI(e.field_type, GD_RECIP_ENTRY);
     CHECKS(e.in_fields[0], "in1");
     CHECKF(e.EN(recip,dividend), 3.2);
-    CHECKI(e.comp_scal, 0);
+    CHECKX(e.flags, GD_EN_CALC);
     CHECKI(e.fragment_index, 0);
     gd_free_entry_strings(&e);
   }

@@ -32,7 +32,7 @@ LincomEntry::LincomEntry(const char* field_code, int n_fields,
   E.field_type = GD_LINCOM_ENTRY;
   E.u.lincom.n_fields = n_fields;
   E.fragment_index = fragment_index;
-  E.comp_scal = 0;
+  E.flags = 0;
   for (i = 0; i < n_fields; ++i) {
     E.in_fields[i] = strdup(in_fields[i]);
     E.u.lincom.m[i] = m[i];
@@ -50,7 +50,7 @@ LincomEntry::LincomEntry(const char* field_code, int n_fields,
   E.field_type = GD_LINCOM_ENTRY;
   E.u.lincom.n_fields = n_fields;
   E.fragment_index = fragment_index;
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
   for (i = 0; i < n_fields; ++i) {
     E.in_fields[i] = strdup(in_fields[i]);
     E.u.lincom.cm[i][0] = cm[i].real();
@@ -121,7 +121,7 @@ int LincomEntry::SetScale(std::complex<double> scale, int index)
 
   E.u.lincom.m[index] = E.u.lincom.cm[index][0] = scale.real();
   E.u.lincom.cm[index][1] = scale.imag();
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, 0);
@@ -171,7 +171,7 @@ int LincomEntry::SetOffset(std::complex<double> offset, int index)
 
   E.u.lincom.b[index] = E.u.lincom.cb[index][0] = offset.real();
   E.u.lincom.cb[index][1] = offset.imag();
-  E.comp_scal = 1;
+  E.flags = GD_EN_COMPSCAL;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, 0);

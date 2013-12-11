@@ -58,7 +58,7 @@ int main(void)
   CHECKI(n, 0);
   CHECKS(E.field, "data");
   CHECKI(E.field_type, GD_LINCOM_ENTRY);
-  CHECKI(E.comp_scal, 0);
+  CHECKX(E.flags, GD_EN_CALC);
   CHECKI(E.EN(lincom,n_fields), 3);
   CHECKS(E.in_fields[0], "in1");
   CHECKS(E.in_fields[1], "in2");

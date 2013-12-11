@@ -1403,10 +1403,10 @@ C     129: GDNTYP check
       CALL CHKEOK(ne, 129, d)
       CALL CHKINT(ne, 129, n, GD_I8)
 
-C     130: GDCSCL check
-      CALL GDCSCL(n, d, 'polynom', 7)
+C     130: GDENFL check
+      CALL GDENFL(n, d, 'polynom', 7)
       CALL CHKEOK(ne, 130, d)
-      CALL CHKINT(ne, 130, n, 1)
+      CALL CHKINT(ne, 130, n, GDE_CS + GDE_CA)
 
 C     131: GDVLDT check
       CALL GDVLDT(n, d, 'new7', 4)
@@ -2181,9 +2181,9 @@ C     243: GDASLC check
      +'in3', 3, 1.4d0,      '', -1, -1, 0d0, 'carray', 6, 5, 0)
       CALL CHKOK2(ne, 243, 1, d)
 
-      CALL GDCSCL(n, d, 'new243', 6)
+      CALL GDENFL(n, d, 'new243', 6)
       CALL CHKOK2(ne, 243, 2, d)
-      CALL CHKIN2(ne, 243, 3, n, 0)
+      CALL CHKIN2(ne, 243, 3, n, GDE_CA)
 
       l = flen
       CALL GDGELC(i, fields(1), l, p(1), p(2), fields(2), l, p(3),
@@ -2246,9 +2246,9 @@ C     244: GDASPN check
      +0d0,  '', -1, -1, 0d0,  '', -1, -1, 0)
       CALL CHKOK2(ne, 244, 1, d)
 
-      CALL GDCSCL(n, d, 'new244', 6)
+      CALL GDENFL(n, d, 'new244', 6)
       CALL CHKOK2(ne, 244, 2, d)
-      CALL CHKIN2(ne, 244, 3, n, 0)
+      CALL CHKIN2(ne, 244, 3, n, GDE_CA)
 
       l = flen
       CALL GDGEPN(i, fn, l, p(1), p(2), p(3), p(4), p(5), p(6),
@@ -2336,9 +2336,9 @@ C     251: GDASRC check
       CALL GDASRC(d, 'new251', 6, 'in1', 3, 0d0, 'carray', 6, 4, 0)
       CALL CHKOK2(ne, 251, 1, d)
 
-      CALL GDCSCL(n, d, 'new251', 6)
+      CALL GDENFL(n, d, 'new251', 6)
       CALL CHKOK2(ne, 251, 2, d)
-      CALL CHKIN2(ne, 251, 3, n, 0)
+      CALL CHKIN2(ne, 251, 3, n, GDE_CA)
 
       l = flen
       CALL GDGERC(fn, l, dp, n, d, 'new251', 6)
@@ -2415,9 +2415,9 @@ C     255: GDASCL check
      +'carray', 6, 5, 0)
       CALL CHKOK2(ne, 255, 1, d)
 
-      CALL GDCSCL(n, d, 'new255', 6)
+      CALL GDENFL(n, d, 'new255', 6)
       CALL CHKOK2(ne, 255, 2, d)
-      CALL CHKIN2(ne, 255, 3, n, 1)
+      CALL CHKIN2(ne, 255, 3, n, GDE_CS + GDE_CA)
 
       l = flen
       CALL GDGECL(i, fields(1), l, cp(1), cp(2), fields(2), l, cp(3),
@@ -2481,9 +2481,9 @@ C     256: GDASCP check
      +dcmplx(0, 0),  '', -1, -1, 0)
       CALL CHKOK2(ne, 256, 1, d)
 
-      CALL GDCSCL(n, d, 'new256', 6)
+      CALL GDENFL(n, d, 'new256', 6)
       CALL CHKOK2(ne, 256, 2, d)
-      CALL CHKIN2(ne, 256, 3, n, 1)
+      CALL CHKIN2(ne, 256, 3, n, GDE_CS + GDE_CA)
 
       l = flen
       CALL GDGECP(i, fn, l, cp(1), cp(2), cp(3), cp(4), cp(5), cp(6),
@@ -2528,9 +2528,9 @@ C     257: GDASCR check
       CALL GDASCR(d, 'new257', 6, 'in1', 3, 0d0, 'carray', 6, 4, 0)
       CALL CHKOK2(ne, 257, 1, d)
 
-      CALL GDCSCL(n, d, 'new257', 6)
+      CALL GDENFL(n, d, 'new257', 6)
       CALL CHKOK2(ne, 257, 2, d)
-      CALL CHKIN2(ne, 257, 3, n, 0)
+      CALL CHKIN2(ne, 257, 3, n, GDE_CA)
 
       l = flen
       CALL GDGECR(fn, l, dc, n, d, 'new257', 6)
@@ -2578,9 +2578,9 @@ C     259: GDLSLC check
      +'', -1, 0d0, 'const', 5, -1, 0d0, 'const', 5, -1)
       CALL CHKOK2(ne, 259, 1, d)
 
-      CALL GDCSCL(n, d, 'new243', 6)
+      CALL GDENFL(n, d, 'new243', 6)
       CALL CHKOK2(ne, 259, 2, d)
-      CALL CHKIN2(ne, 259, 3, n, 0)
+      CALL CHKIN2(ne, 259, 3, n, GDE_CA)
 
       l = flen
       CALL GDGELC(i, fields(1), l, p(1), p(2), fields(2), l, p(3),
@@ -2644,9 +2644,9 @@ C     260: GDLSLC check
      +'', -1, dcmplx(0, 0), '', 0, -1, dcmplx(0, 0), '', 0, -1)
       CALL CHKOK2(ne, 260, 1, d)
 
-      CALL GDCSCL(n, d, 'new243', 6)
+      CALL GDENFL(n, d, 'new243', 6)
       CALL CHKOK2(ne, 260, 2, d)
-      CALL CHKIN2(ne, 260, 3, n, 1)
+      CALL CHKIN2(ne, 260, 3, n, GDE_CS + GDE_CA)
 
       l = flen
       CALL GDGECL(i, fields(1), l, cp(1), cp(2), fields(2), l, cp(3),
@@ -2709,9 +2709,9 @@ C     261: GDLSPN check
      +0d0, '', -1, 0, 0d0, '', -1, 0)
       CALL CHKOK2(ne, 261, 1, d)
 
-      CALL GDCSCL(n, d, 'new244', 6)
+      CALL GDENFL(n, d, 'new244', 6)
       CALL CHKOK2(ne, 261, 2, d)
-      CALL CHKIN2(ne, 261, 3, n, 0)
+      CALL CHKIN2(ne, 261, 3, n, GDE_CA)
 
       l = flen
       CALL GDGEPN(i, fn, l, p(1), p(2), p(3), p(4), p(5), p(6),
@@ -2759,9 +2759,9 @@ C     262: GDLSCP check
      +dcmplx(0d0, 0d0), '', -1, 0, dcmplx(0d0, 0d0), '', -1, 0)
       CALL CHKOK2(ne, 262, 1, d)
 
-      CALL GDCSCL(n, d, 'new244', 6)
+      CALL GDENFL(n, d, 'new244', 6)
       CALL CHKOK2(ne, 262, 2, d)
-      CALL CHKIN2(ne, 262, 3, n, 0)
+      CALL CHKIN2(ne, 262, 3, n, GDE_CA)
 
       l = flen
       CALL GDGECP(i, fn, l, cp(1), cp(2), cp(3), cp(4), cp(5), cp(6),
@@ -2874,9 +2874,9 @@ C     266: GDLSRC check
       CALL GDLSRC(d, 'new251', 6, 'in5', 3, 0d0, 'carray', 6, 2)
       CALL CHKOK2(ne, 266, 1, d)
 
-      CALL GDCSCL(n, d, 'new251', 6)
+      CALL GDENFL(n, d, 'new251', 6)
       CALL CHKOK2(ne, 266, 2, d)
-      CALL CHKIN2(ne, 266, 3, n, 0)
+      CALL CHKIN2(ne, 266, 3, n, GDE_CA)
 
       l = flen
       CALL GDGERC(fn, l, dp, n, d, 'new251', 6)
@@ -2897,9 +2897,9 @@ C     267: GDLSCR check
      +-1)
       CALL CHKOK2(ne, 267, 1, d)
 
-      CALL GDCSCL(n, d, 'new251', 6)
+      CALL GDENFL(n, d, 'new251', 6)
       CALL CHKOK2(ne, 267, 2, d)
-      CALL CHKIN2(ne, 267, 3, n, 1)
+      CALL CHKIN2(ne, 267, 3, n, GDE_CS + GDE_CA)
 
       l = flen
       CALL GDGECR(fn, l, dc, n, d, 'new251', 6)

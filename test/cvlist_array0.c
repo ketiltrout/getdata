@@ -46,7 +46,7 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  field_list = (struct uint8_carrays*)gd_carrays(D, GD_UINT8);
+  field_list = (gd_carray_t*)gd_carrays(D, GD_UINT8);
 
   error = gd_error(D);
 

@@ -40,7 +40,7 @@ int main(void)
     "/INCLUDE format1\n";
   const char *format1_data = "data1 RAW UINT16 8\n/ENDIAN little arm\n";
   unsigned long e0, e1, e2, e3;
-  int fd, ret, error, i = 0, r = 0;
+  int fd, ret, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();

@@ -54,7 +54,7 @@ int main(void)
 
   error = gd_error(D);
   CHECKI(error, 0);
-  CHECKIi(0,E.comp_scal, 1);
+  CHECKXi(0, E.flags, GD_EN_COMPSCAL | GD_EN_CALC);
   CHECKFi(0,E.EN(lincom,cm)[0][0], 3.3);
   CHECKFi(0,E.EN(lincom,cm)[0][1], 4.4);
   CHECKFi(0,E.EN(lincom,cb)[0][0], 5.5);
@@ -75,7 +75,7 @@ int main(void)
   error3 = gd_error(D);
   CHECKI(error3, 0);
   CHECKIi(1,E.EN(polynom,poly_ord),2);
-  CHECKIi(1,E.comp_scal,1);
+  CHECKXi(1, E.flags, GD_EN_COMPSCAL | GD_EN_CALC);
   CHECKFi(1,E.EN(polynom,ca)[0][0], ca[0]);
   CHECKFi(1,E.EN(polynom,ca)[0][1], ca[1]);
   CHECKFi(1,E.EN(polynom,ca)[1][0], ca[2]);

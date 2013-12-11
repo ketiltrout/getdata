@@ -53,7 +53,7 @@ int main(void)
     CHECKS(e.in_fields[0], "in1");
     CHECKF(e.EN(recip,cdividend)[0], div[0]);
     CHECKF(e.EN(recip,cdividend)[1], div[1]);
-    CHECKI(e.comp_scal, 1);
+    CHECKX(e.flags, GD_EN_COMPSCAL | GD_EN_CALC);
     CHECKI(e.fragment_index, 0);
     gd_free_entry_strings(&e);
   }

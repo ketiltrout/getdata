@@ -39,7 +39,7 @@ int main(void)
     "/REFERENCE data\n";
   unsigned char c[8];
   unsigned char data_data[256];
-  int fd, ret, error, n, r = 0;
+  int fd, ret, error, r = 0;
   char *ref1, *ref2;
   DIRFILE *D;
 

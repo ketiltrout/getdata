@@ -342,6 +342,11 @@ typedef union {
   double r;
 } gd_triplet_t;
 
+/* Entry object flags */
+#define GD_EN_COMPSCAL 0x1 /* entry has complex scalar parameters */
+#define GD_EN_CALC     0x2 /* scalar field codes have been resolved */
+#define GD_EN_HIDDEN   0x4 /* entry is hidden */
+
 /* ANSI C does not permit anonymous structs/unions */
 #ifdef GD_C89_API
 # define GD_ANON(x) x
@@ -356,8 +361,7 @@ struct gd_unified_entry_ {
   char *scalar[GD_MAX_POLYORD + 1];
   int scalar_ind[GD_MAX_POLYORD + 1];
   int fragment_index;
-  int comp_scal;
-  int hidden;
+  unsigned flags;
   union {
     struct { /* RAW */
       unsigned int spf;

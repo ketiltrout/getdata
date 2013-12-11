@@ -39,7 +39,6 @@ int main(void)
   const char *format1_data = "mata RAW UINT8 11\nREFERENCE mata\n";
   int fd, e1, r = 0;
   const char *r1;
-  unsigned int spf;
   DIRFILE *D;
 
   rmdirfile();

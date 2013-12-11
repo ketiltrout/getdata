@@ -45,7 +45,7 @@ int main(void)
   mkdir(filedir, 0777);
 
   for (fd = 0; fd < 128; ++fd)
-    data_data[fd] = fd * (0x02000001);
+    data_data[fd] = fd * (0x02000001U);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));

@@ -39,7 +39,7 @@ int main(void)
   const char *data = "dirfile/data.gz";
   const char *format_data = "data RAW UINT8 8\n";
   uint8_t c[8];
-  int fd, i, n, error1, error2, stat_data, unlink_data, ret, r = 0;
+  int fd, i, n, error1, error2, unlink_data, ret, r = 0;
   int rmdir_filedir;
   DIRFILE *D;
 

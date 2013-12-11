@@ -545,7 +545,7 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
   /* Clear the cache of all fields */
   /* FIXME: Should probably just clear affected fields */
   for (i = 0; i < D->n_entries; ++i) {
-    D->entry[i]->e->calculated = 0;
+    D->entry[i]->flags &= ~GD_EN_CALC;
     for (j = 0; j < GD_MAX_LINCOM; ++j)
       D->entry[i]->e->entry[j] = NULL;
     D->entry[i]->e->value_list_validity = 0;

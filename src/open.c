@@ -518,7 +518,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
     return D;
   }
   memset(D->entry[0]->e, 0, sizeof(struct gd_private_entry_));
-  D->entry[0]->e->calculated = 1;
+  D->entry[0]->flags = GD_EN_CALC;
 
   /* open the format file (or create it) */
   if ((fp = _GD_CreateDirfile(D, dirfd, dirfd_error, dirfile, &mtime)) == NULL)

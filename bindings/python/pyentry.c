@@ -254,9 +254,9 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
 
         obj = PyTuple_GetItem(parm2, i);
         if (PyComplex_Check(obj)) {
-          E->comp_scal = 1;
+          E->flags |= GD_EN_COMPSCAL;
           gdpy_as_complex(gd_csp_(E->EN(lincom,cm)[i]), obj);
-        } else if (E->comp_scal)
+        } else if (E->flags & GD_EN_COMPSCAL)
           gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, &E->scalar[i],
               &E->EN(lincom,cm)[i]);
         else {
@@ -272,9 +272,9 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
 
         obj = PyTuple_GetItem(parm3, i);
         if (PyComplex_Check(obj)) {
-          E->comp_scal = 1;
+          E->flags |= GD_EN_COMPSCAL;
           gdpy_as_complex(gd_csp_(E->EN(lincom,cb)[i]), obj);
-        } else if (E->comp_scal)
+        } else if (E->flags & GD_EN_COMPSCAL)
           gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128,
               &E->scalar[i + GD_MAX_LINCOM], &E->EN(lincom,cb)[i]);
         else {
@@ -349,9 +349,9 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
 
       obj = PyTuple_GetItem(tuple, 1);
       if (PyComplex_Check(obj)) {
-        E->comp_scal = 1;
+        E->flags |= GD_EN_COMPSCAL;
         gdpy_as_complex(gd_csp_(E->EN(recip,cdividend)), obj);
-      } else if (E->comp_scal)
+      } else if (E->flags & GD_EN_COMPSCAL)
         gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, &E->scalar[0],
             &E->EN(recip,cdividend));
       else {
@@ -399,10 +399,10 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       for (i = 0; i <= count; ++i) {
         obj = PyTuple_GetItem(parm2, i);
         if (PyComplex_Check(obj)) {
-          E->comp_scal = 1;
+          E->flags |= GD_EN_COMPSCAL;
           gdpy_as_complex(gd_csp_(E->EN(polynom,ca)[i]), obj);
           E->scalar[i] = NULL;
-        } else if (E->comp_scal)
+        } else if (E->flags & GD_EN_COMPSCAL)
           gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, &E->scalar[i],
               &E->EN(polynom,ca)[i]);
         else {
@@ -972,7 +972,7 @@ static PyObject *gdpy_entry_getdatatypename(struct gdpy_entry_t *self,
 
   if (t != -1) {
     sprintf(buffer, "%s%i", (t & GD_COMPLEX) ? "COMPLEX" :
-        (t & GD_IEEE754) ? "FLOAT" : (t & GD_SIGNED) ?  "INT" : "UINT",
+        (t & GD_IEEE754) ? "FLOAT" : (t & GD_SIGNED) ? "INT" : "UINT",
         8 * GD_SIZE(t));
     obj = PyString_FromString(buffer);
   }
@@ -1211,7 +1211,8 @@ static PyObject *gdpy_entry_getm(struct gdpy_entry_t *self, void *closure)
     obj = PyTuple_New(self->E->EN(lincom,n_fields));
     for (i = 0; i < self->E->EN(lincom,n_fields); ++i)
       PyTuple_SetItem(obj, i, (self->E->scalar[i] == NULL) ?
-          (self->E->comp_scal) ?  gdpy_from_complex(self->E->EN(lincom,cm)[i]) :
+          (self->E->flags & GD_EN_COMPSCAL) ?
+          gdpy_from_complex(self->E->EN(lincom,cm)[i]) :
           PyFloat_FromDouble(self->E->EN(lincom,m)[i]) :
           PyString_FromString(self->E->scalar[i]));
   } else
@@ -1259,7 +1260,7 @@ static int gdpy_entry_setm(struct gdpy_entry_t *self, PyObject *value,
   for (i = 0; i < self->E->EN(lincom,n_fields); ++i) {
     PyObject *obj = PyTuple_GetItem(value, i);
     if (PyComplex_Check(obj)) {
-      comp_scal = 1;
+      comp_scal = GD_EN_COMPSCAL;
       gdpy_as_complex(gd_csp_(cm[i]), obj);
       m[i] = creal(cm[i]);
       scalar[i] = NULL;
@@ -1282,13 +1283,13 @@ static int gdpy_entry_setm(struct gdpy_entry_t *self, PyObject *value,
   for (i = 0; i < self->E->EN(lincom,n_fields); ++i) {
     /* check whether the corresponding cb is complex */
     if (!comp_scal && cimag(self->E->EN(lincom,cb)[i]))
-      comp_scal = 1;
+      comp_scal = GD_EN_COMPSCAL;
     gd_cs2cs_(self->E->EN(lincom,cm)[i], cm[i]);
     self->E->EN(lincom,m)[i] = m[i];
     free(self->E->scalar[i]);
     self->E->scalar[i] = scalar[i];
   }
-  self->E->comp_scal = comp_scal;
+  self->E->flags |= comp_scal;
 
   dreturn("%i", 0);
   return 0;
@@ -1305,7 +1306,8 @@ static PyObject *gdpy_entry_getb(struct gdpy_entry_t *self, void *closure)
     obj = PyTuple_New(self->E->EN(lincom,n_fields));
     for (i = 0; i < self->E->EN(lincom,n_fields); ++i)
       PyTuple_SetItem(obj, i, (self->E->scalar[i + GD_MAX_LINCOM] == NULL) ?
-          (self->E->comp_scal) ?  gdpy_from_complex(self->E->EN(lincom,cb)[i]) :
+          (self->E->flags & GD_EN_COMPSCAL) ?
+          gdpy_from_complex(self->E->EN(lincom,cb)[i]) :
           PyFloat_FromDouble(self->E->EN(lincom,b)[i]) :
           PyString_FromString(self->E->scalar[i + GD_MAX_LINCOM]));
   } else
@@ -1353,7 +1355,7 @@ static int gdpy_entry_setb(struct gdpy_entry_t *self, PyObject *value,
   for (i = 0; i < self->E->EN(lincom,n_fields); ++i) {
     PyObject *obj = PyTuple_GetItem(value, i);
     if (PyComplex_Check(obj)) {
-      comp_scal = 1;
+      comp_scal = GD_EN_COMPSCAL;
       gdpy_as_complex(gd_csp_(cb[i]), obj);
       b[i] = creal(cb[i]);
       scalar[i] = NULL;
@@ -1376,13 +1378,13 @@ static int gdpy_entry_setb(struct gdpy_entry_t *self, PyObject *value,
   for (i = 0; i < self->E->EN(lincom,n_fields); ++i) {
     /* check whether the corresponding cm is complex */
     if (!comp_scal && cimag(self->E->EN(lincom,cm)[i]))
-      comp_scal = 1;
+      comp_scal = GD_EN_COMPSCAL;
     gd_cs2cs_(self->E->EN(lincom,cb)[i], cb[i]);
     self->E->EN(lincom,b)[i] = b[i];
     free(self->E->scalar[i + GD_MAX_LINCOM]);
     self->E->scalar[i + GD_MAX_LINCOM] = scalar[i];
   }
-  self->E->comp_scal = comp_scal;
+  self->E->flags |= comp_scal;
 
   dreturn("%i", 0);
   return 0;
@@ -1551,7 +1553,7 @@ static PyObject *gdpy_entry_getdividend(struct gdpy_entry_t *self,
   if (self->E->field_type == GD_RECIP_ENTRY) {
     if (self->E->scalar[0])
       obj = PyString_FromString(self->E->scalar[0]);
-    else if (self->E->comp_scal)
+    else if (self->E->flags & GD_EN_COMPSCAL)
       obj = gdpy_from_complex(self->E->EN(recip,cdividend));
     else
       obj = PyFloat_FromDouble(self->E->EN(recip,dividend));
@@ -1585,7 +1587,7 @@ static int gdpy_entry_setdividend(struct gdpy_entry_t *self, PyObject *value,
   }
 
   if (PyComplex_Check(value) || PyString_Check(value))
-    comp_scal = 1;
+    comp_scal = GD_EN_COMPSCAL;
 
   if (comp_scal) {
     gdpy_set_scalar_from_pyobj(value, GD_COMPLEX128, &scalar, &cdividend);
@@ -1600,7 +1602,7 @@ static int gdpy_entry_setdividend(struct gdpy_entry_t *self, PyObject *value,
     return -1;
   }
 
-  self->E->comp_scal = comp_scal;
+  self->E->flags |= comp_scal;
   gd_cs2cs_(self->E->EN(recip,cdividend), cdividend);
   self->E->EN(recip,dividend) = dividend;
   free(self->E->scalar[0]);
@@ -1776,7 +1778,8 @@ static PyObject *gdpy_entry_geta(struct gdpy_entry_t *self, void *closure)
     obj = PyTuple_New(self->E->EN(polynom,poly_ord) + 1);
     for (i = 0; i <= self->E->EN(polynom,poly_ord); ++i)
       PyTuple_SetItem(obj, i, (self->E->scalar[i] == NULL) ?
-          (self->E->comp_scal) ? gdpy_from_complex(self->E->EN(polynom,ca)[i]) :
+          (self->E->flags & GD_EN_COMPSCAL) ?
+          gdpy_from_complex(self->E->EN(polynom,ca)[i]) :
           PyFloat_FromDouble(self->E->EN(polynom,a)[i]) :
           PyString_FromString(self->E->scalar[i]));
   } else
@@ -1824,7 +1827,7 @@ static int gdpy_entry_seta(struct gdpy_entry_t *self, PyObject *value,
   for (i = 0; i <= self->E->EN(polynom,poly_ord); ++i) {
     PyObject *obj = PyTuple_GetItem(value, i);
     if (PyComplex_Check(obj)) {
-      comp_scal = 1;
+      comp_scal = GD_EN_COMPSCAL;
       scalar[i] = NULL;
     } else if (comp_scal) {
       gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, scalar + i, ca + i);
@@ -1846,7 +1849,7 @@ static int gdpy_entry_seta(struct gdpy_entry_t *self, PyObject *value,
     free(self->E->scalar[i]);
     self->E->scalar[i] = scalar[i];
   }
-  self->E->comp_scal = comp_scal;
+  self->E->flags |= comp_scal;
 
   dreturn("%i", 0);
   return 0;
@@ -1938,7 +1941,7 @@ static PyObject *gdpy_entry_getparms(struct gdpy_entry_t *self, void *closure)
           self->E->in_fields[1]);
       break;
     case GD_RECIP_ENTRY:
-      if (self->E->comp_scal)
+      if (self->E->flags & GD_EN_COMPSCAL)
         tuple = Py_BuildValue("(sO)", self->E->in_fields[0],
             gdpy_from_complex(self->E->EN(recip,cdividend)));
       else
@@ -1951,7 +1954,7 @@ static PyObject *gdpy_entry_getparms(struct gdpy_entry_t *self, void *closure)
       break;
     case GD_POLYNOM_ENTRY:
       a = PyTuple_New(self->E->EN(polynom,poly_ord) + 1);
-      if (self->E->comp_scal)
+      if (self->E->flags & GD_EN_COMPSCAL)
         for (i = 0; i <= self->E->EN(polynom,poly_ord); ++i)
           PyTuple_SetItem(a, i, gdpy_from_complex(self->E->EN(polynom,ca)[i]));
       else
@@ -1962,7 +1965,7 @@ static PyObject *gdpy_entry_getparms(struct gdpy_entry_t *self, void *closure)
     case GD_LINCOM_ENTRY:
       switch (self->E->EN(lincom,n_fields)) {
         case 1:
-          if (self->E->comp_scal)
+          if (self->E->flags & GD_EN_COMPSCAL)
             tuple = Py_BuildValue("((s)(O)(O))", self->E->in_fields[0],
                 gdpy_from_complex(self->E->EN(lincom,cm)[0]),
                 gdpy_from_complex(self->E->EN(lincom,cb)[0]));
@@ -1971,7 +1974,7 @@ static PyObject *gdpy_entry_getparms(struct gdpy_entry_t *self, void *closure)
                 self->E->EN(lincom,m)[0], self->E->EN(lincom,b)[0]);
           break;
         case 2:
-          if (self->E->comp_scal)
+          if (self->E->flags & GD_EN_COMPSCAL)
             tuple = Py_BuildValue("((ss)(OO)(OO))", self->E->in_fields[0],
                 self->E->in_fields[1],
                 gdpy_from_complex(self->E->EN(lincom,cm)[0]),
@@ -1985,7 +1988,7 @@ static PyObject *gdpy_entry_getparms(struct gdpy_entry_t *self, void *closure)
                 self->E->EN(lincom,b)[1]);
           break;
         case 3:
-          if (self->E->comp_scal)
+          if (self->E->flags & GD_EN_COMPSCAL)
             tuple = Py_BuildValue("((sss)(OOO)(OOO))", self->E->in_fields[0],
                 self->E->in_fields[1], self->E->in_fields[2],
                 gdpy_from_complex(self->E->EN(lincom,cm)[0]),

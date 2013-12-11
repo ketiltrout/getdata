@@ -34,7 +34,6 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format_data = "polynom POLYNOM a 3 5 7 9\n";
-  uint8_t d;
   int fd, i, ret, error, r = 0;
   DIRFILE *D;
   gd_entry_t E;

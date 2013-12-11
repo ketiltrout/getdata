@@ -589,7 +589,7 @@ program big_test
   call check_str2(ne, 42,  4, ent%field(1), 'data')
   call check_str2(ne, 42,  5 , ent%field(2), 'INDEX')
   call check_str2(ne, 42,  6, ent%field(3), 'linterp')
-  call check_int2(ne, 42,  7, ent%comp_scal, 1)
+  call check_int2(ne, 42,  7, ent%flags, GD_EN_CALC + GD_EN_COMPSCAL)
   call check_str2(ne, 42,  8, ent%scalar(1), '')
   call check_str2(ne, 42,  9, ent%scalar(2), '')
   call check_str2(ne, 42, 10, ent%scalar(3), 'const')
@@ -709,7 +709,7 @@ program big_test
   call check_int2(ne, 54, 5, ent%fragment_index, 0)
   call check_str2(ne, 54, 6, ent%field(1), 'in1')
   call check_str2(ne, 54, 7, ent%field(2), 'in2')
-  call check_int2(ne, 54, 8, ent%comp_scal, 0)
+  call check_int2(ne, 54, 8, ent%flags, GD_EN_CALC)
 
   q = (/ 9.9d0, 8.8d0, 7.7d0, 6.6d0, 5.5d0, 5.5d0 /)
   do i=1,2
@@ -733,7 +733,7 @@ program big_test
   call check_int2(ne, 55, 5, ent%fragment_index, 0)
   call check_str2(ne, 55, 6, ent%field(1), 'in1')
   call check_str2(ne, 55, 7, ent%field(2), 'in2')
-  call check_int2(ne, 55, 8, ent%comp_scal, 1)
+  call check_int2(ne, 55, 8, ent%flags, GD_EN_CALC + GD_EN_COMPSCAL)
 
   cq(1) = dcmplx(1.1, 1.2)
   cq(2) = dcmplx(1.3, 1.4)
@@ -755,7 +755,7 @@ program big_test
   call check_int2(ne, 56, 2, ent%poly_ord, 3)
   call check_int2(ne, 56, 3, ent%fragment_index, 0)
   call check_str2(ne, 56, 4, ent%field(1), 'in1')
-  call check_int2(ne, 56, 5, ent%comp_scal, 0)
+  call check_int2(ne, 56, 5, ent%flags, GD_EN_CALC)
 
   q = (/ 3d3, 4d4, 5d5, 6d6, 5.5d0, 5.5d0 /)
   DO i=1,4
@@ -777,7 +777,7 @@ program big_test
   call check_int2(ne, 57, 2, ent%poly_ord, 3)
   call check_int2(ne, 57, 3, ent%fragment_index, 0)
   call check_str2(ne, 57, 4, ent%field(1), 'in1')
-  call check_int2(ne, 57, 5, ent%comp_scal, 1)
+  call check_int2(ne, 57, 5, ent%flags, GD_EN_CALC + GD_EN_COMPSCAL)
 
   cq(1) = dcmplx(3.1, 7.0)
   cq(2) = dcmplx(4.2, 8.0)
@@ -927,7 +927,7 @@ program big_test
   call check_int2(ne, 71, 5, ent%fragment_index, 0)
   call check_str2(ne, 71, 6, ent%field(1), 'in1')
   call check_str2(ne, 71, 7, ent%field(2), 'in2')
-  call check_int2(ne, 71, 8, ent%comp_scal, 0)
+  call check_int2(ne, 71, 8, ent%flags, GD_EN_CALC)
 
   q = (/ 9.9d0, 8.8d0, 7.7d0, 6.6d0, 5.5d0, 5.5d0 /)
   DO i=1,2
@@ -951,7 +951,7 @@ program big_test
   call check_int2(ne, 72, 3, ent%fragment_index, 0)
   call check_str2(ne, 72, 4, ent%field(1), 'in1')
   call check_str2(ne, 72, 5, ent%field(2), 'in2')
-  call check_int2(ne, 72, 6, ent%comp_scal, 1)
+  call check_int2(ne, 72, 6, ent%flags, GD_EN_CALC + GD_EN_COMPSCAL)
 
   cq(1) = dcmplx(1.1, 1.2)
   cq(2) = dcmplx(1.3, 1.4)
@@ -1255,7 +1255,7 @@ program big_test
   call check_str2(ne, 100, 6, ent%field(1), 'in4')
   call check_str2(ne, 100, 7, ent%field(2), 'in5')
   call check_str2(ne, 100, 8, ent%field(3), 'in6')
-  call check_int2(ne, 100, 5, ent%comp_scal, 0)
+  call check_int2(ne, 100, 5, ent%flags, GD_EN_CALC)
 
   q = (/ 9.9d-1, 7.8d0, 1.1d1, 2.2d-2, 1.96d0, 0d0 /)
   DO i=1,3
@@ -1279,7 +1279,7 @@ program big_test
   call check_int2(ne, 101, 3, ent%fragment_index, 0)
   call check_str2(ne, 101, 4, ent%field(1), 'in4')
   call check_str2(ne, 101, 5, ent%field(2), 'in3')
-  call check_int2(ne, 101, 6, ent%comp_scal, 1)
+  call check_int2(ne, 101, 6, ent%flags, GD_EN_CALC + GD_EN_COMPSCAL)
 
   cq(1) = dcmplx(0.1, 0.2)
   cq(2) = dcmplx(0.3, 0.4)
@@ -1321,7 +1321,7 @@ program big_test
   call check_int2(ne, 103, 2, ent%poly_ord, 3)
   call check_int2(ne, 103, 3, ent%fragment_index, 0)
   call check_str2(ne, 103, 4, ent%field(1), 'in1')
-  call check_int2(ne, 103, 5, ent%comp_scal, 1)
+  call check_int2(ne, 103, 5, ent%flags, GD_EN_CALC + GD_EN_COMPSCAL)
 
   cq(1) = dcmplx(1.1, 5.0)
   cq(2) = dcmplx(1.2, 4.0)
@@ -1562,7 +1562,7 @@ program big_test
 ! 135: fgd_add raw
   ent%data_type = GD_FLOAT32
   ent%fragment_index = 0
-  ent%spf = 0;
+  ent%spf = 0
   ent%field_type = GD_RAW_ENTRY
   ent%scalar(1) = 'carray'
   ent%scalar_ind(1) = 2
@@ -1626,7 +1626,7 @@ program big_test
   call check_ok(ne, 145, d)
   call check_int2(ne, 145, 1, n, GD_RECIP_ENTRY)
   call check_int2(ne, 145, 2, ent%fragment_index, 0)
-  call check_int2(ne, 145, 3, ent%comp_scal, 1)
+  call check_int2(ne, 145, 3, ent%flags, GD_EN_CALC + GD_EN_COMPSCAL)
   call check_str2(ne, 145, 4, ent%field(1), 'div')
   call check_cpx2(ne, 145, 5, ent%cdividend, dcmplx(6.5d0, 4.3d0))
 
@@ -1650,7 +1650,7 @@ program big_test
   call check_int2(ne, 147, 1, n, GD_RECIP_ENTRY)
   call check_int2(ne, 147, 2, ent%fragment_index, 0)
   call check_str2(ne, 147, 3, ent%field(1), 'in1')
-  call check_int2(ne, 147, 4, ent%comp_scal, 0)
+  call check_int2(ne, 147, 4, ent%flags, GD_EN_CALC)
   call check_dbl2(ne, 147, 5, ent%dividend, 31.9d0)
 
 ! 148: fgd_add_recip check
@@ -1662,7 +1662,7 @@ program big_test
   call check_int2(ne, 148, 1, n, GD_RECIP_ENTRY)
   call check_int2(ne, 148, 2, ent%fragment_index, 0)
   call check_str2(ne, 148, 3, ent%field(1), 'in1')
-  call check_int2(ne, 148, 4, ent%comp_scal, 1)
+  call check_int2(ne, 148, 4, ent%flags, GD_EN_CALC + GD_EN_COMPSCAL)
   call check_cpx2(ne, 148, 5, ent%cdividend, dcmplx(31.9d0, 38.2d0))
 
 ! 149: fgd_madd_divide check
@@ -1685,7 +1685,7 @@ program big_test
   call check_int2(ne, 150, 1, n, GD_RECIP_ENTRY)
   call check_int2(ne, 150, 2, ent%fragment_index, 0)
   call check_str2(ne, 150, 3, ent%field(1), 'in0')
-  call check_int2(ne, 150, 4, ent%comp_scal, 0)
+  call check_int2(ne, 150, 4, ent%flags, GD_EN_CALC)
   call check_dbl2(ne, 150, 5, ent%dividend, 95.5d0)
 
 ! 151: fgd_madd_recip check
@@ -1697,7 +1697,7 @@ program big_test
   call check_int2(ne, 151, 1, n, GD_RECIP_ENTRY)
   call check_int2(ne, 151, 2, ent%fragment_index, 0)
   call check_str2(ne, 151, 3, ent%field(1), 'in3')
-  call check_int2(ne, 151, 4, ent%comp_scal, 1)
+  call check_int2(ne, 151, 4, ent%flags, GD_EN_CALC + GD_EN_COMPSCAL)
   call check_cpx2(ne, 151, 5, ent%cdividend, dcmplx(8.47d0, 6.22d0))
 
 ! 152: fgd_alter_divide check
@@ -2562,7 +2562,7 @@ program big_test
   ent%field_type = GD_LINCOM_ENTRY
   ent%fragment_index = 0
   ent%n_fields = 3
-  ent%comp_scal = 0
+  ent%flags = 0
   ent%field(1) = 'in1'
   ent%field(2) = 'in2'
   ent%field(3) = 'in3'
@@ -2589,7 +2589,7 @@ program big_test
   call check_str2(ne, 243,  6, ent%field(1), 'in1')
   call check_str2(ne, 243,  7, ent%field(2), 'in2')
   call check_str2(ne, 243,  8, ent%field(3), 'in3')
-  call check_int2(ne, 243,  9, ent%comp_scal, 0)
+  call check_int2(ne, 243,  9, ent%flags, GD_EN_CALC)
   call check_str2(ne, 243, 10, ent%scalar(1), '')
   call check_str2(ne, 243, 11, ent%scalar(2), 'const')
   call check_str2(ne, 243, 12, ent%scalar(3), '')
@@ -2611,7 +2611,7 @@ program big_test
   ent%field_type = GD_POLYNOM_ENTRY
   ent%fragment_index = 0
   ent%field(1) = 'in1'
-  ent%comp_scal = 0
+  ent%flags = 0
   ent%a(1) = 33d0
   ent%a(2) = 44d0
   ent%a(3) = 66d0
@@ -2630,7 +2630,7 @@ program big_test
   call check_int2(ne, 244,  4, ent%poly_ord, 3)
   call check_int2(ne, 244,  5, ent%fragment_index, 0)
   call check_str2(ne, 244,  6, ent%field(1), 'in1')
-  call check_int2(ne, 244,  7, ent%comp_scal, 0)
+  call check_int2(ne, 244,  7, ent%flags, GD_EN_CALC)
   call check_dbl2(ne, 244,  8, ent%a(1), 33d0)
   call check_dbl2(ne, 244,  9, ent%a(2), 44d0)
   call check_dbl2(ne, 244, 10, ent%a(3), 66d0)
@@ -2686,7 +2686,7 @@ program big_test
   ent%field_type = GD_RECIP_ENTRY
   ent%fragment_index = 0
   ent%scalar(1) = 'carray'
-  ent%comp_scal = 0
+  ent%flags = 0
   ent%scalar_ind = 4
   call fgd_add(d, 'new251', ent)
   call check_ok2(ne, 251, 1, d)
@@ -2695,7 +2695,7 @@ program big_test
   call check_ok2(ne, 251, 2, d)
   call check_int2(ne, 251, 3, n, GD_RECIP_ENTRY)
   call check_int2(ne, 251, 4, ent%fragment_index, 0)
-  call check_int2(ne, 251, 5, ent%comp_scal, 0)
+  call check_int2(ne, 251, 5, ent%flags, GD_EN_CALC)
   call check_str2(ne, 251, 6, ent%field(1), 'in1')
   call check_dbl2(ne, 251, 7, ent%dividend, 180d0)
   call check_str2(ne, 251, 8, ent%scalar(1), 'carray')
@@ -2751,7 +2751,7 @@ program big_test
   ent%field_type = GD_LINCOM_ENTRY
   ent%fragment_index = 0
   ent%n_fields = 3
-  ent%comp_scal = 1
+  ent%flags = GD_EN_COMPSCAL
   ent%field(1) = 'in1'
   ent%field(2) = 'in2'
   ent%field(3) = 'in3'
@@ -2778,7 +2778,7 @@ program big_test
   call check_str2(ne, 255,  6, ent%field(1), 'in1')
   call check_str2(ne, 255,  7, ent%field(2), 'in2')
   call check_str2(ne, 255,  8, ent%field(3), 'in3')
-  call check_int2(ne, 255,  9, ent%comp_scal, 1)
+  call check_int2(ne, 255,  9, ent%flags, GD_EN_CALC + GD_EN_COMPSCAL)
   call check_str2(ne, 255, 10, ent%scalar(1), '')
   call check_str2(ne, 255, 11, ent%scalar(2), 'const')
   call check_str2(ne, 255, 12, ent%scalar(3), '')
@@ -2799,7 +2799,7 @@ program big_test
   ent%field_type = GD_POLYNOM_ENTRY
   ent%fragment_index = 0
   ent%field(1) = 'in1'
-  ent%comp_scal = 1
+  ent%flags = GD_EN_COMPSCAL
   ent%ca(1) = dcmplx(22d0, 33d0)
   ent%ca(2) = dcmplx(44d0, 55d0)
   ent%ca(3) = dcmplx(66d0, 77d0)
@@ -2818,7 +2818,7 @@ program big_test
   call check_int2(ne, 256,  4, ent%poly_ord, 3)
   call check_int2(ne, 256,  5, ent%fragment_index, 0)
   call check_str2(ne, 256,  6, ent%field(1), 'in1')
-  call check_int2(ne, 256,  7, ent%comp_scal, 1)
+  call check_int2(ne, 256,  7, ent%flags, GD_EN_CALC + GD_EN_COMPSCAL)
   call check_cpx2(ne, 256,  8, ent%ca(1), dcmplx(22d0, 33d0))
   call check_cpx2(ne, 256,  9, ent%ca(2), dcmplx(44d0, 55d0))
   call check_cpx2(ne, 256, 10, ent%ca(3), dcmplx(66d0, 77d0))
@@ -2834,7 +2834,7 @@ program big_test
   ent%field_type = GD_RECIP_ENTRY
   ent%fragment_index = 0
   ent%scalar(1) = 'carray'
-  ent%comp_scal = 1
+  ent%flags = GD_EN_COMPSCAL
   ent%scalar_ind = 4
   call fgd_add(d, 'new257', ent)
   call check_ok2(ne, 257, 1, d)
@@ -2843,7 +2843,7 @@ program big_test
   call check_ok2(ne, 257, 2, d)
   call check_int2(ne, 257, 3, n, GD_RECIP_ENTRY)
   call check_int2(ne, 257, 4, ent%fragment_index, 0)
-  call check_int2(ne, 257, 5, ent%comp_scal, 0)
+  call check_int2(ne, 257, 5, ent%flags, GD_EN_CALC)
   call check_str2(ne, 257, 6, ent%field(1), 'in1')
   call check_dbl2(ne, 257, 7, ent%dividend, 180d0)
   call check_str2(ne, 257, 8, ent%scalar(1), 'carray')
@@ -2872,8 +2872,8 @@ program big_test
 ! 259: fgd_alter_entry lincom
   ent%field_type = GD_LINCOM_ENTRY
   ent%field(2) = 'in4'
-  ent%comp_scal = 0;
-  ent%m(1) = 2.2d0;
+  ent%flags = 0
+  ent%m(1) = 2.2d0
   ent%scalar(2) = ''
   ent%scalar(3) = 'const'
   ent%scalar(4) = 'carray'
@@ -2891,7 +2891,7 @@ program big_test
   call check_str2(ne, 259,  6, ent%field(1), 'in1')
   call check_str2(ne, 259,  7, ent%field(2), 'in4')
   call check_str2(ne, 259,  8, ent%field(3), 'in3')
-  call check_int2(ne, 259,  9, ent%comp_scal, 0)
+  call check_int2(ne, 259,  9, ent%flags, GD_EN_CALC)
   call check_str2(ne, 259, 10, ent%scalar(1), '')
   call check_str2(ne, 259, 11, ent%scalar(2), 'const')
   call check_str2(ne, 259, 12, ent%scalar(3), 'const')
@@ -2914,7 +2914,7 @@ program big_test
   ent%field(2) = 'in4'
   ent%field(3) = 'in3'
   ent%field_type = GD_LINCOM_ENTRY
-  ent%comp_scal = 1
+  ent%flags = GD_EN_COMPSCAL
   ent%cm(1) = dcmplx(9d0, 8d0)
   ent%scalar(2) = ''
   ent%scalar(3) = ''
@@ -2932,7 +2932,7 @@ program big_test
   call check_str2(ne, 260,  6, ent%field(1), 'in1')
   call check_str2(ne, 260,  7, ent%field(2), 'in4')
   call check_str2(ne, 260,  8, ent%field(3), 'in3')
-  call check_int2(ne, 260,  9, ent%comp_scal, 1)
+  call check_int2(ne, 260,  9, ent%flags, GD_EN_CALC + GD_EN_COMPSCAL)
   call check_str2(ne, 260, 10, ent%scalar(1), '')
   call check_str2(ne, 260, 11, ent%scalar(2), 'const')
   call check_str2(ne, 260, 12, ent%scalar(3), 'const')
@@ -2953,7 +2953,7 @@ program big_test
 ! 261: fgd_alter_entry POLYNOM
   ent%field(1) = 'in3'
   ent%field_type = GD_POLYNOM_ENTRY
-  ent%comp_scal = 0
+  ent%flags = 0
   ent%a(1) = 2d0
   ent%a(2) = 6d0
   ent%scalar(1) = ''
@@ -2969,7 +2969,7 @@ program big_test
   call check_int2(ne, 261,  4, ent%poly_ord, 3)
   call check_int2(ne, 261,  5, ent%fragment_index, 0)
   call check_str2(ne, 261,  6, ent%field(1), 'in3')
-  call check_int2(ne, 261,  7, ent%comp_scal, 0)
+  call check_int2(ne, 261,  7, ent%flags, GD_EN_CALC)
   call check_dbl2(ne, 261,  8, ent%a(1), 2d0)
   call check_dbl2(ne, 261,  9, ent%a(2), 6d0)
   call check_dbl2(ne, 261, 10, ent%a(3), 15d0)
@@ -2982,7 +2982,7 @@ program big_test
 
 ! 262: fgd_alter_entry CPOLYNOM
   ent%field_type = GD_POLYNOM_ENTRY
-  ent%comp_scal = 1
+  ent%flags = GD_EN_COMPSCAL
   ent%ca(3) = dcmplx(26d0, 2d0)
   ent%scalar(1) = 'const'
   ent%scalar(2) = 'const'
@@ -2997,7 +2997,7 @@ program big_test
   call check_int2(ne, 262,  4, ent%poly_ord, 3)
   call check_int2(ne, 262,  5, ent%fragment_index, 0)
   call check_str2(ne, 262,  6, ent%field(1), 'in3')
-  call check_int2(ne, 262,  7, ent%comp_scal, 1)
+  call check_int2(ne, 262,  7, ent%flags, GD_EN_CALC + GD_EN_COMPSCAL)
   call check_cpx2(ne, 262,  8, ent%ca(1), dcmplx(93d0, 0))
   call check_cpx2(ne, 262,  9, ent%ca(2), dcmplx(93d0, 0))
   call check_cpx2(ne, 262, 10, ent%ca(3), dcmplx(26d0, 2d0))
@@ -3061,7 +3061,7 @@ program big_test
  
 ! 266: fgd_alter_entry RECIP
   ent%field_type = GD_RECIP_ENTRY
-  ent%comp_scal = 0
+  ent%flags = 0
   ent%field(1) = 'in5'
   ent%scalar(1) = 'carray'
   ent%scalar_ind(1) = 2
@@ -3072,7 +3072,7 @@ program big_test
   call check_ok2(ne, 266, 2, d)
   call check_int2(ne, 266, 3, n, GD_RECIP_ENTRY)
   call check_int2(ne, 266, 4, ent%fragment_index, 0)
-  call check_int2(ne, 266, 5, ent%comp_scal, 0)
+  call check_int2(ne, 266, 5, ent%flags, GD_EN_CALC)
   call check_str2(ne, 266, 6, ent%field(1), 'in5')
   call check_dbl2(ne, 266, 7, ent%dividend, 12d0)
   call check_str2(ne, 266, 8, ent%scalar(1), 'carray')
@@ -3081,7 +3081,7 @@ program big_test
 ! 267: fgd_alter_entry CRECIP
   ent%field_type = GD_RECIP_ENTRY
   ent%field(1) = 'in4'
-  ent%comp_scal = 1
+  ent%flags = GD_EN_COMPSCAL
   ent%cdividend = dcmplx(12d0, 14d0)
   call fgd_alter_entry(d, 'new251', ent, 15, 0)
   call check_ok2(ne, 267, 1, d)
@@ -3090,7 +3090,7 @@ program big_test
   call check_ok2(ne, 267, 2, d)
   call check_int2(ne, 267, 3, n, GD_RECIP_ENTRY)
   call check_int2(ne, 267, 4, ent%fragment_index, 0)
-  call check_int2(ne, 267, 5, ent%comp_scal, 1)
+  call check_int2(ne, 267, 5, ent%flags, GD_EN_CALC + GD_EN_COMPSCAL)
   call check_str2(ne, 267, 6, ent%field(1), 'in4')
   call check_cpx2(ne, 267, 7, ent%cdividend, dcmplx(12d0, 14d0))
   call check_str2(ne, 267, 8, ent%scalar(1), '')

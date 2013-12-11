@@ -51,6 +51,7 @@ int main(void)
   field_list = (uint8_t *)gd_mconstants(D, "parent", GD_UINT8);
 
   error = gd_error(D);
+  CHECKI(error, 0);
   CHECKP(field_list);
 
   gd_discard(D);

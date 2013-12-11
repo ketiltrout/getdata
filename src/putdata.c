@@ -261,7 +261,7 @@ static size_t _GD_DoLincomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   memcpy(tmpbuf, data_in, num_samp * GD_SIZE(data_type));
 
-  if (E->comp_scal) {
+  if (E->flags & GD_EN_COMPSCAL) {
 #ifdef GD_NO_C99_API
     double cm[1][2];
     double cb[1][2];
@@ -410,7 +410,7 @@ static size_t _GD_DoRecipOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   memcpy(tmpbuf, data_in, num_samp * GD_SIZE(data_type));
 
   /* calculate x = a/y instead of y = a/x */
-  if (E->comp_scal)
+  if (E->flags & GD_EN_COMPSCAL)
     _GD_CInvertData(D, tmpbuf, data_type, E->EN(recip,cdividend), num_samp);
   else
     _GD_InvertData(D, tmpbuf, data_type, E->EN(recip,dividend), num_samp);
@@ -469,7 +469,7 @@ static size_t _GD_DoPolynomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   memcpy(tmpbuf, data_in, num_samp * GD_SIZE(data_type));
 
-  if (E->comp_scal) {
+  if (E->flags & GD_EN_COMPSCAL) {
 #ifdef GD_NO_C99_API
     double cm[1][2];
     double cb[1][2];
@@ -674,7 +674,7 @@ size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
     return 0;
   }
 
-  if (!E->e->calculated)
+  if (!(E->flags & GD_EN_CALC))
     _GD_CalculateEntry(D, E, 1);
 
   if (D->error) {

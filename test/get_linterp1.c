@@ -38,7 +38,7 @@ int main(void)
   const char *format_data = "linterp LINTERP data ./table\ndata RAW UINT8 1\n";
   unsigned char c = 0;
   unsigned char data_data[64];
-  int fd, i, n, error, r = 0;
+  int fd, n, error, r = 0;
   DIRFILE *D;
   FILE *t;
 

@@ -39,10 +39,10 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
       type = E->EN(raw,data_type);
       break;
     case GD_LINCOM_ENTRY:
-      if (!E->e->calculated)
+      if (!(E->flags & GD_EN_CALC))
         _GD_CalculateEntry(D, E, 1);
 
-      if (E->comp_scal) {
+      if (E->flags & GD_EN_COMPSCAL) {
         type = GD_COMPLEX128;
         break;
       }
@@ -78,11 +78,14 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
         ? GD_COMPLEX128 : GD_FLOAT64;
       break;
     case GD_RECIP_ENTRY:
+      if (!(E->flags & GD_EN_CALC))
+        _GD_CalculateEntry(D, E, 1);
+
       if (_GD_BadInput(D, E, 0, 1))
         break;
 
       type = ((_GD_NativeType(D, E->e->entry[0], E->e->repr[0]) & GD_COMPLEX)
-          || E->comp_scal) ?  GD_COMPLEX128 : GD_FLOAT64;
+          || (E->flags & GD_EN_COMPSCAL)) ? GD_COMPLEX128 : GD_FLOAT64;
       break;
     case GD_BIT_ENTRY:
     case GD_INDEX_ENTRY:
@@ -97,10 +100,10 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
       type = _GD_NativeType(D, E->e->entry[0], E->e->repr[0]);
       break;
     case GD_POLYNOM_ENTRY:
-      if (!E->e->calculated)
+      if (!(E->flags & GD_EN_CALC))
         _GD_CalculateEntry(D, E, 1);
 
-      if (E->comp_scal) {
+      if (E->flags & GD_EN_COMPSCAL) {
         type = GD_COMPLEX128;
         break;
       }

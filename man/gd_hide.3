@@ -1,6 +1,6 @@
 .\" gd_hide.3.  The gd_hidden man page.
 .\"
-.\" Copyright (C) 2012 D. V. Wiebe
+.\" Copyright (C) 2012, 2013 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_hide 3 "1 January 2012" "Version 0.8.0" "GETDATA"
+.TH gd_hide 3 "10 December 2013" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_hide, gd_unhide \(em hide or unhide a dirfile database entry
 .SH SYNOPSIS
@@ -38,7 +38,9 @@ in the dirfile(5) database specified by
 and indicates whether the field or alias called is hidden or not.  Similarly,
 the
 .BR gd_unhide ()
-function unhides the specified entry.
+function unhides the specified entry.  An entry can also be hidden or unhidden
+using
+.BR gd_alter_entry (3).
 
 A hidden entry does not appear in the field lists returned by the functions
 .BR gd_field_list (3),
@@ -81,7 +83,7 @@ a call to
 .BR gd_error_string (3).
 
 .SH SEE ALSO
-.BR gd_entry (3),
+.BR gd_alter_entry (3),
 .BR gd_field_list (3),
 .BR gd_hidden (3),
 .BR gd_nfields (3),

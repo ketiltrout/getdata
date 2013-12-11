@@ -402,7 +402,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
           _GD_WriteFieldCode(D, stream, me, E->in_fields[i], permissive,
               D->standards);
           fputc(' ', stream);
-          if (E->comp_scal) {
+          if (E->flags & GD_EN_COMPSCAL) {
             _GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
                 &E->EN(lincom,cm)[i], E->scalar[i], E->scalar_ind[i], " ");
             _GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
@@ -477,7 +477,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
             D->standards);
         fputc(' ', stream);
         for (i = 0; i <= E->EN(polynom,poly_ord); ++i)
-          if (E->comp_scal)
+          if (E->flags & GD_EN_COMPSCAL)
             _GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
                 &E->EN(polynom,ca)[i], E->scalar[i], E->scalar_ind[i],
                 (i == E->EN(polynom,poly_ord)) ?  "\n" : " ");
@@ -491,8 +491,8 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
         _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
             D->standards);
         fputc(' ', stream);
-        _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE, &E->EN(bit,bitnum),
-            E->scalar[0], E->scalar_ind[0], " ");
+        _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
+            &E->EN(bit,bitnum), E->scalar[0], E->scalar_ind[0], " ");
         _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
             &E->EN(bit,numbits), E->scalar[1], E->scalar_ind[1], "\n");
         break;
@@ -586,7 +586,9 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     }
   }
 
-  if (!D->error && E->hidden && (permissive || D->standards >= 9)) {
+  if (!D->error && (E->flags & GD_EN_HIDDEN) &&
+      (permissive || D->standards >= 9))
+  {
     fputs("/HIDDEN ", stream);
     _GD_WriteFieldCode(D, stream, me, E->field, permissive, D->standards);
     fputc('\n', stream);
@@ -1028,7 +1030,7 @@ uint64_t _GD_FindVersion(DIRFILE *D)
   }
 
   for (i = 0; D->av && i < D->n_entries; ++i) {
-    if (D->entry[i]->hidden)
+    if (D->entry[i]->flags & GD_EN_HIDDEN)
       D->av &= GD_VERS_GE_9;
     else
       switch (D->entry[i]->field_type) {

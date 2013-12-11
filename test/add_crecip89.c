@@ -50,7 +50,7 @@ int main(void)
   else {
     CHECKI(e.field_type, GD_RECIP_ENTRY);
     CHECKS(e.in_fields[0], "in");
-    CHECKI(e.comp_scal, 1);
+    CHECKX(e.flags, GD_EN_COMPSCAL | GD_EN_CALC);
     CHECKF(e.EN(recip,cdividend)[0], dividend[0]);
     CHECKF(e.EN(recip,cdividend)[1], dividend[1]);
     CHECKI(e.fragment_index, 0);

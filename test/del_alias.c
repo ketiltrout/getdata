@@ -32,7 +32,6 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
   const char *format_data =
     "data RAW UINT8 8\n"
     "/ALIAS alias data\n";

@@ -33,7 +33,6 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
   const char *format_data = "lincom LINCOM a 1 2\n";
   int fd, ret, error, r = 0;
   gd_entry_t E;

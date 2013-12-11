@@ -46,7 +46,9 @@ namespace GetData {
             E.in_fields[index] : NULL;
       };
 
-      virtual int ComplexScalars() const { return E.comp_scal; }
+      virtual int ComplexScalars() const {
+        return (E.flags & GD_EN_COMPSCAL) ? 1 : 0;
+      }
 
       virtual int NFields() const { return E.u.lincom.n_fields; };
 

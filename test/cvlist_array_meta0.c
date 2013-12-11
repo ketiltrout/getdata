@@ -37,7 +37,7 @@ int main(void)
     "parent CARRAY UINT8 1\n"
     "META parent data4 LINTERP UINT8 1\n";
   int fd, r = 0;
-  size_t i, error;
+  size_t error;
   gd_carray_t *field_list;
   DIRFILE *D;
 
@@ -49,7 +49,7 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  field_list = (struct uint8_carrays *)gd_mcarrays(D, "parent", GD_UINT8);
+  field_list = (gd_carray_t *)gd_mcarrays(D, "parent", GD_UINT8);
 
   error = gd_error(D);
   CHECKI(error, 0);

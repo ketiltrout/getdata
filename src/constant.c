@@ -194,7 +194,7 @@ static int _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, int repr,
 
   /* Flag all clients as needing recalculation */
   for (i = 0; i < E->e->u.scalar.n_client; ++i)
-    E->e->u.scalar.client[i]->e->calculated = 0;
+    E->e->u.scalar.client[i]->flags &= ~GD_EN_CALC;
 
   /* Clear the client list */
   free(E->e->u.scalar.client);

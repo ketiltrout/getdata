@@ -371,7 +371,7 @@ static int _GD_UpdateScalar(DIRFILE *D, gd_entry_t *T,
   }
 
   if (!(mode & GD_UPDI)) /* clear the cache */
-    T->e->calculated = 0;
+    T->flags &= ~GD_EN_CALC;
 
   if (mode == GD_UP_IN_UP) { /* create new field codes */
     if (_GD_MakeNewCode(D, T->scalar[n], T->fragment_index, NULL, 0, c, rdat)) {

@@ -100,9 +100,16 @@ namespace GetData {
       };
 
       virtual int ComplexScalars() const {
-        return (E.field_type == GD_LINCOM_ENTRY ||
-            E.field_type == GD_POLYNOM_ENTRY) ? E.comp_scal : 0;
+        if (E.field_type == GD_LINCOM_ENTRY ||
+            E.field_type == GD_POLYNOM_ENTRY ||
+            E.field_type == GD_RECIP_ENTRY)
+          if (E.flags & GD_EN_COMPSCAL)
+            return 1;
+
+        return 0;
       }
+
+      unsigned int Flags() const { return E.flags; };
 
       virtual const char *Scalar(int index = 0) const;
 

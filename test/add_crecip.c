@@ -54,7 +54,7 @@ int main(void)
   else {
     CHECKI(e.field_type, GD_RECIP_ENTRY);
     CHECKS(e.in_fields[0], "in");
-    CHECKI(e.comp_scal, 1);
+    CHECKX(e.flags, GD_EN_COMPSCAL | GD_EN_CALC);
     CHECKC(e.EN(recip,cdividend), cdividend);
     CHECKI(e.fragment_index, 0);
 

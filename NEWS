@@ -60,9 +60,19 @@ New in verison 0.9.0a:
 
   * gd_free_entry_strings() now NULLs pointers after freeing them.
 
+  * The comp_scal member of the gd_entry_t object has been replaced with a flags
+    member, containing a flag (GD_EN_COMPSCAL) with the meaning of the former
+    comp_scal member.  There are also flags for hiddenness (GD_EN_HIDDEN) and
+    whether the scalar entries have been computed (GD_EN_CALC).
+
   * gd_entry() now returns entry metadata when they contain scalar field codes
-    which do not exist.  Previously, it would fail with the error
-    GD_E_BAD_SCALAR and return nothing.
+    which do not exist.  In this case the GD_EN_CALC flag in the object will
+    not be set.  Previously, on such entries, this function would fail with the
+    error GD_E_BAD_SCALAR and return nothing.
+
+  * gd_[m]add() and gd_alter_entry() can now be used to set or change the
+    hiddenness of a field by setting or clearing the GD_EN_HIDDEN bit in the
+    supplied gd_entry_t object.
 
   * Two new rename flags have been added:
     - GD_REN_DANGLE which indicates the library shouldn't update ALIASes whose
@@ -155,6 +165,10 @@ New in verison 0.9.0a:
 
   * C++ BUG FIX: Fixed segfault in RawEntry destructor.  Reported by S. J.
     Benton.
+
+  * C++ BUG FIX: Entry::ComplexScalars() now returns non-zero for RECIP
+    entries when appropriate, instead of always returning zero.  (The
+    RecipEntry::ComplexScalars() method always returned the correct value.)
 
   * F77 and F95 BUG FIX: Named scalar indices are now indexed from one instead
     of zero, like all other array indices are in the Fortran GetData bindings.

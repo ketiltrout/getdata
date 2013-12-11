@@ -1028,7 +1028,7 @@ static size_t _GD_DoLincom(DIRFILE *restrict D, gd_entry_t *restrict E,
   }
 
   /* Compute everything at once */
-  if (E->comp_scal)
+  if (E->flags & GD_EN_COMPSCAL)
     _GD_CLincomData(D, E->EN(lincom,n_fields), data_out, return_type,
         (GD_DCOMPLEXP_t)tmpbuf2, (GD_DCOMPLEXP_t)tmpbuf3, E->EN(lincom,cm),
         E->EN(lincom,cb), spf, n_read);
@@ -1178,7 +1178,7 @@ static size_t _GD_DoRecip(DIRFILE *restrict D, gd_entry_t *restrict E,
   }
 
   /* Compute a reciprocal */
-  if (E->comp_scal)
+  if (E->flags & GD_EN_COMPSCAL)
     _GD_CInvertData(D, data_out, return_type, E->EN(recip,cdividend), num_samp);
   else
     _GD_InvertData(D, data_out, return_type, E->EN(recip,dividend), num_samp);
@@ -1437,7 +1437,7 @@ static size_t _GD_DoPolynom(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  if (E->comp_scal)
+  if (E->flags & GD_EN_COMPSCAL)
     _GD_CPolynomData(D, data_out, return_type, n_read, E->EN(polynom,poly_ord),
         E->EN(polynom,ca));
   else
@@ -1782,12 +1782,13 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
     return 0;
   }
 
-  if (!E->e->calculated)
+  if (!(E->flags & GD_EN_CALC)) {
     _GD_CalculateEntry(D, E, 1);
 
-  if (D->error) {
-    dreturn("%i", 0);
-    return 0;
+    if (D->error) {
+      dreturn("%i", 0);
+      return 0;
+    }
   }
 
   /* calculate the native type */

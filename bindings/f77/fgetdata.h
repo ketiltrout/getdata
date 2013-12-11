@@ -470,7 +470,7 @@ void F77_FUNC(gdalcp, GDALCP) (const int32_t *dirfile, const char *field_code,
     const GD_DCOMPLEXP(a2), const GD_DCOMPLEXP(a3),
     const GD_DCOMPLEXP(a4), const GD_DCOMPLEXP(a5));
 
-void F77_FUNC(gdcscl, GDCSCL) (int32_t *comp_scal, const int32_t *dirfile,
+void F77_FUNC(gdenfl, GDENFL) (int32_t *flags, const int32_t *dirfile,
     const char *field_code, const int32_t *field_code_l);
 
 void F77_FUNC(gdvldt, GDVLDT) (int32_t *valid, const int32_t *dirfile,

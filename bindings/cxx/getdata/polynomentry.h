@@ -42,7 +42,9 @@ namespace GetData {
 
       virtual const char *Input() const { return E.in_fields[0]; };
 
-      virtual int ComplexScalars() const { return E.comp_scal; }
+      virtual int ComplexScalars() const {
+        return (E.flags & GD_EN_COMPSCAL) ? 1 : 0;
+      }
 
       virtual int PolyOrd() const { return E.u.polynom.poly_ord; };
 

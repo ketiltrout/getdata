@@ -1,6 +1,6 @@
 .\" gd_add.3.  The gd_add man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2012 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add 3 "26 July 2012" "Version 0.8.1" "GETDATA"
+.TH gd_add 3 "10 December 2013" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_add, gd_madd \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -57,6 +57,20 @@ field, the field's data will be set to zero.  If
 specifies a
 .B STRING
 field, the field data will be set to the empty string.
+
+The only flags in the
+.IR entry -> flags
+member which are honoured are
+.BR GD_EN_HIDDEN ,
+which should be set or cleared to set the hiddenness of the entry (see
+.BR gd_hidden (3)),
+and
+.BR GD_EN_COMPSCAL ,
+which indicates whether scalar parameters are initialised from the complex
+valued or purely real member, which both are present
+.RB ( LINCOM ,
+.BR POLYNOM ,
+.BR RECIP ).
 
 A metafield may be added either by calling
 .BR gd_madd ()

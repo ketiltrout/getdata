@@ -33,7 +33,6 @@ int main(void)
   E.field_type = GD_POLYNOM_ENTRY;
   E.fragment_index = 0;
   E.EN(polynom,poly_ord) = 3;
-  E.comp_scal = 0;
   E.in_fields[0] = "INDEX";
   E.scalar[0] = "A";
   E.scalar[1] = "B";

@@ -58,7 +58,7 @@ int main(void)
   CHECKI(n, 0);
   CHECKS(E.field, "data");
   CHECKX(E.field_type, GD_RECIP_ENTRY);
-  CHECKI(E.comp_scal, 0);
+  CHECKX(E.flags, GD_EN_CALC);
   CHECKI(E.EN(recip,dividend), 2);
   CHECKS(E.in_fields[0], "in");
   gd_free_entry_strings(&E);
