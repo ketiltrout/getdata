@@ -31,7 +31,7 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "const RAW UINT32 8\ndata RAW UINT8 const\n";
+  const char *format_data = "const STRING 8\ndata RAW UINT8 const\n";
   int fd, n, error, r = 0;
   DIRFILE *D;
   gd_entry_t E;
@@ -48,7 +48,9 @@ int main(void)
   n = gd_entry(D, "data", &E);
   error = gd_error(D);
   CHECKI(error, 0);
+  CHECKI(E.flags, 0);
   CHECKI(n, 0);
+  gd_free_entry_strings(&E);
 
   gd_discard(D);
   unlink(format);

@@ -18,6 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+/* this tests whether _GD_CanonicalPath can deal with symlink loops */
 #include "test.h"
 
 #include <stdlib.h>
@@ -34,7 +35,6 @@ int main(void)
 #else
   const char *link = "dirfile/link";
   const char *filedir = "dirfile/link/dirfile";
-  char *targ;
   int error, r = 0;
   int cwd_size = 2048;
   char *ptr, *cwd = NULL;
@@ -46,12 +46,8 @@ int main(void)
   mkdir("dirfile", 0777);
 
   /* make a bad symlink */
-  targ = (char*)malloc(cwd_size + 8);
-  sprintf(targ, "%s/dirfile", cwd);
-
   symlink("link", link);
 
-  /* this tests whether _GD_CanonicalPath can deal with symlink loops */
   D = gd_open(filedir, GD_RDONLY);
   error = gd_error(D);
   gd_discard(D);

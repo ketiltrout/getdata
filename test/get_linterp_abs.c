@@ -95,6 +95,8 @@ int main(void)
   CHECKI(n, 1);
   CHECKU(c, 10);
 
+  free(cwd);
+
   return r;
 #endif
 }

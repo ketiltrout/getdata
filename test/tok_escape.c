@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Parser check */
 #include "test.h"
 
 #include <stdlib.h>
@@ -41,29 +40,35 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL | GD_VERBOSE);
   e1 = gd_error(D);
+  CHECKI(e1,GD_E_OK);
 
   tok1 = gd_strtok(D, spec);
   e2 = gd_error(D);
+  CHECKI(e2,GD_E_OK);
+  CHECKS(tok1,"string");
+  free(tok1);
+
   tok2 = gd_strtok(D, NULL);
   e3 = gd_error(D);
+  CHECKI(e3,GD_E_OK);
+  CHECKS(tok2,"STRING");
+  free(tok2);
+
   tok3 = gd_strtok(D, NULL);
   e4 = gd_error(D);
+  CHECKI(e4,GD_E_OK);
+  CHECKS(tok3," value");
+  free(tok3);
+
   tok4 = gd_strtok(D, NULL);
   e5 = gd_error(D);
+  CHECKI(e5,GD_E_OK);
+  CHECKP(tok4);
 
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(e1,GD_E_OK);
-  CHECKI(e2,GD_E_OK);
-  CHECKI(e3,GD_E_OK);
-  CHECKI(e4,GD_E_OK);
-  CHECKI(e5,GD_E_OK);
-  CHECKS(tok1,"string");
-  CHECKS(tok2,"STRING");
-  CHECKS(tok3," value");
-  CHECKP(tok4);
   return r;
 }

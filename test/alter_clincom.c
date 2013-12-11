@@ -80,6 +80,7 @@ int main(void)
   CHECKC(E.EN(lincom,cb)[0], b[0]);
   CHECKC(E.EN(lincom,cb)[1], b[1]);
 #endif
+  gd_free_entry_strings(&E);
 
   gd_discard(D);
 

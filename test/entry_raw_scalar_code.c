@@ -48,7 +48,9 @@ int main(void)
   n = gd_entry(D, "data", &E);
   error = gd_error(D);
   CHECKI(error, 0);
+  CHECKI(E.flags, 0);
   CHECKI(n, 0);
+  gd_free_entry_strings(&E);
 
   gd_discard(D);
   unlink(format);
