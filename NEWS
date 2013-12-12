@@ -50,6 +50,9 @@ New in verison 0.9.0a:
   * BUG FIX: DIVIDE fields with complex valued divisors are now properly
     computed.
 
+  * BUG FIX: Complex-valued DIVIDE, POLYNOM, and RECIP fields are now computed
+    properly when the library is built in ANSI C mode.
+
   * BUG FIX: Writing complex MPLEX fields no longer corrupts the stored data.
 
   * BUG FIX: Several fixes have been made to the sample index encoding (SIE)

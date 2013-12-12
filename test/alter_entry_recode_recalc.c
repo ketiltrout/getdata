@@ -70,6 +70,9 @@ int main(void)
   ret = gd_alter_entry(D, "data", &E, 1);
   error = gd_error(D);
   n = gd_nframes(D);
+  CHECKI(error, 0);
+  CHECKI(n, 32);
+  CHECKI(ret, 0);
 
   gd_discard(D);
 
@@ -87,13 +90,9 @@ int main(void)
     r = 1;
   }
 
-//  unlink(data);
+  unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, 0);
-  CHECKI(n, 32);
-  CHECKI(ret, 0);
 
   return r;
 }

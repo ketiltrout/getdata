@@ -123,7 +123,7 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
   if (D->error)
     r |= GD_AS_ERROR;
 
-  dreturn("%i", r);
+  dreturn("0x%X", r);
   return r;
 }
 

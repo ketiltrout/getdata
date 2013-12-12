@@ -764,7 +764,7 @@ void _GD_InvertData(DIRFILE *restrict D, void *restrict data,
     for (i = 0; i < n_read; i++) { \
       const t d = ((t *)data)[2 * i] * ((t *)data)[2 * i] + \
       ((t *)data)[2 * i + 1] * ((t *)data)[2 * i + 1]; \
-      ((t *)data)[2 * i] = (t)((dividend[0] * ((t *)data)[2 * i] - \
+      ((t *)data)[2 * i] = (t)((dividend[0] * ((t *)data)[2 * i] + \
           dividend[1] * ((t *)data)[2 * i + 1]) / d); \
       ((t *)data)[2 * i + 1] = (t)((dividend[1] * ((t *)data)[2 * i] - \
           dividend[0] * ((t *)data)[2 * i]) / d); \

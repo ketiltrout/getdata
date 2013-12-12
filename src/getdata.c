@@ -386,12 +386,90 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
 #ifdef GD_NO_C99_API
 #define POLYNOMC(t) \
   switch (n) { \
-    case 2: POLYNOM2(t,2 * npts); break; \
-    case 3: POLYNOM3(t,2 * npts); break; \
-    case 4: POLYNOM4(t,2 * npts); break; \
-    case 5: POLYNOM5(t,2 * npts); break; \
+    case 2: POLYNOMC2(t,npts); break; \
+    case 3: POLYNOMC3(t,npts); break; \
+    case 4: POLYNOMC4(t,npts); break; \
+    case 5: POLYNOMC5(t,npts); break; \
     default: _GD_InternalError(D); \
   }
+
+#define POLYNOMC5(t,npts) \
+  do { \
+    for (i = 0; i < npts; i++) { \
+      const double x = ((t*)data)[2 * i]; \
+      const double x2 = x * x; \
+      const double x3 = x2 * x; \
+      const double x4 = x3 * x; \
+      const double x5 = x4 * x; \
+      const double y = ((t*)data)[2 * i + 1]; \
+      const double y2 = y * y; \
+      const double y3 = y2 * y; \
+      const double y4 = y3 * y; \
+      const double y5 = y4 * y; \
+      ((t*)data)[2 * i] = (t)( \
+        a[5] * (x5 - 10 * x3 * y2 + 5 * x * y4) \
+        - a[4] * (x4 - 6 * x2 * y2 + y4) - a[3] * (x3 - 3 * x * y2) \
+        + a[2] * (x2 - y2) + a[1] * x + a[0] \
+        ); \
+      ((t*)data)[2 * i + 1] = (t)( \
+        a[5] * (5 * x4 * y - 10 * x3 * y2 + y5) \
+        + a[4] * (4 * x3 * y - 4 * x * y3) + a[3] * (3 * x2 * y - y3) \
+        + a[2] * 2 * x * y + a[1] * y \
+        ); \
+    } \
+  } while (0)
+
+#define POLYNOMC4(t,npts) \
+  do { \
+    for (i = 0; i < npts; i++) { \
+      const double x = ((t*)data)[2 * i]; \
+      const double x2 = x * x; \
+      const double x3 = x2 * x; \
+      const double x4 = x3 * x; \
+      const double y = ((t*)data)[2 * i + 1]; \
+      const double y2 = y * y; \
+      const double y3 = y2 * y; \
+      const double y4 = y3 * y; \
+      ((t*)data)[2 * i] = (t)( \
+        a[4] * (x4 - 6 * x2 * y2 + y4) + a[3] * (x3 - 3 * x * y2) \
+        + a[2] * (x2 - y2) + a[1] * x + a[0] \
+        ); \
+      ((t*)data)[2 * i + 1] = (t)( \
+        a[4] * (4 * x3 * y - 4 * x * y3) + a[3] * (3 * x2 * y - y3) \
+        + a[2] * 2 * x * y + a[1] * y \
+        ); \
+    } \
+  } while (0)
+
+#define POLYNOMC3(t,npts) \
+  do { \
+    for (i = 0; i < npts; i++) { \
+      const double x = ((t*)data)[2 * i]; \
+      const double x2 = x * x; \
+      const double x3 = x2 * x; \
+      const double y = ((t*)data)[2 * i + 1]; \
+      const double y2 = y * y; \
+      const double y3 = y2 * y; \
+      ((t*)data)[2 * i] = (t)( \
+        a[3] * (x3 - 3 * x * y2) + a[2] * (x2 - y2) + a[1] * x + a[0] \
+        ); \
+      ((t*)data)[2 * i + 1] = (t)( \
+        a[3] * (3 * x2 * y - y3) + a[2] * 2 * x * y + a[1] * y \
+        ); \
+    } \
+  } while (0)
+
+#define POLYNOMC2(t,npts) \
+  do { \
+    for (i = 0; i < npts; i++) { \
+      const double x = ((t*)data)[2 * i]; \
+      const double x2 = x * x; \
+      const double y = ((t*)data)[2 * i + 1]; \
+      const double y2 = y * y; \
+      ((t*)data)[2 * i] = (t)(a[2] * (x2 - y2) + a[1] * x + a[0]); \
+      ((t*)data)[2 * i + 1] = (t)(a[2] * 2 * x * y + a[1] * y); \
+    } \
+  } while (0)
 #else
 #define POLYNOMC(t) POLYNOM(complex t)
 #endif
@@ -442,7 +520,11 @@ static void _GD_PolynomData(DIRFILE *restrict D, void *restrict data,
 }
 
 #ifdef GD_NO_C99_API
-#undef POLYNOMC
+#undef POLYNOMC5
+#undef POLYNOMC4
+#undef POLYNOMC3
+#undef POLYNOMC2
+#undef POLYNOMC1
 
 #define POLYNOMC5(t,npts) \
   do { \
@@ -545,15 +627,6 @@ static void _GD_PolynomData(DIRFILE *restrict D, void *restrict data,
         ); \
     } \
   } while (0)
-
-#define POLYNOMC(t) \
-  switch (n) { \
-    case 2: POLYNOMC2(t,npts); break; \
-    case 3: POLYNOMC3(t,npts); break; \
-    case 4: POLYNOMC4(t,npts); break; \
-    case 5: POLYNOMC5(t,npts); break; \
-    default: _GD_InternalError(D); \
-  }
 #endif
 
 
@@ -743,9 +816,9 @@ static void _GD_DivideData(DIRFILE *restrict D, void *restrict A,
       const int i2 = 2 * (i * spfB / spfA); \
       const t x = ((t*)A)[2 * i]; \
       const t y = ((t*)A)[2 * i + 1]; \
-      const double d = B[i2] * B[i2] - B[i2 + 1] * B[i2 + 1]; \
+      const double d = B[i2] * B[i2] + B[i2 + 1] * B[i2 + 1]; \
       ((t*)A)[2 * i] = (t)((x * B[i2] + y * B[i2 + 1]) / d); \
-      ((t*)A)[2 * i + 1] = (t)((x * B[i2] - y * B[i2 + 1]) / d); \
+      ((t*)A)[2 * i + 1] = (t)((y * B[i2] - x * B[i2 + 1]) / d); \
     } \
   } while (0)
 

@@ -428,8 +428,6 @@ static int _GD_UpdateInputs(DIRFILE *D, struct gd_rename_data_ *rdat,
   unsigned u;
   int i;
 
-  dtrace("%p, %p, %i", D, rdat, perform);
-
   /* look for meta fields */
   const int search_meta = (rdat->E->e->n_meta != -1);
 
@@ -447,6 +445,8 @@ static int _GD_UpdateInputs(DIRFILE *D, struct gd_rename_data_ *rdat,
   const int amode = (update_aliases ? GD_UPDU : 0) |
     (perform ? 0 : GD_UPDI);
 
+  dtrace("%p, %p, %i", D, rdat, perform);
+
   /* reset the code count */
   rdat->n_code = 0;
 
@@ -454,7 +454,7 @@ static int _GD_UpdateInputs(DIRFILE *D, struct gd_rename_data_ *rdat,
     if (update_vectors)
       switch (D->entry[u]->field_type) {
         case GD_LINCOM_ENTRY:
-          for (i = 0; i < D->entry[u]->n_fields; ++i) {
+          for (i = 0; i < D->entry[u]->EN(lincom,n_fields); ++i) {
             if (_GD_UpdateInField(D, D->entry[u], rdat, i, search_meta, mode)) {
               dreturn("%i", -1);
               return -1;

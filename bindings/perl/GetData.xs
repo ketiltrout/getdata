@@ -1359,7 +1359,8 @@ entry(dirfile, field_code)
           GDP_PUSHrvavcmp(E.EN(lincom,cm), E.EN(lincom,n_fields));
           GDP_PUSHpvn("b");
           GDP_PUSHrvavcmp(E.EN(lincom,cb), E.EN(lincom,n_fields));
-          sp = gdp_store_scalars(sp, &E, ((1 << E.EN(lincom,n_fields)) - 1) * 9);
+          sp = gdp_store_scalars(sp, &E,
+              ((1 << E.EN(lincom,n_fields)) - 1) * 9);
           break;
         case GD_LINTERP_ENTRY:
           GDP_PUSHpvn("in_fields");

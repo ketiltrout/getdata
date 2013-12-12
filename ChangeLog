@@ -1,3 +1,15 @@
+2013-12-12   D. V. Wiebe <getdata@ketiltrout.net> svn:872
+	* configure.ac: Disable PHP bindings if we don't have a C99 compiler.
+
+	* src/common.c (_GD_CInvertData): Correct algebra in C89 INVERT macro.
+	* src/getdata.c (_GD_PolynomData): Implement correct C89 POLYNOMC macro.
+	* src/getdata.c (_GD_CDivideData): Correct algebra in C89 DIVIDEC macro.
+
+	* src/entry.c (_GD_CalculateEntry): Return success or failure separately
+	from Dirfile error.
+
+	* src/internal.h: Fix pointer arithmetic in C89 gd_cap_ macro.
+
 2013-12-10   D. V. Wiebe <getdata@ketiltrout.net> svn:868
 	* src/getdata.h.in src/internal.h: Merge gd_entry_t members 'comp_scal' and
 	'hidden', plus private member 'calculated' into (public) member 'flags', and

@@ -155,13 +155,15 @@ typedef gd_off64_t off64_t;
 /* imaginary part of (*z) */
 #  define cimagp(z) cimag(z)
 /* a pointer to element i of GD_DCOMPLEXP_t array a */
-#  define gd_cap_(a,i) ((GD_DCOMPLEXP_t)(a + 2 * i))
+#  define gd_cap_(a,i) (((GD_DCOMPLEXP_t)(a)) + 2 * i)
 /* a pointer to a complex scalar */
 #  define gd_csp_(a) ((GD_DCOMPLEXP_t)a)
 /* assign real two-element array b to scalar a */
 #  define gd_ra2cs_(a,b) gd_cs2cs_(a,b)
 /* assign scalar b to scalar a */
 #  define gd_cs2cs_(a,b) do { (a)[0] = (b)[0]; (a)[1] = (b)[1]; } while(0)
+/* assign scalar *b to scalar a */
+#  define gd_cp2cs_(a,b) gd_cs2cs_(a,b)
 /* assign scalar b to scalar (*a) */
 #  define gd_cs2cp_(a,b) gd_cs2cs_(a,b)
 /* assign b[i] to scalar a */
@@ -206,15 +208,16 @@ typedef gd_off64_t off64_t;
 #  define gd_csp_(a) (&(a))
 #  define gd_ra2cs_(a,b) a = *((double complex*)(b))
 #  define gd_cs2cs_(a,b) a = b
-#  define gd_cs2cp_(a,b) *a = b
+#  define gd_cp2cs_(a,b) a = *(b)
+#  define gd_cs2cp_(a,b) *(a) = b
 #  define gd_ca2cs_(a,b,i) a = b[i]
 #  define gd_cp2ca_(a,i,b) (a)[i] = *(b)
 #  define gd_li2cs_(a,x,y) a = (x + _Complex_I * y)
-#  define gd_li2cp_(a,x,y) *a = (x + _Complex_I * y)
+#  define gd_li2cp_(a,x,y) *(a) = (x + _Complex_I * y)
 #  define gd_po2cs_(a,r,p) a = (r) * cexp(p)
-#  define gd_po2cp_(a,r,p) *a = (r) * cexp(p)
+#  define gd_po2cp_(a,r,p) *(a) = (r) * cexp(p)
 #  define gd_rs2cs_(a,b) a = b
-#  define gd_rs2cp_(a,b) *a = b
+#  define gd_rs2cp_(a,b) *(a) = b
 #  define gd_cs2ca_(a,i,b,t) ((complex t*)a)[i] = (complex t)(b)
 #  define gd_rs2ca_(a,i,b,t) gd_cs2ca_(a,i,b,t)
 #  define gd_ccmpl_(a,x,y) (a == (x + _Complex_I * y))

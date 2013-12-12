@@ -209,21 +209,24 @@ static int _GD_GetScalar(DIRFILE *restrict D, gd_entry_t *restrict E, int i,
 /* resolve non-literal scalars */
 int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
 {
-  int i, cs = 0;
+  int i, e = 0, cs = 0;
 
   dtrace("%p, %p, %i", D, E, err);
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      _GD_GetScalar(D, E, 0, GD_UINT_TYPE, &E->EN(raw,spf), err);
+      e = _GD_GetScalar(D, E, 0, GD_UINT_TYPE, &E->EN(raw,spf), err);
       break;
     case GD_POLYNOM_ENTRY:
       for (i = 0; i <= E->EN(polynom,poly_ord); ++i) {
-        _GD_GetScalar(D, E, i, GD_COMPLEX128, &E->EN(polynom,ca)[i], err);
-        E->EN(polynom,a)[i] = creal(E->EN(polynom,ca)[i]);
+        if (_GD_GetScalar(D, E, i, GD_COMPLEX128, &E->EN(polynom,ca)[i], err))
+          e = 1;
+        else {
+          E->EN(polynom,a)[i] = creal(E->EN(polynom,ca)[i]);
 
-        if (!cs && cimag(E->EN(polynom,ca)[i]))
-          cs = 1;
+          if (!cs && cimag(E->EN(polynom,ca)[i]))
+            cs = 1;
+        }
 
         if (D->error)
           break;
@@ -231,55 +234,67 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
       break;
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-        _GD_GetScalar(D, E, i, GD_COMPLEX128, &E->EN(lincom,cm)[i], err);
-        E->EN(lincom,m)[i] = creal(E->EN(lincom,cm)[i]);
+        if (_GD_GetScalar(D, E, i, GD_COMPLEX128, &E->EN(lincom,cm)[i], err))
+          e = 1;
+        else {
+          E->EN(lincom,m)[i] = creal(E->EN(lincom,cm)[i]);
 
-        if (!cs && cimag(E->EN(lincom,cm)[i]))
-          cs = 1;
+          if (!cs && cimag(E->EN(lincom,cm)[i]))
+            cs = 1;
+        }
 
-        _GD_GetScalar(D, E, i + GD_MAX_LINCOM, GD_COMPLEX128,
-            &E->EN(lincom,cb)[i], err);
-        E->EN(lincom,b)[i] = creal(E->EN(lincom,cb)[i]);
+        if (_GD_GetScalar(D, E, i + GD_MAX_LINCOM, GD_COMPLEX128,
+            &E->EN(lincom,cb)[i], err))
+        {
+          e = 1;
+        } else {
+          E->EN(lincom,b)[i] = creal(E->EN(lincom,cb)[i]);
 
-        if (!cs && cimag(E->EN(lincom,cb)[i]))
-          cs = 1;
+          if (!cs && cimag(E->EN(lincom,cb)[i]))
+            cs = 1;
+        }
 
         if (D->error)
           break;
       }
       break;
     case GD_RECIP_ENTRY:
-      _GD_GetScalar(D, E, 0, GD_COMPLEX128, &E->EN(recip,cdividend), err);
-      E->EN(recip,dividend) = creal(E->EN(recip,cdividend));
-      if (cimag(E->EN(recip,cdividend)))
-        cs = 1;
+      if (_GD_GetScalar(D, E, 0, GD_COMPLEX128, &E->EN(recip,cdividend), err))
+        e = 1;
+      else {
+        E->EN(recip,dividend) = creal(E->EN(recip,cdividend));
+        if (cimag(E->EN(recip,cdividend)))
+          cs = 1;
+      }
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      _GD_GetScalar(D, E, 0, GD_INT_TYPE, &E->EN(bit,bitnum), err);
-      _GD_GetScalar(D, E, 1, GD_INT_TYPE, &E->EN(bit,numbits), err);
+      e = _GD_GetScalar(D, E, 0, GD_INT_TYPE, &E->EN(bit,bitnum), err);
+      e |= _GD_GetScalar(D, E, 1, GD_INT_TYPE, &E->EN(bit,numbits), err);
       break;
     case GD_PHASE_ENTRY:
-      _GD_GetScalar(D, E, 0, GD_INT64, &E->EN(phase,shift), err);
+      e = _GD_GetScalar(D, E, 0, GD_INT64, &E->EN(phase,shift), err);
       break;
     case GD_WINDOW_ENTRY:
       switch (E->EN(window,windop)) {
         case GD_WINDOP_EQ:
         case GD_WINDOP_NE:
-          _GD_GetScalar(D, E, 0, GD_INT64, &E->EN(window,threshold.i), err);
+          e = _GD_GetScalar(D, E, 0, GD_INT64, &E->EN(window,threshold.i), err);
           break;
         case GD_WINDOP_SET:
         case GD_WINDOP_CLR:
-          _GD_GetScalar(D, E, 0, GD_UINT64, &E->EN(window,threshold.u), err);
+          e = _GD_GetScalar(D, E, 0, GD_UINT64, &E->EN(window,threshold.u),
+              err);
           break;
         default:
-          _GD_GetScalar(D, E, 0, GD_FLOAT64, &E->EN(window,threshold.r), err);
+          e = _GD_GetScalar(D, E, 0, GD_FLOAT64, &E->EN(window,threshold.r),
+              err);
           break;
       }
       break;
     case GD_MPLEX_ENTRY:
-      _GD_GetScalar(D, E, 0, GD_INT_TYPE, &E->EN(mplex,count_val), err);
-      _GD_GetScalar(D, E, 1, GD_INT_TYPE, &E->EN(mplex,period), err);
+      e = _GD_GetScalar(D, E, 0, GD_INT_TYPE, &E->EN(mplex,count_val), err);
+      e |= _GD_GetScalar(D, E, 1, GD_INT_TYPE, &E->EN(mplex,period), err);
       break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:
@@ -293,7 +308,7 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
       break;
   }
 
-  if (!D->error)
+  if (!e)
     E->flags |= GD_EN_CALC;
 
   if (cs)
@@ -301,8 +316,8 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
   else
     E->flags &= ~GD_EN_COMPSCAL;
 
-  dreturn("%i", (E->flags & GD_EN_CALC) ? 1 : 0);
-  return (E->flags & GD_EN_CALC) ? 1 : 0;
+  dreturn("%i", !e);
+  return !e;
 }
 
 char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow

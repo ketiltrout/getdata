@@ -48,8 +48,8 @@ int main(void)
 
   memset(&E, 0, sizeof(E));
   E.field_type = GD_BIT_ENTRY;
-  E.bitnum = -1;
-  E.numbits = 3;
+  E.EN(bit,bitnum) = -1;
+  E.EN(bit,numbits) = 3;
   E.in_fields[0] = "in";
 
   ret = gd_alter_entry(D, "data", &E, 0);

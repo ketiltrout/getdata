@@ -141,9 +141,9 @@ static void _GDF_ClearDirfile(int d)
 /* create a gd_triple_t value */
 static gd_triplet_t _GDF_SetTriplet(gd_windop_t op, const void *data)
 {
-  dtrace("%i, %p", op, data);
-
   gd_triplet_t t;
+
+  dtrace("%i, %p", op, data);
 
   switch(op) {
     case GD_WINDOP_EQ:
@@ -3253,11 +3253,13 @@ void F77_FUNC(gdcons, GDCONS) (void *value, const int32_t *dirfile,
     const int32_t *return_type, const int32_t *field_num)
 {
   const void *v;
+  DIRFILE *D;
+  unsigned int nfields;
 
   dtrace("%p, %i, 0x%x, %i", value, *dirfile, *return_type, *field_num);
 
-  DIRFILE *D = _GDF_GetDirfile(*dirfile);
-  unsigned int nfields = gd_nfields_by_type(D, GD_CONST_ENTRY);
+  D = _GDF_GetDirfile(*dirfile);
+  nfields = gd_nfields_by_type(D, GD_CONST_ENTRY);
 
   if (!gd_error(D) && (*field_num > 0) && (*field_num <= (int)nfields)) {
     v = gd_constants(D, (gd_type_t)*return_type);
@@ -3301,11 +3303,13 @@ void F77_FUNC(gdstrs, GDSTRS) (char *value, int32_t *value_l,
     const int32_t *dirfile, const int32_t *field_num)
 {
   const char **v;
+  DIRFILE *D;
+  unsigned int nfields;
 
   dtrace("%p, %i, %i, %i", value, *value_l, *dirfile, *field_num);
 
-  DIRFILE *D = _GDF_GetDirfile(*dirfile);
-  unsigned int nfields = gd_nfields_by_type(D, GD_STRING_ENTRY);
+  D = _GDF_GetDirfile(*dirfile);
+  nfields = gd_nfields_by_type(D, GD_STRING_ENTRY);
 
   if (!gd_error(D) && (*field_num > 0) && (*field_num <= (int)nfields)) {
     v = gd_strings(D);
@@ -3347,12 +3351,15 @@ void F77_FUNC(gdmsts, GDMSTS) (void *value, int32_t *value_l,
 /* Return the maximum string value length */
 void F77_FUNC(gdstrx, GDSTRX) (int32_t *max, const int32_t *dirfile)
 {
-  dtrace("%p, %i", max, *dirfile);
-
   const char **v;
   size_t len = 0;
-  DIRFILE *D = _GDF_GetDirfile(*dirfile);
-  unsigned int i, nfields = gd_nfields_by_type(D, GD_STRING_ENTRY);
+  DIRFILE *D;
+  unsigned int i, nfields;
+
+  dtrace("%p, %i", max, *dirfile);
+
+  D = _GDF_GetDirfile(*dirfile);
+  nfields = gd_nfields_by_type(D, GD_STRING_ENTRY);
 
   if (!gd_error(D)) {
     v = gd_strings(D);
@@ -3553,10 +3560,11 @@ void F77_FUNC(gdalsx, GDALSX) (int32_t *max, const int32_t *dirfile,
   size_t len = 0;
   char *fc;
   unsigned int i, nalias;
+  DIRFILE *D;
 
   dtrace("%p, %i, %p, %i", max, *dirfile, field_code, *field_code_l);
 
-  DIRFILE* D = _GDF_GetDirfile(*dirfile);
+  D = _GDF_GetDirfile(*dirfile);
   _GDF_CString(&fc, field_code, *field_code_l);
 
   nalias = gd_naliases(D, fc);
@@ -3598,11 +3606,12 @@ void F77_FUNC(gdalss, GDALSS) (char *alias, int32_t *alias_l,
   const char **al;
   char *fc;
   unsigned int nalias;
+  DIRFILE *D;
 
   dtrace("%p, %i, %i, %p, %i, %i", alias, *alias_l, *dirfile, field_code,
       *field_code_l, *num);
 
-  DIRFILE* D = _GDF_GetDirfile(*dirfile);
+  D = _GDF_GetDirfile(*dirfile);
   _GDF_CString(&fc, field_code, *field_code_l);
 
   nalias = gd_naliases(D, fc);
@@ -4079,8 +4088,8 @@ void F77_FUNC(gdaslc, GDASLC) (const int32_t *dirfile, const char *field_code,
 
   GDF_SCIND_F2C(E.scalar_ind[0], *m1_scalar_ind);
   GDF_SCIND_F2C(E.scalar_ind[0 + GD_MAX_LINCOM], *b1_scalar_ind);
-  E.m[0] = *m1;
-  E.b[0] = *b1;
+  E.EN(lincom,m[0]) = *m1;
+  E.EN(lincom,b[0]) = *b1;
 
   if (n > 1) {
     _GDF_CString(E.in_fields + 1, in_field2, *in_field2_l);
@@ -4089,8 +4098,8 @@ void F77_FUNC(gdaslc, GDASLC) (const int32_t *dirfile, const char *field_code,
 
     GDF_SCIND_F2C(E.scalar_ind[1], *m2_scalar_ind);
     GDF_SCIND_F2C(E.scalar_ind[1 + GD_MAX_LINCOM], *b2_scalar_ind);
-    E.m[1] = *m2;
-    E.b[1] = *b2;
+    E.EN(lincom,m[1]) = *m2;
+    E.EN(lincom,b[1]) = *b2;
   }
 
   if (n > 2) {
@@ -4100,8 +4109,8 @@ void F77_FUNC(gdaslc, GDASLC) (const int32_t *dirfile, const char *field_code,
 
     GDF_SCIND_F2C(E.scalar_ind[2], *m3_scalar_ind);
     GDF_SCIND_F2C(E.scalar_ind[2 + GD_MAX_LINCOM], *b3_scalar_ind);
-    E.m[2] = *m3;
-    E.b[2] = *b3;
+    E.EN(lincom,m[2]) = *m3;
+    E.EN(lincom,b[2]) = *b3;
   }
 
   gd_add(_GDF_GetDirfile(*dirfile), &E);
@@ -4137,13 +4146,13 @@ void F77_FUNC(gdascl, GDASCL) (const int32_t *dirfile, const char *field_code,
   dtrace("%i, %p, %i, %i, %p, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %p, "
       "%i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %p, %i, %g;%g, %p, %i, %i, "
       "%g;%g, %p, %i, %i, %i", *dirfile, field_code, *field_code_l, *n_fields,
-      in_field1, *in_field1_l, creal(*m1), cimag(*m1), m1_scalar, *m1_scalar_l,
-      *m1_scalar_ind, creal(*b1), cimag(*b1), b1_scalar, *b1_scalar_l,
-      *b1_scalar_ind, in_field2, *in_field2_l, creal(*m2), cimag(*m2),
-      m2_scalar, *m2_scalar_l, *m2_scalar_ind, creal(*b2), cimag(*b2),
+      in_field1, *in_field1_l, crealp(m1), cimagp(m1), m1_scalar, *m1_scalar_l,
+      *m1_scalar_ind, crealp(b1), cimagp(b1), b1_scalar, *b1_scalar_l,
+      *b1_scalar_ind, in_field2, *in_field2_l, crealp(m2), cimagp(m2),
+      m2_scalar, *m2_scalar_l, *m2_scalar_ind, crealp(b2), cimagp(b2),
       b2_scalar, *b2_scalar_l, *b2_scalar_ind, in_field3, *in_field3_l,
-      creal(*m3), cimag(*m3), m3_scalar, *m3_scalar_l, *m3_scalar_ind,
-      creal(*b3), cimag(*b3), b3_scalar, *b3_scalar_l, *b3_scalar_ind,
+      crealp(m3), cimagp(m3), m3_scalar, *m3_scalar_l, *m3_scalar_ind,
+      crealp(b3), cimagp(b3), b3_scalar, *b3_scalar_l, *b3_scalar_ind,
       *fragment_index);
 
   memset(&E, 0, sizeof(E));
@@ -4159,8 +4168,8 @@ void F77_FUNC(gdascl, GDASCL) (const int32_t *dirfile, const char *field_code,
 
   GDF_SCIND_F2C(E.scalar_ind[0], *m1_scalar_ind);
   GDF_SCIND_F2C(E.scalar_ind[0 + GD_MAX_LINCOM], *b1_scalar_ind);
-  gd_cp2ca_(E.cm, 0, m1);
-  gd_cp2ca_(E.cb, 0, b1);
+  gd_cp2cs_(E.EN(lincom,cm)[0], m1);
+  gd_cp2cs_(E.EN(lincom,cb)[0], b1);
 
   if (n > 1) {
     _GDF_CString(E.in_fields + 1, in_field2, *in_field2_l);
@@ -4169,8 +4178,8 @@ void F77_FUNC(gdascl, GDASCL) (const int32_t *dirfile, const char *field_code,
 
     GDF_SCIND_F2C(E.scalar_ind[1], *m2_scalar_ind);
     GDF_SCIND_F2C(E.scalar_ind[1 + GD_MAX_LINCOM], *b2_scalar_ind);
-    gd_cp2ca_(E.cm, 1, m2);
-    gd_cp2ca_(E.cb, 1, b2);
+    gd_cp2cs_(E.EN(lincom,cm)[1], m2);
+    gd_cp2cs_(E.EN(lincom,cb)[1], b2);
   }
 
   if (n > 2) {
@@ -4180,8 +4189,8 @@ void F77_FUNC(gdascl, GDASCL) (const int32_t *dirfile, const char *field_code,
 
     GDF_SCIND_F2C(E.scalar_ind[2], *m3_scalar_ind);
     GDF_SCIND_F2C(E.scalar_ind[2 + GD_MAX_LINCOM], *b3_scalar_ind);
-    gd_cp2ca_(E.cm, 2, m3);
-    gd_cp2ca_(E.cb, 2, b3);
+    gd_cp2cs_(E.EN(lincom,cm)[2], m3);
+    gd_cp2cs_(E.EN(lincom,cb)[2], b3);
   }
 
   gd_add(_GDF_GetDirfile(*dirfile), &E);
@@ -4237,30 +4246,30 @@ void F77_FUNC(gdaspn, GDASPN) (const int32_t *dirfile, const char *field_code,
     case 5:
       _GDF_CString(E.scalar + 5, a5_scalar, *a5_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[5], *a5_scalar_ind);
-      E.a[5] = *a5;
+      E.EN(polynom,a[5]) = *a5;
       /* fallthrough */
     case 4:
       _GDF_CString(E.scalar + 4, a4_scalar, *a4_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[4], *a4_scalar_ind);
-      E.a[4] = *a4;
+      E.EN(polynom,a[4]) = *a4;
       /* fallthrough */
     case 3:
       _GDF_CString(E.scalar + 3, a3_scalar, *a3_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[3], *a3_scalar_ind);
-      E.a[3] = *a3;
+      E.EN(polynom,a[3]) = *a3;
       /* fallthrough */
     case 2:
       _GDF_CString(E.scalar + 2, a2_scalar, *a2_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[2], *a2_scalar_ind);
-      E.a[2] = *a2;
+      E.EN(polynom,a[2]) = *a2;
       /* fallthrough */
     default:
       _GDF_CString(E.scalar + 1, a1_scalar, *a1_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[1], *a1_scalar_ind);
-      E.a[1] = *a1;
+      E.EN(polynom,a[1]) = *a1;
       _GDF_CString(E.scalar + 0, a0_scalar, *a0_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[0], *a0_scalar_ind);
-      E.a[0] = *a0;
+      E.EN(polynom,a[0]) = *a0;
   }
 
   gd_add(_GDF_GetDirfile(*dirfile), &E);
@@ -4292,12 +4301,12 @@ void F77_FUNC(gdascp, GDASCP) (const int32_t *dirfile, const char *field_code,
   dtrace("%i, %p, %i, %i, %p, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %g;%g, "
       "%p, %i, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %i",
       *dirfile, field_code, *field_code_l, *poly_ord, in_field, *in_field_l,
-      creal(*a0), cimag(*a0), a0_scalar, *a0_scalar_l, *a0_scalar_ind,
-      creal(*a1), cimag(*a1), a1_scalar, *a1_scalar_l, *a1_scalar_ind,
-      creal(*a2), cimag(*a2), a2_scalar, *a2_scalar_l, *a2_scalar_ind,
-      creal(*a3), cimag(*a3), a3_scalar, *a3_scalar_l, *a3_scalar_ind,
-      creal(*a4), cimag(*a4), a4_scalar, *a4_scalar_l, *a4_scalar_ind,
-      creal(*a5), cimag(*a5), a5_scalar, *a5_scalar_l, *a5_scalar_ind,
+      crealp(a0), cimagp(a0), a0_scalar, *a0_scalar_l, *a0_scalar_ind,
+      crealp(a1), cimagp(a1), a1_scalar, *a1_scalar_l, *a1_scalar_ind,
+      crealp(a2), cimagp(a2), a2_scalar, *a2_scalar_l, *a2_scalar_ind,
+      crealp(a3), cimagp(a3), a3_scalar, *a3_scalar_l, *a3_scalar_ind,
+      crealp(a4), cimagp(a4), a4_scalar, *a4_scalar_l, *a4_scalar_ind,
+      crealp(a5), cimagp(a5), a5_scalar, *a5_scalar_l, *a5_scalar_ind,
       *fragment_index);
 
   memset(&E, 0, sizeof(E));
@@ -4317,30 +4326,30 @@ void F77_FUNC(gdascp, GDASCP) (const int32_t *dirfile, const char *field_code,
     case 5:
       _GDF_CString(E.scalar + 5, a5_scalar, *a5_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[5], *a5_scalar_ind);
-      gd_cp2ca_(E.ca, 5, a5);
+      gd_cp2cs_(E.EN(polynom,ca)[5], a5);
       /* fallthrough */
     case 4:
       _GDF_CString(E.scalar + 4, a4_scalar, *a4_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[4], *a4_scalar_ind);
-      gd_cp2ca_(E.ca, 4, a4);
+      gd_cp2cs_(E.EN(polynom,ca)[4], a4);
       /* fallthrough */
     case 3:
       _GDF_CString(E.scalar + 3, a3_scalar, *a3_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[3], *a3_scalar_ind);
-      gd_cp2ca_(E.ca, 3, a3);
+      gd_cp2cs_(E.EN(polynom,ca)[3], a3);
       /* fallthrough */
     case 2:
       _GDF_CString(E.scalar + 2, a2_scalar, *a2_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[2], *a2_scalar_ind);
-      gd_cp2ca_(E.ca, 2, a2);
+      gd_cp2cs_(E.EN(polynom,ca)[2], a2);
       /* fallthrough */
     default:
       _GDF_CString(E.scalar + 1, a1_scalar, *a1_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[1], *a1_scalar_ind);
-      gd_cp2ca_(E.ca, 1, a1);
+      gd_cp2cs_(E.EN(polynom,ca)[1], a1);
       _GDF_CString(E.scalar + 0, a0_scalar, *a0_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[0], *a0_scalar_ind);
-      gd_cp2ca_(E.ca, 0, a0);
+      gd_cp2cs_(E.EN(polynom,ca)[0], a0);
   }
 
   gd_add(_GDF_GetDirfile(*dirfile), &E);
@@ -4431,7 +4440,7 @@ void F77_FUNC(gdascr, GDASCR) (const int32_t *dirfile, const char *field_code,
   _GDF_CString(&E.field, field_code, *field_code_l);
   _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
   E.fragment_index = *fragment_index;
-  gd_li2cs_(E.EN(recip,dividend), dividend[0], dividend[1]);
+  gd_li2cs_(E.EN(recip,cdividend), dividend[0], dividend[1]);
   _GDF_CString(E.scalar + 0, dividend_scalar, *dividend_scalar_l);
   GDF_SCIND_F2C(E.scalar_ind[0], *dividend_scalar_ind);
 
@@ -4464,8 +4473,8 @@ void F77_FUNC(gdaswd, GDASWD) (const int32_t *dirfile, const char *field_code,
   _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
   _GDF_CString(&E.in_fields[1], check_field, *check_field_l);
   E.fragment_index = *fragment_index;
-  E.windop = *windop;
-  E.threshold = _GDF_SetTriplet(E.windop, threshold);
+  E.EN(window,windop) = *windop;
+  E.EN(window,threshold) = _GDF_SetTriplet(E.EN(window,windop), threshold);
   _GDF_CString(E.scalar + 0, threshold_scalar, *threshold_scalar_l);
   GDF_SCIND_F2C(E.scalar_ind[0], *threshold_scalar_ind);
 
@@ -4502,8 +4511,8 @@ void F77_FUNC(gdasmx, GDASMX) (const int32_t *dirfile, const char *field_code,
   _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
   _GDF_CString(&E.in_fields[1], count_field, *count_field_l);
   E.fragment_index = *fragment_index;
-  E.count_val = *val;
-  E.period = *period;
+  E.EN(mplex,count_val) = *val;
+  E.EN(mplex,period) = *period;
   _GDF_CString(E.scalar + 0, val_scalar, *val_scalar_l);
   GDF_SCIND_F2C(E.scalar_ind[0], *val_scalar_ind);
   _GDF_CString(E.scalar + 1, period_scalar, *period_scalar_l);
@@ -4647,12 +4656,12 @@ void F77_FUNC(gdlscp, GDLSCP) (const int32_t *dirfile, const char *field_code,
   dtrace("%i, %p, %i, %i, %p, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %g;%g, "
       "%p, %i, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i",
       *dirfile, field_code, *field_code_l, *poly_ord, in_field, *in_field_l,
-      creal(*a0), cimag(*a0), a0_scalar, *a0_scalar_l, *a0_scalar_ind,
-      creal(*a1), cimag(*a1), a1_scalar, *a1_scalar_l, *a1_scalar_ind,
-      creal(*a2), cimag(*a2), a2_scalar, *a2_scalar_l, *a2_scalar_ind,
-      creal(*a3), cimag(*a3), a3_scalar, *a3_scalar_l, *a3_scalar_ind,
-      creal(*a4), cimag(*a4), a4_scalar, *a4_scalar_l, *a4_scalar_ind,
-      creal(*a5), cimag(*a5), a5_scalar, *a5_scalar_l, *a5_scalar_ind);
+      crealp(a0), cimagp(a0), a0_scalar, *a0_scalar_l, *a0_scalar_ind,
+      crealp(a1), cimagp(a1), a1_scalar, *a1_scalar_l, *a1_scalar_ind,
+      crealp(a2), cimagp(a2), a2_scalar, *a2_scalar_l, *a2_scalar_ind,
+      crealp(a3), cimagp(a3), a3_scalar, *a3_scalar_l, *a3_scalar_ind,
+      crealp(a4), cimagp(a4), a4_scalar, *a4_scalar_l, *a4_scalar_ind,
+      crealp(a5), cimagp(a5), a5_scalar, *a5_scalar_l, *a5_scalar_ind);
 
   memset(&E, 0, sizeof(E));
   E.field_type = GD_POLYNOM_ENTRY;
@@ -4669,30 +4678,30 @@ void F77_FUNC(gdlscp, GDLSCP) (const int32_t *dirfile, const char *field_code,
     case 5:
       _GDF_CString(E.scalar + 5, a5_scalar, *a5_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[5], *a5_scalar_ind);
-      gd_cp2ca_(E.ca, 5, a5);
+      gd_cp2cs_(E.EN(polynom,ca)[5], a5);
       /* fallthrough */
     case 4:
       _GDF_CString(E.scalar + 4, a4_scalar, *a4_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[4], *a4_scalar_ind);
-      gd_cp2ca_(E.ca, 4, a4);
+      gd_cp2cs_(E.EN(polynom,ca)[4], a4);
       /* fallthrough */
     case 3:
       _GDF_CString(E.scalar + 3, a3_scalar, *a3_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[3], *a3_scalar_ind);
-      gd_cp2ca_(E.ca, 3, a3);
+      gd_cp2cs_(E.EN(polynom,ca)[3], a3);
       /* fallthrough */
     case 2:
       _GDF_CString(E.scalar + 2, a2_scalar, *a2_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[2], *a2_scalar_ind);
-      gd_cp2ca_(E.ca, 2, a2);
+      gd_cp2cs_(E.EN(polynom,ca)[2], a2);
       /* fallthrough */
     default:
       _GDF_CString(E.scalar + 1, a1_scalar, *a1_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[1], *a1_scalar_ind);
-      gd_cp2ca_(E.ca, 1, a1);
+      gd_cp2cs_(E.EN(polynom,ca)[1], a1);
       _GDF_CString(E.scalar + 0, a0_scalar, *a0_scalar_l);
       GDF_SCIND_F2C(E.scalar_ind[0], *a0_scalar_ind);
-      gd_cp2ca_(E.ca, 0, a0);
+      gd_cp2cs_(E.EN(polynom,ca)[0], a0);
   }
 
   gd_alter_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
@@ -4725,8 +4734,8 @@ void F77_FUNC(gdlswd, GDLSWD) (const int32_t *dirfile, const char *field_code,
   E.field_type = GD_WINDOW_ENTRY;
   _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
   _GDF_CString(&E.in_fields[1], check_field, *check_field_l);
-  E.windop = *windop;
-  E.threshold = _GDF_SetTriplet(E.windop, threshold);
+  E.EN(window,windop) = *windop;
+  E.EN(window,threshold) = _GDF_SetTriplet(E.EN(window,windop), threshold);
   _GDF_CString(E.scalar + 0, threshold_scalar, *threshold_scalar_l);
   GDF_SCIND_F2C(E.scalar_ind[0], *threshold_scalar_ind);
 
@@ -4937,8 +4946,8 @@ void F77_FUNC(gdlslc, GDLSLC) (const int32_t *dirfile, const char *field_code,
 
   GDF_SCIND_F2C(E.scalar_ind[0], *m1_scalar_ind);
   GDF_SCIND_F2C(E.scalar_ind[0 + GD_MAX_LINCOM], *b1_scalar_ind);
-  E.m[0] = *m1;
-  E.b[0] = *b1;
+  E.EN(lincom,m[0]) = *m1;
+  E.EN(lincom,b[0]) = *b1;
 
   if (n > 1) {
     _GDF_CString(E.in_fields + 1, in_field2, *in_field2_l);
@@ -4947,8 +4956,8 @@ void F77_FUNC(gdlslc, GDLSLC) (const int32_t *dirfile, const char *field_code,
 
     GDF_SCIND_F2C(E.scalar_ind[1], *m2_scalar_ind);
     GDF_SCIND_F2C(E.scalar_ind[1 + GD_MAX_LINCOM], *b2_scalar_ind);
-    E.m[1] = *m2;
-    E.b[1] = *b2;
+    E.EN(lincom,m[1]) = *m2;
+    E.EN(lincom,b[1]) = *b2;
   }
 
   if (n > 2) {
@@ -4958,8 +4967,8 @@ void F77_FUNC(gdlslc, GDLSLC) (const int32_t *dirfile, const char *field_code,
 
     GDF_SCIND_F2C(E.scalar_ind[2], *m3_scalar_ind);
     GDF_SCIND_F2C(E.scalar_ind[2 + GD_MAX_LINCOM], *b3_scalar_ind);
-    E.m[2] = *m3;
-    E.b[2] = *b3;
+    E.EN(lincom,m[2]) = *m3;
+    E.EN(lincom,b[2]) = *b3;
   }
 
   gd_alter_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
@@ -4997,13 +5006,13 @@ void F77_FUNC(gdlscl, GDLSCL) (const int32_t *dirfile, const char *field_code,
   dtrace("%i, %p, %i, %i, %p, %i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %p, "
       "%i, %g;%g, %p, %i, %i, %g;%g, %p, %i, %i, %p, %i, %g;%g, %p, %i, %i, "
       "%g;%g, %p, %i, %i", *dirfile, field_code, *field_code_l, *n_fields,
-      in_field1, *in_field1_l, creal(*m1), cimag(*m1), m1_scalar, *m1_scalar_l,
-      *m1_scalar_ind, creal(*b1), cimag(*b1), b1_scalar, *b1_scalar_l,
-      *b1_scalar_ind, in_field2, *in_field2_l, creal(*m2), cimag(*m2),
-      m2_scalar, *m2_scalar_l, *m2_scalar_ind, creal(*b2), cimag(*b2),
+      in_field1, *in_field1_l, crealp(m1), cimagp(m1), m1_scalar, *m1_scalar_l,
+      *m1_scalar_ind, crealp(b1), cimagp(b1), b1_scalar, *b1_scalar_l,
+      *b1_scalar_ind, in_field2, *in_field2_l, crealp(m2), cimagp(m2),
+      m2_scalar, *m2_scalar_l, *m2_scalar_ind, crealp(b2), cimagp(b2),
       b2_scalar, *b2_scalar_l, *b2_scalar_ind, in_field3, *in_field3_l,
-      creal(*m3), cimag(*m3), m3_scalar, *m3_scalar_l, *m3_scalar_ind,
-      creal(*b3), cimag(*b3), b3_scalar, *b3_scalar_l, *b3_scalar_ind);
+      crealp(m3), cimagp(m3), m3_scalar, *m3_scalar_l, *m3_scalar_ind,
+      crealp(b3), cimagp(b3), b3_scalar, *b3_scalar_l, *b3_scalar_ind);
 
   memset(&E, 0, sizeof(E));
   E.field_type = GD_LINCOM_ENTRY;
@@ -5016,8 +5025,8 @@ void F77_FUNC(gdlscl, GDLSCL) (const int32_t *dirfile, const char *field_code,
 
   GDF_SCIND_F2C(E.scalar_ind[0], *m1_scalar_ind);
   GDF_SCIND_F2C(E.scalar_ind[0 + GD_MAX_LINCOM], *b1_scalar_ind);
-  gd_cp2ca_(E.cm, 0, m1);
-  gd_cp2ca_(E.cb, 0, b1);
+  gd_cp2cs_(E.EN(lincom,cm)[0], m1);
+  gd_cp2cs_(E.EN(lincom,cb)[0], b1);
 
   if (n > 1) {
     _GDF_CString(E.in_fields + 1, in_field2, *in_field2_l);
@@ -5026,8 +5035,8 @@ void F77_FUNC(gdlscl, GDLSCL) (const int32_t *dirfile, const char *field_code,
 
     GDF_SCIND_F2C(E.scalar_ind[1], *m2_scalar_ind);
     GDF_SCIND_F2C(E.scalar_ind[1 + GD_MAX_LINCOM], *b2_scalar_ind);
-    gd_cp2ca_(E.cm, 1, m2);
-    gd_cp2ca_(E.cb, 1, b2);
+    gd_cp2cs_(E.EN(lincom,cm)[1], m2);
+    gd_cp2cs_(E.EN(lincom,cb)[1], b2);
   }
 
   if (n > 2) {
@@ -5037,8 +5046,8 @@ void F77_FUNC(gdlscl, GDLSCL) (const int32_t *dirfile, const char *field_code,
 
     GDF_SCIND_F2C(E.scalar_ind[2], *m3_scalar_ind);
     GDF_SCIND_F2C(E.scalar_ind[2 + GD_MAX_LINCOM], *b3_scalar_ind);
-    gd_cp2ca_(E.cm, 2, m3);
-    gd_cp2ca_(E.cb, 2, b3);
+    gd_cp2cs_(E.EN(lincom,cm)[2], m3);
+    gd_cp2cs_(E.EN(lincom,cb)[2], b3);
   }
 
   gd_alter_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
@@ -5163,8 +5172,8 @@ void F77_FUNC(gdlsmx, GDLSMX) (const int32_t *dirfile, const char *field_code,
   E.field_type = GD_MPLEX_ENTRY;
   _GDF_CString(&E.in_fields[0], in_field, *in_field_l);
   _GDF_CString(&E.in_fields[1], count_field, *count_field_l);
-  E.count_val = *val;
-  E.period = *period;
+  E.EN(mplex,count_val) = *val;
+  E.EN(mplex,period) = *period;
   _GDF_CString(E.scalar + 0, val_scalar, *val_scalar_l);
   GDF_SCIND_F2C(E.scalar_ind[0], *val_scalar_ind);
   _GDF_CString(E.scalar + 1, period_scalar, *period_scalar_l);

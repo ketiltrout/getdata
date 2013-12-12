@@ -929,11 +929,20 @@ if test "x$make_matlabbindings" = "xyes"; then
   fi
 fi
 
-dnl matlab
+dnl php
 if test "x$make_phpbindings" = "xyes"; then
   echo
   echo "*** Configuring PHP bindings"
   echo
+  AC_MSG_CHECKING([whether C99 is supported])
+  if test "x$disable_c99" = "xno"; then
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
+    make_phpbindings=no
+  fi
+fi
+if test "x$make_phpbindings" = "xyes"; then
   GD_PHP
   if test "x$have_php" = "xno"; then
     make_phpbindings=no

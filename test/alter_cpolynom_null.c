@@ -38,7 +38,7 @@ int main(void)
     "polynom POLYNOM data 1;2 2;3 1;9\n";
   int fd, i, ret, error, n, error2, r = 0;
   gd_entry_t E;
-#ifdef GD_NO_C89_API
+#ifdef GD_NO_C99_API
   const double a[2][2] = {{1, 2}, {2, 3}};
 #endif
   DIRFILE *D;
