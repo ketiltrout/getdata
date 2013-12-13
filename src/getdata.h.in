@@ -412,7 +412,7 @@ struct gd_unified_entry_ {
 
 typedef struct gd_unified_entry_ gd_entry_t;
 
-/* The dirifle object */
+/* The dirfile object */
 typedef struct gd_dirfile_ DIRFILE;
 
 /* Parser callback objects */
