@@ -1,3 +1,13 @@
+2013-12-12   D. V. Wiebe <getdata@ketiltrout.net> svn:874
+	* src/endian.c (_GD_CheckByteSex): Added.
+	* src/endian.c (_GD_FileSwapBytes): Added (replacing macro in internal.h).
+	* src/endian.c (_GD_FixEndianness): Call _GD_CheckByteSex() to check wether
+	correction is needed.
+
+	* src/getdata.c (_GD_DoRaw) src/move.c (_GD_MogrifyFile) src/putdata.c
+	(_GD_DoRawOut): Let _GD_FixEndianness and _GD_CheckByteSex do the endianness
+	logic.
+
 2013-12-12   D. V. Wiebe <getdata@ketiltrout.net> svn:872
 	* configure.ac: Disable PHP bindings if we don't have a C99 compiler.
 

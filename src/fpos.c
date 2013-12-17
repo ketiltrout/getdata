@@ -39,7 +39,7 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
       /* We must open the file to know its starting offset */
       if (E->e->u.raw.file[0].idata < 0)
         if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_READ,
-              _GD_FileSwapBytes(D, E->fragment_index)))
+              _GD_FileSwapBytes(D, E)))
         {
           break;
         }
@@ -175,7 +175,7 @@ off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
       dreturn("%i", -1);
       return -1;
     } else if (_GD_InitRawIO(D, E, NULL, 0, NULL, GD_EF_SEEK, GD_FILE_WRITE,
-          _GD_FileSwapBytes(D, E->fragment_index)))
+          _GD_FileSwapBytes(D, E)))
     {
       dreturn("%i", -1);
       return -1;
@@ -255,7 +255,7 @@ int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode)
     case GD_RAW_ENTRY:
       /* open/create the file, if necessary */
       if (_GD_InitRawIO(D, E, NULL, 0, NULL, GD_EF_SEEK, mode,
-            _GD_FileSwapBytes(D, E->fragment_index)))
+            _GD_FileSwapBytes(D, E)))
       {
         break;
       }

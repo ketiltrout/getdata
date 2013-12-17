@@ -311,7 +311,7 @@ won't overrun the line when flushed to disk.  On a 32-bit system, this number
 is 2**24.  It is larger on a 64-bit system.
 
 The C89 GetData API provides different prototypes for
-.BR gd_add_clincom ()", " gd_add_cpolynom (),
+.BR gd_add_clincom "(), " gd_add_cpolynom (),
 and
 .BR gd_add_crecip ():
 .PP
@@ -331,7 +331,7 @@ and
 .BI int " fragment_index );
 .HP
 .BI "int gd_add_crecip(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "const char *" in_field ", double " cdividend [2],
+.BI "const char *" in_field ", const double " cdividend [2],
 .BI "int " fragment_index );
 .hy
 .ad n

@@ -67,34 +67,14 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  if (gd_ef_[E->e->u.raw.file[0].subenc].flags & GD_EF_ECOR) {
-    /* convert to/from middle-ended doubles */
-    if ((E->EN(raw,data_type) == GD_FLOAT64 || E->EN(raw,data_type) ==
-          GD_COMPLEX128) &&
-        D->fragment[E->fragment_index].byte_sex & GD_ARM_FLAG)
-    {
-      _GD_ArmEndianise((uint64_t*)databuffer, E->EN(raw,data_type) & GD_COMPLEX,
-          ns);
-    }
+  /* fix endianness, if necessary */
+  if (gd_ef_[E->e->u.raw.file[0].subenc].flags & GD_EF_ECOR)
+    _GD_FixEndianness(databuffer, ns, E->EN(raw,data_type), 0,
+        D->fragment[E->fragment_index].byte_sex);
 
-    if (D->fragment[E->fragment_index].byte_sex &
-#ifdef WORDS_BIGENDIAN
-           GD_LITTLE_ENDIAN
-#else
-           GD_BIG_ENDIAN
-#endif
-           )
-    {
-      if (E->EN(raw,data_type) & GD_COMPLEX)
-        _GD_FixEndianness((char *)databuffer, E->e->u.raw.size / 2, ns * 2);
-      else
-        _GD_FixEndianness((char *)databuffer, E->e->u.raw.size, ns);
-    }
-  }
   /* write data to file. */
-
   if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_WRITE,
-        _GD_FileSwapBytes(D, E->fragment_index)))
+        _GD_FileSwapBytes(D, E)))
   {
     free(databuffer);
     dreturn("%i", 0);

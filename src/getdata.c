@@ -253,8 +253,8 @@ static int _GD_FillZero(void *databuffer, gd_type_t type, size_t nz)
 static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
     size_t ns, gd_type_t return_type, void *restrict data_out)
 {
-  size_t n_read = 0;
-  ssize_t samples_read;
+  size_t n_read, zeroed_samples = 0;
+  ssize_t samples_read = 0;
   char *databuffer;
   size_t zero_pad = 0;
 
@@ -274,11 +274,10 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
   }
 
   if (zero_pad > 0) {
-    n_read = _GD_FillZero(databuffer, E->EN(raw,data_type), (zero_pad > ns) ?
-        ns :
-        zero_pad);
-    ns -= n_read;
-    E->e->u.raw.file[0].pos = s0 + n_read - E->EN(raw,spf) *
+    zeroed_samples = _GD_FillZero(databuffer, E->EN(raw,data_type),
+        (zero_pad > ns) ? ns : zero_pad);
+    ns -= zeroed_samples;
+    E->e->u.raw.file[0].pos = s0 + zeroed_samples - E->EN(raw,spf) *
       D->fragment[E->fragment_index].frame_offset;
     s0 = 0;
   }
@@ -286,7 +285,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
   if (ns > 0) {
     /** open the file (and cache the fp) if it hasn't been opened yet. */
     if (_GD_InitRawIO(D, E, NULL, 0, NULL, GD_EF_SEEK | GD_EF_READ,
-          GD_FILE_READ, _GD_FileSwapBytes(D, E->fragment_index)))
+          GD_FILE_READ, _GD_FileSwapBytes(D, E)))
     {
       free(databuffer);
       dreturn("%i", 0);
@@ -302,9 +301,9 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
       return 0;
     }
 
-    samples_read =
-      (*gd_ef_[E->e->u.raw.file[0].subenc].read)(E->e->u.raw.file,
-          databuffer + n_read * E->e->u.raw.size, E->EN(raw,data_type), ns);
+    samples_read = (*gd_ef_[E->e->u.raw.file[0].subenc].read)(E->e->u.raw.file,
+          databuffer + zeroed_samples * E->e->u.raw.size, E->EN(raw,data_type),
+          ns);
 
     if (samples_read == -1) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
@@ -313,35 +312,15 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
       return 0;
     }
 
-    if (gd_ef_[E->e->u.raw.file[0].subenc].flags & GD_EF_ECOR) {
-      /* convert to/from middle-ended doubles */
-      if ((E->EN(raw,data_type) == GD_FLOAT64 ||
-            E->EN(raw,data_type) == GD_COMPLEX128) &&
-          D->fragment[E->fragment_index].byte_sex & GD_ARM_FLAG)
-      {
-        _GD_ArmEndianise((uint64_t *)(databuffer + n_read * E->e->u.raw.size),
-            E->EN(raw,data_type) & GD_COMPLEX, samples_read);
-      }
+    if (gd_ef_[E->e->u.raw.file[0].subenc].flags & GD_EF_ECOR)
+      _GD_FixEndianness(databuffer + zeroed_samples * E->e->u.raw.size,
+          samples_read, E->EN(raw,data_type),
+          D->fragment[E->fragment_index].byte_sex, 0);
 
-      if (D->fragment[E->fragment_index].byte_sex &
-#ifdef WORDS_BIGENDIAN
-          GD_LITTLE_ENDIAN
-#else
-          GD_BIG_ENDIAN
-#endif
-         )
-      {
-        if (E->EN(raw,data_type) & GD_COMPLEX)
-          _GD_FixEndianness(databuffer + n_read * E->e->u.raw.size,
-              E->e->u.raw.size / 2, samples_read * 2);
-        else
-          _GD_FixEndianness(databuffer + n_read * E->e->u.raw.size,
-              E->e->u.raw.size, samples_read);
-      }
-    }
-
-    n_read += samples_read;
   }
+
+  n_read = samples_read + zeroed_samples;
+
   _GD_ConvertType(D, databuffer, E->EN(raw,data_type), data_out, return_type,
       n_read);
 

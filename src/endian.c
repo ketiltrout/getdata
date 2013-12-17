@@ -63,7 +63,7 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
           break;
 
         /* if the field's data type is one byte long, and no in-framework
-         * byte-swapping is required, do nothing */
+         * byte-swapping is performed, do nothing */
         if (D->entry[i]->e->u.raw.size == 1 &&
             !(gd_ef_[D->entry[i]->e->u.raw.file[0].subenc].flags & GD_EF_SWAP))
           continue;
@@ -174,13 +174,10 @@ unsigned long gd_endianness(DIRFILE* D, int fragment) gd_nothrow
   return D->fragment[fragment].byte_sex;
 }
 
-void _GD_ArmEndianise(uint64_t* databuffer, int is_complex, size_t ns)
+static void _GD_ArmEndianise(uint64_t* databuffer, size_t ns)
 {
   uint64_t *p;
-  dtrace("%p, %i, %zi", databuffer, is_complex, ns);
-
-  if (is_complex)
-    ns *= 2;
+  dtrace("%p, %zi", databuffer, ns);
 
   for (p = databuffer; p < databuffer + ns; ++p)
     *p = ((*p & 0xffffffff) << 32) | ((*p & 0xffffffff00000000ULL) >> 32);
@@ -188,26 +185,153 @@ void _GD_ArmEndianise(uint64_t* databuffer, int is_complex, size_t ns)
   dreturnvoid();
 }
 
-void _GD_FixEndianness(void* databuffer, size_t size, size_t ns)
+/* determine byte sex flags for the machine endianness */
+#ifdef FLOATS_BIGENDIAN
+#define  GD_FLOAT_SEX     GD_BIG_ENDIAN
+#else
+#define  GD_FLOAT_SEX     GD_LITTLE_ENDIAN
+#endif
+
+#ifdef WORDS_BIGENDIAN
+#define  GD_INT_SEX     GD_BIG_ENDIAN
+#else
+#define  GD_INT_SEX     GD_LITTLE_ENDIAN
+#endif
+
+/* returns non-zero if sex1 and sex2 imply byte sex correction is required, and
+ * sets *arm_fix if middle-ended double correction is needed; returns 
+ */
+int _GD_CheckByteSex(gd_type_t type, unsigned sex1, unsigned sex2,
+    int skip_bytes, int *restrict arm_fix)
+{
+  int endian_fix = 0;
+
+  dtrace("0x%X, 0x%X, 0x%X, %p", type, sex1, sex2, arm_fix);
+
+  /* the trivial case */
+  if (GD_SIZE(type) < 1 || (skip_bytes && GD_SIZE(type) == 1)) {
+    if (arm_fix)
+      *arm_fix = 0;
+    dreturn("%i/%i", 0, 0);
+    return 0;
+  }
+
+  /* ensure we have exactly one of GD_BIG_ENDIAN or GD_LITTLE_ENDIAN set in
+   * both bitfields */
+  if (type & (GD_IEEE754 | GD_COMPLEX)) {
+    /* arm check */
+    if (arm_fix) {
+      if (type == GD_FLOAT64 || type == GD_COMPLEX128)
+        *arm_fix = ((sex1 & GD_ARM_FLAG) != (sex2 & GD_ARM_FLAG));
+      else
+        *arm_fix = 0;
+    }
+
+    switch (sex1 & (GD_LITTLE_ENDIAN | GD_BIG_ENDIAN)) {
+      case 0:
+        sex1 |= GD_FLOAT_SEX;
+        break;
+      case GD_LITTLE_ENDIAN | GD_BIG_ENDIAN:
+        sex1 &= ~GD_FLOAT_SEX;
+        break;
+      default:
+        break; /* bits are okay */
+    }
+    switch (sex2 & (GD_LITTLE_ENDIAN | GD_BIG_ENDIAN)) {
+      case 0:
+        sex2 |= GD_FLOAT_SEX;
+        break;
+      case GD_LITTLE_ENDIAN | GD_BIG_ENDIAN:
+        sex2 &= ~GD_FLOAT_SEX;
+        break;
+      default:
+        break; /* bits are okay */
+    }
+  } else {
+    if (arm_fix)
+      *arm_fix = 0;
+
+    switch (sex1 & (GD_LITTLE_ENDIAN | GD_BIG_ENDIAN)) {
+      case 0:
+        sex1 |= GD_INT_SEX;
+        break;
+      case GD_LITTLE_ENDIAN | GD_BIG_ENDIAN:
+        sex1 &= ~GD_INT_SEX;
+        break;
+      default:
+        break; /* bits are okay */
+    }
+    switch (sex2 & (GD_LITTLE_ENDIAN | GD_BIG_ENDIAN)) {
+      case 0:
+        sex2 |= GD_INT_SEX;
+        break;
+      case GD_LITTLE_ENDIAN | GD_BIG_ENDIAN:
+        sex2 &= ~GD_INT_SEX;
+        break;
+      default:
+        break; /* bits are okay */
+    }
+  }
+
+  /* endianness check */
+  endian_fix = ((sex1 & (GD_LITTLE_ENDIAN | GD_BIG_ENDIAN)) != 
+    (sex2 & (GD_LITTLE_ENDIAN | GD_BIG_ENDIAN)));
+
+  dreturn("%i/%i", endian_fix, arm_fix ? *arm_fix : -1);
+  return endian_fix;
+}
+
+/* returns non-zero if the byte sex of RAW entry E is different than the native
+ * machine endianness */
+int _GD_FileSwapBytes(const DIRFILE *restrict D, const gd_entry_t *restrict E)
+{
+  int swap;
+
+  dtrace("%p, %p", D, E);
+
+  swap = _GD_CheckByteSex(E->EN(raw,data_type),
+      D->fragment[E->fragment_index].byte_sex, 0, 0, NULL);
+
+  dreturn("%i", swap);
+  return swap;
+}
+
+void _GD_FixEndianness(void* databuffer, size_t ns, gd_type_t type, unsigned
+    old_sex, unsigned new_sex)
 {
   size_t i;
+  int endian_fix, arm_fix;
 
-  dtrace("%p, %zu, %" PRNsize_t, databuffer, size, ns);
+  dtrace("%p, %" PRNsize_t ", 0x%X, 0x%X, 0x%X", databuffer, ns, type, old_sex,
+      new_sex);
 
-  switch (size) {
-    case 2:
-      for (i = 0; i < ns; ++i)
-        ((uint16_t*)databuffer)[i] = gd_swap16(((uint16_t*)databuffer)[i]);
-      break;
-    case 4:
-      for (i = 0; i < ns; ++i)
-        ((uint32_t*)databuffer)[i] = gd_swap32(((uint32_t*)databuffer)[i]);
-      break;
-    case 8:
-      for (i = 0; i < ns; ++i)
-        ((uint64_t*)databuffer)[i] = gd_swap64(((uint64_t*)databuffer)[i]);
-      break;
+  /* compare byte sexes */
+  endian_fix = _GD_CheckByteSex(type, old_sex, new_sex, 1, &arm_fix);
+  
+  /* complex data - treat as twice as many floating point */
+  if (type & GD_COMPLEX) {
+    ns *= 2;
+    type = (GD_SIZE(type) >> 1) | GD_IEEE754;
   }
+
+  if (arm_fix)
+    _GD_ArmEndianise(databuffer, ns);
+
+  if (endian_fix)
+    switch (GD_SIZE(type)) {
+      case 2:
+        for (i = 0; i < ns; ++i)
+          ((uint16_t*)databuffer)[i] = gd_swap16(((uint16_t*)databuffer)[i]);
+        break;
+      case 4:
+        for (i = 0; i < ns; ++i)
+          ((uint32_t*)databuffer)[i] = gd_swap32(((uint32_t*)databuffer)[i]);
+        break;
+      case 8:
+        for (i = 0; i < ns; ++i)
+          ((uint64_t*)databuffer)[i] = gd_swap64(((uint64_t*)databuffer)[i]);
+        break;
+    }
 
   dreturnvoid();
 }

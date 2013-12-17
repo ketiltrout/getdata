@@ -201,7 +201,7 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
 
       ns = (*gd_ef_[E->e->u.raw.file[0].subenc].size)(
           D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
-          E->EN(raw,data_type), _GD_FileSwapBytes(D, E->fragment_index));
+          E->EN(raw,data_type), _GD_FileSwapBytes(D, E));
 
       if (ns < 0) {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);

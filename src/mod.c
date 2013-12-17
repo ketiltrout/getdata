@@ -335,7 +335,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
         /* open the old file */
         if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_READ,
-              _GD_FileSwapBytes(D, E->fragment_index)))
+              _GD_FileSwapBytes(D, E)))
         {
           break;
         } else if ((*enc->seek)(E->e->u.raw.file, 0, E->EN(raw,data_type),
@@ -350,7 +350,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
         /* Create a temporary file and open it */
         if (_GD_InitRawIO(D, E, NULL, -1, enc, 0, GD_FILE_WRITE | GD_FILE_TEMP,
-              _GD_FileSwapBytes(D, E->fragment_index)))
+              _GD_FileSwapBytes(D, E)))
           break;
         else if (_GD_WriteSeek(D, E, enc, 0, GD_FILE_WRITE | GD_FILE_TEMP)
             == -1)

@@ -302,7 +302,7 @@ and
 .BI "int " poly_ord ", const char *" in_fields ", const double *" ca );
 .HP
 .BI "int gd_alter_crecip(DIRFILE *" dirfile ", const char *" field_code ,
-.BI "const char *" in_field ", double " cdividend [2]);
+.BI "const char *" in_field ", const double " cdividend [2]);
 .hy
 .ad n
 .PP
@@ -337,7 +337,10 @@ portability, the C89 version of
 .BR gd_alter_crecip ()
 is always available, and may be accessed as
 .BR gd_alter_crecip89 (),
-with the C89 prototype, in both the C99 and C89 APIs.
+with the C89 prototype, in both the C99 and C89 APIs.  Passing NULL as
+.I cdividend
+is equivalent to specifying a dividend of zero: it indicates no change to the
+dividend parameter.
 
 .SH SEE ALSO
 .BR gd_alter_entry (3),

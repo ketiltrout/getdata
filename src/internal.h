@@ -807,6 +807,11 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_ARG_NO_VERS        5
 #define GD_E_ARG_BAD_VERS       6
 
+/* the size of the memory buffer used for various bulk I/O operations */
+#define BUFFER_SIZE 9000000
+
+/* number of lines chunked-in from a LINTERP table at a time */
+#define GD_LUT_CHUNK 100
 
 /* I/O flags */
 #define GD_FILE_READ  0x1
@@ -899,20 +904,19 @@ struct gd_private_entry_ {
   } u;
 };
 
-#define GD_ENC_NONE       0
-#define GD_ENC_SLIM       1
-#define GD_ENC_GZ_RAW     2
-#define GD_ENC_BZ2_RAW    3
-#define GD_ENC_ASCII      4
-#define GD_ENC_LZMA_RAW   5
-#define GD_ENC_XZ_RAW     6
-#define GD_ENC_SIE        7
-#define GD_ENC_ZZIP       8
-#define GD_ENC_ZZSLIM     9
-#define GD_ENC_UNKNOWN   10
+/* _GD_FiniRawIO flags */
+#define GD_FINIRAW_KEEP      0x0
+#define GD_FINIRAW_DISCARD   0x1
+#define GD_FINIRAW_DEFER     0x2
+#define GD_FINIRAW_CLOTEMP   0x4
 
-#define GD_N_SUBENCODINGS (GD_ENC_UNKNOWN + 1)
+/* number of subencodings (ie. the length of the gd_ef_ array */
+#define GD_N_SUBENCODINGS 11
 
+/* the last record of the gd_ef_ array is always the unknown encoding */
+#define GD_ENC_UNKNOWN (GD_N_SUBENCODINGS - 1)
+
+/* external module function provides flags */
 #define GD_EF_NAME    0x0001
 #define GD_EF_OPEN    0x0002
 #define GD_EF_CLOSE   0x0004
@@ -924,21 +928,7 @@ struct gd_private_entry_ {
 #define GD_EF_MOVE    0x0100
 #define GD_EF_UNLINK  0x0200
 
-#define GD_FINIRAW_KEEP      0x0
-#define GD_FINIRAW_DISCARD   0x1
-#define GD_FINIRAW_DEFER     0x2
-#define GD_FINIRAW_CLOTEMP   0x4
-
-#define BUFFER_SIZE 9000000
-
-#define GD_LUT_CHUNK 100
-
-/* helper macro */
-#if defined ARM_ENDIAN_FLOATS || \
-  ((defined WORDS_BIGENDIAN) ^ (defined FLOATS_BIGENDIAN))
-#  define SCREWY_FLOATS
-#endif
-
+/* encoding scheme method prototypes */
 typedef int (*gd_ef_name_t)(DIRFILE *D, const char *, struct gd_raw_file_*,
     const char*, int, int);
 typedef int (*gd_ef_open_t)(int, struct gd_raw_file_*, int, unsigned int);
@@ -955,17 +945,38 @@ typedef int (*gd_ef_move_t)(int, struct gd_raw_file_*, int, char*);
 
 /* Encoding scheme flags */
 #define GD_EF_ECOR 0x1 /* post-framework byte-sex correction required */
-#define GD_EF_SWAP 0x2 /* in-framework byte-sex metadata correction required */
+#define GD_EF_SWAP 0x2 /* in-framework byte-sex metadata correction occurs */
 #define GD_EF_OOP  0x4 /* writes occur out-of-place */
 #define GD_EF_EDAT 0x8 /* The /ENCODING datum is used */
+
+/* Just so we're clear on the difference between GD_EF_ECOR and GD_EF_SWAP:
+ *
+ * - ECOR means the data returned by the encoding framework has the byte sex of
+ *   the fragment; GetData needs to swap bytes around after the framework
+ *   finishes if this is different than the machine endianness.  Most binary
+ *   formats set ECOR, but TEXT doesn't, since sscanf() puts stuff into the
+ *   machine endianness.
+ *
+ * - SWAP means that internal workings of the encoding needs to know whether
+ *   the byte sex of the fragment is different than the machine endianness.
+ *   This is set by SIE since its sample indices are stored in the fragment
+ *   endianness, which need to be converted by within the encoding scheme itself
+ *   to be able to read opposite endian data files.
+ *
+ * Note: any encoding scheme could set SWAP instead of ECOR and then perform its
+ *   own byte sex correction to hide it from GetData proper, but this should be
+ *   avoided because it can lead to more byte swapping than necessary.
+ */
+
 /* Encoding schemes */
 extern struct encoding_t {
-  unsigned long int scheme;
-  const char* ext;
-  unsigned int flags; /* flags */
-  const char* affix;
-  const char* ffname;
-  unsigned int provides;
+  unsigned long int scheme; /* scheme number (the gd_open() flag value) */
+  const char* ext;          /* filename extension */
+  unsigned int flags;       /* encoding flags */
+  const char* affix;        /* function name prefix (NULL for internal scheme)*/
+  const char* ffname;       /* /ENCODING directive name */
+  unsigned int provides;    /* bitfield of functions provided by external
+                               module (0 for internal scheme) */
   gd_ef_name_t name;
   gd_ef_open_t open;
   gd_ef_close_t close;
@@ -980,14 +991,10 @@ extern struct encoding_t {
 
 /* Format file fragment metadata */
 struct gd_fragment_t {
-  /* Canonical name (full path) */
-  char* cname;
-  /* Subdirectory name */
-  char* sname;
-  /* basename */
-  char *bname;
-  /* External name (the one that appears in the format file) */
-  char* ename;
+  char* cname; /* Canonical name (full path) */
+  char* sname; /* Subdirectory name (path relative to dirfile or absolute) */
+  char *bname; /* basename (filename) */
+  char* ename; /* External name (the one that appears in the format file) */
   void *enc_data;
   int modified;
   int parent;
@@ -1011,7 +1018,7 @@ struct gd_dir_t {
   int rc;
 };
 
-/* internal flags */
+/* internal dirfile flags */
 #define GD_MULTISTANDARD   0x20000000 /* have multiple standards in format */
 #define GD_HAVE_VERSION    0x40000000 /* have computed the version */
 #define GD_INVALID         0x80000000 /* the dirfile is invalid */
@@ -1023,6 +1030,7 @@ struct gd_dir_t {
 #define GD_REPR_MOD  'm'
 #define GD_REPR_ARG  'a'
 
+/* the implicit representation */
 #define GD_REPR_AUTO GD_REPR_REAL
 
 /* The DIRFILE struct.  */
@@ -1089,7 +1097,6 @@ struct gd_dirfile_ {
 
 /* forward declarations */
 void *_GD_Alloc(DIRFILE*, gd_type_t, size_t) __attribute_malloc__;
-void _GD_ArmEndianise(uint64_t*, int, size_t);
 int _GD_BadInput(DIRFILE *, const gd_entry_t *, int, int);
 
 #define _GD_BadWindop(op) \
@@ -1101,6 +1108,7 @@ int _GD_BadInput(DIRFILE *, const gd_entry_t *, int, int);
 
 int _GD_CalculateEntry(DIRFILE *restrict, gd_entry_t *restrict, int);
 char *_GD_CanonicalPath(const char *restrict, const char *restrict);
+int _GD_CheckByteSex(gd_type_t, unsigned, unsigned, int, int *restrict);
 gd_entry_t *_GD_CheckParent(DIRFILE *restrict D, char **restrict name, int me,
     int linenum);
 int _GD_CheckCodeAffixes(DIRFILE *D, const gd_entry_t *P,
@@ -1131,12 +1139,8 @@ gd_entry_t *_GD_FindField(const DIRFILE *restrict, const char *restrict,
 gd_entry_t *_GD_FindFieldAndRepr(DIRFILE *restrict, const char *restrict,
     char **restrict, int *restrict, unsigned int *restrict, int, int);
 uint64_t _GD_FindVersion(DIRFILE *D);
-void _GD_FixEndianness(void* databuffer, size_t size, size_t ns);
-#ifdef WORDS_BIGENDIAN
-#define _GD_FileSwapBytes(D,i) ((D)->fragment[i].byte_sex & GD_LITTLE_ENDIAN)
-#else
-#define _GD_FileSwapBytes(D,i) ((D)->fragment[i].byte_sex & GD_BIG_ENDIAN)
-#endif
+void _GD_FixEndianness(void*, size_t, gd_type_t, unsigned, unsigned);
+int _GD_FileSwapBytes(const DIRFILE *restrict, const gd_entry_t *restrict);
 int _GD_FiniRawIO(DIRFILE*, const gd_entry_t*, int, int);
 void _GD_Flush(DIRFILE *restrict, gd_entry_t *restrict, int, int);
 void _GD_FlushMeta(DIRFILE* D, int fragment, int force);
@@ -1347,6 +1351,7 @@ off64_t _GD_ZzslimSize(int, struct gd_raw_file_* file, gd_type_t data_type,
 # define gd_nothrow
 #endif
 
+/* deal with GD_ANON */
 #ifdef GD_C89_API
 # define EN(t,v) u.t.v
 #else

@@ -1573,7 +1573,7 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D, int n_cols, char **in_cols,
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
       else
         _GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_WRITE | GD_FILE_TOUCH,
-            _GD_FileSwapBytes(D, E->fragment_index));
+            _GD_FileSwapBytes(D, E));
     }
 
     /* Is this the first raw field ever defined? */

@@ -298,8 +298,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
             GD_SIZE(E->EN(raw,data_type))) == 0)
         _GD_SetError(D, GD_E_BAD_TYPE, entry->EN(raw,data_type), NULL, 0, NULL);
       else if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0,
-            GD_FILE_WRITE | GD_FILE_TOUCH,
-            _GD_FileSwapBytes(D, E->fragment_index)))
+            GD_FILE_WRITE | GD_FILE_TOUCH, _GD_FileSwapBytes(D, E)))
       {
         ;
       } else if (D->fragment[E->fragment_index].ref_name == NULL) {

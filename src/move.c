@@ -30,7 +30,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   ssize_t nread, nwrote;
   int subencoding = GD_ENC_UNKNOWN;
   int i, ef_swap;
-  int arm_endianise;
+  int arm_fix = 0, endian_fix = 0;
   void *buffer;
 
   dtrace("%p, %p, %lu, %lu, %lli, %i, %i, %p", D, E, encoding, byte_sex,
@@ -92,33 +92,41 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
 
   enc_in = gd_ef_ + E->e->u.raw.file[0].subenc;
 
-  /* Need to do the ARM thing? */
-  arm_endianise = (((byte_sex & GD_ARM_FLAG) && (enc_out->flags & GD_EF_ECOR)) ^
-      ((D->fragment[E->fragment_index].byte_sex & GD_ARM_FLAG) &&
-       (enc_in->flags & GD_EF_ECOR))) && (E->EN(raw,data_type) == GD_FLOAT64 ||
-       E->EN(raw,data_type) == GD_COMPLEX128);
+  /* if neither encoding scheme does internal byte swapping, and the data
+   * type can't be endianness swapped, sex differences can't matter */
+  if (GD_SIZE(E->e->u.raw.size) != 1 || (enc_in->flags & GD_EF_SWAP) ||
+      (enc_out->flags & GD_EF_SWAP))
+  {
+    /* figure out whether endianness correction is required */
+    if ((enc_in->flags & GD_EF_ECOR) || (enc_in->flags & GD_EF_ECOR)) {
+      unsigned in_sex = D->fragment[E->fragment_index].byte_sex;
+      unsigned out_sex = byte_sex;
 
-  /* Normalise endiannesses */
-#ifdef WORDS_BIGENDIAN
-  ef_swap = (byte_sex & GD_LITTLE_ENDIAN) ? 1 : 0;
-  byte_sex = ((byte_sex & GD_LITTLE_ENDIAN) &&
-      (enc_out->flags & (GD_EF_ECOR | GD_EF_SWAP))) ^
-    ((D->fragment[E->fragment_index].byte_sex & GD_LITTLE_ENDIAN) &&
-     (enc_in->flags & (GD_EF_ECOR | GD_EF_SWAP)));
-#else
-  ef_swap = (byte_sex & GD_BIG_ENDIAN) ? 1 : 0;
-  byte_sex = ((byte_sex & GD_BIG_ENDIAN) &&
-      (enc_out->flags & (GD_EF_ECOR | GD_EF_SWAP))) ^
-    ((D->fragment[E->fragment_index].byte_sex & GD_BIG_ENDIAN) &&
-     (enc_in->flags & (GD_EF_ECOR | GD_EF_SWAP)));
-#endif
-  /* Now byte_sex is true if endianness conversion is required. */
+      /* fix endian flags for encoding behaviour */
+      if (!(enc_in->flags & (GD_EF_SWAP | GD_EF_ECOR))) {
+        in_sex = (in_sex & ~(GD_LITTLE_ENDIAN | GD_BIG_ENDIAN)) |
+          (out_sex & (GD_LITTLE_ENDIAN | GD_BIG_ENDIAN));
+        if (!(enc_in->flags & GD_EF_ECOR))
+          in_sex = (in_sex & ~GD_ARM_FLAG) | (out_sex & GD_ARM_FLAG);
+      }
+
+      if (!(enc_out->flags & (GD_EF_SWAP | GD_EF_ECOR))) {
+        out_sex = (out_sex & ~(GD_LITTLE_ENDIAN | GD_BIG_ENDIAN)) |
+          (in_sex & (GD_LITTLE_ENDIAN | GD_BIG_ENDIAN));
+        if (!(enc_out->flags & GD_EF_ECOR))
+          out_sex = (out_sex & ~GD_ARM_FLAG) | (in_sex | GD_ARM_FLAG);
+      }
+
+      endian_fix = _GD_CheckByteSex(E->EN(raw,data_type), in_sex, out_sex, 0,
+          &arm_fix);
+    }
+  }
 
   /* If all that's changing is the byte sex, but we don't need to do
    * endianness conversion, don't do anything */
   if (offset == 0 && encoding == D->fragment[E->fragment_index].encoding &&
-      !byte_sex && !arm_endianise && strcmp(new_filebase,
-        E->e->u.raw.filebase) == 0 && D->fragment[new_fragment].dirfd ==
+      !endian_fix && !arm_fix && strcmp(new_filebase, E->e->u.raw.filebase) == 0
+      && D->fragment[new_fragment].dirfd ==
       D->fragment[E->fragment_index].dirfd)
   {
     free(new_filebase);
@@ -139,12 +147,15 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
 
   /* Open the input file, if necessary */
   if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_READ,
-        _GD_FileSwapBytes(D, E->fragment_index)))
+        _GD_FileSwapBytes(D, E)))
   {
     free(new_filebase);
     dreturn("%i", -1);
     return -1;
   }
+
+  /* set ef_swap, the output encoding in-framework endian correction flag */
+  ef_swap = _GD_CheckByteSex(E->EN(raw,data_type), byte_sex, 0, 0, NULL);
 
   /* Create the output file and open it. If we're changing encodings, we
    * could write to the new file directly.  However, we use a temporary file
@@ -202,18 +213,9 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
     if (nread == 0)
       break;
 
-    /* fix army-ness, if required */
-    if (arm_endianise)
-      _GD_ArmEndianise((uint64_t *)buffer, E->EN(raw,data_type) & GD_COMPLEX,
-          nread);
-
     /* swap endianness, if required */
-    if (byte_sex) {
-      if (E->EN(raw,data_type) & GD_COMPLEX)
-        _GD_FixEndianness((char *)buffer, E->e->u.raw.size / 2, nread * 2);
-      else
-        _GD_FixEndianness((char *)buffer, E->e->u.raw.size, nread);
-    }
+    _GD_FixEndianness(buffer, nread, E->EN(raw,data_type),
+        D->fragment[E->fragment_index].byte_sex, byte_sex);
 
     nwrote = _GD_WriteOut(E, enc_out, buffer, E->EN(raw,data_type), nread, 1);
 

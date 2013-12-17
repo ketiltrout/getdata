@@ -36,6 +36,7 @@ static int framework_initialised = 0;
   NULL
 #define GD_EF_GENERIC_SET &_GD_GenericName, NULL, NULL, NULL, NULL, NULL, \
   NULL, NULL, &_GD_GenericMove, &_GD_GenericUnlink
+
 #ifdef USE_MODULES
 #define GD_EXT_ENCODING_NULL(sc,ex,ec,af,ff) \
 { sc,ex,ec,af,ff,GD_EF_PROVIDES,GD_EF_NULL_SET }
