@@ -35,8 +35,8 @@ ADD_TESTS=add_add add_affix add_alias add_alias_affix add_alias_meta add_bit \
 					add_mplex_scalars add_multiply add_multiply_invalid add_phase \
 					add_phase_invalid add_polynom add_polynom_scalar add_protect add_raw \
 					add_raw_include add_raw_invalid add_raw_spf add_raw_spf_scalar \
-					add_raw_type add_rdonly add_recip add_resolv add_sbit add_scalar \
-					add_scalar_carray add_scalar_carray_bad add_sort add_spec \
+					add_raw_sub add_raw_type add_rdonly add_recip add_resolv add_sbit \
+					add_scalar add_scalar_carray add_scalar_carray_bad add_sort add_spec \
 					add_spec_directive add_spec_invalid add_spec_meta add_spec_resolv \
 					add_string add_string_affix add_type add_window add_window_op
 
@@ -60,8 +60,8 @@ ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
 						alter_recip alter_recip_zero alter_scalar_affix alter_spec \
 						alter_spec_affix alter_spec_meta alter_spec_polynom alter_window
 
-ASCII_TESTS=ascii_add ascii_get ascii_get_complex ascii_get_get ascii_nframes \
-						ascii_put ascii_sync
+ASCII_TESTS=ascii_add ascii_get ascii_get_complex ascii_get_get ascii_get_sub \
+						ascii_nframes ascii_put ascii_sync
 
 BOF_TESTS=bof bof_bit bof_index bof_lincom bof_phase bof_phase_neg
 
@@ -209,7 +209,7 @@ GLOBAL_TESTS=global_flags global_name global_ref global_ref_empty global_ref_set
 
 GZIP_TESTS=gzip_add gzip_del gzip_get gzip_get_get gzip_get_get2 gzip_get_put \
 					 gzip_move_from gzip_move_to gzip_nframes gzip_put gzip_put_back \
-					 gzip_put_endian gzip_put_get gzip_sync
+					 gzip_put_endian gzip_put_get gzip_put_sub gzip_sync
 
 HEADER_TESTS=header_complex
 
@@ -337,7 +337,7 @@ PUT_TESTS=put64 put_bad_code put_bit put_bof put_carray put_carray_client \
 					put_multiply put_null put_off64 put_phase put_phase_noin \
 					put_polynom1 put_polynom2 put_polynom_noin put_protect put_rdonly \
 					put_recip put_recurse put_repr put_rofs put_sbit put_sf put_ss \
-					put_string put_string_protect put_type put_uint16 put_uint32 \
+					put_string put_string_protect put_sub put_type put_uint16 put_uint32 \
 					put_uint64 put_window put_zero
 
 REF_TESTS=ref ref_none ref_two
@@ -348,7 +348,7 @@ REPR_TESTS=repr_a repr_bad repr_float32 repr_float64 repr_i repr_int16 \
 					 repr_uint64 repr_uint8
 
 SEEK_TESTS=seek64 seek_cur seek_end seek_foffs seek_index seek_lincom \
-					 seek_mult seek_neg seek_phase seek_set
+					 seek_mult seek_neg seek_phase seek_set seek_sub
 
 SIE_TESTS=sie_get_big sie_get_little sie_move_from sie_move_to sie_nframes_big \
 					sie_nframes_little sie_put_append sie_put_append2 sie_put_back \
@@ -365,7 +365,7 @@ SPF_TESTS=spf_alias spf_alias_missing spf_alias_meta spf_divide spf_lincom \
 
 TABLE_TESTS=table table_code table_type
 
-TELL_TESTS=tell tell64 tell_multidiv
+TELL_TESTS=tell tell64 tell_multidiv tell_sub
 
 TOK_TESTS=tok_arg tok_escape tok_quote
 

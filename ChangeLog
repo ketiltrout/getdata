@@ -1,3 +1,13 @@
+2013-12-17   D. V. Wiebe <getdata@ketiltrout.net> svn:875
+	* src/add.c (_GD_Add) src/fpos.c (_GD_GetFilePos _GD_WriteSeek _GD_Seek)
+	src/getdata.c (_GD_DoRaw) src/mod.c (_GD_Change) src/move.c
+	(_GD_MogrifyFile) src/parse.c (_GD_ParseFieldSpec) src/putdata.c
+	(_GD_InitRawIO): Call _GD_InitRawIO with fragment = -1.
+	* test/add_raw_sub.c test/ascii_get_sub.c test/gzip_put_sub.c test/put_sub.c
+	test/seek_sub.c test/tell_sub.c: Added.
+
+	* src/errors.c src/internal.h: Add GD_E_UNCLEAN_CALL suberror.
+
 2013-12-12   D. V. Wiebe <getdata@ketiltrout.net> svn:874
 	* src/endian.c (_GD_CheckByteSex): Added.
 	* src/endian.c (_GD_FileSwapBytes): Added (replacing macro in internal.h).

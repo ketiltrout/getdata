@@ -73,7 +73,7 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
         D->fragment[E->fragment_index].byte_sex);
 
   /* write data to file. */
-  if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_WRITE,
+  if (_GD_InitRawIO(D, E, NULL, -1, NULL, 0, GD_FILE_WRITE,
         _GD_FileSwapBytes(D, E)))
   {
     free(databuffer);

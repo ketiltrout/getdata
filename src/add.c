@@ -297,7 +297,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       else if (E->EN(raw,data_type) & 0x40 || (E->e->u.raw.size =
             GD_SIZE(E->EN(raw,data_type))) == 0)
         _GD_SetError(D, GD_E_BAD_TYPE, entry->EN(raw,data_type), NULL, 0, NULL);
-      else if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0,
+      else if (_GD_InitRawIO(D, E, NULL, -1, NULL, 0,
             GD_FILE_WRITE | GD_FILE_TOUCH, _GD_FileSwapBytes(D, E)))
       {
         ;

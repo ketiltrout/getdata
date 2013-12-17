@@ -284,7 +284,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
 
   if (ns > 0) {
     /** open the file (and cache the fp) if it hasn't been opened yet. */
-    if (_GD_InitRawIO(D, E, NULL, 0, NULL, GD_EF_SEEK | GD_EF_READ,
+    if (_GD_InitRawIO(D, E, NULL, -1, NULL, GD_EF_SEEK | GD_EF_READ,
           GD_FILE_READ, _GD_FileSwapBytes(D, E)))
     {
       free(databuffer);

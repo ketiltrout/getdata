@@ -185,9 +185,11 @@ static const struct {
   { GD_E_CALLBACK, 0, "Unrecognised response from callback function: {3}", 0 },
   /* GD_E_ExISTS: (nothing) */
   { GD_E_EXISTS, 0, "Dirfile exists", 0 },
-  /* GD_E_UNCLEAN_DB: 3 = fragment */
+  /* GD_E_UNCLEAN_DB: 2 = fragment, 3 = errno; 4 = call */
+  { GD_E_UNCLEAN_DB, GD_E_UNCLEAN_CALL,
+    "Unexpected system error processing {2}; database unclean: {4}: ", 1 },
   { GD_E_UNCLEAN_DB, 0,
-    "Unexpected system error processing {3}; database unclean", 0 },
+    "Unexpected system error processing {2}; database unclean", 0 },
   /* GD_E_DOMAIN: (nothing) */
   { GD_E_DOMAIN, GD_E_DOMAIN_COMPLEX, "Improper domain: complex valued", 0 },
   { GD_E_DOMAIN, GD_E_DOMAIN_EMPTY, "Improper domain: empty set", 0 },

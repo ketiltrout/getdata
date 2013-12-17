@@ -340,7 +340,8 @@ static int _GD_MoveOver(DIRFILE *restrict D, int fragment,
       file[1].name = NULL;
     }
     errno = move_errno;
-    _GD_SetError(D, GD_E_UNCLEAN_DB, 0, D->fragment[fragment].cname, 0, NULL);
+    _GD_SetError(D, GD_E_UNCLEAN_DB, GD_E_UNCLEAN_CALL,
+        D->fragment[fragment].cname, errno, "gd_RenameAt");
     D->flags |= GD_INVALID;
     dreturn("%i", -1);
     return -1;

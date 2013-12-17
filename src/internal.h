@@ -782,6 +782,8 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_REPR_UNKNOWN       1
 #define GD_E_REPR_PUT           2
 
+#define GD_E_UNCLEAN_CALL       1
+
 #define GD_E_DOMAIN_COMPLEX     1
 #define GD_E_DOMAIN_EMPTY       2
 #define GD_E_DOMAIN_ANTITONIC   3
