@@ -20,7 +20,7 @@ New in verison 0.9.0a:
 
   * BUG FIX: When performing a metadata update due to a renamed field, the field
     codes containing subfields of the renamed field are now also updated,
-    including field codes specifying meta subfield which do not exist.
+    including field codes specifying meta subfields which do not exist.
 
   * BUG FIX: The gd_[m]add() functions now ignore zero-length scalar strings.
     Previously they would store these invalid field codes, causing problems
@@ -117,8 +117,8 @@ New in verison 0.9.0a:
     field_end which is beyond the end of field, and then is required to
     extrapolate outside of the specified frame range.
 
-  * BUG FIX: gd_add_polynom() and similar now produce the correct error string
-    when encountering a poly_ord out of range.
+  * BUG FIX: gd_error_string() now produces the correct string when reporting
+    an out-of-range poly_ord encountered by gd_add_polynom() and similar.
 
   * BUG FIX: gd_alter_raw() and similar no longer fail when asked to re-encode
     the data file of a RAW field which has not been previously accessed.
@@ -181,6 +181,9 @@ New in verison 0.9.0a:
 
   * IDL BUG FIX: the /UPDATEDB flag to gd_rename now operates as expected.
     Previously it would act like /MOVE_DATA.
+
+  * PYTHON BUG FIX: The keyword for the "dirfile" parameter in the
+    getdata.fragment constructor is now properly spelled.
 
 |==============================================================================|
 
@@ -1442,7 +1445,7 @@ New in version 0.5.0:
 
   Miscellaneous:
 
-  * BUG FIX: The dirifle_madd_bit(3) manual page has been corrected to show
+  * BUG FIX: The dirfile_madd_bit(3) manual page has been corrected to show
     the correct order or parameters for all the dirfile_madd_<field_type>
     functions.
 

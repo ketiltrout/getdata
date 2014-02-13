@@ -1,3 +1,7 @@
+2014-02-21   D. V. Wiebe <getdata@ketiltrout.net> svn:876
+	* bindings/python/pyfragment.c (gdpy_fragment_init): Fix typo in keyword
+	names.
+
 2013-12-17   D. V. Wiebe <getdata@ketiltrout.net> svn:875
 	* src/add.c (_GD_Add) src/fpos.c (_GD_GetFilePos _GD_WriteSeek _GD_Seek)
 	src/getdata.c (_GD_DoRaw) src/mod.c (_GD_Change) src/move.c
@@ -3067,7 +3071,7 @@
 
 	* util/dirfile2ascii.c util/checkdirfile.c: Update for new function names.
 
-	* util/checkdirifle.c: Report standards version compliance.
+	* util/checkdirfile.c: Report standards version compliance.
 
 	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
 	bindings/f77/test/big_test.f bindings/f77/test/big_test95.f90

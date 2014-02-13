@@ -677,9 +677,9 @@ Subroutines interacting with global metadata
   Input:
     INTEGER dirfile_unit
 
-  This wraps diriflename(3).  The name of the dirfile will be returned in name.
-  If the name of the dirfile is longer than name_len, it will return the actual
-  length of the name in name_len and not modify the name argument.
+  This wraps gd_dirfilename(3).  The name of the dirfile will be returned in
+  name.  If the name of the dirfile is longer than name_len, it will return the
+  actual length of the name in name_len and not modify the name argument.
 
 * GDREFE(name, name_len, dirfile_unit, field_code, field_code_len)
 

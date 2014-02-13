@@ -50,7 +50,7 @@ static PyObject *gdpy_fragment_create(PyTypeObject *type, PyObject *args,
 static int gdpy_fragment_init(struct gdpy_fragment_t *self, PyObject *args,
     PyObject *keys)
 {
-  char *keywords[] = {"dirifle", "index", NULL};
+  char *keywords[] = {"dirfile", "index", NULL};
 
   dtrace("%p, %p, %p", self, args, keys);
 
