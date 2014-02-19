@@ -335,7 +335,7 @@ ssize_t _GD_SampIndRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
     f->p += nelem - count;
     count = nelem;
   } else {
-    cur = _GD_Duplicate(cur, f->d + 1, GD_SIZE(data_type), f->s - f->p + 1);
+    _GD_Duplicate(cur, f->d + 1, GD_SIZE(data_type), f->s - f->p + 1);
     count += f->s - f->p + 1;
     f->p = f->s + 1;
   }
@@ -569,6 +569,7 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
   /* truncate the file if necessary */
   if (rin < rout) {
     if (gd_truncate(fileno(f->fp), (nrec - rout + rin) * size)) {
+      free(p);
       dreturn("%i", -1);
       return -1;
     }

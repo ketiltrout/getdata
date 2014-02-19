@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2010 D. V. Wiebe
+ * Copyright (C) 2005-2010, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -633,6 +633,7 @@ gd_nothrow
           _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
           break;
       }
+      break;
     case GD_COMPLEX128:
       switch (out_type) {
         case GD_INT8:

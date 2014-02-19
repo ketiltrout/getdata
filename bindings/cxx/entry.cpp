@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2012 D. V. Wiebe
+// Copyright (C) 2008-2012, 2014 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -31,7 +31,8 @@ Entry::Entry()
 Entry::Entry(const GetData::Dirfile *dirfile, const char* field_code)
 {
   D = dirfile;
-  gd_entry(D->D, field_code, &E);
+  if (gd_entry(D->D, field_code, &E))
+    memset(&E, 0, sizeof(E));
 }
 
 Entry::~Entry()
@@ -101,6 +102,19 @@ int Entry::Rename(const char* new_name, unsigned flags)
     if (E.field == NULL) {
       E.field = strdup(new_name);
     } else {
+      /* this buffer is used if E is a metafield, in which case we'll
+       * replace the subfield name in E.field with new_name.  The length
+       * of the new code is
+       *
+       *   strlen(E.field) - strlen(<subfield-name>) + strlen(new_name)
+       *     + 1 (for the trailing NUL).
+       *
+       * The subfield name in E.field must be at least one character long, so
+       * the length of the new code is at most:
+       *
+       *   strlen(E.field) - 1 + strlen(new_name) + 1
+       *   = strlen(E.field) + strlen(new_name)
+       */
       char* nn = (char*)malloc(strlen(E.field) + strlen(new_name));
       strcpy(nn, E.field);
       ptr = strchr(nn, '/');

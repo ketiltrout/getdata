@@ -6,6 +6,17 @@ New in verison 0.9.0a:
     semicolon) when the parameter is purely real.  However, a non-zero imaginary
     part is still an error.
 
+  * gd_free_entry_strings() now NULLs pointers after freeing them.
+
+  * gd_entry() now returns entry metadata when they contain scalar field codes
+    which do not exist.  In this case the GD_EN_CALC flag in the object will
+    not be set.  Previously, on such entries, this function would fail with the
+    error GD_E_BAD_SCALAR, and return nothing.
+
+  * gd_rename() now by default updates the target of ALIASes pointing to a
+    renamed field to point to the new field instead of leaving them dangle.
+    (But see GD_REN_DANGLE).
+
   * BUG FIX: The parsing of the \x and \u escape sequences are now correct.
 
   * BUG FIX: Computation of LINCOMs with complex valued input fields now
@@ -26,7 +37,7 @@ New in verison 0.9.0a:
     Previously they would store these invalid field codes, causing problems
     later.
 
-  * BUG FIX: Returning complex-valued CARRAYs as purely real now works.
+  * BUG FIX: Returning complex-valued CARRAYs as purely real data now works.
     Previously only the first element requested would be returned, the remaining
     output buffer containing uninitialised data.
 
@@ -34,10 +45,10 @@ New in verison 0.9.0a:
     entry is no longer ignored by gd_[m]add().
 
   * BUG FIX: Entry members spf, bitnum, numbits, and period are now completely
-    ignored by gd_[m]add() when corresponding named scalars are specified.
+    ignored by gd_[m]add() if corresponding named scalars are specified.
     Previously, an invalid value in these members would result in the entry
-    being rejected, even though the rest of GetData ignored the invalid, unsued
-    value.
+    being rejected, even though the invalid value was immediately discarded
+    when the field was added.
 
   * BUG FIX: gd_[m]add() no longer rejects MPLEX fields with negative count_val.
 
@@ -47,58 +58,19 @@ New in verison 0.9.0a:
   * BUG FIX: reading a LINTERP table with fewer than two lines no longer results
     in a segfault on close/discard.
   
-  * BUG FIX: DIVIDE fields with complex valued divisors are now properly
+  * BUG FIX: DIVIDE fields with complex-valued divisors are now properly
     computed.
 
   * BUG FIX: Complex-valued DIVIDE, POLYNOM, and RECIP fields are now computed
     properly when the library is built in ANSI C mode.
 
-  * BUG FIX: Writing complex MPLEX fields no longer corrupts the stored data.
+  * BUG FIX: Writing complex-valued MPLEX fields no longer corrupts the stored
+    data.
 
   * BUG FIX: Several fixes have been made to the sample index encoding (SIE)
     engine, which should now produce properly encoded data when performing
     random writes.
 
-  API Changes:
-
-  * gd_free_entry_strings() now NULLs pointers after freeing them.
-
-  * The comp_scal member of the gd_entry_t object has been replaced with a flags
-    member, containing a flag (GD_EN_COMPSCAL) with the meaning of the former
-    comp_scal member.  There are also flags for hiddenness (GD_EN_HIDDEN) and
-    whether the scalar entries have been computed (GD_EN_CALC).
-
-  * gd_entry() now returns entry metadata when they contain scalar field codes
-    which do not exist.  In this case the GD_EN_CALC flag in the object will
-    not be set.  Previously, on such entries, this function would fail with the
-    error GD_E_BAD_SCALAR and return nothing.
-
-  * gd_[m]add() and gd_alter_entry() can now be used to set or change the
-    hiddenness of a field by setting or clearing the GD_EN_HIDDEN bit in the
-    supplied gd_entry_t object.
-
-  * Two new rename flags have been added:
-    - GD_REN_DANGLE which indicates the library shouldn't update ALIASes whose
-      target has been renamed (turning them into dangling aliases)
-    - GD_REN_FORCE which causes the library to skip updating field codes which
-      would be invalid due to affixes instead of failing.
-
-  * gd_rename() now by default updates the target of ALIASes pointing to a
-    renamed field to point to the new field instead of leaving them dangle.
-    (But see GD_REN_DANGLE).
-
-  * The move_data argument of gd_move() has been replaced with a flags argument
-    which accepts the GD_REN_* flags, which have the same meaning as they do
-    with gd_rename().
-
-  * gd_move_alias() has been deleted: its function is now performed by
-    gd_move().  If gd_move() is passed the field code of an alias, the alias is
-    now moved, instead of moving the field the alias points to.
-
-  * BUG FIX: If the dirfile path provided cannot be resolved (due to, for
-    instance, a symbolic link pointing to a non-existent path), gd_open() and
-    friends now return GD_E_OPEN, as documented, instead of GD_E_RAW_IO.
-  
   * BUG FIX: gd_bof() now returns the correct number (i.e.: zero) when reporting
     the beginning of field of derived fields shifted to before the start of the
     dirfile.  Previously, this function incorrectly returned values ranging from
@@ -134,10 +106,40 @@ New in verison 0.9.0a:
     of the affected fragment; previously, these old, cached filenames could lead
     to I/O errors when reading and writing the re-encoded RAW data files.
 
-  Legacy API Changes:
+  * BUG FIX: Calling the Legacy API function GetFormat() on a Dirfile with MPLEX
+    or WINDOW fields no longer results in a segmentation fault.
 
-  * BUG FIX: Calling GetFormat on a Dirfile with MPLEX or WINDOW fields no
-    longer results in a segmentation fault.
+  API Changes:
+
+  * The comp_scal member of the gd_entry_t object has been replaced with a flags
+    member, containing a flag (GD_EN_COMPSCAL) with the meaning of the former
+    comp_scal member.  There are also flags for hiddenness (GD_EN_HIDDEN) and
+    whether the scalar entries have been computed (GD_EN_CALC).
+
+  * gd_[m]add() and gd_alter_entry() can now be used to set or change the
+    hiddenness of a field by setting or clearing the GD_EN_HIDDEN bit in the
+    supplied gd_entry_t object.
+
+  * Two new rename flags have been added:
+    - GD_REN_DANGLE which indicates the library shouldn't update ALIASes whose
+      target has been renamed (turning them into dangling aliases)
+    - GD_REN_FORCE which causes the library to skip updating field codes which
+      would be invalid due to affixes instead of failing.
+
+  * The move_data argument of gd_move() has been replaced with a flags argument
+    which accepts the GD_REN_* flags, which have the same meaning as they do
+    with gd_rename().
+
+  * gd_move_alias() has been deleted: its function is now performed by
+    gd_move().  If gd_move() is passed the field code of an alias, the alias is
+    now moved, instead of moving the field the alias points to.
+
+  * BUG FIX: If the dirfile path provided cannot be resolved (due to, for
+    instance, a symbolic link pointing to a non-existent path), gd_open() and
+    friends now return GD_E_OPEN, as documented, instead of GD_E_RAW_IO.
+  
+  * BUG FIX: gd_naliases() now returns an unsigned int, and zero on error,
+    as documented.
 
   Bindings Changes:
 
@@ -240,10 +242,6 @@ New in version 0.8.4:
 
   Library Changes:
 
-  * The count_max member of the gd_entry_t object has been renamed to period.
-    The corresponding dummy argument in various function prototypes has been
-    similarly renamed.
-
   * BUG FIX: The library no longer incorrectly rejects negative count_val MPLEX
     parameters.  Furthermore, a count_val of -1 in gd_alter_entry or
     gd_[m]alter_mplex calls is not a special value: it just sets count_val to
@@ -272,6 +270,12 @@ New in version 0.8.4:
   * BUG FIX: The field code of a reference field declared in a subfragment
     included with affixes is no longer corrupted by spurious application of the
     affixes when the subfragment's metadata are (re-)written.  Reported by Seth.
+
+  API Changes:
+
+  * The count_max member of the gd_entry_t object has been renamed to period.
+    The corresponding dummy argument in various function prototypes has been
+    similarly renamed.
 
   Bindings Changes:
 
@@ -340,6 +344,9 @@ New in version 0.8.1:
 
   Library Changes:
 
+  * gd_dirfilename() now returns a fully canonicalised version of the dirfile
+    path.
+
   * BUG FIX: A segfault when negotiating symbolic links in file paths, typically
     manifesting in gd_open calls, has been fixed.
 
@@ -358,6 +365,13 @@ New in version 0.8.1:
     the current Standards Version, potentially leading to rejected valid
     dirfiles.  Reported by Daniel Flanigan.
 
+  * BUG FIX: gd_alter_entry() and gd_madd_alias() weren't clearing the Dirfile
+    error before operation, resulting in them failing erroneously in certain
+    situations.
+
+  * BUG FIX: When including an existing fragment which itself has subfragments,
+    gd_include() no longer returns the wrong fragment index.
+
   * WIN32 BUG FIX: On Windows, the parser can now properly handle hexadecimal
     floating point.
 
@@ -368,20 +382,10 @@ New in version 0.8.1:
     suffix, if any, which should remove the need to do manual affix bookkeeping
     when reading metadata.  The other side to this change is that when modifying
     metdata (gd_add(), gd_alter_entry(), &c.), supplied field codes must also
-    contain the appropriate suffixes.
-
-  * gd_dirfilename() now returns a fully canonicalised version of the dirfile
-    path.
+    contain the appropriate affixes.
 
   * A new function, gd_linterp_tablename() has been added which returns a fully
     canonicalised version of the look-up table pathname for a LINTERP.
-
-  * BUG FIX: gd_alter_entry() and gd_madd_alias() weren't clearing the Dirfile
-    error before operation, resulting in them failing erroneously in certain
-    situations.
-
-  * BUG FIX: When including an existing fragment which itself has subfragments,
-    gd_include() no longer returns the wrong fragment index.
 
   Bindings Changes:
 
@@ -537,6 +541,9 @@ New in version 0.8.0:
     documentation indicates it should) and checks the protection of the
     fragment containing the parent field.
 
+  * BUG FIX: calling gd_putdata() with num_frames and num_samples both zero
+    no longer confuses GetData: instead it simply does nothing.
+
   API Changes:
 
   * Functions which add fields (gd_add(), gd_add_<type>(), &c.) can now be
@@ -639,9 +646,6 @@ New in version 0.8.0:
 
   * C89 API: Passing NULL to gd_alter_crecip() for cdividend is now treated
     as if it were passed zero (ie. it indicates no change for cdividend).
-
-  * BUG FIX: calling gd_putdata() with num_frames and num_samples both zero
-    no longer confuses GetData: instead it simply does nothing.
 
   * BUG FIX: gd_spf() now returns GD_E_DIMENSION when passed a scalar field
     code, as the documentation says it should.  Previously it returned
@@ -799,6 +803,7 @@ New in version 0.7.1:
   Bindings Changes:
 
   * F77 BUG FIX: A memory leak in GDASCA has been fixed.
+
   * Python BUG FIX: The first element of a python list (instead of a NumPy
     array) is no longer dropped when passed to pygetdata on 64-bit systems.
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 D. V. Wiebe
+/* Copyright (C) 2012, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -27,7 +27,8 @@ int main(void)
   const char *format1 = "dirfile/format";
   const char *data = "dirfile/data";
   const char *target;
-  int e1, e2, e3, i, n, r = 0;
+  int e1, e2, e3, i, r = 0;
+  unsigned int n;
   DIRFILE *D;
 
   rmdirfile();
@@ -60,7 +61,7 @@ int main(void)
   CHECKI(e2, GD_E_BAD_CODE);
   CHECKI(e3, GD_E_OK);
   CHECKI(i, 1);
-  CHECKI(n, 2);
+  CHECKU(n, 2);
 
   return r;
 }

@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2013 D. V. Wiebe
+ * Copyright (C) 2005-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1335,6 +1335,8 @@ static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
         _GD_FreeE(D, E, 1);
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
             in_cols[c]);
+        dreturn("%p", NULL);
+        return NULL;
       }
     }
 
@@ -1626,15 +1628,6 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D, int n_cols, char **in_cols,
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_LINE, format_file, linenum,
         NULL);
 
-  if (is_dot) {
-    ptr = _GD_Realloc(D, D->dot_list, (D->n_dot + 1) * sizeof(gd_entry_t*));
-    if (ptr == NULL) {
-      dreturn ("%p", NULL);
-      return NULL;
-    }
-    D->dot_list = (gd_entry_t **)ptr;
-  }
-
   if (insert && D->error == GD_E_OK && E != NULL) {
     /* the Format file fragment index */
     unsigned int u;
@@ -1651,6 +1644,16 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D, int n_cols, char **in_cols,
       return NULL;
     }
 
+    if (is_dot) {
+      ptr = _GD_Realloc(D, D->dot_list, (D->n_dot + 1) * sizeof(gd_entry_t*));
+      if (ptr == NULL) {
+        _GD_FreeE(D, E, 1);
+        dreturn ("%p", NULL);
+        return NULL;
+      }
+      D->dot_list = (gd_entry_t **)ptr;
+    }
+
     /* Initialse the meta counts */
     if (P != NULL) {
       E->e->n_meta = -1;
@@ -1663,6 +1666,9 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D, int n_cols, char **in_cols,
         dreturn ("%p", NULL);
         return NULL;
       }
+
+      /* Nothing may fail from now on */
+
       P->e->p.meta_entry = (gd_entry_t **)ptr;
       P->e->p.meta_entry[P->e->n_meta++] = E;
     }

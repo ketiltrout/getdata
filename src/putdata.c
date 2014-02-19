@@ -1,6 +1,6 @@
 /* Copyright (C) 2003-2005 C. Barth Netterfield
  * Copyright (C) 2003-2005 Theodore Kisner
- * Copyright (C) 2005-2013 D. V. Wiebe
+ * Copyright (C) 2005-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -574,6 +574,7 @@ static size_t _GD_DoMplexOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   cntbuf = (int*)_GD_Alloc(D, GD_INT_TYPE, num_samp2);
 
   if (tmpbuf == NULL || cntbuf == NULL) {
+    free(cntbuf);
     free(tmpbuf);
     dreturn("%i", 0);
     return 0;

@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2010, 2011 D. V. Wiebe
+// Copyright (C) 2008, 2010, 2011, 2014 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -35,7 +35,9 @@ Fragment::Fragment(const GetData::Dirfile *dirfile, int index)
   prot = gd_protection(D->D, index);
   name = gd_fragmentname(D->D, index);
   parent = (index == 0) ? -1 : gd_parent_fragment(D->D, index);
-  gd_fragment_affixes(D->D, index, &prefix, &suffix);
+
+  if (gd_fragment_affixes(D->D, index, &prefix, &suffix) == -1)
+    prefix = suffix = NULL;
 
   dreturnvoid();
 }

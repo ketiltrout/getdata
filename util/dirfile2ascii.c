@@ -1,5 +1,5 @@
 /* Copyright (C) 2010, 2011 Matthew Truch
- * Copyright (C) 2010 D. V. Wiebe
+ * Copyright (C) 2010, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -61,7 +61,7 @@ struct field
 void version(void)
 {
   printf("dirfile2ascii (%s)\n"
-      "Copyright (C) 2010 Matthew Truch\n\n"
+      "Copyright (C) 2010, 2011, 2014 Matthew Truch and others\n\n"
       "Please send reports of bugs and other communication to:\n  %s\n\n"
       "This program comes with NO WARRANTY, not even for MERCHANTABILITY "
       "or FITNESS\n"
@@ -236,7 +236,7 @@ int main (int argc, char **argv)
         if (dirfile_name == NULL) {
           dirfile_name = optarg;
         } else { /* Standard output field */
-          if (numfields > BUF_LEN) {
+          if (numfields >= BUF_LEN) {
             fprintf(stderr, "Error: Too many fields!\n");
             exit(-2);
           }
@@ -260,7 +260,7 @@ int main (int argc, char **argv)
       case 'F':
       case 'A':
       case 'a':
-        if (numfields > BUF_LEN) {
+        if (numfields >= BUF_LEN) {
           fprintf(stderr, "Error: Too many fields!\n");
           exit(-2);
         }

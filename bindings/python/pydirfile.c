@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2013 D. V. Wiebe
+/* Copyright (C) 2009-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -728,6 +728,7 @@ static PyObject *gdpy_dirfile_getentry(struct gdpy_dirfile_t *self,
   const char *field_code;
   struct gdpy_entry_t *obj;
   gd_entry_t *E;
+  int e;
 
   dtrace("%p, %p, %p", self, args, keys);
 
@@ -748,12 +749,20 @@ static PyObject *gdpy_dirfile_getentry(struct gdpy_dirfile_t *self,
 
   gd_entry(self->D, field_code, E);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  if ((e = gd_error(D))) {
+    PYGD_REPORT_ERROR(D,e);
+    gd_free_entry_strings(E);
+    free(E);
+    dreturn("%p", NULL);
+    return NULL;
+  }
 
   obj = (struct gdpy_entry_t*)gdpy_entry.tp_alloc(&gdpy_entry, 0);
 
   if (obj == NULL) {
     PyErr_NoMemory();
+    gd_free_entry_strings(E);
+    free(E);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -1682,7 +1691,7 @@ static PyObject *gdpy_dirfile_getstring(struct gdpy_dirfile_t *self,
 
   gd_get_string(self->D, field_code, len, data);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  PYGD_CHECK_ERROR2(self->D, NULL, free(data));
 
   pyobj = PyString_FromString(data);
 
@@ -1848,6 +1857,7 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
       if (type == GD_UNKNOWN) {
         PyErr_SetString(PyExc_ValueError,
             "pygetdata.dirfile.put_carray() unknown data type for argument 2.");
+        free(data);
         dreturn ("%p", NULL);
         return NULL;
       }
@@ -1961,6 +1971,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
       if (type == GD_UNKNOWN) {
         PyErr_SetString(PyExc_ValueError,
             "pygetdata.dirfile.putdata() unknown data type for argument 2.");
+        free(data);
         dreturn ("%p", NULL);
         return NULL;
       }

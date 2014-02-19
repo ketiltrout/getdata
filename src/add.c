@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2013 D. V. Wiebe
+/* Copyright (C) 2008-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -2037,25 +2037,25 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
 
     offset = strlen(parent) + 1;
     munged_code = (char *)_GD_Malloc(D, offset + strlen(field_code) + 1);
-    if (munged_code) {
-      strcpy(munged_code, parent);
-      munged_code[offset - 1] = '/';
-      strcpy(munged_code + offset, field_code);
-    }
-  } else
+    if (munged_code == NULL)
+      goto add_alias_error;
+
+    strcpy(munged_code, parent);
+    munged_code[offset - 1] = '/';
+    strcpy(munged_code + offset, field_code);
+  } else {
     /* this will check for affixes and take care of detecting Barth-style
      * metafield definitions */
     P = _GD_FixName(D, &munged_code, field_code, fragment_index, &offset);
 
-  if (D->error)
-    goto add_alias_error;
+    if (D->error)
+      goto add_alias_error;
+  }
 
   /* check alias name */
-  if (munged_code && _GD_ValidateField(munged_code + offset, D->standards, 1, 0,
-        NULL))
-  {
+  if (_GD_ValidateField(munged_code + offset, D->standards, 1, 0, NULL))
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, field_code);
-  } else if (_GD_FindField(D, munged_code, D->entry, D->n_entries, 1, &u))
+  else if (_GD_FindField(D, munged_code, D->entry, D->n_entries, 1, &u))
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, munged_code);
   else
     _GD_CheckCodeAffixes(D, NULL, target, fragment_index, 1); /* check target */

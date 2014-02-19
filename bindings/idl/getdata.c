@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2013 D. V. Wiebe
+/* Copyright (C) 2009-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -5466,7 +5466,7 @@ IDL_VPTR gdidl_naliases(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
-  int nalias;
+  unsigned int nalias;
 
   GDIDL_KW_ONLY_ERROR;
 
@@ -5479,7 +5479,7 @@ IDL_VPTR gdidl_naliases(int argc, IDL_VPTR argv[], char *argk)
 
   IDL_KW_FREE;
 
-  IDL_VPTR r = IDL_GettmpLong(nalias);
+  IDL_VPTR r = IDL_GettmpUInt(nalias);
   dreturn("%p", r);
   return r;
 }

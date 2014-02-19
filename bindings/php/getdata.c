@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1560,6 +1560,7 @@ static void gdphp_data_to_array(zval *a, const void *data, gd_type_t type,
       for (i = 0; i < n; ++i)
         add_index_zval(a, i, gdphp_from_complex(NULL, ((float*)(data))[i * 2],
               ((float*)(data))[i * 2 + 1]));
+      break;
     case GD_COMPLEX128:
       for (i = 0; i < n; ++i)
         add_index_zval(a, i, gdphp_from_complex(NULL, ((double*)(data))[i * 2],
@@ -3017,9 +3018,12 @@ PHP_FUNCTION(gd_error_string)
 
   s = gd_error_string(D, NULL, 0);
 
-  RETVAL_STRING(s, 1);
-  free(s);
-  dreturn("\"%s\"", s);
+  if (s) {
+    RETVAL_STRING(s, 1);
+    dreturn("\"%s\"", s);
+    free(s);
+  } else
+    GDPHP_RETURN_F;
 }
 
 PHP_FUNCTION(gd_field_list)

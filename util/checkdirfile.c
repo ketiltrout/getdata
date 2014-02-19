@@ -82,7 +82,8 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  /* open the dirfile */
+  /* open the dirfile -- the callback will print syntax errors as
+   * found, and return the number of lines with errors in ne. */
   puts("Checking syntax...");
   dirfile = gd_cbopen(argv[1], GD_RDONLY, callback, &ne);
 
@@ -107,6 +108,10 @@ int main(int argc, char* argv[])
 
     printf("  Syntax OK.\n\n");
 
+    /* Run through every known standards version and check whether the dirfile
+     * is conformant by trying to set the loaded dirfile's version to that
+     * value
+     */
     for (i = 0; i <= GD_DIRFILE_STANDARDS_VERSION; ++i) {
       if (gd_dirfile_standards(dirfile, i) == i) {
         vers[i] = 1;
@@ -121,6 +126,7 @@ int main(int argc, char* argv[])
       printf("Dirfile conforms to Standards %s ",
           (nvers == 1) ? "Version" : "Versions");
 
+      /* pretty-print the list of conformed versions */
       for (i = 0; i <= GD_DIRFILE_STANDARDS_VERSION; ++i) {
         if (vers[i]) {
           if (first == -1)
@@ -161,7 +167,7 @@ int main(int argc, char* argv[])
 
   }
 
-  /* Check the validity of each field defined */
+  /* Check the validity of each entry defined */
   ne = 0;
   puts("\nChecking fields...");
   flist = gd_entry_list(dirfile, NULL, 0, GD_ENTRIES_HIDDEN |
@@ -186,6 +192,8 @@ int main(int argc, char* argv[])
       nfields++;
     }
 
+    /* ferret out dangling meta ALIASes by first collecting a list
+     * of all of them, and then trying to use them as field codes */
     mflist = gd_entry_list(dirfile, flist[i], GD_ALIAS_ENTRIES,
         GD_ENTRIES_HIDDEN);
     for (j = 0; mflist[j] != NULL; ++j) {
@@ -205,7 +213,8 @@ int main(int argc, char* argv[])
     }
   }
 
-  /* look for dangling aliases */
+  /* ferret out dangling ALIASes by first collecting a list
+   * of all of them, and then trying to use them as field codes */
   flist = gd_entry_list(dirfile, NULL, GD_ALIAS_ENTRIES, GD_ENTRIES_HIDDEN);
   for (i = 0; flist[i] != NULL; ++i) {
     if (gd_entry_type(dirfile, flist[i]) == GD_NO_ENTRY) {

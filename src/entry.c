@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2013 D. V. Wiebe
+/* Copyright (C) 2008-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -127,7 +127,7 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
     free(entry);
   } else {
     entry->field = NULL;
-    memset(entry->in_fields, 0, sizeof(char*) * GD_MAX_LINCOM * 2);
+    memset(entry->in_fields, 0, sizeof(char*) * GD_MAX_LINCOM);
     memset(entry->scalar, 0, sizeof(char*) * GD_MAX_LINCOM * 2);
   }
 
@@ -523,8 +523,8 @@ const char *gd_alias_target(DIRFILE *D, const char *field_code) gd_nothrow
 const char **gd_aliases(DIRFILE *D, const char *field_code) gd_nothrow
 {
   gd_entry_t *E;
-  int n, j = 1;
-  unsigned u;
+  int j = 1;
+  unsigned u, n;
 
   dtrace("%p, \"%s\"", D, field_code);
 
@@ -573,26 +573,25 @@ const char **gd_aliases(DIRFILE *D, const char *field_code) gd_nothrow
   return E->e->alias_list;
 }
 
-int gd_naliases(DIRFILE *D, const char *field_code) gd_nothrow
+unsigned int gd_naliases(DIRFILE *D, const char *field_code) gd_nothrow
 {
   gd_entry_t *E;
-  int n = 1;
-  unsigned u;
+  unsigned u, n = 1;
 
   dtrace("%p, \"%s\"", D, field_code);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%u", 0);
+    return 0;
   }
 
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
 
   if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%u", 0);
+    return 0;
   }
 
   for (u = 0; u < D->n_entries; ++u)
@@ -602,7 +601,7 @@ int gd_naliases(DIRFILE *D, const char *field_code) gd_nothrow
       n++;
     }
 
-  dreturn("%i", n);
+  dreturn("%u", n);
   return n;
 }
 
@@ -870,7 +869,8 @@ char *gd_linterp_tablename(DIRFILE *D, const char *field_code_in) gd_nothrow
     free(field_code);
 
   if (E->field_type != GD_LINTERP_ENTRY) {
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0,
+        field_code_in);
     dreturn("%p", NULL);
     return NULL;
   }

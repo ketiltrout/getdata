@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -30,7 +30,8 @@ int main(void)
     "/ALIAS b d\n"
     "/ALIAS c d\n"
     "/ALIAS d f\n";
-  int fd, e, n, r = 0;
+  int fd, e, r = 0;
+  unsigned n;
   DIRFILE *D;
 
   rmdirfile();
@@ -46,7 +47,7 @@ int main(void)
   e = gd_error(D);
 
   CHECKI(e, GD_E_BAD_CODE);
-  CHECKI(n, -1);
+  CHECKU(n, 0);
 
   gd_discard(D);
   unlink(format);

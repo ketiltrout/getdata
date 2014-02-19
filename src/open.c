@@ -347,6 +347,10 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
       _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, errno, NULL);
       free(dirfile);
       free(format_file);
+#ifndef GD_NO_DIR_OPEN
+      if (dirfd >= 0)
+        close(dirfd);
+#endif
       dreturn("%p", NULL);
       return NULL;
     }
@@ -364,6 +368,10 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
     free(dirfile);
     free(format_file);
     close(fd);
+#ifndef GD_NO_DIR_OPEN
+    if (dirfd >= 0)
+      close(dirfd);
+#endif
     dreturn("%p", NULL);
     return NULL;
   }
@@ -459,7 +467,8 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   if (D == NULL) {
     free(dirfile);
 #ifndef GD_NO_DIR_OPEN
-    close(dirfd);
+    if (dirfd >= 0)
+      close(dirfd);
 #endif
     dreturn("%p", NULL);
     return NULL;
@@ -482,7 +491,8 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   if (dirfile == NULL) {
     _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_IO, filedir, dirfd_error, NULL);
 #ifndef GD_NO_DIR_OPEN
-    close(dirfd);
+    if (dirfd >= 0)
+      close(dirfd);
 #endif
     dreturn("%p", D);
     return D;
@@ -524,7 +534,8 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   if ((fp = _GD_CreateDirfile(D, dirfd, dirfd_error, dirfile, &mtime)) == NULL)
   {
 #ifndef GD_NO_DIR_OPEN
-    close(dirfd);
+    if (dirfd >= 0)
+      close(dirfd);
 #endif
     D->name = NULL; /* so a subsequent gd_discard() doesn't go awry. */
     dreturn("%p", D);
@@ -536,6 +547,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   D->name = strdup(filedir);
 
   if (D->name == NULL) {
+    fclose(fp);
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", D);
     return D;

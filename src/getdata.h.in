@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
  * Copyright (C) 2003-2005 Theodore Kisner
- * Copyright (C) 2005-2013 D. V. Wiebe
+ * Copyright (C) 2005-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -855,8 +855,8 @@ extern const char **gd_mvector_list(DIRFILE *dirfile,
 
 extern const char *gd_dirfilename(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
-extern int gd_naliases(DIRFILE *dirfile, const char *field_code) gd_nothrow
-gd_nonnull ((1,2));
+extern unsigned int gd_naliases(DIRFILE *dirfile,
+    const char *field_code) gd_nothrow gd_nonnull ((1,2));
 
 extern gd_type_t gd_native_type(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1,2));
@@ -921,7 +921,7 @@ extern int gd_validate(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull((1,2));
 
 extern int gd_verbose_prefix(DIRFILE *D, const char *prefix) gd_nothrow
-gd_nonnull ((1,2));
+gd_nonnull ((1));
 
 extern const char **gd_vector_list(DIRFILE *dirfile) gd_nothrow gd_nonnull((1));
 

@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2013 D. V. Wiebe
+ * Copyright (C) 2005-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1024,7 +1024,6 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
     work = (char*)malloc(PATH_MAX);
     if (res == NULL || work == NULL) {
       free(res);
-      free(res);
       dreturn("%p", NULL);
       return NULL;
     }
@@ -1164,7 +1163,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
           }
 
           /* get the link target */
-          slen = readlink(res, target, PATH_MAX);
+          slen = readlink(res, target, PATH_MAX - 1);
           if (slen == -1) {
             free(res);
             free(work);

@@ -112,8 +112,6 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
       *(int32_t *)lout = *(int32_t *)lin;
     else if (type == GD_UINT32)
       *(uint32_t *)lout = *(uint32_t *)lin;
-    else if (type == GD_INT64)
-      *(int64_t *)lout = *(int64_t *)lin;
     else if (type == GD_UINT64)
       *(uint64_t *)lout = *(uint64_t *)lin;
     else

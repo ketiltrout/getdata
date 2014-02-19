@@ -1,4 +1,58 @@
-2014-02-21   D. V. Wiebe <getdata@ketiltrout.net> svn:876
+2014-02-14   D. V. Wiebe <getdata@ketiltrout.net> svn:877
+	* bindings/cxx/entry.cpp (Entry::Entry): Zero E if gd_entry call fails.
+	
+	* bindings/cxx/fragment.cpp (Fragment::Fragment): Handle error in
+	gd_fragment_affixes call.
+
+	* bindings/f77/fgetdata.c (GDASCA): Handle error in gd_entry call.
+
+	* bindings/php/getdata.c (gdphp_data_to_array): Add missing break.
+
+	* bindings/php/getdata.c (gd_error_string): Handle error in gd_error_string
+	call.
+
+	* bindings/python/pygetdata.h (PYGD_REPORT_ERROR): Added.
+	
+	* bindings/python/pydirfile.c (gdpy_dirfile_getentry gdpy_dirfile_getstring
+	gdpy_dirfile_putcarray gdpy_dirfile_putdata) src/include.c (_GD_Include)
+	src/name.c (_GD_PrepareRename) src/putdata.c (_GD_DoMplexOut) src/sie.c
+	(_GD_SampIndWrite) src/types.c (_GD_ConvertType): Deallocate buffers on error.
+
+	* bindings/python/pyentry.c (gdpy_entry_seta): Set a[i] if the pyobj is
+	complex.
+
+	* src/bzip.c (_GD_Bzip2Size): Free ptr only after we're done with it.
+
+	* src/common.c (_GD_CanonicalPath): Don't let readlink overrun the buffer.
+	Also fix double free.
+
+	* src/entry.c (_GD_FreeE): Fix overrun on zeroing of in_fields.
+
+	* src/entry.c (gd_linterp_tablename): Don't use field_code after free.
+
+	* src/getdata.h.in: Remove __nonnull__ from parameter two of
+	gd_verbose_prefix.
+
+	* src/gzip.c (_GD_GzipOpen): Check that _GD_MakeTempFile() worked.
+
+	* src/open.c (_GD_CreateDirfile _GD_Open): Close descriptors on error.
+
+	* src/parse.c (_GD_ParseCarray): Return on error.
+
+	* src/parse.c (_GD_ParseFieldSpec): Only resize the dot_list when necessary.
+		Also, clean up if the resize doesn't work.
+
+	* util/dirfile2ascii.c (main): Fix check for too many fields.
+
+	* src/entry.c (gd_naliases): Return unsigned int and zero on error per
+	documentation.
+	* bindings/idl/getdata.c (gdidl_naliases) src/entry.c (gd_aliases)
+	test/add_alias.c test/add_alias_affix.c test/add_alias_meta.c
+	test/add_resolv.c test/add_spec_resolv.c test/alias_num.c
+	test/alias_num_alias.c test/alias_num_missing.c test/madd_alias.c
+	test/madd_alias_affix.c test/madd_spec_resolv.c: Handle unsigned gd_naliases.
+
+2014-02-13   D. V. Wiebe <getdata@ketiltrout.net> svn:876
 	* bindings/python/pyfragment.c (gdpy_fragment_init): Fix typo in keyword
 	names.
 

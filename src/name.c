@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2013 D. V. Wiebe
+/* Copyright (C) 2008-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -694,6 +694,7 @@ struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict D,
      * fails */
     rdat->meta_name = (char**)_GD_Malloc(D, sizeof(char *) * rdat->n_meta);
     if (!rdat->meta_name) {
+      _GD_CleanUpRename(rdat, 1);
       dreturn("%p", NULL);
       return NULL;
     }

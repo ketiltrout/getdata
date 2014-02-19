@@ -69,16 +69,25 @@
 
 #define PYGD_CHECK_ERROR2(D,R,E) \
   do { \
-    int the_error; \
-    if ((the_error = gd_error(D))) { \
-      char buffer[GD_MAX_LINE_LENGTH]; \
-      PyErr_SetString(gdpy_exceptions[the_error], gd_error_string((D), \
-            buffer, GD_MAX_LINE_LENGTH)); \
+    int e; \
+    if ((e = gd_error(D))) { \
+      PYGD_REPORT_ERROR(D,e); \
       E; \
       dreturnvoid(); \
       return (R); \
     } \
   } while(0)
+
+#define PYGD_REPORT_ERROR(D,e) \
+  do { \
+    char *buffer = gd_error_string((D), NULL, 0); \
+    if (buffer) { \
+      PyErr_SetString(gdpy_exceptions[e], buffer); \
+      free(buffer); \
+    } else \
+      PyErr_SetString(gdpy_exceptions[e], "Unspecified error"); \
+  } while (0)
+
 
 extern PyObject *gdpy_exceptions[GD_N_ERROR_CODES];
 extern PyTypeObject gdpy_dirfile;
