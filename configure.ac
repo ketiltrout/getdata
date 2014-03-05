@@ -156,7 +156,7 @@ make_perlbindings="yes"
 make_matlabbindings="yes"
 make_phpbindings="yes"
 AC_ARG_ENABLE(bindings, AS_HELP_STRING([--disable-bindings],
-              [don't build any bindings, just build the C library]),
+              [don't build any bindings; just build the C library]),
               [
                if test "x${enableval}" = "xno"; then
                  make_cxxbindings="no"
@@ -389,6 +389,12 @@ AC_ARG_ENABLE([fast-unaligned], AS_HELP_STRING([--enable-fast-unaligned],
    esac
    ], [gd_unaligned_override="check"])
 
+m4_divert_once([HELP_ENABLE], AS_HELP_STRING([--disable-fast-unaligned],
+               [don't use fast loads and stores with non-aligned data, ]dnl'
+               [even if it looks like they should work.  This is always ]
+               [safe, but can result in significant slow-down.]
+               [ [default: autodetect]]))
+
 AC_MSG_CHECKING([whether ${host} supports fast unaligned memory access])
 if test "x$gd_unaligned_override" = "xyes"; then
   gd_unaligned_ok=yes
@@ -421,6 +427,7 @@ AC_DEFINE_UNQUOTED([GD_DIRSEP], ['$GD_DIRSEP'],
                    [ The directory separator between path elements ])
 AC_MSG_RESULT([$GD_FDIRSEP])
 
+AC_MSG_CHECKING([for extra LDFLAGS needed on ${host}])
 case "${host}" in
   *-pc-mingw*)
   NO_UNDEFINED=" -no-undefined"
@@ -430,6 +437,19 @@ case "${host}" in
   NO_DLOPEN_TESTS=1 ;;
   *) NO_DLOPEN_TESTS=0 ;;
 esac
+
+if test "x${NO_UNDEFINED}" = "x"; then
+  AC_MSG_RESULT([none needed])
+else
+  AC_MSG_RESULT([${NO_UNDEFINED}])
+fi
+
+AC_MSG_CHECKING([whether the test suite can dynamically load objects])
+if test "x${NO_DLOPEN_TESTS}" = "x1"; then
+  AC_MSG_RESULT([no])
+else
+  AC_MSG_RESULT([yes])
+fi
 
 echo
 echo "*** Checking C compiler characteristics"
