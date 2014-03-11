@@ -44,6 +44,7 @@
 # define gd_colclear()
 # define GD_INT_TYPE ((gd_type_t)(SIZEOF_INT | GD_SIGNED))
 # define GD_UINT_TYPE ((gd_type_t)(SIZEOF_UNSIGNED_INT))
+# define gd_static_inline_ static inline
 #else
 # include "../../src/internal.h"
 #endif
