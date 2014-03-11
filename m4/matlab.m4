@@ -38,12 +38,18 @@ AC_ARG_WITH([mex], AS_HELP_STRING([--with-mex=PATH],
 dnl try to find mex
 MEX="not found"
 if test "x$user_mex" != "x"; then
-  AC_MSG_CHECKING([if $user_mex is a MATLAB mex compiler])
-  mex_out=`$user_mex 2>&1`
+  MEX=$user_mex
+else
+  AC_PATH_PROG([MEX], [mex], [not found])
+fi
+
+if test "x$MEX" != "xnot found"; then
+  AC_MSG_CHECKING([if $MEX is a MATLAB mex compiler])
+  mex_out=`$MEX 2>&1`
   mex_status=$?
   if test $mex_status -eq 1; then
-    if echo $mex_out | grep -q 'consult the MATLAB External Interfaces Guide'; then
-      MEX=$user_mex
+    if ! echo $mex_out | grep -q 'consult the MATLAB External Interfaces Guide'; then
+      MEX="not found";
     fi
   fi
   if test "x$MEX" = "xnot found"; then
@@ -51,14 +57,13 @@ if test "x$user_mex" != "x"; then
   else
     AC_MSG_RESULT([yes])
   fi
-else
-  AC_PATH_PROG([MEX], [mex], [not found])
 fi
 
 if test "x$MEX" = "xnot found"; then
   have_matlab="no"
   MEX=
 fi
+
 AC_SUBST([MEX])
 ])
 
@@ -107,19 +112,21 @@ fi
 dnl find matlab
 if test "x${have_matlab}" != "xno"; then
   dnl try to find matlab
-  MATLAB="not found"
   if test "x$user_matlab" != "x"; then
-    AC_MSG_CHECKING([if $user_matlab is a MATLAB interpreter])
-    GD_MATLAB_EVAL([matlab_ver], [version], [$user_matlab])
-    if test "x$matlab_ver" = "x"; then
-      AC_MSG_RESULT([no])
-    else
-      AC_MSG_RESULT([yes])
-      MATLAB=$user_matlab
-      MATLAB_VERSION=$matlab_ver
-    fi
+    MATLAB=$user_matlab;
   else
     AC_PATH_PROG([MATLAB], [matlab], [not found])
+  fi
+
+  if test "x$MATLAB" != "xnot found"; then
+    AC_MSG_CHECKING([$MATLAB version])
+    GD_MATLAB_EVAL([MATLAB_VERSION], [version], [$MATLAB])
+    if test "x$MATLAB_VERSION" = "x"; then
+      AC_MSG_RESULT([none])
+      MATLAB="not found"
+    else
+      AC_MSG_RESULT([$MATLAB_VERSION])
+    fi
   fi
 
   if test "x$MATLAB" = "xnot found"; then

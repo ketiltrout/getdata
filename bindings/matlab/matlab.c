@@ -954,7 +954,7 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
       mxSetField(lhs, 0, "in_fields",
           gdmx_from_nstring_list((const char**)E->in_fields,
             E->EN(lincom,n_fields)));
-      if (E->comp_scal) {
+      if (E->flags & GD_EN_COMPSCAL) {
         mxSetField(lhs, 0, "m", gdmx_from_data(E->EN(lincom,cm), GD_COMPLEX128,
               E->EN(lincom,n_fields)));
         mxSetField(lhs, 0, "b", gdmx_from_data(E->EN(lincom,cb), GD_COMPLEX128,
@@ -990,7 +990,7 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
       break;
     case GD_POLYNOM_ENTRY:
       mxSetField(lhs, 0, "in_fields", mxCreateString(E->in_fields[0]));
-      if (E->comp_scal) {
+      if (E->flags & GD_EN_COMPSCAL) {
         mxSetField(lhs, 0, "a", gdmx_from_data(E->EN(polynom,ca), GD_COMPLEX128,
               E->EN(polynom,poly_ord) + 1));
       } else {
@@ -1006,7 +1006,7 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
       break;
     case GD_RECIP_ENTRY:
       mxSetField(lhs, 0, "in_fields", mxCreateString(E->in_fields[0]));
-      if (E->comp_scal)
+      if (E->flags & GD_EN_COMPSCAL)
         mxSetField(lhs, 0, "dividend",
             gdmx_from_cdouble((double*)&E->EN(recip,cdividend)));
       else
@@ -1285,7 +1285,7 @@ gd_entry_t *gdmx_to_entry(const mxArray **rhs, int n, unsigned flags)
       break;
     case GD_LINCOM_ENTRY:
       E->EN(lincom,n_fields) = gdmx_convert_in_fields(rhs[n], &ctx, E);
-      E->comp_scal = 1;
+      E->flags |= GD_EN_COMPSCAL;
       gdmx_convert_entry_array(rhs[n], &ctx, "m", E->EN(lincom,cm),
           E->EN(lincom,n_fields));
       gdmx_convert_entry_array(rhs[n], &ctx, "b", E->EN(lincom,cb),
@@ -1309,7 +1309,7 @@ gd_entry_t *gdmx_to_entry(const mxArray **rhs, int n, unsigned flags)
       break;
     case GD_POLYNOM_ENTRY:
       gdmx_convert_in_fields(rhs[n], &ctx, E);
-      E->comp_scal = 1;
+      E->flags |= GD_EN_COMPSCAL;
       E->EN(polynom,poly_ord) = gdmx_convert_entry_array(rhs[n], &ctx, "a",
           E->EN(polynom,ca), GD_MAX_POLYORD + 1) - 1;
       break;
@@ -1322,7 +1322,7 @@ gd_entry_t *gdmx_to_entry(const mxArray **rhs, int n, unsigned flags)
       break;
     case GD_RECIP_ENTRY:
       gdmx_convert_in_fields(rhs[n], &ctx, E);
-      E->comp_scal = 1;
+      E->flags |= GD_EN_COMPSCAL;
       gdmx_convert_struct_scalar(rhs[n], &ctx, "dividend", GD_COMPLEX128,
           &E->EN(recip,cdividend));
       break;
