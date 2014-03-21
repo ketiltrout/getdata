@@ -751,7 +751,6 @@ static PyObject *gdpy_dirfile_getentry(struct gdpy_dirfile_t *self,
 
   if ((e = gd_error(self->D))) {
     PYGD_REPORT_ERROR(self->D,e);
-    gd_free_entry_strings(E);
     free(E);
     dreturn("%p", NULL);
     return NULL;

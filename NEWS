@@ -114,7 +114,8 @@ New in verison 0.9.0a:
   * The comp_scal member of the gd_entry_t object has been replaced with a flags
     member, containing a flag (GD_EN_COMPSCAL) with the meaning of the former
     comp_scal member.  There are also flags for hiddenness (GD_EN_HIDDEN) and
-    whether the scalar entries have been computed (GD_EN_CALC).
+    whether the scalar entry codes in the field definition have been
+    dereferenced (GD_EN_CALC).
 
   * gd_[m]add() and gd_alter_entry() can now be used to set or change the
     hiddenness of a field by setting or clearing the GD_EN_HIDDEN bit in the

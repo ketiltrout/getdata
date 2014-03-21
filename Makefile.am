@@ -1,4 +1,4 @@
-# Copyright (C) 2008, 2011 D. V. Wiebe
+# Copyright (C) 2008, 2011, 2014 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -18,7 +18,7 @@
 # along with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-AUTOMAKE_OPTIONS = foreign dist-bzip2 check-news 1.10
+AUTOMAKE_OPTIONS = foreign dist-xz check-news 1.10
 
 EXTRA_DIST = ChangeLog
 
@@ -131,9 +131,9 @@ windist: $(DISTFILES)
 	rm -rf crlf_export
 
 # package lists
-PACKAGES=$(distdir).tar.gz $(distdir).tar.bz2 idl_$(distdir).tar.gz \
-				 idl_$(distdir).tar.bz2 getdata_win-$(PACKAGE_VERSION).zip \
-				 matlab_$(distdir).tar.gz matlab_$(distdir).tar.bz2
+PACKAGES=$(distdir).tar.gz $(distdir).tar.xz idl_$(distdir).tar.gz \
+				 idl_$(distdir).tar.xz getdata_win-$(PACKAGE_VERSION).zip \
+				 matlab_$(distdir).tar.gz matlab_$(distdir).tar.xz
 SIGS=$(addsuffix .sig,$(PACKAGES))
 
 # release stuff

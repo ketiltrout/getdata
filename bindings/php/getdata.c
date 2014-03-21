@@ -1949,7 +1949,7 @@ PHP_FUNCTION(gd_add_polynom)
   long index = 0;
   zval *za;
 
-  double a[GD_MAX_POLYORD + 1];
+  double a[2 * (GD_MAX_POLYORD + 1)];
   int o;
 
   DIRFILE *D;
@@ -3657,7 +3657,7 @@ PHP_FUNCTION(gd_madd_polynom)
   int field_code_len, in_field_len, parent_len;
   zval *za;
 
-  double a[GD_MAX_POLYORD + 1];
+  double a[2 * (GD_MAX_POLYORD + 1)];
   int o;
 
   DIRFILE *D;

@@ -1,3 +1,8 @@
+2014-03-20   D. V. Wiebe <getdata@ketiltrout.net> svn:882
+	* bindings/php/getdata.c (gd_add_polynom gd_madd_polynom): Fix array size.
+	* bindings/python/pydirfile.c (gdpy_dirfile_getentry): Fix segfault.
+	* test/zzslim_get.c: Fix.
+
 2014-03-10   D. V. Wiebe <getdata@ketiltrout.net> svn:880
 	* bindings/matlab/gd_move_alias.c: Deleted.
 	* bindings/matlab/test/big_test/m: Delete test 224.

@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. V. Wiebe
+/* Copyright (C) 2012-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -36,7 +36,7 @@ int main(void)
   uint16_t c[8];
   char command[4096];
   uint16_t data_data[256];
-  int fd, n, error, r = 0;
+  int i, fd, n, error, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
