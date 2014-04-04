@@ -289,6 +289,7 @@ and
 .PP
 .nf
 .B #define GD_C89_API
+.br
 .B #include <getdata.h>
 .fi
 .HP
@@ -302,7 +303,7 @@ and
 .BI "int " poly_ord ", const char *" in_fields ", const double *" ca );
 .HP
 .BI "int gd_alter_crecip(DIRFILE *" dirfile ", const char *" field_code ,
-.BI "const char *" in_field ", const double " cdividend [2]);
+.BI "const char *" in_field ", const double " cdividend\fR[2] );
 .hy
 .ad n
 .PP
@@ -311,7 +312,7 @@ In this case, the array pointers passed as
 or
 .IR ca
 should have twice as many (purely real) elements, consisting of alternating
-real and imaginary parts for the complex data.  For example,
+real and imaginary parts for the complex data.  That is, for example,
 .IR ca [0]
 should be the real part of the first co-efficient,
 .IR ca [1]

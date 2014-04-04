@@ -205,8 +205,9 @@ GetData artificially limits the number of elements in a
 to the value of the symbol GD_MAX_CARRAY_LENGTH defined in getdata.h.  This is
 done to be certain that the
 .B CARRAY
-won't overrun the line when flushed to disk.  On a 32-bit system, this number
-is 2**24.  It is larger on a 64-bit system.
+won't overrun the line when flushed to disk.  On platforms with a \fIn\fR-bit
+.BR size_t ,
+GD_MAX_CARRAY_LENGTH is 2**(\fIn\fR-8)-1.
 
 .SH SEE ALSO
 .BR gd_add_bit (3),

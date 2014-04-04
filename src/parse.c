@@ -1242,7 +1242,8 @@ static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
     int pedantic, int *restrict is_dot, char **outstring, const char *tok_pos)
 {
   unsigned dummy;
-  int offset, c, first, n, new_z, s, z;
+  int offset, c, first, new_z, s, z;
+  size_t n;
   gd_type_t t;
   char* ptr;
   void *data;

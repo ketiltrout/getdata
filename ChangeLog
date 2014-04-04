@@ -1,3 +1,9 @@
+2014-04-03   D. V. Wiebe <getdata@ketiltrout.net> svn:883
+	* src/add.c (gd_add_crecip gd_madd_crecip) src/mod.c (gd_alter_crecip): Call
+	the ...crecip89 function.
+
+	* src/getdata.h.in: Fix GD_MAX_CARRAY_LENGTH computation.
+
 2014-03-20   D. V. Wiebe <getdata@ketiltrout.net> svn:882
 	* bindings/php/getdata.c (gd_add_polynom gd_madd_polynom): Fix array size.
 	* bindings/python/pydirfile.c (gdpy_dirfile_getentry): Fix segfault.

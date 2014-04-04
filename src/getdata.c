@@ -1808,7 +1808,7 @@ static size_t _GD_DoConst(DIRFILE *restrict D, const gd_entry_t *restrict E,
     return 0;
   }
 
-  dreturn("%i", len);
+  dreturn("%zu", len);
   return len;
 }
 

@@ -1087,21 +1087,8 @@ int gd_add_crecip(DIRFILE* D, const char* field_code, const char* in_field,
   dtrace("%p, \"%s\", \"%s\", %g;%g, %i", D, field_code, in_field,
       creal(cdividend), cimag(cdividend), fragment_index);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  gd_entry_t E;
-  memset(&E, 0, sizeof(gd_entry_t));
-  E.field = (char *)field_code;
-  E.field_type = GD_RECIP_ENTRY;
-  E.EN(recip,cdividend) = cdividend;
-  E.flags = GD_EN_COMPSCAL;
-  E.in_fields[0] = (char *)in_field;
-  E.fragment_index = fragment_index;
-  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
+  error = gd_add_crecip89(D, field_code, in_field, (const double*)(&cdividend),
+      fragment_index);
 
   dreturn("%i", error);
   return error;
@@ -1788,20 +1775,8 @@ int gd_madd_crecip(DIRFILE* D, const char *parent, const char* field_code, const
   dtrace("%p, \"%s\", \"%s\", \"%s\", %g;%g", D, parent, field_code, in_field,
       creal(cdividend), cimag(cdividend));
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  gd_entry_t E;
-  memset(&E, 0, sizeof(gd_entry_t));
-  E.field = (char *)field_code;
-  E.field_type = GD_RECIP_ENTRY;
-  E.EN(recip,cdividend) = cdividend;
-  E.flags = GD_EN_COMPSCAL;
-  E.in_fields[0] = (char *)in_field;
-  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
+  error = gd_madd_crecip89(D, parent, field_code, in_field,
+      (const double*)(&cdividend));
 
   dreturn("%i", error);
   return error;

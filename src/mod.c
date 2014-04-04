@@ -1303,25 +1303,11 @@ int gd_alter_crecip(DIRFILE* D, const char* field_code, const char* in_field,
     double complex cdividend)
 {
   int ret;
-  gd_entry_t N;
 
   dtrace("%p, \"%s\", \"%s\", %g;%g", D, field_code, in_field, creal(cdividend),
       cimag(cdividend));
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  memset(&N, 0, sizeof(gd_entry_t));
-  N.field_type = GD_RECIP_ENTRY;
-  N.in_fields[0] = (char *)in_field;
-  N.scalar[0] = (cdividend == 0) ? "" : NULL;
-  N.EN(recip,cdividend) = cdividend;
-  N.flags = GD_EN_COMPSCAL;
-
-  ret = _GD_Change(D, field_code, &N, 0);
+  ret = gd_alter_crecip89(D, field_code, in_field, (const double*)(&cdividend));
 
   dreturn("%i", ret);
   return ret;
@@ -1334,7 +1320,7 @@ int gd_alter_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
   int ret;
   gd_entry_t N;
 
-  dtrace("%p, \"%s\", \"%s\", {%g, %g}", D, field_code, in_field,
+  dtrace("%p, \"%s\", \"%s\", %p={%g, %g}", D, field_code, in_field, cdividend,
       (cdividend == NULL) ? 0 : cdividend[0],
       (cdividend == NULL) ? 0 : cdividend[1]);
 

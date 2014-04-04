@@ -720,8 +720,10 @@ GetData artificially limits the size of a
 .B CARRAY
 field to GD_MAX_CARRAY_LENGTH elements, to be certain it is always able to
 write the CARRAY back to disk without overrunning its maximum line length.
-On 32-bit systems, GD_MAX_CARRAY_LENGTH is 2**24.  It is larger on 64-bit
-systems.  Excess elements are silently truncated on dirfile open.
+On platforms with a \fIn\fR-bit
+.BR size_t ,
+GD_MAX_CARRAY_LENGTH is 2**(\fIn\fR-8)-1.  Excess elements are silently
+truncated on dirfile open.
 
 GetData's parser assumes it is running on an ASCII-compatible platform.  Format
 specification parsing will fail gloriously on an EBCDIC platform.

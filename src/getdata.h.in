@@ -120,7 +120,7 @@ extern "C" {
  * whatever fits on a format file line, but that's hard to calculate.  This is
  * 2**(n-8)-1 on a n-bit system.
  */
-#define GD_MAX_CARRAY_LENGTH ((int)(((unsigned int)-1) >> 8))
+#define GD_MAX_CARRAY_LENGTH (((size_t)-1) >> 8)
 
 
 /* error codes */

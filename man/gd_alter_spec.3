@@ -152,12 +152,13 @@ The dirfile error may be retrieved by calling
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR gd_error_string (3).
-.SH BUGS
+.SH NOTES
 If a
 .B CARRAY
 field with more than GD_MAX_CARRAY_LENGTH elements is provided, subsequent
-elements will be silently truncated.  GD_MAX_CARRAY_LENGTH is 2**24 on 32-bit
-systems.  It is larger on 64-bit systems.
+elements will be silently truncated.  On platforms with a \fIn\fR-bit
+.BR size_t ,
+GD_MAX_CARRAY_LENGTH is 2**(\fIn\fR-8)-1.
 .SH SEE ALSO
 .BR gd_alter_bit (3),
 .BR gd_alter_const (3),
