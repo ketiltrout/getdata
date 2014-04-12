@@ -51,6 +51,14 @@ extern zend_module_entry getdata_module_entry;
 #include "TSRM.h"
 #endif
 
+#ifndef PHP_FE_END
+#define PHP_FE_END ZEND_FE_END
+#endif
+
+#ifndef ZEND_FE_END
+#define ZEND_FE_END { NULL, NULL, NULL, 0, 0 }
+#endif
+
 void gdphp_register_constants(int module_number);
 
 #endif

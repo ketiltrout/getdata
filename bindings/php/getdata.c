@@ -32,12 +32,12 @@ typedef int64_t gdphp_long_t;
 #endif
 
 /* PHP globals */
-ZEND_DECLARE_MODULE_GLOBALS(getdata)
-
 ZEND_BEGIN_MODULE_GLOBALS(getdata)
   zend_bool degrade_complex;
   zend_bool unpack;
 ZEND_END_MODULE_GLOBALS(getdata)
+
+ZEND_DECLARE_MODULE_GLOBALS(getdata)
 
 #ifdef ZTS
 # define GDPHP_G(v) TSRMG(getdata_globals_id, zend_getdata_globals *, v)
