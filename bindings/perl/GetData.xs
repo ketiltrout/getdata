@@ -284,7 +284,7 @@ static int gdp_fetch_in_fields(char **in_fields, SV *sv, int partial, int min,
       croak("%s::%s() - Key 'in_fields' must be list or string in entry hash",
           pkg, func);
   } else {
-    int have[GD_MAX_LINCOM];
+    int have[GD_MAX_LINCOM * 2];
 
     memset(have, 0, sizeof(int) * GD_MAX_LINCOM * 2);
 
@@ -305,7 +305,7 @@ static int gdp_fetch_in_fields(char **in_fields, SV *sv, int partial, int min,
 
   if (n < min || n > max) {
     croak("%s::%s() - Bad array length (%i) for key 'in_fields' in entry hash",
-        n, pkg, func);
+        pkg, func, n);
   }
 
   dreturn("%i", n);
