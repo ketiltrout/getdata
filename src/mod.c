@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2013 D. V. Wiebe
+/* Copyright (C) 2008-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -479,14 +479,14 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             gd_rs2cs_(Q.EN(lincom,cm)[i], Q.EN(lincom,m)[i]);
           }
 
+          if (j & GD_AS_ERROR)
+            break;
           if (j & GD_AS_FREE_SCALAR)
             scalar_free |= 1 << i;
           if (j & GD_AS_MODIFIED)
             modified = 1;
           if (j & GD_AS_NEED_RECALC)
             Q.flags &= ~GD_EN_CALC;
-          if (j & GD_AS_MODIFIED)
-            modified = 1;
         }
 
         if (flags & 0x4) {
@@ -507,14 +507,14 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             gd_rs2cs_(Q.EN(lincom,cb)[i], Q.EN(lincom,b)[i]);
           }
 
+          if (j & GD_AS_ERROR)
+            break;
           if (j & GD_AS_FREE_SCALAR)
             scalar_free |= 1 << (i + GD_MAX_LINCOM);
           if (j & GD_AS_MODIFIED)
             modified = 1;
           if (j & GD_AS_NEED_RECALC)
             Q.flags &= ~GD_EN_CALC;
-          if (j & GD_AS_MODIFIED)
-            modified = 1;
         }
 
         if (cimag(Q.EN(lincom,cm)[i]) || cimag(Q.EN(lincom,cb)[i]))
@@ -913,48 +913,74 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       Q.EN(scalar,const_type) = (N->EN(scalar,const_type) == GD_NULL) ?
         E->EN(scalar,const_type) : N->EN(scalar,const_type);
 
-      if (Q.EN(scalar,const_type) & 0x40 || GD_SIZE(Q.EN(scalar,const_type)) ==
-          0)
-      {
-        _GD_SetError(D, GD_E_BAD_TYPE, Q.EN(scalar,const_type), NULL, 0, NULL);
-        dreturn("%i", -1);
-        return -1;
-      } else if (E->EN(scalar,array_len) > GD_MAX_CARRAY_LENGTH) {
-        _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
-        dreturn("%i", -1);
-        return -1;
-      }
-
       if (Q.EN(scalar,const_type) != E->EN(scalar,const_type) ||
           Q.EN(scalar,array_len) != E->EN(scalar,array_len))
       {
         modified = 1;
+
+        if (Q.EN(scalar,const_type) & 0x40 ||
+            GD_SIZE(Q.EN(scalar,const_type)) == 0)
+        {
+          _GD_SetError(D, GD_E_BAD_TYPE, Q.EN(scalar,const_type), NULL, 0,
+              NULL);
+          break;
+        } else if (Q.EN(scalar,array_len) > GD_MAX_CARRAY_LENGTH) {
+          _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
+          break;
+        }
+
+        type = _GD_ConstType(D, Q.EN(scalar,const_type));
+        Qe.u.scalar.d = _GD_Malloc(D, GD_SIZE(type) * Q.EN(scalar,array_len));
+        if (Qe.u.scalar.d == NULL)
+          break;
+        memset(Qe.u.scalar.d, 0, GD_SIZE(type) * Q.EN(scalar,array_len));
+
+        /* copy via type conversion, if array_len has increased, trailing
+         * elements are uninitialised. */
+        n = E->EN(scalar,array_len);
+        if (n > Q.EN(scalar,array_len))
+          n = Q.EN(scalar,array_len);
+
+        _GD_ConvertType(D, E->e->u.scalar.d, _GD_ConstType(D,
+              E->EN(scalar,const_type)), Qe.u.scalar.d, type, n);
+
+        if (D->error) {
+          free(Qe.u.scalar.d);
+          break;
+        }
+
+        free(E->e->u.scalar.d);
+      } else
+        Qe.u.scalar.d = E->e->u.scalar.d;
+      break;
+    case GD_SARRAY_ENTRY:
+      if (N->EN(scalar,array_len) == 0) {
+        Q.EN(scalar,array_len) = E->EN(scalar,array_len);
+        Qe.u.scalar.d = E->e->u.scalar.d;
+      } else {
+        Q.EN(scalar,array_len) = N->EN(scalar,array_len);
+
+        if (Q.EN(scalar,array_len) != E->EN(scalar,array_len)) {
+          modified = 1;
+
+          if (Q.EN(scalar,array_len) > GD_MAX_CARRAY_LENGTH) {
+            _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
+            break;
+          }
+
+          Qe.u.scalar.d = _GD_Realloc(D, E->e->u.scalar.d,
+              sizeof(const char *) * Q.EN(scalar,array_len));
+          if (Qe.u.scalar.d == NULL)
+            break;
+
+          if (Q.EN(scalar,array_len) > E->EN(scalar,array_len)) {
+            memset(((char**)Qe.u.scalar.d) + E->EN(scalar,array_len), 0,
+                sizeof(char**) * (Q.EN(scalar,array_len) -
+                  E->EN(scalar,array_len)));
+          }
+        } else
+          Qe.u.scalar.d = E->e->u.scalar.d;
       }
-
-      type = _GD_ConstType(D, Q.EN(scalar,const_type));
-      Qe.u.scalar.d = _GD_Malloc(D, GD_SIZE(type) * Q.EN(scalar,array_len));
-      if (Qe.u.scalar.d == NULL) {
-        dreturn("%i", -1);
-        return -1;
-      }
-      memset(Qe.u.scalar.d, 0, GD_SIZE(type) * Q.EN(scalar,array_len));
-
-      /* copy via type conversion, if array_len has increased, trailing elements
-       * are uninitialised. */
-      n = E->EN(scalar,array_len);
-      if (n > Q.EN(scalar,array_len))
-        n = Q.EN(scalar,array_len);
-
-      _GD_ConvertType(D, E->e->u.scalar.d, _GD_ConstType(D,
-            E->EN(scalar,const_type)), Qe.u.scalar.d, type, n);
-
-      if (D->error) {
-        free(Qe.u.scalar.d);
-        dreturn("%i", -1);
-        return -1;
-      }
-
-      free(E->e->u.scalar.d);
       break;
     case GD_INDEX_ENTRY:
       /* INDEX may not be modified */
@@ -1474,6 +1500,30 @@ int gd_alter_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
   return ret;
 }
 
+int gd_alter_sarray(DIRFILE* D, const char* field_code, size_t array_len)
+  gd_nothrow
+{
+  int ret;
+  gd_entry_t N;
+
+  dtrace("%p, \"%s\", %" PRNsize_t, D, field_code, array_len);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  memset(&N, 0, sizeof(gd_entry_t));
+  N.field_type = GD_SARRAY_ENTRY;
+  N.EN(scalar,array_len) = array_len;
+
+  ret = _GD_Change(D, field_code, &N, 0);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
 int gd_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
     const char* in_field, const double* a) gd_nothrow
 {
@@ -1587,7 +1637,7 @@ int gd_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
 
 int gd_alter_window(DIRFILE* D, const char *field_code, const char *in_field,
     const char *check_field, gd_windop_t windop, gd_triplet_t threshold)
-  gd_nothrow
+gd_nothrow
 {
   int ret;
   gd_entry_t N;
@@ -1618,7 +1668,7 @@ int gd_alter_window(DIRFILE* D, const char *field_code, const char *in_field,
 
 int gd_alter_mplex(DIRFILE* D, const char *field_code, const char *in_field,
     const char *count_field, int count_val, int period)
-  gd_nothrow
+gd_nothrow
 {
   int ret;
   gd_entry_t N;

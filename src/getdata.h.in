@@ -244,6 +244,7 @@ typedef enum {
   GD_CONST_ENTRY    = GD_SCALAR_ENTRY_BIT | 0x00,
   GD_STRING_ENTRY   = GD_SCALAR_ENTRY_BIT | 0x01,
   GD_CARRAY_ENTRY   = GD_SCALAR_ENTRY_BIT | 0x02,
+  GD_SARRAY_ENTRY   = GD_SCALAR_ENTRY_BIT | 0x03,
 
   /* not a real entry type, but it's convenient to put this here */
   GD_ALIAS_ENTRY    =   -1
@@ -573,6 +574,10 @@ extern int gd_add_recip(DIRFILE *dirfile, const char *field_code,
     const char *in_field, double dividend, int fragment_index) gd_nothrow
 gd_nonnull ((1,2,3));
 
+extern int gd_add_sarray(DIRFILE *dirfile, const char* field_code,
+    size_t array_len, const char **values, int fragment_index) gd_nothrow
+gd_nonnull ((1,2,4));
+
 extern int gd_add_sbit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, int bitnum, int numbits,
     int fragment_index) gd_nothrow gd_nonnull ((1,2,3));
@@ -648,6 +653,9 @@ gd_nonnull((1,2));
 extern int gd_alter_recip(DIRFILE *dirfile, const char *field_code,
     const char *in_field, double cdividend) gd_nothrow gd_nonnull((1,2));
 
+extern int gd_alter_sarray(DIRFILE* D, const char* field_code,
+    size_t array_len) gd_nothrow gd_nonnull((1,2));
+
 extern int gd_alter_sbit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, int bitnum, int numbits) gd_nothrow
 gd_nonnull((1,2));
@@ -666,14 +674,14 @@ extern int gd_get_carray(DIRFILE *dirfile, const char *field_code,
     gd_type_t return_type, void *data_out) gd_nothrow gd_nonnull((1,2));
 
 extern int gd_get_carray_slice(DIRFILE *dirfile, const char *field_code,
-    unsigned int start, size_t n, gd_type_t return_type, void *data_out)
+    unsigned long start, size_t n, gd_type_t return_type, void *data_out)
 gd_nothrow gd_nonnull((1,2));
 
 extern int gd_put_carray(DIRFILE *dirfile, const char *field_code,
   gd_type_t data_type, const void *data_in) gd_nothrow gd_nonnull((1,2,4));
 
 extern int gd_put_carray_slice(DIRFILE *dirfile, const char *field_code,
-    unsigned int first, size_t n, gd_type_t data_type, const void *data_in)
+    unsigned long first, size_t n, gd_type_t data_type, const void *data_in)
 gd_nothrow gd_nonnull((1,2,6));
 
 extern int gd_get_constant(DIRFILE *dirfile, const char *field_code,
@@ -813,6 +821,10 @@ extern int gd_madd_recip(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field, double dividend) gd_nothrow
 gd_nonnull ((1,2,3,4));
 
+extern int gd_madd_sarray(DIRFILE *dirfile, const char *parent,
+    const char *field_code, size_t array_len, const char **values) gd_nothrow
+gd_nonnull ((1,2,3,5));
+
 extern int gd_madd_sbit(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field, int bitnum,
     int numbits) gd_nothrow gd_nonnull ((1,2,3,4));
@@ -899,6 +911,23 @@ extern char *gd_raw_filename(DIRFILE *dirfile,
 
 extern const char *gd_reference(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1));
+
+extern int gd_get_sarray(DIRFILE *dirfile, const char *field_code,
+    const char **data_out) gd_nothrow gd_nonnull((1,2));
+
+extern int gd_get_sarray_slice(DIRFILE *dirfile, const char *field_code,
+    unsigned long start, size_t n, const char **data_out) gd_nothrow
+gd_nonnull((1,2));
+
+extern size_t gd_sarray_len(DIRFILE *dirfile, const char *field_code) gd_nothrow
+gd_nonnull((1,2));
+
+extern int gd_put_sarray(DIRFILE *dirfile, const char *field_code,
+  const char **data_in) gd_nothrow gd_nonnull((1,2,3));
+
+extern int gd_put_sarray_slice(DIRFILE *dirfile, const char *field_code,
+    unsigned long first, size_t n, const char **data_in) gd_nothrow
+gd_nonnull((1,2,5));
 
 extern unsigned int gd_spf(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull ((1, 2));

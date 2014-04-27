@@ -18,7 +18,7 @@
 # along with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = foreign serial-tests
 
 LDADD=../src/libgetdata.la
 INCLUDES=${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
@@ -35,10 +35,11 @@ ADD_TESTS=add_add add_affix add_alias add_alias_affix add_alias_meta add_bit \
 					add_mplex_scalars add_multiply add_multiply_invalid add_phase \
 					add_phase_invalid add_polynom add_polynom_scalar add_protect add_raw \
 					add_raw_include add_raw_invalid add_raw_spf add_raw_spf_scalar \
-					add_raw_sub add_raw_type add_rdonly add_recip add_resolv add_sbit \
-					add_scalar add_scalar_carray add_scalar_carray_bad add_sort add_spec \
-					add_spec_directive add_spec_invalid add_spec_meta add_spec_resolv \
-					add_string add_string_affix add_type add_window add_window_op
+					add_raw_sub add_raw_type add_rdonly add_recip add_resolv add_sarray \
+					add_sbit add_scalar add_scalar_carray add_scalar_carray_bad add_sort \
+					add_spec add_spec_directive add_spec_invalid add_spec_meta \
+					add_spec_resolv add_string add_string_affix add_type add_window \
+					add_window_op
 
 ALIAS_TESTS=alias_list alias_list_alias alias_list_missing alias_num \
 						alias_num_alias alias_num_missing alias_target alias_target_alias \
@@ -57,8 +58,9 @@ ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
 						alter_linterp alter_linterp_move alter_mplex alter_mspec \
 						alter_mspec_affix alter_multiply alter_phase alter_polynom_coeff \
 						alter_polynom_input alter_polynom_ord alter_raw_spf alter_raw_type \
-						alter_recip alter_recip_zero alter_scalar_affix alter_spec \
-						alter_spec_affix alter_spec_meta alter_spec_polynom alter_window
+						alter_recip alter_recip_zero alter_sarray alter_scalar_affix \
+						alter_spec alter_spec_affix alter_spec_meta alter_spec_polynom \
+						alter_window
 
 ASCII_TESTS=ascii_add ascii_get ascii_get_complex ascii_get_get ascii_get_sub \
 						ascii_nframes ascii_put ascii_sync
@@ -200,9 +202,10 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_multiply_rcin get_multiply_s get_neg get_nonexistent get_null \
 					get_off64 get_phase get_phase_affix get_polynom get_polynom_cmpin \
 					get_polynom_noin get_recip get_recip_const get_recurse get_rofs \
-					get_sbit get_sf get_ss get_type get_uint16 get_uint32 get_uint64 \
-					get_window get_window_clr get_window_complex get_window_ge \
-					get_window_gt get_window_le get_window_lt get_window_ne get_window_s \
+					get_sbit get_sarray get_sarray_len get_sarray_slice get_sf get_ss \
+					get_string get_type get_uint16 get_uint32 get_uint64 get_window \
+					get_window_clr get_window_complex get_window_ge get_window_gt \
+					get_window_le get_window_lt get_window_ne get_window_s \
 					get_window_set get_zero get_zero_complex get_zero_float
 
 GLOBAL_TESTS=global_flags global_name global_ref global_ref_empty global_ref_set
@@ -235,8 +238,9 @@ MADD_TESTS=madd madd_affix madd_alias madd_alias_affix madd_bit \
 					 madd_crecip madd_crecip89 madd_divide madd_index madd_lincom \
 					 madd_lincom_invalid madd_linterp madd_linterp_invalid madd_mplex \
 					 madd_multiply madd_multiply_invalid madd_phase madd_phase_invalid \
-					 madd_polynom madd_recip madd_sbit madd_spec madd_spec_directive \
-					 madd_spec_invalid madd_spec_resolv madd_string madd_window
+					 madd_polynom madd_recip madd_sarray madd_sbit madd_spec \
+					 madd_spec_directive madd_spec_invalid madd_spec_resolv madd_string \
+					 madd_window
 
 MOVE_TESTS=move_affix move_affix_dup move_affix_meta move_affix_updb \
 					 move_alias move_data_enc_ar move_data_enc_ra move_data_endian \
@@ -310,12 +314,12 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_protect_format parse_protect_none parse_quote \
 						parse_quote_mismatch parse_raw parse_raw_char parse_raw_char_bad \
 						parse_raw_ncols parse_raw_scalar parse_raw_spf parse_raw_type \
-						parse_recip parse_ref parse_ref_nonexistent parse_sbit parse_sort \
-						parse_string parse_string_ncols parse_string_null parse_utf8 \
-						parse_utf8_invalid parse_utf8_zero parse_version \
-						parse_version_89 parse_version_98 parse_version_include \
-						parse_version_permissive parse_version_p8 parse_version_p9 \
-						parse_version_slash parse_whitespace parse_window \
+						parse_recip parse_ref parse_ref_nonexistent parse_sarray \
+						parse_sarray_long parse_sbit parse_sort parse_string \
+						parse_string_ncols parse_string_null parse_utf8 parse_utf8_invalid \
+						parse_utf8_zero parse_version parse_version_89 parse_version_98 \
+						parse_version_include parse_version_permissive parse_version_p8 \
+						parse_version_p9 parse_version_slash parse_whitespace parse_window \
 						parse_window_ncols parse_window_op parse_window_scalar
 
 PROTECT_TESTS=protect_alter protect_alter_all protect_get
@@ -336,9 +340,9 @@ PUT_TESTS=put64 put_bad_code put_bit put_bof put_carray put_carray_client \
 					put_linterp_notab put_linterp_reverse put_mplex put_mplex_complex \
 					put_multiply put_null put_off64 put_phase put_phase_noin \
 					put_polynom1 put_polynom2 put_polynom_noin put_protect put_rdonly \
-					put_recip put_recurse put_repr put_rofs put_sbit put_sf put_ss \
-					put_string put_string_protect put_sub put_type put_uint16 put_uint32 \
-					put_uint64 put_window put_zero
+					put_recip put_recurse put_repr put_rofs put_sarray put_sarray_slice \
+					put_sbit put_sf put_ss put_string put_string_protect put_sub \
+					put_type put_uint16 put_uint32 put_uint64 put_window put_zero
 
 REF_TESTS=ref ref_none ref_two
 

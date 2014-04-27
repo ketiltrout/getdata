@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2013 D. V. Wiebe
+ * Copyright (C) 2005-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -199,10 +199,13 @@ static const struct {
   { GD_E_BAD_REPR, GD_E_REPR_UNKNOWN, "Unknown field representation: .{4}", 0 },
   { GD_E_BAD_REPR, GD_E_REPR_PUT, "Unable to write to field reprentation: .{4}",
     0 },
-  /* GD_E_FLUSH: 3 = suberror, 4 = filename */
+  /* GD_E_FLUSH: 3 = suberror */
   { GD_E_FLUSH, GD_E_FLUSH_MKTMP, "I/O error creating temporary file: ", 1 },
   { GD_E_FLUSH, GD_E_FLUSH_OPEN, "I/O error opening temporary file: ", 1 },
   { GD_E_FLUSH, GD_E_FLUSH_RENAME, "I/O error replacing format metadata: ", 1 },
+  { GD_E_FLUSH, GD_E_FLUSH_WRITE, "I/O error writing format metadata: ", 1 },
+  { GD_E_FLUSH, GD_E_FLUSH_TOO_LONG, "Line too long writing format metadata",
+    0 },
   /* GD_E_BOUNDS: (nothing) */
   { GD_E_BOUNDS, 0, "CARRAY length out of bounds", 0 },
   /* GD_E_LINE_TOO_LONG: 2 = fragment, 3 = line number */

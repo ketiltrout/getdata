@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2013 D. V. Wiebe
+ * Copyright (C) 2005-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1928,6 +1928,7 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
       n_read = _GD_DoConst(D, E, first_samp, num_samp, return_type, data_out);
       break;
     case GD_STRING_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_ALIAS_ENTRY:
     case GD_NO_ENTRY:
       /* Can't get here */

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2010, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,16 +20,16 @@
  */
 #include "internal.h"
 
-int gd_get_carray_slice(DIRFILE* D, const char *field_code_in,
-    unsigned int start, size_t n, gd_type_t return_type, void *data_out)
+int gd_get_carray_slice(DIRFILE *D, const char *field_code_in,
+    unsigned long start, size_t n, gd_type_t return_type, void *data_out)
   gd_nothrow
 {
   gd_entry_t *entry;
   char* field_code;
   int repr;
 
-  dtrace("%p, \"%s\", %i, %" PRNsize_t ", 0x%x, %p", D, field_code_in,
-      (int)start, n, return_type, data_out);
+  dtrace("%p, \"%s\", %lu, %" PRNsize_t ", 0x%x, %p", D, field_code_in, start,
+      n, return_type, data_out);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -118,7 +118,7 @@ int gd_get_carray(DIRFILE *D, const char *field_code_in, gd_type_t return_type,
 int gd_get_constant(DIRFILE* D, const char *field_code_in,
     gd_type_t return_type, void *data_out) gd_nothrow
 {
-  return gd_get_carray_slice(D, field_code_in, 0, 1, return_type, data_out);
+  return gd_get_carray(D, field_code_in, return_type, data_out);
 }
 
 size_t gd_carray_len(DIRFILE *D, const char *field_code_in) gd_nothrow
@@ -166,12 +166,12 @@ size_t gd_carray_len(DIRFILE *D, const char *field_code_in) gd_nothrow
 }
 
 static int _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, int repr,
-    unsigned int first, size_t n, gd_type_t data_type, const void *data_in)
+    unsigned long first, size_t n, gd_type_t data_type, const void *data_in)
   gd_nothrow
 {
   int i;
 
-  dtrace("%p, %p, %i, %u, %" PRNsize_t ", 0x%X, %p", D, E, repr, first, n,
+  dtrace("%p, %p, %i, %lu, %" PRNsize_t ", 0x%X, %p", D, E, repr, first, n,
       data_type, data_in);
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR) {
@@ -206,15 +206,15 @@ static int _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, int repr,
 }
 
 int gd_put_carray_slice(DIRFILE* D, const char *field_code_in,
-    unsigned int first, size_t n, gd_type_t data_type, const void *data_in)
+    unsigned long first, size_t n, gd_type_t data_type, const void *data_in)
 gd_nothrow
 {
   gd_entry_t *entry;
-  int repr, r = 1;
+  int repr, r = -1;
   char* field_code;
 
-  dtrace("%p, \"%s\", %u, %" PRNsize_t ", 0x%X, %p", D, field_code_in, first, n,
-      data_type, data_in);
+  dtrace("%p, \"%s\", %lu, %" PRNsize_t ", 0x%X, %p", D, field_code_in, first,
+      n, data_type, data_in);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -250,7 +250,7 @@ int gd_put_carray(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
     const void *data_in) gd_nothrow
 {
   gd_entry_t *entry;
-  int repr, r = 1;
+  int repr, r = -1;
   char* field_code;
 
   dtrace("%p, \"%s\", 0x%x, %p", D, field_code_in, data_type, data_in);

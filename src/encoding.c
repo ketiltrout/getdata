@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2013 D. V. Wiebe
+/* Copyright (C) 2008-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -641,7 +641,7 @@ static unsigned long _GD_ResolveEncoding(DIRFILE *restrict D,
       if (scheme == gd_ef_[i].scheme) {
         file->subenc = i;
         dreturn("0x%08lx", gd_ef_[i].scheme);
-        return gd_ef_[i].scheme;;
+        return gd_ef_[i].scheme;
       }
   }
 

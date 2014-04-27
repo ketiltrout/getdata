@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2013 D. V. Wiebe
+ * Copyright (C) 2005-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -798,6 +798,8 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_FLUSH_MKTMP        1
 #define GD_E_FLUSH_OPEN         2
 #define GD_E_FLUSH_RENAME       3
+#define GD_E_FLUSH_WRITE        4
+#define GD_E_FLUSH_TOO_LONG     5
 
 #define GD_E_UNENC_UNDET        1
 #define GD_E_UNENC_TARGET       2
@@ -1133,8 +1135,6 @@ size_t _GD_DoField(DIRFILE *restrict, gd_entry_t *restrict, int, off64_t,
     size_t, gd_type_t, void *restrict);
 size_t _GD_DoFieldOut(DIRFILE *restrict, gd_entry_t *restrict, int, off64_t,
     size_t, gd_type_t, const void *restrict);
-size_t _GD_DoStringOut(DIRFILE *restrict D, gd_entry_t *restrict E,
-    const char *data_in);
 int _GD_EntryCmp(const void*, const void*);
 gd_entry_t *_GD_FindField(const DIRFILE *restrict, const char *restrict,
     gd_entry_t *const *, unsigned int, int, unsigned int *restrict);

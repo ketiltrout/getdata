@@ -1234,26 +1234,27 @@ static gd_entry_t *_GD_ParseConst(DIRFILE *restrict D,
   return E;
 }
 
-/* _GD_ParseCarray: parse CARRAY entry in formats file.
+/* _GD_ParseArray: parse [CS]ARRAY entry in formats file.
 */
-static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
+static gd_entry_t *_GD_ParseArray(DIRFILE *restrict D, int string,
     char *in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t *restrict parent,
     const char *restrict format_file, int line, int me, int standards,
     int pedantic, int *restrict is_dot, char **outstring, const char *tok_pos)
 {
   unsigned dummy;
-  int offset, c, first, new_z, s, z;
-  size_t n;
-  gd_type_t t;
+  int offset, c, first, s;
+  size_t n = 0, data_size = 0, new_size;
+  gd_type_t t = GD_NULL;
   char* ptr;
-  void *data;
+  void *data = NULL;
   gd_entry_t *E;
 
-  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %i, %p, %p, %p", D, in_cols,
-      n_cols, parent, format_file, line, me, standards, pedantic, is_dot,
-      outstring, tok_pos);
+  dtrace("%p, %i, %p, %i, %p, \"%s\", %i, %i, %i, %i, %p, %p, %p", D, string,
+      in_cols, n_cols, parent, format_file, line, me, standards, pedantic,
+      is_dot, outstring, tok_pos);
 
-  if (n_cols < 4) {
+  /* CARRAYs have a data_type token which SARRAYs lack */
+  if (n_cols < 4 - string) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
     dreturn("%p", NULL);
     return NULL;
@@ -1275,7 +1276,7 @@ static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
   }
   memset(E->e, 0, sizeof(struct gd_private_entry_));
 
-  E->field_type = GD_CARRAY_ENTRY;
+  E->field_type = string ? GD_SARRAY_ENTRY : GD_CARRAY_ENTRY;
   E->flags |= GD_EN_CALC;
 
   E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
@@ -1289,31 +1290,30 @@ static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
     return NULL;
   }
 
-  E->EN(scalar,const_type) = _GD_RawType(in_cols[2], standards, pedantic);
+  if (string) {
+    s = sizeof(const char *);
+    first = 2;
+  } else {
+    E->EN(scalar,const_type) = _GD_RawType(in_cols[2], standards, pedantic);
+    t = _GD_ConstType(D, E->EN(scalar,const_type));
+    first = 3;
+    s = GD_SIZE(t);
 
-  if (GD_SIZE(E->EN(scalar,const_type)) == 0 || E->EN(raw,data_type) & 0x40) {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
-        in_cols[2]);
-  }
-
-  if (D->error) {
-    _GD_FreeE(D, E, 1);
-    dreturn("%p", NULL);
-    return NULL;
+    if (GD_SIZE(E->EN(scalar,const_type)) == 0 || E->EN(raw,data_type) & 0x40) {
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
+          in_cols[2]);
+      _GD_FreeE(D, E, 1);
+      dreturn("%p", NULL);
+      return NULL;
+    }
   }
 
   /* spool in the data */
-  new_z = MAX_IN_COLS - 2;
-  z = 0;
-  n = 0;
-  first = 3;
-  data = NULL;
-  t = _GD_ConstType(D, E->EN(scalar,const_type));
-  s = GD_SIZE(t);
+  new_size = MAX_IN_COLS - first;
 
   for (;;) {
-    if (z < new_z) {
-      void *new_data = (char *)_GD_Realloc(D, data, new_z * s);
+    if (data_size < new_size) {
+      void *new_data = _GD_Realloc(D, data, new_size * s);
       if (new_data == NULL) {
         free(data);
         _GD_FreeE(D, E, 1);
@@ -1321,24 +1321,36 @@ static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
         return NULL;
       }
       data = new_data;
-      z = new_z;
+      data_size = new_size;
     }
 
     for (c = first; c < n_cols; ++c) {
-      ptr = _GD_SetScalar(D, in_cols[c], (char *)data + s * n++, t, me,
-          format_file, line, &offset, &dummy, standards, pedantic);
+      if (string) {
+        ((const char**)data)[n++] = _GD_Strdup(D, in_cols[c]);
+
+        if (D->error) {
+          free(data);
+          _GD_FreeE(D, E, 1);
+          dreturn("%p", NULL);
+          return NULL;
+        }
+      } else {
+        ptr = _GD_SetScalar(D, in_cols[c], (char *)data + s * n++, t, me,
+            format_file, line, &offset, &dummy, standards, pedantic);
+
+        if (ptr) {
+          free(ptr);
+          free(data);
+          _GD_FreeE(D, E, 1);
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
+              in_cols[c]);
+          dreturn("%p", NULL);
+          return NULL;
+        }
+      }
+
       if (n == GD_MAX_CARRAY_LENGTH)
         break;
-
-      if (ptr) {
-        free(ptr);
-        free(data);
-        _GD_FreeE(D, E, 1);
-        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
-            in_cols[c]);
-        dreturn("%p", NULL);
-        return NULL;
-      }
     }
 
     if (n_cols < MAX_IN_COLS)
@@ -1351,7 +1363,7 @@ static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
     if (n_cols == 0 || D->error)
       break;
     first = 0;
-    new_z = z + n_cols;
+    new_size = data_size + n_cols;
   }
   /* save the list */
   E->e->u.scalar.d = data;
@@ -1620,11 +1632,14 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D, int n_cols, char **in_cols,
     E = _GD_ParseConst(D, in_cols, n_cols, P, format_file, linenum, me,
         standards, pedantic, &is_dot);
   else if (strcmp(in_cols[1], "CARRAY") == 0 && (!pedantic || standards >= 8))
-    E = _GD_ParseCarray(D, in_cols, n_cols, P, format_file, linenum, me,
+    E = _GD_ParseArray(D, 0, in_cols, n_cols, P, format_file, linenum, me,
         standards, pedantic, &is_dot, outstring, tok_pos);
   else if (strcmp(in_cols[1], "STRING") == 0 && (!pedantic || standards >= 6))
     E = _GD_ParseString(D, in_cols, n_cols, P, format_file, linenum, me,
         standards, pedantic, &is_dot);
+  else if (strcmp(in_cols[1], "SARRAY") == 0 && (!pedantic || standards >= 8))
+    E = _GD_ParseArray(D, 1, in_cols, n_cols, P, format_file, linenum, me,
+        standards, pedantic, &is_dot, outstring, tok_pos);
   else if (standards <= GD_DIRFILE_STANDARDS_VERSION || pedantic)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_LINE, format_file, linenum,
         NULL);

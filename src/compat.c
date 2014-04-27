@@ -1,4 +1,4 @@
-/* Copyright (C) 2010, 2011, 2012 D. V. Wiebe
+/* Copyright (C) 2010-2012, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -91,6 +91,9 @@ int gd_RenameAt(const DIRFILE *D, int olddirfd, const char *oldname,
 #endif
 
 #ifndef HAVE_FSTATAT
+#ifndef AT_SYMLINK_NOFOLLOW
+#define AT_SYMLINK_NOFOLLOW 0 /* will never match */
+#endif
 int gd_StatAt(const DIRFILE* D, int dirfd, const char* name, struct stat* buf,
     int flags)
 {
@@ -100,7 +103,7 @@ int gd_StatAt(const DIRFILE* D, int dirfd, const char* name, struct stat* buf,
   dtrace("%p, %i, \"%s\", %p, %x", D, dirfd, name, buf, flags);
 
   path = _GD_MakeFullPathOnly(D, dirfd, name);
-#if defined(HAVE_LSTAT) && defined(AT_SYMLINK_NOFOLLOW)
+#ifdef HAVE_LSTAT
   if (flags & AT_SYMLINK_NOFOLLOW)
     ret = lstat(path, buf);
   else

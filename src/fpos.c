@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2013 D. V. Wiebe
+/* Copyright (C) 2011-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -106,6 +106,7 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_ALIAS_ENTRY:
       _GD_InternalError(D);
   }
@@ -312,6 +313,7 @@ int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode)
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_ALIAS_ENTRY:
       _GD_InternalError(D);
   }

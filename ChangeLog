@@ -1,3 +1,44 @@
+2014-04-03   D. V. Wiebe <getdata@ketiltrout.net> svn:887
+	* src/entry.c (_GD_FreeE _GD_CalculateEntry gd_entry gd_validate)
+	src/legacy.c (GetFormat) src/getdata.c (_GD_DoField) src/name.c
+	(_GD_UpdateInputs) src/flush.c (_GD_Flush _GD_FieldSpec _GD_FindVersion)
+	src/native.c (_GD_NativeType) src/spf.c (_GD_GetSPF) src/putdata.c
+	(_GD_DoFieldOut) src/del.c (_GD_DeReference) src/flimits.c (_GD_GetEOF
+	_GD_GetBOF) src/fpos.c (_GD_GetFilePos _GD_Seek) src/mod.c (_GD_Change)
+	src/add.c (_GD_InvalidEntype _GD_Add): Handle GD_SARRAY_ENTRY.
+	* src/string.c (gd_get_sarray_slice gd_get_sarray gd_sarray_len
+	gd_put_sarray_slice gd_put_sarray) src/mod.c (gd_alter_sarray) src/add.c
+	(gd_add_sarraygd_madd_sarray): Added.
+	* src/string.c (_GD_PutSarraySlice): Renamed from _GD_DoStringOut and
+	updated to handle SARRAYs.  Made static.
+	* src/parse.c (_GD_ParseArray): Renamed from _GD_ParseCarray and updated to
+	handle SARRAYs.
+
+	* test/get_sarray.c test/add_sarray.c test/get_sarray_len.c
+	test/get_string.c test/get_sarray_slice.c test/alter_sarray.c
+	test/parse_sarray.c test/madd_sarray.c test/put_sarray.c
+	test/put_sarray_slice.c test/parse_sarray_long.c: Added.
+
+	* src/add.c (gd_add_string gd_madd_string): Don't call _GD_DoStringOut to
+	set the value, just set it directly.
+
+	* src/compat.c: Define AT_SYMLINK_NOFOLLOW if necessary.
+
+	* src/mod.c (_GD_Change): Report AlterScalar errors for LINCOMs.
+
+	* src/errors.c: Add GD_E_FLUSH_WRITE and GD_E_FLUSH_TOO_LONG.
+	* src/flush.c (_GD_StringEscapeise): Return -1 on error; don't write
+	anything if stream == NULL.
+	* src/flush.c (_GD_StringEscapeise _GD_WriteFieldCode _GD_WriteConst
+	_GD_FieldSpec _GD_FlushFragment): Report write errors.
+	
+	* src/flush.c (_GD_WriteFieldCode): Write a trailing space if requested.
+
+	* src/flush.c (_GD_FlushFragment): Try USER if LOGNAME not available.
+
+	* src/constant.c (gd_get_carray_slice _GD_PutCarraySlice
+	gd_put_carray_slice): Make first long.
+
 2014-04-03   D. V. Wiebe <getdata@ketiltrout.net> svn:883
 	* src/add.c (gd_add_crecip gd_madd_crecip) src/mod.c (gd_alter_crecip): Call
 	the ...crecip89 function.

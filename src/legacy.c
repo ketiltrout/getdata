@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
  * Copyright (C) 2003-2005 Theodore Kisner
- * Copyright (C) 2005-2012 D. V. Wiebe
+ * Copyright (C) 2005-2012, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -452,6 +452,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
       case GD_ALIAS_ENTRY:
       case GD_CONST_ENTRY:
       case GD_CARRAY_ENTRY:
+      case GD_SARRAY_ENTRY:
       case GD_INDEX_ENTRY:
       case GD_STRING_ENTRY:
         break;
@@ -530,6 +531,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
       case GD_STRING_ENTRY:
       case GD_CONST_ENTRY:
       case GD_CARRAY_ENTRY:
+      case GD_SARRAY_ENTRY:
       case GD_INDEX_ENTRY:
       case GD_ALIAS_ENTRY:
       case GD_NO_ENTRY:

@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2012 D. V. Wiebe
+ * Copyright (C) 2005-2012, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -65,6 +65,7 @@ unsigned int _GD_GetSPF(DIRFILE *D, gd_entry_t *E)
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_ALIAS_ENTRY:
     case GD_NO_ENTRY:
       _GD_InternalError(D);

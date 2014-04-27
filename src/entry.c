@@ -23,6 +23,7 @@
 void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
 {
   int i;
+  size_t n;
 
   dtrace("%p, %p, %i", D, entry, priv);
 
@@ -77,6 +78,13 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
       if (priv)
         free(entry->e->u.string);
       break;
+    case GD_SARRAY_ENTRY:
+      if (priv) {
+        for (n = 0; n < entry->EN(scalar,array_len); ++n)
+          free(((char **)entry->e->u.scalar.d)[n]);
+        free(entry->e->u.scalar.d);
+      }
+      break;
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
       if (priv) {
@@ -103,12 +111,12 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
       free(entry->in_fields[0]);
       free(entry->in_fields[1]);
       break;
+    case GD_ALIAS_ENTRY:
+      free(entry->in_fields[0]);
+      break;
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
       break;
-    default:
-      if (entry->field_type == GD_ALIAS_ENTRY)
-        free(entry->in_fields[0]);
   }
 
   if (priv) {
@@ -303,6 +311,7 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
     case GD_STRING_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_ALIAS_ENTRY:
       break;
@@ -480,6 +489,7 @@ int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_NO_ENTRY:
     case GD_ALIAS_ENTRY:
@@ -826,6 +836,7 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
     case GD_RAW_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:

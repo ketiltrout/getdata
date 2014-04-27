@@ -27,7 +27,8 @@ int _GD_InvalidEntype(gd_entype_t t) {
       t != GD_BIT_ENTRY && t != GD_MULTIPLY_ENTRY && t != GD_PHASE_ENTRY &&
       t != GD_CONST_ENTRY && t != GD_POLYNOM_ENTRY && t != GD_SBIT_ENTRY &&
       t != GD_DIVIDE_ENTRY && t != GD_RECIP_ENTRY && t != GD_WINDOW_ENTRY &&
-      t != GD_MPLEX_ENTRY && t != GD_CARRAY_ENTRY && t != GD_STRING_ENTRY)
+      t != GD_MPLEX_ENTRY && t != GD_CARRAY_ENTRY && t != GD_STRING_ENTRY &&
+      t != GD_SARRAY_ENTRY)
   {
     dreturn("%i", -1);
     return -1;
@@ -503,6 +504,19 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
           E->EN(scalar,array_len);
         if (!D->error)
           E->e->u.scalar.d = _GD_Malloc(D, size);
+        if (E->e->u.scalar.d)
+          memset(E->e->u.scalar.d, 0, size);
+      }
+      break;
+    case GD_SARRAY_ENTRY:
+      E->EN(scalar,const_type) = GD_NULL;
+      E->EN(scalar,array_len) = entry->EN(scalar,array_len);
+
+      if (E->EN(scalar,array_len) > GD_MAX_CARRAY_LENGTH)
+        _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
+      else {
+        size_t size = sizeof(const char *) * E->EN(scalar,array_len);
+        E->e->u.scalar.d = _GD_Malloc(D, size);
         if (E->e->u.scalar.d)
           memset(E->e->u.scalar.d, 0, size);
       }
@@ -1296,6 +1310,7 @@ int gd_add_string(DIRFILE* D, const char* field_code, const char* value,
 {
   gd_entry_t *entry;
   gd_entry_t S;
+  char *ptr;
 
   dtrace("%p, \"%s\", \"%s\", %i", D, field_code, value, fragment_index);
 
@@ -1309,14 +1324,25 @@ int gd_add_string(DIRFILE* D, const char* field_code, const char* value,
   S.field = (char *)field_code;
   S.field_type = GD_STRING_ENTRY;
   S.fragment_index = fragment_index;
+
+  /* duplicate early, in case of failure */
+  ptr = _GD_Strdup(D, value);
+  if (ptr == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
   entry = _GD_Add(D, &S, NULL);
 
-  /* Actually store the string, now */
-  if (entry)
-    _GD_DoStringOut(D, entry, value);
+  if (D->error) {
+    free(ptr);
+    dreturn("%i", -1);
+    return -1;
+  }
 
-  dreturn("%i", D->error ? -1 : 0);
-  return D->error ? -1 : 0;
+  entry->e->u.string = ptr;
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a CONST entry */
@@ -1381,6 +1407,66 @@ int gd_add_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
 
   dreturn("%i", D->error ? -1 : 0);
   return D->error ? -1 : 0;
+}
+
+/* add a SARRAY entry */
+int gd_add_sarray(DIRFILE* D, const char* field_code, size_t array_len,
+    const char **values, int fragment_index) gd_nothrow
+{
+  size_t i;
+  gd_entry_t *entry;
+  gd_entry_t E;
+  char **data;
+
+  dtrace("%p, \"%s\", %" PRNsize_t ", %p, %i", D, field_code, array_len, values,
+      fragment_index);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  memset(&E, 0, sizeof(gd_entry_t));
+  E.field = (char *)field_code;
+  E.field_type = GD_SARRAY_ENTRY;
+  E.EN(scalar,array_len) = array_len;
+  E.fragment_index = fragment_index;
+
+  /* duplicate early, in case of failure */
+  data = _GD_Malloc(D, array_len * sizeof(char *));
+  if (data == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  memset(data, 0, array_len * sizeof(char*));
+  for (i = 0; i < array_len; ++i)
+    data[i] = _GD_Strdup(D, values[i]);
+
+  if (D->error) {
+    for (i = 0; i < array_len; ++i)
+      free(data[i]);
+    free(data);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  entry = _GD_Add(D, &E, NULL);
+
+  if (D->error) {
+    for (i = 0; i < array_len; ++i)
+      free(data[i]);
+    free(data);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  free(entry->e->u.scalar.d);
+  entry->e->u.scalar.d = data;
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 int gd_madd(DIRFILE* D, const gd_entry_t* entry, const char* parent) gd_nothrow
@@ -1877,6 +1963,7 @@ int gd_madd_string(DIRFILE* D, const char* parent,
 {
   gd_entry_t *entry;
   gd_entry_t S;
+  char *ptr;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\"", D, parent, field_code, value);
 
@@ -1890,14 +1977,25 @@ int gd_madd_string(DIRFILE* D, const char* parent,
   S.field = (char *)field_code;
   S.field_type = GD_STRING_ENTRY;
   S.fragment_index = 0;
+
+  /* duplicate early, in case of failure */
+  ptr = _GD_Strdup(D, value);
+  if (ptr == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
   entry = _GD_Add(D, &S, parent);
 
-  /* Actually store the string, now */
-  if (entry)
-    _GD_DoStringOut(D, entry, value);
+  if (D->error) {
+    free(ptr);
+    dreturn("%i", -1);
+    return -1;
+  }
 
-  dreturn("%i", D->error ? -1 : 0);
-  return D->error ? -1 : 0;
+  entry->e->u.string = ptr;
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a META CONST entry */
@@ -1962,6 +2060,65 @@ int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
 
   dreturn("%i", D->error ? -1 : 0);
   return D->error ? -1 : 0;
+}
+
+/* Add META SARRAY */
+int gd_madd_sarray(DIRFILE* D, const char *parent, const char *field_code,
+    size_t array_len, const char **values) gd_nothrow
+{
+  size_t i;
+  gd_entry_t *entry;
+  gd_entry_t E;
+  char **data;
+
+  dtrace("%p, \"%s\", \"%s\", %" PRNsize_t ", %p", D, parent, field_code,
+      array_len, values);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  memset(&E, 0, sizeof(gd_entry_t));
+  E.field = (char *)field_code;
+  E.field_type = GD_SARRAY_ENTRY;
+  E.EN(scalar,array_len) = array_len;
+
+  /* duplicate early, in case of failure */
+  data = _GD_Malloc(D, array_len * sizeof(char *));
+  if (data == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  memset(data, 0, array_len * sizeof(char*));
+  for (i = 0; i < array_len; ++i)
+    data[i] = _GD_Strdup(D, values[i]);
+
+  if (D->error) {
+    for (i = 0; i < array_len; ++i)
+      free(data[i]);
+    free(data);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  entry = _GD_Add(D, &E, parent);
+
+  if (D->error) {
+    for (i = 0; i < array_len; ++i)
+      free(data[i]);
+    free(data);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  free(entry->e->u.scalar.d);
+  entry->e->u.scalar.d = data;
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add an alias */

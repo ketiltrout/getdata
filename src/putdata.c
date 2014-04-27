@@ -717,6 +717,7 @@ size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
       n_wrote = _GD_DoConstOut(D, E, first_samp, num_samp, data_type, data_in);
       break;
     case GD_STRING_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_ALIAS_ENTRY:
     case GD_NO_ENTRY:
       _GD_InternalError(D);

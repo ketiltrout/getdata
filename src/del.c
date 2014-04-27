@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2008-2012, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -213,6 +213,7 @@ static void _GD_DeReference(DIRFILE *restrict D, gd_entry_t *restrict E,
     case GD_STRING_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_ALIAS_ENTRY:
       break;

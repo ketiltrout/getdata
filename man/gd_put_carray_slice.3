@@ -139,9 +139,10 @@ argument must point to a valid DIRFILE object previously created by a call to
 .BR gd_open (3).
 .SH RETURN VALUE
 On success,
-.BR gd_put_carray ()
-and
+.BR gd_put_carray (),
 .BR gd_put_carray_slice ()
+and
+.BR gd_put_constant ()
 return zero.  On error, they return -1 and set the dirfile error to a non-zero
 value.  Possible error values are:
 .TP 8

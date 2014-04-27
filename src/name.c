@@ -486,6 +486,7 @@ static int _GD_UpdateInputs(DIRFILE *D, struct gd_rename_data_ *rdat,
         case GD_NO_ENTRY:
         case GD_CONST_ENTRY:
         case GD_CARRAY_ENTRY:
+        case GD_SARRAY_ENTRY:
         case GD_STRING_ENTRY:
         case GD_ALIAS_ENTRY:
           break;
@@ -534,6 +535,7 @@ static int _GD_UpdateInputs(DIRFILE *D, struct gd_rename_data_ *rdat,
         case GD_STRING_ENTRY:
         case GD_CONST_ENTRY:
         case GD_CARRAY_ENTRY:
+        case GD_SARRAY_ENTRY:
         case GD_ALIAS_ENTRY:
           break;
       }
