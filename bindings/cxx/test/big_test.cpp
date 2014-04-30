@@ -1270,7 +1270,7 @@ int main(void)
   // 157: Dirfile::Standards check
   n = d->Standards();
   CHECK_OK2(157,1);
-  CHECK_INT(157,n,9);
+  CHECK_INT(157,n,GD_DIRFILE_STANDARDS_VERSION);
   d->Standards(0);
   CHECK_ERROR2(157,2,GD_E_ARGUMENT);
 

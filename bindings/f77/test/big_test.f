@@ -1638,7 +1638,7 @@ C     157: GDSTDV check
       n = GDSV_C
       CALL GDSTDV(n, d)
       CALL CHKOK2(ne, 157, 1, d)
-      CALL CHKINT(ne, 157, n, 9)
+      CALL CHKINT(ne, 157, n, GD_DSV)
 
       n = 0
       CALL GDSTDV(n, d)

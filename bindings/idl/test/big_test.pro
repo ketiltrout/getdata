@@ -1024,7 +1024,7 @@ gd_close, m
 ;  157: gd_dirfile_standards
 n = gd_dirfile_standards(d, /CURRENT)
 nume += check_ok2(157, 1, d)
-nume += check_simple(157, n, 9)
+nume += check_simple(157, n, !GD.DIRFILE_STANDARDS_VERSION)
 n = gd_dirfile_standards(d, 0)
 nume += check_error2(157, 2, d, !GD.E_ARGUMENT)
 

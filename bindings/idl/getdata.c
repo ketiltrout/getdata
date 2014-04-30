@@ -173,38 +173,54 @@ static void gdidl_clear_dirfile(IDL_LONG d)
 }
 
 /* convert a GetData type code to an IDL type code */
-gd_static_inline_ UCHAR gdidl_idl_type(gd_type_t t) {
+gd_static_inline_ UCHAR gdidl_idl_type(gd_type_t t)
+{
+  UCHAR it;
+  dtrace("0x%X", t);
+
   switch (t) {
     case GD_UINT8:
-      return IDL_TYP_BYTE;
+      it = IDL_TYP_BYTE;
+      break;
     case GD_UINT16:
-      return IDL_TYP_UINT;
+      it = IDL_TYP_UINT;
+      break;
     case GD_INT8: /* there is no signed 8-bit type in IDL
                      - we type promote to INT */
     case GD_INT16:
-      return IDL_TYP_INT;
+      it = IDL_TYP_INT;
+      break;
     case GD_UINT32:
-      return IDL_TYP_ULONG;
+      it = IDL_TYP_ULONG;
+      break;
     case GD_INT32:
-      return IDL_TYP_LONG;
+      it = IDL_TYP_LONG;
+      break;
     case GD_UINT64:
-      return IDL_TYP_ULONG64;
+      it = IDL_TYP_ULONG64;
+      break;
     case GD_INT64:
-      return IDL_TYP_LONG64;
+      it = IDL_TYP_LONG64;
+      break;
     case GD_FLOAT32:
-      return IDL_TYP_FLOAT;
+      it = IDL_TYP_FLOAT;
+      break;
     case GD_FLOAT64:
-      return IDL_TYP_DOUBLE;
+      it = IDL_TYP_DOUBLE;
+      break;
     case GD_COMPLEX64:
-      return IDL_TYP_COMPLEX;
+      it = IDL_TYP_COMPLEX;
+      break;
     case GD_COMPLEX128:
-      return IDL_TYP_DCOMPLEX;
+      it = IDL_TYP_DCOMPLEX;
+      break;
     case GD_NULL:
     case GD_UNKNOWN:
-      ;
+      it = IDL_TYP_UNDEF;
   }
 
-  return IDL_TYP_UNDEF;
+  dreturn("%u", it);
+  return it;
 }
 
 /* convert an IDL type code to a GetData type code */

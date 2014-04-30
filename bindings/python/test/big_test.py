@@ -1321,7 +1321,7 @@ try:
   n = d.standards
 except:
   CheckOK2(157,1)
-CheckSimple(157,n,9)
+CheckSimple(157,n,pygetdata.DIRFILE_STANDARDS_VERSION)
 
 try:
   d.standards = 0

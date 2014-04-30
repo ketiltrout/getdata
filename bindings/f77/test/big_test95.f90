@@ -1749,7 +1749,7 @@ program big_test
 ! 157: fgd_dirfile_standards
   n = fgd_dirfile_standards(d, GD_VERSION_CURRENT)
   call check_ok2(ne, 157, 1, d)
-  call check_int(ne, 157, n, 9)
+  call check_int(ne, 157, n, GD_DIRFILE_STANDARDS_VERSION)
 
   n = fgd_dirfile_standards(d, 0)
   call check_err2(ne, 157, 2, d, GD_E_ARGUMENT)
