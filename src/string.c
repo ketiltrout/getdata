@@ -121,7 +121,7 @@ size_t gd_get_string(DIRFILE *D, const char *field_code, size_t len,
   dtrace("%p, \"%s\", %" PRNsize_t ", %p", D, field_code, len, data_out);
 
   /* get string */
-  if (gd_get_sarray(D, field_code, &ptr)) {
+  if (gd_get_sarray_slice(D, field_code, 0, 1, &ptr)) {
     dreturn("%i", 0);
     return 0;
   }

@@ -1,3 +1,11 @@
+2014-04-30   D. V. Wiebe <getdata@ketiltrout.net> svn:890 svn:891
+	* bindings/cxx/test/big_test.cpp bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro
+	bindings/python/test/big_test.py: Fix test 157 for DSV 10.
+	* src/constant.c (gd_get_constant) src/string.c (gd_get_string): Fix call in
+	the case of using a [CS]ARRAY after breaking it.
+	* test/get_const_carray.c: Added.
+
 2014-04-30   D. V. Wiebe <getdata@ketiltrout.net> svn:889
 	* test/parse_indir.c test/get_sindir.c test/alter_entry_sarray.c
 	test/add_sindir.c test/getstr_sindir.c test/name_updb_sarray.c

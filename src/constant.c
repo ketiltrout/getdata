@@ -118,7 +118,7 @@ int gd_get_carray(DIRFILE *D, const char *field_code_in, gd_type_t return_type,
 int gd_get_constant(DIRFILE* D, const char *field_code_in,
     gd_type_t return_type, void *data_out) gd_nothrow
 {
-  return gd_get_carray(D, field_code_in, return_type, data_out);
+  return gd_get_carray_slice(D, field_code_in, 0, 1, return_type, data_out);
 }
 
 size_t gd_carray_len(DIRFILE *D, const char *field_code_in) gd_nothrow

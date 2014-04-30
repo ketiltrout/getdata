@@ -180,11 +180,11 @@ FRAGMENT_TESTS=fragment_affix fragment_affix_alter fragment_affix_alter2 \
 
 GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_carray_c2r get_carray_slice get_char get_clincom get_complex128 \
-					get_complex64 get_const get_const_complex get_const_repr \
-					get_cpolynom get_cpolynom1 get_cpolynom_int get_dim get_divide \
-					get_divide_ccin get_divide_crin get_divide_crinr get_divide_rcin \
-					get_divide_s get_endian8 get_endian16 get_endian32 get_endian64 \
-					get_endian_complex128_arm get_endian_complex128_big \
+					get_complex64 get_const get_const_carray get_const_complex \
+					get_const_repr get_cpolynom get_cpolynom1 get_cpolynom_int get_dim \
+					get_divide get_divide_ccin get_divide_crin get_divide_crinr \
+					get_divide_rcin get_divide_s get_endian8 get_endian16 get_endian32 \
+					get_endian64 get_endian_complex128_arm get_endian_complex128_big \
 					get_endian_complex128_little get_endian_complex64_arm \
 					get_endian_complex64_big get_endian_complex64_little \
 					get_endian_float32_arm get_endian_float32_big \
