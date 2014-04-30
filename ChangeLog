@@ -1,4 +1,45 @@
-2014-04-03   D. V. Wiebe <getdata@ketiltrout.net> svn:887
+2014-04-30   D. V. Wiebe <getdata@ketiltrout.net> svn:889
+	* test/parse_indir.c test/get_sindir.c test/alter_entry_sarray.c
+	test/add_sindir.c test/getstr_sindir.c test/name_updb_sarray.c
+	test/add_indir.c test/get_indir.c test/getstr_here.c test/alter_sindir.c
+	test/parse_sindir.c test/alter_indir.c test/getstr_type.c
+	test/name_updb_carray.c test/madd_sindir.c test/put_indir.c
+	test/put_sindir.c test/madd_indir.c test/add_sarray_nil.c: Added.
+	* test/name_updb.c test/native_const.c: Update.
+
+	* src/entry.c (_GD_FreeE _GD_CalculateEntry gd_entry gd_validate)
+	src/legacy.c (GetFormat) src/getdata.c (_GD_DoField gd_getdata64) src/name.c
+	(_GD_UpdateInputs) src/flush.c (_GD_Flush _GD_FieldSpec _GD_FindVersion)
+	src/native.c (_GD_NativeType) src/spf.c (_GD_GetSPF) src/putdata.c
+	(_GD_DoFieldOut) src/del.c (_GD_ClearDerived _GD_DeReference _GD_Delete) 
+	src/flimits.c (_GD_GetEOF _GD_GetBOF) src/fpos.c (_GD_GetFilePos _GD_Seek)
+	src/parse.c (_GD_ParseFieldSpec) src/mod.c (_GD_Change) src/add.c
+	(_GD_InvalidEntype _GD_Add): Handle INDIR and SINDIR.
+	* src/getdata.c (_GD_IndirData _GD_DoIndir gd_getstrdata64 gd_getdata64)
+	src/parse.c (_GD_ParseYoke) src/mod.c (_GD_AlterYoke gd_alter_indir
+	gd_alter_sindir) src/add.c (_GD_AddYoke gd_add_indir gd_add_sindir
+	_GD_MAddYoke gd_madd_indir gd_madd_sindir): Added.
+	* src/common.c (_GD_BadInput): Add entry type parameter and allow non-vector
+	input fields.
+
+	* src/parse.c (_GD_ParseDivide _GD_ParseMultiply): Deleted (merged into
+	_GD_ParseYoke).
+	* src/mod.c (gd_alter_divide gd_alter_multiply): Call _GD_AlterYoke.
+	* src/add.c (gd_add_multiply gd_add_divide): Call _GD_AddYoke.
+	* src/add.c (gd_madd_multiply gd_madd_divide): Call _GD_MAddYoke.
+
+	* src/errors.c: Add GD_E_FIELD_FORMAT and GD_E_FIELD_STR.
+
+	* src/native.c (_GD_NativeType): Return internal type for CONST/CARRAY not
+	storage type (ie. run it through _GD_ConstType).
+
+	* src/string.c (gd_get_sarray_slice gd_get_sarray) src/mod.c (_GD_Change)
+	src/add.c (_GD_Add): Nilify new SARRAYs on creation, not on read.
+
+	* src/getdata.h.in: Bump GD_DIRFILE_STANDARDS_VERSION.  Add GD_INDIR_ENTRY
+	and GD_SINDIR_ENTRY.
+
+2014-04-27   D. V. Wiebe <getdata@ketiltrout.net> svn:887
 	* src/entry.c (_GD_FreeE _GD_CalculateEntry gd_entry gd_validate)
 	src/legacy.c (GetFormat) src/getdata.c (_GD_DoField) src/name.c
 	(_GD_UpdateInputs) src/flush.c (_GD_Flush _GD_FieldSpec _GD_FindVersion)

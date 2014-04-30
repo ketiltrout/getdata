@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,31 +20,51 @@
  */
 #include "test.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "const CONST UINT8 11\n";
-  int fd, error, r = 0;
+  const char *data = "dirfile/data";
+  const char *format_data =
+    "indir INDIR data carray\n"
+    "carray CARRAY INT32 10 20 30 11 21 31 12 22 32 13 23 33 14 24 34\n"
+    "data RAW UINT8 8\n";
+  int32_t c[8];
+  int32_t val[8] = {23, 33, 14, 24, 34, 0, 0, 0};
+  unsigned char data_data[256];
+  int i, fd, n, error, r = 0;
   DIRFILE *D;
-  gd_type_t type;
 
   rmdirfile();
   mkdir(filedir, 0777);
+
+  for (fd = 0; fd < 256; ++fd)
+    data_data[fd] = (unsigned char)(fd + 2);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
+  write(fd, data_data, 256);
+  close(fd);
 
-  type = gd_native_type(D, "const");
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_getdata(D, "indir", 1, 0, 1, 0, GD_INT32, &c);
   error = gd_error(D);
-  CHECKU(type, GD_UINT64);
+
   CHECKI(error, 0);
+  CHECKI(n, 8);
+  for (i = 0; i < 8; ++i)
+    CHECKIi(i, c[i], val[i]);
 
   gd_discard(D);
 
+  unlink(data);
   unlink(format);
   rmdir(filedir);
 

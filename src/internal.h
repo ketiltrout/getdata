@@ -269,15 +269,17 @@ double cimag(double complex z);
 #define SIZEOF_UNSIGNED_INT (sizeof(unsigned int))
 #endif
 
+#define GD_INT_TYPE ((gd_type_t)(SIZEOF_INT | GD_SIGNED))
+#define GD_UINT_TYPE ((gd_type_t)(SIZEOF_UNSIGNED_INT))
+
+/* a few integer limits */
 #ifndef SIZEOF_SIZE_T
 #define SIZEOF_SIZE_T (sizeof(size_t))
 #endif
 
+#define GD_INT64_MAX ((int64_t)((uint64_t)-1>>1))
 #define GD_SSIZE_T_MAX ((ssize_t)((size_t)-1>>1))
 #define GD_SIZE_T_MAX ((size_t)-1)
-
-#define GD_INT_TYPE ((gd_type_t)(SIZEOF_INT | GD_SIGNED))
-#define GD_UINT_TYPE ((gd_type_t)(SIZEOF_UNSIGNED_INT))
 
 /* default buffer size */
 #if SIZEOF_INT < 4
@@ -753,6 +755,8 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_FIELD_PUT         1
 #define GD_E_FIELD_BAD         2
 #define GD_E_FIELD_MATCH       3
+#define GD_E_FIELD_FORMAT      4
+#define GD_E_FIELD_STR         5
 
 #define GD_E_ENTRY_TYPE      1
 #define GD_E_ENTRY_METARAW   2
@@ -1101,7 +1105,7 @@ struct gd_dirfile_ {
 
 /* forward declarations */
 void *_GD_Alloc(DIRFILE*, gd_type_t, size_t) __attribute_malloc__;
-int _GD_BadInput(DIRFILE *, const gd_entry_t *, int, int);
+int _GD_BadInput(DIRFILE *, const gd_entry_t *, int, gd_entype_t, int);
 
 #define _GD_BadWindop(op) \
   ( \

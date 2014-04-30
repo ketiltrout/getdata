@@ -614,6 +614,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       j = _GD_AlterInField(D, 0, Q.in_fields, N->in_fields, E->in_fields,
           E->fragment_index, 0);
       if (j < 0)
@@ -974,9 +976,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             break;
 
           if (Q.EN(scalar,array_len) > E->EN(scalar,array_len)) {
-            memset(((char**)Qe.u.scalar.d) + E->EN(scalar,array_len), 0,
-                sizeof(char**) * (Q.EN(scalar,array_len) -
-                  E->EN(scalar,array_len)));
+            size_t i;
+            for (i = E->EN(scalar,array_len); i < Q.EN(scalar,array_len); ++i)
+              ((const char**)Qe.u.scalar.d)[i] = _GD_Strdup(D, "");
           }
         } else
           Qe.u.scalar.d = E->e->u.scalar.d;
@@ -1375,13 +1377,14 @@ int gd_alter_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
   return ret;
 }
 
-int gd_alter_divide(DIRFILE* D, const char* field_code, const char* in_field1,
-    const char* in_field2) gd_nothrow
+static int _GD_AlterYoke(DIRFILE* D, gd_entype_t t, const char* field_code,
+    const char* in_field1, const char* in_field2) gd_nothrow
 {
   int ret;
   gd_entry_t N;
 
-  dtrace("%p, \"%s\", \"%s\", \"%s\"", D, field_code, in_field1, in_field2);
+  dtrace("%p, 0x%X, \"%s\", \"%s\", \"%s\"", D, t, field_code, in_field1,
+      in_field2);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1390,7 +1393,7 @@ int gd_alter_divide(DIRFILE* D, const char* field_code, const char* in_field1,
   }
 
   memset(&N, 0, sizeof(gd_entry_t));
-  N.field_type = GD_DIVIDE_ENTRY;
+  N.field_type = t;
   N.in_fields[0] = (char *)in_field1;
   N.in_fields[1] = (char *)in_field2;
 
@@ -1400,29 +1403,28 @@ int gd_alter_divide(DIRFILE* D, const char* field_code, const char* in_field1,
   return ret;
 }
 
+int gd_alter_divide(DIRFILE* D, const char* field_code, const char* in_field1,
+    const char* in_field2) gd_nothrow
+{
+  return _GD_AlterYoke(D, GD_DIVIDE_ENTRY, field_code, in_field1, in_field2);
+}
+
 int gd_alter_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
     const char* in_field2) gd_nothrow
 {
-  int ret;
-  gd_entry_t N;
+  return _GD_AlterYoke(D, GD_MULTIPLY_ENTRY, field_code, in_field1, in_field2);
+}
 
-  dtrace("%p, \"%s\", \"%s\", \"%s\"", D, field_code, in_field1, in_field2);
+int gd_alter_indir(DIRFILE* D, const char* field_code, const char* in_field1,
+    const char* in_field2) gd_nothrow
+{
+  return _GD_AlterYoke(D, GD_INDIR_ENTRY, field_code, in_field1, in_field2);
+}
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  memset(&N, 0, sizeof(gd_entry_t));
-  N.field_type = GD_MULTIPLY_ENTRY;
-  N.in_fields[0] = (char *)in_field1;
-  N.in_fields[1] = (char *)in_field2;
-
-  ret = _GD_Change(D, field_code, &N, 0);
-
-  dreturn("%i", ret);
-  return ret;
+int gd_alter_sindir(DIRFILE* D, const char* field_code, const char* in_field1,
+    const char* in_field2) gd_nothrow
+{
+  return _GD_AlterYoke(D, GD_SINDIR_ENTRY, field_code, in_field1, in_field2);
 }
 
 int gd_alter_phase(DIRFILE* D, const char* field_code, const char* in_field,

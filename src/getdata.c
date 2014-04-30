@@ -983,7 +983,7 @@ static size_t _GD_DoLincom(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   /* input field checks */
   for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-    if (_GD_BadInput(D, E, i, 1)) {
+    if (_GD_BadInput(D, E, i, GD_NO_ENTRY, 1)) {
       dreturn("%i", 0);
       return 0;
     }
@@ -1116,12 +1116,12 @@ static size_t _GD_DoMultiply(DIRFILE *restrict D, gd_entry_t *restrict E,
       num_samp, return_type, data_out);
 
   /* Check input fields */
-  if (_GD_BadInput(D, E, 0, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
 
-  if (_GD_BadInput(D, E, 1, 1)) {
+  if (_GD_BadInput(D, E, 1, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1209,7 +1209,7 @@ static size_t _GD_DoRecip(DIRFILE *restrict D, gd_entry_t *restrict E,
       num_samp, return_type, data_out);
 
   /* Check input fields */
-  if (_GD_BadInput(D, E, 0, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1255,7 +1255,9 @@ static size_t _GD_DoDivide(DIRFILE *restrict D, gd_entry_t *restrict E,
       num_samp, return_type, data_out);
 
   /* Check input fields */
-  if (_GD_BadInput(D, E, 0, 1) || _GD_BadInput(D, E, 1, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1) ||
+      _GD_BadInput(D, E, 1, GD_NO_ENTRY, 1))
+  {
     dreturn("%i", 0);
     return 0;
   }
@@ -1350,7 +1352,7 @@ static size_t _GD_DoBit(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %i, %lli, %" PRNsize_t ", 0x%X, %p", D, E, is_signed,
       (long long)first_samp, num_samp, return_type, data_out);
 
-  if (_GD_BadInput(D, E, 0, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1403,7 +1405,7 @@ static size_t _GD_DoPhase(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
       num_samp, return_type, data_out);
 
-  if (_GD_BadInput(D, E, 0, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1427,7 +1429,7 @@ static size_t _GD_DoLinterp(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
       num_samp, return_type, data_out);
 
-  if (_GD_BadInput(D, E, 0, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1469,7 +1471,7 @@ static size_t _GD_DoPolynom(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
       num_samp, return_type, data_out);
 
-  if (_GD_BadInput(D, E, 0, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1516,12 +1518,12 @@ static size_t _GD_DoWindow(DIRFILE *restrict D, gd_entry_t *restrict E,
       num_samp, return_type, data_out);
 
   /* Check input fields */
-  if (_GD_BadInput(D, E, 0, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
 
-  if (_GD_BadInput(D, E, 1, 1)) {
+  if (_GD_BadInput(D, E, 1, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1622,12 +1624,12 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
       num_samp, return_type, data_out);
 
   /* Check input fields */
-  if (_GD_BadInput(D, E, 0, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
 
-  if (_GD_BadInput(D, E, 1, 1)) {
+  if (_GD_BadInput(D, E, 1, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1789,8 +1791,7 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
   return n_read;
 }
 
-/* _GD_DoConst:  Read from a const.  Returns number of samples read (ie. 1).
-*/
+/* _GD_DoConst:  Read from a const.  Returns number of samples read */
 static size_t _GD_DoConst(DIRFILE *restrict D, const gd_entry_t *restrict E,
     off64_t first, size_t len, gd_type_t return_type, void *restrict data_out)
 {
@@ -1810,6 +1811,94 @@ static size_t _GD_DoConst(DIRFILE *restrict D, const gd_entry_t *restrict E,
 
   dreturn("%zu", len);
   return len;
+}
+
+/* simple */
+static void _GD_IndirData(DIRFILE *restrict D, char *restrict cbuf,
+    gd_type_t ctype, const int64_t *restrict ibuf, size_t n, const void *carray,
+    size_t len)
+{
+  size_t i;
+  const int size = GD_SIZE(ctype);
+  int64_t ilen = (len > GD_INT64_MAX) ? GD_INT64_MAX : len;
+
+  dtrace("%p, %p, 0x%X, %p, %" PRNsize_t ", %p, %" PRNsize_t, D, cbuf, ctype,
+      ibuf, n, carray, len);
+
+  for (i = 0; i < n; ++i)
+    if (ibuf[i] < 0 || ibuf[i] >= ilen)
+      _GD_FillZero(cbuf + size * i, ctype, 1);
+    else
+      memcpy(cbuf + size * i, carray + size * ibuf[i], size);
+
+  dreturnvoid();
+}
+
+/* _GD_DoIndir: Read from an indir. */
+static size_t _GD_DoIndir(DIRFILE *restrict D, const gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t return_type,
+    void *restrict data_out)
+{
+  size_t n_read;
+  int64_t *ibuf = NULL;
+  void *cbuf = NULL;
+  gd_type_t ctype;
+
+  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
+      num_samp, return_type, data_out);
+
+  /* Check input fields */
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (_GD_BadInput(D, E, 1, GD_CARRAY_ENTRY, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* index buffer */
+  ibuf = _GD_Alloc(D, GD_INT64, num_samp);
+  if (D->error) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* read the index field and record the number of samples returned */
+  n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp,
+      GD_INT64, ibuf);
+
+  if (D->error || n_read == 0) {
+    free(ibuf);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* the intermediate buffer: it has the load type of the carray */
+  ctype = _GD_ConstType(D, E->e->entry[1]->EN(scalar,const_type));
+  cbuf = _GD_Alloc(D, ctype, n_read);
+  if (D->error) {
+    free(ibuf);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  _GD_IndirData(D, cbuf, GD_SIZE(ctype), ibuf, n_read,
+      E->e->entry[1]->e->u.scalar.d, E->e->entry[1]->EN(scalar,array_len));
+
+  free(ibuf);
+
+  /* type convert into output buffer */
+  _GD_ConvertType(D, cbuf, ctype, data_out, return_type, n_read);
+
+  free(cbuf);
+
+  if (D->error)
+    n_read = 0;
+
+  dreturn("%" PRNsize_t, n_read);
+  return n_read;
 }
 
 /* _GD_DoField: Locate the field in the database and read it.
@@ -1927,8 +2016,12 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
     case GD_CARRAY_ENTRY:
       n_read = _GD_DoConst(D, E, first_samp, num_samp, return_type, data_out);
       break;
+    case GD_INDIR_ENTRY:
+      n_read = _GD_DoIndir(D, E, first_samp, num_samp, return_type, data_out);
+      break;
     case GD_STRING_ENTRY:
     case GD_SARRAY_ENTRY:
+    case GD_SINDIR_ENTRY:
     case GD_ALIAS_ENTRY:
     case GD_NO_ENTRY:
       /* Can't get here */
@@ -1945,6 +2038,110 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
     free(data_out);
 
   D->recurse_level--;
+  dreturn("%" PRNsize_t, n_read);
+  return n_read;
+}
+
+/* this returns string vector data (ie. SINDIR) */
+size_t gd_getstrdata64(DIRFILE *D, const char *field_code, off64_t first_frame,
+    off64_t first_samp, size_t num_frames, size_t num_samp,
+    const char **data_out)
+{
+  size_t i, n_read = 0;
+  gd_entry_t *E;
+  unsigned int spf;
+  int64_t *ibuf = NULL;
+  int64_t len;
+
+  dtrace("%p, \"%s\", %lli %lli, %" PRNsize_t ", %" PRNsize_t ", %p", D,
+      field_code, (long long)first_frame, (long long)first_samp, num_frames,
+      num_samp, data_out);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  _GD_ClearError(D);
+
+  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (E->field_type != GD_SINDIR_ENTRY) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (first_frame == GD_HERE || first_samp == GD_HERE) {
+    first_samp = GD_HERE;
+    first_frame = 0;
+  }
+
+  if (first_frame > 0 || num_frames > 0) {
+    /* get the samples per frame */
+    spf = _GD_GetSPF(D, E);
+
+    if (D->error) {
+      dreturn("%i", 0);
+      return 0;
+    }
+
+    first_samp += spf * first_frame;
+    num_samp += spf * num_frames;
+  }
+
+  if (first_samp < 0 && (first_samp != GD_HERE || first_frame != 0)) {
+    _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* Check input fields */
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (_GD_BadInput(D, E, 1, GD_SARRAY_ENTRY, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* index buffer */
+  ibuf = _GD_Alloc(D, GD_INT64, num_samp);
+  if (D->error) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* read the index field and record the number of samples returned */
+  n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp,
+      GD_INT64, ibuf);
+
+  if (D->error || n_read == 0) {
+    free(ibuf);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  len = (E->e->entry[1]->EN(scalar,array_len) > GD_INT64_MAX) ? GD_INT64_MAX
+    : E->e->entry[1]->EN(scalar,array_len);
+
+  for (i = 0; i < n_read; ++i)
+    if (ibuf[i] < 0 || ibuf[i] >= len)
+      data_out[i] = NULL;
+    else
+      data_out[i] = ((const char **)E->e->entry[1]->e->u.scalar.d)[ibuf[i]];
+
+  free(ibuf);
+
   dreturn("%" PRNsize_t, n_read);
   return n_read;
 }
@@ -1982,6 +2179,8 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
 
   if (entry->field_type & GD_SCALAR_ENTRY_BIT)
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
+  else if (entry->field_type == GD_SINDIR_ENTRY)
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_STR, NULL, 0, field_code);
 
   if (field_code != field_code_in)
     free(field_code);
@@ -2023,6 +2222,13 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
 }
 
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */
+size_t gd_getstrdata(DIRFILE *D, const char *field_code, off_t first_frame,
+    off_t first_samp, size_t num_frames, size_t num_samp, const char **data_out)
+{
+  return gd_getstrdata64(D, field_code, first_frame, first_samp, num_frames,
+      num_samp, data_out);
+}
+
 size_t gd_getdata(DIRFILE* D, const char *field_code, off_t first_frame,
     off_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out)

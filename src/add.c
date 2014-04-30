@@ -28,7 +28,7 @@ int _GD_InvalidEntype(gd_entype_t t) {
       t != GD_CONST_ENTRY && t != GD_POLYNOM_ENTRY && t != GD_SBIT_ENTRY &&
       t != GD_DIVIDE_ENTRY && t != GD_RECIP_ENTRY && t != GD_WINDOW_ENTRY &&
       t != GD_MPLEX_ENTRY && t != GD_CARRAY_ENTRY && t != GD_STRING_ENTRY &&
-      t != GD_SARRAY_ENTRY)
+      t != GD_SARRAY_ENTRY && t != GD_INDIR_ENTRY && t != GD_SINDIR_ENTRY)
   {
     dreturn("%i", -1);
     return -1;
@@ -131,6 +131,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   int i, is_dot, offset;
   void *new_list;
   void *new_ref = NULL;
+  size_t z;
   unsigned int u;
   unsigned mask;
   gd_entry_t *E;
@@ -364,6 +365,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
             entry->fragment_index, 1) || _GD_CheckCodeAffixes(D, NULL,
               entry->in_fields[1], entry->fragment_index, 1))
@@ -509,17 +512,13 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       }
       break;
     case GD_SARRAY_ENTRY:
-      E->EN(scalar,const_type) = GD_NULL;
       E->EN(scalar,array_len) = entry->EN(scalar,array_len);
 
-      if (E->EN(scalar,array_len) > GD_MAX_CARRAY_LENGTH)
-        _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
-      else {
-        size_t size = sizeof(const char *) * E->EN(scalar,array_len);
-        E->e->u.scalar.d = _GD_Malloc(D, size);
-        if (E->e->u.scalar.d)
-          memset(E->e->u.scalar.d, 0, size);
-      }
+      E->e->u.scalar.d = _GD_Malloc(D,
+          sizeof(const char *) * E->EN(scalar,array_len));
+      if (E->e->u.scalar.d)
+        for (z = 0; z < E->EN(scalar,array_len); ++z)
+          ((const char**)E->e->u.scalar.d)[z] = _GD_Strdup(D, "");
       break;
     case GD_STRING_ENTRY:
       E->e->u.string = _GD_Strdup(D, "");
@@ -1008,15 +1007,14 @@ int gd_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
   return error;
 }
 
-/* add a MULTIPLY entry */
-int gd_add_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
-    const char* in_field2, int fragment_index) gd_nothrow
+static int _GD_AddYoke(DIRFILE* D, gd_entype_t t, const char* field_code,
+    const char* in_field1, const char* in_field2, int fragment_index) gd_nothrow
 {
   gd_entry_t M;
   int error;
 
-  dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, in_field1, in_field2,
-      fragment_index);
+  dtrace("%p, 0x%X, \"%s\", \"%s\", \"%s\", %i", D, t, field_code, in_field1,
+      in_field2, fragment_index);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1026,7 +1024,7 @@ int gd_add_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
 
   memset(&M, 0, sizeof(gd_entry_t));
   M.field = (char *)field_code;
-  M.field_type = GD_MULTIPLY_ENTRY;
+  M.field_type = t;
   M.in_fields[0] = (char *)in_field1;
   M.in_fields[1] = (char *)in_field2;
   M.fragment_index = fragment_index;
@@ -1036,32 +1034,32 @@ int gd_add_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
   return error;
 }
 
-/* add a DIVIDE entry */
+int gd_add_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
+    const char* in_field2, int fragment_index) gd_nothrow
+{
+  return _GD_AddYoke(D, GD_MULTIPLY_ENTRY, field_code, in_field1, in_field2,
+      fragment_index);
+}
+
 int gd_add_divide(DIRFILE* D, const char* field_code, const char* in_field1,
     const char* in_field2, int fragment_index) gd_nothrow
 {
-  gd_entry_t E;
-  int error;
-
-  dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, in_field1, in_field2,
+  return _GD_AddYoke(D, GD_DIVIDE_ENTRY, field_code, in_field1, in_field2,
       fragment_index);
+}
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+int gd_add_indir(DIRFILE* D, const char* field_code, const char* in_field1,
+    const char* in_field2, int fragment_index) gd_nothrow
+{
+  return _GD_AddYoke(D, GD_INDIR_ENTRY, field_code, in_field1, in_field2,
+      fragment_index);
+}
 
-  memset(&E, 0, sizeof(gd_entry_t));
-  E.field = (char *)field_code;
-  E.field_type = GD_DIVIDE_ENTRY;
-  E.in_fields[0] = (char *)in_field1;
-  E.in_fields[1] = (char *)in_field2;
-  E.fragment_index = fragment_index;
-  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
-
-  dreturn("%i", error);
-  return error;
+int gd_add_sindir(DIRFILE* D, const char* field_code, const char* in_field1,
+    const char* in_field2, int fragment_index) gd_nothrow
+{
+  return _GD_AddYoke(D, GD_SINDIR_ENTRY, field_code, in_field1, in_field2,
+      fragment_index);
 }
 
 /* add a RECIP entry */
@@ -1660,14 +1658,14 @@ int gd_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
   return error;
 }
 
-/* add a META MULTIPLY entry */
-int gd_madd_multiply(DIRFILE* D, const char* parent, const char* field_code,
-    const char* in_field1, const char* in_field2) gd_nothrow
+static int _GD_MAddYoke(DIRFILE* D, gd_entype_t t, const char* parent,
+    const char* field_code, const char* in_field1, const char* in_field2)
+gd_nothrow
 {
   gd_entry_t M;
   int error;
 
-  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\"", D, field_code, parent,
+  dtrace("%p, 0x%X, \"%s\", \"%s\", \"%s\", \"%s\"", D, t, field_code, parent,
       in_field1, in_field2);
 
   if (D->flags & GD_INVALID) {/* don't crash */
@@ -1678,7 +1676,7 @@ int gd_madd_multiply(DIRFILE* D, const char* parent, const char* field_code,
 
   memset(&M, 0, sizeof(gd_entry_t));
   M.field = (char *)field_code;
-  M.field_type = GD_MULTIPLY_ENTRY;
+  M.field_type = t;
   M.in_fields[0] = (char *)in_field1;
   M.in_fields[1] = (char *)in_field2;
   M.fragment_index = 0;
@@ -1686,6 +1684,13 @@ int gd_madd_multiply(DIRFILE* D, const char* parent, const char* field_code,
 
   dreturn("%i", error);
   return error;
+}
+
+int gd_madd_multiply(DIRFILE* D, const char *parent, const char* field_code,
+    const char* in_field1, const char* in_field2) gd_nothrow
+{
+  return _GD_MAddYoke(D, GD_MULTIPLY_ENTRY, parent, field_code, in_field1,
+      in_field2);
 }
 
 /* add a META PHASE entry */
@@ -1798,31 +1803,25 @@ int gd_madd_cpolynom(DIRFILE* D, const char* parent, const char* field_code,
   return error;
 }
 
-/* add a META DIVIDE entry */
 int gd_madd_divide(DIRFILE* D, const char *parent, const char* field_code,
     const char* in_field1, const char* in_field2) gd_nothrow
 {
-  int error;
-  gd_entry_t E;
-
-  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\"", D, parent, field_code, in_field1,
+  return _GD_MAddYoke(D, GD_DIVIDE_ENTRY, parent, field_code, in_field1,
       in_field2);
+}
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+int gd_madd_indir(DIRFILE* D, const char *parent, const char* field_code,
+    const char* in_field1, const char* in_field2) gd_nothrow
+{
+  return _GD_MAddYoke(D, GD_INDIR_ENTRY, parent, field_code, in_field1,
+      in_field2);
+}
 
-  memset(&E, 0, sizeof(gd_entry_t));
-  E.field = (char *)field_code;
-  E.field_type = GD_DIVIDE_ENTRY;
-  E.in_fields[0] = (char *)in_field1;
-  E.in_fields[1] = (char *)in_field2;
-  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
-
-  dreturn("%i", error);
-  return error;
+int gd_madd_sindir(DIRFILE *D, const char *parent, const char* field_code,
+    const char* in_field1, const char* in_field2) gd_nothrow
+{
+  return _GD_MAddYoke(D, GD_SINDIR_ENTRY, parent, field_code, in_field1,
+      in_field2);
 }
 
 /* add a RECIP entry */

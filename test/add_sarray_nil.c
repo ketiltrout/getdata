@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,28 +20,47 @@
  */
 #include "test.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "const CONST UINT8 11\n";
-  int fd, error, r = 0;
+  const char *data[6] = {NULL, NULL, NULL, NULL, NULL, NULL};
+  int n, error;
+  int r = 0;
+  gd_entry_t E;
   DIRFILE *D;
-  gd_type_t type;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-
-  type = gd_native_type(D, "const");
+  E.field = "data";
+  E.field_type = GD_SARRAY_ENTRY;
+  E.EN(scalar,array_len) = 6;
+  E.fragment_index = 0;
+  gd_add(D, &E);
   error = gd_error(D);
-  CHECKU(type, GD_UINT64);
-  CHECKI(error, 0);
+  CHECKI(error, GD_E_OK);
+
+  /* check */
+  memset(&E, 0, sizeof(E));
+  gd_entry(D, "data", &E);
+  if (gd_error(D))
+    r = 1;
+  else {
+    CHECKI(E.field_type, GD_SARRAY_ENTRY);
+    CHECKI(E.fragment_index, 0);
+    gd_free_entry_strings(&E);
+  }
+  n = (int)gd_sarray_len(D, "data");
+  CHECKI(n, 6);
+
+  gd_get_sarray(D, "data", data);
+  for (n = 0; n < 6; ++n)
+    CHECKSi(n, data[n], "");
 
   gd_discard(D);
 

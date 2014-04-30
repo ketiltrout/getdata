@@ -54,7 +54,9 @@ unsigned int _GD_GetSPF(DIRFILE *D, gd_entry_t *E)
     case GD_SBIT_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
-      if (_GD_BadInput(D, E, 0, 1))
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
+      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
         break;
 
       spf = _GD_GetSPF(D, E->e->entry[0]);

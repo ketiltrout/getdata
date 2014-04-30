@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,14 +20,17 @@
  */
 #include "test.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "const CONST UINT8 11\n";
+  const char *format_data = "data INDIR in1 in2\n";
   int fd, error, r = 0;
   DIRFILE *D;
-  gd_type_t type;
 
   rmdirfile();
   mkdir(filedir, 0777);
@@ -37,16 +40,12 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-
-  type = gd_native_type(D, "const");
   error = gd_error(D);
-  CHECKU(type, GD_UINT64);
-  CHECKI(error, 0);
-
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
 
+  CHECKI(error,GD_E_OK);
   return r;
 }

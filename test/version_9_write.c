@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -90,7 +90,7 @@ int main(void)
   h2 = gd_hidden(D, "AdYZ");
   CHECKI(h2,1);
   CHECKI(n,8);
-  CHECKI(v,9);
+  CHECKI(v,GD_DIRFILE_STANDARDS_VERSION);
 
   for (i = 0; i < n; ++i)
     CHECKUi(i,c[i], (i & 1) ? 4 + i : 0);

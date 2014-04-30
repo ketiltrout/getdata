@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2013 D. V. Wiebe
+/* Copyright (C) 2011-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -29,9 +29,12 @@ int main(void)
     "late PHASE data 0\n"
     "/ALIAS bata data\n"
     "data RAW UINT8 8\n"
+    "lincom LINCOM data 1 0 INDEX 1 0 data 1 0\n"
+    "indir INDIR data carray\n"
+    "sindir SINDIR data sarray\n"
     "phase PHASE data2 0\n";
-  int fd, e1, e2, e3, e4, e5, r = 0;
-  char *s1, *s2, *s4;
+  int fd, e1, e2, e3, e4, e5, e6, e7, e8, r = 0;
+  char *s1, *s2, *s4, *s5, *s6, *s7, *s8, *s9, *s10, *s11;
   const char *s3;
   DIRFILE *D;
   gd_entry_t E;
@@ -79,6 +82,35 @@ int main(void)
   e5 = gd_error(D);
   CHECKI(e5, 0);
   CHECKS(s4, "data2");
+  gd_free_entry_strings(&E);
+
+  gd_entry(D, "lincom", &E);
+  e6 = gd_error(D);
+  s5 = E.in_fields[0];
+  s6 = E.in_fields[1];
+  s7 = E.in_fields[2];
+  CHECKI(e6, 0);
+  CHECKS(s5, "zata");
+  CHECKS(s6, "INDEX");
+  CHECKS(s7, "zata");
+  gd_free_entry_strings(&E);
+
+  gd_entry(D, "indir", &E);
+  e7 = gd_error(D);
+  s8 = E.in_fields[0];
+  s9 = E.in_fields[1];
+  CHECKI(e7, 0);
+  CHECKS(s8, "zata");
+  CHECKS(s9, "carray");
+  gd_free_entry_strings(&E);
+
+  gd_entry(D, "sindir", &E);
+  e8 = gd_error(D);
+  s10 = E.in_fields[0];
+  s11 = E.in_fields[1];
+  CHECKI(e8, 0);
+  CHECKS(s10, "zata");
+  CHECKS(s11, "sarray");
   gd_free_entry_strings(&E);
 
   gd_discard(D);

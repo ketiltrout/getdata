@@ -526,9 +526,10 @@ static gd_entry_t *_GD_ParseLinterp(DIRFILE *restrict D,
   return E;
 }
 
-/* _GD_ParseMultiply: parse MULTIPLY entry in format file.
+/* _GD_ParseYoke: parse a field specified by two input fields only (MULTIPLY,
+ * DIVIDE, INDIR, SINDIR)
 */
-static gd_entry_t *_GD_ParseMultiply(DIRFILE *restrict D,
+static gd_entry_t *_GD_ParseYoke(DIRFILE *restrict D, gd_entype_t type,
     char *gd_restrict_arr in_cols[MAX_IN_COLS], int n_cols,
     const gd_entry_t *restrict parent, const char *restrict format_file,
     int line, int me, int standards, int pedantic, int *restrict is_dot)
@@ -536,8 +537,8 @@ static gd_entry_t *_GD_ParseMultiply(DIRFILE *restrict D,
   gd_entry_t *E;
   int offset;
 
-  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %i, %p", D, in_cols, n_cols,
-      parent, format_file, line, me, standards, pedantic, is_dot);
+  dtrace("%p, 0x%X, %p, %i, %p, \"%s\", %i, %i, %i, %i, %p", D, type, in_cols,
+      n_cols, parent, format_file, line, me, standards, pedantic, is_dot);
 
   if (n_cols < 4) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
@@ -561,7 +562,7 @@ static gd_entry_t *_GD_ParseMultiply(DIRFILE *restrict D,
   }
   memset(E->e, 0, sizeof(struct gd_private_entry_));
 
-  E->field_type = GD_MULTIPLY_ENTRY;
+  E->field_type = type;
   E->in_fields[0] = E->in_fields[1] = NULL;
   E->e->entry[0] = E->e->entry[1] = NULL;
   E->flags |= GD_EN_CALC;
@@ -812,69 +813,6 @@ static gd_entry_t *_GD_ParseMplex(DIRFILE *restrict D,
   if (D->error != GD_E_OK) {
     _GD_FreeE(D, E, 1);
     E = NULL;
-  }
-
-  dreturn("%p", E);
-  return E;
-}
-
-/* _GD_ParseDivide: parse DIVIDE entry in format file.
-*/
-static gd_entry_t *_GD_ParseDivide(DIRFILE *restrict D,
-    char *gd_restrict_arr in_cols[MAX_IN_COLS], int n_cols,
-    const gd_entry_t *restrict parent, const char *restrict format_file,
-    int line, int me, int standards, int pedantic, int *restrict is_dot)
-{
-  gd_entry_t *E;
-  int offset;
-
-  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %i, %p", D, in_cols, n_cols,
-      parent, format_file, line, me, standards, pedantic, is_dot);
-
-  if (n_cols < 4) {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  E = (gd_entry_t *)_GD_Malloc(D, sizeof(gd_entry_t));
-  if (E == NULL) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-  memset(E, 0, sizeof(gd_entry_t));
-
-  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
-      sizeof(struct gd_private_entry_));
-  if (E->e == NULL) {
-    free(E);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-  memset(E->e, 0, sizeof(struct gd_private_entry_));
-
-  E->field_type = GD_DIVIDE_ENTRY;
-  E->in_fields[0] = E->in_fields[1] = NULL;
-  E->e->entry[0] = E->e->entry[1] = NULL;
-
-  E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
-  if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
-        is_dot))
-  {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
-        in_cols[0]);
-    _GD_FreeE(D, E, 1);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  E->in_fields[0] = _GD_MungeFromFrag(D, NULL, me, in_cols[2], &offset);
-  E->in_fields[1] = _GD_MungeFromFrag(D, NULL, me, in_cols[3], &offset);
-
-  if (D->error) {
-    _GD_FreeE(D, E, 1);
-    dreturn("%p", NULL);
-    return NULL;
   }
 
   dreturn("%p", E);
@@ -1602,8 +1540,8 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D, int n_cols, char **in_cols,
     E = _GD_ParseLinterp(D, in_cols, n_cols, P, format_file, linenum, me,
         standards, pedantic, &is_dot);
   else if (strcmp(in_cols[1], "MULTIPLY") == 0 && (!pedantic || standards >= 2))
-    E = _GD_ParseMultiply(D, in_cols, n_cols, P, format_file, linenum, me,
-        standards, pedantic, &is_dot);
+    E = _GD_ParseYoke(D, GD_MULTIPLY_ENTRY, in_cols, n_cols, P, format_file,
+        linenum, me, standards, pedantic, &is_dot);
   else if (strcmp(in_cols[1], "BIT") == 0)
     E = _GD_ParseBit(D, 0, in_cols, n_cols, P, format_file, linenum, me,
         standards, pedantic, &is_dot);
@@ -1617,8 +1555,8 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D, int n_cols, char **in_cols,
     E = _GD_ParseBit(D, 1, in_cols, n_cols, P, format_file, linenum, me,
         standards, pedantic, &is_dot);
   else if (strcmp(in_cols[1], "DIVIDE") == 0 && (!pedantic || standards >= 8))
-    E = _GD_ParseDivide(D, in_cols, n_cols, P, format_file, linenum, me,
-        standards, pedantic, &is_dot);
+    E = _GD_ParseYoke(D, GD_DIVIDE_ENTRY, in_cols, n_cols, P, format_file,
+        linenum, me, standards, pedantic, &is_dot);
   else if (strcmp(in_cols[1], "RECIP") == 0 && (!pedantic || standards >= 8))
     E = _GD_ParseRecip(D, in_cols, n_cols, P, format_file, linenum, me,
         standards, pedantic, &is_dot);
@@ -1628,6 +1566,12 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D, int n_cols, char **in_cols,
   else if (strcmp(in_cols[1], "MPLEX") == 0 && (!pedantic || standards >= 9))
     E = _GD_ParseMplex(D, in_cols, n_cols, P, format_file, linenum, me,
         standards, pedantic, &is_dot);
+  else if (strcmp(in_cols[1], "INDIR") == 0 && (!pedantic || standards >= 10))
+    E = _GD_ParseYoke(D, GD_INDIR_ENTRY, in_cols, n_cols, P, format_file,
+        linenum, me, standards, pedantic, &is_dot);
+  else if (strcmp(in_cols[1], "SINDIR") == 0 && (!pedantic || standards >= 10))
+    E = _GD_ParseYoke(D, GD_SINDIR_ENTRY, in_cols, n_cols, P, format_file,
+        linenum, me, standards, pedantic, &is_dot);
   else if (strcmp(in_cols[1], "CONST") == 0 && (!pedantic || standards >= 6))
     E = _GD_ParseConst(D, in_cols, n_cols, P, format_file, linenum, me,
         standards, pedantic, &is_dot);
@@ -1637,7 +1581,7 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D, int n_cols, char **in_cols,
   else if (strcmp(in_cols[1], "STRING") == 0 && (!pedantic || standards >= 6))
     E = _GD_ParseString(D, in_cols, n_cols, P, format_file, linenum, me,
         standards, pedantic, &is_dot);
-  else if (strcmp(in_cols[1], "SARRAY") == 0 && (!pedantic || standards >= 8))
+  else if (strcmp(in_cols[1], "SARRAY") == 0 && (!pedantic || standards >= 10))
     E = _GD_ParseArray(D, 1, in_cols, n_cols, P, format_file, linenum, me,
         standards, pedantic, &is_dot, outstring, tok_pos);
   else if (standards <= GD_DIRFILE_STANDARDS_VERSION || pedantic)

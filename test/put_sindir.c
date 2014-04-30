@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,30 +20,48 @@
  */
 #include "test.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "const CONST UINT8 11\n";
-  int fd, error, r = 0;
+  const char *data = "dirfile/data";
+  const char *format_data =
+    "sindir SINDIR data sarray\n"
+    "sarray SARRAY a b c d e f g h i j k l\n"
+    "data RAW INT8 8\n";
+  int8_t c[8];
+  struct stat buf;
+  int fd, i, n, e1, e2, r = 0;
   DIRFILE *D;
-  gd_type_t type;
 
+  memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0777);
+
+  for (i = 0; i < 8; ++i)
+    c[i] = (int8_t)(40 + i);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
+  n = gd_putdata(D, "sindir", 5, 0, 1, 0, GD_INT8, c);
+  e1 = gd_error(D);
+  CHECKI(n,0);
+  CHECKI(e1,GD_E_BAD_FIELD_TYPE);
 
-  type = gd_native_type(D, "const");
-  error = gd_error(D);
-  CHECKU(type, GD_UINT64);
-  CHECKI(error, 0);
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
-  gd_discard(D);
+  if (!stat(data, &buf)) {
+    perror("stat");
+    r = 1;
+  }
 
   unlink(format);
   rmdir(filedir);

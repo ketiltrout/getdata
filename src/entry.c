@@ -55,6 +55,8 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       free(entry->in_fields[1]);
       free(entry->in_fields[0]);
       break;
@@ -312,6 +314,8 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
     case GD_SARRAY_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_ALIAS_ENTRY:
       break;
@@ -451,6 +455,8 @@ int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       entry->in_fields[0] = strdup(E->in_fields[0]);
       entry->in_fields[1] = strdup(E->in_fields[1]);
       break;
@@ -817,13 +823,21 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
   switch (E->field_type) {
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->EN(lincom,n_fields); ++i)
-        _GD_BadInput(D, E, i, 1);
+        _GD_BadInput(D, E, i, GD_NO_ENTRY, 1);
+      break;
+    case GD_INDIR_ENTRY:
+      _GD_BadInput(D, E, 0, GD_NO_ENTRY, 1);
+      _GD_BadInput(D, E, 0, GD_CARRAY_ENTRY, 1);
+      break;
+    case GD_SINDIR_ENTRY:
+      _GD_BadInput(D, E, 0, GD_NO_ENTRY, 1);
+      _GD_BadInput(D, E, 0, GD_SARRAY_ENTRY, 1);
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
-      _GD_BadInput(D, E, 1, 1);
+      _GD_BadInput(D, E, 1, GD_NO_ENTRY, 1);
       /* fallthrough */
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
@@ -831,7 +845,7 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
-      _GD_BadInput(D, E, 0, 1);
+      _GD_BadInput(D, E, 0, GD_NO_ENTRY, 1);
       /* Fallthrough */
     case GD_RAW_ENTRY:
     case GD_CONST_ENTRY:

@@ -451,46 +451,72 @@ static int _GD_UpdateInputs(DIRFILE *D, struct gd_rename_data_ *rdat,
   rdat->n_code = 0;
 
   for (u = 0; u < D->n_entries; ++u) {
-    if (update_vectors)
-      switch (D->entry[u]->field_type) {
-        case GD_LINCOM_ENTRY:
+    switch (D->entry[u]->field_type) {
+      case GD_LINCOM_ENTRY:
+        if (update_vectors)
           for (i = 0; i < D->entry[u]->EN(lincom,n_fields); ++i) {
             if (_GD_UpdateInField(D, D->entry[u], rdat, i, search_meta, mode)) {
               dreturn("%i", -1);
               return -1;
             }
           }
-          break;
-        case GD_MULTIPLY_ENTRY:
-        case GD_DIVIDE_ENTRY:
-        case GD_WINDOW_ENTRY:
-        case GD_MPLEX_ENTRY:
+        break;
+      case GD_MULTIPLY_ENTRY:
+      case GD_DIVIDE_ENTRY:
+      case GD_WINDOW_ENTRY:
+      case GD_MPLEX_ENTRY:
+        if (update_vectors)
           if (_GD_UpdateInField(D, D->entry[u], rdat, 1, search_meta, mode)) {
             dreturn("%i", -1);
             return -1;
           }
-          /* Fallthrough */
-        case GD_LINTERP_ENTRY:
-        case GD_BIT_ENTRY:
-        case GD_PHASE_ENTRY:
-        case GD_POLYNOM_ENTRY:
-        case GD_RECIP_ENTRY:
-        case GD_SBIT_ENTRY:
+        /* Fallthrough */
+      case GD_LINTERP_ENTRY:
+      case GD_BIT_ENTRY:
+      case GD_PHASE_ENTRY:
+      case GD_POLYNOM_ENTRY:
+      case GD_RECIP_ENTRY:
+      case GD_SBIT_ENTRY:
+        if (update_vectors)
           if (_GD_UpdateInField(D, D->entry[u], rdat, 0, search_meta, mode)) {
             dreturn("%i", -1);
             return -1;
           }
-          break;
-        case GD_INDEX_ENTRY:
-        case GD_RAW_ENTRY:
-        case GD_NO_ENTRY:
-        case GD_CONST_ENTRY:
-        case GD_CARRAY_ENTRY:
-        case GD_SARRAY_ENTRY:
-        case GD_STRING_ENTRY:
-        case GD_ALIAS_ENTRY:
-          break;
-      }
+        break;
+      case GD_INDIR_ENTRY:
+        if (update_vectors)
+          if (_GD_UpdateInField(D, D->entry[u], rdat, 0, search_meta, mode)) {
+            dreturn("%i", -1);
+            return -1;
+          }
+        if (rdat->E->field_type == GD_CARRAY_ENTRY || search_meta)
+          if (_GD_UpdateInField(D, D->entry[u], rdat, 1, search_meta, mode)) {
+            dreturn("%i", -1);
+            return -1;
+          }
+        break;
+      case GD_SINDIR_ENTRY:
+        if (update_vectors)
+          if (_GD_UpdateInField(D, D->entry[u], rdat, 0, search_meta, mode)) {
+            dreturn("%i", -1);
+            return -1;
+          }
+        if (rdat->E->field_type == GD_SARRAY_ENTRY || search_meta)
+          if (_GD_UpdateInField(D, D->entry[u], rdat, 1, search_meta, mode)) {
+            dreturn("%i", -1);
+            return -1;
+          }
+        break;
+      case GD_INDEX_ENTRY:
+      case GD_RAW_ENTRY:
+      case GD_NO_ENTRY:
+      case GD_CONST_ENTRY:
+      case GD_CARRAY_ENTRY:
+      case GD_SARRAY_ENTRY:
+      case GD_STRING_ENTRY:
+      case GD_ALIAS_ENTRY:
+        break;
+    }
     if (update_scalars)
       switch (D->entry[u]->field_type) {
         case GD_LINCOM_ENTRY:
@@ -536,6 +562,8 @@ static int _GD_UpdateInputs(DIRFILE *D, struct gd_rename_data_ *rdat,
         case GD_CONST_ENTRY:
         case GD_CARRAY_ENTRY:
         case GD_SARRAY_ENTRY:
+        case GD_INDIR_ENTRY:
+        case GD_SINDIR_ENTRY:
         case GD_ALIAS_ENTRY:
           break;
       }

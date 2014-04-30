@@ -439,6 +439,8 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
         break;
       case GD_MULTIPLY_ENTRY:
       case GD_DIVIDE_ENTRY:
+      case GD_INDIR_ENTRY:
+      case GD_SINDIR_ENTRY:
         Format.n_multiply++;
         break;
       case GD_PHASE_ENTRY:
@@ -517,6 +519,8 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
         break;
       case GD_MULTIPLY_ENTRY:
       case GD_DIVIDE_ENTRY:
+      case GD_INDIR_ENTRY:
+      case GD_SINDIR_ENTRY:
         CopyMultDivEntry(&Format.multiplyEntries[nmultiply++], D->entry[i]);
         break;
       case GD_PHASE_ENTRY:

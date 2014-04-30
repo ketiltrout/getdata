@@ -114,10 +114,13 @@ static const struct {
     "Recursion too deep including {4} on line {3} of {2}", 0 },
   /* GD_E_BAD_DIRFILE: (nothing) */
   { GD_E_BAD_DIRFILE, 0, "Invalid dirfile", 0 },
-  /* GD_E_BAD_FIELD_TYPE: 4 = fieldcode */
+  /* GD_E_BAD_FIELD_TYPE: 2 = parent field (if any) 4 = fieldcode */
   { GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, "No method to write field {4}", 0 },
   { GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, "Invalid field type for {4}", 0 },
   { GD_E_BAD_FIELD_TYPE, GD_E_FIELD_MATCH, "Field type mismatch for {4}", 0 },
+  { GD_E_BAD_FIELD_TYPE, GD_E_FIELD_FORMAT,
+    "Bad field type for {4} in definition of {2}", 0 },
+  { GD_E_BAD_FIELD_TYPE, GD_E_FIELD_STR, "Non-numeric data in {4}", 0 },
   /* GD_E_ACCMODE: (nothing) */
   { GD_E_ACCMODE, 0, "Dirfile has been opened read-only", 0 },
   /* GD_E_UNSUPPORTED: (nothing) */

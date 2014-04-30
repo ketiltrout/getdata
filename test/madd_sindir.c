@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,29 +24,33 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "const CONST UINT8 11\n";
-  int fd, error, r = 0;
+  int error, ge_error, r = 0;
+  gd_entry_t e;
   DIRFILE *D;
-  gd_type_t type;
 
   rmdirfile();
-  mkdir(filedir, 0777);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-
-  type = gd_native_type(D, "const");
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  gd_add_phase(D, "new", "in", 3, 0);
+  gd_madd_sindir(D, "new", "meta", "in1", "in2");
   error = gd_error(D);
-  CHECKU(type, GD_UINT64);
-  CHECKI(error, 0);
+
+  /* check */
+  gd_entry(D, "new/meta", &e);
+  ge_error = gd_error(D);
+  CHECKI(ge_error, 0);
+  if (!r) {
+    CHECKI(e.field_type, GD_SINDIR_ENTRY);
+    CHECKS(e.in_fields[0], "in1");
+    CHECKS(e.in_fields[1], "in2");
+    CHECKI(e.fragment_index, 0);
+    gd_free_entry_strings(&e);
+  }
 
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
 
+  CHECKI(error, GD_E_OK);
   return r;
 }

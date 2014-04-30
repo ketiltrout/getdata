@@ -116,7 +116,7 @@ static size_t _GD_DoLinterpOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
       num_samp, data_type, data_in);
 
-  if (_GD_BadInput(D, E, 0, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -226,7 +226,7 @@ static size_t _GD_DoLincomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  if (_GD_BadInput(D, E, 0, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -296,7 +296,7 @@ static size_t _GD_DoBitOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
       num_samp, data_type, data_in);
 
-  if (_GD_BadInput(D, E, 0, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -351,7 +351,7 @@ static size_t _GD_DoPhaseOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
       num_samp, data_type, data_in);
 
-  if (_GD_BadInput(D, E, 0, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -374,7 +374,7 @@ static size_t _GD_DoRecipOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
       num_samp, data_type, data_in);
 
-  if (_GD_BadInput(D, E, 0, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -428,7 +428,7 @@ static size_t _GD_DoPolynomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  if (_GD_BadInput(D, E, 0, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -548,12 +548,12 @@ static size_t _GD_DoMplexOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
       num_samp, data_type, data_in);
 
-  if (_GD_BadInput(D, E, 0, 1)) {
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
 
-  if (_GD_BadInput(D, E, 1, 1)) {
+  if (_GD_BadInput(D, E, 1, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -696,12 +696,6 @@ size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
     case GD_MPLEX_ENTRY:
       n_wrote = _GD_DoMplexOut(D, E, first_samp, num_samp, data_type, data_in);
       break;
-    case GD_MULTIPLY_ENTRY:
-    case GD_DIVIDE_ENTRY:
-    case GD_WINDOW_ENTRY:
-    case GD_INDEX_ENTRY:
-      _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, E->field);
-      break;
     case GD_RECIP_ENTRY:
       n_wrote = _GD_DoRecipOut(D, E, first_samp, num_samp, data_type, data_in);
       break;
@@ -715,6 +709,14 @@ size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
       n_wrote = _GD_DoConstOut(D, E, first_samp, num_samp, data_type, data_in);
+      break;
+    case GD_MULTIPLY_ENTRY:
+    case GD_DIVIDE_ENTRY:
+    case GD_WINDOW_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
+    case GD_INDEX_ENTRY:
+      _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, E->field);
       break;
     case GD_STRING_ENTRY:
     case GD_SARRAY_ENTRY:

@@ -855,11 +855,11 @@ int _GD_GetRepr(DIRFILE *restrict D, const char *restrict field_code_in,
 }
 
 /* Ensure that an input field has been identified (with error checking) */
-int _GD_BadInput(DIRFILE *D, const gd_entry_t *E, int i, int err)
+int _GD_BadInput(DIRFILE *D, const gd_entry_t *E, int i, gd_entype_t t, int err)
 {
   char *code;
 
-  dtrace("%p, %p, %i, %i", D, E, i, err);
+  dtrace("%p, %p, %i, 0x%X, %i", D, E, i, t, err);
 
   if (E->e->entry[i] == NULL) {
     E->e->entry[i] = _GD_FindFieldAndRepr(D, E->in_fields[i], &code,
@@ -874,9 +874,17 @@ int _GD_BadInput(DIRFILE *D, const gd_entry_t *E, int i, int err)
       free(code);
   }
 
-  /* scalar entries not allowed */
-  if (E->e->entry[i]->field_type & GD_SCALAR_ENTRY_BIT) {
-    _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_FORMAT, E->field, 0,
+  /* check field type */
+  if (t == GD_NO_ENTRY) {
+    /* scalar entries not allowed */
+    if (E->e->entry[i]->field_type & GD_SCALAR_ENTRY_BIT) {
+      _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_FORMAT, E->field, 0,
+          E->e->entry[i]->field);
+      dreturn("%i", 1);
+      return 1;
+    }
+  } else if (E->e->entry[i]->field_type != t) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_FORMAT, E->field, 0,
         E->e->entry[i]->field);
     dreturn("%i", 1);
     return 1;

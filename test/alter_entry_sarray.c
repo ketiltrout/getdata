@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,16 +18,23 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+/* Test field modifying */
 #include "test.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "const CONST UINT8 11\n";
-  int fd, error, r = 0;
+  const char *format_data = "sarray SARRAY a b c d\n";
+  int fd, i, n, error, r = 0;
+  const char *d[6];
+  const char *v[6] = {"a", "b", "c", "d", "", ""};
+  gd_entry_t E;
   DIRFILE *D;
-  gd_type_t type;
 
   rmdirfile();
   mkdir(filedir, 0777);
@@ -36,12 +43,21 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  E.field_type = GD_SARRAY_ENTRY;
+  E.EN(scalar,array_len) = 6;
 
-  type = gd_native_type(D, "const");
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  n = gd_alter_entry(D, "sarray", &E, 0);
   error = gd_error(D);
-  CHECKU(type, GD_UINT64);
+
+  CHECKI(n, 0);
   CHECKI(error, 0);
+
+  gd_get_sarray(D, "sarray", d);
+  for (i = 0; i < 6; ++i) {
+    CHECKPNi(i, d[i]);
+    CHECKSi(i, d[i], v[i]);
+  }
 
   gd_discard(D);
 

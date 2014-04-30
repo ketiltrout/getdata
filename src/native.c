@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2012 D. V. Wiebe
+/* Copyright (C) 2009-2012, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -49,7 +49,7 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
 
       type = GD_FLOAT64;
       for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-        if (_GD_BadInput(D, E, i, 1))
+        if (_GD_BadInput(D, E, i, GD_NO_ENTRY, 1))
           break;
 
         if (_GD_NativeType(D, E->e->entry[i], E->e->repr[i]) & GD_COMPLEX) {
@@ -70,8 +70,11 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
-      if (_GD_BadInput(D, E, 0, 1) || _GD_BadInput(D, E, 1, 1))
+      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1) ||
+          _GD_BadInput(D, E, 1, GD_NO_ENTRY, 1))
+      {
         break;
+      }
 
       type = (_GD_NativeType(D, E->e->entry[0], E->e->repr[0]) & GD_COMPLEX
           || _GD_NativeType(D, E->e->entry[1], E->e->repr[1]) & GD_COMPLEX)
@@ -81,7 +84,7 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
       if (!(E->flags & GD_EN_CALC))
         _GD_CalculateEntry(D, E, 1);
 
-      if (_GD_BadInput(D, E, 0, 1))
+      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
         break;
 
       type = ((_GD_NativeType(D, E->e->entry[0], E->e->repr[0]) & GD_COMPLEX)
@@ -94,7 +97,7 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
     case GD_PHASE_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
-      if (_GD_BadInput(D, E, 0, 1))
+      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
         break;
 
       type = _GD_NativeType(D, E->e->entry[0], E->e->repr[0]);
@@ -108,7 +111,7 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
         break;
       }
 
-      if (_GD_BadInput(D, E, 0, 1))
+      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
         break;
 
       type = (_GD_NativeType(D, E->e->entry[0], E->e->repr[0]) & GD_COMPLEX) ?
@@ -120,10 +123,18 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
       break;
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
-      type = E->EN(scalar,const_type);
+      type = _GD_ConstType(D, E->EN(scalar,const_type));
+      break;
+    case GD_INDIR_ENTRY:
+      if (_GD_BadInput(D, E, 1, GD_CARRAY_ENTRY, 1))
+        break;
+
+      type = _GD_NativeType(D, E->e->entry[1], E->e->repr[1]);
+
       break;
     case GD_STRING_ENTRY:
     case GD_SARRAY_ENTRY:
+    case GD_SINDIR_ENTRY:
       type = GD_NULL;
       break;
     case GD_NO_ENTRY:

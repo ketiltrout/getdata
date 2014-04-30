@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,10 +24,12 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "const CONST UINT8 11\n";
-  int fd, error, r = 0;
+  const char *format_data = 
+    "data SARRAY UINT8 8 9 10 11 12\n"
+    "sindir SINDIR index data\n";
+  int fd, e1, e2, r = 0;
   DIRFILE *D;
-  gd_type_t type;
+  gd_entry_t E;
 
   rmdirfile();
   mkdir(filedir, 0777);
@@ -36,12 +38,18 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
 
-  type = gd_native_type(D, "const");
-  error = gd_error(D);
-  CHECKU(type, GD_UINT64);
-  CHECKI(error, 0);
+  gd_rename(D, "data", "zata", GD_REN_UPDB);
+  e1 = gd_error(D);
+  CHECKI(e1, 0);
+
+  gd_entry(D, "sindir", &E);
+  e2 = gd_error(D);
+  CHECKI(e2, 0);
+  CHECKS(E.in_fields[0], "index");
+  CHECKS(E.in_fields[1], "zata");
+  gd_free_entry_strings(&E);
 
   gd_discard(D);
 

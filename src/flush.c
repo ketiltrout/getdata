@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2008-2012, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -58,7 +58,7 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
       break;
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-        if (!_GD_BadInput(D, E, i, 0))
+        if (!_GD_BadInput(D, E, i, GD_NO_ENTRY, 0))
             _GD_Flush(D, E->e->entry[i], syn, clo);
       }
       break;
@@ -66,7 +66,7 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
-      if (!_GD_BadInput(D, E, 1, 0))
+      if (!_GD_BadInput(D, E, 1, GD_NO_ENTRY, 0))
         _GD_Flush(D, E->e->entry[1], syn, clo);
       /* fallthrough */
     case GD_LINTERP_ENTRY:
@@ -75,7 +75,9 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
-      if (!_GD_BadInput(D, E, 0, 0))
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
+      if (!_GD_BadInput(D, E, 0, GD_NO_ENTRY, 0))
         _GD_Flush(D, E->e->entry[0], syn, clo);
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
@@ -731,6 +733,26 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
           }
         }
         break;
+      case GD_INDIR_ENTRY:
+        if (fprintf(stream, " INDIR%s ", pretty ? "   " : "") < 0 ||
+            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
+              D->standards, 1) < 0 ||
+            _GD_WriteFieldCode(D, stream, me, E->in_fields[1], permissive,
+              D->standards, 0) < 0)
+        {
+          goto WRITE_ERR;
+        }
+        break;
+      case GD_SINDIR_ENTRY:
+        if (fprintf(stream, " SINDIR%s ", pretty ? "  " : "") < 0 ||
+            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
+              D->standards, 1) < 0 ||
+            _GD_WriteFieldCode(D, stream, me, E->in_fields[1], permissive,
+              D->standards, 0) < 0)
+        {
+          goto WRITE_ERR;
+        }
+        break;
       case GD_INDEX_ENTRY:
       case GD_ALIAS_ENTRY:
       case GD_NO_ENTRY:
@@ -1318,6 +1340,8 @@ uint64_t _GD_FindVersion(DIRFILE *D)
           D->av &= GD_VERS_GE_6;
           break;
         case GD_SARRAY_ENTRY:
+        case GD_INDIR_ENTRY:
+        case GD_SINDIR_ENTRY:
           D->av &= GD_VERS_GE_10;
           break;
         case GD_BIT_ENTRY:

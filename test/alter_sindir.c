@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,14 +20,18 @@
  */
 #include "test.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "const CONST UINT8 11\n";
-  int fd, error, r = 0;
+  const char *format_data = "sindir SINDIR data sarray\n";
+  int fd, ret, error, n, r = 0;
   DIRFILE *D;
-  gd_type_t type;
+  gd_entry_t E;
 
   rmdirfile();
   mkdir(filedir, 0777);
@@ -36,17 +40,23 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-
-  type = gd_native_type(D, "const");
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_alter_sindir(D, "sindir", NULL, "darray");
+  CHECKI(ret,0);
   error = gd_error(D);
-  CHECKU(type, GD_UINT64);
-  CHECKI(error, 0);
+  CHECKI(error,0);
+
+  n = gd_entry(D, "sindir", &E);
+  CHECKI(n,0);
+  CHECKS(E.in_fields[0], "data");
+  CHECKS(E.in_fields[1], "darray");
+  gd_free_entry_strings(&E);
 
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
+
 
   return r;
 }

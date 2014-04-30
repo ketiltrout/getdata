@@ -59,7 +59,7 @@ extern "C" {
 #endif
 
 /* The most recent standards version supported by this library */
-#define GD_DIRFILE_STANDARDS_VERSION 9
+#define GD_DIRFILE_STANDARDS_VERSION 10
 
 #include <math.h>
 #include <sys/types.h>
@@ -241,6 +241,8 @@ typedef enum {
   GD_RECIP_ENTRY    = 0x0B,
   GD_WINDOW_ENTRY   = 0x0C,
   GD_MPLEX_ENTRY    = 0x0D,
+  GD_INDIR_ENTRY    = 0x0E,
+  GD_SINDIR_ENTRY   = 0x0F,
   GD_CONST_ENTRY    = GD_SCALAR_ENTRY_BIT | 0x00,
   GD_STRING_ENTRY   = GD_SCALAR_ENTRY_BIT | 0x01,
   GD_CARRAY_ENTRY   = GD_SCALAR_ENTRY_BIT | 0x02,
@@ -546,6 +548,10 @@ extern int gd_add_divide(DIRFILE *dirfile, const char *field_code,
     const char *in_field1, const char *in_field2, int fragment_index)
 gd_nothrow gd_nonnull ((1,2,3,4));
 
+extern int gd_add_indir(DIRFILE *dirfile, const char *field_code,
+    const char *in_field1, const char *in_field2, int fragment_index)
+gd_nothrow gd_nonnull ((1,2,3,4));
+
 extern int gd_add_lincom(DIRFILE *dirfile, const char *field_code, int n_fields,
     const char **in_fields, const double *m, const double *b,
     int fragment_index) gd_nothrow gd_nonnull ((1,2,4,5,6));
@@ -581,6 +587,10 @@ gd_nonnull ((1,2,4));
 extern int gd_add_sbit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, int bitnum, int numbits,
     int fragment_index) gd_nothrow gd_nonnull ((1,2,3));
+
+extern int gd_add_sindir(DIRFILE *dirfile, const char *field_code,
+    const char *in_field1, const char *in_field2, int fragment_index)
+gd_nothrow gd_nonnull ((1,2,3,4));
 
 extern int gd_add_string(DIRFILE *dirfile, const char *field_code,
     const char *value, int fragment_index) gd_nothrow gd_nonnull((1,2,3));
@@ -632,6 +642,9 @@ gd_nonnull((1,2));
 extern int gd_alter_divide(DIRFILE *dirfile, const char *field_code,
     const char *in_field1, const char *in_field2) gd_nothrow gd_nonnull((1,2));
 
+extern int gd_alter_indir(DIRFILE *dirfile, const char *field_code,
+    const char *in_field1, const char *in_field2) gd_nothrow gd_nonnull((1,2));
+
 extern int gd_alter_lincom(DIRFILE *dirfile, const char *field_code,
     int n_fields, const char **in_fields, const double *m, const double *b)
 gd_nothrow gd_nonnull((1,2));
@@ -659,6 +672,9 @@ extern int gd_alter_sarray(DIRFILE* D, const char* field_code,
 extern int gd_alter_sbit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, int bitnum, int numbits) gd_nothrow
 gd_nonnull((1,2));
+
+extern int gd_alter_sindir(DIRFILE *dirfile, const char *field_code,
+    const char *in_field1, const char *in_field2) gd_nothrow gd_nonnull((1,2));
 
 extern int gd_alter_window(DIRFILE *dirfile, const char *field_code,
     const char *in_field, const char *check_field, gd_windop_t windop,
@@ -792,6 +808,10 @@ extern int gd_madd_divide(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field1, const char *in_field2)
 gd_nothrow gd_nonnull ((1,2,3,4,5));
 
+extern int gd_madd_indir(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field1, const char *in_field2)
+gd_nothrow gd_nonnull ((1,2,3,4,5));
+
 extern int gd_madd_lincom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int n_fields, const char **in_fields,
     const double *m, const double *b) gd_nothrow gd_nonnull((1,2,3,5,6,7));
@@ -828,6 +848,10 @@ gd_nonnull ((1,2,3,5));
 extern int gd_madd_sbit(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field, int bitnum,
     int numbits) gd_nothrow gd_nonnull ((1,2,3,4));
+
+extern int gd_madd_sindir(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field1, const char *in_field2)
+gd_nothrow gd_nonnull ((1,2,3,4,5));
 
 extern int gd_madd_spec(DIRFILE *dirfile, const char *line,
     const char *parent) gd_nothrow gd_nonnull ((1,2,3));
@@ -1041,6 +1065,10 @@ extern size_t gd_getdata(DIRFILE *dirfile, const char *field_code,
     off_t first_frame, off_t first_sample, size_t num_frames,
     size_t num_samples, gd_type_t return_type, void *data) gd_nonnull ((1, 2));
 
+extern size_t gd_getstrdata(DIRFILE *dirfile, const char *field_code,
+    off_t first_frame, off_t first_sample, size_t num_frames,
+    size_t num_samples, const char **data) gd_nonnull ((1, 2));
+
 extern size_t gd_putdata(DIRFILE *dirfile, const char *field_code,
     off_t first_frame, off_t first_sample, size_t num_frames,
     size_t num_samples, gd_type_t data_type, const void *data)
@@ -1089,6 +1117,11 @@ extern size_t __REDIRECT (gd_getdata, (DIRFILE *dirfile, const char *field_code,
       off_t first_frame, off_t first_samp, size_t num_frames, size_t num_samp,
       gd_type_t return_type, void *data), gd_getdata64) gd_nonnull ((1, 2));
 
+extern size_t __REDIRECT (gd_getstrdata, (DIRFILE *dirfile,
+      const char *field_code, off_t first_frame, off_t first_samp,
+      size_t num_frames, size_t num_samp, const char **data), gd_getstrdata64)
+gd_nonnull ((1, 2));
+
 extern size_t __REDIRECT (gd_putdata, (DIRFILE *dirfile, const char *field_code,
       off_t first_frame, off_t first_sample, size_t num_frames,
       size_t num_samples, gd_type_t data_type, const void *data),
@@ -1110,6 +1143,7 @@ gd_nonnull ((1,2));
 # else
 #  define gd_alter_frameoffset gd_alter_frameoffset64
 #  define gd_getdata gd_getdata64
+#  define gd_getstrdata gd_getstrdata64
 #  define gd_putdata gd_putdata64
 #  define gd_nframes gd_nframes64
 #  define gd_eof gd_eof64
@@ -1141,6 +1175,10 @@ extern int gd_alter_frameoffset64(DIRFILE *dirfile, gd_off64_t offset,
 extern size_t gd_getdata64(DIRFILE *dirfile, const char *field_code,
     gd_off64_t first_frame, gd_off64_t first_samp, size_t num_frames,
     size_t num_samp, gd_type_t return_type, void *data) gd_nonnull ((1, 2));
+
+extern size_t gd_getstrdata64(DIRFILE *dirfile, const char *field_code,
+    gd_off64_t first_frame, gd_off64_t first_samp, size_t num_frames,
+    size_t num_samp, const char **data) gd_nonnull ((1, 2));
 
 extern size_t gd_putdata64(DIRFILE *dirfile, const char *field_code,
     gd_off64_t first_frame, gd_off64_t first_sample, size_t num_frames,

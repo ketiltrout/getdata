@@ -20,13 +20,10 @@
  */
 #include "internal.h"
 
-static const char *nil = "";
-
 int gd_get_sarray_slice(DIRFILE *D, const char *field_code, unsigned long start,
     size_t n, const char **data_out)
 gd_nothrow
 {
-  size_t i;
   gd_entry_t *E;
 
   dtrace("%p, \"%s\", %lu, %" PRNsize_t ", %p", D, field_code, start, n,
@@ -71,11 +68,6 @@ gd_nothrow
   } else {
     memcpy(data_out, ((const char **)E->e->u.scalar.d) + start,
         n * sizeof(const char*));
-
-    /* replace NULLs */
-    for (i = 0; i < n; ++i)
-      if (data_out[i] == NULL)
-        data_out[i] = nil;
   }
 
   dreturn("%i", 0);
@@ -85,7 +77,6 @@ gd_nothrow
 int gd_get_sarray(DIRFILE *D, const char *field_code, const char **data_out)
 gd_nothrow
 {
-  size_t i;
   gd_entry_t *E;
 
   dtrace("%p, \"%s\", %p", D, field_code, data_out);
@@ -108,15 +99,10 @@ gd_nothrow
 
   if (E->field_type == GD_STRING_ENTRY)
     data_out[0] = E->e->u.string;
-  else if (E->field_type == GD_SARRAY_ENTRY) {
+  else if (E->field_type == GD_SARRAY_ENTRY)
     memcpy(data_out, E->e->u.scalar.d,
         E->EN(scalar,array_len) * sizeof(const char*));
-
-    /* replace NULLs */
-    for (i = 0; i < E->EN(scalar,array_len); ++i)
-      if (data_out[i] == NULL)
-        data_out[i] = nil;
-  } else {
+  else {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
     dreturn("%i", -1);
     return -1;
