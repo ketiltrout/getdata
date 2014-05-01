@@ -1887,7 +1887,7 @@ PHP_FUNCTION(gd_add_linterp)
 
   dtracephp();
 
-  GDPHP_PARSED("ssp|l", &field_code, &field_code_len, &in_field, &in_field_len,
+  GDPHP_PARSED("sss|l", &field_code, &field_code_len, &in_field, &in_field_len,
       &table, &table_len, &index);
 
   GDPHP_RETURN_BOOL(gd_add_linterp(D, field_code, in_field, table, index));
@@ -1977,7 +1977,7 @@ PHP_FUNCTION(gd_add_raw)
 
   dtracephp();
 
-  GDPHP_PARSED("pll|l", &field_code, &field_code_len, &data_type, &spf,
+  GDPHP_PARSED("sll|l", &field_code, &field_code_len, &data_type, &spf,
       &index);
 
   GDPHP_RETURN_BOOL(gd_add_raw(D, field_code, data_type, spf, index));
@@ -3338,7 +3338,7 @@ PHP_FUNCTION(gd_getdata)
   GDPHP_CHECK_ERROR(D);
 
   gdphp_from_data(return_value, n, data_type, data, 0, unpack);
-  dreturn("%i", n);
+  dreturn("%" PRNsize_t, n);
 }
 
 PHP_FUNCTION(gd_hidden)
@@ -3387,7 +3387,7 @@ PHP_FUNCTION(gd_include)
 
   dtracephp();
 
-  GDPHP_PARSED("pl|lss", &path, &path_len, &parent, &flags, &prefix,
+  GDPHP_PARSED("sl|lss", &path, &path_len, &parent, &flags, &prefix,
       &prefix_len, &suffix, &suffix_len);
 
   i = gd_include_affix(D, path, parent, prefix, suffix, flags);
@@ -3597,7 +3597,7 @@ PHP_FUNCTION(gd_madd_linterp)
 
   dtracephp();
 
-  GDPHP_PARSED("sssp", &parent, &parent_len, &field_code, &field_code_len,
+  GDPHP_PARSED("ssss", &parent, &parent_len, &field_code, &field_code_len,
       &in_field, &in_field_len, &table, &table_len);
 
   GDPHP_RETURN_BOOL(gd_madd_linterp(D, parent, field_code, in_field, table));
