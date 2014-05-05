@@ -38,13 +38,13 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
   switch(E->field_type) {
     case GD_RAW_ENTRY:
       if (E->e->u.raw.file[0].idata >= 0 ||
-          ((gd_ef_[E->e->u.raw.file[0].subenc].flags & GD_EF_OOP) &&
+          ((_GD_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_OOP) &&
            (E->e->u.raw.file[1].idata >= 0)))
       {
         if (syn && (D->flags & GD_ACCMODE) == GD_RDWR &&
             (E->e->u.raw.file[0].mode & GD_FILE_WRITE) &&
-            gd_ef_[E->e->u.raw.file[0].subenc].sync != NULL &&
-            (*gd_ef_[E->e->u.raw.file[0].subenc].sync)(E->e->u.raw.file))
+            _GD_ef[E->e->u.raw.file[0].subenc].sync != NULL &&
+            (*_GD_ef[E->e->u.raw.file[0].subenc].sync)(E->e->u.raw.file))
         {
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);

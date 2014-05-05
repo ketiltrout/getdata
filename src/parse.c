@@ -2034,10 +2034,10 @@ static int _GD_ParseDirective(DIRFILE *D, char **in_cols, int n_cols,
         if (!(*flags & GD_FORCE_ENCODING)) {
           D->fragment[me].encoding = GD_ENC_UNSUPPORTED;
           for (i = 0; i < GD_N_SUBENCODINGS - 1; ++i)
-            if (strcmp(in_cols[1], gd_ef_[i].ffname) == 0) {
-              D->fragment[me].encoding = gd_ef_[i].scheme;
+            if (strcmp(in_cols[1], _GD_ef[i].ffname) == 0) {
+              D->fragment[me].encoding = _GD_ef[i].scheme;
               free(D->fragment[me].enc_data);
-              if (n_cols > 2 && gd_ef_[i].flags & GD_EF_EDAT)
+              if (n_cols > 2 && _GD_ef[i].flags & GD_EF_EDAT)
                 D->fragment[me].enc_data = _GD_Strdup(D, in_cols[2]);
               else
                 D->fragment[me].enc_data = NULL;

@@ -329,7 +329,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         if (D->error)
           break;
 
-        enc = gd_ef_ + E->e->u.raw.file[0].subenc;
+        enc = _GD_ef + E->e->u.raw.file[0].subenc;
 
         /* open the old file */
         if (_GD_InitRawIO(D, E, NULL, -1, NULL, 0, GD_FILE_READ,

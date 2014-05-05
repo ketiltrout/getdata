@@ -65,7 +65,7 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
         /* if the field's data type is one byte long, and no in-framework
          * byte-swapping is performed, do nothing */
         if (D->entry[i]->e->u.raw.size == 1 &&
-            !(gd_ef_[D->entry[i]->e->u.raw.file[0].subenc].flags & GD_EF_SWAP))
+            !(_GD_ef[D->entry[i]->e->u.raw.file[0].subenc].flags & GD_EF_SWAP))
           continue;
 
         /* add this raw field to the list */

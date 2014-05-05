@@ -918,10 +918,10 @@ struct gd_private_entry_ {
 #define GD_FINIRAW_DEFER     0x2
 #define GD_FINIRAW_CLOTEMP   0x4
 
-/* number of subencodings (ie. the length of the gd_ef_ array */
+/* number of subencodings (ie. the length of the _GD_ef array */
 #define GD_N_SUBENCODINGS 11
 
-/* the last record of the gd_ef_ array is always the unknown encoding */
+/* the last record of the _GD_ef array is always the unknown encoding */
 #define GD_ENC_UNKNOWN (GD_N_SUBENCODINGS - 1)
 
 /* external module function provides flags */
@@ -995,7 +995,7 @@ extern struct encoding_t {
   gd_ef_sync_t sync;
   gd_ef_move_t move;
   gd_ef_unlink_t unlink;
-} gd_ef_[GD_N_SUBENCODINGS];
+} _GD_ef[GD_N_SUBENCODINGS];
 
 /* Format file fragment metadata */
 struct gd_fragment_t {

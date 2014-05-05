@@ -192,14 +192,14 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
       if (!_GD_Supports(D, E, GD_EF_NAME | GD_EF_SIZE))
         break;
 
-      if ((*gd_ef_[E->e->u.raw.file[0].subenc].name)(D,
+      if ((*_GD_ef[E->e->u.raw.file[0].subenc].name)(D,
             (const char*)D->fragment[E->fragment_index].enc_data,
             E->e->u.raw.file, E->e->u.raw.filebase, 0, 0))
       {
         break;
       }
 
-      ns = (*gd_ef_[E->e->u.raw.file[0].subenc].size)(
+      ns = (*_GD_ef[E->e->u.raw.file[0].subenc].size)(
           D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
           E->EN(raw,data_type), _GD_FileSwapBytes(D, E));
 

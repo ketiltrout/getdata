@@ -350,7 +350,7 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
         return -1;
       }
 
-      if ((*gd_ef_[E->e->u.raw.file[0].subenc].name)(D,
+      if ((*_GD_ef[E->e->u.raw.file[0].subenc].name)(D,
             (const char*)D->fragment[E->fragment_index].enc_data,
             E->e->u.raw.file, E->e->u.raw.filebase, 0, 0))
       {
@@ -359,7 +359,7 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
         return -1;
       }
 
-      if ((*gd_ef_[E->e->u.raw.file[0].subenc].unlink)(
+      if ((*_GD_ef[E->e->u.raw.file[0].subenc].unlink)(
             D->fragment[E->fragment_index].dirfd, E->e->u.raw.file))
       {
         if (errno != ENOENT) {

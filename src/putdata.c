@@ -68,7 +68,7 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   }
 
   /* fix endianness, if necessary */
-  if (gd_ef_[E->e->u.raw.file[0].subenc].flags & GD_EF_ECOR)
+  if (_GD_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_ECOR)
     _GD_FixEndianness(databuffer, ns, E->EN(raw,data_type), 0,
         D->fragment[E->fragment_index].byte_sex);
 
@@ -81,7 +81,7 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  if (_GD_WriteSeek(D, E, gd_ef_ + E->e->u.raw.file[0].subenc, s0,
+  if (_GD_WriteSeek(D, E, _GD_ef + E->e->u.raw.file[0].subenc, s0,
         GD_FILE_WRITE) == -1)
   {
     _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
@@ -90,7 +90,7 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  n_wrote = _GD_WriteOut(E, gd_ef_ + E->e->u.raw.file[0].subenc, databuffer,
+  n_wrote = _GD_WriteOut(E, _GD_ef + E->e->u.raw.file[0].subenc, databuffer,
       E->EN(raw,data_type), ns, 0);
 
   if (n_wrote < 0) {

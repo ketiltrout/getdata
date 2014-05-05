@@ -292,7 +292,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
       return 0;
     }
 
-    if ((*gd_ef_[E->e->u.raw.file[0].subenc].seek)(E->e->u.raw.file, s0,
+    if ((*_GD_ef[E->e->u.raw.file[0].subenc].seek)(E->e->u.raw.file, s0,
           E->EN(raw,data_type), GD_FILE_READ) == -1)
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
@@ -301,7 +301,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
       return 0;
     }
 
-    samples_read = (*gd_ef_[E->e->u.raw.file[0].subenc].read)(E->e->u.raw.file,
+    samples_read = (*_GD_ef[E->e->u.raw.file[0].subenc].read)(E->e->u.raw.file,
           databuffer + zeroed_samples * E->e->u.raw.size, E->EN(raw,data_type),
           ns);
 
@@ -312,7 +312,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
       return 0;
     }
 
-    if (gd_ef_[E->e->u.raw.file[0].subenc].flags & GD_EF_ECOR)
+    if (_GD_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_ECOR)
       _GD_FixEndianness(databuffer + zeroed_samples * E->e->u.raw.size,
           samples_read, E->EN(raw,data_type),
           D->fragment[E->fragment_index].byte_sex, 0);
