@@ -933,6 +933,9 @@ int gd_encoding_support(unsigned long encoding) gd_nothrow
 
   dtrace("0x%lX", encoding);
 
+  /* spin up ltdl if needed */
+  _GD_InitialiseFramework();
+
   /* make sure we have a valid encoding */
   if (!_GD_EncodingUnderstood(encoding)) {
     dreturn("%i", -1);

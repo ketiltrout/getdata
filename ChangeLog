@@ -1,3 +1,6 @@
+2014-05-05     D. V. Wiebe <getdata@ketiltrout.net> svn:896
+	* src/encoding.c (gd_encoding_support): Call _GD_InitialiseFramework().
+
 2014-05-05     D. V. Wiebe <getdata@ketiltrout.net> svn:895
 	* src/getdata.h.in: Remove GD_MAX_CARRAY_LENGTH.
 	* src/add.c (_GD_Add) src/mod.c (_GD_Change) src/parse.c (_GD_ParseArray):

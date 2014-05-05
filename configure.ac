@@ -183,8 +183,8 @@ AC_MSG_RESULT([$make_cxxbindings])
 
 dnl Fortran 77 bindings
 AC_ARG_ENABLE(fortran, AS_HELP_STRING([--disable-fortran],
-              [don't build the Fortran 77 bindings (libfgetdata) nor the
-               Fortran 95 bindings (libf95getdata)]),
+              [don't build the Fortran 77 bindings (libfgetdata) nor ]dnl'
+              [the Fortran 95 bindings (libf95getdata)]),
               [
                case "${enableval}" in
                  no) make_f77bindings="no" ;;
@@ -194,7 +194,7 @@ AC_ARG_ENABLE(fortran, AS_HELP_STRING([--disable-fortran],
 
 dnl Fortran 95 bindings
 AC_ARG_ENABLE(fortran95, AS_HELP_STRING([--disable-fortran95],
-              [don't build the Fortran 95 bindings (libf95getdata)]),
+              [don't build the Fortran 95 bindings (libf95getdata)]),dnl'
               [
                case "${enableval}" in
                  no) make_f95bindings="no" ;;
@@ -212,29 +212,10 @@ fi
 AC_MSG_CHECKING([whether to include the Fortran 77 bindings])
 AC_MSG_RESULT([$make_f77bindings])
 
-dnl DL library path munging for test suite
-case "${host}" in
-  *-apple-darwin*) DL_LIBRARY_PATH="DYLD_LIBRARY_PATH" ;;
-  *) DL_LIBRARY_PATH="LD_LIBRARY_PATH" ;;
-esac
-AC_SUBST([DL_LIBRARY_PATH])
-
-dnl Python bindings
-AC_ARG_ENABLE(python, AS_HELP_STRING([--disable-python],
-              [don't build the Python bindings (pygetdata)]),
-              [
-               case "${enableval}" in
-                 no) make_pybindings="no" ;;
-                 *) make_pybindings="yes" ;;
-               esac
-              ])
-
-AC_MSG_CHECKING([whether to include the Python bindings])
-AC_MSG_RESULT([$make_pybindings])
-
 dnl IDL bindings
 AC_ARG_ENABLE(idl, AS_HELP_STRING([--disable-idl],
-       [don't build the Interactive Data Language (IDL) bindings (IDL_GetData)]),
+              [don't build the Interactive Data Language (IDL) bindings ]dnl'
+              [(IDL_GetData)]),
               [
                case "${enableval}" in
                  no) make_idlbindings="no" ;;
@@ -244,19 +225,6 @@ AC_ARG_ENABLE(idl, AS_HELP_STRING([--disable-idl],
 
 AC_MSG_CHECKING([whether to include the IDL bindings])
 AC_MSG_RESULT([$make_idlbindings])
-
-dnl Perl bindings
-AC_ARG_ENABLE(perl, AS_HELP_STRING([--disable-perl],
-              [don't build the Perl bindings (GetData)]),dnl'
-              [
-               case "${enableval}" in
-                 no) make_perlbindings="no" ;;
-                 *) make_perlbindings="yes" ;;
-               esac
-              ])
-
-AC_MSG_CHECKING([whether to include the Perl bindings])
-AC_MSG_RESULT([$make_perlbindings])
 
 dnl MATLAB bindings
 AC_ARG_ENABLE(matlab, AS_HELP_STRING([--disable-matlab],
@@ -271,6 +239,19 @@ AC_ARG_ENABLE(matlab, AS_HELP_STRING([--disable-matlab],
 AC_MSG_CHECKING([whether to include the MATLAB bindings])
 AC_MSG_RESULT([$make_matlabbindings])
 
+dnl Perl bindings
+AC_ARG_ENABLE(perl, AS_HELP_STRING([--disable-perl],
+              [don't build the Perl bindings (GetData)]),dnl'
+              [
+               case "${enableval}" in
+                 no) make_perlbindings="no" ;;
+                 *) make_perlbindings="yes" ;;
+               esac
+              ])
+
+AC_MSG_CHECKING([whether to include the Perl bindings])
+AC_MSG_RESULT([$make_perlbindings])
+
 dnl PHP bindings
 AC_ARG_ENABLE(php, AS_HELP_STRING([--disable-php],
               [don't build the PHP bindings]),dnl'
@@ -280,6 +261,19 @@ AC_ARG_ENABLE(php, AS_HELP_STRING([--disable-php],
                  *) make_phpbindings="yes" ;;
                esac
               ])
+
+dnl Python bindings
+AC_ARG_ENABLE(python, AS_HELP_STRING([--disable-python],
+              [don't build the Python bindings (pygetdata)]),dnl'
+              [
+               case "${enableval}" in
+                 no) make_pybindings="no" ;;
+                 *) make_pybindings="yes" ;;
+               esac
+              ])
+
+AC_MSG_CHECKING([whether to include the Python bindings])
+AC_MSG_RESULT([$make_pybindings])
 
 AC_MSG_CHECKING([whether to include the PHP bindings])
 AC_MSG_RESULT([$make_phpbindings])
@@ -450,6 +444,13 @@ if test "x${NO_DLOPEN_TESTS}" = "x1"; then
 else
   AC_MSG_RESULT([yes])
 fi
+
+dnl DL library path munging for test suite
+case "${host}" in
+  *-apple-darwin*) DL_LIBRARY_PATH="DYLD_LIBRARY_PATH" ;;
+  *) DL_LIBRARY_PATH="LD_LIBRARY_PATH" ;;
+esac
+AC_SUBST([DL_LIBRARY_PATH])
 
 echo
 echo "*** Checking C compiler characteristics"
@@ -865,6 +866,68 @@ AC_CHECK_DECLS([get_unaligned, put_unaligned],,,
 #endif
 ])
 
+dnl idl
+if test "x$make_idlbindings" = "xyes"; then
+  echo
+  echo "*** Configuring interactive data language (IDL) bindings"
+  echo
+  AC_MSG_CHECKING([whether C99 is supported])
+  if test "x$disable_c99" = "xno"; then
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
+    make_idlbindings=no
+  fi
+fi
+if test "x$make_idlbindings" = "xyes"; then
+  GD_IDL([5.5])
+  if test "x$have_idl" = "xno"; then
+    make_idlbindings="no"
+  fi
+fi
+
+dnl matlab
+if test "x$make_matlabbindings" = "xyes"; then
+  echo
+  echo "*** Configuring MATLAB bindings"
+  echo
+  GD_MATLAB
+  if test "x$have_matlab" = "xno"; then
+    make_matlabbindings=no
+  fi
+fi
+
+dnl perl
+if test "x$make_perlbindings" = "xyes"; then
+  echo
+  echo "*** Configuring Perl bindings"
+  echo
+  GD_PERL
+  if test "x$have_perl" = "xno"; then
+    make_perlbindings=no
+  fi
+fi
+
+dnl php
+if test "x$make_phpbindings" = "xyes"; then
+  echo
+  echo "*** Configuring PHP bindings"
+  echo
+  AC_MSG_CHECKING([whether C99 is supported])
+  if test "x$disable_c99" = "xno"; then
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
+    make_phpbindings=no
+  fi
+fi
+if test "x$make_phpbindings" = "xyes"; then
+  GD_PHP
+  if test "x$have_php" = "xno"; then
+    make_phpbindings=no
+  fi
+fi
+
 dnl python
 if test "x$make_pybindings" = "xyes"; then
   echo
@@ -907,68 +970,6 @@ EOF
   fi
 fi
 
-dnl idl
-if test "x$make_idlbindings" = "xyes"; then
-  echo
-  echo "*** Configuring interactive data language (IDL) bindings"
-  echo
-  AC_MSG_CHECKING([whether C99 is supported])
-  if test "x$disable_c99" = "xno"; then
-    AC_MSG_RESULT([yes])
-  else
-    AC_MSG_RESULT([no])
-    make_idlbindings=no
-  fi
-fi
-if test "x$make_idlbindings" = "xyes"; then
-  GD_IDL([5.5])
-  if test "x$have_idl" = "xno"; then
-    make_idlbindings="no"
-  fi
-fi
-
-dnl perl
-if test "x$make_perlbindings" = "xyes"; then
-  echo
-  echo "*** Configuring Perl bindings"
-  echo
-  GD_PERL
-  if test "x$have_perl" = "xno"; then
-    make_perlbindings=no
-  fi
-fi
-
-dnl matlab
-if test "x$make_matlabbindings" = "xyes"; then
-  echo
-  echo "*** Configuring MATLAB bindings"
-  echo
-  GD_MATLAB
-  if test "x$have_matlab" = "xno"; then
-    make_matlabbindings=no
-  fi
-fi
-
-dnl php
-if test "x$make_phpbindings" = "xyes"; then
-  echo
-  echo "*** Configuring PHP bindings"
-  echo
-  AC_MSG_CHECKING([whether C99 is supported])
-  if test "x$disable_c99" = "xno"; then
-    AC_MSG_RESULT([yes])
-  else
-    AC_MSG_RESULT([no])
-    make_phpbindings=no
-  fi
-fi
-if test "x$make_phpbindings" = "xyes"; then
-  GD_PHP
-  if test "x$have_php" = "xno"; then
-    make_phpbindings=no
-  fi
-fi
-
 dnl external encodings
 GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2],[])
 GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip],[])
@@ -980,8 +981,8 @@ GD_CHECK_ENCODING([zzip],[zzip],[zzip_open],[zzip/lib.h],[zip],[unzip],[])
 dnl zzslim hackery -- there's no easy way to check whether slim supports zzip
 AC_ARG_ENABLE(zzslim, AS_HELP_STRING([--enable-zzslim],
               [skip probing for zzslim required features and enable the zzslim
-               encoding.  The default is to autodetect support.  Note: zzslim
-               encoding support requires both slim and zzip encoding support.]),
+               encoding.  Note: zzslim encoding support requires both slim and
+               zzip encoding support.  [default: autodetect]]),
               [
                case "${enableval}" in
                  no) zzslim_override="no" ;;
