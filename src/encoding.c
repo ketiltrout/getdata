@@ -195,7 +195,8 @@ void _GD_InitialiseFramework(void)
   ((encoding == GD_UNENCODED || encoding == GD_SLIM_ENCODED || \
     encoding == GD_GZIP_ENCODED || encoding == GD_BZIP2_ENCODED || \
     encoding == GD_TEXT_ENCODED || encoding == GD_LZMA_ENCODED || \
-    encoding == GD_SIE_ENCODED))
+    encoding == GD_SIE_ENCODED || encoding == GD_ZZIP_ENCODED || \
+    encoding == GD_ZZSLIM_ENCODED))
 
 #ifdef USE_MODULES
 static void *_GD_ResolveSymbol(lt_dlhandle lib, struct encoding_t *restrict enc,
@@ -918,6 +919,47 @@ unsigned long gd_encoding(DIRFILE* D, int fragment) gd_nothrow
 
   dreturn("%lx", (unsigned long)reported_encoding);
   return reported_encoding;
+}
+
+/* report whether a particular encoding is supported */
+int gd_encoding_support(unsigned long encoding) gd_nothrow
+{
+  int i;
+
+  const unsigned int read_funcs = GD_EF_NAME | GD_EF_OPEN | GD_EF_CLOSE |
+    GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE;
+  const unsigned int write_funcs = read_funcs | GD_EF_WRITE | GD_EF_SYNC |
+    GD_EF_MOVE | GD_EF_UNLINK;
+
+  dtrace("0x%lX", encoding);
+
+  /* make sure we have a valid encoding */
+  if (!_GD_EncodingUnderstood(encoding)) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* Loop through valid subencodings checking for write support */
+  for (i = 0; gd_ef_[i].scheme != GD_ENC_UNSUPPORTED; i++)
+    if (gd_ef_[i].scheme == encoding) {
+      if (!_GD_MissingFramework(i, write_funcs)) {
+        dreturn("%i", GD_RDWR);
+        return GD_RDWR;
+      }
+    }
+
+  /* No write support; try read support */
+  for (i = 0; gd_ef_[i].scheme != GD_ENC_UNSUPPORTED; i++)
+    if (gd_ef_[i].scheme == encoding) {
+      if (!_GD_MissingFramework(i, read_funcs)) {
+        dreturn("%i", GD_RDONLY);
+        return GD_RDONLY;
+      }
+    }
+
+  /* nope */
+  dreturn("%i", -1);
+  return -1;
 }
 
 /* This is basically the non-existant POSIX funcion mkstempat.  There are two

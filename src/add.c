@@ -500,9 +500,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
           == 0)
       {
         _GD_SetError(D, GD_E_BAD_TYPE, E->EN(scalar,const_type), NULL, 0, NULL);
-      } else if (E->EN(scalar,array_len) > GD_MAX_CARRAY_LENGTH)
-        _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
-      else {
+      } else {
         size_t size = GD_SIZE(_GD_ConstType(D, E->EN(scalar,const_type))) *
           E->EN(scalar,array_len);
         if (!D->error)
@@ -817,7 +815,6 @@ int gd_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
     unsigned int spf, int fragment_index)
 {
   gd_entry_t R;
-  int error;
 
   dtrace("%p, \"%s\", 0x%X, %i, %i", D, field_code, data_type, spf,
       fragment_index);
@@ -834,10 +831,14 @@ int gd_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
   R.EN(raw,spf) = spf;
   R.EN(raw,data_type) = data_type;
   R.fragment_index = fragment_index;
-  error = (_GD_Add(D, &R, NULL) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &R, NULL) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a LINCOM entry */
@@ -845,7 +846,7 @@ int gd_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
     const char** in_fields, const double* m, const double* b,
     int fragment_index) gd_nothrow
 {
-  int i, error;
+  int i;
   gd_entry_t L;
 
   dtrace("%p, \"%s\", %i, %p, %p, %p, %i", D, field_code, n_fields, in_fields,
@@ -874,10 +875,14 @@ int gd_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
     L.EN(lincom,m)[i] = m[i];
     L.EN(lincom,b)[i] = b[i];
   }
-  error = (_GD_Add(D, &L, NULL) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &L, NULL) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a LINCOM entry with complex scalars */
@@ -885,7 +890,7 @@ int gd_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
     const char** in_fields, const GD_DCOMPLEXP(cm), const GD_DCOMPLEXP(cb),
     int fragment_index) gd_nothrow
 {
-  int i, error;
+  int i;
   gd_entry_t L;
 
   dtrace("%p, \"%s\", %i, %p, %p, %p, %i", D, field_code, n_fields, in_fields,
@@ -915,10 +920,14 @@ int gd_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
     gd_ca2cs_(L.EN(lincom,cm)[i], cm, i);
     gd_ca2cs_(L.EN(lincom,cb)[i], cb, i);
   }
-  error = (_GD_Add(D, &L, NULL) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &L, NULL) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a LINTERP entry */
@@ -926,7 +935,6 @@ int gd_add_linterp(DIRFILE* D, const char* field_code, const char* in_field,
     const char* table, int fragment_index) gd_nothrow
 {
   gd_entry_t L;
-  int error;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, in_field, table,
       fragment_index);
@@ -943,10 +951,14 @@ int gd_add_linterp(DIRFILE* D, const char* field_code, const char* in_field,
   L.in_fields[0] = (char *)in_field;
   L.EN(linterp,table) = (char *)table;
   L.fragment_index = fragment_index;
-  error = (_GD_Add(D, &L, NULL) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &L, NULL) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a BIT entry */
@@ -954,7 +966,6 @@ int gd_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
     int bitnum, int numbits, int fragment_index) gd_nothrow
 {
   gd_entry_t B;
-  int error;
 
   dtrace("%p, \"%s\", \"%s\", %i, %i, %i", D, field_code, in_field, bitnum,
       numbits, fragment_index);
@@ -972,10 +983,14 @@ int gd_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
   B.EN(bit,bitnum) = bitnum;
   B.EN(bit,numbits) = numbits;
   B.fragment_index = fragment_index;
-  error = (_GD_Add(D, &B, NULL) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &B, NULL) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a SBIT entry */
@@ -983,7 +998,6 @@ int gd_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
     int bitnum, int numbits, int fragment_index) gd_nothrow
 {
   gd_entry_t B;
-  int error;
 
   dtrace("%p, \"%s\", \"%s\", %i, %i, %i", D, field_code, in_field, bitnum,
       numbits, fragment_index);
@@ -1001,17 +1015,20 @@ int gd_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
   B.EN(bit,bitnum) = bitnum;
   B.EN(bit,numbits) = numbits;
   B.fragment_index = fragment_index;
-  error = (_GD_Add(D, &B, NULL) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &B, NULL) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 static int _GD_AddYoke(DIRFILE* D, gd_entype_t t, const char* field_code,
     const char* in_field1, const char* in_field2, int fragment_index) gd_nothrow
 {
   gd_entry_t M;
-  int error;
 
   dtrace("%p, 0x%X, \"%s\", \"%s\", \"%s\", %i", D, t, field_code, in_field1,
       in_field2, fragment_index);
@@ -1028,10 +1045,14 @@ static int _GD_AddYoke(DIRFILE* D, gd_entype_t t, const char* field_code,
   M.in_fields[0] = (char *)in_field1;
   M.in_fields[1] = (char *)in_field2;
   M.fragment_index = fragment_index;
-  error = (_GD_Add(D, &M, NULL) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &M, NULL) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 int gd_add_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
@@ -1067,7 +1088,6 @@ int gd_add_recip(DIRFILE* D, const char* field_code, const char* in_field,
     double dividend, int fragment_index) gd_nothrow
 {
   gd_entry_t E;
-  int error;
 
   dtrace("%p, \"%s\", \"%s\", %g, %i", D, field_code, in_field, dividend,
       fragment_index);
@@ -1084,10 +1104,14 @@ int gd_add_recip(DIRFILE* D, const char* field_code, const char* in_field,
   E.EN(recip,dividend) = dividend;
   E.in_fields[0] = (char *)in_field;
   E.fragment_index = fragment_index;
-  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &E, NULL) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 #ifndef GD_NO_C99_API
@@ -1111,7 +1135,6 @@ int gd_add_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
     const double cdividend[2], int fragment_index) gd_nothrow
 {
   gd_entry_t E;
-  int error;
 
   dtrace("%p, \"%s\", \"%s\", {%g, %g}, %i", D, field_code, in_field,
       cdividend[0], cdividend[1], fragment_index);
@@ -1129,17 +1152,21 @@ int gd_add_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
   E.flags = GD_EN_COMPSCAL;
   E.in_fields[0] = (char *)in_field;
   E.fragment_index = fragment_index;
-  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &E, NULL) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a POLYNOM entry */
 int gd_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
     const char* in_field, const double* a, int fragment_index) gd_nothrow
 {
-  int i, error;
+  int i;
   gd_entry_t E;
 
   dtrace("%p, \"%s\", %i, \"%s\", %p, %i", D, field_code, poly_ord, in_field,
@@ -1167,16 +1194,19 @@ int gd_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   for (i = 0; i <= poly_ord; ++i)
     E.EN(polynom,a)[i] = a[i];
 
-  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
+  if (_GD_Add(D, &E, NULL) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
 
-  dreturn("%i", error);
-  return error;
+  dreturn("%i", 0);
+  return 0;
 }
 
 int gd_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
     const char* in_field, const GD_DCOMPLEXP(ca), int fragment_index) gd_nothrow
 {
-  int i, error;
+  int i;
   gd_entry_t E;
 
   dtrace("%p, \"%s\", %i, \"%s\", %p, %i", D, field_code, poly_ord, in_field,
@@ -1205,10 +1235,13 @@ int gd_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
   for (i = 0; i <= poly_ord; ++i)
     gd_ca2cs_(E.EN(polynom,ca)[i], ca, i);
 
-  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
+  if (_GD_Add(D, &E, NULL) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
 
-  dreturn("%i", error);
-  return error;
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a PHASE entry */
@@ -1216,7 +1249,6 @@ int gd_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
     gd_shift_t shift, int fragment_index) gd_nothrow
 {
   gd_entry_t P;
-  int error;
 
   dtrace("%p, \"%s\", \"%s\", %lli, %i", D, field_code, in_field,
       (long long)shift, fragment_index);
@@ -1233,10 +1265,14 @@ int gd_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
   P.in_fields[0] = (char *)in_field;
   P.EN(phase,shift) = shift;
   P.fragment_index = fragment_index;
-  error = (_GD_Add(D, &P, NULL) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &P, NULL) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a WINDOW entry */
@@ -1245,7 +1281,6 @@ int gd_add_window(DIRFILE *D, const char *field_code, const char *in_field,
     int fragment_index) gd_nothrow
 {
   gd_entry_t E;
-  int error;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i, {%g,%llx,%lli}, %i", D, field_code,
       in_field, check_field, windop, threshold.r,
@@ -1265,10 +1300,14 @@ int gd_add_window(DIRFILE *D, const char *field_code, const char *in_field,
   E.in_fields[0] = (char *)in_field;
   E.in_fields[1] = (char *)check_field;
   E.fragment_index = fragment_index;
-  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &E, NULL) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a MPLEX entry */
@@ -1277,7 +1316,6 @@ int gd_add_mplex(DIRFILE *D, const char *field_code, const char *in_field,
   gd_nothrow
 {
   gd_entry_t E;
-  int error;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %i, %i", D, field_code, in_field,
       count_field, count_val, period, fragment_index);
@@ -1296,10 +1334,14 @@ int gd_add_mplex(DIRFILE *D, const char *field_code, const char *in_field,
   E.in_fields[0] = (char *)in_field;
   E.in_fields[1] = (char *)count_field;
   E.fragment_index = fragment_index;
-  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &E, NULL) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a STRING entry */
@@ -1490,7 +1532,7 @@ int gd_madd_lincom(DIRFILE* D, const char* parent, const char* field_code,
     int n_fields, const char** in_fields, const double* m, const double* b)
   gd_nothrow
 {
-  int i, error;
+  int i;
   gd_entry_t L;
 
   dtrace("%p, \"%s\", \"%s\", %i, %p, %p, %p", D, field_code, parent,
@@ -1521,10 +1563,14 @@ int gd_madd_lincom(DIRFILE* D, const char* parent, const char* field_code,
     L.scalar[i] = NULL;
     L.scalar[i + GD_MAX_LINCOM] = NULL;
   }
-  error = (_GD_Add(D, &L, parent) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &L, parent) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a META LINCOM entry, with complex scalaras */
@@ -1532,7 +1578,7 @@ int gd_madd_clincom(DIRFILE* D, const char* parent, const char* field_code,
     int n_fields, const char** in_fields, const GD_DCOMPLEXP(cm),
     const GD_DCOMPLEXP(cb)) gd_nothrow
 {
-  int i, error;
+  int i;
   gd_entry_t L;
 
   dtrace("%p, \"%s\", \"%s\", %i, %p, %p, %p", D, field_code, parent,
@@ -1564,10 +1610,14 @@ int gd_madd_clincom(DIRFILE* D, const char* parent, const char* field_code,
     L.scalar[i] = NULL;
     L.scalar[i + GD_MAX_LINCOM] = NULL;
   }
-  error = (_GD_Add(D, &L, parent) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &L, parent) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a META LINTERP entry */
@@ -1575,7 +1625,6 @@ int gd_madd_linterp(DIRFILE* D, const char* parent,
     const char* field_code, const char* in_field, const char* table) gd_nothrow
 {
   gd_entry_t L;
-  int error;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\"", D, field_code, parent, in_field,
       table);
@@ -1592,10 +1641,14 @@ int gd_madd_linterp(DIRFILE* D, const char* parent,
   L.in_fields[0] = (char *)in_field;
   L.EN(linterp,table) = (char *)table;
   L.fragment_index = 0;
-  error = (_GD_Add(D, &L, parent) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &L, parent) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a META BIT entry */
@@ -1603,7 +1656,6 @@ int gd_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
     const char* in_field, int bitnum, int numbits) gd_nothrow
 {
   gd_entry_t B;
-  int error;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %in", D, field_code, parent, in_field,
       bitnum, numbits);
@@ -1622,10 +1674,14 @@ int gd_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
   B.EN(bit,numbits) = numbits;
   B.fragment_index = 0;
   B.scalar[0] = B.scalar[1] = NULL;
-  error = (_GD_Add(D, &B, parent) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &B, parent) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a META SBIT entry */
@@ -1633,7 +1689,6 @@ int gd_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
     const char* in_field, int bitnum, int numbits) gd_nothrow
 {
   gd_entry_t B;
-  int error;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %in", D, field_code, parent, in_field,
       bitnum, numbits);
@@ -1652,10 +1707,14 @@ int gd_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
   B.EN(bit,numbits) = numbits;
   B.fragment_index = 0;
   B.scalar[0] = B.scalar[1] = NULL;
-  error = (_GD_Add(D, &B, parent) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &B, parent) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 static int _GD_MAddYoke(DIRFILE* D, gd_entype_t t, const char* parent,
@@ -1663,7 +1722,6 @@ static int _GD_MAddYoke(DIRFILE* D, gd_entype_t t, const char* parent,
 gd_nothrow
 {
   gd_entry_t M;
-  int error;
 
   dtrace("%p, 0x%X, \"%s\", \"%s\", \"%s\", \"%s\"", D, t, field_code, parent,
       in_field1, in_field2);
@@ -1680,10 +1738,14 @@ gd_nothrow
   M.in_fields[0] = (char *)in_field1;
   M.in_fields[1] = (char *)in_field2;
   M.fragment_index = 0;
-  error = (_GD_Add(D, &M, parent) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &M, parent) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 int gd_madd_multiply(DIRFILE* D, const char *parent, const char* field_code,
@@ -1697,7 +1759,6 @@ int gd_madd_multiply(DIRFILE* D, const char *parent, const char* field_code,
 int gd_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
     const char* in_field, gd_shift_t shift) gd_nothrow
 {
-  int error;
   gd_entry_t P;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\", %lli", D, field_code, parent, in_field,
@@ -1716,17 +1777,21 @@ int gd_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
   P.EN(phase,shift) = shift;
   P.fragment_index = 0;
   P.scalar[0] = NULL;
-  error = (_GD_Add(D, &P, parent) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &P, parent) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a META POLYNOM entry */
 int gd_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
     int poly_ord, const char* in_field, const double* a) gd_nothrow
 {
-  int i, error;
+  int i;
   gd_entry_t E;
 
   dtrace("%p, \"%s\", \"%s\", %i, \"%s\", %p", D, field_code, parent, poly_ord,
@@ -1756,17 +1821,20 @@ int gd_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
     E.scalar[i] = NULL;
   }
 
-  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
+  if (_GD_Add(D, &E, parent) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
 
-  dreturn("%i", error);
-  return error;
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a META POLYNOM entry */
 int gd_madd_cpolynom(DIRFILE* D, const char* parent, const char* field_code,
     int poly_ord, const char* in_field, const GD_DCOMPLEXP(ca)) gd_nothrow
 {
-  int i, error;
+  int i;
   gd_entry_t E;
 
   dtrace("%p, \"%s\", \"%s\", %i, \"%s\", %p", D, field_code, parent, poly_ord,
@@ -1797,10 +1865,13 @@ int gd_madd_cpolynom(DIRFILE* D, const char* parent, const char* field_code,
     E.scalar[i] = NULL;
   }
 
-  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
+  if (_GD_Add(D, &E, parent) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
 
-  dreturn("%i", error);
-  return error;
+  dreturn("%i", 0);
+  return 0;
 }
 
 int gd_madd_divide(DIRFILE* D, const char *parent, const char* field_code,
@@ -1828,7 +1899,6 @@ int gd_madd_sindir(DIRFILE *D, const char *parent, const char* field_code,
 int gd_madd_recip(DIRFILE* D, const char *parent, const char* field_code,
     const char* in_field, double dividend) gd_nothrow
 {
-  int error;
   gd_entry_t E;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\", %g", D, parent, field_code, in_field,
@@ -1845,10 +1915,14 @@ int gd_madd_recip(DIRFILE* D, const char *parent, const char* field_code,
   E.field_type = GD_RECIP_ENTRY;
   E.EN(recip,dividend) = dividend;
   E.in_fields[0] = (char *)in_field;
-  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &E, parent) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 #ifndef GD_NO_C99_API
@@ -1872,7 +1946,6 @@ int gd_madd_crecip89(DIRFILE* D, const char *parent, const char* field_code,
     const char* in_field, const double cdividend[2]) gd_nothrow
 {
   gd_entry_t E;
-  int error;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\", {%g, %g}", D, parent, field_code,
       in_field, cdividend[0], cdividend[1]);
@@ -1889,10 +1962,14 @@ int gd_madd_crecip89(DIRFILE* D, const char *parent, const char* field_code,
   gd_ra2cs_(E.EN(recip,cdividend), cdividend);
   E.flags = GD_EN_COMPSCAL;
   E.in_fields[0] = (char *)in_field;
-  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &E, parent) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a META WINDOW entry */
@@ -1900,7 +1977,6 @@ int gd_madd_window(DIRFILE *D, const char *parent, const char *field_code,
     const char *in_field, const char *check_field, gd_windop_t windop,
     gd_triplet_t threshold) gd_nothrow
 {
-  int error;
   gd_entry_t E;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\", %i, {%g,%llx,%lli}", D, parent,
@@ -1920,10 +1996,14 @@ int gd_madd_window(DIRFILE *D, const char *parent, const char *field_code,
   E.EN(window,windop) = windop;
   E.in_fields[0] = (char *)in_field;
   E.in_fields[1] = (char *)check_field;
-  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &E, parent) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a META MPLEX entry */
@@ -1931,7 +2011,6 @@ int gd_madd_mplex(DIRFILE *D, const char *parent, const char *field_code,
     const char *in_field, const char *count_field, int count_val, int period)
   gd_nothrow
 {
-  int error;
   gd_entry_t E;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\", %i, %i", D, parent, field_code,
@@ -1950,10 +2029,14 @@ int gd_madd_mplex(DIRFILE *D, const char *parent, const char *field_code,
   E.EN(mplex,period) = period;
   E.in_fields[0] = (char *)in_field;
   E.in_fields[1] = (char *)count_field;
-  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
 
-  dreturn("%i", error);
-  return error;
+  if (_GD_Add(D, &E, parent) == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* add a META STRING entry */

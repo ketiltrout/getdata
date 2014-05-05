@@ -1,0 +1,69 @@
+.\" gd_encoding_support.3.  The gd_encoding_support man page.
+.\"
+.\" Copyright (C) 2014 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_encoding_support 3 "5 May 2014" "Version 0.9.0" "GETDATA"
+.SH NAME
+gd_encoding_support \(em determine GetData library support for data encodings
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_encoding_support(unsigned long " encoding );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_encoding_support ()
+function reports whether the Dirfile encoding specified by
+.I encoding
+is supported by the GetData library.  The
+.I encoding
+argument should be one of the following symbols, indicating the encoding type:
+.IP
+.nh
+.ad l
+.BR GD_UNENCODED ", " GD_BZIP2_ENCODED ", " GD_GZIP_ENCODED ,
+.BR GD_LZMA_ENCODED ", " GD_SIE_ENCODED ", " GD_SLIM_ENCODED ,
+.BR GD_TEXT_ENCODED ", " GD_ZZIP_ENCODED ", " GD_ZZSLIM_ENCODED .
+.ad n
+.hy
+.PP
+See
+.BR gd_cbopen (3)
+and dirfile-encoding(5) for the meanings of these symbols and details on the
+known encoding schemes.
+
+.SH RETURN VALUE
+The function
+.BR gd_encoding_support ()
+returns
+.B GD_RDWR
+if the GetData library can read from and write to the specified encoding,
+.B GD_RDONLY
+if the GetData library can only read from the specified encoding, or -1 if
+neither reading nor writing is supported, or if
+.I encoding
+was not one of the symbols listed above.
+.SH NOTES
+GetData's encoding support framework is more finely grained than the three-way
+system reported by this function.  It is possible for the library to have
+partial support for reading or writing a particular encoding.  This function
+will only report positive support if all functions of a given class (read-only
+or read-write) are supported.
+.SH SEE ALSO
+dirfile-encoding(5),
+.BR gd_cbopen (3),
+.BR gd_encoding (3)

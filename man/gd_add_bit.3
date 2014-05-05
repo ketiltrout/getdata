@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add_bit 3 "30 September 2013" "Version 0.9.0" "GETDATA"
+.TH gd_add_bit 3 "5 May 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_add_bit, gd_add_carray gd_add_clincom, gd_add_const, gd_add_cpolynom,
 gd_add_crecip, gd_add_divide, gd_add_lincom, gd_add_linterp, gd_add_multiply,
@@ -254,13 +254,6 @@ argument provided to
 .BR gd_add_raw "()  or " gd_add_const (),
 was invalid.
 .TP
-.B GD_E_BOUNDS
-The
-.I array_len
-parameter provided to
-.BR gd_add_carray ()
-was greater than GD_MAX_CARRAY_LENGTH.
-.TP
 .B GD_E_DUPLICATE
 The
 .IR field_name
@@ -302,15 +295,6 @@ a call to
 .BR gd_error_string (3).
 
 .SH NOTES
-GetData artificially limits the number of elements in a
-.B CARRAY
-to the value of the symbol GD_MAX_CARRAY_LENGTH defined in getdata.h.  This is
-done to be certain that the
-.B CARRAY
-won't overrun the line when flushed to disk.  On platforms with a \fIn\fR-bit
-.BR size_t ,
-GD_MAX_CARRAY_LENGTH is 2**(\fIn\fR-8)-1.
-
 The C89 GetData API provides different prototypes for
 .BR gd_add_clincom "(), " gd_add_cpolynom (),
 and

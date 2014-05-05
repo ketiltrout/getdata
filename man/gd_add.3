@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add 3 "10 December 2013" "Version 0.9.0" "GETDATA"
+.TH gd_add 3 "5 May 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_add, gd_madd \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -153,13 +153,6 @@ or
 .B CARRAY
 entry, was invalid.
 .TP
-.B GD_E_BOUNDS
-The
-.IR entry -> array_len
-parameter provided with a
-.B CARRAY
-entry was greater than GD_MAX_CARRAY_LENGTH.
-.TP
 .B GD_E_DUPLICATE
 The field name provided in
 .IR entry -> field
@@ -199,15 +192,6 @@ The dirfile error may be retrieved by calling
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR gd_error_string (3).
-.SH NOTES
-GetData artificially limits the number of elements in a
-.B CARRAY
-to the value of the symbol GD_MAX_CARRAY_LENGTH defined in getdata.h.  This is
-done to be certain that the
-.B CARRAY
-won't overrun the line when flushed to disk.  On platforms with a \fIn\fR-bit
-.BR size_t ,
-GD_MAX_CARRAY_LENGTH is 2**(\fIn\fR-8)-1.
 
 .SH SEE ALSO
 .BR gd_add_bit (3),

@@ -926,9 +926,6 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           _GD_SetError(D, GD_E_BAD_TYPE, Q.EN(scalar,const_type), NULL, 0,
               NULL);
           break;
-        } else if (Q.EN(scalar,array_len) > GD_MAX_CARRAY_LENGTH) {
-          _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
-          break;
         }
 
         type = _GD_ConstType(D, Q.EN(scalar,const_type));
@@ -964,11 +961,6 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
         if (Q.EN(scalar,array_len) != E->EN(scalar,array_len)) {
           modified = 1;
-
-          if (Q.EN(scalar,array_len) > GD_MAX_CARRAY_LENGTH) {
-            _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
-            break;
-          }
 
           Qe.u.scalar.d = _GD_Realloc(D, E->e->u.scalar.d,
               sizeof(const char *) * Q.EN(scalar,array_len));

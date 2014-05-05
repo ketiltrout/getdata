@@ -1263,6 +1263,9 @@ static gd_entry_t *_GD_ParseArray(DIRFILE *restrict D, int string,
     }
 
     for (c = first; c < n_cols; ++c) {
+      if (n == GD_SIZE_T_MAX)
+        break;
+
       if (string) {
         ((const char**)data)[n++] = _GD_Strdup(D, in_cols[c]);
 
@@ -1286,9 +1289,6 @@ static gd_entry_t *_GD_ParseArray(DIRFILE *restrict D, int string,
           return NULL;
         }
       }
-
-      if (n == GD_MAX_CARRAY_LENGTH)
-        break;
     }
 
     if (n_cols < MAX_IN_COLS)

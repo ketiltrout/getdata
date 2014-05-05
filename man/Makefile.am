@@ -28,17 +28,17 @@ dist_man_MANS = checkdirfile.1 dirfile2ascii.1 gd_add.3 gd_add_alias.3 \
 								gd_alter_protection.3 gd_alter_spec.3 gd_bof.3 gd_bof64.3 \
 								gd_carray_len.3 gd_carrays.3 gd_cbopen.3 gd_close.3 \
 								gd_constants.3 gd_delete.3 gd_desync.3 gd_dirfile_standards.3 \
-								gd_dirfilename.3 gd_encoding.3 gd_endianness.3 gd_entry.3 \
-								gd_entry_list.3 gd_entry_type.3 gd_eof.3 gd_eof64.3 gd_error.3 \
-								gd_error_count.3 gd_error_string.3 gd_flags.3 gd_flush.3 \
-								gd_fragment_affixes.3 gd_fragment_index.3 gd_fragmentname.3 \
-								gd_framenum_subset.3 gd_framenum_subset64.3 gd_frameoffset.3 \
-								gd_frameoffset64.3 gd_free_entry_strings.3 \
-								gd_get_carray_slice.3 gd_get_string.3 gd_getdata.3 \
-								gd_getdata64.3 gd_hidden.3 gd_hide.3 gd_include_affix.3 \
-								gd_invalid_dirfile.3 gd_linterp_tablename.3 gd_madd_bit.3 \
-								gd_mcarrays.3 gd_mconstants.3 gd_metaflush.3 gd_move.3 \
-								gd_mplex_lookback.3 gd_mstrings.3 gd_naliases.3 \
+								gd_dirfilename.3 gd_encoding.3 gd_encoding_support.3 \
+								gd_endianness.3 gd_entry.3 gd_entry_list.3 gd_entry_type.3 \
+								gd_eof.3 gd_eof64.3 gd_error.3 gd_error_count.3 \
+								gd_error_string.3 gd_flags.3 gd_flush.3 gd_fragment_affixes.3 \
+								gd_fragment_index.3 gd_fragmentname.3 gd_framenum_subset.3 \
+								gd_framenum_subset64.3 gd_frameoffset.3 gd_frameoffset64.3 \
+								gd_free_entry_strings.3 gd_get_carray_slice.3 gd_get_string.3 \
+								gd_getdata.3 gd_getdata64.3 gd_hidden.3 gd_hide.3 \
+								gd_include_affix.3 gd_invalid_dirfile.3 gd_linterp_tablename.3 \
+								gd_madd_bit.3 gd_mcarrays.3 gd_mconstants.3 gd_metaflush.3 \
+								gd_move.3 gd_mplex_lookback.3 gd_mstrings.3 gd_naliases.3 \
 								gd_native_type.3 gd_nentries.3 gd_nfragments.3 gd_nframes.3 \
 								gd_nframes64.3 gd_parent_fragment.3 gd_parser_callback.3 \
 								gd_protection.3 gd_put_carray_slice.3 \

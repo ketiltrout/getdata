@@ -1,3 +1,19 @@
+2014-05-05     D. V. Wiebe <getdata@ketiltrout.net> svn:895
+	* src/getdata.h.in: Remove GD_MAX_CARRAY_LENGTH.
+	* src/add.c (_GD_Add) src/mod.c (_GD_Change) src/parse.c (_GD_ParseArray):
+	Remove references to GD_MAX_CARRAY_LENGTH.
+
+	* src/add.c (gd_add_raw gd_add_lincom gd_add_clincom gd_add_linterp
+	gd_add_bit gd_add_sbit _GD_AddYoke gd_add_recip gd_add_crecip89
+	gd_add_polynom gd_add_cpolynom gd_add_phase gd_add_window gd_add_mplex
+	gd_madd_lincom gd_madd_clincom gd_madd_linterp gd_madd_bit gd_madd_sbit
+	_GD_MAddYoke gd_madd_phase gd_madd_polynom gd_madd_cpolynom gd_madd_recip
+	gd_madd_crecip89 gd_madd_window gd_madd_mplex): Call _GD_Add in a slightly
+	less ridiculous way.
+
+	* src/encoding.c (gd_encoding_support): Added.
+	* man/gd_encoding_support.3 test/encode_support.c: Added.
+
 2014-04-30   D. V. Wiebe <getdata@ketiltrout.net> svn:890 svn:891
 	* bindings/cxx/test/big_test.cpp bindings/f77/test/big_test.f
 	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro

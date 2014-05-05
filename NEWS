@@ -17,6 +17,13 @@ New in verison 0.9.0a:
     renamed field to point to the new field instead of leaving them dangle.
     (But see GD_REN_DANGLE).
 
+  * CARRAYs are no longer truncated to GD_MAX_CARRAY_LENGTH elements.  Flushing
+    metadata to disk will now fail if writing a CARRAY would overflow a format
+    file line.  (It's platform specific, but format file lines are typically
+    permitted to be at least 2**31 bytes long, so such an error usually
+    indicates something pathological happening.)  The GD_MAX_CARRAY_LENGTH
+    symbol has been removed from the GetData header file.
+
   * BUG FIX: The parsing of the \x and \u escape sequences are now correct.
 
   * BUG FIX: Computation of LINCOMs with complex valued input fields now
@@ -134,6 +141,9 @@ New in verison 0.9.0a:
   * gd_move_alias() has been deleted: its function is now performed by
     gd_move().  If gd_move() is passed the field code of an alias, the alias is
     now moved, instead of moving the field the alias points to.
+
+  * gd_encoding_support() has been added to permit run-time determination of
+    supported encodings.
 
   * BUG FIX: If the dirfile path provided cannot be resolved (due to, for
     instance, a symbolic link pointing to a non-existent path), gd_open() and

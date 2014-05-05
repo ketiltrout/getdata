@@ -142,7 +142,7 @@ DESYNC_TESTS=desync desync_flush desync_path desync_reopen desync_reopen_inv
 ELIST_TESTS=elist_alias elist_hidden elist_noalias elist_scalar
 
 ENCODE_TESTS=encode_alter encode_alter_all encode_alter_open encode_get \
-						 encode_recode encode_recode_open
+						 encode_recode encode_recode_open encode_support
 
 ENDIAN_TESTS=endian_alter endian_alter_all endian_alter_sie endian_get \
 						 endian_move
