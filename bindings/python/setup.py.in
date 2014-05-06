@@ -23,7 +23,9 @@
 from distutils.core import setup
 from distutils.extension import Extension
 from distutils.command.clean import clean as clean
+from distutils.command.build import build as build
 from os.path import join
+from os.path import exists
 from os import unlink
 from shutil import copy
 
@@ -52,20 +54,25 @@ class gd_clean(clean):
         unlink(x)
     clean.run(self)
 
+class gd_build(build):
+  def run(self):
+    # if we don't do this, the object files will end up in
+    #   @top_builddir@/bindings/bindings/python,
+    # instead of
+    #   @builddir@/build/temp.<whatever>
+    # like they're supposed to.  It seems to work, but it's a little crazier
+    # than we're willing to deal with.
+    for x in sources:
+      if not exists(x):
+        copy(join(srcdir, x), x)
+    build.run(self)
+
 # deal with out-of-place (VPATH) builds
 if srcdir != '.':
   includes.append(srcdir) # to find pygetdata.h
 
-  # if we don't do this, the object files will end up in
-  #   @top_builddir@/bindings/bindings/python,
-  # instead of
-  #   @builddir@/build/temp.<whatever>
-  # like they're supposed to.  It seems to work, but it's a little crazier
-  # than we're willing to deal with.
-  for x in sources:
-    copy(join(srcdir, x), x)
-
-  # handle clean up
+  # handle set up and clean up
+  cmdclass['build'] = gd_build
   cmdclass['clean'] = gd_clean
 
 # now add this built source; it always ends up where distutils wants it to be

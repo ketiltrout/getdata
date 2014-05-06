@@ -26,6 +26,8 @@ nodist_python_SCRIPTS = pygetdata.so
 
 BUILT_SOURCES = pyconstants.c
 
+EXTRA_DIST = pydirfile.c pygetdata.c pyentry.c pygetdata.h pyfragment.c
+
 distutils_path=build/lib.${PYTHON_PLATFORM}-${PYTHON_VERSION}
 pygetdata.so: ${distutils_path}/pygetdata.so
 	cp $< $@
