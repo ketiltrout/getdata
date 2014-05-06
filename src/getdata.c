@@ -1814,16 +1814,19 @@ static size_t _GD_DoConst(DIRFILE *restrict D, const gd_entry_t *restrict E,
 }
 
 /* simple */
-static void _GD_IndirData(DIRFILE *restrict D, char *restrict cbuf,
-    gd_type_t ctype, const int64_t *restrict ibuf, size_t n, const void *carray,
-    size_t len)
+static void _GD_IndirData(char *restrict cbuf, gd_type_t ctype,
+    const int64_t *restrict ibuf, size_t n, const void *carray, size_t len)
 {
   size_t i;
   const int size = GD_SIZE(ctype);
-  int64_t ilen = (len > GD_INT64_MAX) ? GD_INT64_MAX : len;
+  int64_t ilen =
+#if SIZEOF_SIZE_T == 8
+    (len > GD_INT64_MAX) ? GD_INT64_MAX :
+#endif
+    len;
 
-  dtrace("%p, %p, 0x%X, %p, %" PRNsize_t ", %p, %" PRNsize_t, D, cbuf, ctype,
-      ibuf, n, carray, len);
+  dtrace("%p, 0x%X, %p, %" PRNsize_t ", %p, %" PRNsize_t, cbuf, ctype, ibuf, n,
+      carray, len);
 
   for (i = 0; i < n; ++i)
     if (ibuf[i] < 0 || ibuf[i] >= ilen)
@@ -1884,7 +1887,7 @@ static size_t _GD_DoIndir(DIRFILE *restrict D, const gd_entry_t *restrict E,
     return 0;
   }
 
-  _GD_IndirData(D, cbuf, GD_SIZE(ctype), ibuf, n_read,
+  _GD_IndirData(cbuf, GD_SIZE(ctype), ibuf, n_read,
       E->e->entry[1]->e->u.scalar.d, E->e->entry[1]->EN(scalar,array_len));
 
   free(ibuf);
@@ -2131,8 +2134,11 @@ size_t gd_getstrdata64(DIRFILE *D, const char *field_code, off64_t first_frame,
     return 0;
   }
 
-  len = (E->e->entry[1]->EN(scalar,array_len) > GD_INT64_MAX) ? GD_INT64_MAX
-    : E->e->entry[1]->EN(scalar,array_len);
+  len =
+#if SIZEOF_SIZE_T == 8
+    (E->e->entry[1]->EN(scalar,array_len) > GD_INT64_MAX) ? GD_INT64_MAX :
+#endif
+    E->e->entry[1]->EN(scalar,array_len);
 
   for (i = 0; i < n_read; ++i)
     if (ibuf[i] < 0 || ibuf[i] >= len)

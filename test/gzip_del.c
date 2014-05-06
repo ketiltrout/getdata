@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -19,14 +19,6 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "test.h"
-
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
 
 /* this tests discarding OOP-writable (also temporary) RAW files */
 int main(void)
@@ -54,16 +46,30 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
+#if defined USE_GZIP
   D = gd_open(filedir, GD_RDWR | GD_GZIP_ENCODED | GD_VERBOSE);
+#else
+  D = gd_open(filedir, GD_RDWR | GD_GZIP_ENCODED);
+#endif
   n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
   e1 = gd_error(D);
+#if defined USE_GZIP
   CHECKI(n, 8);
   CHECKI(e1, GD_E_OK);
+#else
+  CHECKI(n, 0);
+  CHECKI(e1, GD_E_UNSUPPORTED);
+#endif
 
   ret = gd_delete(D, "data", GD_DEL_DATA);
   e2 = gd_error(D);
+#if defined USE_GZIP
   CHECKI(ret, 0);
   CHECKI(e2, GD_E_OK);
+#else
+  CHECKI(ret, -1);
+  CHECKI(e2, GD_E_UNSUPPORTED);
+#endif
 
   e3 = gd_close(D);
   CHECKI(e3, 0);

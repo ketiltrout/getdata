@@ -362,14 +362,14 @@ PyObject *gdpy_convert_to_pylist(const void *data, gd_type_t type, size_t ns)
 
   dtrace("%p, %02x, %zi", data, type, ns);
 
-  if (type != GD_NULL)
-    pyobj = PyList_New(0);
+  if (type == GD_NULL) {
+    Py_INCREF(Py_None);
+    dreturn("%p", Py_None);
+    return Py_None;
+  }
+  pyobj = PyList_New(0);
 
   switch(type) {
-    case GD_NULL:
-      Py_INCREF(Py_None);
-      dreturn("%p", Py_None);
-      return Py_None;
     case GD_UINT8:
       for (i = 0; i < ns; ++i)
         if (PyList_Append(pyobj, PyInt_FromLong((long)((uint8_t*)data)[i])))
@@ -433,6 +433,7 @@ PyObject *gdpy_convert_to_pylist(const void *data, gd_type_t type, size_t ns)
         if (PyList_Append(pyobj, gdpy_from_complexp(((double*)data) + 2 * i)))
           return NULL;
       break;
+    case GD_NULL:
     case GD_UNKNOWN: /* prevent compiler warning */
       break;
   }
