@@ -515,6 +515,12 @@ if test "x${cross_compiling}" != "xno"; then
   if test -z "$BUILDCC"; then
     AC_CHECK_PROGS([BUILDCC], [gcc cc cl])
   fi
+  # bindings requiring interpreters aren't built when cross compiling
+  make_idlbindings=no
+  make_phpbindings=no
+  make_pybindings=no
+  make_perlbindings=no
+  make_matlabbindings=no
 else
   BUILDCC=$CC
   AC_SUBST([BUILDCC])
@@ -1219,6 +1225,9 @@ fi
 
 echo
 echo "Configuration summary: "
+if test "x${cross_compiling}" != "xno"; then
+  echo "  Cross compiling for:           ${host}"
+fi
 echo "  ANSI C compatibility mode:     ${disable_c99}"
 echo "  Legacy API:                    ${include_legacy_api}"
 echo "  Verbose debugging:             ${enable_debug}"
