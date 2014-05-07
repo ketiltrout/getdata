@@ -34,7 +34,7 @@
 #endif
 
 #ifdef USE_BZIP2
-#define GD_BZIP2_MODE GD_RDONLY
+#define GD_BZIP2_MODE GD_RDWR
 #else
 #define GD_BZIP2_MODE -1
 #endif
