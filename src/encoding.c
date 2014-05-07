@@ -74,16 +74,18 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
 
 #ifdef USE_BZIP2
 #define GD_EF_PROVIDES \
-    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE
+  GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE | \
+  GD_EF_WRITE | GD_EF_SYNC
 #define GD_INT_FUNCS \
   &_GD_GenericName, &_GD_Bzip2Open, &_GD_Bzip2Close, &_GD_Bzip2Seek, \
-  &_GD_Bzip2Read, &_GD_Bzip2Size, NULL /* WRITE */, NULL /* SYNC */, \
+  &_GD_Bzip2Read, &_GD_Bzip2Size, &_GD_Bzip2Write, &_GD_Bzip2Sync, \
   &_GD_GenericMove, &_GD_GenericUnlink
 #else
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
 #endif
-  GD_EXT_ENCODING_GEN(GD_BZIP2_ENCODED, ".bz2", GD_EF_ECOR, "Bzip2", "bzip2"),
+  GD_EXT_ENCODING_GEN(GD_BZIP2_ENCODED, ".bz2", GD_EF_ECOR | GD_EF_OOP, "Bzip2",
+      "bzip2"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES
 
@@ -323,13 +325,18 @@ static int _GD_MoveOver(DIRFILE *restrict D, int fragment,
 #ifdef HAVE_FCHMOD
   int fd;
   struct stat stat_buf;
-  mode_t mode;
+  mode_t mode, tmode;
 #endif
   dtrace("%p, %i, %p", D, fragment, file);
 
 #ifdef HAVE_FCHMOD
+  if (gd_StatAt(D, dirfd, file[1].name, &stat_buf, 0))
+    tmode = 0644;
+  else
+    tmode = stat_buf.st_mode;
+
   if (gd_StatAt(D, dirfd, file[0].name, &stat_buf, 0))
-    mode = 0644;
+    mode = tmode;
   else
     mode = stat_buf.st_mode;
 #endif
@@ -349,9 +356,11 @@ static int _GD_MoveOver(DIRFILE *restrict D, int fragment,
   }
 
 #ifdef HAVE_FCHMOD
-  fd = gd_OpenAt(file->D, dirfd, file[0].name, O_RDONLY, 0666);
-  fchmod(fd, mode);
-  close(fd);
+  if (tmode != mode) {
+    fd = gd_OpenAt(file->D, dirfd, file[0].name, O_RDONLY, 0666);
+    fchmod(fd, mode);
+    close(fd);
+  }
 #endif
 
   dreturn("%i", 0);

@@ -49,7 +49,7 @@ int gd_OpenAt(const DIRFILE *D, int dirfd, const char *name, int flags,
   int ret;
   char *path;
 
-  dtrace("%p, %i, \"%s\", %x, 0%o", D, dirfd, name, flags, mode);
+  dtrace("%p, %i, \"%s\", 0x%X, 0%o", D, dirfd, name, flags, mode);
 
   path = _GD_MakeFullPathOnly(D, dirfd, name);
   ret = open(path, flags | O_BINARY, mode);
@@ -100,7 +100,7 @@ int gd_StatAt(const DIRFILE* D, int dirfd, const char* name, struct stat* buf,
   int ret;
   char *path;
 
-  dtrace("%p, %i, \"%s\", %p, %x", D, dirfd, name, buf, flags);
+  dtrace("%p, %i, \"%s\", %p, 0x%X", D, dirfd, name, buf, flags);
 
   path = _GD_MakeFullPathOnly(D, dirfd, name);
 #ifdef HAVE_LSTAT

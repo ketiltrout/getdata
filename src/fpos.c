@@ -176,63 +176,65 @@ off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
   dtrace("%p, %p, %p, %lli, 0x%X", D, E, enc, (long long)offset, mode);
 
   /* in this case we need to close and then re-open the file */
-  if ((offset < E->e->u.raw.file[which].pos) && oop_write) {
-    if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP)) {
-      dreturn("%i", -1);
-      return -1;
-    } else if (_GD_InitRawIO(D, E, NULL, -1, NULL, GD_EF_SEEK, GD_FILE_WRITE,
-          _GD_FileSwapBytes(D, E)))
-    {
-      dreturn("%i", -1);
-      return -1;
+  if (oop_write) {
+    if (offset < E->e->u.raw.file[which].pos) {
+      if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP)) {
+        dreturn("%i", -1);
+        return -1;
+      } else if (_GD_InitRawIO(D, E, NULL, -1, NULL, GD_EF_SEEK, GD_FILE_WRITE,
+            _GD_FileSwapBytes(D, E)))
+      {
+        dreturn("%i", -1);
+        return -1;
+      }
     }
-  }
 
-  if (oop_write && E->e->u.raw.file[0].idata >= 0) {
-    /* read from the old file until we reach the point we're interested in or
-     * run out of data */
-    char buffer[GD_BUFFER_SIZE];
-    ssize_t n_read, n_wrote;
+    if (E->e->u.raw.file[0].idata >= 0) {
+      /* read from the old file until we reach the point we're interested in or
+       * run out of data */
+      char buffer[GD_BUFFER_SIZE];
+      ssize_t n_read, n_wrote;
 
-    while (offset * GD_SIZE(E->EN(raw,data_type)) > GD_BUFFER_SIZE) {
-      n_read = (*enc->read)(E->e->u.raw.file, buffer, E->EN(raw,data_type),
+      while (offset * GD_SIZE(E->EN(raw,data_type)) > GD_BUFFER_SIZE) {
+        n_read = (*enc->read)(E->e->u.raw.file, buffer, E->EN(raw,data_type),
             GD_BUFFER_SIZE);
-      if (n_read > 0) {
-        n_wrote = (*enc->write)(E->e->u.raw.file + 1, buffer,
-            E->EN(raw,data_type), n_read);
-        if (n_wrote != n_read) {
+        if (n_read > 0) {
+          n_wrote = (*enc->write)(E->e->u.raw.file + 1, buffer,
+              E->EN(raw,data_type), n_read);
+          if (n_wrote != n_read) {
+            dreturn("%i", -1);
+            return -1;
+          }
+          offset -= n_wrote;
+          pos += n_wrote;
+        } else if (n_read < 0) {
           dreturn("%i", -1);
           return -1;
         }
-        offset -= n_wrote;
-        pos += n_wrote;
-      } else if (n_read < 0) {
-        dreturn("%i", -1);
-        return -1;
       }
-    }
 
-    if (offset > 0) {
-      n_read = (*enc->read)(E->e->u.raw.file, buffer, E->EN(raw,data_type),
+      if (offset > 0) {
+        n_read = (*enc->read)(E->e->u.raw.file, buffer, E->EN(raw,data_type),
             offset);
-      if (n_read > 0) {
-        n_wrote = (*enc->write)(E->e->u.raw.file + 1, buffer,
-            E->EN(raw,data_type), n_read);
-        if (n_wrote != n_read) {
+        if (n_read > 0) {
+          n_wrote = (*enc->write)(E->e->u.raw.file + 1, buffer,
+              E->EN(raw,data_type), n_read);
+          if (n_wrote != n_read) {
+            dreturn("%i", -1);
+            return -1;
+          }
+          offset -= n_wrote;
+          pos += n_wrote;
+        } else if (n_read < 0) {
           dreturn("%i", -1);
           return -1;
         }
-        offset -= n_wrote;
-        pos += n_wrote;
-      } else if (n_read < 0) {
-        dreturn("%i", -1);
-        return -1;
       }
     }
   }
 
-  pos += (*enc->seek)(E->e->u.raw.file + which, offset, E->EN(raw,data_type),
-      mode);
+  pos = (*enc->seek)(E->e->u.raw.file + which, pos + offset,
+      E->EN(raw,data_type), mode);
 
   dreturn("%lli", (long long)pos);
   return pos;
@@ -331,7 +333,7 @@ int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode)
 }
 
 /* Set the I/O position of the given field
- */
+*/
 off64_t gd_seek64(DIRFILE *D, const char *field_code_in, off64_t frame_num,
     off64_t sample_num, int whence)
 {

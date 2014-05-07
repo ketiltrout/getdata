@@ -29,14 +29,19 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data_bz2 = "dirfile/data.bz2";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT8 8\n";
-  uint8_t c[8];
+  const char *format_data = "data RAW UINT16 8\n"
+#ifdef WORDS_BIGENDIAN
+  "ENDIAN little\n";
+#else
+  "ENDIAN big\n";
+#endif
+  uint16_t c[8];
 #ifdef USE_BZIP2
   char command[4096];
-  uint8_t d;
+  uint16_t d;
 #endif
   struct stat buf;
-  int fd, i, n, e1, e2, stat_data, unlink_data, unlink_bz2, r = 0;
+  int fd, i, n, e1, e2, stat_data, unlink_data, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -44,7 +49,7 @@ int main(void)
   mkdir(filedir, 0777);
 
   for (i = 0; i < 8; ++i)
-    c[i] = (uint8_t)(40 + i);
+    c[i] = (uint16_t)(0x102 * i);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
@@ -55,7 +60,7 @@ int main(void)
 #else
   D = gd_open(filedir, GD_RDWR | GD_BZIP2_ENCODED);
 #endif
-  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
+  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
   e1 = gd_error(D);
 
   e2 = gd_close(D);
@@ -80,11 +85,11 @@ int main(void)
     fd = open(data, O_RDONLY | O_BINARY);
     if (fd >= 0) {
       i = 0;
-      while (read(fd, &d, sizeof(uint8_t))) {
+      while (read(fd, &d, sizeof(uint16_t))) {
         if (i < 40 || i > 48) {
           CHECKIi(i, d, 0);
         } else
-          CHECKIi(i, d, i);
+          CHECKIi(i, d, 0x201 * (i - 40));
         i++;
       }
       CHECKI(i, 48);
@@ -92,9 +97,6 @@ int main(void)
     }
   }
 #endif
-
-  unlink_bz2 = unlink(data_bz2);
-  CHECKI(unlink_bz2, -1);
 
   unlink_data = unlink(data);
   unlink(format);

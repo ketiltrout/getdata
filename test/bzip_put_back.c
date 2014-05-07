@@ -22,7 +22,7 @@
 
 int main(void)
 {
-#ifndef TEST_BZIP2
+#if ! (defined TEST_BZIP2) || ! (defined USE_BZIP2)
   return 77;
 #else
   const char *filedir = "dirfile";
@@ -31,12 +31,10 @@ int main(void)
   const char *data = "dirfile/data";
   const char *format_data = "data RAW UINT8 8\n";
   uint8_t c[8];
-#ifdef USE_BZIP2
   char command[4096];
   uint8_t d;
-#endif
   struct stat buf;
-  int fd, i, n, e1, e2, stat_data, unlink_data, unlink_bz2, r = 0;
+  int fd, i, n1, n2, e1, e2, e3, stat_data, unlink_data, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -50,28 +48,26 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-#ifdef USE_BZIP2
   D = gd_open(filedir, GD_RDWR | GD_BZIP2_ENCODED | GD_VERBOSE);
-#else
-  D = gd_open(filedir, GD_RDWR | GD_BZIP2_ENCODED);
-#endif
-  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
+  n1 = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
   e1 = gd_error(D);
+  CHECKI(e1, GD_E_OK);
+  CHECKI(n1, 8);
 
-  e2 = gd_close(D);
-  CHECKI(e2, 0);
+  n2 = gd_putdata(D, "data", 0, 0, 1, 0, GD_UINT8, c);
+  e2 = gd_error(D);
+  CHECKI(e2, GD_E_OK);
+  CHECKI(n2, 8);
+
+  e3 = gd_close(D);
+  CHECKI(e3, 0);
 
   stat_data = stat(data_bz2, &buf);
-#ifdef USE_BZIP2
   if (stat_data) {
     perror("stat");
   }
   CHECKI(stat_data, 0);
-#else
-  CHECKI(stat_data, -1);
-#endif
 
-#ifdef USE_BZIP2
   /* uncompress */
   snprintf(command, 4096, "%s -f %s > /dev/null", BUNZIP2, data_bz2);
   if (gd_system(command)) {
@@ -81,7 +77,9 @@ int main(void)
     if (fd >= 0) {
       i = 0;
       while (read(fd, &d, sizeof(uint8_t))) {
-        if (i < 40 || i > 48) {
+        if (i < 8) {
+          CHECKIi(i, d, i + 40);
+        } else if (i < 40 || i > 48) {
           CHECKIi(i, d, 0);
         } else
           CHECKIi(i, d, i);
@@ -91,24 +89,12 @@ int main(void)
       close(fd);
     }
   }
-#endif
-
-  unlink_bz2 = unlink(data_bz2);
-  CHECKI(unlink_bz2, -1);
 
   unlink_data = unlink(data);
   unlink(format);
   rmdir(filedir);
 
-#ifdef USE_BZIP2
   CHECKI(unlink_data, 0);
-  CHECKI(e1, GD_E_OK);
-  CHECKI(n, 8);
-#else
-  CHECKI(unlink_data, -1);
-  CHECKI(e1, GD_E_UNSUPPORTED);
-  CHECKI(n, 0);
-#endif
 
   return r;
 #endif

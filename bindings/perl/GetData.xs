@@ -96,7 +96,7 @@ static gd_type_t gdp_get_type(SV **sv, const char *pkg, const char *func)
 {
   dtrace("%p, \"%s\", \"%s\"", sv, pkg, func);
 
-  if (sv == NULL && *sv == undef)
+  if (sv == NULL || *sv == undef)
     croak("%s::%s() - Value may not be undef", pkg, func);
 
   if (sv_isa(*sv, "Math::Complex")) {
@@ -867,6 +867,8 @@ static int gdp_parser_callback(gd_parser_data_t *pdata, void *extra)
   SV *ret, **dummy;
   int n, sem = GD_SYNTAX_ABORT;
   int was_rv = 0;
+  AV *av;
+  int len;
 
   /* local stack pointer */
   dSP;
@@ -919,56 +921,53 @@ static int gdp_parser_callback(gd_parser_data_t *pdata, void *extra)
 
   /* ferret out response */
   switch (SvTYPE(ret)) {
-    AV *av;
-    int len;
-
     case SVt_IV:
-    sem = SvIV(ret);
-    break;
+      sem = SvIV(ret);
+      break;
     case SVt_PVAV:
-    av = (AV *)ret;
-    len = av_len(av);
-    if (len < 0) {
-      croak("GetData: parser callback returned empty array.");
-      return GD_SYNTAX_ABORT; /* ca'n't get here */
-    } else if (len > 1) {
-      croak("GetData: too many elements in array returned by parser "
-          "callback.");
-      return GD_SYNTAX_ABORT; /* ca'n't get here */
-    } else if (len == 0) {
-      SV **val = av_fetch(av, 0, 0);
-      if (val == NULL || SvROK(*val)) {
-        croak("GetData: bad data type in array returned by parser callback.");
+      av = (AV *)ret;
+      len = av_len(av);
+      if (len < 0) {
+        croak("GetData: parser callback returned empty array.");
         return GD_SYNTAX_ABORT; /* ca'n't get here */
-      }
+      } else if (len > 1) {
+        croak("GetData: too many elements in array returned by parser "
+            "callback.");
+        return GD_SYNTAX_ABORT; /* ca'n't get here */
+      } else if (len == 0) {
+        SV **val = av_fetch(av, 0, 0);
+        if (val == NULL || SvROK(*val)) {
+          croak("GetData: bad data type in array returned by parser callback.");
+          return GD_SYNTAX_ABORT; /* ca'n't get here */
+        }
 
-      if (SvTYPE(*val) == SVt_IV) {
-        sem = SvIV(*val);
-      } else if (SvTYPE(*val) == SVt_PV) {
-        pdata->line = strdup(SvPV_nolen(*val));
-        sem = GD_SYNTAX_RESCAN;
-      } else {
-        croak("GetData: bad data type in array returned by parser callback.");
-        return GD_SYNTAX_ABORT; /* ca'n't get here */
-      }
-    } else { /* len == 1 */
-      SV **val0 = av_fetch(av, 0, 0);
-      SV **val1 = av_fetch(av, 1, 0);
+        if (SvTYPE(*val) == SVt_IV) {
+          sem = SvIV(*val);
+        } else if (SvTYPE(*val) == SVt_PV) {
+          pdata->line = strdup(SvPV_nolen(*val));
+          sem = GD_SYNTAX_RESCAN;
+        } else {
+          croak("GetData: bad data type in array returned by parser callback.");
+          return GD_SYNTAX_ABORT; /* ca'n't get here */
+        }
+      } else { /* len == 1 */
+        SV **val0 = av_fetch(av, 0, 0);
+        SV **val1 = av_fetch(av, 1, 0);
 
-      if (val0 == NULL || SvROK(*val0) || val1 == NULL || SvROK(*val1)) {
-        croak("GetData: bad data type in array returned by parser callback.");
-        return GD_SYNTAX_ABORT; /* ca'n't get here */
-      }
+        if (val0 == NULL || SvROK(*val0) || val1 == NULL || SvROK(*val1)) {
+          croak("GetData: bad data type in array returned by parser callback.");
+          return GD_SYNTAX_ABORT; /* ca'n't get here */
+        }
 
-      if (SvTYPE(*val0) == SVt_IV && SvTYPE(*val1) == SVt_PV) {
-        sem = SvIV(*val0);
-        pdata->line = strdup(SvPV_nolen(*val1));
-      } else {
-        croak("GetData: bad data type in array returned by parser callback.");
-        return GD_SYNTAX_ABORT; /* ca'n't get here */
+        if (SvTYPE(*val0) == SVt_IV && SvTYPE(*val1) == SVt_PV) {
+          sem = SvIV(*val0);
+          pdata->line = strdup(SvPV_nolen(*val1));
+        } else {
+          croak("GetData: bad data type in array returned by parser callback.");
+          return GD_SYNTAX_ABORT; /* ca'n't get here */
+        }
       }
-    }
-    break;
+      break;
     case SVt_PV:
     pdata->line = strdup(SvPV_nolen(ret));
     sem = GD_SYNTAX_RESCAN;

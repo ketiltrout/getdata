@@ -20,11 +20,6 @@
  */
 #define GD_TEST
 #include "internal.h"
-#include <inttypes.h>
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 
 #ifdef HAVE_FLOAT_H
 #include <float.h>

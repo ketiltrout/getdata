@@ -15,7 +15,7 @@ New in verison 0.9.0a:
 
   * gd_rename() now by default updates the target of ALIASes pointing to a
     renamed field to point to the new field instead of leaving them dangle.
-    (But see GD_REN_DANGLE).
+    (But see GD_REN_DANGLE in the API section below).
 
   * CARRAYs are no longer truncated to GD_MAX_CARRAY_LENGTH elements.  Flushing
     metadata to disk will now fail if writing a CARRAY would overflow a format
@@ -23,6 +23,10 @@ New in verison 0.9.0a:
     permitted to be at least 2**31 bytes long, so such an error usually
     indicates something pathological happening.)  The GD_MAX_CARRAY_LENGTH
     symbol has been removed from the GetData header file.
+
+  * Write support for bzip2-encoded data has been added.  This works identically
+    to how writing gzip-encoded data is written.  See the gzip discussion in the
+    0.8.0 section below for important notes.
 
   * BUG FIX: The parsing of the \x and \u escape sequences are now correct.
 
@@ -116,6 +120,9 @@ New in verison 0.9.0a:
   * BUG FIX: Calling the Legacy API function GetFormat() on a Dirfile with MPLEX
     or WINDOW fields no longer results in a segmentation fault.
 
+  * BUG FIX: Attempts to read past the EOF of a gzipped field no longer results
+    in an I/O errorr, but successfully returns no data.
+
   API Changes:
 
   * The comp_scal member of the gd_entry_t object has been replaced with a flags
@@ -130,7 +137,7 @@ New in verison 0.9.0a:
 
   * Two new rename flags have been added:
     - GD_REN_DANGLE which indicates the library shouldn't update ALIASes whose
-      target has been renamed (turning them into dangling aliases)
+      target has been renamed (instead it will turn them into dangling aliases)
     - GD_REN_FORCE which causes the library to skip updating field codes which
       would be invalid due to affixes instead of failing.
 

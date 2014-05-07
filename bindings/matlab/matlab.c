@@ -799,7 +799,7 @@ mxArray *gdmx_from_string_list(const char **l)
   for (i = 0; l[i]; ++i) {
     ptr = (mxArray **)mxRealloc(s, sizeof(mxArray*) * (i + 1));
     if (ptr == NULL) {
-      free(s);
+      mxFree(s);
       mexErrMsgIdAndTxt("GetData:GDMX:Alloc", "Out of memory.");
     }
     s = ptr;

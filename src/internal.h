@@ -96,6 +96,9 @@
 #ifdef HAVE_DIRECT_H
 #include <direct.h>
 #endif
+#ifdef HAVE_IO_H
+#include <io.h>
+#endif
 
 /* MSVC types */
 #ifdef _MSC_VER
@@ -324,18 +327,6 @@ gd_static_inline_ int64_t gd_put_unaligned64(int64_t v, void *p)
   return v;
 }
 #endif
-#endif
-
-/* For the C99 integer types */
-#ifdef HAVE_INTTYPES_H
-# ifndef __STDC_FORMAT_MACROS
-#  define __STDC_FORMAT_MACROS
-# endif
-#include <inttypes.h>
-#endif
-
-#ifdef HAVE_IO_H
-#  include <io.h>
 #endif
 
 #define GD_ARM_FLAG (GD_ARM_ENDIAN | GD_NOT_ARM_ENDIAN)
@@ -1277,9 +1268,11 @@ off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t count,
     gd_type_t data_type, unsigned int);
 ssize_t _GD_Bzip2Read(struct gd_raw_file_ *restrict, void *restrict, gd_type_t,
     size_t);
-int _GD_Bzip2Close(struct gd_raw_file_* file);
-off64_t _GD_Bzip2Size(int, struct gd_raw_file_* file, gd_type_t data_type,
-    int swap);
+ssize_t _GD_Bzip2Write(struct gd_raw_file_ *restrict, const void *restrict,
+    gd_type_t, size_t);
+int _GD_Bzip2Sync(struct gd_raw_file_*);
+int _GD_Bzip2Close(struct gd_raw_file_*);
+off64_t _GD_Bzip2Size(int, struct gd_raw_file_*, gd_type_t, int);
 
 /* gzip I/O methods */
 int _GD_GzipOpen(int, struct gd_raw_file_* file, int swap, unsigned int);

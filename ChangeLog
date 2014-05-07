@@ -1,3 +1,26 @@
+2014-05-06     D. V. Wiebe <getdata@ketiltrout.net> svn:901
+	* src/encoding.c: Add bzip2 OOP write support.
+	* src/bzip.c (_GD_Bzip2DoOpen _GD_Bzip2Open _GD_Bzip2Seek _GD_Bzip2Close
+	_GD_Bzip2Read): Handle writes.  Properly clean up on error.  Track file->pos.
+	* src/bzip.c (_GD_Bzip2Write _GD_Bzip2Sync): Added.
+	* test/bzip_add.c test/bzip_put_back.c test/bzip_move_to.c
+	test/bzip_get_far.c test/bzip_put_pad.c test/bzip_put_sub.c
+	test/bzip_get_get2.c test/bzip_put_get.c test/bzip_put_endian.c
+	test/bzip_sync.c test/bzip_get_put.c: Added.
+	* test/bzip_put.c: Replaced with a working test.
+
+	* src/fpos.c (_GD_WriteSeek): Fix offset in the seek call.
+	* src/gzip.c (_GD_GzipSeek): Handle seeks past the EOF while reading.
+	* test/gzip_get_far.c test/gzip_put_pad.c: Added.
+
+	* test/test.h: Remove unnecessary include statements.
+
+	* src/encoding.c (_GD_MoveOver): Don't attempt to change mode if not needed.
+
+	* bindings/matlab/matlab.c (gdmx_from_string_list): Use mxFree.
+
+	* bindings/perl/GetData.xs (gdp_get_type): Fix undef check.
+
 2014-05-05     D. V. Wiebe <getdata@ketiltrout.net> svn:896
 	* src/encoding.c (gd_encoding_support): Call _GD_InitialiseFramework().
 

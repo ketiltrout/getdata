@@ -495,7 +495,7 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
   rin++;
 
   for (i = 0; i < (size_t)rin; ++i) {
-    dprintf_sie("%i: 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X",
+    dprintf_sie("%zu: 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X",
         i, ((char*)p)[size * i + 0], ((char*)p)[size * i + 1],
         ((char*)p)[size * i + 2], ((char*)p)[size * i + 3],
         ((char*)p)[size * i + 4], ((char*)p)[size * i + 5],

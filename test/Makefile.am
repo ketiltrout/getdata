@@ -68,7 +68,10 @@ ASCII_TESTS=ascii_add ascii_get ascii_get_complex ascii_get_get ascii_get_sub \
 
 BOF_TESTS=bof bof_bit bof_index bof_lincom bof_phase bof_phase_neg
 
-BZIP_TESTS=bzip_get bzip_get_get bzip_move_from bzip_nframes
+BZIP_TESTS=bzip_add bzip_get bzip_get_far bzip_get_get bzip_get_get2 \
+					 bzip_get_put bzip_move_from bzip_move_to bzip_nframes bzip_put \
+					 bzip_put_back bzip_put_endian bzip_put_get bzip_put_pad \
+					 bzip_put_sub bzip_sync
 
 CVLIST_TESTS=cvlist cvlist_array cvlist_array0 cvlist_array_free \
 						 cvlist_array_hidden cvlist_array_meta cvlist_array_meta0 \
@@ -214,9 +217,10 @@ GETSTR_TESTS=getstr_here getstr_sindir getstr_type
 
 GLOBAL_TESTS=global_flags global_name global_ref global_ref_empty global_ref_set
 
-GZIP_TESTS=gzip_add gzip_del gzip_get gzip_get_get gzip_get_get2 gzip_get_put \
-					 gzip_move_from gzip_move_to gzip_nframes gzip_put gzip_put_back \
-					 gzip_put_endian gzip_put_get gzip_put_sub gzip_sync
+GZIP_TESTS=gzip_add gzip_del gzip_get gzip_get_far gzip_get_get gzip_get_get2 \
+					 gzip_get_put gzip_move_from gzip_move_to gzip_nframes gzip_put \
+					 gzip_put_back gzip_put_endian gzip_put_get gzip_put_pad \
+					 gzip_put_sub gzip_sync
 
 HEADER_TESTS=header_complex
 
