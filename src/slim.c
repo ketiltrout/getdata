@@ -38,24 +38,43 @@
 int _GD_SlimOpen(int dirfd, struct gd_raw_file_* file, int swap gd_unused_,
     unsigned int mode gd_unused_)
 {
-  char *filepath;
-
   dtrace("%i, %p, <unused>, <unused>", dirfd, file);
 
-  /* this is easily broken, but the best we can do for now... */
-  filepath = gd_MakeFullPathOnly(file->D, dirfd, file->name);
-  if (filepath == NULL) {
-    dreturn("%i", 1);
-    return 1;
-  }
+#ifdef HAVE_SLIMDOPEN
+  {
+    int fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666);
+    if (fd < 0) {
+      dreturn("%i", -1);
+      return -1;
+    }
 
-  file->edata = slimopen(filepath, "r");
-  free(filepath);
+    file->edata = slimdopen(fd, "r");
 
-  if (file->edata == NULL) {
-    dreturn("%i", 1);
-    return 1;
+    if (file->edata == NULL) {
+      close(fd);
+      dreturn("%i", 1);
+      return 1;
+    }
   }
+#else
+  {
+    char *filepath;
+    /* this is easily broken, but the best we can do in this case */
+    filepath = gd_MakeFullPathOnly(file->D, dirfd, file->name);
+    if (filepath == NULL) {
+      dreturn("%i", 1);
+      return 1;
+    }
+
+    file->edata = slimopen(filepath, "r");
+    free(filepath);
+
+    if (file->edata == NULL) {
+      dreturn("%i", 1);
+      return 1;
+    }
+  }
+#endif
 
   file->mode = GD_RDONLY;
   file->idata = 0;
@@ -115,20 +134,34 @@ int _GD_SlimClose(struct gd_raw_file_ *file)
 off64_t _GD_SlimSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
     int swap gd_unused_)
 {
-  char *filepath;
   off64_t size;
 
   dtrace("%i, %p, 0x%X", dirfd, file, data_type);
 
-  /* this is easily broken, but the best we can do for now... */
-  filepath = gd_MakeFullPathOnly(file->D, dirfd, file->name);
-  if (filepath == NULL) {
-    dreturn("%i", 1);
-    return 1;
-  }
+#ifdef HAVE_SLIMDRAWSIZE
+  {
+    int fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666);
+    if (fd < 0) {
+      dreturn("%i", -1);
+      return -1;
+    }
 
-  size = slimrawsize(filepath);
-  free(filepath);
+    size = slimdrawsize(fd);
+    close(fd);
+  }
+#else
+  {
+    /* this is easily broken, but the best we can do in this case */
+    char *filepath = gd_MakeFullPathOnly(file->D, dirfd, file->name);
+    if (filepath == NULL) {
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    size = slimrawsize(filepath);
+    free(filepath);
+  }
+#endif
 
   if (size < 0) {
     dreturn("%i", -1);
