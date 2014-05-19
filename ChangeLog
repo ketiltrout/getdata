@@ -1,3 +1,18 @@
+2014-05-19     D. V. Wiebe <getdata@ketiltrout.net> svn:904
+	* src/lzma.c: Rewritten with better understanding of liblzma.  Includes
+	write support.
+	* src/encoding.c: LZMA write support.
+	* test/lzma_xz_get_get.c test/lzma_xz_get_get2.c test/lzma_xz_put.c
+	test/lzma_xz_get_put.c test/lzma_xz_add.c test/lzma_xz_sync.c
+	test/lzma_xz_move_to.c test/lzma_put.c test/lzma_xz_get_far.c
+	test/lzma_xz_put_pad.c test/lzma_xz_put_endian.c test/lzma_xz_put_back.c
+	test/lzma_xz_put_get.c: Added.
+	* test/lzma_xz_get.c test/lzma_xz_nframes.c: Renamed from
+	xz_{get|nframes}.c.
+	* test/encode_support.c: Update for LZMA writes.
+
+	* src/bzip.c: Remove unnecessary .write member.
+
 2014-05-06     D. V. Wiebe <getdata@ketiltrout.net> svn:901
 	* src/encoding.c: Add bzip2 OOP write support.
 	* src/bzip.c (_GD_Bzip2DoOpen _GD_Bzip2Open _GD_Bzip2Seek _GD_Bzip2Close

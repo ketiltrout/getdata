@@ -239,7 +239,10 @@ LEGACY_TESTS=legacy_error legacy_format legacy_get legacy_get_put \
 						 legacy_spf
 endif
 
-LZMA_TESTS=lzma_get lzma_nframes
+LZMA_TESTS=lzma_get lzma_nframes lzma_put lzma_xz_add lzma_xz_get \
+					 lzma_xz_get_far lzma_xz_get_get lzma_xz_get_get2 lzma_xz_get_put \
+					 lzma_xz_move_to lzma_xz_nframes lzma_xz_put lzma_xz_put_back \
+					 lzma_xz_put_endian lzma_xz_put_get lzma_xz_put_pad lzma_xz_sync
 
 MADD_TESTS=madd madd_affix madd_alias madd_alias_affix madd_bit \
 					 madd_bit_invalid madd_carray madd_clincom madd_const madd_cpolynom \
@@ -396,8 +399,6 @@ VERSION_TESTS=version_0 version_0_write version_1 version_1_write version_2 \
 VLIST_TESTS=vlist vlist_alias vlist_hidden vlist_invalid vlist_meta \
 						vlist_meta_hidden vlist_meta_invalid
 
-XZ_TESTS=xz_get xz_nframes
-
 ZZIP_TESTS=zzip_data zzip_get zzip_get_get zzip_nframes
 
 ZZSLIM_TESTS=zzslim_get zzslim_nframes
@@ -417,7 +418,7 @@ TESTS=$(ADD_TESTS)      $(ALIAS_TESTS)    $(ALTER_TESTS)    $(ASCII_TESTS)    \
 			$(SEEK_TESTS)     $(SIE_TESTS)      $(SLIM_TESTS)     $(SPF_TESTS)      \
 			$(SVLIST_TESTS)   $(TABLE_TESTS)    $(TELL_TESTS)     $(TOK_TESTS)      \
 			$(TRUNC_TESTS)    $(UNCLUDE_TESTS)  $(VERSION_TESTS)  $(VLIST_TESTS)    \
-			$(XZ_TESTS)       $(ZZIP_TESTS)     $(ZZSLIM_TESTS)
+			$(ZZIP_TESTS)     $(ZZSLIM_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

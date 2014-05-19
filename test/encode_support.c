@@ -40,7 +40,7 @@
 #endif
 
 #ifdef USE_LZMA
-#define GD_LZMA_MODE GD_RDONLY
+#define GD_LZMA_MODE GD_RDWR
 #else
 #define GD_LZMA_MODE -1
 #endif

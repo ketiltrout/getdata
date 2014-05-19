@@ -1282,7 +1282,7 @@ ssize_t _GD_GzipRead(struct gd_raw_file_ *restrict, void *restrict, gd_type_t,
     size_t);
 ssize_t _GD_GzipWrite(struct gd_raw_file_ *restrict, const void *restrict,
     gd_type_t, size_t);
-int _GD_GzipSync(struct gd_raw_file_* file);
+int _GD_GzipSync(struct gd_raw_file_*);
 int _GD_GzipClose(struct gd_raw_file_* file);
 off64_t _GD_GzipSize(int, struct gd_raw_file_* file, gd_type_t data_type,
     int swap);
@@ -1293,7 +1293,10 @@ off64_t _GD_LzmaSeek(struct gd_raw_file_* file, off64_t count,
     gd_type_t data_type, unsigned int);
 ssize_t _GD_LzmaRead(struct gd_raw_file_ *restrict, void *restrict, gd_type_t,
     size_t);
+ssize_t _GD_LzmaWrite(struct gd_raw_file_ *restrict, const void *restrict,
+    gd_type_t, size_t);
 int _GD_LzmaClose(struct gd_raw_file_* file);
+int _GD_LzmaSync(struct gd_raw_file_ *file);
 off64_t _GD_LzmaSize(int, struct gd_raw_file_* file, gd_type_t data_type,
     int swap);
 

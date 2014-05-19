@@ -110,7 +110,14 @@ ssize_t _GD_RawWrite(struct gd_raw_file_ *restrict file,
 
 int _GD_RawSync(struct gd_raw_file_ *file)
 {
-  return fsync(file->idata);
+  int r;
+
+  dtrace("%p", file);
+
+  r = fsync(file->idata);
+
+  dreturn("%i", r);
+  return r;
 }
 
 int _GD_RawClose(struct gd_raw_file_ *file)

@@ -24,9 +24,15 @@ New in verison 0.9.0a:
     indicates something pathological happening.)  The GD_MAX_CARRAY_LENGTH
     symbol has been removed from the GetData header file.
 
-  * Write support for bzip2-encoded data has been added.  This works identically
-    to how writing gzip-encoded data is written.  See the gzip discussion in the
-    0.8.0 section below for important notes.
+  * Write support for bzip2-encoded and lzma-encoded data has been added.  LZMA
+    write support is only available for .xz files, not the obsolete .lzma
+    format.  The write support occurs out-of-place, just like how writing
+    gzip-encoded data works.  See the gzip discussion in the 0.8.0 section below
+    for important notes.
+
+  * BUG FIX: In addition to the addition of write support mentioned above, a
+    number of problems with reading LZMA files has been fixed, which should
+    result in fewer segmentaion faults.
 
   * BUG FIX: The parsing of the \x and \u escape sequences are now correct.
 

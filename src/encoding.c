@@ -106,9 +106,27 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
 #undef GD_EF_PROVIDES
 
 
+/* We only provide write support for .xz files, not .lzma */
 #ifdef USE_LZMA
 #define GD_EF_PROVIDES \
-    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE
+  GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE | \
+  GD_EF_WRITE | GD_EF_SYNC
+#define GD_INT_FUNCS \
+  &_GD_GenericName, &_GD_LzmaOpen, &_GD_LzmaClose, &_GD_LzmaSeek, \
+  &_GD_LzmaRead, &_GD_LzmaSize, &_GD_LzmaWrite, &_GD_LzmaSync, \
+  &_GD_GenericMove, &_GD_GenericUnlink
+#else
+#define GD_INT_FUNCS GD_EF_NULL_SET
+#define GD_EF_PROVIDES 0
+#endif
+  GD_EXT_ENCODING_GEN(GD_LZMA_ENCODED, ".xz", GD_EF_ECOR | GD_EF_OOP, "Lzma",
+      "lzma"),
+#undef GD_INT_FUNCS
+#undef GD_EF_PROVIDES
+
+#ifdef USE_LZMA
+#define GD_EF_PROVIDES \
+  GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE
 #define GD_INT_FUNCS \
   &_GD_GenericName, &_GD_LzmaOpen, &_GD_LzmaClose, &_GD_LzmaSeek, \
   &_GD_LzmaRead, &_GD_LzmaSize, NULL /* WRITE */, NULL /* SYNC */, \
@@ -117,7 +135,6 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
 #endif
-  GD_EXT_ENCODING_GEN(GD_LZMA_ENCODED, ".xz", GD_EF_ECOR, "Lzma", "lzma"),
   GD_EXT_ENCODING_GEN(GD_LZMA_ENCODED, ".lzma", GD_EF_ECOR, "Lzma", "lzma"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES

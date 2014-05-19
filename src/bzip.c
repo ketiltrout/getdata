@@ -44,7 +44,6 @@ struct gd_bzdata {
   BZFILE* bzfile;
   FILE* stream;
   int bzerror;
-  int write;
   int stream_end;
   int pos, end;
   off64_t base;
@@ -95,10 +94,8 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct gd_raw_file_* file,
   ptr->bzerror = ptr->stream_end = 0;
   if (mode & GD_FILE_READ) {
     ptr->bzfile = BZ2_bzReadOpen(&ptr->bzerror, stream, 0, 0, NULL, 0);
-    ptr->write = 0;
   } else {
     ptr->bzfile = BZ2_bzWriteOpen(&ptr->bzerror, stream, 9, 0, 30);
-    ptr->write = 1;
     memset(ptr->data, 0, GD_BZIP_BUFFER_SIZE);
   }
 
@@ -325,10 +322,10 @@ int _GD_Bzip2Close(struct gd_raw_file_ *file)
   dtrace("%p", file);
 
   ptr->bzerror = 0;
-  if (ptr->write)
-    BZ2_bzWriteClose(&ptr->bzerror, ptr->bzfile, 0, NULL, NULL);
-  else
+  if (file->mode & GD_FILE_READ)
     BZ2_bzReadClose(&ptr->bzerror, ptr->bzfile);
+  else
+    BZ2_bzWriteClose(&ptr->bzerror, ptr->bzfile, 0, NULL, NULL);
 
   if (ptr->bzerror || fclose(ptr->stream)) {
     dreturn("%i", 1);

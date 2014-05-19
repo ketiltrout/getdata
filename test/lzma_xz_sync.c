@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -22,66 +22,71 @@
 
 int main(void)
 {
-#ifndef TEST_LZMA
+#if !defined TEST_LZMA || !defined USE_LZMA
   return 77;
 #else
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
+  const char *data_xz = "dirfile/data.xz";
   const char *data = "dirfile/data";
-  const char *xzdata = "dirfile/data.xz";
-  const char *format_data = "data RAW UINT16 8\n";
-  uint16_t c[8];
+  const char *format_data = "data RAW UINT8 8\n";
+  uint8_t c[8];
   char command[4096];
-  uint16_t data_data[256];
-#ifdef USE_LZMA
-  int i;
-#endif
-  int fd, n, error, r = 0;
+  uint8_t d;
+  struct stat buf;
+  int fd, i, n, e1, e2, stat_data, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0777);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
+  for (i = 0; i < 8; ++i)
+    c[i] = (uint8_t)(40 + i);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256 * sizeof(uint16_t));
-  close(fd);
+  D = gd_open(filedir, GD_RDWR | GD_LZMA_ENCODED | GD_VERBOSE);
+  gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
+  n = gd_flush(D, "data");
+  e1 = gd_error(D);
+  CHECKI(e1, GD_E_OK);
+  CHECKI(n, 0);
 
-  /* compress */
-  snprintf(command, 4096, "%s -f %s > /dev/null", XZ, data);
-  if (gd_system(command))
-    return 1;
+  e2 = gd_close(D);
+  CHECKI(e2, 0);
 
-#ifdef USE_LZMA
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-#else
-  D = gd_open(filedir, GD_RDONLY);
-#endif
-  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
-  error = gd_error(D);
+  stat_data = stat(data_xz, &buf);
+  if (stat_data) {
+    perror("stat");
+  }
+  CHECKI(stat_data, 0);
 
-  gd_discard(D);
+  /* uncompress */
+  snprintf(command, 4096, "%s --decompress -f %s > /dev/null", XZ, data_xz);
+  if (gd_system(command)) {
+    r = 1;
+  } else {
+    fd = open(data, O_RDONLY | O_BINARY);
+    if (fd >= 0) {
+      i = 0;
+      while (read(fd, &d, sizeof(uint8_t))) {
+        if (i < 40 || i > 48) {
+          CHECKIi(i, d, 0);
+        } else
+          CHECKIi(i, d, i);
+        i++;
+      }
+      CHECKI(i, 48);
+      close(fd);
+    }
+  }
 
-  unlink(xzdata);
+  unlink(data);
   unlink(format);
   rmdir(filedir);
-
-#ifdef USE_LZMA
-  CHECKI(error,0);
-  CHECKI(n,8);
-  for (i = 0; i < 8; ++i)
-    CHECKUi(i,c[i],40 + i);
-#else
-  CHECKI(error,GD_E_UNSUPPORTED);
-  CHECKI(n,0);
-#endif
 
   return r;
 #endif
