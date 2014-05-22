@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -136,6 +136,90 @@ int _GD_Bzip2Open(int dirfd, struct gd_raw_file_* file, int swap gd_unused_,
   return 0;
 }
 
+ssize_t _GD_Bzip2Read(struct gd_raw_file_ *restrict file, void *restrict data,
+    gd_type_t data_type, size_t nmemb)
+{
+  char* output = (char*)data;
+  struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
+  unsigned long long nbytes = nmemb * GD_SIZE(data_type);
+
+  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
+
+  while (nbytes > (unsigned long long)(ptr->end - ptr->pos)) {
+    int n;
+
+    memcpy(output, ptr->data + ptr->pos, ptr->end - ptr->pos);
+    output += ptr->end - ptr->pos;
+    nbytes -= ptr->end - ptr->pos;
+    ptr->pos = ptr->end;
+
+    if (ptr->stream_end) {
+      dreturn("%li", (long)(nmemb - nbytes / GD_SIZE(data_type)));
+      return nmemb - nbytes / GD_SIZE(data_type);
+    }
+
+    ptr->bzerror = 0;
+    n = BZ2_bzRead(&ptr->bzerror, ptr->bzfile, ptr->data,
+        GD_BZIP_BUFFER_SIZE);
+
+    if (ptr->bzerror == BZ_OK || ptr->bzerror == BZ_STREAM_END) {
+      ptr->base += ptr->end;
+      ptr->pos = 0;
+      ptr->end = n;
+    } else {
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    /* eof */
+    if (ptr->bzerror != BZ_OK) {
+      ptr->stream_end = 1;
+      break;
+    }
+  }
+
+  if (nbytes > (unsigned long long)(ptr->end - ptr->pos)) {
+    memcpy(output, ptr->data + ptr->pos, ptr->end - ptr->pos);
+    ptr->pos = ptr->end;
+    nbytes -= ptr->end;
+  } else {
+    memcpy(output, ptr->data + ptr->pos, nbytes);
+    ptr->pos += nbytes;
+    nbytes = 0;
+  }
+
+  file->pos = (ptr->base + ptr->pos) / GD_SIZE(data_type);
+
+  dreturn("%li", (long)(nmemb - nbytes / GD_SIZE(data_type)));
+  return nmemb - nbytes / GD_SIZE(data_type);
+}
+
+ssize_t _GD_Bzip2Write(struct gd_raw_file_ *file, const void *data,
+    gd_type_t data_type, size_t nmemb)
+{
+  struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
+  ssize_t n;
+
+  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
+
+  n = GD_SIZE(data_type) * nmemb;
+  if (n > INT_MAX)
+    n = INT_MAX;
+
+  BZ2_bzWrite(&ptr->bzerror, ptr->bzfile, (void*)data, (int)n);
+
+  if (ptr->bzerror)
+    n = -1;
+  else {
+    ptr->base += n;
+    n /= GD_SIZE(data_type);
+    file->pos += n;
+  }
+
+  dreturn("%" PRNssize_t, n);
+  return n;
+}
+
 off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t count,
     gd_type_t data_type, unsigned int mode)
 {
@@ -221,90 +305,6 @@ off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t count,
 
   dreturn("%lli", (long long)file->pos);
   return file->pos;;
-}
-
-ssize_t _GD_Bzip2Read(struct gd_raw_file_ *restrict file, void *restrict data,
-    gd_type_t data_type, size_t nmemb)
-{
-  char* output = (char*)data;
-  struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
-  unsigned long long nbytes = nmemb * GD_SIZE(data_type);
-
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
-
-  while (nbytes > (unsigned long long)(ptr->end - ptr->pos)) {
-    int n;
-
-    memcpy(output, ptr->data + ptr->pos, ptr->end - ptr->pos);
-    output += ptr->end - ptr->pos;
-    nbytes -= ptr->end - ptr->pos;
-    ptr->pos = ptr->end;
-
-    if (ptr->stream_end) {
-      dreturn("%li", (long)(nmemb - nbytes / GD_SIZE(data_type)));
-      return nmemb - nbytes / GD_SIZE(data_type);
-    }
-
-    ptr->bzerror = 0;
-    n = BZ2_bzRead(&ptr->bzerror, ptr->bzfile, ptr->data,
-        GD_BZIP_BUFFER_SIZE);
-
-    if (ptr->bzerror == BZ_OK || ptr->bzerror == BZ_STREAM_END) {
-      ptr->base += ptr->end;
-      ptr->pos = 0;
-      ptr->end = n;
-    } else {
-      dreturn("%i", -1);
-      return -1;
-    }
-
-    /* eof */
-    if (ptr->bzerror != BZ_OK) {
-      ptr->stream_end = 1;
-      break;
-    }
-  }
-
-  if (nbytes > (unsigned long long)(ptr->end - ptr->pos)) {
-    memcpy(output, ptr->data + ptr->pos, ptr->end - ptr->pos);
-    ptr->pos = ptr->end;
-    nbytes -= ptr->end;
-  } else {
-    memcpy(output, ptr->data + ptr->pos, nbytes);
-    ptr->pos += nbytes;
-    nbytes = 0;
-  }
-
-  file->pos = (ptr->base + ptr->pos) / GD_SIZE(data_type);
-
-  dreturn("%li", (long)(nmemb - nbytes / GD_SIZE(data_type)));
-  return nmemb - nbytes / GD_SIZE(data_type);
-}
-
-ssize_t _GD_Bzip2Write(struct gd_raw_file_ *file, const void *data,
-    gd_type_t data_type, size_t nmemb)
-{
-  struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
-  ssize_t n;
-
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
-
-  n = GD_SIZE(data_type) * nmemb;
-  if (n > INT_MAX)
-    n = INT_MAX;
-
-  BZ2_bzWrite(&ptr->bzerror, ptr->bzfile, (void*)data, (int)n);
-
-  if (ptr->bzerror)
-    n = -1;
-  else {
-    ptr->base += n;
-    n /= GD_SIZE(data_type);
-    file->pos += n;
-  }
-
-  dreturn("%" PRNssize_t, n);
-  return n;
 }
 
 /* This function does nothing */

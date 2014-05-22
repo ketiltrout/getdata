@@ -195,16 +195,20 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
 void _GD_InitialiseFramework(void)
 {
   dtracevoid();
+
 #ifdef USE_MODULES
 #ifdef USE_PTHREAD
-  pthread_mutex_lock(&gd_mutex_);
-#endif
   if (!framework_initialised) {
-    framework_initialised = 1;
-    lt_dlinit();
-  }
+    pthread_mutex_lock(&gd_mutex_);
+#endif
+    /* check again */
+    if (!framework_initialised) {
+      framework_initialised = 1;
+      lt_dlinit();
+    }
 #ifdef USE_PTHREAD
-  pthread_mutex_unlock(&gd_mutex_);
+    pthread_mutex_unlock(&gd_mutex_);
+  }
 #endif
 #endif
   dreturnvoid();

@@ -28,6 +28,8 @@
 #define _GD_LzmaOpen libgetdatalzma_LTX_GD_LzmaOpen
 #define _GD_LzmaSeek libgetdatalzma_LTX_GD_LzmaSeek
 #define _GD_LzmaRead libgetdatalzma_LTX_GD_LzmaRead
+#define _GD_LzmaWrite libgetdatalzma_LTX_GD_LzmaWrite
+#define _GD_LzmaSync libgetdatalzma_LTX_GD_LzmaSync
 #define _GD_LzmaClose libgetdatalzma_LTX_GD_LzmaClose
 #define _GD_LzmaSize libgetdatalzma_LTX_GD_LzmaSize
 #endif
@@ -222,6 +224,66 @@ static void _GD_LzmaClear(struct gd_lzmadata *lzd)
   dreturnvoid();
 }
 
+/* flush the output buffer to the stream */
+static int _GD_LzmaFlush(struct gd_lzmadata *lzd)
+{
+  uint8_t *ptr;
+
+  dtrace("%p", lzd);
+
+  ptr = lzd->data_out;
+  while (NOUT(*lzd) > 0) {
+    ssize_t nw = fwrite(ptr, 1, NOUT(*lzd), lzd->stream);
+    if (nw == 0 && ferror(lzd->stream)) {
+      dreturn("%i", 1);
+      return 1;
+    }
+
+    ptr += nw;
+    lzd->xz.avail_out += nw;
+  }
+
+  /* reset output buffer */
+  lzd->xz.next_out = lzd->data_out;
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+ssize_t _GD_LzmaWrite(struct gd_raw_file_ *file, const void *data,
+    gd_type_t data_type, size_t nmemb)
+{
+  lzma_ret e;
+  size_t n;
+  struct gd_lzmadata *lzd = (struct gd_lzmadata *)file->edata;
+
+  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
+
+  n = nmemb * GD_SIZE(data_type);
+
+  /* We let liblzma read directly from the caller's buffer */
+  lzd->xz.next_in = data;
+  lzd->xz.avail_in = n;
+
+  /* code */
+  while (lzd->xz.avail_in > 0) {
+    e = lzma_code(&lzd->xz, LZMA_RUN);
+    if (e != LZMA_OK) {
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    if (_GD_LzmaFlush(lzd)) {
+      dreturn("%i", -1);
+      return -1;
+    }
+  }
+
+  /* we always write all the input, if successful */
+  dreturn("%" PRNssize_t, (ssize_t)nmemb);
+  return nmemb;
+}
+
 off64_t _GD_LzmaSeek(struct gd_raw_file_* file, off64_t count,
     gd_type_t data_type, unsigned int mode)
 {
@@ -354,66 +416,6 @@ ssize_t _GD_LzmaRead(struct gd_raw_file_ *file, void *data, gd_type_t data_type,
 
   dreturn("%" PRNssize_t, nread);
   return nread;
-}
-
-/* flush the output buffer to the stream */
-static int _GD_LzmaFlush(struct gd_lzmadata *lzd)
-{
-  uint8_t *ptr;
-
-  dtrace("%p", lzd);
-
-  ptr = lzd->data_out;
-  while (NOUT(*lzd) > 0) {
-    ssize_t nw = fwrite(ptr, 1, NOUT(*lzd), lzd->stream);
-    if (nw == 0 && ferror(lzd->stream)) {
-      dreturn("%i", 1);
-      return 1;
-    }
-
-    ptr += nw;
-    lzd->xz.avail_out += nw;
-  }
-
-  /* reset output buffer */
-  lzd->xz.next_out = lzd->data_out;
-
-  dreturn("%i", 0);
-  return 0;
-}
-
-ssize_t _GD_LzmaWrite(struct gd_raw_file_ *file, const void *data,
-    gd_type_t data_type, size_t nmemb)
-{
-  lzma_ret e;
-  size_t n;
-  struct gd_lzmadata *lzd = (struct gd_lzmadata *)file->edata;
-
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
-
-  n = nmemb * GD_SIZE(data_type);
-
-  /* We let liblzma read directly from the caller's buffer */
-  lzd->xz.next_in = data;
-  lzd->xz.avail_in = n;
-
-  /* code */
-  while (lzd->xz.avail_in > 0) {
-    e = lzma_code(&lzd->xz, LZMA_RUN);
-    if (e != LZMA_OK) {
-      dreturn("%i", -1);
-      return -1;
-    }
-
-    if (_GD_LzmaFlush(lzd)) {
-      dreturn("%i", -1);
-      return -1;
-    }
-  }
-
-  /* we always write all the input, if successful */
-  dreturn("%" PRNssize_t, (ssize_t)nmemb);
-  return nmemb;
 }
 
 int _GD_LzmaClose(struct gd_raw_file_ *file)

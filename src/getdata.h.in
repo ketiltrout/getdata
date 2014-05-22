@@ -246,7 +246,7 @@ typedef enum {
 } gd_entype_t;
 
 /* GD_NO_ENTRY and GD_ALIAS_ENTRY are not part of this count */
-#define GD_N_ENTYPES 16
+#define GD_N_ENTYPES 19
 
 /* Special types for gd_nentries(3) and gd_entry_list(3) */
 #define GD_ALL_ENTRIES    0

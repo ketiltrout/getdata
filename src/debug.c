@@ -40,7 +40,7 @@ const char* gd_coladd(void)
 const char* gd_colsub(void)
 {
   static char buffer[GD_COL_SIZE + 1];
-  strcpy(buffer, gd_colnil());
+  strcpy(buffer, gd_debug_col);
 
   if (gd_col_count > 0)
     gd_debug_col[--gd_col_count] = '\0';

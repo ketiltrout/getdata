@@ -1,3 +1,13 @@
+2014-05-22     D. V. Wiebe <getdata@ketiltrout.net> svn:905
+	* src/slim.c (_GD_SlimOpen _GD_SlimSize): Disable the slimdopen and
+	slimdrawsize stuff to avoid a slimlib bug.
+
+	* src/bzip.c src/lzma.c: Re-order some functions to get modules working
+	again.
+	
+	* src/encoding.c (_GD_InitialiseFramework): Don't try to lock the mutex if
+	it's not needed.
+
 2014-05-19     D. V. Wiebe <getdata@ketiltrout.net> svn:904
 	* src/lzma.c: Rewritten with better understanding of liblzma.  Includes
 	write support.
@@ -12,6 +22,10 @@
 	* test/encode_support.c: Update for LZMA writes.
 
 	* src/bzip.c: Remove unnecessary .write member.
+
+2014-05-10     D. V. Wiebe <getdata@ketiltrout.net> svn:903
+	* src/slim.c (_GD_SlimOpen _GD_SlimSize): Use slimdopen and slimdrawsize if
+	available to reduce race conditions.
 
 2014-05-06     D. V. Wiebe <getdata@ketiltrout.net> svn:901
 	* src/encoding.c: Add bzip2 OOP write support.

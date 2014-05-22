@@ -1,4 +1,4 @@
-/* Copyright (C) 2008, 2010, 2011 D. V. Wiebe
+/* Copyright (C) 2008, 2010, 2011, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -40,7 +40,10 @@ int _GD_SlimOpen(int dirfd, struct gd_raw_file_* file, int swap gd_unused_,
 {
   dtrace("%i, %p, <unused>, <unused>", dirfd, file);
 
-#ifdef HAVE_SLIMDOPEN
+  /* slimdopen in slimlib-2.6.7 and earlier contains a bug resulting in a SEGV,
+   * so disable this for now */
+#if 0
+  /* #ifdef HAVE_SLIMDOPEN */
   {
     int fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666);
     if (fd < 0) {
@@ -138,7 +141,10 @@ off64_t _GD_SlimSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 
   dtrace("%i, %p, 0x%X", dirfd, file, data_type);
 
-#ifdef HAVE_SLIMDRAWSIZE
+  /* slimdrawsize in slimlib-2.6.7 and earlier contains a bug resulting in a
+   * SEGV, so disable this for now */
+#if 0
+  /* #ifdef HAVE_SLIMDRAWSIZE */
   {
     int fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666);
     if (fd < 0) {
