@@ -1,3 +1,15 @@
+2014-05-23     D. V. Wiebe <getdata@ketiltrout.net> svn:906
+	* src/field_list.c (gd_sarrays gd_msarrays): Added.
+	* src/close.c (_GD_FreeD) src/entry.c (_GD_FreeE): Free sarray_value_list.
+	* test/svlist_array.c test/svlist_array_meta.c: Added.
+
+	* src/field_list.c (gd_mstrings): Don't use realloc to skip the unnecessary 
+	potential memcpy.
+
+	* src/include.c (_GD_SetFieldAffixes) src/open.c (_GD_CreateDirfile)
+	src/zzslim.c (_GD_ZzslimName): Use sprintf instead of convolutions of strcpy
+	and strcat for efficiency's sake.
+
 2014-05-22     D. V. Wiebe <getdata@ketiltrout.net> svn:905
 	* src/slim.c (_GD_SlimOpen _GD_SlimSize): Disable the slimdopen and
 	slimdrawsize stuff to avoid a slimlib bug.

@@ -573,7 +573,7 @@ extern int gd_add_recip(DIRFILE *dirfile, const char *field_code,
     const char *in_field, double dividend, int fragment_index) gd_nothrow
 gd_nonnull ((1,2,3));
 
-extern int gd_add_sarray(DIRFILE *dirfile, const char* field_code,
+extern int gd_add_sarray(DIRFILE *dirfile, const char *field_code,
     size_t array_len, const char **values, int fragment_index) gd_nothrow
 gd_nonnull ((1,2,4));
 
@@ -659,7 +659,7 @@ gd_nonnull((1,2));
 extern int gd_alter_recip(DIRFILE *dirfile, const char *field_code,
     const char *in_field, double cdividend) gd_nothrow gd_nonnull((1,2));
 
-extern int gd_alter_sarray(DIRFILE* D, const char* field_code,
+extern int gd_alter_sarray(DIRFILE *dirfile, const char *field_code,
     size_t array_len) gd_nothrow gd_nonnull((1,2));
 
 extern int gd_alter_sbit(DIRFILE *dirfile, const char *field_code,
@@ -718,8 +718,8 @@ extern unsigned long int gd_endianness(DIRFILE *dirfile,
 extern int gd_entry(DIRFILE *dirfile, const char *field_code,
     gd_entry_t *entry) gd_nothrow gd_nonnull ((1, 2));
 
-extern const char **gd_entry_list(DIRFILE* D, const char *parent, int type,
-    unsigned int flags) gd_nothrow gd_nonnull ((1));
+extern const char **gd_entry_list(DIRFILE *dirfile, const char *parent,
+    int type, unsigned int flags) gd_nothrow gd_nonnull ((1));
 
 extern gd_entype_t gd_entry_type(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1));
@@ -878,6 +878,9 @@ extern const char **gd_mfield_list_by_type(DIRFILE *dirfile,
 extern void gd_mplex_lookback(DIRFILE *dirfile, int lookback) gd_nothrow
 gd_nonnull((1));
 
+extern const char ***gd_msarrays(DIRFILE *dirfile,
+    const char *parent) gd_nothrow gd_nonnull ((1,2));
+
 extern const char **gd_mstrings(DIRFILE *dirfile, const char *parent) gd_nothrow
 gd_nonnull((1,2));
 
@@ -956,6 +959,8 @@ extern size_t gd_get_string(DIRFILE *dirfile, const char *field_code,
 
 extern size_t gd_put_string(DIRFILE *dirfile, const char *field_code,
     const char *data) gd_nothrow gd_nonnull ((1, 2, 3));
+
+const char ***gd_sarrays(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
 extern const char **gd_strings(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 

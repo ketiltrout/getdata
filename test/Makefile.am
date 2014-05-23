@@ -373,7 +373,8 @@ SIE_TESTS=sie_get_big sie_get_little sie_move_from sie_move_to sie_nframes_big \
 
 SLIM_TESTS=slim_get slim_nframes
 
-SVLIST_TESTS=svlist svlist0 svlist2 svlist_hidden svlist_invalid svlist_meta \
+SVLIST_TESTS=svlist svlist0 svlist2 svlist_array svlist_array_meta \
+						 svlist_hidden svlist_invalid svlist_meta \
 						 svlist_meta0 svlist_meta_hidden svlist_meta_invalid
 
 SPF_TESTS=spf_alias spf_alias_missing spf_alias_meta spf_divide spf_lincom \

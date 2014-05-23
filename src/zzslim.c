@@ -67,7 +67,7 @@ int _GD_ZzslimName(DIRFILE *restrict D, const char *restrict enc_data,
 
     strcpy(file->name, enc_data);
     file->name[enc_len] = '/';
-    strcat(strcpy(file->name + enc_len + 1, base), ".slm");
+    sprintf(file->name + enc_len + 1, "%s.slm", base);
   }
 
   dreturn("%i (%s)", 0, file->name);

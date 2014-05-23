@@ -343,7 +343,7 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
             (format_trunc ? O_TRUNC : O_EXCL), 0666)) < 0)
     {
       char *format_file = (char *)malloc(strlen(dirfile) + 8);
-      strcat(strcpy(format_file, dirfile), "/format");
+      sprintf(dirfile, "%s/format", dirfile);
       _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, errno, NULL);
       free(dirfile);
       free(format_file);
@@ -363,7 +363,7 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   /* associate a stream with the format file */
   if ((fp = fdopen(fd, "rb")) == NULL) {
     char *format_file = (char *)malloc(strlen(dirfile) + 8);
-    strcat(strcpy(format_file, dirfile), "/format");
+    sprintf(dirfile, "%s/format", dirfile);
     _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, errno, NULL);
     free(dirfile);
     free(format_file);

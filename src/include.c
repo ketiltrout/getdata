@@ -45,7 +45,7 @@ static int _GD_SetFieldAffixes(DIRFILE *D, int me, const char *prefix_in,
       *suffix = (char*)_GD_Malloc(D, strlen(D->fragment[me].suffix) +
           strlen(suffix_in) + 1);
       if (*suffix)
-        strcat(strcpy(*suffix, suffix_in), D->fragment[me].suffix);
+        sprintf(*suffix, "%s%s", suffix_in, D->fragment[me].suffix);
     }
   } else if (D->fragment[me].suffix)
     *suffix = _GD_Strdup(D, D->fragment[me].suffix);
@@ -71,7 +71,7 @@ static int _GD_SetFieldAffixes(DIRFILE *D, int me, const char *prefix_in,
       *prefix = (char*)_GD_Malloc(D, strlen(D->fragment[me].prefix) +
           strlen(prefix_in) + 1);
       if (*prefix)
-        strcat(strcpy(*prefix, D->fragment[me].prefix), prefix_in);
+        sprintf(*prefix, "%s%s", D->fragment[me].prefix, prefix_in);
     }
   } else if (D->fragment[me].prefix)
     *prefix = _GD_Strdup(D, D->fragment[me].prefix);

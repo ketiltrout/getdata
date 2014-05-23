@@ -239,6 +239,7 @@ static void *_GD_ResolveSymbol(lt_dlhandle lib, struct encoding_t *restrict enc,
 }
 #endif
 
+#define GETDATA_MODULEPREFIX GETDATA_MODULEDIR "/libgetdata"
 int _GD_MissingFramework(int encoding, unsigned int funcs)
 {
   int ret;
@@ -267,9 +268,12 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
       return 1;
     }
 
-    strcat(strcat(strcpy(library, GETDATA_MODULEDIR "/libgetdata"),
-          _GD_ef[encoding].affix), "-" PACKAGE_VERSION);
-    library[sizeof(GETDATA_MODULEDIR) + 10] -= 'A' - 'a';
+    sprintf(library, GETDATA_MODULEPREFIX "%s-" PACKAGE_VERSION,
+        _GD_ef[encoding].affix);
+
+    /* affix starts with a capital letter, we need to lowercasify it --
+     * also, sizeof includes the trailing NUL in its count */
+    library[sizeof(GETDATA_MODULEPREFIX) - 1] -= 'A' - 'a';
 
     /* open */
     if ((lib = lt_dlopenext(library)) == NULL) {
@@ -643,7 +647,7 @@ static unsigned long _GD_ResolveEncoding(DIRFILE *restrict D,
         if (!candidate)
           continue;
 
-        strcat(strcpy(candidate, name), _GD_ef[i].ext);
+        sprintf(candidate, "%s%s", name, _GD_ef[i].ext);
       } else {
         if (_GD_MissingFramework(i, GD_EF_NAME))
           continue;
@@ -733,8 +737,8 @@ int _GD_GenericName(DIRFILE *restrict D,
       return -1;
     }
 
-    strcat(strcpy(file->name, base), temp ? "_XXXXXX" :
-        _GD_ef[file->subenc].ext);
+    sprintf(file->name, "%s%s", base,
+        temp ? "_XXXXXX" : _GD_ef[file->subenc].ext);
   }
 
   dreturn("%i (%s)", 0, file->name);

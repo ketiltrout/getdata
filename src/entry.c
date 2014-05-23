@@ -127,10 +127,19 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
       free(entry->e->entry_list[i]);
     free(entry->e->string_value_list);
     free(entry->e->const_value_list);
-    if (entry->e->carray_value_list)
+
+    if (entry->e->carray_value_list) {
       for (i = 0; entry->e->carray_value_list[i].n != 0; ++i)
         free(entry->e->carray_value_list[i].d);
-    free(entry->e->carray_value_list);
+      free(entry->e->carray_value_list);
+    }
+
+    if (entry->e->sarray_value_list) {
+      for (i = 0; entry->e->sarray_value_list[i] != NULL; ++i)
+        free(entry->e->sarray_value_list[i]);
+      free(entry->e->sarray_value_list);
+    }
+
     if (entry->e->n_meta > -1)
       free(entry->e->p.meta_entry);
     free(entry->e);
