@@ -56,7 +56,7 @@ int main(void)
     CHECKI(e.fragment_index, 0);
     gd_free_entry_strings(&e);
   }
-  n = (int)gd_sarray_len(D, "data");
+  n = (int)gd_array_len(D, "data");
   CHECKI(n, 6);
 
   gd_get_sarray(D, "data", data);

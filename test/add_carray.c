@@ -56,7 +56,7 @@ int main(void)
     CHECKI(e.EN(scalar,const_type), GD_UINT8);
     gd_free_entry_strings(&e);
   }
-  n = (int)gd_carray_len(D, "data");
+  n = (int)gd_array_len(D, "data");
   CHECKI(n, 5);
   gd_get_carray(D, "data", GD_UINT8, &data);
   for (n = 0; n < 5; ++n)

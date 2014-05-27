@@ -46,7 +46,7 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  n = gd_carray_len(D, "carray");
+  n = gd_array_len(D, "carray");
   error = gd_error(D);
 
   gd_discard(D);

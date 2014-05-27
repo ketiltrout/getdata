@@ -1,6 +1,6 @@
-.\" gd_carray_len.3.  The gd_carray_len man page.
+.\" gd_array_len.3.  The gd_array_len man page.
 .\"
-.\" Copyright (C) 2010, 2011, 2012 D. V. Wiebe
+.\" Copyright (C) 2010, 2011, 2012, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,27 +13,27 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_carray_len 3 "4 July 2012" "Version 0.8.0" "GETDATA"
+.TH gd_array_len 3 "27 May 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
-gd_carray_len \(em returns the length of a CARRAY field in a dirfile
+gd_array_len \(em returns the length of a CARRAY or SARRAY field in a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "size_t gd_carray_len(DIRFILE *" dirfile ", const char *" field_code );
+.BI "size_t gd_array_len(DIRFILE *" dirfile ", const char *" field_code );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR gd_carray_len ()
+.BR gd_array_len ()
 function queries a dirfile(5) database specified by
 .I dirfile
 and returns the number of length of the
-.B CONST
+.BR CARRAY ", " CONST ", " STRING ,
 or
-.B CARRAY
-field
+.B SARRAY
+field called
 .IR field_code .
 If
 .I field_code
@@ -46,9 +46,11 @@ argument must point to a valid DIRFILE object previously created by a call to
 
 .SH RETURN VALUE
 Upon successful completion,
-.BR gd_carray_len ()
+.BR gd_array_len ()
 returns the array length of the field specified.  (The length of a
 .B CONST
+or a
+.B STRING
 field is always 1.)  On error, it returns zero and sets the dirfile error to a
 non-zero error value.  Possible error values are:
 .TP 8
@@ -66,10 +68,7 @@ The supplied dirfile was invalid.
 .B GD_E_BAD_FIELD_TYPE
 The field specified by
 .I field_code
-was not a
-.B CONST
-or
-.BR CARRAY .
+was not of one of the field types listed above.
 .TP
 .B GD_E_BAD_REPR
 The representation suffix specified in
@@ -81,6 +80,10 @@ The dirfile error may be retrieved by calling
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR gd_error_string (3).
+.SH NOTES
+This function used to be called
+.BR gd_carray_len ().
+This name can still be used, but it has been marked deprecated.
 .SH SEE ALSO
 .BR dirfile (5),
 .BR gd_open (3),

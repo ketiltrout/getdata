@@ -136,41 +136,6 @@ size_t gd_get_string(DIRFILE *D, const char *field_code, size_t len,
   return n_read;
 }
 
-size_t gd_sarray_len(DIRFILE *D, const char *field_code) gd_nothrow
-{
-  gd_entry_t *E;
-
-  dtrace("%p, \"%s\"", D, field_code);
-
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  _GD_ClearError(D);
-
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
-
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (E->field_type == GD_STRING_ENTRY) {
-    dreturn("%i", 1);
-    return 1;
-  } else if (E->field_type == GD_SARRAY_ENTRY) {
-    dreturn("%" PRNsize_t, E->EN(scalar,array_len));
-    return E->EN(scalar,array_len);
-  }
-
-  _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-  dreturn("%i", 0);
-  return 0;
-}
-
 static size_t _GD_PutSarraySlice(DIRFILE *restrict D, gd_entry_t *restrict E,
     unsigned long first, size_t n, const char **data_in)
 {

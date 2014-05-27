@@ -25,9 +25,9 @@ nodist_man_MANS = gd_alter_encoding.3 gd_alter_endianness.3 \
 dist_man_MANS = checkdirfile.1 dirfile2ascii.1 gd_add.3 gd_add_alias.3 \
 								gd_add_bit.3 gd_add_spec.3 gd_alias_target.3 gd_aliases.3 \
 								gd_alter_affixes.3 gd_alter_bit.3 gd_alter_entry.3 \
-								gd_alter_protection.3 gd_alter_spec.3 gd_bof.3 gd_bof64.3 \
-								gd_carray_len.3 gd_carrays.3 gd_cbopen.3 gd_close.3 \
-								gd_constants.3 gd_delete.3 gd_desync.3 gd_dirfile_standards.3 \
+								gd_alter_protection.3 gd_alter_spec.3 gd_array_len.3 gd_bof.3 \
+								gd_bof64.3 gd_carrays.3 gd_cbopen.3 gd_close.3 gd_constants.3 \
+								gd_delete.3 gd_desync.3 gd_dirfile_standards.3 \
 								gd_dirfilename.3 gd_encoding.3 gd_encoding_support.3 \
 								gd_endianness.3 gd_entry.3 gd_entry_list.3 gd_entry_type.3 \
 								gd_eof.3 gd_eof64.3 gd_error.3 gd_error_count.3 \
@@ -95,7 +95,8 @@ MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
 	gd_entry_list.3:gd_field_list.3 gd_entry_list.3:gd_field_list_by_type.3 \
 	gd_entry_list.3:gd_mfield_list.3 gd_entry_list.3:gd_mfield_list_by_type.3 \
 	gd_entry_list.3:gd_nmvectore.3 gd_entry_list.3:gd_vector_list.3 \
-	gd_frameoffset64.3:gd_alter_frameoffset64.3
+	gd_frameoffset64.3:gd_alter_frameoffset64.3 \
+	gd_array_len.3:gd_carray_len.3
 
 #man conversion
 HTMLMANS=$(addsuffix .html,${nodist_man_MANS}) \

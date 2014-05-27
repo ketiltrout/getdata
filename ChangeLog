@@ -1,3 +1,10 @@
+2014-05-27     D. V. Wiebe <getdata@ketiltrout.net> svn:907
+	* src/constant.c (gd_array_len): Added.
+	* src/constant.c (gd_carray_len): Replaced with a gd_array_len() call and
+	marked deprecated.
+	* src/string.c (gd_sarray_len): Deleted.
+	* man/gd_array_len.3: Renamed from man/gd_carray_len.3
+
 2014-05-23     D. V. Wiebe <getdata@ketiltrout.net> svn:906
 	* src/field_list.c (gd_sarrays gd_msarrays): Added.
 	* src/close.c (_GD_FreeD) src/entry.c (_GD_FreeE): Free sarray_value_list.

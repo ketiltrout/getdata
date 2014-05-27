@@ -53,7 +53,7 @@ int main(void)
   CHECKI(error, 0);
   CHECKI(ret, 0);
 
-  z = gd_sarray_len(D, "sarray");
+  z = gd_array_len(D, "sarray");
   CHECKU(z, 5);
 
   n = gd_get_sarray(D, "sarray", d);

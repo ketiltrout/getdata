@@ -127,7 +127,7 @@ New in verison 0.9.0a:
     or WINDOW fields no longer results in a segmentation fault.
 
   * BUG FIX: Attempts to read past the EOF of a gzipped field no longer results
-    in an I/O errorr, but successfully returns no data.
+    in an I/O error, but successfully returns no data.
 
   API Changes:
 
@@ -157,6 +157,10 @@ New in verison 0.9.0a:
 
   * gd_encoding_support() has been added to permit run-time determination of
     supported encodings.
+
+  * gd_array_len() is the new name for gd_carray_len().  It now also handles
+    STRING and SARRAY field types.  The gd_carray_len() name remains in the
+    library, but has been marked deprecated.
 
   * BUG FIX: If the dirfile path provided cannot be resolved (due to, for
     instance, a symbolic link pointing to a non-existent path), gd_open() and

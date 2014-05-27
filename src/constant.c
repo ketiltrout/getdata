@@ -121,11 +121,12 @@ int gd_get_constant(DIRFILE* D, const char *field_code_in,
   return gd_get_carray_slice(D, field_code_in, 0, 1, return_type, data_out);
 }
 
-size_t gd_carray_len(DIRFILE *D, const char *field_code_in) gd_nothrow
+size_t gd_array_len(DIRFILE *D, const char *field_code_in) gd_nothrow
 {
   gd_entry_t *entry;
   char* field_code;
   int repr;
+  size_t len = 0;
 
   dtrace("%p, \"%s\"", D, field_code_in);
 
@@ -145,24 +146,28 @@ size_t gd_carray_len(DIRFILE *D, const char *field_code_in) gd_nothrow
     return 0;
   }
 
-  if (entry->field_type != GD_CARRAY_ENTRY &&
-      entry->field_type != GD_CONST_ENTRY)
+  if (entry->field_type == GD_CARRAY_ENTRY ||
+      entry->field_type == GD_SARRAY_ENTRY)
   {
+    len = entry->EN(scalar,array_len);
+  } else if (entry->field_type == GD_CONST_ENTRY ||
+      entry->field_type == GD_STRING_ENTRY)
+  {
+    len = 1;
+  } else 
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-  }
 
   if (field_code != field_code_in)
     free(field_code);
 
-  if (D->error) {
-    dreturn("%i", 0);
-    return 0;
-  }
+  dreturn("%" PRNsize_t, len);
+  return len;
+}
 
-  dreturn("%" PRNsize_t, (entry->field_type == GD_CONST_ENTRY) ? 1 :
-    entry->EN(scalar,array_len));
-  return (entry->field_type == GD_CONST_ENTRY) ? 1 :
-    entry->EN(scalar,array_len);
+/* Deprecated alias */
+size_t gd_carray_len(DIRFILE *D, const char *field_code) gd_nothrow
+{
+  return gd_array_len(D, field_code);
 }
 
 static int _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, int repr,

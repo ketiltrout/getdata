@@ -50,7 +50,7 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   ret = gd_alter_carray(D, "carray", GD_NULL, 5);
   error = gd_error(D);
-  z = gd_carray_len(D, "carray");
+  z = gd_array_len(D, "carray");
   n = gd_get_carray(D, "carray", GD_FLOAT64, &d);
 
   gd_discard(D);

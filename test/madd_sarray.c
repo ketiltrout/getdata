@@ -55,7 +55,7 @@ int main(void)
     CHECKI(e.field_type, GD_SARRAY_ENTRY);
     gd_free_entry_strings(&e);
   }
-  n = (int)gd_sarray_len(D, "new/data");
+  n = (int)gd_array_len(D, "new/data");
   CHECKI(n, 6);
 
   gd_get_sarray(D, "new/data", data);
