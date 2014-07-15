@@ -1,6 +1,6 @@
 .\" dirfile.5.  The dirfile man page.
 .\"
-.\" Copyright (C) 2005, 2006, 2008, 2009 D. V. Wiebe
+.\" Copyright (C) 2005, 2006, 2008, 2009, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile 5 "1 April 2012" "Standards Version 9" "DATA FORMATS"
+.TH dirfile 5 "15 July 2014" "Standards Version 9" "DATA FORMATS"
 .SH NAME
 dirfile \(em a filesystem-based database format for time-ordered binary data
 .SH DESCRIPTION
@@ -111,12 +111,7 @@ Unencoded complex numbers are stored on disk in "Fortran order", that is
 with the IEEE-754 real part followed by the IEEE-754 imaginary part.  The
 specified endianness of the two components follows that of purely real floating
 point numbers.  Endianness does not affect the ordering of the real and
-imaginary parts.  This format also conforms to the C99 standard.  The latest
-C++ standard (C++98) does not specify a standard storage format for native
-complex numbers, but the upcoming standard, (C++0x) is intended to specify the
-above format for compatibility with C99
-.RI ( see :
-ISO/IEC JTC1/SC22/WG21/N1388).
+imaginary parts.  This format also conforms to the C99 and C++11 standards.
 
 To aid in using complex valued data, dirfile field codes may contain a
 .I representation suffix
