@@ -56,7 +56,10 @@ namespace GetData {
     DivideEntryType   = GD_DIVIDE_ENTRY,
     RecipEntryType    = GD_RECIP_ENTRY,
     WindowEntryType   = GD_WINDOW_ENTRY,
-    MplexEntryType    = GD_MPLEX_ENTRY
+    MplexEntryType    = GD_MPLEX_ENTRY,
+    SarrayEntryType   = GD_SARRAY_ENTRY,
+    IndirEntryType    = GD_INDIR_ENTRY,
+    SindirEntryType   = GD_SINDIR_ENTRY,
   };
 
   enum WindOpType {

@@ -52,7 +52,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   D = gdmx_to_dirfile(prhs[0]);
   field_name = gdmx_to_string(prhs, 1, 0);
   const_type = gdmx_to_gd_type(prhs, 2);
-  gdmx_to_data(&data, &data_type, &n, prhs, 3);
+  gdmx_to_data(&data, &data_type, &n, prhs[3], 3);
   fragment_index = gdmx_to_int(prhs, 4);
 
   gd_add_carray(D, field_name, const_type, n, data_type, data, fragment_index);

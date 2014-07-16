@@ -56,7 +56,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     gdmx_err(D, 0);
   }
 
-  len = gd_carray_len(D, field_code);
+  len = gd_array_len(D, field_code);
   gdmx_err(D, 0);
 
   plhs[0] = gdmx_vector(type, len, &data);

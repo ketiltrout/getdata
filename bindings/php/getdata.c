@@ -442,6 +442,9 @@ static void gdphp_from_entry(zval *z, gd_entry_t *E)
       add_assoc_long(z, "numbits", E->EN(bit,numbits));
       gdphp_add_assoc_scalars(z, E, 0x3);
       break;
+    case GD_SARRAY_ENTRY:
+      add_assoc_long(z, "array_len", E->EN(scalar,array_len));
+      break;
     case GD_CARRAY_ENTRY:
       add_assoc_long(z, "array_len", E->EN(scalar,array_len));
       /* fallthrough */
@@ -464,6 +467,8 @@ static void gdphp_from_entry(zval *z, gd_entry_t *E)
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       gdphp_add_assoc_string_arr(z, "in_fields", E->in_fields, 2);
       break;
     case GD_PHASE_ENTRY:
@@ -810,7 +815,74 @@ static int gdphp_convert_cmparray(double *out, zval *z, int min, int max,
 }
 
 /* convert a PHP array to an array of strings; returns the number of elements */
-static int gdphp_convert_sarray(char **out, zval *z, int min, int max,
+static size_t gdphp_convert_sarray(const char ***out, const zval *z, int p)
+{
+  HashTable *a = Z_ARRVAL_P(z);
+  HashPosition i;
+  zval **d = NULL;
+  size_t j, n = 0;
+  unsigned key_len;
+  char *key;
+  long index;
+
+  GDPHP_CONTEXTp(ctx,p);
+
+  dtrace("%p, %p, %i", out, z, p);
+
+  /* count and check */
+  for (zend_hash_internal_pointer_reset_ex(a, &i);
+      zend_hash_get_current_data_ex(a, (void*)&d, &i) == SUCCESS;
+      zend_hash_move_forward_ex(a, &i))
+  {
+    /* check key */
+    if (zend_hash_get_current_key_ex(a, &key, &key_len, (ulong*)&index, 0, &i)
+        == HASH_KEY_IS_STRING)
+    {
+      GDPHP_DIE(&ctx, "cannot use associative array");
+    } else if (index < 0)
+      GDPHP_DIE2(&ctx, "bad array index (%li)", index);
+
+    if (Z_TYPE_PP(d) != IS_STRING)
+      GDPHP_DIE(&ctx, "string array required");
+
+    if (n < index)
+      n = index;
+  }
+  n++;
+
+  if (n == 0) {
+    *out = NULL;
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* allocate and zero */
+  *out = emalloc(sizeof(**out) * n);
+  for (j = 0; j < n; ++j)
+    (*out)[j] = NULL;
+
+  /* convert */
+  for (zend_hash_internal_pointer_reset_ex(a, &i);
+      zend_hash_get_current_data_ex(a, (void*)&d, &i) == SUCCESS;
+      zend_hash_move_forward_ex(a, &i))
+  {
+    zend_hash_get_current_key_ex(a, &key, &key_len, (ulong*)&index, 0, &i);
+
+    (*out)[index] = Z_STRVAL_PP(d);
+  }
+
+  /* look for holes */
+  for (j = 0; j < n; ++j)
+    if ((*out)[j] == NULL)
+      GDPHP_DIE2(&ctx, "missing array index (%li)", j);
+
+  dreturn("%zu", n);
+  return n;
+}
+
+/* convert a PHP array to a bounded array of strings; returns the number of
+ * elements */
+static int gdphp_convert_nsarray(char **out, zval *z, int min, int max,
     struct gdphp_context_t *ctx)
 {
   HashTable *a = Z_ARRVAL_P(z);
@@ -1107,7 +1179,7 @@ static int gdphp_entry_infields(char **l, HashTable *a, int min, int max,
   {
     ctx->k = "in_fields";
     if (Z_TYPE_PP(z) == IS_ARRAY)
-      n = gdphp_convert_sarray(l, *z, min, max, ctx);
+      n = gdphp_convert_nsarray(l, *z, min, max, ctx);
     else if (Z_TYPE_PP(z) == IS_STRING) {
       if (min > 1)
         GDPHP_DIE(ctx, "bad string array count");
@@ -1291,6 +1363,10 @@ static void gdphp_to_entry(gd_entry_t *E, zval *z, const gd_entry_t *old_E,
           E->EN(bit,numbits) = 1;
       }
       break;
+    case GD_SARRAY_ENTRY:
+      E->EN(scalar,array_len) = gdphp_entry_long(a, "array_len",
+          sizeof("array_len"), NULL, partial, ctx);
+      break;
     case GD_CARRAY_ENTRY:
       E->EN(scalar,array_len) = gdphp_entry_long(a, "array_len",
           sizeof("array_len"), NULL, partial, ctx);
@@ -1356,6 +1432,8 @@ static void gdphp_to_entry(gd_entry_t *E, zval *z, const gd_entry_t *old_E,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       gdphp_entry_infields((char**)E->in_fields, a, 2, 2, partial, ctx);
       break;
     case GD_PHASE_ENTRY:
@@ -1438,12 +1516,16 @@ static void gdphp_to_entry(gd_entry_t *E, zval *z, const gd_entry_t *old_E,
   dreturnvoid();
 }
 
-/* convert a C string list to a array of strings */
-static void gdphp_to_string_array(zval *z, const char **l, int n)
+/* convert a C string list to a array of strings; if n is zero, the list is
+ * NULL terminated */
+static zval *gdphp_to_string_array(zval *z, const char **l, int n)
 {
   int i;
 
   dtrace("%p, %p, %i", z, l, n);
+
+  if (z == NULL)
+    ALLOC_INIT_ZVAL(z);
 
   array_init(z);
 
@@ -1453,7 +1535,8 @@ static void gdphp_to_string_array(zval *z, const char **l, int n)
     else
       add_index_string(z, i, l[i], 1);
 
-  dreturnvoid();
+  dreturn("%p", z);
+  return z;
 }
 
 /* convert a datum to a PHP value */
@@ -1659,6 +1742,9 @@ PHP_MINIT_FUNCTION(getdata)
   /* initialise globals */
   ZEND_INIT_MODULE_GLOBALS(getdata, gdphp_init_globals, NULL);
 
+  /* INI entries */
+  REGISTER_INI_ENTRIES();
+
   /* Register constants */
   gdphp_register_constants(module_number);
 
@@ -1667,9 +1753,6 @@ PHP_MINIT_FUNCTION(getdata)
       module_number TSRMLS_CC);
   zend_register_long_constant(ZEND_STRS("GD_FLOAT"), GD_FLOAT64, CONST_CS,
       module_number TSRMLS_CC);
-
-  /* INI entries */
-  REGISTER_INI_ENTRIES();
 
   /* dirfile resource */
   le_gdphp_dirfile = zend_register_list_destructors_ex(gdphp_dirfile_dtor, NULL,
@@ -1808,6 +1891,30 @@ PHP_FUNCTION(gd_add_carray)
   GDPHP_RETURN_BOOL(r);
 }
 
+PHP_FUNCTION(gd_add_sarray)
+{
+  char *field_code;
+  int field_code_len;
+  zval *zdata;
+  DIRFILE *D;
+
+  int r;
+  size_t n;
+  const char **d;
+  long index = 0;
+
+  dtracephp();
+
+  GDPHP_PARSED("szl", &field_code, &field_code_len, &zdata, &index);
+
+  n = gdphp_convert_sarray(&d, zdata, 1);
+
+  r = gd_add_sarray(D, field_code, n, d, index);
+  efree(d);
+
+  GDPHP_RETURN_BOOL(r);
+}
+
 PHP_FUNCTION(gd_add_const)
 {
   char *field_code;
@@ -1846,6 +1953,38 @@ PHP_FUNCTION(gd_add_divide)
   GDPHP_RETURN_BOOL(gd_add_divide(D, field_code, in1, in2, index));
 }
 
+PHP_FUNCTION(gd_add_indir)
+{
+  char *field_code, *in1, *in2;
+  int field_code_len, in1_len, in2_len;
+  long index = 0;
+
+  DIRFILE *D;
+
+  dtracephp();
+
+  GDPHP_PARSED("sss|l", &field_code, &field_code_len, &in1, &in1_len, &in2,
+      &in2_len, &index);
+
+  GDPHP_RETURN_BOOL(gd_add_indir(D, field_code, in1, in2, index));
+}
+
+PHP_FUNCTION(gd_add_sindir)
+{
+  char *field_code, *in1, *in2;
+  int field_code_len, in1_len, in2_len;
+  long index = 0;
+
+  DIRFILE *D;
+
+  dtracephp();
+
+  GDPHP_PARSED("sss|l", &field_code, &field_code_len, &in1, &in1_len, &in2,
+      &in2_len, &index);
+
+  GDPHP_RETURN_BOOL(gd_add_sindir(D, field_code, in1, in2, index));
+}
+
 PHP_FUNCTION(gd_add_lincom)
 {
   char *field_code;
@@ -1867,7 +2006,7 @@ PHP_FUNCTION(gd_add_lincom)
 
   /* these don't return on error */
   ctx.p = 2;
-  n = gdphp_convert_sarray((char**)in, zin, 1, GD_MAX_LINCOM, &ctx);
+  n = gdphp_convert_nsarray((char**)in, zin, 1, GD_MAX_LINCOM, &ctx);
   ctx.p = 3;
   gdphp_convert_cmparray(m, zm, n, n, 0, &ctx);
   ctx.p = 4;
@@ -2184,6 +2323,21 @@ PHP_FUNCTION(gd_alter_carray)
   GDPHP_RETURN_BOOL(gd_alter_carray(D, field_code, type, len));
 }
 
+PHP_FUNCTION(gd_alter_sarray)
+{
+  char *field_code;
+  int field_code_len;
+  long len = 0;
+
+  DIRFILE *D;
+
+  dtracephp();
+
+  GDPHP_PARSED("s|l", &field_code, &field_code_len, &len);
+
+  GDPHP_RETURN_BOOL(gd_alter_sarray(D, field_code, len));
+}
+
 PHP_FUNCTION(gd_alter_const)
 {
   char *field_code;
@@ -2286,6 +2440,44 @@ PHP_FUNCTION(gd_alter_divide)
   GDPHP_RETURN_BOOL(gd_alter_divide(D, field_code, in_field1p, in_field2p));
 }
 
+PHP_FUNCTION(gd_alter_indir)
+{
+  char *field_code, *in_field1 = NULL, *in_field2 = NULL;
+  int field_code_len, in_field1_len, in_field2_len;
+  
+  DIRFILE *D;
+  char *in_field1p, *in_field2p;
+
+  dtracephp();
+
+  GDPHP_PARSED("s|ss", &field_code, &field_code_len, &in_field1,
+      &in_field1_len, &in_field2, &in_field2_len);
+
+  in_field1p = gdphp_check_null_string(in_field1);
+  in_field2p = gdphp_check_null_string(in_field2);
+  
+  GDPHP_RETURN_BOOL(gd_alter_indir(D, field_code, in_field1p, in_field2p));
+}
+
+PHP_FUNCTION(gd_alter_sindir)
+{
+  char *field_code, *in_field1 = NULL, *in_field2 = NULL;
+  int field_code_len, in_field1_len, in_field2_len;
+  
+  DIRFILE *D;
+  char *in_field1p, *in_field2p;
+
+  dtracephp();
+
+  GDPHP_PARSED("s|ss", &field_code, &field_code_len, &in_field1,
+      &in_field1_len, &in_field2, &in_field2_len);
+
+  in_field1p = gdphp_check_null_string(in_field1);
+  in_field2p = gdphp_check_null_string(in_field2);
+  
+  GDPHP_RETURN_BOOL(gd_alter_sindir(D, field_code, in_field1p, in_field2p));
+}
+
 PHP_FUNCTION(gd_alter_lincom)
 {
   char *field_code;
@@ -2321,7 +2513,8 @@ PHP_FUNCTION(gd_alter_lincom)
     min = n, max = n;
     ctx.p = 2;
 
-    nout = gdphp_convert_sarray((char**)in_fields, zin, 1, GD_MAX_LINCOM, &ctx);
+    nout = gdphp_convert_nsarray((char**)in_fields, zin, 1, GD_MAX_LINCOM,
+        &ctx);
 
     if (n == 0)
       min = max = n = nout;
@@ -2657,9 +2850,33 @@ PHP_FUNCTION(gd_carray_len)
 
   dtracephp();
 
+  zend_error(E_DEPRECATED,
+      "gd_carray_len() is deprecated.  Use gd_array_len() instead.");
+
   GDPHP_PARSED("s", &field_code, &field_code_len);
 
-  n = gd_carray_len(D, field_code);
+  n = gd_array_len(D, field_code);
+
+  if (n == 0)
+    GDPHP_RETURN_F;
+
+  dreturn("%zu", n);
+  RETURN_LONG(n);
+}
+
+PHP_FUNCTION(gd_array_len)
+{
+  char *field_code;
+  int field_code_len;
+
+  DIRFILE *D;
+  size_t n;
+
+  dtracephp();
+
+  GDPHP_PARSED("s", &field_code, &field_code_len);
+
+  n = gd_array_len(D, field_code);
 
   if (n == 0)
     GDPHP_RETURN_F;
@@ -2694,6 +2911,31 @@ PHP_FUNCTION(gd_carrays)
   for (i = 0; c[i].n; ++i)
     add_index_zval(return_value, i, gdphp_from_data(NULL, c[i].n, data_type,
           c[i].d, 1, unpack));
+
+  dreturnvoid();
+}
+
+PHP_FUNCTION(gd_sarrays)
+{
+  DIRFILE *D;
+  size_t i;
+  const char ***s;
+  zval *z;
+
+  dtracephp();
+
+  GDPHP_PARSED_ONLY();
+
+  s = gd_sarrays(D);
+
+  if (s == NULL)
+    GDPHP_RETURN_F;
+
+  /* convert */
+  array_init(return_value);
+
+  for (i = 0; s[i]; ++i)
+    add_index_zval(return_value, i, gdphp_to_string_array(NULL, s[i], 0));
 
   dreturnvoid();
 }
@@ -3219,7 +3461,7 @@ PHP_FUNCTION(gd_get_carray)
   unpack = gdphp_unpack(zunpack);
 
   if (len == -1) {
-    len = gd_carray_len(D, field_code) - start;
+    len = gd_array_len(D, field_code) - start;
     if (len == 0) /* error */
       GDPHP_RETURN_F;
   }
@@ -3242,6 +3484,46 @@ PHP_FUNCTION(gd_get_carray)
   }
 
   gdphp_from_data(return_value, len, data_type, data, 0, unpack);
+  dreturn("%li", len);
+}
+
+PHP_FUNCTION(gd_get_sarray)
+{
+  char *field_code;
+  int field_code_len;
+  long start = 0;
+  zval *zlen = NULL;
+
+  long len;
+  const char **data = NULL;
+  DIRFILE *D;
+  GDPHP_CONTEXTp(ctx,3);
+
+  dtracephp();
+
+  GDPHP_PARSED("s|lz", &field_code, &field_code_len, &start, &zlen);
+
+  len = gdphp_long_from_zval_null(zlen, -1);
+
+  if (len == -1) {
+    len = gd_array_len(D, field_code) - start;
+    if (len == 0) /* error */
+      GDPHP_RETURN_F;
+  } else if (len == 0) { /* explicit request for no data */
+    dreturnvoid();
+    array_init(return_value);
+    return;
+  }
+
+  data = emalloc(len * sizeof(*data));
+
+  if (gd_get_sarray_slice(D, field_code, start, len, data)) {
+    efree(data);
+    GDPHP_RETURN_F;
+  }
+
+  gdphp_to_string_array(return_value, data, len);
+  efree(data);
   dreturn("%li", len);
 }
 
@@ -3338,6 +3620,46 @@ PHP_FUNCTION(gd_getdata)
   GDPHP_CHECK_ERROR(D);
 
   gdphp_from_data(return_value, n, data_type, data, 0, unpack);
+  dreturn("%" PRNsize_t, n);
+}
+
+PHP_FUNCTION(gd_getstrdata)
+{
+  long first_frame, first_sample, num_frames, num_samples;
+  char *field_code;
+  int field_code_len;
+  size_t ns;
+
+  const char **data = NULL;
+  DIRFILE *D;
+  size_t n = 0;
+  GDPHP_CONTEXTp(ctx,6);
+
+  dtracephp();
+
+  GDPHP_PARSED("sllll", &field_code, &field_code_len, &first_frame,
+      &first_sample, &num_frames, &num_samples);
+
+  /* figure out how much data we have */
+  if (num_frames > 0) {
+    unsigned spf = gd_spf(D, field_code);
+    if (spf == 0)
+      GDPHP_RETURN_F;
+    ns = num_frames * spf + num_samples;
+  } else
+    ns = num_samples;
+
+  /* allocate a buffer */
+  data = emalloc(ns * sizeof(*data));
+
+  n = gd_getstrdata(D, field_code, first_frame, first_sample, 0, ns, data);
+
+  if (gd_error(D)) {
+    efree(data);
+    GDPHP_RETURN_F;
+  }
+
+  gdphp_to_string_array(return_value, data, n);
   dreturn("%" PRNsize_t, n);
 }
 
@@ -3519,6 +3841,30 @@ PHP_FUNCTION(gd_madd_carray)
   GDPHP_RETURN_BOOL(r);
 }
 
+PHP_FUNCTION(gd_madd_sarray)
+{
+  char *field_code, *parent;
+  int field_code_len, parent_len;
+  zval *zdata;
+  DIRFILE *D;
+
+  int r;
+  size_t n;
+  const char **d;
+
+  dtracephp();
+
+  GDPHP_PARSED("ssz", &parent, &parent_len, &field_code, &field_code_len,
+      &zdata);
+
+  n = gdphp_convert_sarray(&d, zdata, 2);
+
+  r = gd_madd_sarray(D, parent, field_code, n, d);
+  efree(d);
+
+  GDPHP_RETURN_BOOL(r);
+}
+
 PHP_FUNCTION(gd_madd_const)
 {
   char *field_code, *parent;
@@ -3557,6 +3903,36 @@ PHP_FUNCTION(gd_madd_divide)
   GDPHP_RETURN_BOOL(gd_madd_divide(D, parent, field_code, in1, in2));
 }
 
+PHP_FUNCTION(gd_madd_indir)
+{
+  char *field_code, *in1, *in2, *parent;
+  int field_code_len, in1_len, in2_len, parent_len;
+
+  DIRFILE *D;
+
+  dtracephp();
+
+  GDPHP_PARSED("ssss", &parent, &parent_len, &field_code, &field_code_len, &in1,
+      &in1_len, &in2, &in2_len);
+
+  GDPHP_RETURN_BOOL(gd_madd_indir(D, parent, field_code, in1, in2));
+}
+
+PHP_FUNCTION(gd_madd_sindir)
+{
+  char *field_code, *in1, *in2, *parent;
+  int field_code_len, in1_len, in2_len, parent_len;
+
+  DIRFILE *D;
+
+  dtracephp();
+
+  GDPHP_PARSED("ssss", &parent, &parent_len, &field_code, &field_code_len, &in1,
+      &in1_len, &in2, &in2_len);
+
+  GDPHP_RETURN_BOOL(gd_madd_sindir(D, parent, field_code, in1, in2));
+}
+
 PHP_FUNCTION(gd_madd_lincom)
 {
   char *field_code, *parent;
@@ -3578,7 +3954,7 @@ PHP_FUNCTION(gd_madd_lincom)
 
   /* these don't return on error */
   ctx.p = 2;
-  n = gdphp_convert_sarray((char**)in, zin, 1, GD_MAX_LINCOM, &ctx);
+  n = gdphp_convert_nsarray((char**)in, zin, 1, GD_MAX_LINCOM, &ctx);
   ctx.p = 3;
   gdphp_convert_cmparray(m, zm, n, n, 0, &ctx);
   ctx.p = 4;
@@ -3807,6 +4183,33 @@ PHP_FUNCTION(gd_mcarrays)
   for (i = 0; c[i].n; ++i)
     add_index_zval(return_value, i, gdphp_from_data(NULL, c[i].n, data_type,
           c[i].d, 1, unpack));
+
+  dreturnvoid();
+}
+
+PHP_FUNCTION(gd_msarrays)
+{
+  char *parent;
+  int parent_len;
+
+  DIRFILE *D;
+  int i;
+  const char ***s;
+
+  dtracephp();
+
+  GDPHP_PARSED("s", &parent, &parent_len);
+
+  s = gd_msarrays(D, parent);
+
+  if (s == NULL)
+    GDPHP_RETURN_F;
+
+  /* convert */
+  array_init(return_value);
+
+  for (i = 0; s[i]; ++i)
+    add_index_zval(return_value, i, gdphp_to_string_array(NULL, s[i], 0));
 
   dreturnvoid();
 }
@@ -4334,6 +4737,37 @@ PHP_FUNCTION(gd_put_carray)
   GDPHP_RETURN_BOOL(r);
 }
 
+PHP_FUNCTION(gd_put_sarray)
+{
+  char *field_code;
+  int field_code_len;
+  zval *z1, *z2 = NULL;
+
+  DIRFILE *D;
+  int r;
+  long start = 0;
+  size_t n;
+  const char **d;
+
+  dtracephp();
+
+  GDPHP_PARSED("sz|z", &field_code, &field_code_len, &z1, &z2);
+
+  /* if z2 exists, it's the data and z1 is the start, otherwise z1 is the data
+   */
+  if (z2 == NULL)
+    n = gdphp_convert_sarray(&d, z1, 2);
+  else {
+    start = Z_LVAL_P(z1);
+    n = gdphp_convert_sarray(&d, z2, 3);
+  }
+
+  r = gd_put_sarray_slice(D, field_code, start, n, d);
+  efree(d);
+
+  GDPHP_RETURN_BOOL(r);
+}
+
 PHP_FUNCTION(gd_put_constant)
 {
   char *field_code;
@@ -4686,6 +5120,24 @@ PHP_FUNCTION(gd_verbose_prefix)
   GDPHP_RETURN_BOOL(gd_verbose_prefix(D, prefixp));
 }
 
+PHP_FUNCTION(gd_encoding_support)
+{
+  unsigned long e;
+  long r;
+
+  dtracephp();
+
+  GDPHP_PARSE("l", &e);
+
+  r = gd_encoding_support(e);
+
+  if (r == -1)
+    GDPHP_RETURN_F;
+
+  dreturn("%li", r);
+  RETURN_LONG(r);
+}
+
 
 /* MODULE DECLARATIONS */
 static const zend_function_entry getdata_functions[] = {
@@ -4695,6 +5147,7 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_add_carray, NULL)
     PHP_FE(gd_add_const, NULL)
     PHP_FE(gd_add_divide, NULL)
+    PHP_FE(gd_add_indir, NULL)
     PHP_FE(gd_add_lincom, NULL)
     PHP_FE(gd_add_linterp, NULL)
     PHP_FE(gd_add_mplex, NULL)
@@ -4703,7 +5156,9 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_add_polynom, NULL)
     PHP_FE(gd_add_raw, NULL)
     PHP_FE(gd_add_recip, NULL)
+    PHP_FE(gd_add_sarray, NULL)
     PHP_FE(gd_add_sbit, NULL)
+    PHP_FE(gd_add_sindir, NULL)
     PHP_FE(gd_add_spec, NULL)
     PHP_FE(gd_add_string, NULL)
     PHP_FE(gd_add_window, NULL)
@@ -4718,6 +5173,7 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_alter_endianness, NULL)
     PHP_FE(gd_alter_entry, NULL)
     PHP_FE(gd_alter_frameoffset, NULL)
+    PHP_FE(gd_alter_indir, NULL)
     PHP_FE(gd_alter_lincom, NULL)
     PHP_FE(gd_alter_linterp, NULL)
     PHP_FE(gd_alter_mplex, NULL)
@@ -4727,12 +5183,15 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_alter_protection, NULL)
     PHP_FE(gd_alter_raw, NULL)
     PHP_FE(gd_alter_recip, NULL)
+    PHP_FE(gd_alter_sarray, NULL)
     PHP_FE(gd_alter_sbit, NULL)
+    PHP_FE(gd_alter_sindir, NULL)
     PHP_FE(gd_alter_spec, NULL)
     PHP_FE(gd_alter_window, NULL)
+    PHP_FE(gd_array_len, NULL)
     PHP_FE(gd_bof, NULL)
-    PHP_FE(gd_carray_len, NULL)
     PHP_FE(gd_carrays, NULL)
+    PHP_FE(gd_carray_len, NULL)
     PHP_FE(gd_close, NULL)
     PHP_FE(gd_constants, NULL)
     PHP_FE(gd_delete, NULL)
@@ -4743,6 +5202,7 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_dirfilename, NULL)
     PHP_FE(gd_discard, NULL)
     PHP_FE(gd_encoding, NULL)
+    PHP_FE(gd_encoding_support, NULL)
     PHP_FE(gd_endianness, NULL)
     PHP_FE(gd_entry, NULL)
     PHP_FE(gd_entry_list, NULL)
@@ -4761,8 +5221,10 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_frameoffset, NULL)
     PHP_FE(gd_get_carray, NULL)
     PHP_FE(gd_get_constant, NULL)
+    PHP_FE(gd_get_sarray, NULL)
     PHP_FE(gd_get_string, NULL)
     PHP_FE(gd_getdata, NULL)
+    PHP_FE(gd_getstrdata, NULL)
     PHP_FE(gd_hidden, NULL)
     PHP_FE(gd_hide, NULL)
     PHP_FE(gd_include, NULL)
@@ -4774,6 +5236,7 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_madd_carray, NULL)
     PHP_FE(gd_madd_const, NULL)
     PHP_FE(gd_madd_divide, NULL)
+    PHP_FE(gd_madd_indir, NULL)
     PHP_FE(gd_madd_lincom, NULL)
     PHP_FE(gd_madd_linterp, NULL)
     PHP_FE(gd_madd_mplex, NULL)
@@ -4781,7 +5244,9 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_madd_phase, NULL)
     PHP_FE(gd_madd_polynom, NULL)
     PHP_FE(gd_madd_recip, NULL)
+    PHP_FE(gd_madd_sarray, NULL)
     PHP_FE(gd_madd_sbit, NULL)
+    PHP_FE(gd_madd_sindir, NULL)
     PHP_FE(gd_madd_spec, NULL)
     PHP_FE(gd_madd_string, NULL)
     PHP_FE(gd_madd_window, NULL)
@@ -4793,6 +5258,7 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_mfield_list_by_type, NULL)
     PHP_FE(gd_move, NULL)
     PHP_FE(gd_mplex_lookback, NULL)
+    PHP_FE(gd_msarrays, NULL)
     PHP_FE(gd_mstrings, NULL)
     PHP_FE(gd_mvector_list, NULL)
     PHP_FE(gd_naliases, NULL)
@@ -4812,6 +5278,7 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_protection, NULL)
     PHP_FE(gd_put_carray, NULL)
     PHP_FE(gd_put_constant, NULL)
+    PHP_FE(gd_put_sarray, NULL)
     PHP_FE(gd_put_string, NULL)
     PHP_FE(gd_putdata, NULL)
     PHP_FE(gd_raw_close, NULL)
@@ -4819,6 +5286,7 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_reference, NULL)
     PHP_FE(gd_rename, NULL)
     PHP_FE(gd_rewrite_fragment, NULL)
+    PHP_FE(gd_sarrays, NULL)
     PHP_FE(gd_seek, NULL)
     PHP_FE(gd_spf, NULL)
     PHP_FE(gd_strings, NULL)

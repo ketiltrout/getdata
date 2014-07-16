@@ -773,7 +773,7 @@ mxArray *gdmx_from_nstring_list(const char **l, size_t n)
   mxArray *lhs;
   size_t i;
 
-  dtrace("%p", l);
+  dtrace("%p, %zu", l, n);
 
   /* create and populate cell array */
   lhs = mxCreateCellMatrix(1, n);
@@ -858,6 +858,8 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
   const int recip_nfields = GDMX_NSCALAR + 2;
   const char *recip_fields[] = {GDMX_COMMON_FIELDS, "in_fields", "dividend",
     GDMX_SCALAR_FIELDS};
+  const int sarray_nfields = 1;
+  const char *sarray_fields[] = {GDMX_COMMON_FIELDS, "array_len"};
   const int window_nfields = GDMX_NSCALAR + 3;
   const char *window_fields[] = {GDMX_COMMON_FIELDS, "in_fields", "windop",
     "threshold", GDMX_SCALAR_FIELDS};
@@ -870,6 +872,10 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
     case GD_SBIT_ENTRY:
       nfields = GDMX_NCOMMON + bit_nfields;
       field_names = bit_fields;
+      break;
+    case GD_SARRAY_ENTRY:
+      nfields = GDMX_NCOMMON + sarray_nfields;
+      field_names = sarray_fields;
       break;
     case GD_CARRAY_ENTRY:
       nfields = GDMX_NCOMMON + carray_nfields;
@@ -898,6 +904,8 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       nfields = GDMX_NCOMMON + multiply_nfields;
       field_names = multiply_fields;
       break;
@@ -980,6 +988,8 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       mxSetField(lhs, 0, "in_fields",
           gdmx_from_nstring_list((const char**)E->in_fields, 2));
       break;
@@ -1012,6 +1022,10 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
       else
         mxSetField(lhs, 0, "dividend", gdmx_from_double(E->EN(recip,dividend)));
       nscalar = 1;
+      break;
+    case GD_SARRAY_ENTRY:
+      mxSetField(lhs, 0, "array_len",
+          gdmx_from_size_t(E->EN(scalar,array_len)));
       break;
     case GD_WINDOW_ENTRY:
       mxSetField(lhs, 0, "in_fields",
@@ -1076,6 +1090,26 @@ mxArray *gdmx_from_carrays(const gd_carray_t *c, gd_type_t type)
 
     mxSetCell(lhs, n, a);
   }
+
+  dreturn("%p", lhs);
+  return lhs;
+}
+
+mxArray *gdmx_from_sarrays(const char ***l)
+{
+  mxArray *lhs;
+  size_t i, n;
+
+  dtrace("%p", l);
+
+  /* count */
+  for (n = 0; l[n]; ++n)
+    ;
+
+  /* create and populate cell array of cell arrays */
+  lhs = mxCreateCellMatrix(1, n);
+  for (i = 0; i < n; ++i)
+    mxSetCell(lhs, i, gdmx_from_string_list(l[i]));
 
   dreturn("%p", lhs);
   return lhs;
@@ -1271,6 +1305,10 @@ gd_entry_t *gdmx_to_entry(const mxArray **rhs, int n, unsigned flags)
       gdmx_convert_struct_scalar(rhs[n], &ctx, "numbits", GD_INT_TYPE,
           &E->EN(bit,numbits));
       break;
+    case GD_SARRAY_ENTRY:
+      gdmx_convert_struct_scalar(rhs[n], &ctx, "array_len", GD_UINT64, &s);
+      E->EN(scalar,array_len) = (size_t)s;
+      break;
     case GD_CARRAY_ENTRY:
       gdmx_convert_struct_scalar(rhs[n], &ctx, "array_len", GD_UINT64, &s);
       E->EN(scalar,array_len) = (size_t)s;
@@ -1281,6 +1319,8 @@ gd_entry_t *gdmx_to_entry(const mxArray **rhs, int n, unsigned flags)
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       gdmx_convert_in_fields(rhs[n], &ctx, E);
       break;
     case GD_LINCOM_ENTRY:
@@ -1376,8 +1416,7 @@ gd_entry_t *gdmx_to_entry(const mxArray **rhs, int n, unsigned flags)
           E->scalar_ind[0] = -1;
       } else if (!mxIsCell(scalar))
         mexErrMsgIdAndTxt("GetData:GDMX:BadEntryScalars",
-            "Field 'scalar' must be a string or cell array in parameter %i", n,
-            mxGetClassName(scalar));
+            "Field 'scalar' must be a string or cell array in parameter %i", n);
       else {
         abort();
       }
@@ -1473,7 +1512,7 @@ void gdmx_fix_vector(mxArray *lhs, gd_type_t type, size_t nsamp, void *data)
 }
 
 void gdmx_to_data(void **data, gd_type_t *type, size_t *nsamp,
-    const mxArray **rhs, int n)
+    const mxArray *rhs, int n)
 {
   int cflag = 0;
   size_t i, ndims, ns = 1;
@@ -1484,16 +1523,16 @@ void gdmx_to_data(void **data, gd_type_t *type, size_t *nsamp,
   dtrace("%p, %p, %p, %p, %i", data, type, nsamp, rhs, n);
 
   /* check for complex data */
-  if (mxIsComplex(rhs[n]))
+  if (mxIsComplex(rhs))
     cflag = 1;
 
   /* datatype */
-  *type = t = gdmx_type(rhs[n], &ctx, cflag);
+  *type = t = gdmx_type(rhs, &ctx, cflag);
 
   /* length */
-  ndims = mxGetNumberOfDimensions(rhs[n]);
+  ndims = mxGetNumberOfDimensions(rhs);
 
-  dims = mxGetDimensions(rhs[n]);
+  dims = mxGetDimensions(rhs);
   for (i = 0; i < ndims; ++i)
     ns *= dims[i];
 
@@ -1505,8 +1544,8 @@ void gdmx_to_data(void **data, gd_type_t *type, size_t *nsamp,
     *data = mxMalloc(sizeof(float) * 2 * ns);
     d = (float*)*data;
 
-    pr = (float*)mxGetData(rhs[n]);
-    pi = (float*)mxGetImagData(rhs[n]);
+    pr = (float*)mxGetData(rhs);
+    pi = (float*)mxGetImagData(rhs);
 
     for (i = 0; i < ns; ++i) {
       d[i * 2] = pr[i];
@@ -1517,15 +1556,15 @@ void gdmx_to_data(void **data, gd_type_t *type, size_t *nsamp,
     *data = mxMalloc(sizeof(double) * 2 * ns);
     d = (double*)*data;
 
-    pr = (double*)mxGetData(rhs[n]);
-    pi = (double*)mxGetImagData(rhs[n]);
+    pr = (double*)mxGetData(rhs);
+    pi = (double*)mxGetImagData(rhs);
 
     for (i = 0; i < ns; ++i) {
       d[i * 2] = pr[i];
       d[i * 2 + 1] = pi[i];
     }
   } else
-    *data = mxGetData(rhs[n]);
+    *data = mxGetData(rhs);
 
   dreturn("%p; 0x%X, %zu", *data, *type, *nsamp);
 }
@@ -1536,6 +1575,43 @@ void gdmx_free_data(void *data, gd_type_t type)
 
   if (type & GD_COMPLEX)
     mxFree(data);
+
+  dreturnvoid();
+}
+
+void gdmx_to_sdata(const char ***data, size_t *nsamp, const mxArray *rhs, int n)
+{
+  size_t i, ndims, ns;
+  const mwSize *dims;
+  struct gdmx_context_t ctx = { NULL, NULL, n };
+
+  dtrace("%p, %p, %p, %i", data, nsamp, rhs, n);
+
+  if (!mxIsCell(rhs))
+    mexErrMsgIdAndTxt("GetData:GDMX:BadData",
+        "Expected cell array of strings in %s, %i.",
+        gdmx_context(&ctx, 0), (int)mxGetClassID(rhs));
+  
+  *nsamp = ns = gdmx_get_length(rhs);
+
+  /* create the string list */
+  *data = mxMalloc(sizeof(**data) * ns);
+
+  for (i = 0; i < ns; ++i)
+    (*data)[i] = gdmx_to_string_(mxGetCell(rhs, i), &ctx, 1);
+
+  dreturn("%p; %zu", *data, *nsamp);
+}
+
+void gdmx_free_sdata(const char **data, size_t n)
+{
+  size_t i;
+
+  dtrace("%p, %zu", data, n);
+
+  for (i = 0; i < n; ++i)
+    mxFree((char*)data[i]);
+  mxFree(data);
 
   dreturnvoid();
 }

@@ -374,14 +374,14 @@ const char* gd_colnil(void);
 const char* gd_coladd(void);
 const char* gd_colsub(void);
 void gd_colclear(void);
-#define dtracevoid() printf("%s %s()\n", gd_coladd(), __FUNCTION__)
+#define dtracevoid() printf("%s %s()\n", gd_coladd(), __func__)
 #define dtrace(fmt, ...) printf("%s %s(" fmt ")\n", gd_coladd(), \
-    __FUNCTION__, ##__VA_ARGS__)
+    __func__, ##__VA_ARGS__)
 #define dprintf(fmt, ...) printf("%s %s:%i " fmt "\n", gd_colnil(), \
-    __FUNCTION__, __LINE__, ##__VA_ARGS__)
-#define dreturnvoid() printf("%s %s = (nil)\n", gd_colsub(), __FUNCTION__)
+    __func__, __LINE__, ##__VA_ARGS__)
+#define dreturnvoid() printf("%s %s = (nil)\n", gd_colsub(), __func__)
 #define dreturn(fmt, ...) printf("%s %s = " fmt "\n", gd_colsub(), \
-    __FUNCTION__, ##__VA_ARGS__)
+    __func__, ##__VA_ARGS__)
 #define dwatch(fmt, v) printf("%s %s = " fmt "\n", gd_colnil(), #v, v)
 #else
 #define gd_colclear()

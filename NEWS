@@ -34,7 +34,7 @@ New in verison 0.9.0a:
     number of problems with reading LZMA files has been fixed, which should
     result in fewer segmentaion faults.
 
-  * BUG FIX: The parsing of the \x and \u escape sequences are now correct.
+  * BUG FIX: The parsing of the \x and \u escape sequences is now correct.
 
   * BUG FIX: Computation of LINCOMs with complex valued input fields now
     correctly happens in the complex plane.  As a side effect, gd_native_type()
@@ -50,9 +50,9 @@ New in verison 0.9.0a:
     codes containing subfields of the renamed field are now also updated,
     including field codes specifying meta subfields which do not exist.
 
-  * BUG FIX: The gd_[m]add() functions now ignore zero-length scalar strings.
-    Previously they would store these invalid field codes, causing problems
-    later.
+  * BUG FIX: The gd_[m]add() functions now ignore zero-length scalar strings
+    (i.e., they treat them as if they were NULL).  Previously they would store
+    these invalid field codes, causing problems later.
 
   * BUG FIX: Returning complex-valued CARRAYs as purely real data now works.
     Previously only the first element requested would be returned, the remaining

@@ -76,6 +76,7 @@ void gdmx_free_entry(gd_entry_t *);
 mxArray *gdmx_from_dirfile(const DIRFILE*);
 mxArray *gdmx_from_data(const void *, gd_type_t, size_t);
 mxArray *gdmx_from_entry(const gd_entry_t*);
+mxArray *gdmx_from_nstring_list(const char **, size_t);
 mxArray *gdmx_from_string_list(const char **);
 
 #define gdmx_from_int gdmx_from_long
@@ -88,6 +89,7 @@ mxArray *gdmx_from_ulong(unsigned long);
 mxArray *gdmx_from_ullong(unsigned long long);
 
 mxArray *gdmx_from_carrays(const gd_carray_t *, gd_type_t);
+mxArray *gdmx_from_sarrays(const char ***);
 mxArray *gdmx_vector(gd_type_t, size_t, void**);
 
 /* convert from MATLAB type */
@@ -107,7 +109,10 @@ unsigned long gdmx_to_ulong(const mxArray **, int);
 unsigned long long gdmx_to_ullong(const mxArray **, int);
 
 size_t gdmx_to_nsamp(DIRFILE*, const char*, const mxArray**, int, int);
-void gdmx_to_data(void**, gd_type_t*, size_t*, const mxArray**, int);
+void gdmx_to_data(void**, gd_type_t*, size_t*, const mxArray*, int);
 void gdmx_free_data(void*, gd_type_t);
+
+void gdmx_to_sdata(const char***, size_t*, const mxArray*, int);
+void gdmx_free_sdata(const char**, size_t);
 
 #endif

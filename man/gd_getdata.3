@@ -355,7 +355,7 @@ as they are read, and getdata doesn't close data files between
 .BR gd_getdata ()
 calls for efficiency's sake.  Memory used by this internal slimlib buffer can be
 reclaimed by calling
-.BR df_raw_close (3)
+.BR gd_raw_close (3)
 on fields when finished reading them.
 
 .SH SEE ALSO

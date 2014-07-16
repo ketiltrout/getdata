@@ -99,8 +99,8 @@ static struct {
   CONSTANT(E_BAD_PROTECTION, "GD_EBP", 0), /* deprecated */
   CONSTANT(E_BAD_VERSION,    "GD_EVR", 0), /* deprecated */
 
-  CONSTANT(RDONLY,           "GD_RO",  1),
-  CONSTANT(RDWR,             "GD_RW",  1),
+  CONSTANT(RDONLY,           "GD_RO",  2),
+  CONSTANT(RDWR,             "GD_RW",  2),
   CONSTANT(FORCE_ENDIAN,     "GD_FE",  1),
   CONSTANT(BIG_ENDIAN,       "GD_BE",  2),
   CONSTANT(LITTLE_ENDIAN,    "GD_LE",  2),
@@ -143,9 +143,12 @@ static struct {
   CONSTANT(RECIP_ENTRY,      "GD_RCE", 3),
   CONSTANT(WINDOW_ENTRY,     "GD_WDE", 3),
   CONSTANT(MPLEX_ENTRY,      "GD_MXE", 3),
+  CONSTANT(INDIR_ENTRY,      "GD_IDE", 3),
+  CONSTANT(SINDIR_ENTRY,     "GD_SDE", 3),
   CONSTANT(CONST_ENTRY,      "GD_COE", 3),
   CONSTANT(CARRAY_ENTRY,     "GD_CAE", 3),
   CONSTANT(STRING_ENTRY,     "GD_STE", 3),
+  CONSTANT(SARRAY_ENTRY,     "GD_SAE", 3),
 
   CONSTANT(NULL,             "GD_NUL", 4),
   CONSTANT(UINT8,            "GD_U8",  4),
@@ -380,6 +383,7 @@ void Fortran(void)
     printf("/\n");
   }
   printf("s/@GD_MAX_LINE_LENGTH@/%i/\n", GD_MAX_LINE_LENGTH);
+  printf("s/@SIZEOF_VOID_P@/%i/\n", SIZEOF_VOID_P);
 }
 
 void Python(void)

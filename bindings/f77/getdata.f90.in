@@ -916,6 +916,12 @@ function fgd_entry (dirfile, field_code, ent)
     len1 = GD_FIELD_LEN
     call gdgsca(ent%scalar(2), len1, ent%scalar_ind(2), dirfile, &
     TRIM(field_code), LEN_TRIM(field_code), 2)
+  else if (fgd_entry .EQ. GD_INDIR_ENTRY) then
+    call gdgeid(ent%field(1), len1, ent%field(2), len2, ent%fragment_index, &
+    dirfile, TRIM(field_code), LEN_TRIM(field_code))
+  else if (fgd_entry .EQ. GD_SINDIR_ENTRY) then
+    call gdgesd(ent%field(1), len1, ent%field(2), len2, ent%fragment_index, &
+    dirfile, TRIM(field_code), LEN_TRIM(field_code))
   else if (fgd_entry .EQ. GD_CONST_ENTRY) then
     !const
     call gdgeco(ent%data_type, ent%fragment_index, dirfile, TRIM(field_code), &
@@ -924,6 +930,10 @@ function fgd_entry (dirfile, field_code, ent)
     !carray
     call gdgeca(ent%data_type, ent%array_len, ent%fragment_index, dirfile, &
     TRIM(field_code), LEN_TRIM(field_code))
+  else if (fgd_entry .EQ. GD_SARRAY_ENTRY) then
+    !sarray
+    call gdgesa(ent%array_len, ent%fragment_index, dirfile, TRIM(field_code), &
+      LEN_TRIM(field_code))
   else if (fgd_entry .EQ. GD_STRING_ENTRY) then
     !string
     call gdfrgi(ent%fragment_index, dirfile, TRIM(field_code), &
@@ -1079,12 +1089,22 @@ subroutine fgd_add (dirfile, field_code, ent)
     LEN_TRIM(ent%scalar(1)), ent%scalar_ind(1), ent%period, &
     TRIM(ent%scalar(2)), LEN_TRIM(ent%scalar(2)), ent%scalar_ind(2), &
     ent%fragment_index)
+  else if (ent%field_type .EQ. GD_INDIR_ENTRY) then
+    call gdadid(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
+    LEN_TRIM(ent%field(2)), ent%fragment_index)
+  else if (ent%field_type .EQ. GD_SINDIR_ENTRY) then
+    call gdadsd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
+    LEN_TRIM(ent%field(2)), ent%fragment_index)
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdadco(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     ent%data_type, GD_INT32, zero, ent%fragment_index)
   else if (ent%field_type .EQ. GD_CARRAY_ENTRY) then
     call fgd_add_carray(dirfile, field_code, ent%data_type, ent%array_len, &
     ent%fragment_index)
+  else if (ent%field_type .EQ. GD_SARRAY_ENTRY) then
+    call fgd_add_sarray(dirfile, field_code, ent%array_len, ent%fragment_index)
   else if (ent%field_type .EQ. GD_STRING_ENTRY) then
     call gdadst(dirfile, TRIM(field_code), LEN_TRIM(field_code), nil, zero, &
     ent%fragment_index)
@@ -1323,12 +1343,22 @@ subroutine fgd_madd (dirfile, parent, field_code, ent)
     call gdmdmx(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
     LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
     TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%count_val, ent%period)
+  else if (ent%field_type .EQ. GD_INDIR_ENTRY) then
+    call gdmdid(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+    LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
+    TRIM(ent%field(2)), LEN_TRIM(ent%field(2)))
+  else if (ent%field_type .EQ. GD_SINDIR_ENTRY) then
+    call gdmdsd(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+    LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
+    TRIM(ent%field(2)), LEN_TRIM(ent%field(2)))
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdmdco(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
     LEN_TRIM(field_code), ent%data_type, GD_INT32, zero)
   else if (ent%field_type .EQ. GD_CARRAY_ENTRY) then
     call fgd_madd_carray(dirfile, parent, field_code, ent%data_type, &
     ent%array_len)
+  else if (ent%field_type .EQ. GD_SARRAY_ENTRY) then
+    call fgd_madd_sarray(dirfile, parent, field_code, ent%array_len)
   else if (ent%field_type .EQ. GD_STRING_ENTRY) then
     call gdmdst(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
     LEN_TRIM(field_code), nil, zero)
@@ -1820,6 +1850,16 @@ subroutine fgd_alter_entry (dirfile, field_code, ent, remove_scalars, recode)
     TRIM(ent%field(1)), field_len(1), TRIM(ent%field(2)), field_len(2), &
     ent%count_val, TRIM(ent%scalar(1)), scalar_len(1), ent%scalar_ind(1), &
     ent%period, TRIM(ent%scalar(2)), scalar_len(2), ent%scalar_ind(2))
+  else if (ent%field_type .EQ. GD_INDIR_ENTRY) then
+    call fgd__set_field_len(field_len, 2, ent)
+
+    call gdalid(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), field_len(1), TRIM(ent%field(2)), field_len(2))
+  else if (ent%field_type .EQ. GD_SINDIR_ENTRY) then
+    call fgd__set_field_len(field_len, 2, ent)
+
+    call gdalsd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), field_len(1), TRIM(ent%field(2)), field_len(2))
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdalco(dirfile, TRIM(field_code), LEN_TRIM(field_code), ent%data_type)
   else if (ent%field_type .EQ. GD_CARRAY_ENTRY) then
@@ -2311,13 +2351,21 @@ subroutine fgd_put_carray_c16 (dirfile, field_code, start, array_len, data_in)
   end if
 end subroutine
 
+function fgd_array_len (dirfile, field_code)
+  integer :: fgd_array_len
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  ! call f77 library
+  call gdarln(fgd_array_len, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+end function
+
 function fgd_carray_len (dirfile, field_code)
   integer :: fgd_carray_len
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
 
-  ! call f77 library
-  call gdcaln(fgd_carray_len, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+  fgd_carray_len = fgd_array_len(dirfile,field_code)
 end function
 
 subroutine fgd_add_carray (dirfile, field_name, const_type, array_len, &
@@ -2346,9 +2394,6 @@ end subroutine
 subroutine fgd_alter_carray (dirfile, field_name, const_type, array_len)
   integer, intent(in) :: dirfile, const_type, array_len
   character (len=*), intent(in) :: field_name
-  integer*1, dimension(array_len) :: zero
-
-  zero = 0
 
   call gdalca(dirfile, TRIM(field_name), LEN_TRIM(field_name), const_type, &
   array_len)
@@ -3025,6 +3070,210 @@ function fgd_linterp_tablename (dirfile, field_code)
 
   call gdlttn (fgd_linterp_tablename, l, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code))
+end function
+
+function fgd_encoding_support (encoding)
+  integer :: fgd_encoding_support
+  integer, intent(in) :: encoding
+
+  call gdencs(fgd_encoding_support, encoding)
+end function
+
+function fgd_sarray_value_max (dirfile)
+  integer :: fgd_sarray_value_max
+  integer, intent(in) :: dirfile
+
+  call gdsarx(fgd_sarray_value_max, dirfile)
+end function
+
+function fgd_msarray_value_max (dirfile, parent)
+  integer :: fgd_msarray_value_max
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: parent
+
+  call gdmsax(fgd_msarray_value_max, dirfile, TRIM(parent), LEN_TRIM(parent))
+end function
+
+subroutine fgd_get_sarray (field_list, field_len, dirfile, field_code)
+  character(len=*), dimension(:), intent(out) :: field_list
+  integer, intent(inout) :: field_len
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  integer :: array_len, i, max_field_len, l
+
+  array_len = fgd_array_len(dirfile, field_code)
+
+  max_field_len = field_len
+  do i=1,array_len
+    l = field_len
+    call gdgtsa(field_list(i), l, dirfile, TRIM(field_code), &
+      LEN_TRIM(field_code), i)
+    if (l .gt. max_field_len) then
+      max_field_len = l
+    end if
+  end do
+  field_len = max_field_len
+end subroutine
+
+subroutine fgd_get_sarray_slice (field_list, field_len, dirfile, field_code, &
+  first, num)
+  character(len=*), dimension(:), intent(out) :: field_list
+  integer, intent(inout) :: field_len
+  integer, intent(in) :: dirfile, first, num
+  character (len=*), intent(in) :: field_code
+
+  integer :: i, max_field_len, l
+
+  max_field_len = field_len
+  do i=1,num
+    l = field_len
+    call gdgtsa(field_list(i), l, dirfile, TRIM(field_code), &
+      LEN_TRIM(field_code), i+first-1)
+    if (l .gt. max_field_len) then
+      max_field_len = l
+    end if
+  end do
+  field_len = max_field_len
+end subroutine
+
+subroutine fgd_put_sarray (dirfile, field_code, strdata)
+  integer, intent(in) :: dirfile
+  character(len=*), intent(in) :: field_code
+  character(len=*), dimension(:), intent(in) :: strdata
+
+  integer :: i, array_len
+
+  array_len = fgd_array_len(dirfile, field_code)
+
+  do i=1,array_len
+    call gdptsa(dirfile, TRIM(field_code), LEN_TRIM(field_code), i, &
+      TRIM(strdata(i)), LEN_TRIM(strdata(i)))
+  end do
+end subroutine
+
+subroutine fgd_put_sarray_slice (dirfile, field_code, first, num, strdata)
+  integer, intent(in) :: dirfile, first, num
+  character(len=*), intent(in) :: field_code
+  character(len=*), dimension(:), intent(in) :: strdata
+
+  integer :: i
+
+  do i=1,num
+    call gdptsa(dirfile, TRIM(field_code), LEN_TRIM(field_code), i+first-1, &
+      TRIM(strdata(i)), LEN_TRIM(strdata(i)))
+  end do
+end subroutine
+
+subroutine fgd_add_sarray (dirfile, field_name, array_len, fragment_index)
+  integer, intent(in) :: dirfile, fragment_index, array_len
+  character (len=*), intent(in) :: field_name
+
+  call gdadsa(dirfile, TRIM(field_name), LEN_TRIM(field_name), array_len, &
+    fragment_index)
+end subroutine
+
+subroutine fgd_madd_sarray (dirfile, parent, field_name, array_len)
+  integer, intent(in) :: dirfile, array_len
+  character (len=*), intent(in) :: field_name, parent
+
+  call gdmdsa(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), array_len)
+end subroutine
+
+subroutine fgd_alter_sarray (dirfile, field_name, array_len)
+  integer, intent(in) :: dirfile, array_len
+  character (len=*), intent(in) :: field_name
+
+  call gdalsa(dirfile, TRIM(field_name), LEN_TRIM(field_name), array_len)
+end subroutine
+
+subroutine fgd_add_indir (dirfile, field_name, in_field1, in_field2, &
+  fragment_index)
+  integer, intent(in) :: dirfile, fragment_index
+  character (len=*), intent(in) :: field_name, in_field1, in_field2
+
+  call gdadid(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+  TRIM(in_field1), LEN_TRIM(in_field1), TRIM(in_field2), LEN_TRIM(in_field2), &
+  fragment_index)
+end subroutine
+
+subroutine fgd_add_sindir (dirfile, field_name, in_field1, in_field2, &
+  fragment_index)
+  integer, intent(in) :: dirfile, fragment_index
+  character (len=*), intent(in) :: field_name, in_field1, in_field2
+
+  call gdadsd(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+  TRIM(in_field1), LEN_TRIM(in_field1), TRIM(in_field2), LEN_TRIM(in_field2), &
+  fragment_index)
+end subroutine
+
+subroutine fgd_madd_indir (dirfile, parent, field_name, in_field1, in_field2)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, parent
+
+  call gdmdid(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), TRIM(in_field1), LEN_TRIM(in_field1), TRIM(in_field2), &
+  LEN_TRIM(in_field2))
+end subroutine
+
+subroutine fgd_madd_sindir (dirfile, parent, field_name, in_field1, in_field2)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, parent
+
+  call gdmdsd(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), TRIM(in_field1), LEN_TRIM(in_field1), TRIM(in_field2), &
+  LEN_TRIM(in_field2))
+end subroutine
+
+subroutine fgd_alter_indir (dirfile, field_name, in_field1, in_field2)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_name, in_field1, in_field2
+
+  call gdalid(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+  TRIM(in_field1), LEN_TRIM(in_field1), TRIM(in_field2), LEN_TRIM(in_field2))
+end subroutine
+
+subroutine fgd_alter_sindir (dirfile, field_name, in_field1, in_field2)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_name, in_field1, in_field2
+
+  call gdalsd(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+  TRIM(in_field1), LEN_TRIM(in_field1), TRIM(in_field2), LEN_TRIM(in_field2))
+end subroutine
+
+function fgd_getstrdata (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_out, data_len)
+  integer :: fgd_getstrdata
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: first_frame, first_sample, num_frames, num_samples
+  character(len=*), dimension(:), intent(out) :: data_out
+  integer, intent(inout) :: data_len
+  
+  integer :: i, l, max_data_len
+  character(len=@SIZEOF_VOID_P@) :: packed
+
+  call gdgstp(fgd_getstrdata, packed, dirfile, TRIM(field_code), &
+    LEN_TRIM(field_code), first_frame, first_sample, num_frames, num_samples)
+
+  if (fgd_getstrdata .gt. 0) then
+    ! unpack
+    max_data_len = data_len
+    do i=1,fgd_getstrdata
+      l = data_len
+      call gdxstp(data_out(i), l, packed, i)
+      if (l .gt. max_data_len) then
+        max_data_len = l
+      end if
+    end do
+
+    ! clean up
+    call gddstp(packed)
+    if (max_data_len .ne. data_len) then
+      fgd_getstrdata = 0
+    end if
+  endif
 end function
 
 end module

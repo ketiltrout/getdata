@@ -6,7 +6,7 @@ The bindings are provided in a PHP extension (called "getdata") which also
 defines all the GetData constants (GD_RDONLY, GD_E_OK, &c.).  The bindings
 are configured using php-config(1), which should provide all necessary
 configuration.  The install path can be changed by passing --with-php-dir to
-./configure.
+GetData's ./configure script.
 
 In PHP, the C API's DIRFILE object is represented by a Dirfile resource,
 allocated by gd_open().  The DIRFILE associated with a Dirfile resource is
@@ -40,20 +40,19 @@ gd_entry(3)), with the following exceptions:
 * Because the extension can determine at run-time the type of a value, there
   is no need to distinguish purely real from complex data in the entry
   arrays.  As a result, complex data will be stored in the values associated
-  with "m", "b", "a", "dividend" when appropriate.  For the same reason, there
-  is no "comp_scal" key.
+  with "m", "b", "a", "dividend" when appropriate.
 
 Data can be returned by the extension either packed or unpacked.  Packed data
 are returned as a string and can be later unpacked using the standard unpack()
 function.  Unpacked data are returned as an array of the data type requested.
 See the INI setting "getdata.unpack" below for ways of indicating whether
-packed or unpacked data should be returned.
+packed or unpacked data should be returned by default.
 
 Although PHP does not support unsigned integers, if requested, the extension
 will return unpacked unsigned data coerced to signed.  Be careful with its
 interpretation.  For convenience, in addition to the standard GD_INT32,
 GD_INT64, &c. data type symbols, the extension defines the constants GD_INT
-and GD_FLOAT to the native PHP integer and floating point types.
+and GD_FLOAT to indicate the native PHP integer and floating point types.
 
 Similarly, data vectors passed to the extension can be packed or unpacked.
 Packed data require a GetData type code indicating the type of the packed data.
@@ -91,9 +90,9 @@ function.
 Functions
 ---------
 
-Unless otherwise indicated, functions in the extension return false on error,
-regardless of their stated return type.  Functions which are specified to return
-a bool return true on success, except as noted.
+Unless otherwise indicated, functions in the extension return boolean false on
+error, regardless of their stated return type.  Functions which are specified to
+return a bool return true on success, except as noted.
 
 Most functions behave equivalently to their counterparts in the C API.  See the
 corresponding manual page in the Unix manual for complete details.  A complete
@@ -105,7 +104,7 @@ or else an array containing unpacked data; "number" can be any numeric type
 (including a two-element array representing a complex number).
 
 Optional arguments are given in square brackets with their default values.
-The default value for the always-optional $unpack parameter is not given; the
+The default value for the always-optional $unpack parameter is not given; its
 default is the current value of the getdata.unpack INI setting (see above).
 Some functions have several ways that they can be called.
 
@@ -348,7 +347,8 @@ Some functions have several ways that they can be called.
       If $len is null (or not given), all values to the end of the CARRAY are
       returned.
 
-* number gd_get_constant(resource $dirfile, string $field_code, int $return_type)
+* number gd_get_constant(resource $dirfile, string $field_code,
+        int $return_type)
 
 * string gd_get_string(resource $dirfile, string $field_code)
 
@@ -514,7 +514,7 @@ Some functions have several ways that they can be called.
       Dirfile resource; generally, a failed open will still return a Dirfile
       resource.  Use gd_error() to check for success.
 
-      The returned resource will be persistent (ie. it won't be deleted when
+      The returned resource will be persistent, i.e. it won't be deleted when
       it goes out of scope.  If a persistent Dirfile is already open with the
       same $dirfilename (including embedded NULs), its resource will be returned
       and no new Dirfile will be opened.
@@ -559,7 +559,7 @@ Some functions have several ways that they can be called.
 
 * array gd_strtok(resource $dirfile, string $string)
 
-      Unlike the C API function, this function fully tokenises the string and
+      Unlike the C API function, this function fully scans the string and
       returns an array of string tokens.
 
 * bool gd_sync(resource $dirfile, [ string $field_code = null ])
@@ -568,7 +568,8 @@ Some functions have several ways that they can be called.
 
 * bool gd_unhide(resource $dirfile, string $field_code)
 
-* bool gd_uninclude(resource $dirfile, int $fragment_index, [ bool $delete = false ])
+* bool gd_uninclude(resource $dirfile, int $fragment_index,
+      [ bool $delete = false ])
 
 * bool gd_validate(resource $dirfile, string $field_code)
 

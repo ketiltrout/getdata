@@ -50,7 +50,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   D = gdmx_to_dirfile(prhs[0]);
   field_code = gdmx_to_string(prhs, 1, 0);
   start = gdmx_to_uint(prhs, 2);
-  gdmx_to_data(&data, &type, &nsamp, prhs, 3);
+  gdmx_to_data(&data, &type, &nsamp, prhs[3], 3);
 
   gd_put_carray_slice(D, field_code, start, nsamp, type, data);
 

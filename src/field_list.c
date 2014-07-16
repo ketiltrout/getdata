@@ -69,26 +69,35 @@ gd_static_inline_ int _GD_EntryIndex(unsigned int t)
     case GD_MPLEX_ENTRY:
       i = 12;
       break;
-    case GD_CONST_ENTRY:
+    case GD_INDIR_ENTRY:
       i = 13;
       break;
-    case GD_CARRAY_ENTRY:
+    case GD_SINDIR_ENTRY:
       i = 14;
       break;
-    case GD_STRING_ENTRY:
+    case GD_CONST_ENTRY:
       i = 15;
       break;
-    case GD_VECTOR_ENTRIES:
+    case GD_CARRAY_ENTRY:
       i = 16;
       break;
-    case GD_SCALAR_ENTRIES:
+    case GD_STRING_ENTRY:
       i = 17;
       break;
-    case GD_ALIAS_ENTRY:
+    case GD_SARRAY_ENTRY:
       i = 18;
       break;
-    case GD_ALL_ENTRIES:
+    case GD_VECTOR_ENTRIES:
       i = 19;
+      break;
+    case GD_SCALAR_ENTRIES:
+      i = 20;
+      break;
+    case GD_ALIAS_ENTRY:
+      i = 21;
+      break;
+    case GD_ALL_ENTRIES:
+      i = 22;
       break;
     default:
       i = -1;

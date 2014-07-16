@@ -31,8 +31,8 @@ gd_nothrow
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", 0);
-    return 0;
+    dreturn("%i", -1);
+    return -1;
   }
 
   _GD_ClearError(D);
@@ -63,12 +63,11 @@ gd_nothrow
     return 0;
   }
 
-  if (E->field_type == GD_STRING_ENTRY) {
+  if (E->field_type == GD_STRING_ENTRY)
     data_out[0] = E->e->u.string;
-  } else {
+  else
     memcpy(data_out, ((const char **)E->e->u.scalar.d) + start,
         n * sizeof(const char*));
-  }
 
   dreturn("%i", 0);
   return 0;
@@ -141,7 +140,7 @@ static size_t _GD_PutSarraySlice(DIRFILE *restrict D, gd_entry_t *restrict E,
 {
   size_t len;
 
-  dtrace("%p, %p, %lu, %" PRNsize_t " %p", D, E, first, n, data_in);
+  dtrace("%p, %p, %lu, %" PRNsize_t ", %p", D, E, first, n, data_in);
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);

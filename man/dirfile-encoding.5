@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile-encoding 5 "26 January 2013" "Standards Version 9" "DATA FORMATS"
+.TH dirfile-encoding 5 "22 May 2014" "Standards Version 10" "DATA FORMATS"
 .SH NAME
 dirfile-encoding \(em dirfile database encoding schemes
 .SH DESCRIPTION
@@ -106,15 +106,31 @@ The text encoding and the sample-index encoding are implemented by GetData
 natively and need no external library.  As a result, they are always present in
 the library.
 
+.SS Out-of-place writes
+
+Some of the encodings listed below only support writing via out-of-place writes;
+that is, raw files are written in a temporary location and only moved into place
+when closed.  As a result, writing to these encodings requires making a copy of
+the whole binary data file.  A further side effect of this is that a third-party
+trying to concurrently read a Dirfile which is being written to using one of
+these encodings usually doesn't work.
+
+Within GetData, reading from a field so encoded after writing to it will cause
+writing to the temporary file to be finished and then the file moved into place
+before the read occurs, which may take some time to do.  Encodings which perform
+out-of-place writes are:
+.IR bzip2 ", " gzip ", and " lzma .
+
 .SS BZip2 Encoding
 
 The BZip2 Encoding reads compressed raw binary files using the Burrows-Wheeler
 block sorting text compression algorithm and Huffman coding, as implemented in
 the bzip2 format.  GetData's BZip2 Encoding scheme is implemented through the
 .I bzip2 compression library
-written by Julian Seward.  GetData's BZip2 Encoding framework currently lacks
-write capabilities; as a result the BZip2 Encoding does not support functions
-which modify binary data.
+written by Julian Seward.  All operations are supported by the BZip2 Encoding,
+but writing occurs out-of-place.  See the
+.B Out-of-place writes
+section above for details.
 
 GetData caches an uncompressed megabyte of data at a time to speed access times.
 A call to
@@ -131,10 +147,9 @@ implemented in the gzip format.  GetData's GZip Encoding scheme is implemented
 through the the
 .I zlib compression library
 written by Jean-loup Gailly and Mark Adler. All operations are supported by the
-GZip Encoding.  Writes to GZip encoded data occur out-of-place; that is: writing
-GZip Encoded data requires making a copy of the whole binary data file.  A side
-effect of this is that concurrently reading a GZip Encoded Dirfile which is
-being written to usually doesn't work.
+GZip Encoding, but writing occurs out-of-place.  See the
+.B Out-of-place writes
+section above for details.
 
 To speed the operation of
 .BR gd_nframes (3),
@@ -153,16 +168,18 @@ LZMA Encoding scheme is implemented through the
 .IR "lzma library" ,
 part of the
 .I XZ Utils
-suite written by Lasse Collin, Ville Koskinen, and Igor Pavlov.  GetData's LZMA
-Encoding framework currently lacks write capabilities; as a result the LZMA
-Encoding does not support functions which modify binary data.
+suite written by Lasse Collin, Ville Koskinen, and Igor Pavlov.  All operations
+are supported by the LZMA Encoding, but writing occurs out-of-place.  See the
+.B Out-of-place writes
+section above for details.  Writing is supported only for the .xz container
+format, and not for the obsolete .lzma format, which can still be read.
 
-As with the BZip2 Encoding, GetData caches an uncompressed megabyte of data at a
-time to speed access times.  A call to
+GetData caches an uncompressed megabyte of data at a time to speed access times.
+A call to
 .BR gd_nframes (3)
 requires decompression of the entire binary file to determine its uncompressed
-size, and may take some time to complete.
-The file extension of the LZMA Encoding is
+size, and may take some time to complete.  The file extension of the LZMA
+Encoding is
 .BR .xz ,
 or
 .BR .lzma .

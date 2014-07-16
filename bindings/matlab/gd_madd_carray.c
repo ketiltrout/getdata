@@ -51,7 +51,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   parent = gdmx_to_string(prhs, 1, 0);
   field_name = gdmx_to_string(prhs, 2, 0);
   const_type = gdmx_to_gd_type(prhs, 3);
-  gdmx_to_data(&data, &data_type, &n, prhs, 4);
+  gdmx_to_data(&data, &data_type, &n, prhs[4], 4);
 
   gd_madd_carray(D, parent, field_name, const_type, n, data_type, data);
 

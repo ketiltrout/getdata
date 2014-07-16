@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Copyright (C) 2011-2013 D. V. Wiebe
+# Copyright (C) 2011-2014 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1518;
+use Test::More tests => 1729;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -144,9 +144,9 @@ sub CheckEOSArray {
 sub CheckOK { &CheckError($_[0], 0) }
 sub CheckOK2 { &CheckError2(@_, 0) }
 
-my $nfields = 17;
-my @fields = (qw(INDEX alias bit carray const data div lincom linterp mplex mult
-  phase polynom recip sbit string window));
+my $nfields = 20;
+my @fields = (qw(INDEX alias bit carray const data div indir lincom linterp
+  mplex mult phase polynom recip sarray sbit sindir string window));
 
 #create the dirfile
 system "rm -rf dirfile" if (-e "dirfile");
@@ -177,6 +177,10 @@ recip RECIP div 6.5;4.3
 phase PHASE data 11
 window WINDOW linterp mult LT 4.1
 ALIAS alias data
+sarray SARRAY one two three four five six seven
+data/msarray SARRAY eight nine ten eleven twelve
+indir INDIR data carray
+sindir SINDIR data sarray
 string STRING \"Zaphod Beeblebrox\"
 EOF
   or die;
@@ -231,12 +235,12 @@ CheckSArray(25, \@a, @fields);
 # 26: nmfields check
 $s = $_->mfield_list("data");
 CheckOK(26);
-CheckNum(26, $s, 4);
+CheckNum(26, $s, 5);
 
 # 27: mfield_list check
 @a = $_->mfield_list("data");
 CheckOK(27);
-CheckSArray(27, \@a, qw(mstr mconst mcarray mlut));
+CheckSArray(27, \@a, qw(mstr mconst mcarray mlut msarray));
 
 # 28: nframes check
 $s = $_->nframes;
@@ -600,14 +604,14 @@ CheckSArray(68, \@a, qw(lincom new3));
 # 69: nvectors
 $s = $_->vector_list;
 CheckOK(69);
-CheckNum(69, $s, 22);
+CheckNum(69, $s, 24);
 
 # 70: vector_list
 @a = $_->vector_list;
 CheckOK(70);
-CheckSArray(70, \@a, qw(INDEX alias bit data div lincom linterp mplex mult),
-  qw(new1 new10 new3 new4 new6 new7 new8 new9 phase polynom recip sbit),
-  qw(window));
+CheckSArray(70, \@a, qw(INDEX alias bit data div indir lincom linterp mplex
+  mult new1 new10 new3 new4 new6 new7 new8 new9 phase polynom recip sbit
+  sindir window));
 
 #72: madd_lincom check
 $s = $_->madd_lincom("data", "mnew2", 2, [ qw(in1 in2) ], [ 9.9+8.8*i, 7.7 ],
@@ -1357,17 +1361,17 @@ CheckNum2(168, 2, $s, 0);
 CheckOK2(168, 3);
 CheckArray2(168, 4, \@a, 9, 8, 7, 6, 5, 4);
 
-#169 put caray slice
+# 169: put carray slice
 $s = $_->put_carray_slice("carray", 2, [ 169, 169 ]);
-CheckOK2(168, 1);
-CheckNum2(168, 2, $s, 0);
+CheckOK2(169, 1);
+CheckNum2(169, 2, $s, 0);
 
 @a = $_->get_carray("carray", $GetData::UINT8);
-CheckOK2(168, 3);
-CheckArray2(168, 4, \@a, 9, 8, 169, 169, 5, 4);
+CheckOK2(169, 3);
+CheckArray2(169, 4, \@a, 9, 8, 169, 169, 5, 4);
 
-# 177: carray len
-$s = $_->carray_len("carray");
+# 177: array len
+$s = $_->array_len("carray");
 CheckOK(177);
 CheckNum(177, $s, 6);
 
@@ -1399,7 +1403,7 @@ CheckNum2(179, 8, $h{'fragment_index'}, 0);
 CheckOK2(179, 9);
 CheckArray2(179, 10, \@a, 1.79, 17.9);
 
-# 180: add carray
+# 180: madd carray
 $s = $_->madd_carray("data", "mnew17", $GetData::FLOAT64, undef, 1.80, 18.0);
 CheckOK2(180, 1);
 CheckNum2(180, 2, $s, 0);
@@ -1694,19 +1698,19 @@ CheckNum(236, $s, 0);
 $s = $_->entry_list("data", $GetData::SCALAR_ENTRIES,
   $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
 CheckOK2(237, 1);
-CheckNum2(237, 1, $s, 6);
+CheckNum2(237, 1, $s, 7);
 $s = $_->entry_list(undef, $GetData::VECTOR_ENTRIES,
   $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
 CheckOK2(237, 2);
-CheckNum2(237, 2, $s, 24);
+CheckNum2(237, 2, $s, 26);
 
 # 239: gd_entry_list
 @a = $_->entry_list(undef, $GetData::VECTOR_ENTRIES,
   $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
 CheckOK(239);
-CheckSArray(239, \@a, qw(INDEX bit data div lincom linterp mplex mult new1
-new135 new14 new16 new18 new21 new3 new4 new6 new7 new8 phase polynom recip sbit
-window));
+CheckSArray(239, \@a, qw(INDEX bit data div indir lincom linterp mplex mult new1
+  new135 new14 new16 new18 new21 new3 new4 new6 new7 new8 phase polynom recip
+  sbit sindir window));
 
 # 240: gd_mplex_lookback
 $_->mplex_lookback($GetData::LOOKBACK_ALL);
@@ -1996,6 +2000,231 @@ CheckNum2(259, 11, $h{'n_fields'}, 3);
 CheckSArray2(259, 12, $h{'scalar'}, undef, 'const', 'const',
   'carray', undef, 'const');
 CheckArray2(259, 13, $h{'scalar_ind'}, undef, -1, -1, 4, undef, -1);
+
+# 274: sarray entry
+%h = $_->entry("sarray");
+CheckOK2(274, 1);
+CheckSArray2(274, 2, [ sort keys %h ],
+  qw(array_len field field_type fragment_index));
+CheckNum2(274, 3, $h{'array_len'}, 7);
+CheckString2(274, 4, $h{'field'}, "sarray");
+CheckNum2(274, 5, $h{'field_type'}, $GetData::SARRAY_ENTRY);
+CheckNum2(274, 6, $h{'fragment_index'}, 0);
+
+# 275: get_sarray
+$s = $_->get_sarray("sarray");
+CheckOK(275);
+CheckSArray(275, $s, qw(one two three four five six seven));
+
+# 276: get_sarray_slice
+@a = $_->get_sarray_slice("sarray", 2, 2);
+CheckOK(276);
+CheckSArray(276, \@a, qw(three four));
+
+# 277: sarrays
+@a = $_->sarrays();
+CheckOK(277);
+CheckNum(277, $#a, 0);
+CheckSArray(277, $a[0], qw(one two three four five six seven));
+
+# 278: put sarray
+$s = $_->put_sarray("sarray", qw(eka dvi tri catur panca sas sapta));
+CheckOK2(278, 1);
+CheckNum2(278, 2, $s, 0);
+
+@a = $_->get_sarray("sarray");
+CheckOK2(278, 3);
+CheckSArray2(278, 4, \@a, qw(eka dvi tri catur panca sas sapta));
+
+# 279: put sarray slice
+$s = $_->put_sarray_slice("sarray", 2, [ "asta", "nava" ]);
+CheckOK2(279, 1);
+CheckNum2(279, 2, $s, 0);
+
+$s = $_->get_sarray("sarray");
+CheckOK2(279, 3);
+CheckSArray2(279, 4, $s, qw(eka dvi asta nava panca sas sapta));
+
+# 280: add sarray
+$s = $_->add_sarray("new280", 0, qw(eins zwei drei));
+CheckOK2(280, 1);
+CheckNum2(280, 2, $s, 0);
+
+%h = $_->entry("new280");
+CheckOK2(280, 3);
+CheckNum2(280, 4, $h{'array_len'}, 3);
+CheckString2(280, 6, $h{'field'}, "new280");
+CheckNum2(280, 7, $h{'field_type'}, $GetData::SARRAY_ENTRY);
+CheckNum2(280, 8, $h{'fragment_index'}, 0);
+
+$s = $_->get_sarray("new280");
+CheckOK2(280, 9);
+CheckSArray2(280, 10, $s, qw(eins zwei drei));
+
+# 282: madd sarray
+$s = $_->madd_sarray("data", "mnew282", [qw(un deux trois)]);
+CheckOK2(282, 1);
+CheckNum2(282, 2, $s, 0);
+
+%h = $_->entry("data/mnew282");
+CheckOK2(282, 3);
+CheckNum2(282, 4, $h{'array_len'}, 3);
+CheckString2(282, 6, $h{'field'}, "data/mnew282");
+CheckNum2(282, 7, $h{'field_type'}, $GetData::SARRAY_ENTRY);
+CheckNum2(282, 8, $h{'fragment_index'}, 0);
+
+$s = $_->get_sarray("data/mnew282");
+CheckOK2(282, 9);
+CheckSArray2(282, 10, $s, qw(un deux trois));
+
+# 283 alter sarray
+$s = $_->alter_sarray("new280", 2);
+CheckOK2(283, 0);
+CheckNum2(283, 1, $s, 0);
+
+%h = $_->entry("new280");
+CheckOK2(283, 3);
+CheckNum2(283, 4, $h{'array_len'}, 2); CheckString2(283, 6, $h{'field'}, "new280");
+CheckNum2(283, 7, $h{'field_type'}, $GetData::SARRAY_ENTRY);
+
+# 284: sarrays
+@a = $_->msarrays("data");
+CheckOK(284);
+CheckNum(284, $#a, 1);
+CheckSArray2(284, 1, $a[0], qw(eight nine ten eleven twelve));
+CheckSArray2(284, 2, $a[1], qw(un deux trois));
+
+# 285 indir entry
+%h = $_->entry("indir");
+CheckOK(285);
+CheckSArray2(285, 0, [ sort keys %h ], qw(field field_type fragment_index),
+  "in_fields");
+CheckString2(285, 1, $h{'field'}, "indir");
+CheckNum2(285, 2, $h{'field_type'}, $GetData::INDIR_ENTRY);
+CheckNum2(285, 3, $h{'fragment_index'}, 0);
+CheckSArray2(285, 4, $h{'in_fields'}, qw(data carray));
+
+# 286 add indir
+$s = $_->add_indir(qw(new286 in2 in3));
+CheckOK2(286, 0);
+CheckNum2(286, 1, $s, 0);
+
+%h = $_->entry("new286");
+CheckOK(286);
+CheckString2(286, 1, $h{'field'}, "new286");
+CheckNum2(286, 2, $h{'field_type'}, $GetData::INDIR_ENTRY);
+CheckNum2(286, 3, $h{'fragment_index'}, 0);
+CheckSArray2(286, 4, $h{'in_fields'}, qw(in2 in3));
+
+# 287 add indir
+$s = $_->add({
+    field          => "new287",
+    field_type     => $GetData::INDIR_ENTRY,
+    fragment_index => 0,
+    in_fields      => [ qw(in3 in4) ],
+  });
+CheckOK2(287,1);
+CheckNum2(287, 2, $s, 0);
+
+%h = $_->entry("new287");
+CheckOK(287);
+CheckString2(287, 1, $h{'field'}, "new287");
+CheckNum2(287, 2, $h{'field_type'}, $GetData::INDIR_ENTRY);
+CheckNum2(287, 3, $h{'fragment_index'}, 0);
+CheckSArray2(287, 4, $h{'in_fields'}, qw(in3 in4));
+
+# 288 madd indir
+$s = $_->madd_indir(qw(data new288 in1 in8));
+CheckOK2(288, 0);
+CheckNum2(288, 1, $s, 0);
+
+%h = $_->entry("data/new288");
+CheckOK(288);
+CheckString2(288, 1, $h{'field'}, "data/new288");
+CheckNum2(288, 2, $h{'field_type'}, $GetData::INDIR_ENTRY);
+CheckNum2(288, 3, $h{'fragment_index'}, 0);
+CheckSArray2(288, 4, $h{'in_fields'}, qw(in1 in8));
+
+# 289 alter_indir
+$s = $_->alter_indir("new286", "in5");
+CheckOK2(289, 1);
+CheckNum2(289, 2, $s, 0);
+
+%h = $_->entry("new286");
+CheckOK2(289, 3);
+CheckString2(289, 4, $h{'field'}, "new286");
+CheckNum2(289, 5, $h{'field_type'}, $GetData::INDIR_ENTRY);
+CheckNum2(289, 6, $h{'fragment_index'}, 0);
+CheckSArray2(289, 7, $h{'in_fields'}, qw(in5 in3));
+
+# 290 sindir entry
+%h = $_->entry("sindir");
+CheckOK(290);
+CheckSArray2(290, 0, [ sort keys %h ], qw(field field_type fragment_index),
+  "in_fields");
+CheckString2(290, 1, $h{'field'}, "sindir");
+CheckNum2(290, 2, $h{'field_type'}, $GetData::SINDIR_ENTRY);
+CheckNum2(290, 3, $h{'fragment_index'}, 0);
+CheckSArray2(290, 4, $h{'in_fields'}, qw(data sarray));
+
+# 291 add sindir
+$s = $_->add_sindir(qw(new291 in2 in3));
+CheckOK2(291, 0);
+CheckNum2(291, 1, $s, 0);
+
+%h = $_->entry("new291");
+CheckOK(291);
+CheckString2(291, 1, $h{'field'}, "new291");
+CheckNum2(291, 2, $h{'field_type'}, $GetData::SINDIR_ENTRY);
+CheckNum2(291, 3, $h{'fragment_index'}, 0);
+CheckSArray2(291, 4, $h{'in_fields'}, qw(in2 in3));
+
+# 292 add sindir
+$s = $_->add({
+    field          => "new292",
+    field_type     => $GetData::SINDIR_ENTRY,
+    fragment_index => 0,
+    in_fields      => [ qw(in3 in4) ],
+  });
+CheckOK2(292,1);
+CheckNum2(292, 2, $s, 0);
+
+%h = $_->entry("new292");
+CheckOK(292);
+CheckString2(292, 1, $h{'field'}, "new292");
+CheckNum2(292, 2, $h{'field_type'}, $GetData::SINDIR_ENTRY);
+CheckNum2(292, 3, $h{'fragment_index'}, 0);
+CheckSArray2(292, 4, $h{'in_fields'}, qw(in3 in4));
+
+# 293 madd sindir
+$s = $_->madd_sindir(qw(data new293 in1 in8));
+CheckOK2(293, 0);
+CheckNum2(293, 1, $s, 0);
+
+%h = $_->entry("data/new293");
+CheckOK(293);
+CheckString2(293, 1, $h{'field'}, "data/new293");
+CheckNum2(293, 2, $h{'field_type'}, $GetData::SINDIR_ENTRY);
+CheckNum2(293, 3, $h{'fragment_index'}, 0);
+CheckSArray2(293, 4, $h{'in_fields'}, qw(in1 in8));
+
+# 294 alter_sindir
+$s = $_->alter_sindir("new291", "in5");
+CheckOK2(294, 1);
+CheckNum2(294, 2, $s, 0);
+
+%h = $_->entry("new291");
+CheckOK2(294, 3);
+CheckString2(294, 4, $h{'field'}, "new291");
+CheckNum2(294, 5, $h{'field_type'}, $GetData::SINDIR_ENTRY);
+CheckNum2(294, 6, $h{'fragment_index'}, 0);
+CheckSArray2(294, 7, $h{'in_fields'}, qw(in5 in3));
+
+# 295 getstrdata
+$s = $_->getdata("sindir", 0, 0, 1, 0);
+CheckOK(295);
+CheckSArray(295, $s, qw(eka eka eka eka eka eka eka eka));
+
 
 
 

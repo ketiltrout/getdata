@@ -497,8 +497,48 @@ PyObject *gdpy_convert_to_pyobj(const void *data, gd_type_t type)
   return pyobj;
 }
 
+static PyObject *gdpy_encoding_support(struct gdpy_fragment_t *self,
+    PyObject *args, PyObject *keys)
+{
+  char *keywords[] = { "encoding", NULL };
+  unsigned long enc;
+  PyObject *pyobj;
+  int n;
+
+  dtrace("%p, %p, %p", self, args, keys);
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "k:pygetdata.encoding_support",
+        keywords, &enc))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  n = gd_encoding_support(enc);
+
+  if (n == 0) {
+    Py_INCREF(Py_None);
+    dreturn("%p", Py_None);
+    return Py_None;
+  }
+
+  pyobj = PyInt_FromLong(n);
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
 /* GetData */
 static PyMethodDef GetDataMethods[] = {
+  { "encoding_support", (PyCFunction)gdpy_encoding_support,
+    METH_VARARGS | METH_KEYWORDS, "encoding_support(encoding)\n\n"
+      "The 'encoding' parameter should be one of the pygetdata.*_ENCODED\n"
+      "symbols.  This method will return pygetdata.RDWR if the library can\n"
+      "read and write the encoding, pygetdata.RDONLY if the library can\n"
+      /* ------- handy ruler ---------------------------------------------| */
+      "only read the encodin, or None otherwise.  See\n"
+      "gd_encoding_support(3)."
+  },
   { NULL, NULL, 0, NULL }
 };
 
@@ -511,21 +551,17 @@ PyMODINIT_FUNC initpygetdata(void)
 
   if (PyType_Ready(&gdpy_dirfile) < 0)
     return;
-  dprintf("gdpy_dirfile ready");
 
   if (PyType_Ready(&gdpy_entry) < 0)
     return;
-  dprintf("gdpy_entry ready");
 
   if (PyType_Ready(&gdpy_fragment) < 0)
     return;
-  dprintf("gdpy_fragment ready");
 
 #ifdef USE_NUMPY
   /* The following macro will cause this function to return if importing numpy
    * fails */
   import_array()
-  dprintf("imported NumPy");
 #endif
 
   mod = Py_InitModule3("pygetdata", GetDataMethods,
@@ -578,35 +614,28 @@ PyMODINIT_FUNC initpygetdata(void)
 
   if (mod == NULL)
     return;
-  dprintf("module init");
 
   Py_INCREF(&gdpy_dirfile);
   PyModule_AddObject(mod, "dirfile", (PyObject *)&gdpy_dirfile);
-  dprintf("gdpy_dirfile added");
 
   Py_INCREF(&gdpy_entry);
   PyModule_AddObject(mod, "entry", (PyObject *)&gdpy_entry);
-  dprintf("gdpy_entry added");
 
   Py_INCREF(&gdpy_fragment);
   PyModule_AddObject(mod, "fragment", (PyObject *)&gdpy_fragment);
-  dprintf("gdpy_fragment added");
 
   /* version */
   PyModule_AddObject(mod, "__version__", Py_BuildValue("(iiis)", GETDATA_MAJOR,
         GETDATA_MINOR, GETDATA_REVISION, GETDATA_VERSION_SUFFIX));
-  dprintf(".__version__ added");
 
   /* author */
   PyModule_AddStringConstant(mod, "__author__",
-      "D. V. Wiebe <getdata@ketiltrout.net>");
-  dprintf(".__author__ added");
+      "The GetData Project <http://getdata.sourceforge.net/>");
 
   /* add constants */
   for (i = 0; gdpy_constant_list[i].name != NULL; ++i)
     PyModule_AddIntConstant(mod, gdpy_constant_list[i].name,
         gdpy_constant_list[i].value);
-  dprintf("constants added");
 
   PyModule_AddIntConstant(mod, "__numpy_supported__",
 #ifdef USE_NUMPY
@@ -615,7 +644,6 @@ PyMODINIT_FUNC initpygetdata(void)
       0
 #endif
       );
-  dprintf(".__numpy_supported__ added");
 
   /* add exceptions */
   GdPy_DirfileError = PyErr_NewException("pygetdata.DirfileError",
@@ -633,7 +661,6 @@ PyMODINIT_FUNC initpygetdata(void)
     } else
       gdpy_exceptions[i] = GdPy_DirfileError;
   }
-  dprintf("Exceptions added");
 
   dreturnvoid();
 }

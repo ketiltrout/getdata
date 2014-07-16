@@ -2,10 +2,10 @@ function gd_put_carray(D, field_code, data)
 % GD_PUT_CARRAY  Modify CARRAY values
 %
 %   GD_PUT_CARRAY(DIRFILE,FIELD_CODE,DATA)
-%             is equivalent to calling GD_PUT_ARRAY_SLICE(DIRFILE, ...
+%             is equivalent to calling GD_PUT_CARRAY_SLICE(DIRFILE, ...
 %                                                             FIELD_CODE,0,DATA)
 %
-%   See also GD_PUT_ARRAY_SLICE
+%   See also GD_PUT_CARRAY_SLICE
 
   gd_put_carray_slice(D, field_code, 0, data);
 end

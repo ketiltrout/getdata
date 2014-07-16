@@ -61,8 +61,20 @@ was not one of the symbols listed above.
 GetData's encoding support framework is more finely grained than the three-way
 system reported by this function.  It is possible for the library to have
 partial support for reading or writing a particular encoding.  This function
-will only report positive support if all functions of a given class (read-only
-or read-write) are supported.
+will only report positive support if
+.I all
+functions of a given class (read-only or read-write) are supported.
+
+Furthermore, encoding types can have multiple subtypes with different degrees of
+support.  This function reports the support of the
+.I most supported
+subtype.  For example, the LZMA encoding framework can read both the .lzma
+and .xz container formats, but only write .xz files.  If LZMA support is available, this function
+will return
+.B GD_RDWR
+when passed
+.BR GD_LZMA_ENCODED .
+
 .SH SEE ALSO
 dirfile-encoding(5),
 .BR gd_cbopen (3),

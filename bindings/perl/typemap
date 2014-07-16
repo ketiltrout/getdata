@@ -80,23 +80,7 @@ T_COMPLEXIN
       gdp_package);
   }
 T_CONST_AVPV
-  if ($arg == undef)
-    $var = NULL;
-  else if (SvROK($arg) && SvTYPE(SvRV($arg)) == SVt_PVAV) {
-    AV *av = (AV*)SvRV($arg);
-    I32 i, len = av_len(av);
-
-    $var = ($type)safemalloc(sizeof(char*) * (1 + len));
-    for (i = 0; i <= len; ++i) {
-      SV **sv = av_fetch(av, i, 0);
-      if (sv == NULL || SvTYPE(*sv) != SVt_PV) {
-        safefree($var);
-        croak(\"%s::${func_name}() - Expected array of strings\", gdp_package);
-      }
-      ${var}[i] = SvPV_nolen(*av_fetch(av, i, 0));
-    }
-  } else
-    croak(\"%s::${func_name}() - Expected array of strings\", gdp_package);
+  { $var = gdp_convert_const_avpv($arg, NULL, gdp_package, \"${func_name}\"); }
 T_COMPLEX
   { gdp_convert_cmp(gd_csp_($var), $arg, NULL, gdp_package, \"${func_name}\"); }
 T_ENTRY
@@ -150,6 +134,7 @@ T_TRIPLET
       $var.r = SvNV($arg);
       break;
   }}
+  
 
  
 

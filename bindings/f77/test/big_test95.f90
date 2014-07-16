@@ -166,13 +166,13 @@ program big_test
   character (len=*), parameter :: frm2 = 'test95_dirfile/form2'
   character (len=*), parameter :: dat = 'test95_dirfile/data'
   integer, parameter :: flen = 11
-  integer, parameter :: nfields = 17
+  integer, parameter :: nfields = 20
   integer, parameter :: slen = 26
 
   character (len=slen), dimension(3) :: strings
   character (len=slen), dimension(3) :: st
-  character (len=flen), dimension(nfields + 11) :: fields
-  character (len=flen), dimension(nfields + 11) :: flist
+  character (len=flen), dimension(nfields + 10) :: fields
+  character (len=flen), dimension(nfields + 10) :: flist
   character (len=GD_FIELD_LEN) :: str
   character (len=4096) :: path
   integer(1), dimension(80) :: datadata
@@ -202,11 +202,12 @@ program big_test
   call system ( 'mkdir ' // fildir )
 
   fields = (/    'INDEX      ', 'alias      ', 'bit        ', 'carray     ', &
-  'const      ', 'data       ', 'div        ', 'lincom     ', 'linterp    ', &
-  'mplex      ', 'mult       ', 'phase      ', 'polynom    ', 'recip      ', &
-  'sbit       ', 'string     ', 'window     ', '           ', '           ', &
+  'const      ', 'data       ', 'div        ', 'indir      ', 'lincom     ', &
+  'linterp    ', 'mplex      ', 'mult       ', 'phase      ', 'polynom    ', &
+  'recip      ', 'sarray     ', 'sbit       ', 'sindir     ', 'string     ', &
+  'window     ', '           ', '           ', '           ', '           ', &
   '           ', '           ', '           ', '           ', '           ', &
-  '           ', '           ', '           ', '           ' /)
+  '           ' /)
 
   open(1, file=frmat, status='new')
   write(1, *) '/ENDIAN little'
@@ -229,6 +230,10 @@ program big_test
   write(1, *) 'window WINDOW linterp mult LT 4.1'
   write(1, *) '/ALIAS alias data'
   write(1, *) 'string STRING "Zaphod Beeblebrox"'
+  write(1, *) 'sarray SARRAY one two three four five six seven'
+  write(1, *) 'data/msarray SARRAY eight nine ten eleven twelve'
+  write(1, *) 'indir INDIR data carray'
+  write(1, *) 'sindir SINDIR data sarray'
   close(1, status='keep')
 
   open(1, file=frm2, status='new')
@@ -380,7 +385,7 @@ program big_test
 ! 22: fgd_mfield_name_max check
   i = fgd_mfield_name_max(d, 'data')
   call check_ok(ne, 22, d)
-  call check_int(ne, 22, i, 6)
+  call check_int(ne, 22, i, 7)
 
 ! 23: fgd_nfields check
   n = fgd_nfields(d)
@@ -400,12 +405,13 @@ program big_test
 ! 26: fgd_nmfields check
   n = fgd_nmfields(d, 'data')
   call check_ok(ne, 26, d)
-  call check_int(ne, 26, n, 3)
+  call check_int(ne, 26, n, 4)
 
 ! 27: fgd_mfield_list check
   fields(1) = 'mstr'
   fields(2) = 'mconst'
   fields(3) = 'mlut'
+  fields(4) = 'msarray'
 
   l = flen
   call fgd_mfield_list(flist, d, 'data', l)
@@ -897,15 +903,16 @@ program big_test
 ! 69: fgd_nvectors check
   n = fgd_nvectors(d)
   call check_ok(ne, 69, d)
-  call check_int(ne, 69, n, 24)
+  call check_int(ne, 69, n, 26)
 
 ! 70: fgd_vector_list check
   fields = (/    'INDEX      ', 'alias      ', 'bit        ', 'data       ', &
-  'div        ', 'lincom     ', 'linterp    ', 'mplex      ', 'mult       ', &
-  'new1       ', 'new10      ', 'new2       ', 'new3       ', 'new4       ', &
-  'new5       ', 'new6       ', 'new7       ', 'new8       ', 'new9       ', &
-  'phase      ', 'polynom    ', 'recip      ', 'sbit       ', 'window     ', &
-  '           ', '           ', '           ', '           ' /)
+  'div        ', 'indir      ', 'lincom     ', 'linterp    ', 'mplex      ', &
+  'mult       ', 'new1       ', 'new10      ', 'new2       ', 'new3       ', &
+  'new4       ', 'new5       ', 'new6       ', 'new7       ', 'new8       ', &
+  'new9       ', 'phase      ', 'polynom    ', 'recip      ', 'sbit       ', &
+  'sindir     ', 'window     ', '           ', '           ', '           ', &
+  '           ' /)
   l = flen
   call fgd_vector_list(flist, d, l)
   call check_ok(ne, 70, d)
@@ -1221,7 +1228,8 @@ program big_test
   'mnew10     ', '           ', '           ', '           ', '           ', &
   '           ', '           ', '           ', '           ', '           ', &
   '           ', '           ', '           ', '           ', '           ', &
-  '           ', '           ', '           ', '           ' /)
+  '           ', '           ', '           ', '           ', '           ', &
+  '           ' /)
   l = flen
   call fgd_mvector_list(flist, d, "data", l)
   call check_ok2(ne, 98, i, d)
@@ -1974,8 +1982,8 @@ program big_test
     call check_cpx2(ne, 175, i, cc16(i), dc)
   end do
 
-! 177: gd_carray_len
-  n = fgd_carray_len(d, 'carray')
+! 177: gd_array_len
+  n = fgd_array_len(d, 'carray')
   call check_ok(ne, 177, d)
   call check_int(ne, 177, n, 6)
 
@@ -1984,8 +1992,8 @@ program big_test
   call check_ok(ne, 178, d)
   call check_int2(ne, 178, 1, n, GD_CARRAY_ENTRY)
   call check_int2(ne, 178, 2, ent%fragment_index, 0)
-  call check_int2(ne, 178, 2, ent%array_len, 6)
-  call check_int2(ne, 178, 3, ent%data_type, GD_FLOAT64)
+  call check_int2(ne, 178, 3, ent%array_len, 6)
+  call check_int2(ne, 178, 4, ent%data_type, GD_FLOAT64)
 
 ! 179: gd_add_carray
   call fgd_add_carray(d, 'new17', GD_FLOAT64, 4, 0)
@@ -2033,13 +2041,6 @@ program big_test
   call check_int2(ne, 181, 2, ent%fragment_index, 0)
   call check_int2(ne, 181, 3, ent%data_type, GD_FLOAT32)
   call check_int2(ne, 181, 4, ent%array_len, 3)
-
-  call fgd_get_carray_r4(d, 'new17', 0, 0, cr4)
-  call check_ok2(ne, 181, 3, d)
-
-  do i=1,4
-  call check_dbl2(ne, 181, i, 1d0 * cr4(i), 0d0)
-  end do
 
 ! 183: fgd_constants_i1 check
   iq(1) = 93
@@ -2520,11 +2521,11 @@ program big_test
   n = fgd_nentries(d, "data", GD_SCALAR_ENTRIES, IOR(GD_ENTRIES_HIDDEN, &
   GD_ENTRIES_NOALIAS))
   call check_ok2(ne, 237, 1, d)
-  call check_int2(ne, 237, 1, n, 5)
+  call check_int2(ne, 237, 1, n, 6)
   n = fgd_nentries(d, "", GD_VECTOR_ENTRIES, IOR(GD_ENTRIES_HIDDEN, &
   GD_ENTRIES_NOALIAS))
   call check_ok2(ne, 237, 2, d)
-  call check_int2(ne, 237, 2, n, 28)
+  call check_int2(ne, 237, 2, n, 30)
 
 ! 238: fgd_field_name_max check
   i = fgd_entry_name_max(d, "", GD_VECTOR_ENTRIES, IOR(GD_ENTRIES_HIDDEN, &
@@ -2534,11 +2535,12 @@ program big_test
 
 ! 239: fgd_field_list check
   fields = (/    'INDEX      ', 'bit        ', 'data       ', 'div        ', &
-  'lincom     ', 'linterp    ', 'mplex      ', 'mult       ', 'new1       ', &
-  'new135     ', 'new14      ', 'new15      ', 'new16      ', 'new18      ', &
-  'new19      ', 'new2       ', 'new21      ', 'new3       ', 'new4       ', &
-  'new5       ', 'new6       ', 'new7       ', 'new8       ', 'phase      ', &
-  'polynom    ', 'recip      ', 'sbit       ', 'window     ' /)
+  'indir      ', 'lincom     ', 'linterp    ', 'mplex      ', 'mult       ', &
+  'new1       ', 'new135     ', 'new14      ', 'new15      ', 'new16      ', &
+  'new18      ', 'new19      ', 'new2       ', 'new21      ', 'new3       ', &
+  'new4       ', 'new5       ', 'new6       ', 'new7       ', 'new8       ', &
+  'phase      ', 'polynom    ', 'recip      ', 'sbit       ', 'sindir     ', &
+  'window     ' /)
   l = flen
   call fgd_entry_list(flist, d, "", GD_VECTOR_ENTRIES, IOR(GD_ENTRIES_HIDDEN, &
       GD_ENTRIES_NOALIAS), l)
@@ -3136,6 +3138,220 @@ program big_test
   call check_str2(ne, 269,  9, ent%scalar(1), 'carray')
   call check_int2(ne, 269, 10, ent%scalar_ind(1), 3)
   call check_str2(ne, 269, 11, ent%scalar(2), '')
+
+! 271: fgd_encoding_support
+  n = fgd_encoding_support(GD_SIE_ENCODED)
+  call check_int(ne, 271, n, GD_RDWR)
+
+! 272: fgd_sarray_value_max
+  n = fgd_sarray_value_max(d)
+  call check_int(ne, 272, n, 5)
+
+! 273: fgd_msarray_value_max
+  n = fgd_msarray_value_max(d, 'data')
+  call check_int(ne, 273, n, 6)
+
+! 274: gd_entry (SARRAY)
+  n = fgd_entry(d, 'sarray', ent)
+  call check_ok(ne, 274, d)
+  call check_int2(ne, 274, 1, n, GD_SARRAY_ENTRY)
+  call check_int2(ne, 274, 2, ent%fragment_index, 0)
+  call check_int2(ne, 274, 3, ent%array_len, 7)
+
+! 275: gd_get_sarray
+  fields(1) = 'one'
+  fields(2) = 'two'
+  fields(3) = 'three'
+  fields(4) = 'four'
+  fields(5) = 'five'
+  fields(6) = 'six'
+  fields(7) = 'seven'
+  l = flen
+  call fgd_get_sarray(flist, l, d, 'sarray')
+  call check_ok(ne, 275, d)
+  call check_int(ne, 275, l, flen)
+  do i=1,n
+  call check_str2(ne, 275, i, flist(i), fields(i))
+  end do 
+
+! 276: gd_get_sarray_slice
+  l = flen
+  call fgd_get_sarray_slice(flist, l, d, 'sarray', 4, 3)
+  call check_ok(ne, 276, d)
+  call check_int(ne, 276, l, flen)
+  do i=1,3
+  call check_str2(ne, 276, i, flist(i), fields(i + 3))
+  end do 
+
+! 278: gd_put_sarray
+  fields(1) = 'eka'
+  fields(2) = 'dvi'
+  fields(3) = 'tri'
+  fields(4) = 'catur'
+  fields(5) = 'panca'
+  fields(6) = 'sas'
+  fields(7) = 'sapta'
+  call fgd_put_sarray(d, 'sarray', fields)
+  call check_ok2(ne, 278, 1, d)
+
+  l = flen
+  call fgd_get_sarray(flist, l, d, 'sarray')
+  call check_ok2(ne, 278, 2, d)
+  call check_int(ne, 278, l, flen)
+  do i=1,n
+  call check_str2(ne, 278, i, flist(i), fields(i))
+  end do 
+
+! 279: gd_put_sarray_slice
+  fields(4) = 'asta'
+  fields(5) = 'nava'
+  call fgd_put_sarray_slice(d, 'sarray', 4, 2, fields(4:5))
+  call check_ok2(ne, 279, 1, d)
+
+  l = flen
+  call fgd_get_sarray(flist, l, d, 'sarray')
+  call check_ok2(ne, 279, 2, d)
+  call check_int(ne, 279, l, flen)
+  do i=1,n
+  call check_str2(ne, 279, i, flist(i), fields(i))
+  end do 
+
+! 280: gd_add_sarray
+  call fgd_add_sarray(d, 'new280', 4, 0)
+  call check_ok2(ne, 280, 1, d)
+
+  n = fgd_entry(d, 'new280', ent)
+  call check_ok2(ne, 280, 2, d)
+  call check_int2(ne, 280, 1, n, GD_SARRAY_ENTRY)
+  call check_int2(ne, 280, 2, ent%fragment_index, 0)
+  call check_int2(ne, 280, 3, ent%array_len, 4)
+
+  call fgd_get_sarray(flist, l, d, 'new280')
+  call check_ok2(ne, 280, 3, d)
+
+  do i=1,4
+  call check_str2(ne, 280, i, flist(i), "");
+  end do
+
+! 282: gd_madd_sarray
+  call fgd_madd_sarray(d, 'data', 'new282', 4)
+  call check_ok2(ne, 282, 1, d)
+
+  n = fgd_entry(d, 'data/new282', ent)
+  call check_ok2(ne, 282, 2, d)
+  call check_int2(ne, 282, 1, n, GD_SARRAY_ENTRY)
+  call check_int2(ne, 282, 2, ent%fragment_index, 0)
+  call check_int2(ne, 282, 3, ent%array_len, 4)
+
+  call fgd_get_sarray(flist, l, d, 'data/new282')
+  call check_ok2(ne, 282, 3, d)
+
+  do i=1,4
+  call check_str2(ne, 282, i, flist(i), "")
+  end do
+
+! 283: gd_alter_carray
+  call fgd_alter_sarray(d, 'new280', 3)
+  call check_ok2(ne, 283, 1, d)
+
+  n = fgd_entry(d, 'new280', ent)
+  call check_ok2(ne, 283, 2, d)
+  call check_int2(ne, 283, 1, n, GD_SARRAY_ENTRY)
+  call check_int2(ne, 283, 2, ent%fragment_index, 0)
+  call check_int2(ne, 283, 3, ent%array_len, 3)
+
+! 285: fgd_entry (INDIR)
+  n = fgd_entry(d, 'indir', ent)
+  call check_ok(ne, 285, d)
+  call check_int2(ne, 285, 1, n, GD_INDIR_ENTRY)
+  call check_int2(ne, 285, 2, ent%fragment_index, 0)
+  call check_str2(ne, 285, 3, ent%field(1), 'data')
+  call check_str2(ne, 285, 4, ent%field(2), 'carray')
+
+! 286: fgd_add_indir check
+  call fgd_add_indir(d, 'new286', 'in1', 'in2', 0)
+  call check_ok2(ne, 286, 1, d)
+
+  n = fgd_entry(d, 'new286', ent)
+  call check_ok2(ne, 286, 2, d)
+  call check_int2(ne, 286, 1, n, GD_INDIR_ENTRY)
+  call check_int2(ne, 286, 2, ent%fragment_index, 0)
+  call check_str2(ne, 286, 3, ent%field(1), 'in1')
+  call check_str2(ne, 286, 4, ent%field(2), 'in2')
+
+! 288: fgd_madd_indir check
+  call fgd_madd_indir(d, 'data', 'new288', 'in3', 'in4')
+  call check_ok2(ne, 288, 1, d)
+
+  n = fgd_entry(d, 'data/new288', ent)
+  call check_ok2(ne, 288, 2, d)
+  call check_int2(ne, 288, 1, n, GD_INDIR_ENTRY)
+  call check_int2(ne, 288, 2, ent%fragment_index, 0)
+  call check_str2(ne, 288, 3, ent%field(1), 'in3')
+  call check_str2(ne, 288, 4, ent%field(2), 'in4')
+
+! 289: fgd_alter_indir check
+  call fgd_alter_indir(d, 'new286', 'in6', 'in4')
+  call check_ok2(ne, 289, 1, d)
+
+  n = fgd_entry(d, 'new286', ent)
+  call check_ok2(ne, 289, 2, d)
+  call check_int2(ne, 289, 1, n, GD_INDIR_ENTRY)
+  call check_int2(ne, 289, 2, ent%fragment_index, 0)
+  call check_str2(ne, 289, 3, ent%field(1), 'in6')
+  call check_str2(ne, 289, 4, ent%field(2), 'in4')
+
+! 290: fgd_entry (SINDIR)
+  n = fgd_entry(d, 'sindir', ent)
+  call check_ok(ne, 290, d)
+  call check_int2(ne, 290, 1, n, GD_SINDIR_ENTRY)
+  call check_int2(ne, 290, 2, ent%fragment_index, 0)
+  call check_str2(ne, 290, 3, ent%field(1), 'data')
+  call check_str2(ne, 290, 4, ent%field(2), 'sarray')
+
+! 291: fgd_add_sindir check
+  call fgd_add_sindir(d, 'new291', 'in1', 'in2', 0)
+  call check_ok2(ne, 291, 1, d)
+
+  n = fgd_entry(d, 'new291', ent)
+  call check_ok2(ne, 291, 2, d)
+  call check_int2(ne, 291, 1, n, GD_SINDIR_ENTRY)
+  call check_int2(ne, 291, 2, ent%fragment_index, 0)
+  call check_str2(ne, 291, 3, ent%field(1), 'in1')
+  call check_str2(ne, 291, 4, ent%field(2), 'in2')
+
+! 293: fgd_madd_sindir check
+  call fgd_madd_sindir(d, 'data', 'new293', 'in3', 'in4')
+  call check_ok2(ne, 293, 1, d)
+
+  n = fgd_entry(d, 'data/new293', ent)
+  call check_ok2(ne, 293, 2, d)
+  call check_int2(ne, 293, 1, n, GD_SINDIR_ENTRY)
+  call check_int2(ne, 293, 2, ent%fragment_index, 0)
+  call check_str2(ne, 293, 3, ent%field(1), 'in3')
+  call check_str2(ne, 293, 4, ent%field(2), 'in4')
+
+! 294: fgd_alter_sindir check
+  call fgd_alter_sindir(d, 'new291', 'in6', 'in4')
+  call check_ok2(ne, 294, 1, d)
+
+  n = fgd_entry(d, 'new291', ent)
+  call check_ok2(ne, 294, 2, d)
+  call check_int2(ne, 294, 1, n, GD_SINDIR_ENTRY)
+  call check_int2(ne, 294, 2, ent%fragment_index, 0)
+  call check_str2(ne, 294, 3, ent%field(1), 'in6')
+  call check_str2(ne, 294, 4, ent%field(2), 'in4')
+
+! 295: fgd_getstrdata check
+  l = flen
+  n  = fgd_getstrdata(d, 'sindir', 0, 0, 1, 0, flist, l)
+  call check_ok(ne, 295, d)
+  call check_int2(ne, 295, 1, l, flen)
+  call check_int2(ne, 295, 2, n, 8)
+
+  do i=1,8
+  call check_str2(ne, 295, i, flist(i), 'eka')
+  end do
 
 
 

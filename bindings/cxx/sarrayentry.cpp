@@ -1,4 +1,4 @@
-// Copyright (C) 2011 D. V. Wiebe
+// Copyright (C) 2014 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -19,3 +19,22 @@
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 #include "internal.h"
+
+SarrayEntry::SarrayEntry(const char* field_code, size_t array_len,
+    int fragment_index)
+{
+  E.field = strdup(field_code);
+  E.field_type = GD_SARRAY_ENTRY;
+  E.u.scalar.array_len = array_len;
+  E.fragment_index = fragment_index;
+}
+
+int SarrayEntry::SetArrayLen(size_t array_len)
+{
+  E.u.scalar.array_len = array_len;
+
+  if (D != NULL)
+    return gd_alter_entry(D->D, E.field, &E, 0);
+  
+  return 0;
+}

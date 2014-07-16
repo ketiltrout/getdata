@@ -51,7 +51,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   field_code = gdmx_to_string(prhs, 1, 0);
   first_frame = gdmx_to_llong(prhs, 2);
   first_samp = gdmx_to_llong(prhs, 3);
-  gdmx_to_data(&data, &type, &nsamp, prhs, 4);
+  gdmx_to_data(&data, &type, &nsamp, prhs[4], 4);
 
   n = gd_putdata64(D, field_code, (gd_off64_t)first_frame,
       (gd_off64_t)first_samp, 0, nsamp, type, data);

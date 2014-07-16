@@ -32,7 +32,7 @@ distutils_path=build/lib.${PYTHON_PLATFORM}-${PYTHON_VERSION}
 pygetdata.so: ${distutils_path}/pygetdata.so
 	cp $< $@
 
-${distutils_path}/pygetdata.so: setup.py ${BUILT_SOURCES}
+${distutils_path}/pygetdata.so: setup.py ${BUILT_SOURCES} ${EXTRA_DIST}
 	${PYTHON} setup.py build
 
 pyconstants.c: ../make_parameters

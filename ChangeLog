@@ -1,3 +1,69 @@
+2014-07-16     D. V. Wiebe <getdata@ketiltrout.net> svn:908
+	* bindings/cxx/dirfile.cpp (GetData::EncodingSupport Dirfile::ArrayLen
+	Dirfile::GetData(..., const char** data_out) Dirfile::GetSarray
+	Dirfile::Sarrays Dirfile::MSarrays Dirfile::PutSarray): Added.
+	* bindings/cxx/getdata/sindirentry.h bindings/cxx/getdata/indirentry.h
+	bindings/cxx/getdata/sarrayentry.h bindings/cxx/indirentry.cpp
+	bindings/cxx/sarrayentry.cpp bindings/cxx/sindirentry.cpp
+
+	* bindings/cxx/indexentry.cpp: Deleted.
+
+	* bindings/f77/fgetdata.c (_GDF_GetEntryYoke GDGEID GDGESD GDGESA GDADID
+	GDADSD GDMDID GDMDSD GDADSA GDMDSA GDALID GDALSD GDENCS GDSARX GDMSAX GDARLN
+	GDGTSA GDPTSA GDALSA GDGSTD GDGSTP GDXSTP GDDSTP): Added.
+	* bindings/f77/getdata.f90.in (fgd_array_len fgd_encoding_support
+	fgd_sarray_value_max fgd_msarray_value_max fgd_get_sarray
+	fgd_get_sarray_slice fgd_put_sarray fgd_put_sarray_slice fgd_add_sarray
+	fgd_madd_sarray fgd_alter_sarray fgd_add_indir fgd_add_sindir fgd_madd_indir
+	fgd_madd_sindir fgd_alter_indir fgd_alter_sindir fgd_getstrdata): Added.
+
+	* bindings/idl/getdata.c (gdidl_add_yoke_ gdidl_alter_yoke_
+	gdidl_encoding_support gdidl_add_sarray gdidl_get_sarray gdidl_alter_sarray
+	gdidl_put_sarray gdidl_add_indir gdidl_alter_indir gdidl_add_sindir
+	gdidl_alter_sindir): Added.
+	* bindings/idl/getdata.c (gdidl_array_len): Renamed from gdidl_carray_len.
+	* bindings/idl/getdata.c (gdidl_getdata): Support gd_getstrdata, too.
+
+	* bindings/matlab/gd_add_indir.m bindings/matlab/gd_add_sarray.c
+	bindings/matlab/gd_add_sindir.m bindings/matlab/gd_alter_indir.m
+	bindings/matlab/gd_alter_sarray.m bindings/matlab/gd_alter_sindir.m
+	bindings/matlab/gd_carray_len.m bindings/matlab/gd_encoding_support.c
+	bindings/matlab/gd_get_sarray.c bindings/matlab/gd_get_sarray_slice.c
+	bindings/matlab/gd_getstrdata.c bindings/matlab/gd_madd_indir.m
+	bindings/matlab/gd_madd_sarray.c bindings/matlab/gd_madd_sindir.m
+	bindings/matlab/gd_msarrays.c bindings/matlab/gd_put_sarray.m
+	bindings/matlab/gd_put_sarray_slice.c bindings/matlab/gd_sarrays.c: Added.
+	* bindings/matlab/gd_array_len.c: Renamed from gd_carray_len.c.
+	* bindings/matlab/matlab.c (gdmx_from_sarrays gdmx_to_sdata
+	gdmx_free_sdata): Added.
+
+	* bindings/perl/GetData.xs (gdp_convert_const_avpv gdp_convert_strarr
+	gdp_newRVavpv0 array_len get_sarray get_sarray_slice sarrays put_sarray
+	put_sarray_slice add_sarray madd_sarray msarrays): Added.
+	* bindings/perl/simple_funcs.xsin (array_len alter_sarray add_indir
+	add_sindir alter_indir alter_sindir madd_indir madd_sindir): Added.
+
+	* bindings/php/getdata.c (gdphp_convert_sarray gdphp_convert_nsarray
+	gd_add_sarray gd_add_indir gd_add_sindir gd_alter_sarray gd_alter_indir
+	gd_alter_sindir gd_array_len gd_sarrays gd_get_sarray gd_getstrdata
+	gd_madd_sarray gd_madd_indir gd_madd_sindir gd_msarrays gd_put_sarray
+	gd_encoding_support): Added.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getsarray gdpy_dirfile_arraylen
+	gdpy_dirfile_sarrays gdpy_dirfile_msarrays gdpy_dirfile_putsarray): Added.
+	* bindings/python/pyentry.c: Handle SARRAY, INDIR, SINDIR
+	* bindings/python/pygetdata.c (gdpy_encoding_support): Added.
+
+	* bindings/cxx/test/big_test.cpp bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro
+	bindings/matlab/test/big_test.m bindings/perl/t/big_test.t
+	bindings/php/test/big_test.php bindings/python/test/big_test.py: Added tests
+	271 through 298.
+
+	* src/field_list.c (_GD_EntryIndex): Handle SARRAY, INDIR, SINDIR
+
+	* gd_get_sarray_slice (gd_get_sarray_slice): Fix return for GD_INVALID.
+
 2014-05-27     D. V. Wiebe <getdata@ketiltrout.net> svn:907
 	* src/constant.c (gd_array_len): Added.
 	* src/constant.c (gd_carray_len): Replaced with a gd_array_len() call and

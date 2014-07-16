@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -19,38 +19,41 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "gd_matlab.h"
+#include <string.h>
 
 /*
- % GD_CARRAY_LEN  Report the length of a CARRAY field
+ % GD_MSARRAYS  Fetch all CARRAY metafield values
  %
- %   L = GD_CARRAY_LEN(DIRFILE,FIELD_CODE)
- %             reports the length, L, of the CARRAY field specified by
- %             FIELD_CODE.
+ %   A = GD_MSARRAYS(DIRFILE,PARENT)
+ %             returns a cell array of numeric arrays, A, containing all the
+ %             CARRAY data in the for metafields under parent field PARENT.  A
+ %             corresponding array of field names can be produced with
+ %             GD_MFIELD_LIST_BY_TYPE.
  %
  %   The DIRFILE object should have previously been created with GD_OPEN.
  %
- %   See the documentation on the C API function gd_alter_endianness(3) in
- %   section 3 of the UNIX manual for more details.
+ %   See the documentation on the C API function gd_msarrays(3) in section 3
+ %   of the UNIX manual for more details.
  %
- %   See also GD_ENDIANNESS, GD_OPEN, GETDATA_CONSTANTS
+ %   See also GD_SARRAYS, GD_MFIELD_LIST_BY_TYPE, GD_GET_CARRAY_SLICE
  */
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
-  void *data;
-  char *field_code;
-  size_t n;
+  const char ***l;
+  char *parent;
 
   GDMX_CHECK_RHS(2);
 
   D = gdmx_to_dirfile(prhs[0]);
-  field_code = gdmx_to_string(prhs, 1, 0);
+  parent = gdmx_to_string(prhs, 1, 0);
 
-  n = gd_carray_len(D, field_code);
+  l = gd_msarrays(D, parent);
+  mxFree(parent);
 
-  mxFree(field_code);
   gdmx_err(D, 0);
 
-  plhs[0] = gdmx_from_size_t(n);
+  /* convert to array of arrays */
+  plhs[0] = gdmx_from_sarrays(l);
 }
