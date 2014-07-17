@@ -1,4 +1,11 @@
-2014-07-16     D. V. Wiebe <getdata@ketiltrout.net> svn:911
+2014-07-17     D. V. Wiebe <g etdata@ketiltrout.net> svn:912
+	* bindings/f77/fgetdata.c (_GDF_SetDirfile): Don't abort on error, just
+	return -1 (optionally discarding the dirfile first).
+
+	* bindings/f77/fgetdata.c (_GDF_Callback GDCOPN): Handle running out of
+		DUNs.
+
+2014-07-17     D. V. Wiebe <g etdata@ketiltrout.net> svn:911
 	* src/getdata.c (_GD_DoSindir): Renamed from gd_getstrdata64 and
 	internalised.  Do return_type checks, and handle num_samp = 0.
 	* src/getdata.c (gd_getstrdata): Deleted.

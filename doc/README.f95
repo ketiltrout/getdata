@@ -15,10 +15,10 @@ As in the Fortran 77 bindings, dirfiles are referred to by "dirfile unit"
 numbers, which are internally converted to the C API DIRFILE pointers.
 Space is available in the compatibility library for only 1023 dirfile units.  If
 an application attempts to open more than 1023 dirfiles simultaneously, the
-compatibility library will emit an error message on standard error and raise
-SIGABRT.  Passing an invalid dirfile unit number to a procedure which requires
-one as input (other than fgd_close, which will simply ignore it) will
-result in the call failing with error code GD_E_BAD_DIRFILE.
+compatibility library will emit an error message on standard error and return
+and invalid dirfile unit number.  Passing an invalid dirfile unit number to a
+procedure which requires one as input (other than fgd_close, which will simply
+ignore it) will result in the call failing with error code GD_E_BAD_DIRFILE.
 
 The "getdata" module, which these bindings define, is described in
 `getdata.mod', which will be installed in the same directory as getdata.h.  The

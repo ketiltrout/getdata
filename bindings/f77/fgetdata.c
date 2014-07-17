@@ -105,11 +105,11 @@ static DIRFILE* _GDF_GetDirfile(int d)
 }
 
 /* convert a new DIRFILE* into an int */
-static int _GDF_SetDirfile(DIRFILE* D)
+static int _GDF_SetDirfile(DIRFILE* D, int close)
 {
   int i;
 
-  dtrace("%p", D);
+  dtrace("%p, %i", D);
 
   if (!f77dirfiles_initialised)
     _GDF_InitDirfiles();
@@ -122,9 +122,11 @@ static int _GDF_SetDirfile(DIRFILE* D)
       return i;
     }
 
-  /* out of f77dirfiles space: complain and abort */
+  /* out of f77dirfiles space: complain */
   fputs("libfgetdata: DIRFILE space exhausted.", stderr);
-  abort();
+  if (close)
+    gd_discard(D);
+  return -1;
 }
 
 /* delete the supplied dirfile */
@@ -207,7 +209,11 @@ static int _GDF_Callback(gd_parser_data_t* pdata, void *f77_callback)
   dtrace("%p, %p", pdata, f77_callback);
 
   if (c != NULL && c->func != NULL) {
-    unit = _GDF_SetDirfile((DIRFILE*)pdata->dirfile);
+    unit = _GDF_SetDirfile((DIRFILE*)pdata->dirfile, 0);
+    if (unit < 0) {
+      dreturn("%i", r);
+      return r;
+    }
 
     (c->func)(&r, &unit, &pdata->suberror, pdata->line, &pdata->linenum,
         pdata->filename);
@@ -230,7 +236,7 @@ void F77_FUNC(gdopen, GDOPEN) (int32_t *dirfile, const char *dirfilename,
   dtrace("%p, %p, %i, %i", dirfile, dirfilename, *dirfilename_l, *flags);
 
   *dirfile = _GDF_SetDirfile(gd_open(_GDF_CString(&out, dirfilename,
-          *dirfilename_l), *flags));
+          *dirfilename_l), *flags), 1);
 
   free(out);
 
@@ -2535,12 +2541,14 @@ void F77_FUNC(gdcopn, GDCOPN) (int32_t *dirfile, const char *dirfilename,
   _GDF_CString(&out, dirfilename, *dirfilename_l);
 
   D = gd_cbopen(out, *flags, _GDF_Callback, (void*)&temp);
-  *dirfile = _GDF_SetDirfile(D);
+  *dirfile = _GDF_SetDirfile(D, 1);
 
-  /* save the callback */
-  f77callbacks[*dirfile].func = callback;
-  /* and tell getdata its new location */
-  gd_parser_callback(D, _GDF_Callback, f77callbacks + *dirfile);
+  if (*dirfile >= 0) {
+    /* save the callback */
+    f77callbacks[*dirfile].func = callback;
+    /* and tell getdata its new location */
+    gd_parser_callback(D, _GDF_Callback, f77callbacks + *dirfile);
+  }
 
   free(out);
   dreturn("%i", *dirfile);
@@ -3466,7 +3474,7 @@ void F77_FUNC(gdinvd, GDINVD) (int32_t *dirfile)
 {
   dtrace("%p", dirfile);
 
-  *dirfile = _GDF_SetDirfile(gd_invalid_dirfile());
+  *dirfile = _GDF_SetDirfile(gd_invalid_dirfile(), 1);
 
   dreturn("%i", *dirfile);
 }

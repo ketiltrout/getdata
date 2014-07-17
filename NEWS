@@ -185,6 +185,9 @@ New in verison 0.9.0a:
 
   * PHP bindings have been added.
 
+  * F77 and F95: The bindings no longer raise SIGABRT when the dirfile space is
+    exhausted.  Instead they simply return an invalid dirfile unit number.
+
   * F77: Functions to add fields with named scalar parameters have been added
     (GDASBT GDASCL GDASCP GDASCR GDASLC GDASMX GDASPH GDASPN GDASRC GDASRW
     GDASSB GDASWD), but only for those field types which permit named scalars.

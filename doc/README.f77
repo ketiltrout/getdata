@@ -17,10 +17,10 @@ pointers are not used to refer to dirfile instances.  Instead, an integer
 dirfile unit number is used.  Space is available in the compatibility library
 for only 1023 dirfile units.  If an application attempts to open more than 1023
 dirfiles simultaneously, the compatibility library will emit an error message
-on standard error and raise SIGABRT.  Passing an invalid dirfile unit number to
-a subroutines which requires one as input (other than GDCLOS, which will simply
-ignore it) will result in the call failing with error code GD_EBD
-(= GD_E_BAD_DIRFILE, see below).
+on standard error and return an invalid dirfile unit number.  Passing an invalid
+dirfile unit number to a subroutines which requires one as input (other than
+GDCLOS, which will simply ignore it) will result in the call failing with error
+code GD_EBD (= GD_E_BAD_DIRFILE, see below).
 
 Including getdata.f (which will be installed in the same directory as getdata.h)
 will define several convenient parameters including the DIRFILE flags, the data
@@ -58,7 +58,8 @@ Subroutines interacting with the database
   This wraps gd_open(3), with the same input arguments (dirfilename_len should
   contain the string length of dirfilename).  It returns the dirfile unit number
   in dirfile_unit.  The flags should be a bitwise "or"d list of flag parameters
-  (see below).  This behaves analogously to gd_open() itself: it returns a valid
+  (see below).  If no more dirfile unit numbers are available, it returns -1,
+  otherwise, this behaves analogously to gd_open() itself: it returns a valid
   dirfile unit even in case of error.
 
 * GDCOPN(dirfile_unit, dirfilename, dirfilename_len, flags, sehandler)
@@ -117,7 +118,8 @@ Subroutines interacting with the database
     INTEGER dirfile_unit
 
   This wraps gd_invalid_dirfile(3), and returns the unit number of a
-  newly-created, invalid dirfile.
+  newly-created, invalid dirfile.  If no dirfile unit numbers were available,
+  it returns -1.
 
 * GDCLOS(dirfile_unit)
 
