@@ -3582,13 +3582,13 @@ PHP_FUNCTION(gd_get_string)
 
 PHP_FUNCTION(gd_getdata)
 {
-  long first_frame, first_sample, num_frames, num_samples, data_type;
+  long first_frame, first_sample, num_frames, num_samples;
   char *field_code;
   int field_code_len;
   size_t ns;
   zval *zunpack = NULL;
 
-  void *data = NULL;
+  long data_type = GD_UNKNOWN;
   DIRFILE *D;
   zend_bool unpack;
   size_t n = 0;
@@ -3596,7 +3596,7 @@ PHP_FUNCTION(gd_getdata)
 
   dtracephp();
 
-  GDPHP_PARSED("slllll|z", &field_code, &field_code_len, &first_frame,
+  GDPHP_PARSED("sllll|lz", &field_code, &field_code_len, &first_frame,
       &first_sample, &num_frames, &num_samples, &data_type, &zunpack);
 
   unpack = gdphp_unpack(zunpack);
@@ -3610,56 +3610,37 @@ PHP_FUNCTION(gd_getdata)
   } else
     ns = num_samples;
 
-  /* allocate a buffer */
-  gdphp_validate_type(data_type, &ctx);
-  data = emalloc(ns * GD_SIZE(data_type));
+  /* get the type, if needed */
+  if (data_type == GD_UNKNOWN)
+    data_type = gd_native_type(D, field_code);
 
-  n = gd_getdata(D, field_code, first_frame, first_sample, 0, ns, data_type,
-      data);
+  if (gd_entry_type(D, field_code) == GD_SINDIR_ENTRY) {
+    const char **data = emalloc(ns * sizeof(*data));
 
-  GDPHP_CHECK_ERROR(D);
+    n = gd_getdata(D, field_code, first_frame, first_sample, 0, ns, GD_STRING,
+        data);
 
-  gdphp_from_data(return_value, n, data_type, data, 0, unpack);
-  dreturn("%" PRNsize_t, n);
-}
-
-PHP_FUNCTION(gd_getstrdata)
-{
-  long first_frame, first_sample, num_frames, num_samples;
-  char *field_code;
-  int field_code_len;
-  size_t ns;
-
-  const char **data = NULL;
-  DIRFILE *D;
-  size_t n = 0;
-  GDPHP_CONTEXTp(ctx,6);
-
-  dtracephp();
-
-  GDPHP_PARSED("sllll", &field_code, &field_code_len, &first_frame,
-      &first_sample, &num_frames, &num_samples);
-
-  /* figure out how much data we have */
-  if (num_frames > 0) {
-    unsigned spf = gd_spf(D, field_code);
-    if (spf == 0)
+    if (gd_error(D)) {
+      efree(data);
       GDPHP_RETURN_F;
-    ns = num_frames * spf + num_samples;
-  } else
-    ns = num_samples;
+    }
 
-  /* allocate a buffer */
-  data = emalloc(ns * sizeof(*data));
-
-  n = gd_getstrdata(D, field_code, first_frame, first_sample, 0, ns, data);
-
-  if (gd_error(D)) {
+    gdphp_to_string_array(return_value, data, n);
     efree(data);
-    GDPHP_RETURN_F;
-  }
+  } else {
+    void *data;
 
-  gdphp_to_string_array(return_value, data, n);
+    /* allocate a buffer */
+    gdphp_validate_type(data_type, &ctx);
+    data = emalloc(ns * GD_SIZE(data_type));
+
+    n = gd_getdata(D, field_code, first_frame, first_sample, 0, ns, data_type,
+        data);
+
+    GDPHP_CHECK_ERROR(D);
+
+    gdphp_from_data(return_value, n, data_type, data, 0, unpack);
+  }
   dreturn("%" PRNsize_t, n);
 }
 
@@ -5224,7 +5205,6 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_get_sarray, NULL)
     PHP_FE(gd_get_string, NULL)
     PHP_FE(gd_getdata, NULL)
-    PHP_FE(gd_getstrdata, NULL)
     PHP_FE(gd_hidden, NULL)
     PHP_FE(gd_hide, NULL)
     PHP_FE(gd_include, NULL)

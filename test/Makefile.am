@@ -203,17 +203,16 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_mplex_bof get_mplex_complex get_mplex_lb get_mplex_lball \
 					get_mplex_nolb get_mplex_s get_mplex_saved get_multiply \
 					get_multiply_ccin get_multiply_crin get_multiply_crinr \
-					get_multiply_noin get_multiply_rcin get_multiply_s get_neg \
+					get_multiply_noin get_multiply_rcin get_multiply_s get_neg get_none \
 					get_nonexistent get_null get_off64 get_phase get_phase_affix \
 					get_polynom get_polynom_cmpin get_polynom_noin get_recip \
 					get_recip_const get_recurse get_rofs get_sarray get_sarray_len \
-					get_sarray_slice get_sbit get_sf get_sindir get_ss get_string \
-					get_type get_uint16 get_uint32 get_uint64 get_window get_window_clr \
-					get_window_complex get_window_ge get_window_gt get_window_le \
-					get_window_lt get_window_ne get_window_s get_window_set get_zero \
-					get_zero_complex get_zero_float
-
-GETSTR_TESTS=getstr_here getstr_sindir getstr_type
+					get_sarray_slice get_sbit get_sf get_sindir get_sindir_none \
+					get_sindir_null get_sindir_type get_ss get_string \
+					get_type get_type_string get_uint16 get_uint32 get_uint64 get_window \
+					get_window_clr get_window_complex get_window_ge get_window_gt \
+					get_window_le get_window_lt get_window_ne get_window_s \
+					get_window_set get_zero get_zero_complex get_zero_float
 
 GLOBAL_TESTS=global_flags global_name global_ref global_ref_empty global_ref_set
 
@@ -410,16 +409,16 @@ TESTS=$(ADD_TESTS)      $(ALIAS_TESTS)    $(ALTER_TESTS)    $(ASCII_TESTS)    \
 			$(DESYNC_TESTS)   $(ELIST_TESTS)    $(ENCODE_TESTS)   $(ENDIAN_TESTS)   \
 			$(ENTRY_TESTS)    $(EOF_TESTS)      $(ERROR_TESTS)    $(FILE_TESTS)     \
 			$(FLIST_TESTS)    $(FLUSH_TESTS)    $(FOFFS_TESTS)    $(FRAGMENT_TESTS) \
-			$(GET_TESTS)      $(GETSTR_TESTS)   $(GLOBAL_TESTS)   $(GZIP_TESTS)     \
-			$(HEADER_TESTS)   $(HIDE_TESTS)     $(INCLUDE_TESTS)  $(INDEX_TESTS)    \
-			$(LEGACY_TESTS)   $(LZMA_TESTS)     $(MADD_TESTS)     $(MOVE_TESTS)     \
-			$(NAME_TESTS)     $(NATIVE_TESTS)   $(NENTRIES_TESTS) $(NFIELDS_TESTS)  \
-			$(NFRAMES_TESTS)  $(NMETA_TESTS)    $(OPEN_TESTS)     $(PARSE_TESTS)    \
-			$(PROTECT_TESTS)  $(PUT_TESTS)      $(REF_TESTS)      $(REPR_TESTS)     \
-			$(SEEK_TESTS)     $(SIE_TESTS)      $(SLIM_TESTS)     $(SPF_TESTS)      \
-			$(SVLIST_TESTS)   $(TABLE_TESTS)    $(TELL_TESTS)     $(TOK_TESTS)      \
-			$(TRUNC_TESTS)    $(UNCLUDE_TESTS)  $(VERSION_TESTS)  $(VLIST_TESTS)    \
-			$(ZZIP_TESTS)     $(ZZSLIM_TESTS)
+			$(GET_TESTS)      $(GLOBAL_TESTS)   $(GZIP_TESTS)     $(HEADER_TESTS)   \
+			$(HIDE_TESTS)     $(INCLUDE_TESTS)  $(INDEX_TESTS)    $(LEGACY_TESTS)   \
+			$(LZMA_TESTS)     $(MADD_TESTS)     $(MOVE_TESTS)     $(NAME_TESTS)     \
+			$(NATIVE_TESTS)   $(NENTRIES_TESTS) $(NFIELDS_TESTS)  $(NFRAMES_TESTS)  \
+			$(NMETA_TESTS)    $(OPEN_TESTS)     $(PARSE_TESTS)    $(PROTECT_TESTS)  \
+			$(PUT_TESTS)      $(REF_TESTS)      $(REPR_TESTS)     $(SEEK_TESTS)     \
+			$(SIE_TESTS)      $(SLIM_TESTS)     $(SPF_TESTS)      $(SVLIST_TESTS)   \
+			$(TABLE_TESTS)    $(TELL_TESTS)     $(TOK_TESTS)      $(TRUNC_TESTS)    \
+			$(UNCLUDE_TESTS)  $(VERSION_TESTS)  $(VLIST_TESTS)    $(ZZIP_TESTS)     \
+			$(ZZSLIM_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

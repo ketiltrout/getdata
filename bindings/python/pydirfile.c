@@ -708,18 +708,16 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  if (!is_sindir) {
-    /* get return type */
-    if (return_type_obj) {
-      return_type = (gd_type_t)PyInt_AsLong(return_type_obj);
-      if (PyErr_Occurred()) {
-        dreturn("%p", NULL);
-        return NULL;
-      }
-    } else {
-      return_type = gd_native_type(self->D, field_code);
-      PYGD_CHECK_ERROR(self->D, NULL);
+  /* get return type */
+  if (return_type_obj) {
+    return_type = (gd_type_t)PyInt_AsLong(return_type_obj);
+    if (PyErr_Occurred()) {
+      dreturn("%p", NULL);
+      return NULL;
     }
+  } else {
+    return_type = gd_native_type(self->D, field_code);
+    PYGD_CHECK_ERROR(self->D, NULL);
   }
 
   if (num_frames_obj) {
@@ -780,8 +778,8 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
   } else if (is_sindir) {
     const char** data = malloc(num_samples * sizeof(*data));
 
-    ns = gd_getstrdata(self->D, field_code, first_frame, first_sample, 0,
-        (size_t)num_samples, data);
+    ns = gd_getdata(self->D, field_code, first_frame, first_sample, 0,
+        (size_t)num_samples, return_type, data);
 
     pyobj = PyList_New(ns);
     for (i = 0; i < ns; ++i)

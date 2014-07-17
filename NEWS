@@ -130,6 +130,18 @@ New in verison 0.9.0a:
     in an I/O error, but successfully returns no data.
 
   API Changes:
+  
+  * CLARIFICATION: The macro GD_SIZE() declared in getdata.h is indeed part of
+    the public API.  It returns the size in bytes of a sample of data of a given
+    type (e.g. GD_SIZE(GD_COMPLEX64) returns 8).  It has been around since
+    GetData-0.3.0, but has only been documented since GetData-0.8.3.
+
+  * A new data type code, GD_STRING, has been declared.  It is needed in
+    gd_getdata() calls to retrieve SINDIR data.  Purely for convenience, it has
+    the property: GD_SIZE(GD_STRING) == sizeof(char*).
+
+  * get_native_type() now returns GD_STRING for string type fields (STRING,
+    SARRAY, SINDIR).  Formerly it would return GD_NULL.
 
   * The comp_scal member of the gd_entry_t object has been replaced with a flags
     member, containing a flag (GD_EN_COMPSCAL) with the meaning of the former

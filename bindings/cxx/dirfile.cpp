@@ -317,8 +317,8 @@ size_t Dirfile::GetData(const char* field_code, gd_off64_t first_frame,
     gd_off64_t first_sample, size_t num_frames, size_t num_samples,
     const char** data_out) const
 {
-  return gd_getstrdata64(D, field_code, first_frame, first_sample, num_frames,
-      num_samples, data_out);
+  return gd_getdata64(D, field_code, first_frame, first_sample, num_frames,
+      num_samples, GD_STRING, data_out);
 }
 
 size_t Dirfile::GetString(const char *field_code, size_t len, char* data_out)

@@ -304,6 +304,7 @@ gd_static_inline_ IDL_ALLTYPES gdidl_to_alltypes(gd_type_t t, void* d)
       v.cmp.r = creal(dc);
       v.cmp.i = cimag(dc);
       break;
+    case GD_STRING:
     case GD_NULL:
     case GD_UNKNOWN:
       ;
@@ -712,6 +713,7 @@ static void gdidl_convert_entry_num(void *dst, gd_type_t dtype, const char *key,
   switch (dtype) {
     case GD_NULL:
     case GD_UNKNOWN:
+    case GD_STRING:
       break;
     case GD_UINT8:
       GDIDL_CONVERT_ENTRY_ELEMENT(*(( uint8_t*)dst), src, key, offset, stype);
@@ -3679,8 +3681,8 @@ IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
     if (t == GD_SINDIR_ENTRY) {
       const char **data = malloc(kw.n_samples * sizeof(*data));
 
-      n = gd_getstrdata64(D, field_code, kw.first_frame, kw.first_sample, 0,
-          kw.n_samples, data);
+      n = gd_getdata64(D, field_code, kw.first_frame, kw.first_sample, 0,
+          kw.n_samples, GD_STRING, data);
 
       if (n == 0)
         r = IDL_GettmpInt(0);

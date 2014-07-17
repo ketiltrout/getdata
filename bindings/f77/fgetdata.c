@@ -5609,7 +5609,7 @@ void F77_FUNC(gdalsa, GDALSA) (const int32_t *dirfile, const char *field_code,
   dreturnvoid();
 }
 
-/* gd_getstrdata wrapper -- this only returns one sample */
+/* gd_getdata wrapper for SINDIRs -- this only returns one sample */
 void F77_FUNC(gdgstd, GDGSTD) (char *value, int32_t *value_l,
     const int32_t *dirfile, const char *field_code, const int32_t *field_code_l,
     const int32_t *first_frame, const int32_t *first_sample)
@@ -5621,9 +5621,9 @@ void F77_FUNC(gdgstd, GDGSTD) (char *value, int32_t *value_l,
   dtrace("%p, %p, %i, %p, %i, %i, %i", value, value_l, *dirfile, field_code,
       *field_code_l, *first_frame, *first_sample);
 
-  n_read = gd_getstrdata(_GDF_GetDirfile(*dirfile),
+  n_read = gd_getdata(_GDF_GetDirfile(*dirfile),
       _GDF_CString(&fc, field_code, *field_code_l), *first_frame,
-      *first_sample, 0, 1, datum);
+      *first_sample, 0, 1, GD_STRING, datum);
   free(fc);
   if (n_read == 0)
     *value_l = 0;
@@ -5633,8 +5633,8 @@ void F77_FUNC(gdgstd, GDGSTD) (char *value, int32_t *value_l,
   dreturn("%i", *value_l);
 }
 
-/* gd_getstrdata wrapper -- this returns an opaquely packed array; see also
- * GDXSTP and GDDSTP */
+/* gd_getdata wrapper for SINDIRs-- this returns an opaquely packed array of
+ * strings; see also GDXSTP and GDDSTP */
 void F77_FUNC(gdgstp, GDGSTP) (int32_t *n_read, char *data,
     const int32_t *dirfile, const char *field_code, const int32_t *field_code_l,
     const int32_t *first_frame, const int32_t *first_sample,
@@ -5677,7 +5677,8 @@ void F77_FUNC(gdgstp, GDGSTP) (int32_t *n_read, char *data,
     return;
   }
 
-  *n_read = gd_getstrdata(D, fc, *first_frame, *first_sample, 0, ns, buffer);
+  *n_read = gd_getdata(D, fc, *first_frame, *first_sample, 0, ns, GD_STRING,
+      buffer);
   free(fc);
 
   if (*n_read == 0) {

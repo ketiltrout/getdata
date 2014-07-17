@@ -1747,8 +1747,8 @@ getdata(dirfile, field_code, first_frame, first_samp, num_frames, num_samp, retu
     if (t == GD_SINDIR_ENTRY) {
       const char **data_out = safemalloc(sizeof(*data_out) * num_samp);
 
-      len = gdp64(gd_getstrdata)(dirfile, field_code, first_frame, first_samp,
-        0, num_samp, data_out);
+      len = gdp64(gd_getdata)(dirfile, field_code, first_frame, first_samp,
+        0, num_samp, GD_STRING, data_out);
 
       GDP_UNDEF_ON_ERROR(safefree(data_out));
 

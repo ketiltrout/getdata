@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -31,19 +31,17 @@ int main(void)
   const char *data = "dirfile/data";
   const char *format_data =
     "sindir SINDIR data sarray\n"
-    "sarray SARRAY a b c d e f g h i j k l m n o p\n"
+    "sarray SARRAY a b c d e f g h i j k l m n o\n"
     "data RAW UINT8 8\n";
-  const char *d[8];
-  const char *val[8] = {"i", "j", "k", "l", "m", "n", "o", "p"};
   unsigned char data_data[256];
-  int fd, i, m, n, error, r = 0;
+  int fd, n, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
   mkdir(filedir, 0777);
 
   for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
+    data_data[fd] = (unsigned char)(fd + 2);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
@@ -53,17 +51,12 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  m = gd_seek(D, "sindir", 1, 0, GD_SEEK_SET);
-  CHECKI(m, 8);
-
-  n = gd_getstrdata(D, "sindir", GD_HERE, 0, 0, 8, d);
+  D = gd_open(filedir, GD_RDONLY);
+  n = gd_getdata(D, "sindir", 1, 0, 1, 0, GD_NULL, NULL);
   error = gd_error(D);
+
   CHECKI(error, 0);
   CHECKI(n, 8);
-
-  for (i = 0; i < 8; ++i)
-    CHECKSi(i, d[i], val[i]);
 
   gd_discard(D);
 

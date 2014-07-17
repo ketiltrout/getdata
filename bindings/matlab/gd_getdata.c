@@ -43,7 +43,6 @@
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
-  void *data;
   char *field_code;
   long long first_frame, first_samp;
   size_t nsamp;
@@ -63,13 +62,28 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     gdmx_err(D, 0);
   }
 
-  plhs[0] = gdmx_vector(type, nsamp, &data);
+  if (gd_entry_type(D, field_code) == GD_SINDIR_ENTRY) {
+    const char **data = mxMalloc(sizeof(*data) * nsamp);
 
-  gd_getdata64(D, field_code, (gd_off64_t)first_frame, (gd_off64_t)first_samp,
-      0, nsamp, type, data);
+    nsamp = gd_getdata64(D, field_code, (gd_off64_t)first_frame,
+        (gd_off64_t)first_samp, 0, nsamp, GD_STRING, data);
 
-  mxFree(field_code);
-  gdmx_err(D, 0);
+    mxFree(field_code);
+    gdmx_err(D, 0);
 
-  gdmx_fix_vector(plhs[0], type, nsamp, data);
+    plhs[0] = gdmx_from_nstring_list(data, nsamp);
+    mxFree(data);
+  } else {
+    void *data;
+
+    plhs[0] = gdmx_vector(type, nsamp, &data);
+
+    nsamp = gd_getdata64(D, field_code, (gd_off64_t)first_frame,
+        (gd_off64_t)first_samp, 0, nsamp, type, data);
+
+    mxFree(field_code);
+    gdmx_err(D, 0);
+
+    gdmx_fix_vector(plhs[0], type, nsamp, data);
+  }
 }

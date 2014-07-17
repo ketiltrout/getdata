@@ -163,6 +163,7 @@ static struct {
   CONSTANT(FLOAT64,          "GD_F64", 4),
   CONSTANT(COMPLEX64,        "GD_C64", 4),
   CONSTANT(COMPLEX128,       "GDC128", 4),
+  CONSTANT(STRING,           "GD_STR", 4),
 
   CONSTANT(DEL_META,         "GDD_MT", 5),
   CONSTANT(DEL_DATA,         "GDD_DT", 5),

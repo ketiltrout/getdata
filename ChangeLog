@@ -1,3 +1,32 @@
+2014-07-16     D. V. Wiebe <getdata@ketiltrout.net> svn:911
+	* src/getdata.c (_GD_DoSindir): Renamed from gd_getstrdata64 and
+	internalised.  Do return_type checks, and handle num_samp = 0.
+	* src/getdata.c (gd_getstrdata): Deleted.
+	* src/getdata.h.in: Add GD_STRING.
+
+	* src/native.c (_GD_NativeType): Return GD_STRING for string types.
+
+	* bindings/make_parameters.c: Add GD_STRING.
+
+	* bindings/cxx/dirfile.cpp (Dirfile::GetData) bindings/f77/fgetdata.c
+	(GDGSTD GDGSTP) bindings/idl/getdata.c (gdidl_getdata)
+	bindings/perl/GetData.xs (getdata) bindings/python/pydirfile.c
+	(gdpy_dirfile_getdata): Convert gd_getstrdata call to gd_getdata.
+	* bindings/matlab/gd_getdata.c: Handle SINDIR.
+	* bindings/matlab/gd_getstrdata.c: Deleted.
+	* bindings/php/getdata.c (gd_getdata): Handle SINDIR; made return_type
+	optional.
+	* bindings/php/getdata.c (gd_getstrdata): Deleted.
+
+	* test/get_none.c: Added.
+	* test/get_sindir.c: Replaced by renaming getstr_sindir.c.
+	* test/get_sindir_none.c test/get_sindir_null.c: Added.
+	* test/get_sindir_type.c: Replaced.
+	* test/getstr_here.c test: Deleted.
+
+	* configure.ac: Renamed the intermediate getdata.h file from getdata.ah to
+	getdata.in2.
+
 2014-07-16     D. V. Wiebe <getdata@ketiltrout.net> svn:908
 	* bindings/cxx/dirfile.cpp (GetData::EncodingSupport Dirfile::ArrayLen
 	Dirfile::GetData(..., const char** data_out) Dirfile::GetSarray

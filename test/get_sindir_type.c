@@ -53,19 +53,11 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY);
-  n = gd_getdata(D, "sindir", 1, 0, 1, 0, GD_STRING, c);
+  n = gd_getdata(D, "sindir", 1, 0, 1, 0, GD_INT64, c);
   error = gd_error(D);
 
-  CHECKI(error, 0);
-  CHECKI(n, 8);
-  for (i = 0; i < 8; ++i) {
-    if (i < 5) {
-      CHECKPNi(i, c[i]);
-      CHECKXi(i, c[i][0], 'k' + i);
-    } else {
-      CHECKPi(i, c[i]);
-    }
-  }
+  CHECKI(error, GD_E_BAD_TYPE);
+  CHECKI(n, 0);
 
   gd_discard(D);
 

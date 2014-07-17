@@ -29,8 +29,10 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT8 8\n";
-  const char *c[8];
+  const char *format_data =
+    "sindir SINDIR data sarray\n"
+    "sarray SARRAY a b c d e f g h i j k l m n o\n"
+    "data RAW UINT8 8\n";
   unsigned char data_data[256];
   int fd, n, error, r = 0;
   DIRFILE *D;
@@ -50,10 +52,10 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY);
-  n = gd_getstrdata(D, "data", 1, 0, 1, 0, c);
+  n = gd_getdata(D, "sindir", 1, 0, 0, 0, GD_STRING, NULL);
   error = gd_error(D);
 
-  CHECKI(error, GD_E_BAD_FIELD_TYPE);
+  CHECKI(error, 0);
   CHECKI(n, 0);
 
   gd_discard(D);

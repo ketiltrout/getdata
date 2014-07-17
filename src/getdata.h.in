@@ -296,6 +296,7 @@ typedef unsigned int gd_spf_t;
 #define GD_SIGNED    0x020
 #define GD_IEEE754   0x080
 #define GD_COMPLEX   0x100
+#define GD_CHAR      0x200
 
 typedef enum {
   GD_NULL       = 0,
@@ -311,8 +312,11 @@ typedef enum {
   GD_FLOAT32    = GD_SIZE32  | GD_IEEE754,
   GD_FLOAT64    = GD_SIZE64  | GD_IEEE754,
   GD_COMPLEX64  = GD_SIZE64  | GD_COMPLEX,
-  GD_COMPLEX128 = GD_SIZE128 | GD_COMPLEX
+  GD_COMPLEX128 = GD_SIZE128 | GD_COMPLEX,
+  GD_STRING     = (sizeof(char*)) | GD_CHAR
 } gd_type_t;
+
+
 /* deprecated type aliases */
 #define GD_FLOAT     GD_FLOAT32
 #define GD_DOUBLE    GD_FLOAT64
@@ -1065,10 +1069,6 @@ extern size_t gd_getdata(DIRFILE *dirfile, const char *field_code,
     off_t first_frame, off_t first_sample, size_t num_frames,
     size_t num_samples, gd_type_t return_type, void *data) gd_nonnull ((1, 2));
 
-extern size_t gd_getstrdata(DIRFILE *dirfile, const char *field_code,
-    off_t first_frame, off_t first_sample, size_t num_frames,
-    size_t num_samples, const char **data) gd_nonnull ((1, 2));
-
 extern size_t gd_putdata(DIRFILE *dirfile, const char *field_code,
     off_t first_frame, off_t first_sample, size_t num_frames,
     size_t num_samples, gd_type_t data_type, const void *data)
@@ -1117,11 +1117,6 @@ extern size_t __REDIRECT (gd_getdata, (DIRFILE *dirfile, const char *field_code,
       off_t first_frame, off_t first_samp, size_t num_frames, size_t num_samp,
       gd_type_t return_type, void *data), gd_getdata64) gd_nonnull ((1, 2));
 
-extern size_t __REDIRECT (gd_getstrdata, (DIRFILE *dirfile,
-      const char *field_code, off_t first_frame, off_t first_samp,
-      size_t num_frames, size_t num_samp, const char **data), gd_getstrdata64)
-gd_nonnull ((1, 2));
-
 extern size_t __REDIRECT (gd_putdata, (DIRFILE *dirfile, const char *field_code,
       off_t first_frame, off_t first_sample, size_t num_frames,
       size_t num_samples, gd_type_t data_type, const void *data),
@@ -1143,7 +1138,6 @@ gd_nonnull ((1,2));
 # else
 #  define gd_alter_frameoffset gd_alter_frameoffset64
 #  define gd_getdata gd_getdata64
-#  define gd_getstrdata gd_getstrdata64
 #  define gd_putdata gd_putdata64
 #  define gd_nframes gd_nframes64
 #  define gd_eof gd_eof64
@@ -1175,10 +1169,6 @@ extern int gd_alter_frameoffset64(DIRFILE *dirfile, gd_off64_t offset,
 extern size_t gd_getdata64(DIRFILE *dirfile, const char *field_code,
     gd_off64_t first_frame, gd_off64_t first_samp, size_t num_frames,
     size_t num_samp, gd_type_t return_type, void *data) gd_nonnull ((1, 2));
-
-extern size_t gd_getstrdata64(DIRFILE *dirfile, const char *field_code,
-    gd_off64_t first_frame, gd_off64_t first_samp, size_t num_frames,
-    size_t num_samp, const char **data) gd_nonnull ((1, 2));
 
 extern size_t gd_putdata64(DIRFILE *dirfile, const char *field_code,
     gd_off64_t first_frame, gd_off64_t first_sample, size_t num_frames,

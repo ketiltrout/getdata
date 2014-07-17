@@ -2275,9 +2275,9 @@ try
     ne = ne + check_ok2(exc, 294, 2);
   end
 
-  % 295: gd_getstrdata
+  % 295: gd_getdata (SINDIR)
   try
-    d = gd_getstrdata(D, 'sindir', 0, 0, 1, 0);
+    d = gd_getdata(D, 'sindir', 0, 0, 1, 0);
     ne = ne + check_sarray(295, d, ...
     {'eka'; 'eka'; 'eka'; 'eka'; 'eka'; 'eka'; 'eka'; 'eka';});
   catch exc

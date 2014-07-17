@@ -2045,66 +2045,17 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
   return n_read;
 }
 
-/* this returns string vector data (ie. SINDIR) */
-size_t gd_getstrdata64(DIRFILE *D, const char *field_code, off64_t first_frame,
-    off64_t first_samp, size_t num_frames, size_t num_samp,
-    const char **data_out)
+/* this returns string vector data; it is called for SINDIRs instead of making
+ * a call to DoField */
+static size_t _GD_DoSindir(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
+    size_t num_samp, gd_type_t return_type, const char **data_out)
 {
   size_t i, n_read = 0;
-  gd_entry_t *E;
-  unsigned int spf;
   int64_t *ibuf = NULL;
   int64_t len;
 
-  dtrace("%p, \"%s\", %lli %lli, %" PRNsize_t ", %" PRNsize_t ", %p", D,
-      field_code, (long long)first_frame, (long long)first_samp, num_frames,
-      num_samp, data_out);
-
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  _GD_ClearError(D);
-
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
-
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  if (E->field_type != GD_SINDIR_ENTRY) {
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  if (first_frame == GD_HERE || first_samp == GD_HERE) {
-    first_samp = GD_HERE;
-    first_frame = 0;
-  }
-
-  if (first_frame > 0 || num_frames > 0) {
-    /* get the samples per frame */
-    spf = _GD_GetSPF(D, E);
-
-    if (D->error) {
-      dreturn("%i", 0);
-      return 0;
-    }
-
-    first_samp += spf * first_frame;
-    num_samp += spf * num_frames;
-  }
-
-  if (first_samp < 0 && (first_samp != GD_HERE || first_frame != 0)) {
-    _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
-    dreturn("%i", 0);
-    return 0;
-  }
+  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
+      num_samp, return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
@@ -2113,6 +2064,19 @@ size_t gd_getstrdata64(DIRFILE *D, const char *field_code, off64_t first_frame,
   }
 
   if (_GD_BadInput(D, E, 1, GD_SARRAY_ENTRY, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* check return type */
+  if (return_type != GD_STRING && return_type != GD_NULL) {
+    _GD_SetError(D, GD_E_BAD_TYPE, return_type, NULL, 0, NULL);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* short circuit: no data requested */
+  if (num_samp == 0) {
     dreturn("%i", 0);
     return 0;
   }
@@ -2132,6 +2096,12 @@ size_t gd_getstrdata64(DIRFILE *D, const char *field_code, off64_t first_frame,
     free(ibuf);
     dreturn("%i", 0);
     return 0;
+  }
+
+  if (return_type == GD_NULL) {
+    free(ibuf);
+    dreturn("%" PRNsize_t, n_read);
+    return n_read;
   }
 
   len =
@@ -2185,8 +2155,6 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
 
   if (entry->field_type & GD_SCALAR_ENTRY_BIT)
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
-  else if (entry->field_type == GD_SINDIR_ENTRY)
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_STR, NULL, 0, field_code);
 
   if (field_code != field_code_in)
     free(field_code);
@@ -2220,21 +2188,18 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
     return 0;
   }
 
-  n_read = _GD_DoField(D, entry, repr, first_samp, num_samp, return_type,
-      data_out);
+  if (entry->field_type == GD_SINDIR_ENTRY)
+    n_read = _GD_DoSindir(D, entry, first_samp, num_samp, return_type,
+        data_out);
+  else
+    n_read = _GD_DoField(D, entry, repr, first_samp, num_samp, return_type,
+        data_out);
 
   dreturn("%" PRNsize_t, n_read);
   return n_read;
 }
 
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */
-size_t gd_getstrdata(DIRFILE *D, const char *field_code, off_t first_frame,
-    off_t first_samp, size_t num_frames, size_t num_samp, const char **data_out)
-{
-  return gd_getstrdata64(D, field_code, first_frame, first_samp, num_frames,
-      num_samp, data_out);
-}
-
 size_t gd_getdata(DIRFILE* D, const char *field_code, off_t first_frame,
     off_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out)

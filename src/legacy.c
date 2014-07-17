@@ -49,7 +49,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   NULL, /* GD_E_TRUNC */
   NULL, /* GD_E_CREAT */
   "Bad field code", /* GD_E_BAD_CODE */
-  "Unrecognized data type", /* GD_E_BAD_TYPE */
+  "Bad data type", /* GD_E_BAD_TYPE */
   "I/O error accessing field file", /* GD_E_RAW_IO */
   "Could not open fragment", /* GD_E_OPEN_FRAGMENT */
   "Internal error", /* GD_E_INTERNAL_ERROR */

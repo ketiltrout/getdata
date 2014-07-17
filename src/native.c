@@ -135,7 +135,7 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
     case GD_STRING_ENTRY:
     case GD_SARRAY_ENTRY:
     case GD_SINDIR_ENTRY:
-      type = GD_NULL;
+      type = GD_STRING;
       break;
     case GD_NO_ENTRY:
     case GD_ALIAS_ENTRY:

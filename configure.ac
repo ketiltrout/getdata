@@ -1117,8 +1117,8 @@ AC_CONFIG_FILES([man/gd_alter_frameoffset.3])
 AC_CONFIG_FILES([src/Makefile])
 dnl This doubling allows us to build getdata.h as a normal AC_CONFIG_FILE, but
 dnl use AC_CONFIG_HEADERS to check whether it has changed.
-AC_CONFIG_FILES([src/getdata.ah:src/getdata.h.in])
-AC_CONFIG_HEADERS([src/getdata.h:src/getdata.ah], [chmod a-w src/getdata.h])
+AC_CONFIG_FILES([src/getdata.h.in2:src/getdata.h.in])
+AC_CONFIG_HEADERS([src/getdata.h:src/getdata.h.in2], [chmod a-w src/getdata.h])
 AC_CONFIG_FILES([src/getdata.pc])
 AC_CONFIG_FILES([test/Makefile])
 AC_CONFIG_FILES([util/Makefile])

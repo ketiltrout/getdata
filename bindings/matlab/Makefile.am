@@ -62,7 +62,7 @@ mexfiles=gd_add gd_add_alias \
 				 gd_error gd_error_string gd_flags gd_flush gd_fragment_affixes \
 				 gd_fragment_index gd_fragmentname \
 				 gd_framenum gd_frameoffset gd_get_carray gd_get_carray_slice \
-				 gd_getdata gd_get_sarray gd_get_sarray_slice gd_getstrdata \
+				 gd_getdata gd_get_sarray gd_get_sarray_slice \
 				 gd_get_string gd_hidden gd_hide gd_include gd_invalid_dirfile \
 				 gd_linterp_tablename gd_madd gd_madd_alias \
 				 gd_madd_carray gd_madd_const gd_madd_sarray \

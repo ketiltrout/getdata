@@ -1838,8 +1838,8 @@ check_var2(294, 3, $v, array('field' => 'new291',
   'field_type' => GD_SINDIR_ENTRY, 'fragment_index' => 0,
   'in_fields' => array('in1', 'in3')));
 
-# 295: getstrdata
-$v = gd_getstrdata($D, 'sindir', 0, 0, 1, 0);
+# 295: getdata (SINDIR)
+$v = gd_getdata($D, 'sindir', 0, 0, 1, 0);
 check_ok(295, $D);
 check_var(295, $v, array('eka', 'eka', 'eka', 'eka', 'eka', 'eka', 'eka',
   'eka'));
