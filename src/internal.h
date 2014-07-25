@@ -736,6 +736,7 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 
 #define GD_E_CODE_MISSING      1
 #define GD_E_CODE_INVALID      2
+#define GD_E_CODE_AMBIGUOUS    3
 
 #define GD_E_LINFILE_LENGTH    1
 #define GD_E_LINFILE_OPEN      2
@@ -1024,6 +1025,10 @@ struct gd_dir_t {
 #define GD_HAVE_VERSION    0x40000000 /* have computed the version */
 #define GD_INVALID         0x80000000 /* the dirfile is invalid */
 
+/* This has been the meaning of GD_PERMISSIVE post-open for a while; let's
+ * alias it to avoid confusing ourselves */
+#define GD_NOSTANDARD      GD_PERMISSIVE /* dirfile conforms to no standard */
+
 /* representation suffixes */
 #define GD_REPR_NONE 0
 #define GD_REPR_REAL 'r'
@@ -1226,6 +1231,8 @@ int _GD_Supports(DIRFILE *, const gd_entry_t*, unsigned int funcs);
 int _GD_Tokenise(DIRFILE *restrict, const char *restrict, char **,
     const char **, int, char **, const char *restrict, int linenum,
     int standards, int pedantic);
+int _GD_TokToNum(const char *restrict, int, int, double*, double*, uint64_t*,
+    int64_t*);
 void _GD_UpdateAliases(DIRFILE*, int);
 int _GD_ValidateField(const char*, int, int, int, int*);
 off64_t _GD_WriteSeek(DIRFILE *restrict, gd_entry_t *restrict,

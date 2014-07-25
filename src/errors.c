@@ -89,6 +89,7 @@ static const struct {
   /* GD_E_BAD_CODE: 4 = field code */
   { GD_E_BAD_CODE, GD_E_CODE_MISSING, "Field not found: {4}", 0 },
   { GD_E_BAD_CODE, GD_E_CODE_INVALID, "Bad field name: {4}", 0 },
+  { GD_E_BAD_CODE, GD_E_CODE_AMBIGUOUS, "Ambiguous field code: {4}", 0 },
   /* GD_E_BAD_TYPE: 1 = data type */
   { GD_E_BAD_TYPE, 0, "Bad data type: {1}", 0 },
   /* GD_E_RAW_IO: 2 = filename, 3 = errno */

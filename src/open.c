@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2012 D. V. Wiebe
+ * Copyright (C) 2005-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -632,12 +632,12 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
     if (_GD_FindVersion(D)) {
       /* conforms to some standard, use the latest */
       gd_dirfile_standards(D, GD_VERSION_LATEST); /* can't fail */
-      D->flags &= ~GD_PERMISSIVE;
+      D->flags &= ~GD_NOSTANDARD;
     } else
       /* non-conformant dirfile, flag it */
-      D->flags |= GD_PERMISSIVE;
+      D->flags |= GD_NOSTANDARD;
   } else
-    D->flags &= ~GD_PERMISSIVE;
+    D->flags &= ~GD_NOSTANDARD;
 
   dreturn("%p", D);
   return D;

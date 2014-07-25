@@ -110,34 +110,168 @@ static gd_windop_t _GD_WindOp(const char *op)
   return o;
 }
 
+/* Convert a string to a number.  The non-NULL pointers provided dictate the
+ * returned type.  Returns -1 if it wasn't a number or -2 if it was but was
+ * out of range */
+int _GD_TokToNum(const char *restrict token, int standards, int pedantic,
+    double *re, double *im, uint64_t *u, int64_t *i)
+{
+  long long ir = 0, ii = 0;
+  unsigned long long ur = 0, ui = 0;
+  double dr = 0, di = 0;
+  char *endptr = NULL;
+  gd_type_t rt = GD_UNKNOWN, it = GD_UNKNOWN;
+  const int base = (!pedantic || standards >= 9) ? 0 : 10;
+
+  dtrace("\"%s\", %i, %i, %p, %p, %p, %p", token, standards, pedantic, re, im,
+      u, i);
+
+  /* we have to run the token through both strtod and strtol because neither of
+   * these handles all the allowed syntax */
+
+  /* the real part */
+  errno = 0;
+  ir = gd_strtoll(token, &endptr, base);
+  if (!errno && (*endptr == '\0' || *endptr == ';'))
+    rt = GD_INT64;
+
+  if (rt == GD_UNKNOWN && errno == ERANGE) {
+    /* could be a uint64 > 2**63 */
+    errno = 0;
+    ur = gd_strtoull(token, &endptr, base);
+    if (!errno && (*endptr == '\0' || *endptr == ';'))
+      rt = GD_UINT64;
+  }
+
+  if (rt == GD_UNKNOWN) { /* all that's left to try */
+    errno = 0;
+    dr = gd_strtod(token, &endptr);
+
+    if (!errno && (*endptr == '\0' || *endptr == ';'))
+      rt = GD_FLOAT64;
+  }
+
+  /* check for real-part success */
+  if (rt == GD_UNKNOWN) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* if there's no semicolon, set the imaginary part to zero */
+  if (*endptr == '\0') {
+    it = GD_NULL;
+  } else {
+    /* convert imaginary part the same way */
+    token = endptr + 1;
+    errno = 0;
+    ii = gd_strtoll(token, &endptr, base);
+    if (!errno && *endptr == '\0')
+      it = (ii == 0) ? GD_NULL : GD_INT64;
+
+    if (it == GD_UNKNOWN && errno == ERANGE) {
+      /* could be a uint64 > 2**63 */
+      errno = 0;
+      ui = gd_strtoull(token, &endptr, base);
+      if (!errno && *endptr == '\0')
+        it = (ui == 0) ? GD_NULL : GD_UINT64;
+    }
+
+    if (it == GD_UNKNOWN) { /* all that's left to try */
+      errno = 0;
+      di = gd_strtod(token, &endptr);
+
+      if (!errno && *endptr == '\0')
+        it = (di == 0) ? GD_NULL : GD_FLOAT64;
+    }
+
+    /* check for imaginary-part success */
+    if (it == GD_UNKNOWN) {
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    if (!im && it != GD_NULL) { /* reject unwanted complex value */
+      dreturn("%i", -2);
+      return -2;
+    }
+  }
+
+  /* return the desired value, if possible */
+  if (re) { /* float or complex */
+    if (rt == GD_FLOAT64)
+      *re = dr;
+    else if (rt == GD_INT64)
+      *re = ir;
+    else
+      *re = ur;
+
+    if (im) { /* complex */
+      if (it == GD_NULL)
+        *im = 0;
+      else if (it == GD_FLOAT64)
+        *im = di;
+      else if (it == GD_INT64)
+        *im = ii;
+      else if (it == GD_UINT64)
+        *im = ui;
+    }
+  } else if (u) { /* unsigned int -- reject negative values */
+    if (rt == GD_UINT64) 
+      *u = ur;
+    else if (rt == GD_INT64) {
+      if (ir < 0) {
+        dreturn("%i", -2);
+        return -2;
+      }
+      *u = ir;
+    } else {
+      if (dr < 0) {
+        dreturn("%i", -2);
+        return -2;
+      }
+      *u = dr;
+    }
+  } else if (i) { /* int */
+    if (rt == GD_INT64)
+      *i = ir;
+    else if (rt == GD_FLOAT64)
+      *i = dr;
+    else { /* this must be an overflow */
+      dreturn("%i", -2);
+      return -2;
+    }
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
 /* Returns a newly malloc'd string containing the scalar field name, or NULL on
  * numeric literal or error */
 static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
-    void *restrict data, int type, int me, const char *restrict format_file,
-    int line, int *restrict index, unsigned *restrict flags, int standards,
-    int pedantic)
+    void *restrict data, gd_type_t type, int me,
+    const char *restrict format_file, int line, int *restrict index,
+    unsigned *restrict flags, int standards, int pedantic)
 {
-  char *ptr = NULL;
-  char *lt;
-  int dummy;
-  const char *semicolon;
+  char *lt, *ptr;
+  int i;
 
   dtrace("%p, \"%s\", %p, 0x%X, \"%s\", %i, %p, %p, %i, %i", D, token, data,
       type, format_file, line, index, flags, standards, pedantic);
 
-  /* check for a complex value -- look for the semicolon */
-  for (semicolon = token; *semicolon; ++semicolon)
-    if (*semicolon == ';')
-      break;
+  /* try a numerical conversion */
+  if (type & GD_COMPLEX) {
+    double re, im;
 
-  if (type & (GD_COMPLEX | GD_IEEE754)) {
-    /* try to convert to double */
-    double i = 0;
-    double d = gd_strtod(token, &ptr);
+    i = _GD_TokToNum(token, standards, pedantic, &re, &im, NULL, NULL);
 
-    /* there were trailing characters in the double or real part of complex */
-    if (ptr != semicolon) {
-      ptr = _GD_Strdup(D, token);
+    if (i == -2) { /* malformed number */
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
+          token);
+      dreturn("%p", NULL);
+      return NULL;
+    } else if (i == -1) { /* assume it's a field name */
+      ptr = _GD_MungeFromFrag(D, NULL, me, token, &i);
       if (D->error) {
         dreturn("%p", NULL);
         return NULL;
@@ -145,69 +279,62 @@ static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
       goto carray_check;
     }
 
-    /* If there was a semicolon, try to extract the imaginary part */
-    if (*semicolon == ';') {
-      i = gd_strtod(semicolon + 1, &ptr);
+    /* flag */
+    if (im)
+      *flags |= GD_EN_COMPSCAL;
 
-      /* there were trailing characters in the imaginary part of complex -- this
-       * can't be a valid field name, since ; is prohibited */
-      if (*ptr != '\0') {
-        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
-            token);
+    /* store the number */
+    if (type == GD_COMPLEX128) {
+      *(double *)data = re;
+      *((double *)data + 1) = im;
+    } else if (type == GD_COMPLEX64) {
+      *(float *)data = (float)re;
+      *((float *)data + 1) = (float)im;
+    } else
+      _GD_InternalError(D);
+  } else if (type & GD_IEEE754) {
+    double d;
+
+    i = _GD_TokToNum(token, standards, pedantic, &d, NULL, NULL, NULL);
+
+    if (i == -2) { /* malformed number */
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
+          token);
+      dreturn("%p", NULL);
+      return NULL;
+    } else if (i == -1) { /* assume it's a field name */
+      ptr = _GD_MungeFromFrag(D, NULL, me, token, &i);
+      if (D->error) {
         dreturn("%p", NULL);
         return NULL;
       }
-
-      /* if a complex value is not permitted, complain */
-      if (i && !(type & GD_COMPLEX)) {
-        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
-            token);
-        dreturn("%p", NULL);
-        return NULL;
-      }
-
-      if (i)
-        *flags |= GD_EN_COMPSCAL;
+      goto carray_check;
     }
 
-    if (type == GD_COMPLEX128) {
-      *(double *)data = d;
-      *((double *)data + 1) = i;
-    } else if (type == GD_COMPLEX64) {
-      *(float *)data = (float)d;
-      *((float *)data + 1) = (float)i;
-    } else if (type == GD_FLOAT64)
+    /* store the number */
+    if (type == GD_FLOAT64)
       *(double *)data = d;
     else if (type == GD_FLOAT32)
       *(float *)data = (float)d;
     else
       _GD_InternalError(D);
   } else if (type & GD_SIGNED) {
-    /* try to convert to long long int */
-    long long int lli = gd_strtoll(token, &ptr,
-        (!pedantic || standards >= 9) ? 0 : 10);
+    int64_t lli;
 
-    /* there were trailing characters in the long long int */
-    if (ptr != semicolon) {
-      ptr = _GD_MungeFromFrag(D, NULL, me, token, &dummy);
+    i = _GD_TokToNum(token, standards, pedantic, NULL, NULL, NULL, &lli);
+
+    if (i == -2) { /* malformed number */
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
+          token);
+      dreturn("%p", NULL);
+      return NULL;
+    } else if (i == -1) { /* assume it's a field name */
+      ptr = _GD_MungeFromFrag(D, NULL, me, token, &i);
       if (D->error) {
         dreturn("%p", NULL);
         return NULL;
       }
       goto carray_check;
-    }
-
-    /* if this is a complex number, a zero imaginary part is permitted */
-    if (*semicolon == ';') {
-      long long int i = gd_strtoll(semicolon + 1, &ptr,
-          (!pedantic || standards >= 9) ? 0 : 10);
-
-      if (i || *ptr != '\0') {
-        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
-            token);
-        dreturn("%p", NULL);
-        return NULL;
-      }
     }
 
     if (type == GD_INT64)
@@ -221,31 +348,22 @@ static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
     else
       _GD_InternalError(D);
   } else {
-    /* try to convert to unsigned long long int */
-    unsigned long long int ulli = gd_strtoull(token, &ptr,
-        (!pedantic || standards >= 9) ? 0 : 10);
+    uint64_t ulli;
 
-    /* there were trailing characters in the unsigned long long int */
-    if (ptr != semicolon) {
-      ptr = _GD_MungeFromFrag(D, NULL, me, token, &dummy);
+    i = _GD_TokToNum(token, standards, pedantic, NULL, NULL, &ulli, NULL);
+
+    if (i == -2) { /* malformed number */
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
+          token);
+      dreturn("%p", NULL);
+      return NULL;
+    } else if (i == -1) { /* assume it's a field name */
+      ptr = _GD_MungeFromFrag(D, NULL, me, token, &i);
       if (D->error) {
         dreturn("%p", NULL);
         return NULL;
       }
       goto carray_check;
-    }
-
-    /* if this is a complex number, a zero imaginary part is permitted */
-    if (*semicolon == ';') {
-      long long unsigned i = gd_strtoull(semicolon + 1, &ptr,
-          (!pedantic || standards >= 9) ? 0 : 10);
-
-      if (i || *ptr != '\0') {
-        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
-            token);
-        dreturn("%p", NULL);
-        return NULL;
-      }
     }
 
     if (type == GD_UINT64)
@@ -264,15 +382,24 @@ static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
   return NULL;
 
 carray_check:
-  /* look for a < delimeter */
+  /* look a < > delimeters */
   *index = -1;
-  for (lt = ptr; *lt; ++lt)
+  for (lt = ptr; *lt; ++lt) {
     if (*lt == '<') {
-      *lt = '\0';
-      *index = atoi(lt + 1);
-      break;
-    }
+      char *endptr = NULL;
 
+      *lt = '\0';
+      *index = (int)strtol(lt + 1, &endptr, 0);
+
+      if (*endptr != '>') {
+        /* invalid CARRAY index, undo the elision */
+        *lt = '<';
+        *index = -1;
+      } else
+        break;
+    }
+  }
+  
   dreturn("\"%s\" (%i)", ptr, *index);
   return ptr;
 }
@@ -347,7 +474,7 @@ static gd_entry_t *_GD_ParseRaw(DIRFILE *restrict D,
           pedantic)) == NULL)
   {
     E->flags |= GD_EN_CALC;
-    if (E->EN(raw,spf) <= 0)
+    if (!D->error && E->EN(raw,spf) <= 0)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_SPF, format_file, line,
           in_cols[3]);
   }
@@ -1075,6 +1202,7 @@ gd_type_t _GD_ConstType(DIRFILE *D, gd_type_t type)
       return GD_COMPLEX128;
     case GD_NULL:
     case GD_UNKNOWN:
+    case GD_STRING:
       _GD_InternalError(D);
   }
 

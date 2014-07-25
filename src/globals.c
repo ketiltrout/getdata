@@ -115,7 +115,7 @@ const char *gd_reference(DIRFILE* D, const char* field_code) gd_nothrow
 }
 
 /* the mask of allowed flags */
-#define GD_FLAG_MASK ( GD_VERBOSE | GD_PRETTY_PRINT)
+#define GD_FLAG_MASK (GD_VERBOSE | GD_PRETTY_PRINT)
 unsigned long gd_flags(DIRFILE *D, unsigned long set, unsigned long reset)
   gd_nothrow
 {

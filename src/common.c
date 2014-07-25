@@ -836,6 +836,9 @@ int _GD_GetRepr(DIRFILE *restrict D, const char *restrict field_code_in,
       case 'a':
         repr = GD_REPR_ARG;
         break;
+      case 'z':
+        repr = GD_REPR_NONE;
+        break;
       default:
         if (err)
           _GD_SetError(D, GD_E_BAD_REPR, GD_E_REPR_UNKNOWN, NULL, 0,

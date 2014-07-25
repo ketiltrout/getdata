@@ -89,7 +89,14 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
     /* 2: set a new CONST field from sout; if this is a RAW field, and we've
      *    been asked to move the raw file, _GD_Change is going to need to
      *    recalculate the entry; no need to change lout: it's ignored. */
-    if (!_GD_CheckCodeAffixes(D, NULL, sin, fragment_index, 1)) {
+    if (_GD_CheckCodeAffixes(D, NULL, sin, fragment_index, 1))
+      ; /* reject codes with bad affixes */
+    else if (iin == -1 && !(D->flags & GD_NOSTANDARD) && D->standards <= 7 &&
+        _GD_TokToNum(sin, D->standards, 1, NULL, NULL, NULL, NULL) != -1)
+    {
+      /* when using early Standards, reject ambiguous field codes */
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_AMBIGUOUS, NULL, 0, sin);
+    } else {
       r = GD_AS_FREE_SCALAR | GD_AS_NEED_RECALC | GD_AS_MODIFIED;
       *sout = _GD_Strdup(D, sin);
       *iout = iin;
@@ -1724,7 +1731,7 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
 
   /* start parsing */
   n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, MAX_IN_COLS, in_cols,
-      "dirfile_alter_spec()", 0, standards, D->flags & GD_PERMISSIVE);
+      "dirfile_alter_spec()", 0, standards, D->flags & GD_NOSTANDARD);
 
   if (D->error) {
     free(outstring);
@@ -1824,7 +1831,7 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
 
   /* start parsing */
   n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, MAX_IN_COLS, in_cols,
-      "dirfile_malter_spec()", 0, standards, D->flags & GD_PERMISSIVE);
+      "dirfile_malter_spec()", 0, standards, D->flags & GD_NOSTANDARD);
 
   if (!D->error) {
     /* Let the parser compose the entry */

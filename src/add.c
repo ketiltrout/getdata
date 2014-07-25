@@ -108,11 +108,26 @@ static unsigned _GD_CopyScalars(DIRFILE *restrict D,
     {
       E->scalar[i] = NULL;
     } else {
-      if (_GD_CheckCodeAffixes(D, NULL, entry->scalar[i],
-            entry->fragment_index, 1))
+      /* check for correct affixes */
+      if (_GD_CheckCodeAffixes(D, NULL, entry->scalar[i], entry->fragment_index,
+            1))
       {
         break;
       }
+
+      /* when using early Standards, reject ambiguous field codes */
+      if (entry->scalar_ind[i] == -1 && !(D->flags & GD_NOSTANDARD) &&
+          D->standards <= 7)
+      {
+        if (_GD_TokToNum(entry->scalar[i], D->standards, 1, NULL, NULL, NULL,
+              NULL) != -1)
+        {
+          _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_AMBIGUOUS, NULL, 0,
+              entry->scalar[i]);
+          break;
+        }
+      }
+
       E->scalar[i] = _GD_Strdup(D, entry->scalar[i]);
       E->scalar_ind[i] = entry->scalar_ind[i];
       mask_out |= (1 << i);
@@ -704,7 +719,7 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
 
   /* start parsing */
   n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, MAX_IN_COLS, in_cols,
-      "dirfile_madd_spec()", 0, D->standards, D->flags & GD_PERMISSIVE);
+      "dirfile_madd_spec()", 0, D->standards, D->flags & GD_NOSTANDARD);
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
   if (!D->error)
@@ -769,7 +784,7 @@ int gd_add_spec(DIRFILE* D, const char* line, int fragment_index)
 
   /* start parsing */
   n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, MAX_IN_COLS, in_cols,
-      "dirfile_add_spec()", 0, D->standards, D->flags & GD_PERMISSIVE);
+      "dirfile_add_spec()", 0, D->standards, D->flags & GD_NOSTANDARD);
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
   if (!D->error)
