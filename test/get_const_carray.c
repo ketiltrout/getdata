@@ -28,9 +28,10 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "carray CARRAY FLOAT64 8.3 7.2 6.1 5.0 3.9 2.8 1.7\n";
+  const char *format_data =
+    "carray CARRAY FLOAT64 8.3 7.2 6.1 5.0 3.9 2.8 1.7\n";
   double c;
-  int fd, i, n, error, r = 0;
+  int fd, n, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();

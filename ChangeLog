@@ -1,3 +1,31 @@
+2014-07-25     D. V. Wiebe <g etdata@ketiltrout.net> svn:915
+	* Makefile.am: Auotmake version bumped to 1.13.
+	* configure.ac: Autoconf version bumped to 2.65.
+
+2014-07-25     D. V. Wiebe <g etdata@ketiltrout.net> svn:914
+	* src/parse.c (_GD_TokToNum): Added.
+	* src/parse.c (_GD_SetScalar): Call _GD_TokToNum to parse numbers.
+
+	* src/errors.c: Add GD_E_CODE_AMBIGUOUS suberror.
+	* src/flush.c (_GD_WriteFieldCode): Append "<0>" when necessary to avoid
+	otherwise ambiguous scalar field codes.  Replaced "space" with "flags"
+	parameter.  Add "index" parameter.
+	* src/add.c (_GD_CopyScalars) src/mod.c (_GD_AlterScalar): Reject ambiguous
+	field codes when the format file writer won't be able to deal with them.
+
+	* src/internal.h: Alias GD_PERMISSIVE to GD_NOSTANDARD for legibility.
+	
+	* src/common.c (_GD_GetRepr): Add .z (we'll want that later).
+
+	* src/parse.c (_GD_ConstType): Handle GD_STRING.
+
+	* src/parse.c (_GD_ParseRaw): Don't set GD_E_FORMAT more than once.
+
+	* src/parse.c (_GD_SetScalar): Check for the closing > with CARRAY indices.
+
+	* test/add_amb_code7.c test/alter_entry_scalar_amb.c test/flush_amb_code.c
+	test/parse_scalar1.c test/parse_scalar2.c test/parse_scalar_repr.c: Added.
+
 2014-07-17     D. V. Wiebe <g etdata@ketiltrout.net> svn:912
 	* bindings/f77/fgetdata.c (_GDF_SetDirfile): Don't abort on error, just
 	return -1 (optionally discarding the dirfile first).

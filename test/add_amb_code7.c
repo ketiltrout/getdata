@@ -20,48 +20,33 @@
  */
 #include "test.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  const char *format_data =
-    "sindir SINDIR data sarray\n"
-    "sarray SARRAY a b c d e f g h i j k l m n o\n"
-    "data RAW UINT8 8\n";
-  const char *c[8];
-  unsigned char data_data[256];
-  int fd, n, error, r = 0;
+  int e1, r = 0;
   DIRFILE *D;
+  gd_entry_t E;
+
+  memset(&E, 0, sizeof(E));
+  E.field = "pathological";
+  E.field_type = GD_PHASE_ENTRY;
+  E.in_fields[0] = "INDEX";
+
+  /* this is a valid field code, sadly */
+  E.scalar[0] = "1";
+  E.scalar_ind[0] = -1;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_TRUNC);
+  gd_dirfile_standards(D, 7);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)(fd + 2);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
-
-  D = gd_open(filedir, GD_RDONLY);
-  n = gd_getdata(D, "sindir", 1, 0, 1, 0, GD_INT64, c);
-  error = gd_error(D);
-
-  CHECKI(error, GD_E_BAD_TYPE);
-  CHECKI(n, 0);
+  gd_add(D, &E);
+  e1 = gd_error(D);
+  CHECKI(e1, GD_E_BAD_CODE);
 
   gd_discard(D);
 
-  unlink(data);
   unlink(format);
   rmdir(filedir);
 

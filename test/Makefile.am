@@ -18,24 +18,25 @@
 # along with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = foreign serial-tests
 
 LDADD=../src/libgetdata.la
-INCLUDES=${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
+AM_CPPFLAGS=${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
 
 EXTRA_DIST=test.h
 
-ADD_TESTS=add_add add_affix add_alias add_alias_affix add_alias_meta add_bit \
-					add_bit_bitnum add_bit_bitsize add_bit_invalid add_bit_numbits \
-					add_bit_scalars add_carray add_clincom add_code add_const \
-					add_cpolynom add_crecip add_crecip89 add_divide add_divide_invalid \
-					add_dot add_duplicate add_format add_indir add_invalid add_lincom \
-					add_lincom_affix add_lincom_invalid add_lincom_nfields add_linterp \
-					add_linterp_invalid add_meta add_meta_alias add_mplex \
-					add_mplex_scalars add_multiply add_multiply_invalid add_phase \
-					add_phase_invalid add_polynom add_polynom_scalar add_protect add_raw \
-					add_raw_include add_raw_invalid add_raw_spf add_raw_spf_scalar \
-					add_raw_sub add_raw_type add_rdonly add_recip add_resolv add_sarray \
+ADD_TESTS=add_add add_affix add_alias add_alias_affix add_alias_meta \
+					add_amb_code7 add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
+					add_bit_numbits add_bit_scalars add_carray add_clincom add_code \
+					add_const add_cpolynom add_crecip add_crecip89 add_divide \
+					add_divide_invalid add_dot add_duplicate add_format add_indir \
+					add_invalid add_lincom add_lincom_affix add_lincom_invalid \
+					add_lincom_nfields add_linterp add_linterp_invalid add_meta \
+					add_meta_alias add_mplex add_mplex_scalars add_multiply \
+					add_multiply_invalid add_phase add_phase_invalid add_polynom \
+					add_polynom_scalar add_protect add_raw add_raw_include \
+					add_raw_invalid add_raw_spf add_raw_spf_scalar add_raw_sub \
+					add_raw_type add_rdonly add_recip add_resolv add_sarray \
 					add_sarray_nil add_sbit add_scalar add_scalar_carray \
 					add_scalar_carray_bad add_sindir add_sort add_spec \
 					add_spec_directive add_spec_invalid add_spec_meta add_spec_resolv \
@@ -53,15 +54,15 @@ ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
 						alter_entry_lincom alter_entry_recode alter_entry_recode_recalc \
 						alter_entry_sarray alter_entry_scalar1 alter_entry_scalar2a \
 						alter_entry_scalar2n alter_entry_scalar3 alter_entry_scalar3c \
-						alter_entry_scalar4 alter_index alter_indir alter_lincom_23 \
-						alter_lincom_32 alter_lincom_affix alter_lincom_input \
-						alter_lincom_offset alter_lincom_slope alter_linterp \
-						alter_linterp_move alter_mplex alter_mspec alter_mspec_affix \
-						alter_multiply alter_phase alter_polynom_coeff alter_polynom_input \
-						alter_polynom_ord alter_raw_spf alter_raw_type alter_recip \
-						alter_recip_zero alter_sarray alter_scalar_affix alter_sindir \
-						alter_spec alter_spec_affix alter_spec_meta alter_spec_polynom \
-						alter_window
+						alter_entry_scalar4 alter_entry_scalar_amb alter_index alter_indir \
+						alter_lincom_23 alter_lincom_32 alter_lincom_affix \
+						alter_lincom_input alter_lincom_offset alter_lincom_slope \
+						alter_linterp alter_linterp_move alter_mplex alter_mspec \
+						alter_mspec_affix alter_multiply alter_phase alter_polynom_coeff \
+						alter_polynom_input alter_polynom_ord alter_raw_spf alter_raw_type \
+						alter_recip alter_recip_zero alter_sarray alter_scalar_affix \
+						alter_sindir alter_spec alter_spec_affix alter_spec_meta \
+						alter_spec_polynom alter_window
 
 ASCII_TESTS=ascii_add ascii_get ascii_get_complex ascii_get_get ascii_get_sub \
 						ascii_nframes ascii_put ascii_sync
@@ -170,9 +171,9 @@ FLIST_TESTS=flist flist0 flist2 flist_hidden flist_invalid flist_meta \
 						flist_type_hidden flist_type_invalid flist_type_meta \
 						flist_type_meta_hidden flist_type_meta_invalid
 
-FLUSH_TESTS=flush_all flush_bad_code flush_flush flush_invalid flush_lincom \
-						flush_lincom1 flush_meta flush_mult flush_raw_close flush_ref \
-						flush_spec flush_string flush_sync
+FLUSH_TESTS=flush_all flush_amb_code flush_bad_code flush_flush flush_invalid \
+						flush_lincom flush_lincom1 flush_meta flush_mult flush_raw_close \
+						flush_ref flush_spec flush_string flush_sync
 
 FOFFS_TESTS=foffs_alter foffs_alter_all foffs_get foffs_move
 
@@ -326,7 +327,8 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_quote_mismatch parse_raw parse_raw_char parse_raw_char_bad \
 						parse_raw_ncols parse_raw_scalar parse_raw_spf parse_raw_type \
 						parse_recip parse_ref parse_ref_nonexistent parse_sarray \
-						parse_sarray_long parse_sbit parse_sindir parse_sort parse_string \
+						parse_sarray_long parse_sbit parse_scalar1 parse_scalar2 \
+						parse_scalar_repr parse_sindir parse_sort parse_string \
 						parse_string_ncols parse_string_null parse_utf8 parse_utf8_invalid \
 						parse_utf8_zero parse_version parse_version_89 parse_version_98 \
 						parse_version_include parse_version_permissive parse_version_p8 \

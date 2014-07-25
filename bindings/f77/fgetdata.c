@@ -109,7 +109,7 @@ static int _GDF_SetDirfile(DIRFILE* D, int close)
 {
   int i;
 
-  dtrace("%p, %i", D);
+  dtrace("%p, %i", D, close);
 
   if (!f77dirfiles_initialised)
     _GDF_InitDirfiles();

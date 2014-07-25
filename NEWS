@@ -34,7 +34,30 @@ New in verison 0.9.0a:
     number of problems with reading LZMA files has been fixed, which should
     result in fewer segmentaion faults.
 
+  * BUG FIX: The parser no longer silently appends a closing > to scalar field
+    codes that contain an umatched opening < (e.g. "scalar<3").  This is now
+    interpreted as a simple field code (which may be rejected later due to the
+    presence of the invalid '<' character).
+
   * BUG FIX: The parsing of the \x and \u escape sequences is now correct.
+
+  * BUG FIX: The parser no-longer interprets various numbers as field codes
+    when it shouldn't (e.g. when specifying a PHASE shift as "1." instead of
+    "1").
+
+  * BUG FIX: When writing scalar field codes to disk which could be interpreted
+    as a number (e.g. the field code "1"), the library now forces the
+    interpretation of these field codes as codes rather than numbers by
+    appending a scalar index (making, e.g., "1<0>"), which is harmless.
+    Previously, these were written as-is, resulting in misinterpretation the
+    next time the Dirfile was opened.  This only happens with Standards Version
+    8 or later, see the following for earlier versions.
+
+  * BUG FIX: If the current Standards Version in effect is 7 or earlier,
+    ambiguous field codes (e.g., "1"), are now rejected by gd_[m]add() and
+    gd_alter_entry() with the error GD_E_BAD_CODE, since they can't be
+    represented in the metadata on disk.  For the behaviour with later Versions,
+    and in permissive mode, see the previous.
 
   * BUG FIX: Computation of LINCOMs with complex valued input fields now
     correctly happens in the complex plane.  As a side effect, gd_native_type()
@@ -50,11 +73,11 @@ New in verison 0.9.0a:
     codes containing subfields of the renamed field are now also updated,
     including field codes specifying meta subfields which do not exist.
 
-  * BUG FIX: The gd_[m]add() functions now ignore zero-length scalar strings
-    (i.e., they treat them as if they were NULL).  Previously they would store
-    these invalid field codes, causing problems later.
+  * BUG FIX: The gd_[m]add() functions now ignore zero-length strings in the
+    scalar[] member (i.e., they treat them as if they were NULL).  Previously
+    they would store these invalid field codes, causing problems later.
 
-  * BUG FIX: Returning complex-valued CARRAYs as purely real data now works.
+  * BUG FIX: Fetching complex-valued CARRAYs as purely real data now works.
     Previously only the first element requested would be returned, the remaining
     output buffer containing uninitialised data.
 
@@ -112,9 +135,10 @@ New in verison 0.9.0a:
   * BUG FIX: gd_alter_raw() and similar no longer fail when asked to re-encode
     the data file of a RAW field which has not been previously accessed.
 
-  * BUG FIX: A previously-read LINTERP table is now always deleted when changing
-    table paths with gd_alter_linterp() or similar.  Previously these obsolete,
-    cached LUTs would sometimes linger, causing incorrect LINTERP computation.
+  * BUG FIX: A previously-read LINTERP table is now always discarded when
+    changing table paths with gd_alter_linterp() or similar.  Previously these
+    obsolete, cached LUTs would sometimes linger, causing incorrect LINTERP
+    computation.
 
   * BUG FIX: gd_[m]alter_spec() no longer ignore co-efficients specified for
     POLYNOM entries.
@@ -472,11 +496,11 @@ New in version 0.8.0:
 
   * Three new encoding schemes are available.  The first is the Sample-
     Index Encoding (SIE), similar to run-length encoding, useful for
-    compressing data which changes very rarely varying data.  Like the
-    ASCII encoding, GetData implements it internally, so it's always
-    available.  The other two schemes (zzip and zzslim) are based around
-    the ZZip library, an access library for PKWARE ZIP files.  These are
-    unusual in that they store all raw data in the same ZIP archive.
+    compressing data which changes very rarely.  Like the ASCII encoding,
+    GetData implements it internally, so it's always available.  The other
+    two schemes (zzip and zzslim) are based around the ZZip library, an
+    access library for PKWARE ZIP files.  These are unusual in that they
+    store all raw data in the same ZIP archive.
 
   * The /ENCODING directive takes an optional second token.  The zzip and
     zzslim encoding schemes optionally use this token to specify the name
@@ -945,7 +969,6 @@ New in version 0.7.0:
   * LINTERP tables are no longer required to be sorted.  The library will
     sort them, if needed.  As a side-effect of this, tables are no longer read
     twice when loading, leading to potential speed-up.
-
 
   * BUG FIX: The library wasn't properly checking that the second and higher
     input fields in LINCOM and MULTIPLY fields were, in fact, vectors, leading

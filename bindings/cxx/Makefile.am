@@ -21,7 +21,7 @@
 AUTOMAKE_OPTIONS = foreign
 getdata_includedir = ${includedir}/getdata
 
-INCLUDES = ${GD_CXX_WALL} $(GD_CXX_WEXTRA) -I$(top_srcdir)/src
+AM_CPPFLAGS = ${GD_CXX_WALL} $(GD_CXX_WEXTRA) -I$(top_srcdir)/src
 LIBS=
 
 SUBDIRS=test

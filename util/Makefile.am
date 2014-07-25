@@ -21,7 +21,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 LDADD=../src/libgetdata.la
-INCLUDES=${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
+AM_CPPFLAGS=${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
 
 bin_PROGRAMS=checkdirfile dirfile2ascii
 checkdirfile_SOURCES=checkdirfile.c
