@@ -1099,7 +1099,7 @@ WRITE_ERR:
 
   /* Only assume we've synced the file if the rename succeeds */
   if (D->error != GD_E_OK)
-    ;//gd_UnlinkAt(D, dirfd, temp_file, 0);
+    gd_UnlinkAt(D, dirfd, temp_file, 0);
   else if (gd_RenameAt(D, dirfd, temp_file, dirfd, D->fragment[i].bname)) {
     _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_RENAME, NULL, errno, NULL);
     gd_UnlinkAt(D, dirfd, temp_file, 0);
