@@ -29,7 +29,6 @@ F95_LIB=libf95getdata.la
 endif
 
 FCFLAGS += $(GD_FC_WALL) $(GD_FC_WEXTRA)
-AM_CPPFLAGS = -I$(top_srcdir)/src
 EXTRA_DIST=getdata.f.in getdata.f90.in
 
 SUBDIRS = test
@@ -40,7 +39,7 @@ LIBS=
 nodist_include_HEADERS=getdata.f $(F95_INC)
 
 lib_LTLIBRARIES=libfgetdata.la $(F95_LIB)
-libfgetdata_la_CPPFLAGS = ${GD_CC_WALL} $(GD_CC_WEXTRA)
+libfgetdata_la_CPPFLAGS = ${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
 libfgetdata_la_SOURCES = fgetdata.c fgetdata.h
 libfgetdata_la_LIBADD=../../src/libgetdata.la
 libfgetdata_la_LDFLAGS = -version-info @FGETDATA_VERSION@

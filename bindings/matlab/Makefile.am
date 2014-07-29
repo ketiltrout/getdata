@@ -86,10 +86,6 @@ nodist_matlab_SCRIPTS=Contents.m getdata_constants.m $(matlabmexfiles) \
 
 lib_LTLIBRARIES=libgetdata-matlab.la
 
-libgetdata_matlab_la_SOURCES=matlab.c gd_matlab.h
-libgetdata_matlab_la_CPPFLAGS=${MATLAB_CPPFLAGS}
-libgetdata_matlab_la_LDFLAGS=-version-info @MATLABGETDATA_VERSION@
-
 if GD_EXTERNAL
 libgetdata_matlab_la_LIBADD=$(GETDATA_LIBS)
 AM_CPPFLAGS=$(GETDATA_CFLAGS)
@@ -99,6 +95,10 @@ libgetdata_matlab_la_LIBADD=../../src/libgetdata.la
 AM_CPPFLAGS=-I${top_srcdir}/src -I../../src
 GDMX_LIBS=-L../../src/.libs -lgetdata
 endif
+
+libgetdata_matlab_la_SOURCES=matlab.c gd_matlab.h
+libgetdata_matlab_la_CPPFLAGS=${MATLAB_CPPFLAGS} ${AM_CPPFLAGS}
+libgetdata_matlab_la_LDFLAGS=-version-info @MATLABGETDATA_VERSION@
 
 %.m: %.c ${srcdir}/doc.tail
 	${GREP} '^ %' $< | ${SED} -e 's/^ //' > $@
