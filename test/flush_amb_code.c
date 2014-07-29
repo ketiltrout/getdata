@@ -35,7 +35,7 @@ int main(void)
   memset(&E, 0, sizeof(E));
   E.field = "pathological";
   E.field_type = GD_POLYNOM_ENTRY;
-  E.poly_ord = 5;
+  E.EN(polynom,poly_ord) = 5;
   E.in_fields[0] = "INDEX";
 
   E.scalar[0] = code[0];
