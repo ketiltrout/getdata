@@ -1,3 +1,22 @@
+2014-07-30     D. V. Wiebe <g etdata@ketiltrout.net> svn:921
+	* src/del.c (gd_delete_alias): Deleted.
+	* src/del.c (gd_delete): Don't dereference the field code.
+
+	* bindings/f77/fgetdata.c (GDDELA) bindings/f77/getdata.f90.in
+	(fgd_delete_alias) bindings/cxx/dirfile.cpp (Dirfile::DeleteAlias)
+	bindings/php/getdata.c (gd_delete_alias) bindings/python/pydirfile.c
+	(gdpy_dirfile_deletealias): Deleted.
+	* bindings/matlab/gd_delete_alias.c: Deleted.
+	* bindings/perl/simple_funcs.xsin: Deleted delete_alias.
+	* bindings/idl/getdata.c (gdidl_delete): Removed the /ALIAS keyword.
+
+	* bindings/cxx/test/big_test.cpp bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro
+	bindings/matlab/test/big_test.m bindings/perl/t/big_test.t
+	bindings/php/test/big_test.php bindings/python/test/big_test.py: Deleted
+	test 225.
+
+
 2014-07-25     D. V. Wiebe <g etdata@ketiltrout.net> svn:915
 	* Makefile.am: Auotmake version bumped to 1.13.
 	* configure.ac: Autoconf version bumped to 2.65.

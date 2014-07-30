@@ -51,7 +51,7 @@ mexfiles=gd_add gd_add_alias \
 				 gd_alter_encoding gd_alter_endianness gd_alter_entry \
 				 gd_alter_frameoffset \
 				 gd_alter_protection gd_alter_spec gd_bof gd_array_len gd_carrays \
-				 gd_close gd_constants gd_delete gd_delete_alias gd_desync \
+				 gd_close gd_constants gd_delete gd_desync \
 				 gd_dirfilename gd_dirfile_standards \
 				 gd_discard gd_encoding gd_encoding_support gd_endianness \
 				 gd_entry gd_entry_list gd_entry_type gd_eof \

@@ -2406,14 +2406,6 @@ program big_test
   call fgd_include_affix(d, 'format1', 0, 'A', 'Z', GD_CREAT + GD_EXCL)
   call check_ok(ne, 223, d)
 
-! 225: fgd_delete_alias check
-  call fgd_delete_alias(d, 'new20', 0)
-  call check_ok2(ne, 225, 1, d)
-
-  n = fgd_fragment_index(d, 'new20')
-  call check_err2(ne, 225, 2, d, GD_E_BAD_CODE)
-  call check_int(ne, 225, n, -1)
-
 ! 226: fgd_fragment_affixes check
   l = flen
   n = flen

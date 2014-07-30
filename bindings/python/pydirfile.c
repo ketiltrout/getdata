@@ -2630,31 +2630,6 @@ static PyObject *gdpy_dirfile_hidden(struct gdpy_dirfile_t *self,
   return pyobj;
 }
 
-static PyObject *gdpy_dirfile_deletealias(struct gdpy_dirfile_t *self,
-    void *args, void *keys)
-{
-  char *keywords[] = {"field_code", "flags", NULL};
-  const char *field_code;
-  unsigned flags = 0;
-
-  dtrace("%p, %p, %p", self, args, keys);
-
-  if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s|I:pygetdata.dirfile.delete", keywords, &field_code, &flags))
-  {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  gd_delete_alias(self->D, field_code, flags);
-
-  PYGD_CHECK_ERROR(self->D, NULL);
-
-  Py_INCREF(Py_None);
-  dreturn("%p", Py_None);
-  return Py_None;
-}
-
 static PyObject *gdpy_dirfile_aliaslist(struct gdpy_dirfile_t *self,
     void *args, void *keys)
 {
@@ -3605,15 +3580,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "This function returns the number of aliases defined for the specified\n"
       "field.  If field_code is valid, this will be at least one.  See\n"
       "gd_naliases(3)."
-  },
-  {"delete_alias", (PyCFunction)gdpy_dirfile_deletealias,
-    METH_VARARGS | METH_KEYWORDS,
-    "delete_alias(field_code[, flags])\n\n"
-      "Delete the alias 'field_code' from the database.  If 'flags' is\n"
-      "omitted, it is assumed to be zero.  Otherwise, 'flags' should be a\n"
-      "bitwise or'd collection of the pygetdata.DEL_* symbols, whose\n"
-      "meanings are described in the gd_delete manual page.  See\n"
-      "gd_delete_alias(3)."
   },
   {"alias_target", (PyCFunction)gdpy_dirfile_aliastarget,
     METH_VARARGS | METH_KEYWORDS,

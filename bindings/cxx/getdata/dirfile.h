@@ -129,8 +129,6 @@ namespace GetData {
 
       int Delete(const char* field_code, int flags = 0) const;
 
-      int DeleteAlias(const char* field_code, int flags = 0) const;
-
       int DeSync(unsigned int flags = 0);
 
       int Discard();

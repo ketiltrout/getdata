@@ -223,7 +223,7 @@
 222 F9CIpPmh gd_aliases
 223 F9CIpPmh gd_include_affix
 224 ........ (unused)
-225 F9CIpPmh gd_delete_alias
+225 ........ (unused)
 226 F9CIpPmh gd_fragment_affixes
 227 F9CIpPmh gd_alter_affixes
 228 F9CIpPmh gd_entry (MPLEX)

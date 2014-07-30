@@ -1362,15 +1362,6 @@ $v = gd_include($D, 'format1', 0, GD_CREAT | GD_EXCL, 'A', 'Z');
 check_ok2(223, 0, $D);
 check_var2(223, 1, $v, 1);
 
-# 225: delete alias
-$v = gd_delete_alias($D, 'new20');
-check_ok2(225, 0, $D);
-check_var2(225, 1, $v, TRUE);
-
-$v = gd_fragment_index($D, 'new20');
-check_error2(225, 2, $D, GD_E_BAD_CODE);
-check_var2(225, 3, $v, FALSE);
-
 # 226: fragment affixes
 $v = gd_fragment_affixes($D, 1);
 check_ok(226, $D);

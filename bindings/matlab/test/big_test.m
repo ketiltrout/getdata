@@ -1815,19 +1815,6 @@ try
     ne = ne + check_ok2(exc, 41, 1);
   end
 
-  % 225: delete_alias
-  try
-    gd_delete_alias(D, 'new20');
-  catch exc
-    ne = ne + check_ok2(exc, 225, 1);
-  end
-
-  try
-    d = gd_fragment_index(D, 'new20');
-  catch exc
-    ne = ne + check_exc2(exc, 225, 2, 'BadCode');
-  end
-
   % 226: fragment_affixes
   try
     d = gd_fragment_affixes(D, 1);

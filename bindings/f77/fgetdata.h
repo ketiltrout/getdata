@@ -679,9 +679,6 @@ void F77_FUNC(gdhidn, GDHIDN) (int32_t *result, const int32_t *dirfile,
 void F77_FUNC(gdfraf, GDFRAF) (char *prefix, int32_t *prefix_l, char *suffix,
     int32_t *suffix_l, const int32_t *dirfile, const int32_t *index);
 
-void F77_FUNC(gddela, GDDELA) (const int32_t *dirfile, const char *field_code,
-    const int32_t *field_code_l, const int32_t *flags);
-
 void F77_FUNC(gdaafx, GDAAFX) (const int32_t *dirfile, const int32_t *index,
     const char *prefix, const int32_t *prefix_l, const char *suffix,
     const int32_t *suffix_l);

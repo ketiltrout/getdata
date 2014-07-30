@@ -2873,13 +2873,6 @@ subroutine fgd_alter_window_r (dirfile, field_name, in_field, check_field, &
   end if
 end subroutine
 
-subroutine fgd_delete_alias (dirfile, field_code, flags)
-  integer, intent(in) :: dirfile, flags
-  character (len=*), intent(in) :: field_code
-
-  call gddela(dirfile, TRIM(field_code), LEN_TRIM(field_code), flags)
-end subroutine
-
 function fgd_hidden (dirfile, field_code)
   integer :: fgd_hidden
   integer, intent(in) :: dirfile

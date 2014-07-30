@@ -2000,14 +2000,6 @@ C     223: GDINCA check
       CALL GDINCA(d, 'format1', 7, 0, 'A', 1, 'Z', 1, GD_CR + GD_EX)
       CALL CHKEOK(ne, 223, d)
 
-C     225: GDDELA check
-      CALL GDDELA(d, 'new20', 7, 0)
-      CALL CHKOK2(ne, 225, 1, d)
-
-      CALL GDFRGI(n, d, 'new20', 7)
-      CALL CHKER2(ne, 225, 2, d, GD_EBC)
-      CALL CHKINT(ne, 225, n, -1)
-
 C     226: GDFRAF check
       l = flen
       n = flen

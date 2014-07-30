@@ -187,9 +187,10 @@ New in verison 0.9.0a:
     which accepts the GD_REN_* flags, which have the same meaning as they do
     with gd_rename().
 
-  * gd_move_alias() has been deleted: its function is now performed by
-    gd_move().  If gd_move() is passed the field code of an alias, the alias is
-    now moved, instead of moving the field the alias points to.
+  * gd_move_alias() and gd_delete_alias() have been deleted: their functions are
+    now performed by gd_move() and gd_delete(), which now operate on the alias
+    itself when given the field code to an alias, rather than the field the alias
+    points to.
 
   * gd_encoding_support() has been added to permit run-time determination of
     supported encodings.
@@ -262,7 +263,7 @@ New in verison 0.9.0a:
     general, most people building GetData from a source release don't need the
     tools to build GetData; the autotools are only needed if changes need to be
     made to the configure script or Makefile input files provided in the
-    release.
+    release or if building from the repository.
 
 |==============================================================================|
 

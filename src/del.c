@@ -73,15 +73,15 @@ static void _GD_ClearDerived(DIRFILE *restrict D, gd_entry_t *restrict E,
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
+    case GD_SARRAY_ENTRY:
       break;
-    default:
-      if (E->field_type == GD_ALIAS_ENTRY)
-        if (E->e->entry[0] == C) {
-          if (check)
-            _GD_SetError(D, GD_E_DELETE, GD_E_DEL_ALIAS, E->field, 0, C->field);
-          else
-            E->e->entry[0] = NULL;
-        }
+    case GD_ALIAS_ENTRY:
+      if (E->e->entry[0] == C) {
+        if (check)
+          _GD_SetError(D, GD_E_DELETE, GD_E_DEL_ALIAS, E->field, 0, C->field);
+        else
+          E->e->entry[0] = NULL;
+      }
   }
 
   dreturnvoid();
@@ -305,7 +305,7 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
   for (i = 0; i < E->e->n_meta; ++i)
     del_list[n_del++] = E->e->p.meta_entry[i];
 
-  /* Check for clients and derived fields */
+  /* Check for clients, derived fields, and inbound aliases */
   if (~flags & GD_DEL_FORCE)
     for (j = 0; j < D->n_entries; ++j)
       for (i = 0; i < n_del; ++i) {
@@ -496,14 +496,13 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
   return 0;
 }
 
-int gd_delete(DIRFILE *D, const char *field_code_in, unsigned int flags)
+int gd_delete(DIRFILE *D, const char *field_code, unsigned int flags)
 {
   unsigned index;
-  int repr, ret;
-  char *field_code;
+  int ret;
   gd_entry_t *E;
 
-  dtrace("%p, \"%s\", 0x%X", D, field_code_in, flags);
+  dtrace("%p, \"%s\", 0x%X", D, field_code, flags);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -513,50 +512,9 @@ int gd_delete(DIRFILE *D, const char *field_code_in, unsigned int flags)
 
   _GD_ClearError(D);
 
-  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, &index, 1, 1);
-
-  if (field_code != field_code_in)
-    free(field_code);
-
-  if (D->error) {
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  ret = _GD_Delete(D, E, index, flags);
-
-  dreturn("%i", ret);
-  return ret;
-}
-
-
-int gd_delete_alias(DIRFILE *D, const char *field_code, unsigned int flags)
-  gd_nothrow
-{
-  unsigned index;
-  int ret;
-  gd_entry_t *E;
-
-  dtrace("%p, \"%s\", 0x%X", D, field_code, flags);
-
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  _GD_ClearError(D);
-
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, &index);
 
-  if (!E) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (E->field_type != GD_ALIAS_ENTRY) {
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+  if (D->error) {
     dreturn("%i", -1);
     return -1;
   }

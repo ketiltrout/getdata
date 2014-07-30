@@ -1798,17 +1798,6 @@ try:
 except:
   CheckOK(223)
 
-# 225: gd_delete_alias check
-try:
-  d.delete_alias('new20', 0)
-except:
-  CheckOK2(225, 1)
-
-try:
-  n = d.fragment_index('new20')
-except:
-  CheckException2(255, 2, pygetdata.BadCodeError)
-
 # 226: gd_fragment_affixes check
 try:
   n = d.fragment(1).prefix

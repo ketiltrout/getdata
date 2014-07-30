@@ -1263,14 +1263,6 @@ nume += check_simple(222, n, [ 'data', 'alias', 'data/mnew20', 'new20' ])
 gd_include, d, 'format1', prefix='A', suffix='Z', /CREAT, /EXCL
 nume += check_ok(223, d)
 
-; 225: gd_delete_alias check
-gd_delete, d, 'new20', /ALIAS
-nume += check_ok2(225, 1, d)
-
-n = gd_fragment_index(d, 'new20')
-nume += check_error2(225, 2, d, !GD.E_BAD_CODE)
-nume += check_simple(225, n, -1)
-
 ; 226: gd_fragment_affixes check
 n = gd_fragment_affixes(d, fragment=1)
 nume += check_ok(226, d)

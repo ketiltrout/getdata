@@ -3963,21 +3963,6 @@ void F77_FUNC(gdalmx, GDALMX) (const int32_t *dirfile, const char *field_code,
   dreturnvoid();
 }
 
-/* gd_delete_alias */
-void F77_FUNC(gddela, GDDELA) (const int32_t *dirfile, const char *field_code,
-    const int32_t *field_code_l, const int32_t *flags)
-{
-  char *fc;
-
-  dtrace("%i, %p, %i, %i", *dirfile, field_code, *field_code_l, *flags);
-
-  gd_delete_alias(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
-        *field_code_l), (unsigned int)*flags);
-
-  free(fc);
-  dreturnvoid();
-}
-
 /* gd_fragment_affixes */
 void F77_FUNC(gdfraf, GDFRAF) (char *prefix, int32_t *prefix_l, char *suffix,
     int32_t *suffix_l, const int32_t *dirfile, const int32_t *index)

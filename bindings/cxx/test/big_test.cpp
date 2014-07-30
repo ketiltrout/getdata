@@ -1587,14 +1587,6 @@ void run_tests(void)
   d->IncludeAffix("format1", 0, "A", "Z", GD_CREAT | GD_EXCL);
   CHECK_OK(223);
 
-  // 225: gd_delete_alias check
-  d->DeleteAlias("new20", 0);
-  CHECK_OK2(225, 1);
-
-  n = d->FragmentIndex("new20");
-  CHECK_ERROR2(225, 2, GD_E_BAD_CODE);
-  CHECK_INT(225, n, -1);
-
   // 226: gd_fragment_affixes check
   frag = d->Fragment(1);
 

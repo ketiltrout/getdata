@@ -683,9 +683,6 @@ gd_nonnull((1,2));
 extern size_t gd_carray_len(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull((1,2)) gd_deprecated;
 
-extern int gd_delete_alias(DIRFILE *dirfile, const char *field_code,
-    unsigned int flags) gd_nothrow gd_nonnull ((1,2));
-
 extern int gd_get_carray(DIRFILE *dirfile, const char *field_code,
     gd_type_t return_type, void *data_out) gd_nothrow gd_nonnull((1,2));
 

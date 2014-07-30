@@ -49,7 +49,7 @@ int main(void)
   D = gd_open(filedir, GD_RDWR);
   t1 = gd_entry_type(D, "alias");
   error1 = gd_error(D);
-  ret = gd_delete_alias(D, "alias", 0);
+  ret = gd_delete(D, "alias", 0);
   error2 = gd_error(D);
   t2 = gd_entry_type(D, "alias");
   error3 = gd_error(D);

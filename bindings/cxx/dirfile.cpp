@@ -494,11 +494,6 @@ const char* Dirfile::AliasTarget(const char* field_code) const
   return gd_alias_target(D, field_code);
 }
 
-int Dirfile::DeleteAlias(const char* field_code, int flags) const
-{
-  return gd_delete_alias(D, field_code, flags);
-}
-
 int Dirfile::Hide(const char* field_code) const
 {
   return gd_hide(D, field_code);

@@ -3005,21 +3005,6 @@ PHP_FUNCTION(gd_delete)
   GDPHP_RETURN_BOOL(gd_delete(D, field_code, flags));
 }
 
-PHP_FUNCTION(gd_delete_alias)
-{
-  char *field_code;
-  int field_code_len;
-  long flags = 0;
-
-  DIRFILE *D;
-
-  dtracephp();
-
-  GDPHP_PARSED("s|l", &field_code, &field_code_len, &flags);
-
-  GDPHP_RETURN_BOOL(gd_delete_alias(D, field_code, flags));
-}
-
 PHP_FUNCTION(gd_desync)
 {
   long flags = 0;
@@ -5176,7 +5161,6 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_close, NULL)
     PHP_FE(gd_constants, NULL)
     PHP_FE(gd_delete, NULL)
-    PHP_FE(gd_delete_alias, NULL)
     PHP_FE(gd_desync, NULL)
     PHP_FE(gd_dirfile_standards, NULL)
     PHP_FE(gd_dirfilekey, NULL)
