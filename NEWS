@@ -254,6 +254,16 @@ New in verison 0.9.0a:
   * PYTHON BUG FIX: The keyword for the "dirfile" parameter in the
     getdata.fragment constructor is now properly spelled.
 
+  Miscellaneous:
+
+  * The minimum autotools versions have been bumped.  Autoconf-2.65 or newer,
+    automake-1.13 or newer, and libtool-2.2.7b or newer are now required to
+    rebuild the configure script and associated build environment.  NOTE: In
+    general, most people building GetData from a source release don't need the
+    tools to build GetData; the autotools are only needed if changes need to be
+    made to the configure script or Makefile input files provided in the
+    release.
+
 |==============================================================================|
 
 New in verison 0.8.5:

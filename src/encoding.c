@@ -230,8 +230,8 @@ static void *_GD_ResolveSymbol(lt_dlhandle lib, struct encoding_t *restrict enc,
 
   dtrace("%p, %p, \"%s\"", lib, enc, name);
   /* create the symbol name */
-  sprintf(symbol, "libgetdata%s_LTX_GD_%s%s", enc->affix, enc->affix, name);
-  symbol[10] -= 'A' - 'a';
+  sprintf(symbol, "lt_libgetdata%s_LTX_GD_%s%s", enc->affix, enc->affix, name);
+  symbol[13] -= 'A' - 'a';
   func = lt_dlsym(lib, symbol);
 
   dreturn("%p", func);

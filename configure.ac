@@ -47,7 +47,7 @@ AC_SUBST([GETDATA_VERSION_SUFFIX], [getdata_extra])
 AC_PREREQ([2.65])
 AC_CONFIG_MACRO_DIR([m4])
 
-LT_PREREQ([2.2.6b])
+LT_PREREQ([2.2.7b])
 
 AC_ARG_VAR([BUILDCC],
            [C compiler command targetting the build system ]

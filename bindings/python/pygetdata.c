@@ -433,6 +433,7 @@ PyObject *gdpy_convert_to_pylist(const void *data, gd_type_t type, size_t ns)
         if (PyList_Append(pyobj, gdpy_from_complexp(((double*)data) + 2 * i)))
           return NULL;
       break;
+    case GD_STRING:
     case GD_NULL:
     case GD_UNKNOWN: /* prevent compiler warning */
       break;
@@ -489,6 +490,7 @@ PyObject *gdpy_convert_to_pyobj(const void *data, gd_type_t type)
     case GD_COMPLEX128:
       pyobj = gdpy_from_complexp((double*)data);
       break;
+    case GD_STRING:
     case GD_UNKNOWN: /* prevent compiler warning */
       break;
   }

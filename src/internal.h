@@ -370,10 +370,21 @@ gd_static_inline_ int64_t gd_put_unaligned64(int64_t v, void *p)
 /* debugging macros */
 #ifdef GETDATA_DEBUG
 #define GD_COL_SIZE 100
-const char* gd_colnil(void);
-const char* gd_coladd(void);
-const char* gd_colsub(void);
-void gd_colclear(void);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+  const char* gd_colnil(void);
+  const char* gd_coladd(void);
+  const char* gd_colsub(void);
+  void gd_colclear(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+
 #define dtracevoid() printf("%s %s()\n", gd_coladd(), __func__)
 #define dtrace(fmt, ...) printf("%s %s(" fmt ")\n", gd_coladd(), \
     __func__, ##__VA_ARGS__)
@@ -1182,18 +1193,29 @@ void _GD_LinterpData(DIRFILE *restrict, void *restrict, gd_type_t, int,
 int _GD_ListEntry(const gd_entry_t *E, int meta, int hidden, int noalias,
     int special, gd_entype_t type);
 char *_GD_MakeFullPath(DIRFILE *restrict, int, const char *restrict, int);
+
 #ifdef USE_MODULES
 #define _GD_MakeFullPathOnly gd_MakeFullPathOnly
+#define _GD_MakeTempFile gd_MakeTempFile
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #else
 #define gd_MakeFullPathOnly _GD_MakeFullPathOnly
-#endif
-char *_GD_MakeFullPathOnly(const DIRFILE *D, int dirfd, const char *name);
-#ifdef USE_MODULES
-#define _GD_MakeTempFile gd_MakeTempFile
-#else
 #define gd_MakeTempFile _GD_MakeTempFile
 #endif
+
+char *_GD_MakeFullPathOnly(const DIRFILE *D, int dirfd, const char *name);
 int _GD_MakeTempFile(const DIRFILE*, int, char*);
+
+#ifdef USE_MODULES
+#ifdef __cplusplus
+}
+#endif
+#endif
+
 void *_GD_Malloc(DIRFILE *D, size_t size);
 int _GD_MissingFramework(int encoding, unsigned int funcs);
 int _GD_MogrifyFile(DIRFILE *restrict, gd_entry_t *restrict, unsigned long int,
@@ -1272,6 +1294,70 @@ int _GD_AsciiClose(struct gd_raw_file_* file);
 off64_t _GD_AsciiSize(int, struct gd_raw_file_* file, gd_type_t data_type,
     int swap);
 
+/* SIE I/O methods */
+int _GD_SampIndOpen(int, struct gd_raw_file_* file, int swap,
+    unsigned int);
+off64_t _GD_SampIndSeek(struct gd_raw_file_* file, off64_t count,
+    gd_type_t data_type, unsigned int);
+ssize_t _GD_SampIndRead(struct gd_raw_file_ *restrict, void *restrict,
+    gd_type_t, size_t);
+ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict, const void *restrict,
+    gd_type_t, size_t);
+int _GD_SampIndSync(struct gd_raw_file_* file);
+int _GD_SampIndClose(struct gd_raw_file_* file);
+off64_t _GD_SampIndSize(int, struct gd_raw_file_* file, gd_type_t data_type,
+    int swap);
+
+#ifdef USE_MODULES
+#define _GD_Bzip2Open lt_libgetdatabzip2_LTX_GD_Bzip2Open
+#define _GD_Bzip2Seek lt_libgetdatabzip2_LTX_GD_Bzip2Seek
+#define _GD_Bzip2Read lt_libgetdatabzip2_LTX_GD_Bzip2Read
+#define _GD_Bzip2Write lt_libgetdatabzip2_LTX_GD_Bzip2Write
+#define _GD_Bzip2Sync lt_libgetdatabzip2_LTX_GD_Bzip2Sync
+#define _GD_Bzip2Close lt_libgetdatabzip2_LTX_GD_Bzip2Close
+#define _GD_Bzip2Size lt_libgetdatabzip2_LTX_GD_Bzip2Size
+
+#define _GD_GzipOpen lt_libgetdatagzip_LTX_GD_GzipOpen
+#define _GD_GzipSeek lt_libgetdatagzip_LTX_GD_GzipSeek
+#define _GD_GzipRead lt_libgetdatagzip_LTX_GD_GzipRead
+#define _GD_GzipWrite lt_libgetdatagzip_LTX_GD_GzipWrite
+#define _GD_GzipSync lt_libgetdatagzip_LTX_GD_GzipSync
+#define _GD_GzipClose lt_libgetdatagzip_LTX_GD_GzipClose
+#define _GD_GzipSize lt_libgetdatagzip_LTX_GD_GzipSize
+
+#define _GD_LzmaOpen lt_libgetdatalzma_LTX_GD_LzmaOpen
+#define _GD_LzmaSeek lt_libgetdatalzma_LTX_GD_LzmaSeek
+#define _GD_LzmaRead lt_libgetdatalzma_LTX_GD_LzmaRead
+#define _GD_LzmaWrite lt_libgetdatalzma_LTX_GD_LzmaWrite
+#define _GD_LzmaSync lt_libgetdatalzma_LTX_GD_LzmaSync
+#define _GD_LzmaClose lt_libgetdatalzma_LTX_GD_LzmaClose
+#define _GD_LzmaSize lt_libgetdatalzma_LTX_GD_LzmaSize
+
+#define _GD_SlimOpen lt_libgetdataslim_LTX_GD_SlimOpen
+#define _GD_SlimSeek lt_libgetdataslim_LTX_GD_SlimSeek
+#define _GD_SlimRead lt_libgetdataslim_LTX_GD_SlimRead
+#define _GD_SlimClose lt_libgetdataslim_LTX_GD_SlimClose
+#define _GD_SlimSize lt_libgetdataslim_LTX_GD_SlimSize
+
+#define _GD_ZzipName lt_libgetdatazzip_LTX_GD_ZzipName
+#define _GD_ZzipOpen lt_libgetdatazzip_LTX_GD_ZzipOpen
+#define _GD_ZzipSeek lt_libgetdatazzip_LTX_GD_ZzipSeek
+#define _GD_ZzipRead lt_libgetdatazzip_LTX_GD_ZzipRead
+#define _GD_ZzipClose lt_libgetdatazzip_LTX_GD_ZzipClose
+#define _GD_ZzipSize lt_libgetdatazzip_LTX_GD_ZzipSize
+
+#define _GD_ZzslimName lt_libgetdatazzslim_LTX_GD_ZzslimName
+#define _GD_ZzslimOpen lt_libgetdatazzslim_LTX_GD_ZzslimOpen
+#define _GD_ZzslimSeek lt_libgetdatazzslim_LTX_GD_ZzslimSeek
+#define _GD_ZzslimRead lt_libgetdatazzslim_LTX_GD_ZzslimRead
+#define _GD_ZzslimClose lt_libgetdatazzslim_LTX_GD_ZzslimClose
+#define _GD_ZzslimSize lt_libgetdatazzslim_LTX_GD_ZzslimSize
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#endif
+
 /* bzip I/O methods */
 int _GD_Bzip2Open(int, struct gd_raw_file_* file, int swap, unsigned int);
 off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t count,
@@ -1320,20 +1406,6 @@ int _GD_SlimClose(struct gd_raw_file_* file);
 off64_t _GD_SlimSize(int, struct gd_raw_file_* file, gd_type_t data_type,
     int swap);
 
-/* SIE I/O methods */
-int _GD_SampIndOpen(int, struct gd_raw_file_* file, int swap,
-    unsigned int);
-off64_t _GD_SampIndSeek(struct gd_raw_file_* file, off64_t count,
-    gd_type_t data_type, unsigned int);
-ssize_t _GD_SampIndRead(struct gd_raw_file_ *restrict, void *restrict,
-    gd_type_t, size_t);
-ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict, const void *restrict,
-    gd_type_t, size_t);
-int _GD_SampIndSync(struct gd_raw_file_* file);
-int _GD_SampIndClose(struct gd_raw_file_* file);
-off64_t _GD_SampIndSize(int, struct gd_raw_file_* file, gd_type_t data_type,
-    int swap);
-
 /* zzip I/O methods */
 int _GD_ZzipName(DIRFILE *restrict, const char *restrict,
     struct gd_raw_file_ *restrict, const char *restrict, int, int);
@@ -1357,6 +1429,12 @@ ssize_t _GD_ZzslimRead(struct gd_raw_file_ *restrict, void *restrict, gd_type_t,
 int _GD_ZzslimClose(struct gd_raw_file_* file);
 off64_t _GD_ZzslimSize(int, struct gd_raw_file_* file, gd_type_t data_type,
     int swap);
+
+#ifdef USE_MODULES
+#ifdef __cplusplus
+}
+#endif
+#endif
 
 #ifndef __cplusplus
 # undef gd_nothrow

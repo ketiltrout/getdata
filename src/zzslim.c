@@ -24,15 +24,6 @@
 #include <slimlib.h>
 #endif
 
-#ifdef USE_MODULES
-#define _GD_ZzslimName libgetdatazzslim_LTX_GD_ZzslimName
-#define _GD_ZzslimOpen libgetdatazzslim_LTX_GD_ZzslimOpen
-#define _GD_ZzslimSeek libgetdatazzslim_LTX_GD_ZzslimSeek
-#define _GD_ZzslimRead libgetdatazzslim_LTX_GD_ZzslimRead
-#define _GD_ZzslimClose libgetdatazzslim_LTX_GD_ZzslimClose
-#define _GD_ZzslimSize libgetdatazzslim_LTX_GD_ZzslimSize
-#endif
-
 /* The zzslim encoding scheme uses edata as a slimfile pointer.  If a file is
  * open, idata = 0 otherwise idata = -1. */
 

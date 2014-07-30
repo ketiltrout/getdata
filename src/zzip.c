@@ -24,15 +24,6 @@
 #include <zzip/lib.h>
 #endif
 
-#ifdef USE_MODULES
-#define _GD_ZzipName libgetdatazzip_LTX_GD_ZzipName
-#define _GD_ZzipOpen libgetdatazzip_LTX_GD_ZzipOpen
-#define _GD_ZzipSeek libgetdatazzip_LTX_GD_ZzipSeek
-#define _GD_ZzipRead libgetdatazzip_LTX_GD_ZzipRead
-#define _GD_ZzipClose libgetdatazzip_LTX_GD_ZzipClose
-#define _GD_ZzipSize libgetdatazzip_LTX_GD_ZzipSize
-#endif
-
 /* The zzip encoding scheme looks just like the regular ol' C IO. */
 
 int _GD_ZzipName(DIRFILE *restrict D, const char *restrict enc_data,

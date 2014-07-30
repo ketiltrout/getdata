@@ -67,6 +67,10 @@
 #define gdmx_from_entype gdmx_from_int
 #define gdmx_from_windop gdmx_from_int
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void gdmx_err(DIRFILE *, int);
 mxClassID gdmx_classid(gd_type_t);
 void gdmx_free_entry(gd_entry_t *);
@@ -91,6 +95,7 @@ mxArray *gdmx_from_ullong(unsigned long long);
 mxArray *gdmx_from_carrays(const gd_carray_t *, gd_type_t);
 mxArray *gdmx_from_sarrays(const char ***);
 mxArray *gdmx_vector(gd_type_t, size_t, void**);
+void gdmx_fix_vector(mxArray *, gd_type_t, size_t, void*);
 
 /* convert from MATLAB type */
 DIRFILE *gdmx_to_dirfile(const mxArray *);
@@ -114,5 +119,9 @@ void gdmx_free_data(void*, gd_type_t);
 
 void gdmx_to_sdata(const char***, size_t*, const mxArray*, int);
 void gdmx_free_sdata(const char**, size_t);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

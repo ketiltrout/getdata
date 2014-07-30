@@ -24,16 +24,6 @@
 #include <bzlib.h>
 #endif
 
-#ifdef USE_MODULES
-#define _GD_Bzip2Open libgetdatabzip2_LTX_GD_Bzip2Open
-#define _GD_Bzip2Seek libgetdatabzip2_LTX_GD_Bzip2Seek
-#define _GD_Bzip2Read libgetdatabzip2_LTX_GD_Bzip2Read
-#define _GD_Bzip2Write libgetdatabzip2_LTX_GD_Bzip2Write
-#define _GD_Bzip2Sync libgetdatabzip2_LTX_GD_Bzip2Sync
-#define _GD_Bzip2Close libgetdatabzip2_LTX_GD_Bzip2Close
-#define _GD_Bzip2Size libgetdatabzip2_LTX_GD_Bzip2Size
-#endif
-
 #if SIZEOF_INT < 4
 #define GD_BZIP_BUFFER_SIZE 32767
 #else

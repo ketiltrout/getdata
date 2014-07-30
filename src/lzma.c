@@ -24,16 +24,6 @@
 #include <lzma.h>
 #endif
 
-#ifdef USE_MODULES
-#define _GD_LzmaOpen libgetdatalzma_LTX_GD_LzmaOpen
-#define _GD_LzmaSeek libgetdatalzma_LTX_GD_LzmaSeek
-#define _GD_LzmaRead libgetdatalzma_LTX_GD_LzmaRead
-#define _GD_LzmaWrite libgetdatalzma_LTX_GD_LzmaWrite
-#define _GD_LzmaSync libgetdatalzma_LTX_GD_LzmaSync
-#define _GD_LzmaClose libgetdatalzma_LTX_GD_LzmaClose
-#define _GD_LzmaSize libgetdatalzma_LTX_GD_LzmaSize
-#endif
-
 #if SIZEOF_INT < 4
 #define GD_LZMA_DATA_OUT 32767
 #else
