@@ -1,3 +1,22 @@
+2014-10-16     D. V. Wiebe <g etdata@ketiltrout.net> svn:928
+	* bindings/make_parameters.c: Replace numeric type literals with CPP macros
+	for legibility.
+
+	* man/gd_getdata.3: Explain I/O pointers more.
+
+	* src/getdata.h.in: Merge GD_E_OPEN, GD_E_TRUNC, GD_E_RAW_IO,
+	GD_E_OPEN_FRAGMENT, most of GD_E_FLUSH and half of GD_E_OPEN_LINFILE into
+	the new GD_E_IO and deprecate.  The remainder of GD_E_OPEN_LINFILE (syntax
+	errors) is now the new GD_E_LUT.
+	* src/common.c (_GD_ReadLinterpFile): Consolidate error handling code.
+	Handle syntax errors better.
+	* src/flush.c (_GD_FieldSpec): Raise GD_E_LINE_TOO_LONG for line overflows.
+	* src/errors.c (_GD_SetError2 _GD_SetError gd_error_string): Track stdlib
+	errno separately and implicitly.
+
+	* bindings/python/pygetdata.c: Define deprecated Exceptions as aliases for
+	current ones.
+
 2014-07-30     D. V. Wiebe <g etdata@ketiltrout.net> svn:921
 	* src/del.c (gd_delete_alias): Deleted.
 	* src/del.c (gd_delete): Don't dereference the field code.

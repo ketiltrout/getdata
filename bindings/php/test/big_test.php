@@ -174,7 +174,7 @@ fclose($handle);
 
 # 1: gd_error
 $D = gd_open('');
-check_error(1, $D, GD_E_OPEN);
+check_error(1, $D, GD_E_IO);
 
 # 2: gd_open
 $D = gd_open("dirfile\0extra", GD_RDWR);

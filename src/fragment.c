@@ -89,7 +89,7 @@ static char **_GD_CheckAffixes(DIRFILE *D, int i, const char *prefix,
 
   dtrace("%p, %i, \"%s\", \"%s\", %p, %p", D, i, prefix, suffix, new_codes, n);
 
-  ptr = (char**)_GD_Realloc(D, codes, sizeof(char*) * (nn + 2));
+  ptr = _GD_Realloc(D, codes, sizeof(*ptr) * (nn + 2));
   if (!ptr) {
     dreturn("%p (%i)", codes, *n);
     return codes;
@@ -133,7 +133,7 @@ static char **_GD_CheckAffixes(DIRFILE *D, int i, const char *prefix,
   /* Check for namespace clashes in our files */
   for (u = 0; u < D->n_entries; ++u)
     if (D->entry[u]->fragment_index == i && D->entry[u]->e->n_meta != -1) {
-      ptr = (char**)_GD_Realloc(D, new_codes, sizeof(char*) * ++nn);
+      ptr = _GD_Realloc(D, new_codes, sizeof(*ptr) * ++nn);
       if (ptr) {
         new_codes = ptr;
         /* remunge the code */
@@ -333,8 +333,8 @@ int gd_desync(DIRFILE *D, unsigned int flags)
       /* stat the file via it's path relative to the original filedir */
       char *buffer;
       if (D->fragment[i].sname) {
-        buffer = (char*)_GD_Malloc(D, strlen(D->name) +
-            strlen(D->fragment[i].bname) + strlen(D->fragment[i].sname) + 3);
+        buffer = _GD_Malloc(D, strlen(D->name) + strlen(D->fragment[i].bname) +
+            strlen(D->fragment[i].sname) + 3);
         if (buffer == NULL) {
           dreturn("%i", -1);
           return -1;
@@ -342,8 +342,8 @@ int gd_desync(DIRFILE *D, unsigned int flags)
         sprintf(buffer, "%s%c%s%c%s", D->name, GD_DIRSEP, D->fragment[i].sname,
             GD_DIRSEP, D->fragment[i].bname);
       } else {
-        buffer = (char*)_GD_Malloc(D, strlen(D->name) +
-            strlen(D->fragment[i].bname) + 2);
+        buffer = _GD_Malloc(D, strlen(D->name) + strlen(D->fragment[i].bname) +
+            2);
         if (buffer == NULL) {
           dreturn("%i", -1);
           return -1;
@@ -351,7 +351,7 @@ int gd_desync(DIRFILE *D, unsigned int flags)
         sprintf(buffer, "%s%c%s", D->name, GD_DIRSEP, D->fragment[i].bname);
       }
       if (stat(buffer, &statbuf)) {
-        _GD_SetError(D, GD_E_RAW_IO, 0, buffer, errno, NULL);
+        _GD_SetError(D, GD_E_IO, 0, buffer, 0, NULL);
         free(buffer);
         dreturn("%i", -1);
         return -1;
@@ -361,7 +361,7 @@ int gd_desync(DIRFILE *D, unsigned int flags)
       /* stat the file based on it's name and our cached dirfd */
       if (gd_StatAt(D, D->fragment[i].dirfd, D->fragment[i].bname, &statbuf, 0))
       {
-        _GD_SetError(D, GD_E_RAW_IO, 0, D->fragment[i].cname, errno, NULL);
+        _GD_SetError(D, GD_E_IO, 0, D->fragment[i].cname, 0, NULL);
         dreturn("%i", -1);
         return -1;
       }
@@ -387,7 +387,7 @@ int gd_desync(DIRFILE *D, unsigned int flags)
     if (!(flags & GD_DESYNC_PATHCHECK)) {
       dirfd = dup(D->fragment[0].dirfd);
       if (dirfd == -1) {
-        _GD_SetError(D, GD_E_RAW_IO, 0, D->name, errno, NULL);
+        _GD_SetError(D, GD_E_IO, GD_E_OPEN, D->name, 0, NULL);
         dreturn("%i", -1);
         return -1;
       }

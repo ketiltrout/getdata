@@ -1,6 +1,6 @@
 .\" gd_native_type.3.  The gd_native_type man page.
 .\"
-.\" Copyright (C) 2009, 2010, 2011, 2012 D. V. Wiebe
+.\" Copyright (C) 2009, 2010, 2011, 2012, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_native_type 3 "17 August 2012" "Version 0.8.0" "GETDATA"
+.TH gd_native_type 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_native_type \(em returns the native data type of a field in a dirfile
 .SH SYNOPSIS
@@ -81,11 +81,11 @@ if the dividend or the native data type of the input field is complex valued:
 otherwise:
 .BR GD_FLOAT64 ;
 .TP
-.BR SBIT " Entry:"
-.BR GD_INT64 ;
+.BR SARRAY " or " STRING " Entry:"
+.BR GD_STRING ;
 .TP
-.BR STRING " Entry:"
-.BR GD_NULL .
+.BR SBIT " Entry:"
+.BR GD_INT64 .
 .PP
 Furthermore, if the supplied
 .I field_code
@@ -101,9 +101,9 @@ the symbols:
 .IP
 .nh
 .ad l
-.BR GD_NULL ", " GD_UINT8 ", " GD_INT8 ", " GD_UINT16 ", " GD_INT16 ,
-.BR GD_UINT32 ", " GD_INT32 ", " GD_FLOAT32 ", " GD_FLOAT64 ", " GD_COMPLEX64 ,
-.BR GD_COMPLEX128 .
+.BR GD_UINT8 ", " GD_INT8 ", " GD_UINT16 ", " GD_INT16 ", " GD_UINT32 ,
+.BR GD_INT32 ", " GD_FLOAT32 ", " GD_FLOAT64 ", " GD_COMPLEX64 ,
+.BR GD_COMPLEX128 ", " GD_STRING .
 .ad n
 .hy
 .PP
@@ -133,8 +133,11 @@ or in one of its input fields, was not recognised.
 .B GD_E_DIMENSION
 A scalar field was found where a vector field was expected.
 .TP
-.B GD_E_OPEN_LINFILE
+.B GD_E_IO
 An error occurred while trying to read a LINTERP table from disk.
+.TP
+.B GD_E_LUT
+A LINTERP table was malformed.
 .TP
 .B GD_E_RECURSE_LEVEL
 Too many levels of recursion were encountered while trying to resolve

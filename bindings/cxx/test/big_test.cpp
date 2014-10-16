@@ -240,7 +240,7 @@ void run_tests(void)
 
   // 1: Dirfile::Error check
   d = new Dirfile("x");
-  CHECK_ERROR(1, GD_E_OPEN);
+  CHECK_ERROR(1, GD_E_IO);
   delete d;
 
   // 2: Dirfile::Dirfile check

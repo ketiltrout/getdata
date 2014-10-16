@@ -282,7 +282,8 @@ int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode)
             E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset, mode)
           == -1)
       {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+        _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[0].name, 0,
+            NULL);
       }
       break;
     case GD_LINCOM_ENTRY:

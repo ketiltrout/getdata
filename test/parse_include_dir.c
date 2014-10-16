@@ -53,6 +53,6 @@ int main(void)
   rmdir(subdir);
   rmdir(filedir);
 
-  CHECKI(error, GD_E_OPEN_FRAGMENT);
+  CHECKI(error, GD_E_IO);
   return r;
 }

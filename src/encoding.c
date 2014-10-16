@@ -374,7 +374,7 @@ static int _GD_MoveOver(DIRFILE *restrict D, int fragment,
     }
     errno = move_errno;
     _GD_SetError(D, GD_E_UNCLEAN_DB, GD_E_UNCLEAN_CALL,
-        D->fragment[fragment].cname, errno, "gd_RenameAt");
+        D->fragment[fragment].cname, 0, "gd_RenameAt");
     D->flags |= GD_INVALID;
     dreturn("%i", -1);
     return -1;
@@ -416,7 +416,7 @@ int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
           n_to_write = n_read = (*_GD_ef[E->e->u.raw.file[0].subenc].read)(
               E->e->u.raw.file, buffer, E->EN(raw,data_type), GD_BUFFER_SIZE);
           if (n_read < 0) {
-            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
+            _GD_SetError(D, GD_E_IO, GD_E_IO_READ, E->e->u.raw.file[0].name, 0,
                 NULL);
             dreturn("%i", -1);
             return -1;
@@ -424,8 +424,8 @@ int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
             n_wrote = (*_GD_ef[E->e->u.raw.file[0].subenc].write)(
                 E->e->u.raw.file + 1, buffer, E->EN(raw,data_type), n_to_write);
             if (n_wrote < 0) {
-              _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
-                  NULL);
+              _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[0].name,
+                  0, NULL);
               dreturn("%i", -1);
               return -1;
             }
@@ -446,8 +446,8 @@ int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
           clotemp))
     {
       if (D->error == GD_E_OK)
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[clotemp].name, errno,
-            NULL);
+        _GD_SetError(D, GD_E_IO, GD_E_IO_CLOSE, E->e->u.raw.file[clotemp].name,
+            0, NULL);
       dreturn("%i", 1);
       return 1;
     }
@@ -467,7 +467,7 @@ int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
             0))
       {
         if (D->error == GD_E_OK)
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
+          _GD_SetError(D, GD_E_IO, GD_E_IO_UNLINK, E->e->u.raw.file[1].name, 0,
               NULL);
         dreturn("%i", -1);
         return -1;
@@ -585,7 +585,7 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
     } else if ((*enc->open)(D->fragment[fragment].dirfd, E->e->u.raw.file + 1,
           swap, GD_FILE_WRITE | GD_FILE_TEMP))
     {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
+      _GD_SetError(D, GD_E_IO, GD_E_IO_OPEN, E->e->u.raw.file[1].name, 0, NULL);
       dreturn("%i", 1);
       return 1;
     }
@@ -612,7 +612,8 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
     {
       /* In oop_write mode, it doesn't matter if the old file doesn't exist */
       if (!oop_write || errno != ENOENT) {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+        _GD_SetError(D, GD_E_IO, GD_E_IO_OPEN, E->e->u.raw.file[0].name, 0,
+            NULL);
         dreturn("%i", 1);
         return 1;
       }
@@ -730,7 +731,7 @@ int _GD_GenericName(DIRFILE *restrict D,
 
   if (file->name == NULL) {
     file->D = D;
-    file->name = (char *)_GD_Malloc(D, strlen(base) + (temp ? 8 :
+    file->name = _GD_Malloc(D, strlen(base) + (temp ? 8 :
           strlen(_GD_ef[file->subenc].ext) + 1));
     if (file->name == NULL) {
       dreturn("%i", -1);
@@ -762,8 +763,7 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
   }
 
   if (move && encoding != D->fragment[fragment].encoding) {
-    gd_entry_t **raw_entry = (gd_entry_t **)_GD_Malloc(D, sizeof(gd_entry_t*) *
-        D->n_entries);
+    gd_entry_t **raw_entry = _GD_Malloc(D, sizeof(*raw_entry) * D->n_entries);
 
     if (raw_entry == NULL) {
       dreturnvoid();

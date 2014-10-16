@@ -1,6 +1,6 @@
 .\" gd_add_bit.3.  The gd_add_bit man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2012, 2013 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add_bit 3 "5 May 2014" "Version 0.9.0" "GETDATA"
+.TH gd_add_bit 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_add_bit, gd_add_carray gd_add_clincom, gd_add_const, gd_add_cpolynom,
 gd_add_crecip, gd_add_divide, gd_add_lincom, gd_add_linterp, gd_add_multiply,
@@ -264,27 +264,30 @@ An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 GetData developers.
 .TP
+.B GD_E_IO
+.RB ( gd_add_raw ()
+only)  An I/O error occurred while creating an empty binary file to be
+associated with a newly added
+.B RAW
+field.
+.TP
 .B GD_E_PROTECTED
 The metadata of the fragment was protected from change.  Or, the creation of a
 .B RAW
 field was attempted and the data of the fragment was protected.
 .TP
-.B GD_E_RAW_IO
-An I/O error occurred while creating an empty binary file to be associated with
-a newly added
-.B RAW
-field.
-.TP
 .B GD_E_UNKNOWN_ENCODING
-The encoding scheme of the indicated format specification fragment is not known
-to the library.  As a result, the library was unable to create an empty binary
-file to be associated with a newly added
+.RB ( gd_add_raw ()
+only) The encoding scheme of the indicated format specification fragment is not
+known to the library.  As a result, the library was unable to create an empty
+binary file to be associated with a newly added
 .B RAW
 field.
 .TP
 .B GD_E_UNSUPPORTED
-The encoding scheme of the indicated format specification fragment does not
-support creating an empty binary file to be associated with a newly added
+.RB ( gd_add_raw ()
+only) The encoding scheme of the indicated format specification fragment does
+not support creating an empty binary file to be associated with a newly added
 .B RAW
 field.
 .PP

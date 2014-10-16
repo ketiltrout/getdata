@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Opening an dirfile with no read permission should fail cleanly */
 #include "test.h"
 
 #include <stdlib.h>
@@ -55,6 +54,6 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, GD_E_OPEN);
+  CHECKI(error, GD_E_IO);
   return r;
 }

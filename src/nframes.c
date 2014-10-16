@@ -61,8 +61,8 @@ off64_t gd_nframes64(DIRFILE* D)
       _GD_FileSwapBytes(D, D->reference_field));
 
   if (nf < 0) {
-    _GD_SetError(D, GD_E_RAW_IO, 0, D->reference_field->e->u.raw.file[0].name,
-        errno, NULL);
+    _GD_SetError(D, GD_E_IO, 0, D->reference_field->e->u.raw.file[0].name, 0,
+        NULL);
     dreturn("%lli", 0LL);
     return 0;
   }

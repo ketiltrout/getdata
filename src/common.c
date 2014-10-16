@@ -254,7 +254,7 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
   struct gd_lut_ *ptr;
   int i, fd;
   int dir = -1;
-  char *line;
+  char *line = NULL;
   size_t n = 0;
   int linenum = 0;
   double yr, yi;
@@ -271,25 +271,33 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
   fd = gd_OpenAt(D, E->e->u.linterp.table_dirfd, E->e->u.linterp.table_file,
       O_RDONLY, 0666);
   if (fd == -1) {
-    _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0,
-        E->EN(linterp,table));
+    _GD_SetError(D, GD_E_IO, GD_E_IO_OPEN, E->EN(linterp,table), 0, NULL);
     dreturnvoid();
     return;
   }
 
   fp = fdopen(fd, "rb");
   if (fp == NULL) {
-    _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0,
-        E->EN(linterp,table));
+    _GD_SetError(D, GD_E_IO, GD_E_IO_OPEN, E->EN(linterp,table), 0, NULL);
     dreturnvoid();
     return;
   }
+
+  E->e->u.linterp.lut = _GD_Malloc(D, buf_len * sizeof(*E->e->u.linterp.lut));
+
+  if (E->e->u.linterp.lut == NULL)
+    goto LUT_ERROR;
 
   /* read the first line to see whether the table is complex valued */
   if ((line = _GD_GetLine(fp, &n, &linenum))) {
     char ystr[50];
     if (sscanf(line, "%lg %49s", &yr, ystr) == 2)
       E->e->u.linterp.complex_table = (strchr(ystr, ';') == NULL) ? 0 : 1;
+    else {
+      _GD_SetError(D, GD_E_LUT, GD_E_LUT_SYNTAX, E->EN(linterp,table), linenum,
+          NULL);
+      goto LUT_ERROR;
+    }
   } else {
     if (errno == EOVERFLOW)
       /* line too long */
@@ -297,31 +305,31 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
           NULL);
     else 
       /* no data in file! */
-      _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0,
-          E->EN(linterp,table));
-    fclose(fp);
-    dreturnvoid();
-    return;
-  }
-
-  E->e->u.linterp.lut = (struct gd_lut_ *)_GD_Malloc(D, buf_len *
-      sizeof(struct gd_lut_));
-
-  if (E->e->u.linterp.lut == NULL) {
-    fclose(fp);
-    dreturnvoid();
-    return;
+      _GD_SetError(D, GD_E_LUT, GD_E_LUT_LENGTH, E->EN(linterp,table), 0, NULL);
+    goto LUT_ERROR;
   }
 
   /* now read in the data -- we've already read line one */
   i = 0;
   do {
     if (E->e->u.linterp.complex_table) {
-      sscanf(line, "%lg %lg;%lg", &(E->e->u.linterp.lut[i].x), &yr, &yi);
-      gd_li2cs_(E->e->u.linterp.lut[i].y.c, yr, yi);
+      if (sscanf(line, "%lg %lg;%lg", &(E->e->u.linterp.lut[i].x), &yr, &yi) ==
+          3)
+      {
+        gd_li2cs_(E->e->u.linterp.lut[i].y.c, yr, yi);
+      } else {
+        _GD_SetError(D, GD_E_LUT, GD_E_LUT_SYNTAX, E->EN(linterp,table),
+            linenum, NULL);
+        goto LUT_ERROR;
+      }
     } else
-      sscanf(line, "%lg %lg", &(E->e->u.linterp.lut[i].x),
-          &(E->e->u.linterp.lut[i].y.r));
+      if (sscanf(line, "%lg %lg", &(E->e->u.linterp.lut[i].x),
+            &(E->e->u.linterp.lut[i].y.r)) != 2)
+      {
+        _GD_SetError(D, GD_E_LUT, GD_E_LUT_SYNTAX, E->EN(linterp,table),
+            linenum, NULL);
+        goto LUT_ERROR;
+      }
 
     if (dir > -2 && i > 0 && E->e->u.linterp.lut[i].x !=
         E->e->u.linterp.lut[i - 1].x)
@@ -335,16 +343,10 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
     i++;
     if (i >= buf_len) {
       buf_len += GD_LUT_CHUNK;
-      ptr = (struct gd_lut_ *)_GD_Realloc(D, E->e->u.linterp.lut, buf_len *
-          sizeof(struct gd_lut_));
+      ptr = _GD_Realloc(D, E->e->u.linterp.lut, buf_len * sizeof(*ptr));
 
-      if (ptr == NULL) {
-        free(E->e->u.linterp.lut);
-        E->e->u.linterp.lut = NULL;
-        fclose(fp);
-        dreturnvoid();
-        return;
-      }
+      if (ptr == NULL)
+        goto LUT_ERROR;
 
       E->e->u.linterp.lut = ptr;
     }
@@ -352,26 +354,15 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
   } while ((line = _GD_GetLine(fp, &n, &linenum)));
 
   if (i < 2) {
-    free(E->e->u.linterp.lut);
-    E->e->u.linterp.lut = NULL;
-    _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0,
-        E->EN(linterp,table));
-    fclose(fp);
-    dreturnvoid();
-    return;
+    _GD_SetError(D, GD_E_LUT, GD_E_LUT_LENGTH, NULL, 0, E->EN(linterp,table));
+    goto LUT_ERROR;
   }
 
   /* Free unused memory */
-  ptr = (struct gd_lut_ *)_GD_Realloc(D, E->e->u.linterp.lut, i
-      * sizeof(struct gd_lut_));
+  ptr = _GD_Realloc(D, E->e->u.linterp.lut, i * sizeof(*ptr));
 
-  if (ptr == NULL) {
-    free(E->e->u.linterp.lut);
-    E->e->u.linterp.lut = NULL;
-    fclose(fp);
-    dreturnvoid();
-    return;
-  }
+  if (ptr == NULL)
+    goto LUT_ERROR;
 
   E->e->u.linterp.table_monotonic = -1;
   E->e->u.linterp.lut = ptr;
@@ -381,6 +372,14 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
   if (dir == -2)
     qsort(E->e->u.linterp.lut, i, sizeof(struct gd_lut_), lutcmp);
 
+  fclose(fp);
+  dreturnvoid();
+  return;
+
+LUT_ERROR:
+  free(E->e->u.linterp.lut);
+  E->e->u.linterp.lut = NULL;
+  free(line);
   fclose(fp);
   dreturnvoid();
 }
@@ -1280,7 +1279,7 @@ char *_GD_MakeFullPath(DIRFILE *D, int dirfd, const char *name, int seterr)
     else {
       /* a last ditch attempt */
       if (dir) {
-        filepath = (char*)_GD_Malloc(D, strlen(dir) + strlen(name) + 2);
+        filepath = _GD_Malloc(D, strlen(dir) + strlen(name) + 2);
         if (filepath)
           sprintf(filepath, "%s%c%s", dir, GD_DIRSEP, name);
       } else 
@@ -1333,7 +1332,7 @@ int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name)
     }
 
   /* new one */
-  ptr = _GD_Realloc(D, D->dir, sizeof(struct gd_dir_t) * (D->ndir + 1));
+  ptr = _GD_Realloc(D, D->dir, sizeof(D->dir[0]) * (D->ndir + 1));
 
   if (ptr == NULL) {
     free(path);
@@ -1341,7 +1340,7 @@ int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name)
     return -1;
   }
 
-  D->dir = (struct gd_dir_t*)ptr;
+  D->dir = ptr;
   D->dir[D->ndir].rc = 1;
   D->dir[D->ndir].path = _GD_Strdup(D, dir);
 

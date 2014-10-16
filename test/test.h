@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2012 D. V. Wiebe
+/* Copyright (C) 2010-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -143,6 +143,8 @@ int gd_system(const char* command)
 #define CHECKSp(n,v)   CHECK(strncmp((n),(v), sizeof(v) - 1),n,"\"%s\"",\
     "\"%s\"",(n),(v));
 #define CHECKBOS(n,v)  CHECK(strncmp((n),(v),strlen(v)-1),n,"\"%s\"","\"%s\"",\
+    (n),(v));
+#define CHECKSS(n,v)  CHECK(strstr((n),(v)) == NULL,n,"\"%s\"","...\"%s\"...",\
     (n),(v));
 #define CHECKEOS(n,v)  CHECK(strcmp((n) + strlen(n) - sizeof(v) + 1,(v)),n,\
     "...\"%s\"","\"%s\"",(n) + strlen(n) - sizeof(v) + 1,(v));

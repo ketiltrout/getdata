@@ -18,8 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Reference to a non-existent dirfile from the legacy API should fail cleanly
- */
 #include "test.h"
 
 #include <stdlib.h>
@@ -38,7 +36,7 @@ int main(void)
   size_t n = GetNFrames("no such dirfile", &error, NULL);
 
   CHECKI(n,0);
-  CHECKI(error, GD_E_OPEN);
+  CHECKI(error, GD_E_IO);
 
   return r;
 #endif

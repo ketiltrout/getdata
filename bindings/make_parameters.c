@@ -29,224 +29,227 @@
 #define GD_NO_LEGACY_API
 #include "getdata.h"
 
-/* The type parameter:
- *   0: error codes
- *   1: open flags not in IDL
- *   2: open flags represented as LONG in IDL
- *   3: entry types
- *   4: data types
- *   5: delete/rename flags (not in IDL)
- *   6: protection levels
- *   7: callback actions (not in IDL)
- *   8: GD_E_FORMAT suberrors (not in IDL)
- *   9: special version codes
- *  10: gd_seek whence values
- *  11: gd_seek flags (not in IDL)
- *  12: window operations
- *  13: desynced flags (not in IDL)
- *  14: entry_list constants (not in IDL)
- *  15: entry flags
- *  98: miscellaneous constants not in IDL
- *  99: miscellaneous constants
- */
+/* parameter types (used by Fortran, IDL, and PHP) */
+#define GDMP_ERR     0x00000001 /* error code */
+#define GDMP_DEPERR  0x00000002 /* deprecated error codes not in PHP */
+#define GDMP_OFLAG   0x00000004 /* open flags not in IDL */
+#define GDMP_OFLAG_L 0x00000008 /* open flags represented as LONG in IDL */
+#define GDMP_ENTYPE  0x00000010 /* entry types */
+#define GDMP_DTYPE   0x00000020 /* data types */
+#define GDMP_RFLAG   0x00000040 /* delete and rename flags (not in IDL) */
+#define GDMP_PROT    0x00000080 /* protection levels */
+#define GDMP_CALLBAK 0x00000100 /* callback actions (not in IDL) */
+#define GDMP_FORMAT  0x00000200 /* GD_E_FORMAT suberrors (not in IDL) */
+#define GDMP_VERS    0x00000400 /* special version codes */
+#define GDMP_WHENCE  0x00000800 /* gd_seek whence values */
+#define GDMP_SEEK    0x00001000 /* gd_seek flags (not in IDL) */
+#define GDMP_WINDOP  0x00002000 /* window operations */
+#define GDMP_DESYNC  0x00004000 /* desync flags (not in IDL) */
+#define GDMP_ENLIST  0x00008000 /* entry_list constants (not in IDL) */
+#define GDMP_EFLAG   0x00010000 /* entry flags */
+#define GDMP_MISC_I  0x00020000 /* miscellaneous constants not in IDL */
+#define GDMP_MISC    0x00040000 /* miscellaneous constants */
+
 #define CONSTANT(s,f,t) { "GD_" #s, #s, f, GD_ ## s, t }
 static struct {
   const char* lname; /* Long name */
   const char* sname; /* Short name */
   const char* fname; /* F77 name */
   long int value;
-  int type;
+  unsigned type;
 } constant_list[] = {
-  CONSTANT(E_OK,             "GD_EOK", 0),
-  CONSTANT(E_OPEN,           "GD_EOP", 0),
-  CONSTANT(E_FORMAT,         "GD_EFO", 0),
-  CONSTANT(E_TRUNC,          "GD_ETR", 0),
-  CONSTANT(E_CREAT,          "GD_ECR", 0),
-  CONSTANT(E_BAD_CODE,       "GD_EBC", 0),
-  CONSTANT(E_BAD_TYPE,       "GD_EBT", 0),
-  CONSTANT(E_RAW_IO,         "GD_ERW", 0),
-  CONSTANT(E_OPEN_FRAGMENT,  "GD_EOF", 0),
-  CONSTANT(E_INTERNAL_ERROR, "GD_EIE", 0),
-  CONSTANT(E_ALLOC,          "GD_EAL", 0),
-  CONSTANT(E_RANGE,          "GD_ERA", 0),
-  CONSTANT(E_OPEN_LINFILE,   "GD_EOL", 0),
-  CONSTANT(E_RECURSE_LEVEL,  "GD_ERL", 0),
-  CONSTANT(E_BAD_DIRFILE,    "GD_EBD", 0),
-  CONSTANT(E_BAD_FIELD_TYPE, "GD_EBF", 0),
-  CONSTANT(E_ACCMODE,        "GD_EAC", 0),
-  CONSTANT(E_UNSUPPORTED,    "GD_UNS", 0),
-  CONSTANT(E_UNKNOWN_ENCODING,"GD_EUE",0),
-  CONSTANT(E_BAD_ENTRY,      "GD_EBE", 0),
-  CONSTANT(E_DUPLICATE,      "GD_EDU", 0),
-  CONSTANT(E_DIMENSION,      "GD_EDM", 0),
-  CONSTANT(E_BAD_INDEX,      "GD_EBI", 0),
-  CONSTANT(E_BAD_SCALAR,     "GD_EBS", 0),
-  CONSTANT(E_BAD_REFERENCE,  "GD_EBR", 0),
-  CONSTANT(E_PROTECTED,      "GD_EPT", 0),
-  CONSTANT(E_DELETE,         "GD_EDL", 0),
-  CONSTANT(E_ARGUMENT,       "GD_EAR", 0),
-  CONSTANT(E_CALLBACK,       "GD_ECB", 0),
-  CONSTANT(E_EXISTS,         "GD_EEX", 0),
-  CONSTANT(E_UNCLEAN_DB,     "GD_UCL", 0),
-  CONSTANT(E_DOMAIN,         "GD_EDO", 0),
-  CONSTANT(E_BAD_REPR,       "GD_ERP", 0),
-  CONSTANT(E_FLUSH,          "GD_EFL", 0),
-  CONSTANT(E_BOUNDS,         "GD_EBO", 0),
-  CONSTANT(E_LINE_TOO_LONG,  "GD_ETL", 0),
+  CONSTANT(E_OK,             "GD_EOK", GDMP_ERR),
+  CONSTANT(E_FORMAT,         "GD_EFO", GDMP_ERR),
+  CONSTANT(E_CREAT,          "GD_ECR", GDMP_ERR),
+  CONSTANT(E_BAD_CODE,       "GD_EBC", GDMP_ERR),
+  CONSTANT(E_BAD_TYPE,       "GD_EBT", GDMP_ERR),
+  CONSTANT(E_IO,             "GD_EIO", GDMP_ERR),
+  CONSTANT(E_INTERNAL_ERROR, "GD_EIE", GDMP_ERR),
+  CONSTANT(E_ALLOC,          "GD_EAL", GDMP_ERR),
+  CONSTANT(E_RANGE,          "GD_ERA", GDMP_ERR),
+  CONSTANT(E_LUT,            "GD_ELT", GDMP_ERR),
+  CONSTANT(E_RECURSE_LEVEL,  "GD_ERL", GDMP_ERR),
+  CONSTANT(E_BAD_DIRFILE,    "GD_EBD", GDMP_ERR),
+  CONSTANT(E_BAD_FIELD_TYPE, "GD_EBF", GDMP_ERR),
+  CONSTANT(E_ACCMODE,        "GD_EAC", GDMP_ERR),
+  CONSTANT(E_UNSUPPORTED,    "GD_UNS", GDMP_ERR),
+  CONSTANT(E_UNKNOWN_ENCODING,"GD_EUE",GDMP_ERR),
+  CONSTANT(E_BAD_ENTRY,      "GD_EBE", GDMP_ERR),
+  CONSTANT(E_DUPLICATE,      "GD_EDU", GDMP_ERR),
+  CONSTANT(E_DIMENSION,      "GD_EDM", GDMP_ERR),
+  CONSTANT(E_BAD_INDEX,      "GD_EBI", GDMP_ERR),
+  CONSTANT(E_BAD_SCALAR,     "GD_EBS", GDMP_ERR),
+  CONSTANT(E_BAD_REFERENCE,  "GD_EBR", GDMP_ERR),
+  CONSTANT(E_PROTECTED,      "GD_EPT", GDMP_ERR),
+  CONSTANT(E_DELETE,         "GD_EDL", GDMP_ERR),
+  CONSTANT(E_ARGUMENT,       "GD_EAR", GDMP_ERR),
+  CONSTANT(E_CALLBACK,       "GD_ECB", GDMP_ERR),
+  CONSTANT(E_EXISTS,         "GD_EEX", GDMP_ERR),
+  CONSTANT(E_UNCLEAN_DB,     "GD_UCL", GDMP_ERR),
+  CONSTANT(E_DOMAIN,         "GD_EDO", GDMP_ERR),
+  CONSTANT(E_BAD_REPR,       "GD_ERP", GDMP_ERR),
+  CONSTANT(E_BOUNDS,         "GD_EBO", GDMP_ERR),
+  CONSTANT(E_LINE_TOO_LONG,  "GD_ETL", GDMP_ERR),
 
-  CONSTANT(E_OPEN_INCLUDE,   "GD_EOI", 0), /* deprecated */
-  CONSTANT(E_BAD_ENDIANNESS, "GD_EEN", 0), /* deprecated */
-  CONSTANT(E_BAD_PROTECTION, "GD_EBP", 0), /* deprecated */
-  CONSTANT(E_BAD_VERSION,    "GD_EVR", 0), /* deprecated */
+  CONSTANT(E_BAD_ENDIANNESS, "GD_EEN", GDMP_DEPERR),
+  CONSTANT(E_BAD_PROTECTION, "GD_EBP", GDMP_DEPERR),
+  CONSTANT(E_BAD_VERSION,    "GD_EVR", GDMP_DEPERR),
+  CONSTANT(E_OPEN_LINFILE,   "GD_EOL", GDMP_DEPERR),
+  CONSTANT(E_FLUSH,          "GD_EFL", GDMP_DEPERR),
+  CONSTANT(E_OPEN,           "GD_EOP", GDMP_DEPERR),
+  CONSTANT(E_OPEN_FRAGMENT,  "GD_EOF", GDMP_DEPERR),
+  CONSTANT(E_OPEN_INCLUDE,   "GD_EOI", GDMP_DEPERR),
+  CONSTANT(E_RAW_IO,         "GD_ERW", GDMP_DEPERR),
+  CONSTANT(E_TRUNC,          "GD_ETR", GDMP_DEPERR),
 
-  CONSTANT(RDONLY,           "GD_RO",  2),
-  CONSTANT(RDWR,             "GD_RW",  2),
-  CONSTANT(FORCE_ENDIAN,     "GD_FE",  1),
-  CONSTANT(BIG_ENDIAN,       "GD_BE",  2),
-  CONSTANT(LITTLE_ENDIAN,    "GD_LE",  2),
-  CONSTANT(CREAT,            "GD_CR",  1),
-  CONSTANT(EXCL,             "GD_EX",  1),
-  CONSTANT(TRUNC,            "GD_TR",  1),
-  CONSTANT(PEDANTIC,         "GD_PE",  1),
-  CONSTANT(FORCE_ENCODING,   "GD_FC",  1),
-  CONSTANT(VERBOSE,          "GD_VB",  2),
-  CONSTANT(IGNORE_DUPS,      "GD_ID",  1),
-  CONSTANT(IGNORE_REFS,      "GD_IR",  1),
-  CONSTANT(PRETTY_PRINT,     "GD_PP",  2),
-  CONSTANT(ARM_ENDIAN,       "GD_AE",  2),
-  CONSTANT(NOT_ARM_ENDIAN,   "GD_NA",  2),
-  CONSTANT(PERMISSIVE,       "GD_PM",  1),
-  CONSTANT(TRUNCSUB,         "GD_TS",  1),
+  CONSTANT(RDONLY,           "GD_RO", GDMP_OFLAG_L),
+  CONSTANT(RDWR,             "GD_RW", GDMP_OFLAG_L),
+  CONSTANT(FORCE_ENDIAN,     "GD_FE", GDMP_OFLAG),
+  CONSTANT(BIG_ENDIAN,       "GD_BE", GDMP_OFLAG_L),
+  CONSTANT(LITTLE_ENDIAN,    "GD_LE", GDMP_OFLAG_L),
+  CONSTANT(CREAT,            "GD_CR", GDMP_OFLAG),
+  CONSTANT(EXCL,             "GD_EX", GDMP_OFLAG),
+  CONSTANT(TRUNC,            "GD_TR", GDMP_OFLAG),
+  CONSTANT(PEDANTIC,         "GD_PE", GDMP_OFLAG),
+  CONSTANT(FORCE_ENCODING,   "GD_FC", GDMP_OFLAG),
+  CONSTANT(VERBOSE,          "GD_VB", GDMP_OFLAG_L),
+  CONSTANT(IGNORE_DUPS,      "GD_ID", GDMP_OFLAG),
+  CONSTANT(IGNORE_REFS,      "GD_IR", GDMP_OFLAG),
+  CONSTANT(PRETTY_PRINT,     "GD_PP", GDMP_OFLAG_L),
+  CONSTANT(ARM_ENDIAN,       "GD_AE", GDMP_OFLAG_L),
+  CONSTANT(NOT_ARM_ENDIAN,   "GD_NA", GDMP_OFLAG_L),
+  CONSTANT(PERMISSIVE,       "GD_PM", GDMP_OFLAG),
+  CONSTANT(TRUNCSUB,         "GD_TS", GDMP_OFLAG),
 
-  CONSTANT(AUTO_ENCODED,     "GDE_AU", 1),
-  CONSTANT(BZIP2_ENCODED,    "GDE_BZ", 2),
-  CONSTANT(GZIP_ENCODED,     "GDE_GZ", 2),
-  CONSTANT(LZMA_ENCODED,     "GDE_LZ", 2),
-  CONSTANT(SIE_ENCODED,      "GDE_SI", 2),
-  CONSTANT(SLIM_ENCODED,     "GDE_SL", 2),
-  CONSTANT(TEXT_ENCODED,     "GDE_TX", 2),
-  CONSTANT(UNENCODED,        "GDE_UN", 2),
-  CONSTANT(ZZSLIM_ENCODED,   "GDE_ZS", 2),
-  CONSTANT(ZZIP_ENCODED,     "GDE_ZZ", 2),
+  CONSTANT(AUTO_ENCODED,     "GDE_AU", GDMP_OFLAG),
+  CONSTANT(BZIP2_ENCODED,    "GDE_BZ", GDMP_OFLAG_L),
+  CONSTANT(GZIP_ENCODED,     "GDE_GZ", GDMP_OFLAG_L),
+  CONSTANT(LZMA_ENCODED,     "GDE_LZ", GDMP_OFLAG_L),
+  CONSTANT(SIE_ENCODED,      "GDE_SI", GDMP_OFLAG_L),
+  CONSTANT(SLIM_ENCODED,     "GDE_SL", GDMP_OFLAG_L),
+  CONSTANT(TEXT_ENCODED,     "GDE_TX", GDMP_OFLAG_L),
+  CONSTANT(UNENCODED,        "GDE_UN", GDMP_OFLAG_L),
+  CONSTANT(ZZSLIM_ENCODED,   "GDE_ZS", GDMP_OFLAG_L),
+  CONSTANT(ZZIP_ENCODED,     "GDE_ZZ", GDMP_OFLAG_L),
 
-  CONSTANT(NO_ENTRY,         "GD_NOE", 3),
-  CONSTANT(RAW_ENTRY,        "GD_RWE", 3),
-  CONSTANT(LINCOM_ENTRY,     "GD_LCE", 3),
-  CONSTANT(LINTERP_ENTRY,    "GD_LTE", 3),
-  CONSTANT(BIT_ENTRY,        "GD_BTE", 3),
-  CONSTANT(MULTIPLY_ENTRY,   "GD_MTE", 3),
-  CONSTANT(PHASE_ENTRY,      "GD_PHE", 3),
-  CONSTANT(INDEX_ENTRY,      "GD_IXE", 3),
-  CONSTANT(POLYNOM_ENTRY,    "GD_PNE", 3),
-  CONSTANT(SBIT_ENTRY,       "GD_SBE", 3),
-  CONSTANT(DIVIDE_ENTRY,     "GD_DVE", 3),
-  CONSTANT(RECIP_ENTRY,      "GD_RCE", 3),
-  CONSTANT(WINDOW_ENTRY,     "GD_WDE", 3),
-  CONSTANT(MPLEX_ENTRY,      "GD_MXE", 3),
-  CONSTANT(INDIR_ENTRY,      "GD_IDE", 3),
-  CONSTANT(SINDIR_ENTRY,     "GD_SDE", 3),
-  CONSTANT(CONST_ENTRY,      "GD_COE", 3),
-  CONSTANT(CARRAY_ENTRY,     "GD_CAE", 3),
-  CONSTANT(STRING_ENTRY,     "GD_STE", 3),
-  CONSTANT(SARRAY_ENTRY,     "GD_SAE", 3),
+  CONSTANT(NO_ENTRY,         "GD_NOE", GDMP_ENTYPE),
+  CONSTANT(RAW_ENTRY,        "GD_RWE", GDMP_ENTYPE),
+  CONSTANT(LINCOM_ENTRY,     "GD_LCE", GDMP_ENTYPE),
+  CONSTANT(LINTERP_ENTRY,    "GD_LTE", GDMP_ENTYPE),
+  CONSTANT(BIT_ENTRY,        "GD_BTE", GDMP_ENTYPE),
+  CONSTANT(MULTIPLY_ENTRY,   "GD_MTE", GDMP_ENTYPE),
+  CONSTANT(PHASE_ENTRY,      "GD_PHE", GDMP_ENTYPE),
+  CONSTANT(INDEX_ENTRY,      "GD_IXE", GDMP_ENTYPE),
+  CONSTANT(POLYNOM_ENTRY,    "GD_PNE", GDMP_ENTYPE),
+  CONSTANT(SBIT_ENTRY,       "GD_SBE", GDMP_ENTYPE),
+  CONSTANT(DIVIDE_ENTRY,     "GD_DVE", GDMP_ENTYPE),
+  CONSTANT(RECIP_ENTRY,      "GD_RCE", GDMP_ENTYPE),
+  CONSTANT(WINDOW_ENTRY,     "GD_WDE", GDMP_ENTYPE),
+  CONSTANT(MPLEX_ENTRY,      "GD_MXE", GDMP_ENTYPE),
+  CONSTANT(INDIR_ENTRY,      "GD_IDE", GDMP_ENTYPE),
+  CONSTANT(SINDIR_ENTRY,     "GD_SDE", GDMP_ENTYPE),
+  CONSTANT(CONST_ENTRY,      "GD_COE", GDMP_ENTYPE),
+  CONSTANT(CARRAY_ENTRY,     "GD_CAE", GDMP_ENTYPE),
+  CONSTANT(STRING_ENTRY,     "GD_STE", GDMP_ENTYPE),
+  CONSTANT(SARRAY_ENTRY,     "GD_SAE", GDMP_ENTYPE),
 
-  CONSTANT(NULL,             "GD_NUL", 4),
-  CONSTANT(UINT8,            "GD_U8",  4),
-  CONSTANT(INT8,             "GD_I8",  4),
-  CONSTANT(UINT16,           "GD_U16", 4),
-  CONSTANT(INT16,            "GD_I16", 4),
-  CONSTANT(UINT32,           "GD_U32", 4),
-  CONSTANT(INT32,            "GD_I32", 4),
-  CONSTANT(UINT64,           "GD_U64", 4),
-  CONSTANT(INT64,            "GD_I64", 4),
-  CONSTANT(FLOAT32,          "GD_F32", 4),
-  CONSTANT(FLOAT64,          "GD_F64", 4),
-  CONSTANT(COMPLEX64,        "GD_C64", 4),
-  CONSTANT(COMPLEX128,       "GDC128", 4),
-  CONSTANT(STRING,           "GD_STR", 4),
+  CONSTANT(NULL,             "GD_NUL", GDMP_DTYPE),
+  CONSTANT(UINT8,            "GD_U8",  GDMP_DTYPE),
+  CONSTANT(INT8,             "GD_I8",  GDMP_DTYPE),
+  CONSTANT(UINT16,           "GD_U16", GDMP_DTYPE),
+  CONSTANT(INT16,            "GD_I16", GDMP_DTYPE),
+  CONSTANT(UINT32,           "GD_U32", GDMP_DTYPE),
+  CONSTANT(INT32,            "GD_I32", GDMP_DTYPE),
+  CONSTANT(UINT64,           "GD_U64", GDMP_DTYPE),
+  CONSTANT(INT64,            "GD_I64", GDMP_DTYPE),
+  CONSTANT(FLOAT32,          "GD_F32", GDMP_DTYPE),
+  CONSTANT(FLOAT64,          "GD_F64", GDMP_DTYPE),
+  CONSTANT(COMPLEX64,        "GD_C64", GDMP_DTYPE),
+  CONSTANT(COMPLEX128,       "GDC128", GDMP_DTYPE),
+  CONSTANT(STRING,           "GD_STR", GDMP_DTYPE),
 
-  CONSTANT(DEL_META,         "GDD_MT", 5),
-  CONSTANT(DEL_DATA,         "GDD_DT", 5),
-  CONSTANT(DEL_DEREF,        "GDD_DR", 5),
-  CONSTANT(DEL_FORCE,        "GDD_FO", 5),
-  CONSTANT(REN_DATA,         "GDR_DT", 5),
-  CONSTANT(REN_UPDB,         "GDR_UP", 5),
-  CONSTANT(REN_DANGLE,       "GDR_DL", 5),
-  CONSTANT(REN_FORCE,        "GDR_FO", 5),
+  CONSTANT(DEL_META,         "GDD_MT", GDMP_RFLAG),
+  CONSTANT(DEL_DATA,         "GDD_DT", GDMP_RFLAG),
+  CONSTANT(DEL_DEREF,        "GDD_DR", GDMP_RFLAG),
+  CONSTANT(DEL_FORCE,        "GDD_FO", GDMP_RFLAG),
+  CONSTANT(REN_DATA,         "GDR_DT", GDMP_RFLAG),
+  CONSTANT(REN_UPDB,         "GDR_UP", GDMP_RFLAG),
+  CONSTANT(REN_DANGLE,       "GDR_DL", GDMP_RFLAG),
+  CONSTANT(REN_FORCE,        "GDR_FO", GDMP_RFLAG),
 
-  CONSTANT(PROTECT_NONE,     "GDPR_N", 6),
-  CONSTANT(PROTECT_FORMAT,   "GDPR_F", 6),
-  CONSTANT(PROTECT_DATA,     "GDPR_D", 6),
-  CONSTANT(PROTECT_ALL,      "GDPR_A", 6),
+  CONSTANT(PROTECT_NONE,     "GDPR_N", GDMP_PROT),
+  CONSTANT(PROTECT_FORMAT,   "GDPR_F", GDMP_PROT),
+  CONSTANT(PROTECT_DATA,     "GDPR_D", GDMP_PROT),
+  CONSTANT(PROTECT_ALL,      "GDPR_A", GDMP_PROT),
 
-  CONSTANT(SYNTAX_ABORT,     "GDSX_A", 7),
-  CONSTANT(SYNTAX_RESCAN,    "GDSX_S", 7),
-  CONSTANT(SYNTAX_IGNORE,    "GDSX_I", 7),
-  CONSTANT(SYNTAX_CONTINUE,  "GDSX_C", 7),
+  CONSTANT(SYNTAX_ABORT,     "GDSX_A", GDMP_CALLBAK),
+  CONSTANT(SYNTAX_RESCAN,    "GDSX_S", GDMP_CALLBAK),
+  CONSTANT(SYNTAX_IGNORE,    "GDSX_I", GDMP_CALLBAK),
+  CONSTANT(SYNTAX_CONTINUE,  "GDSX_C", GDMP_CALLBAK),
 
-  CONSTANT(E_FORMAT_BAD_SPF, "GDF_SF", 8),
-  CONSTANT(E_FORMAT_N_FIELDS,"GDF_NF", 8),
-  CONSTANT(E_FORMAT_N_TOK,   "GDF_NT", 8),
-  CONSTANT(E_FORMAT_NUMBITS, "GDF_NB", 8),
-  CONSTANT(E_FORMAT_BITNUM,  "GDF_BN", 8),
-  CONSTANT(E_FORMAT_BITSIZE, "GDF_SZ", 8),
-  CONSTANT(E_FORMAT_CHARACTER,"GDF_CH", 8),
-  CONSTANT(E_FORMAT_BAD_LINE,"GDF_LI", 8),
-  CONSTANT(E_FORMAT_RES_NAME,"GDF_RN", 8),
-  CONSTANT(E_FORMAT_ENDIAN,  "GDF_EN", 8),
-  CONSTANT(E_FORMAT_BAD_TYPE,"GDF_TY", 8),
-  CONSTANT(E_FORMAT_BAD_NAME,"GDF_NA", 8),
-  CONSTANT(E_FORMAT_UNTERM,  "GDF_UM", 8),
-  CONSTANT(E_FORMAT_METARAW, "GDF_MR", 8),
-  CONSTANT(E_FORMAT_NO_PARENT,"GDF_PA", 8),
-  CONSTANT(E_FORMAT_DUPLICATE,"GDF_DU", 8),
-  CONSTANT(E_FORMAT_LOCATION,"GDF_LO", 8),
-  CONSTANT(E_FORMAT_PROTECT, "GDF_PR", 8),
-  CONSTANT(E_FORMAT_LITERAL, "GDF_LT", 8),
-  CONSTANT(E_FORMAT_WINDOP,  "GDF_WO", 8),
-  CONSTANT(E_FORMAT_META_META,"GDF_MM", 8),
-  CONSTANT(E_FORMAT_ALIAS,   "GDF_AL", 8),
-  CONSTANT(E_FORMAT_MPLEXVAL,"GDF_MV", 8),
+  CONSTANT(E_FORMAT_BAD_SPF,  "GDF_SF", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_N_FIELDS, "GDF_NF", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_N_TOK,    "GDF_NT", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_NUMBITS,  "GDF_NB", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_BITNUM,   "GDF_BN", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_BITSIZE,  "GDF_SZ", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_CHARACTER,"GDF_CH", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_BAD_LINE, "GDF_LI", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_RES_NAME, "GDF_RN", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_ENDIAN,   "GDF_EN", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_BAD_TYPE, "GDF_TY", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_BAD_NAME, "GDF_NA", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_UNTERM,   "GDF_UM", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_METARAW,  "GDF_MR", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_NO_PARENT,"GDF_PA", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_DUPLICATE,"GDF_DU", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_LOCATION, "GDF_LO", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_PROTECT,  "GDF_PR", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_LITERAL,  "GDF_LT", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_WINDOP,   "GDF_WO", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_META_META,"GDF_MM", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_ALIAS,    "GDF_AL", GDMP_FORMAT),
+  CONSTANT(E_FORMAT_MPLEXVAL, "GDF_MV", GDMP_FORMAT),
 
-  CONSTANT(VERSION_CURRENT,  "GDSV_C", 9),
-  CONSTANT(VERSION_LATEST,   "GDSV_L", 9),
-  CONSTANT(VERSION_EARLIEST, "GDSV_E", 9),
+  CONSTANT(VERSION_CURRENT,  "GDSV_C", GDMP_VERS),
+  CONSTANT(VERSION_LATEST,   "GDSV_L", GDMP_VERS),
+  CONSTANT(VERSION_EARLIEST, "GDSV_E", GDMP_VERS),
 
-  CONSTANT(SEEK_SET,         "GDSK_S", 10),
-  CONSTANT(SEEK_CUR,         "GDSK_C", 10),
-  CONSTANT(SEEK_END,         "GDSK_E", 10),
-  CONSTANT(SEEK_WRITE,       "GDSK_W", 11),
+  CONSTANT(SEEK_SET,         "GDSK_S", GDMP_WHENCE),
+  CONSTANT(SEEK_CUR,         "GDSK_C", GDMP_WHENCE),
+  CONSTANT(SEEK_END,         "GDSK_E", GDMP_WHENCE),
+  CONSTANT(SEEK_WRITE,       "GDSK_W", GDMP_SEEK),
 
-  CONSTANT(WINDOP_UNK,       "GDW_UN", 12),
-  CONSTANT(WINDOP_EQ,        "GDW_EQ", 12),
-  CONSTANT(WINDOP_GE,        "GDW_GE", 12),
-  CONSTANT(WINDOP_GT,        "GDW_GT", 12),
-  CONSTANT(WINDOP_LE,        "GDW_LE", 12),
-  CONSTANT(WINDOP_LT,        "GDW_LT", 12),
-  CONSTANT(WINDOP_NE,        "GDW_NE", 12),
-  CONSTANT(WINDOP_SET,       "GDW_ST", 12),
-  CONSTANT(WINDOP_CLR,       "GDW_CL", 12),
+  CONSTANT(WINDOP_UNK,       "GDW_UN", GDMP_WINDOP),
+  CONSTANT(WINDOP_EQ,        "GDW_EQ", GDMP_WINDOP),
+  CONSTANT(WINDOP_GE,        "GDW_GE", GDMP_WINDOP),
+  CONSTANT(WINDOP_GT,        "GDW_GT", GDMP_WINDOP),
+  CONSTANT(WINDOP_LE,        "GDW_LE", GDMP_WINDOP),
+  CONSTANT(WINDOP_LT,        "GDW_LT", GDMP_WINDOP),
+  CONSTANT(WINDOP_NE,        "GDW_NE", GDMP_WINDOP),
+  CONSTANT(WINDOP_SET,       "GDW_ST", GDMP_WINDOP),
+  CONSTANT(WINDOP_CLR,       "GDW_CL", GDMP_WINDOP),
 
-  CONSTANT(DESYNC_PATHCHECK, "GDDS_P", 13),
-  CONSTANT(DESYNC_REOPEN,    "GDDS_O", 13),
+  CONSTANT(DESYNC_PATHCHECK, "GDDS_P", GDMP_DESYNC),
+  CONSTANT(DESYNC_REOPEN,    "GDDS_O", GDMP_DESYNC),
 
-  CONSTANT(ALL_ENTRIES,      "GDEN_X", 14),
-  CONSTANT(VECTOR_ENTRIES,   "GDEN_V", 14),
-  CONSTANT(SCALAR_ENTRIES,   "GDEN_S", 14),
-  CONSTANT(ALIAS_ENTRIES,    "GDEN_A", 14),
-  CONSTANT(ENTRIES_HIDDEN,   "GDEN_H", 14),
-  CONSTANT(ENTRIES_NOALIAS,  "GDEN_N", 14),
+  CONSTANT(ALL_ENTRIES,      "GDEN_X", GDMP_ENLIST),
+  CONSTANT(VECTOR_ENTRIES,   "GDEN_V", GDMP_ENLIST),
+  CONSTANT(SCALAR_ENTRIES,   "GDEN_S", GDMP_ENLIST),
+  CONSTANT(ALIAS_ENTRIES,    "GDEN_A", GDMP_ENLIST),
+  CONSTANT(ENTRIES_HIDDEN,   "GDEN_H", GDMP_ENLIST),
+  CONSTANT(ENTRIES_NOALIAS,  "GDEN_N", GDMP_ENLIST),
 
-  CONSTANT(EN_CALC,          "GDE_CA", 15),
-  CONSTANT(EN_HIDDEN,        "GDE_HI", 15),
-  CONSTANT(EN_COMPSCAL,      "GDE_CS", 15),
+  CONSTANT(EN_CALC,          "GDE_CA", GDMP_EFLAG),
+  CONSTANT(EN_HIDDEN,        "GDE_HI", GDMP_EFLAG),
+  CONSTANT(EN_COMPSCAL,      "GDE_CS", GDMP_EFLAG),
 
-  CONSTANT(ALL_FRAGMENTS,    "GD_ALL", 99),
-  CONSTANT(DEFAULT_LOOKBACK, "GDLB_D", 99),
-  CONSTANT(DIRFILE_STANDARDS_VERSION, "GD_DSV", 99),
-  CONSTANT(HERE,             "GD_HER", 98),
-  CONSTANT(LOOKBACK_ALL,     "GDLB_A", 98),
-  CONSTANT(MAX_LINE_LENGTH,  "GD_MLL", 99),
+  CONSTANT(ALL_FRAGMENTS,    "GD_ALL", GDMP_MISC),
+  CONSTANT(DEFAULT_LOOKBACK, "GDLB_D", GDMP_MISC),
+  CONSTANT(DIRFILE_STANDARDS_VERSION, "GD_DSV", GDMP_MISC),
+  CONSTANT(HERE,             "GD_HER", GDMP_MISC_I),
+  CONSTANT(LOOKBACK_ALL,     "GDLB_A", GDMP_MISC_I),
+  CONSTANT(MAX_LINE_LENGTH,  "GD_MLL", GDMP_MISC),
   { NULL }
 };
 
@@ -275,109 +278,117 @@ void Fortran(void)
       printf("s/@PARAMETERS95@/\\\n! Error codes\\\n");
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 0)
+      if (constant_list[j].type == GDMP_ERR)
+        parameter(constant_list[j].lname, constant_list[j].fname,
+            constant_list[j].value, i);
+
+    printf("\\\n%c Deprecated error codes\\\n", c);
+
+    for (j = 0; constant_list[j].lname != NULL; ++j)
+      if (constant_list[j].type == GDMP_DEPERR)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
     printf("\\\n%c Open flags\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 1 || constant_list[j].type == 2)
+      if (constant_list[j].type & (GDMP_OFLAG | GDMP_OFLAG_L))
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
-    printf("\\\n%c Field types\\\n", c);
+    printf("\\\n%c Entry types\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 3)
+      if (constant_list[j].type == GDMP_ENTYPE)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
     printf(
         "\\\n%c Data types -- the unsigned types won't work when passed as\\\n"
-        "%c               a return type, but we keep them anyways, since\\\n"
-        "%c               they might appear as a result of calling %s\\\n",
-        c, c, c, (i == 0) ? "GDGERW" : "fget_entry");
+        "%c               a return type; they are defined because they\\\n"
+        "%c               may be returned by %s or %s\\\n", c, c, c,
+        (i == 0) ? "GDGERW" : "fget_entry",
+        (i == 0) ? "GDNTYP" : "fget_native_type");
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 4)
+      if (constant_list[j].type == GDMP_DTYPE)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
-    printf("\\\n%c Delete flags\\\n", c);
+    printf("\\\n%c Delete and Rename flags\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 5)
+      if (constant_list[j].type == GDMP_RFLAG)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
     printf("\\\n%c Protection levels\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 6)
+      if (constant_list[j].type == GDMP_PROT)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
     printf("\\\n%c Callback actions\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 7)
+      if (constant_list[j].type == GDMP_CALLBAK)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
     printf("\\\n%c Syntax suberrors\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 8)
+      if (constant_list[j].type == GDMP_FORMAT)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
     printf("\\\n%c Special version codes\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 9)
+      if (constant_list[j].type == GDMP_VERS)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
     printf("\\\n%c Seek flags\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 10 || constant_list[j].type == 11)
+      if (constant_list[j].type & (GDMP_WHENCE | GDMP_SEEK))
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
     printf("\\\n%c Window operations\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 12)
+      if (constant_list[j].type == GDMP_WINDOP)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
     printf("\\\n%c Desync flags\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 13)
+      if (constant_list[j].type == GDMP_DESYNC)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
     printf("\\\n%c Entry List codes and flags\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 14)
+      if (constant_list[j].type == GDMP_ENLIST)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
     printf("\\\n%c Entry object flags\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 15)
+      if (constant_list[j].type == GDMP_EFLAG)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
     printf("\\\n%c Miscellaneous parameters\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 98 || constant_list[j].type == 99)
+      if (constant_list[j].type & (GDMP_MISC | GDMP_MISC_I))
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
@@ -424,13 +435,12 @@ void IDL(void)
       );
 
   for (i = 0; constant_list[i].lname != NULL; ++i)
-    if ((constant_list[i].type != 1) && (constant_list[i].type != 5) &&
-        (constant_list[i].type != 7) && (constant_list[i].type != 8) &&
-        (constant_list[i].type != 11) && (constant_list[i].type != 13) &&
-        (constant_list[i].type != 14) && (constant_list[i].type != 98))
+    if (constant_list[i].type & (GDMP_ERR | GDMP_DEPERR | GDMP_OFLAG_L |
+          GDMP_ENTYPE | GDMP_DTYPE | GDMP_PROT | GDMP_VERS | GDMP_WHENCE |
+          GDMP_WINDOP | GDMP_EFLAG | GDMP_MISC))
     {
       printf("{ \"%s\", 0, (void*)IDL_TYP_%s }, ", constant_list[i].sname,
-          (constant_list[i].type == 2) ? "LONG" : "INT"); 
+          (constant_list[i].type == GDMP_OFLAG_L) ? "LONG" : "INT"); 
     }
 
   printf("{ NULL }};\n");
@@ -446,14 +456,14 @@ void IDL(void)
       "\n");
 
   for (n = i = 0; constant_list[i].lname != NULL; ++i)
-    if ((constant_list[i].type != 1) && (constant_list[i].type != 5) &&
-        (constant_list[i].type != 7) && (constant_list[i].type != 8) &&
-        (constant_list[i].type != 11) && (constant_list[i].type != 13) &&
-        (constant_list[i].type != 14) && (constant_list[i].type != 98))
+    if (constant_list[i].type & (GDMP_ERR | GDMP_DEPERR | GDMP_OFLAG_L |
+          GDMP_ENTYPE | GDMP_DTYPE | GDMP_PROT | GDMP_VERS | GDMP_WHENCE |
+          GDMP_WINDOP | GDMP_EFLAG | GDMP_MISC))
     {
       printf("*(IDL_%s*)(data + IDL_StructTagInfoByIndex(gdidl_const_def, %i, "
-          "IDL_MSG_LONGJMP, NULL)) = %li;\n", (constant_list[i].type == 2) ?
-          "LONG" : "INT", n++, constant_list[i].value);
+          "IDL_MSG_LONGJMP, NULL)) = %li;\n",
+          (constant_list[i].type == GDMP_OFLAG_L) ?  "LONG" : "INT",
+          n++, constant_list[i].value);
     }
 
   printf("return r; }\n");
@@ -569,9 +579,10 @@ void PHP(void)
       );
   
   for (i = 0; constant_list[i].lname != NULL; ++i)
-    printf("zend_register_long_constant(ZEND_STRS(\"%s\"), %li, CONST_CS, "
-        "module_number TSRMLS_CC);", constant_list[i].lname,
-        constant_list[i].value);
+    if (constant_list[i].type != GDMP_DEPERR)
+      printf("zend_register_long_constant(ZEND_STRS(\"%s\"), %li, CONST_CS, "
+          "module_number TSRMLS_CC);", constant_list[i].lname,
+          constant_list[i].value);
 
   puts("dreturnvoid();}");
 }

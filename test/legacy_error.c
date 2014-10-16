@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -22,6 +22,7 @@
 
 #include <string.h>
 
+#define DIRFILENAME "a non-existant dirfile"
 int main(void)
 {
 #ifndef GD_LEGACY_API
@@ -30,13 +31,13 @@ int main(void)
   char string[1000];
   int error, n, r = 0;
 
-  n = GetData("a non-existent dirfile", "data", 5, 0, 1, 0, 'n', NULL, &error);
+  n = GetData(DIRFILENAME, "data", 5, 0, 1, 0, 'n', NULL, &error);
 
   GetDataErrorString(string, 1000);
 
   CHECKI(n, 0);
-  CHECKI(error, GD_E_OPEN);
-  CHECKSp(string, "Dirfile does not exist");
+  CHECKI(error, GD_E_IO);
+  CHECKSS(string, DIRFILENAME);
 
   return r;
 #endif

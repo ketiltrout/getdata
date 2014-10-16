@@ -1,6 +1,6 @@
 .\" gd_close.3.  The gd_close man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,9 +13,9 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_close 3 "17 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_close 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
-gd_close, gd_discard \(em close a dirfile and free associated memory.
+gd_close, gd_discard \(em close a dirfile and free associated memory
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -88,12 +88,14 @@ are:
 .B GD_E_ALLOC
 The library was unable to allocate memory.
 .TP
-.B GD_E_FLUSH
-A temporary file could not be opened into which to write the modified metadata,
-or renaming the temporary file over the original fragment failed.
+.B GD_E_LINE_TOO_LONG
+While attempting to flush modified metadata to disk, a field specification line
+exceeded the maximum allowed length.  On most platforms, the maximum length is
+at least 2**31 bytes, so this typically indicates something pathological
+happening.
 .TP
-.B GD_E_RAW_IO
-An error occurred while trying to flush or close one or more open raw files.
+.B GD_E_IO
+An I/O error occurred while trying to write modified data or metadata to disk.
 In this case, another call to
 .BR gd_close ()
 or

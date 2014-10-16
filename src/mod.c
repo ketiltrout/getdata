@@ -346,7 +346,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         } else if ((*enc->seek)(E->e->u.raw.file, 0, E->EN(raw,data_type),
               GD_FILE_READ) == -1)
         {
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
+          _GD_SetError(D, GD_E_IO, GD_E_IO_READ, E->e->u.raw.file[0].name, 0,
               NULL);
         }
 
@@ -379,7 +379,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
               nf * E->EN(raw,spf));
 
           if (nread < 0) {
-            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
+            _GD_SetError(D, GD_E_IO, GD_E_IO_READ, E->e->u.raw.file[1].name, 0,
                 NULL);
             break;
           }
@@ -413,7 +413,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
               1);
 
           if (nwrote < ns_out) {
-            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
+            _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[1].name, 0,
                 NULL);
             break;
           }
@@ -565,7 +565,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
                 Qe.u.linterp.table_file))
           {
             _GD_ReleaseDir(D, Qe.u.linterp.table_dirfd);
-            _GD_SetError(D, GD_E_RAW_IO, 0, E->EN(linterp,table), errno, 0);
+            _GD_SetError(D, GD_E_IO, GD_E_IO_RENAME, E->EN(linterp,table), 0,
+                NULL);
             break;
           }
         }
@@ -1840,11 +1841,8 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
 
     /* The parse will have re-applied the prefix and suffix, undo that */
     free(N->field);
-    if ((N->field = (char*)_GD_Malloc(D, strlen(parent) + strlen(in_cols[0]) +
-            2)))
-    {
+    if ((N->field = _GD_Malloc(D, strlen(parent) + strlen(in_cols[0]) + 2)))
       sprintf(N->field, "%s/%s", parent, in_cols[0]);
-    }
   }
 
   free(outstring);

@@ -85,12 +85,12 @@ close,1
 
 ;  0: getdata_constants check
 defsysv, "!GD", getdata_constants()
-nume += check_simple(0, !GD.E_OPEN, 1)
+nume += check_simple(0, !GD.E_OK, 0)
 
 ;  1: gd_error check
 d = gd_open("x",error=error)
-nume += check_error(1, d, !GD.E_OPEN)
-nume += check_simple(1, error, !GD.E_OPEN)
+nume += check_error(1, d, !GD.E_IO)
+nume += check_simple(1, error, !GD.E_IO)
 gd_close, d, /DISCARD
 
 ;  2: gd_open check

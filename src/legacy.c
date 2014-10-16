@@ -35,27 +35,28 @@ static DIRFILE _GD_GlobalErrors = {
   .error_string = NULL,
   .error_file = NULL,
   .error_line = 0,
+  .stdlib_errno = 0,
   .flags = GD_INVALID,
 #else
-  0, 0, NULL, NULL, 0, GD_INVALID
+  0, 0, NULL, NULL, 0, 0, GD_INVALID
 #endif
 };
 
 /* old error strings */
 const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Success", /* GD_E_OK */
-  "Error opening dirfile", /* GD_E_OPEN */
+  NULL, /* unused */
   "Error in Format file", /* GD_E_FORMAT */
-  NULL, /* GD_E_TRUNC */
+  NULL, /* unused */
   NULL, /* GD_E_CREAT */
   "Bad field code", /* GD_E_BAD_CODE */
   "Bad data type", /* GD_E_BAD_TYPE */
-  "I/O error accessing field file", /* GD_E_RAW_IO */
-  "Could not open fragment", /* GD_E_OPEN_FRAGMENT */
+  "I/O error", /* GD_E_IO */
+  NULL, /* unused */
   "Internal error", /* GD_E_INTERNAL_ERROR */
   "Memory allocation failed", /* GD_E_ALLOC */
   "Request out-of-range", /* GD_E_RANGE */
-  "Could not open interpolation table", /* GD_E_OPEN_LINFILE */
+  "Bad LINTERP table", /* GD_E_LINTERP */
   "Too many levels of recursion", /* GD_E_RECURSE_LEVEL */
   "Bad dirfile", /* GD_E_BAD_DIRFILE */
   "Bad field type", /* GD_E_BAD_FIELD_TYPE */
@@ -77,7 +78,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Improper domain", /* GD_E_DOMAIN */
   "Bad representation", /* GD_E_BAD_REPR */
   NULL, /* unused */
-  NULL, /* GD_E_FLUSH */
+  NULL, /* unused */
   NULL, /* GD_E_BOUNDS */
   "Line too long", /* GD_E_LINE_TOO_LONG */
 };
@@ -157,14 +158,14 @@ static DIRFILE *_GD_GetDirfile(const char *filename_in, int mode,
   /* if we get here, the file has not yet been read */
   /* Allocate the memory, then fill.  If we have an error, */
   /*  we will have to free the memory... */
-  ptr = realloc(_GD_Dirfiles.D, (_GD_Dirfiles.n + 1) * sizeof(DIRFILE*));
+  ptr = realloc(_GD_Dirfiles.D, (_GD_Dirfiles.n + 1) * sizeof(*_GD_Dirfiles.D));
   if (ptr == NULL) {
     *error_code = _GD_GlobalErrors.error = GD_E_ALLOC;
     dreturn("%p", NULL);
     return NULL;
   }
 
-  _GD_Dirfiles.D = (DIRFILE **)ptr;
+  _GD_Dirfiles.D = ptr;
 
   /* Open a dirfile */
   _GD_Dirfiles.D[_GD_Dirfiles.n] = gd_open(filedir, mode);
@@ -469,20 +470,16 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
   free(Format.bitEntries);
   free(Format.phaseEntries);
 
-  Format.rawEntries = (struct RawEntryType *)malloc(Format.n_raw *
-      sizeof(struct RawEntryType));
-  Format.lincomEntries = (struct LincomEntryType *)malloc(Format.n_lincom *
-      sizeof(struct LincomEntryType));
-  Format.linterpEntries = (struct LinterpEntryType *)malloc(Format.n_linterp *
-      sizeof(struct LinterpEntryType));
-  Format.mplexEntries = (struct MPlexEntryType *)malloc(Format.n_mplex *
-      sizeof(struct MPlexEntryType));
-  Format.multiplyEntries = (struct MultiplyEntryType *)malloc(Format.n_multiply
-      * sizeof(struct MultiplyEntryType));
-  Format.bitEntries = (struct BitEntryType *)malloc(Format.n_bit *
-      sizeof(struct BitEntryType));
-  Format.phaseEntries = (struct PhaseEntryType *)malloc(Format.n_phase *
-      sizeof(struct PhaseEntryType));
+  Format.rawEntries = malloc(Format.n_raw * sizeof(*Format.rawEntries));
+  Format.lincomEntries = malloc(Format.n_lincom *
+      sizeof(*Format.lincomEntries));
+  Format.linterpEntries = malloc(Format.n_linterp *
+      sizeof(*Format.linterpEntries));
+  Format.mplexEntries = malloc(Format.n_mplex * sizeof(*Format.mplexEntries));
+  Format.multiplyEntries = malloc(Format.n_multiply *
+      sizeof(*Format.multiplyEntries));
+  Format.bitEntries = malloc(Format.n_bit * sizeof(*Format.bitEntries));
+  Format.phaseEntries = malloc(Format.n_phase * sizeof(*Format.phaseEntries));
 
   if (Format.rawEntries == NULL || Format.lincomEntries == NULL ||
       Format.linterpEntries == NULL || Format.mplexEntries == NULL ||

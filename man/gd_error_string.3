@@ -1,6 +1,6 @@
 .\" gd_error_string.3.  The gd_error_string man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_error_string 3 "20 April 2011" "Version 0.8.0" "GETDATA"
+.TH gd_error_string 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_error_string \(em report a GetData library error
 .SH SYNOPSIS
@@ -61,9 +61,11 @@ is non-NULL, the
 .BR gd_error_string ()
 function returns 
 .IR buffer ,
-or NULL if buflen is less than one.  Otherwise, it returns a newly malloc'd
-string of sufficient length which should be deallocated by the caller.  The
-error state of
+or NULL if buflen is less than one.  If
+.I buffer
+is NULL, this function returns a newly malloc'd
+string of sufficient length which should be deallocated by the caller, or
+NULL, if memory allocation failed.  In all cases, the error state of
 .I dirfile
 is unchanged.
 .SH SEE ALSO

@@ -2,7 +2,7 @@
 .\"
 .\" @configure_input@
 .\"
-.\" Copyright (C) 2008, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -15,7 +15,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_frameoffset 3 "20 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_frameoffset 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_alter_frameoffset \(em modify the starting frame of fields in a dirfile
 .SH SYNOPSIS
@@ -63,7 +63,12 @@ argument is non-zero, this call will shift the binary data of affected
 fields to account for the change in frame offset.  If the new frame offset
 is larger than the old frame offset, this will result in permanent deletion of
 data from the database.  If the new frame offset is smaller than the old frame
-offset, the binary file will be padded at the front with zeroes.  If
+offset, the binary file will be padded at the front with zeroes.  The I/O
+pointer of all affected
+.B RAW
+fields is reset to the beginning-of-frame.
+
+If
 .I recode
 is zero, affected binary files are left untouched.
 
@@ -85,6 +90,9 @@ The supplied dirfile was invalid.
 .B GD_E_BAD_INDEX
 The supplied index was out of range.
 .TP
+.B GD_E_IO
+An I/O error occurred while attempting to shift a binary file.
+.TP
 .B GD_E_PROTECTED
 The metadata of the given format specification fragment was protected from
 change, or the binary data of the fragment was protected from change and binary
@@ -92,9 +100,6 @@ file shifting was requested.
 .TP
 .B GD_E_RANGE
 The supplied offset was less than zero.
-.TP
-.B GD_E_RAW_IO
-An I/O error occurred while attempting to shift a binary file.
 .TP
 .B GD_E_UNCLEAN_DB
 An error occurred while moving the shifted file into place.  As a result, the

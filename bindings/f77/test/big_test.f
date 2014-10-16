@@ -280,7 +280,7 @@ C     Write the test dirfile
       ne = 0
 C     1: GDEROR check
       CALL GDOPEN(d, "x", 1, GD_RO)
-      CALL CHKERR(ne, 1, d, GD_EOP)
+      CALL CHKERR(ne, 1, d, GD_EIO)
 
 C     2: GDOPEN check
       CALL GDOPEN(d, fildir, 12, GD_RW)

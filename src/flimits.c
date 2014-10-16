@@ -36,8 +36,7 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
   }
 
   if (move && offset != D->fragment[fragment].frame_offset) {
-    gd_entry_t **raw_entry = (gd_entry_t **)_GD_Malloc(D, sizeof(gd_entry_t*) *
-        D->n_entries);
+    gd_entry_t **raw_entry = _GD_Malloc(D, sizeof(*raw_entry) * D->n_entries);
 
     if (raw_entry == NULL) {
       dreturnvoid();
@@ -204,7 +203,7 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
           E->EN(raw,data_type), _GD_FileSwapBytes(D, E));
 
       if (ns < 0) {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+        _GD_SetError(D, GD_E_IO, 0, E->e->u.raw.file[0].name, 0, NULL);
         ns = -1;
         break;
       }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. V. Wiebe
+/* Copyright (C) 2012-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <string.h>
 
+#define DIRFILENAME "a non-existant dirfile"
 int main(void)
 {
 #if !defined HAVE_MKFIFO || !defined HAVE_WORKING_FORK || defined __CYGWIN__
@@ -45,18 +46,19 @@ int main(void)
 
   /* read our standard error */
   if ((pid = fork()) == 0) {
-    char string[1024];
+    char string[10000];
     stream = fopen(fifo, "r");
 
-    fgets(string, 1024, stream);
-    CHECKBOS(string, "libgetdata: Not a dirfile:");
+    fgets(string, 10000, stream);
+    CHECKBOS(string, "libgetdata:");
+    CHECKSS(string, DIRFILENAME);
     return r;
   }
 
   /* retarget stderr */
   freopen(fifo, "w", stderr);
 
-  D = gd_open("", GD_RDONLY | GD_VERBOSE);
+  D = gd_open(DIRFILENAME, GD_RDONLY | GD_VERBOSE);
   error = gd_error(D);
   gd_discard(D);
 
@@ -68,7 +70,7 @@ int main(void)
 
   unlink(fifo);
 
-  CHECKI(error, GD_E_OPEN);
+  CHECKI(error, GD_E_IO);
 
   wait(&status);
   if (status)

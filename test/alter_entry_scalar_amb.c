@@ -33,7 +33,7 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format_data = "/VERSION 7\nphase PHASE INDEX c\n";
-  int fd, ret, error, n, r = 0;
+  int fd, ret, error, r = 0;
   DIRFILE *D;
   gd_entry_t E;
 

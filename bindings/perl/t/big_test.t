@@ -191,7 +191,7 @@ close GLOB;
 
 # 1: error check
 $_ = &GetData::open("x", $GetData::RDONLY);
-CheckError(1, $GetData::E_OPEN);
+CheckError(1, $GetData::E_IO);
 
 # 2: open check
 $_ = &GetData::open("dirfile", $GetData::RDWR);

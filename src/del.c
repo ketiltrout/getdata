@@ -291,8 +291,8 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
   }
 
   /* gather a list of fields */
-  del_list = (gd_entry_t **)_GD_Malloc(D, sizeof(gd_entry_t*) *
-        (((E->e->n_meta == -1) ?  0 : E->e->n_meta) + 1));
+  del_list = _GD_Malloc(D, sizeof(*del_list) * (((E->e->n_meta == -1) ? 0 :
+          E->e->n_meta) + 1));
 
   if (del_list == NULL) {
     dreturn("%i", -1);
@@ -363,7 +363,7 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
             D->fragment[E->fragment_index].dirfd, E->e->u.raw.file))
       {
         if (errno != ENOENT) {
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
+          _GD_SetError(D, GD_E_IO, GD_E_IO_UNLINK, E->e->u.raw.file[0].name, 0,
               NULL);
           free(del_list);
           dreturn("%i", -1);
@@ -375,7 +375,7 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   /* Fix up reference fields */
   if (E->field_type == GD_RAW_ENTRY) {
-    new_ref = (char **)_GD_Malloc(D, sizeof(char*) * D->n_fragment);
+    new_ref = _GD_Malloc(D, sizeof(*new_ref) * D->n_fragment);
     if (new_ref == NULL) {
       free(del_list);
       dreturn("%i", -1);

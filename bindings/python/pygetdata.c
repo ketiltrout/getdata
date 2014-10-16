@@ -23,18 +23,18 @@
 static PyObject *GdPy_DirfileError;
 static const char *gdpy_exception_list[GD_N_ERROR_CODES] = {
   NULL,
-  "Open",
+  NULL, /* 1 */
   "Format",
-  "Truncate",
+  NULL, /* 3 */
   "Creation",
   "BadCode",
   "BadType",
-  "RawIO",
-  "OpenFragment",
+  "IO",
+  NULL, /* 8 */
   "Internal",
   "Alloc",
   "Range",
-  "OpenLinfile",
+  "LUT",
   "RecurseLevel",
   "BadDirfile",
   "BadFieldType",
@@ -55,12 +55,32 @@ static const char *gdpy_exception_list[GD_N_ERROR_CODES] = {
   "UncleanDatabase",
   "Domain",
   "BadRepr",
-  NULL,
-  "Flush",
+  NULL, /* 33 */
+  NULL, /* 34 */
   "Bounds",
   "LineTooLong"
 };
 PyObject *gdpy_exceptions[GD_N_ERROR_CODES];
+
+/* These are unused but for backwards compatibility are defined as aliases of
+ * current exceptions */
+static struct {
+  const char *name;
+  int e;
+} gdpy_dead_exceptions[] = {
+  { "BadEndianness", GD_E_ARGUMENT },
+  { "BadProtection", GD_E_ARGUMENT },
+  { "BadVersion", GD_E_ARGUMENT },
+  { "OpenLinfile", GD_E_LUT },
+  { "Flush", GD_E_IO },
+  { "Open", GD_E_IO },
+  { "OpenFragment", GD_E_IO },
+  { "OpenFragment", GD_E_IO },
+  { "OpenInclude", GD_E_IO },
+  { "RawIO", GD_E_IO },
+  { "Trunc", GD_E_IO },
+  { NULL, 0}
+};
 
 int gdpy_convert_from_pyobj(PyObject *value, union gdpy_quadruple_value *data,
     gd_type_t type)
@@ -548,6 +568,7 @@ PyMODINIT_FUNC initpygetdata(void)
 {
   int i;
   PyObject *mod;
+  PyObject *mdict;
 
   dtracevoid();
 
@@ -663,6 +684,17 @@ PyMODINIT_FUNC initpygetdata(void)
     } else
       gdpy_exceptions[i] = GdPy_DirfileError;
   }
+
+  /* add dead exceptions -- we do this through manual dictionary editing */
+  mdict = PyModule_GetDict(mod);
+  if (mdict)
+    for (i = 0; gdpy_dead_exceptions[i].name; ++i) {
+      char name[40];
+      sprintf(name, "%sError", gdpy_dead_exceptions[i].name);
+      Py_INCREF(gdpy_exceptions[gdpy_dead_exceptions[i].e]);
+      PyDict_SetItemString(mdict, name,
+          gdpy_exceptions[gdpy_dead_exceptions[i].e]);
+    }
 
   dreturnvoid();
 }

@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test include */
 #include "test.h"
 
 #include <stdlib.h>
@@ -51,7 +50,7 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, GD_E_OPEN_INCLUDE);
+  CHECKI(error, GD_E_IO);
 
   return r;
 }

@@ -55,7 +55,7 @@ int main(void)
   unlink(link);
   rmdir("dirfile");
 
-  CHECKI(error, GD_E_OPEN);
+  CHECKI(error, GD_E_IO);
   free(cwd);
   return r;
 #endif

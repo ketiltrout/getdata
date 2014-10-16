@@ -2,7 +2,7 @@
 .\"
 .\" @configure_input@
 .\"
-.\" Copyright (C) 2008, 2010, 2012 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2012, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -15,7 +15,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_endianness 3 "1 January 2012" "Version 0.8.0" "GETDATA"
+.TH gd_alter_endianness 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_alter_endianness \(em modify the byte sex of fields in a dirfile
 .SH SYNOPSIS
@@ -83,7 +83,11 @@ argument is non-zero, this call will byte swap the binary data of affected
 .B RAW
 fields to account for the change in byte sex.  If the encoding of the
 fragment is endianness insensitive, or if the data type is only one byte in
-size, no change is made.  If
+size, no change is made.  The I/O pointer of all affected
+.B RAW
+fields is reset to the beginning-of-frame.
+
+If
 .I recode
 is zero, affected binary files are left untouched.
 
@@ -110,13 +114,13 @@ The supplied dirfile was invalid.
 .B GD_E_BAD_INDEX
 The supplied index was out of range.
 .TP
+.B GD_E_IO
+An I/O error occurred while attempting to byte swap a binary file.
+.TP
 .B GD_E_PROTECTED
 The metadata of the indicated format specification fragment was protected from
 change, or the binary data of the fragment was protected from change and binary
 file byte swapping was requested.
-.TP
-.B GD_E_RAW_IO
-An I/O error occurred while attempting to byte swap a binary file.
 .TP
 .B GD_E_UNCLEAN_DB
 An error occurred while moving the byte-swapped file into place.  As a result,

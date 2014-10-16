@@ -1,6 +1,6 @@
 .\" gd_getdata.3.  The gd_getdata man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_getdata 3 "26 January 2013" "Version 0.8.3" "GETDATA"
+.TH gd_getdata 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_getdata \(em retrieve data from a dirfile database
 .SH SYNOPSIS
@@ -92,8 +92,8 @@ as
 .IR first_frame .
 This will result in the read occurring at the current position of the I/O
 pointer for the field (see
-.BR gd_seek (3)
-for a discussion of field I/O pointers).  In this case, the value of
+.B GetData I/O Pointers
+below for a discussion of field I/O pointers).  In this case, the value of
 .I first_sample
 is ignored.
 
@@ -155,8 +155,8 @@ purely real one is required, only the real portion of the requested vector will
 be returned.
 
 Upon successful completion, the I/O pointer of the field will be on the sample
-immediately following the last sample returned.  On error, the position of the
-I/O pointer is not specified, and may not even be well defined.
+immediately following the last sample returned, if possible.  On error, the
+position of the I/O pointer is not specified, and may not even be well defined.
 
 .SS Behaviour While Reading Specific Field Types
 
@@ -310,12 +310,12 @@ An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
 .TP
-.B GD_E_OPEN_LINFILE
-An error occurred while trying to read a LINTERP table from disk.
-.TP
-.B GD_E_RAW_IO
+.B GD_E_IO
 An error occurred while trying to open or read from a file on disk containing
-a raw field.
+a raw field or LINTERP table.
+.TP
+.B GD_E_LUT
+A LINTERP table was malformed.
 .TP
 .B GD_E_RECURSE_LEVEL
 Too many levels of recursion were encountered while trying to resolve
@@ -338,6 +338,7 @@ The dirfile error may be retrieved by calling
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR gd_error_string (3).
+
 .SH NOTES
 To save memory,
 .BR gd_getdata ()
@@ -351,12 +352,143 @@ will report zero samples returned on error.
 
 Reading slim-compressed data (see defile-encoding(5)), may cause unexpected
 memory usage.  This is because slimlib internally caches open decompressed files
-as they are read, and getdata doesn't close data files between
+as they are read, and GetData doesn't close data files between
 .BR gd_getdata ()
 calls for efficiency's sake.  Memory used by this internal slimlib buffer can be
 reclaimed by calling
 .BR gd_raw_close (3)
 on fields when finished reading them.
+
+.SH GETDATA I/O POINTERs
+This is a general discussion of field I/O pointers in the GetData library, and
+contains information not directly applicable to
+.BR gd_getdata ().
+
+Every
+.B RAW
+field in an open Dirfile has an
+.I I/O pointer
+which indicates the library's current read and write poisition in the field.
+These I/O pointers are useful when performing sequential reads or writes on
+Dirfile fields (see
+.B GD_HERE
+in the description above).  The value of the I/O pointer of a field is reported
+by
+.BR gd_tell (3).
+
+Derived fields have virtual I/O pointers arising from the I/O pointers of their
+input fields.  These virtual I/O pointers may be valid (when all input fields
+agree on their position in the dirfile) or invalid (when the input fields are
+not in agreement).  The I/O pointer of some derived fields is
+.I always
+invalid.  The usual reason for this is the derived field simultaneously reading
+from two different places in the same
+.B RAW
+field.  For example, given the following Dirfile metadata specification:
+
+.RS
+a \fBRAW UINT8\fR 1
+.br
+b \fBPHASE\fR a 1
+.br
+c \fBLINCOM\fR 2 a 1 0 b 1 0
+.RE
+
+the derived field
+.I c
+never has a valid I/O pointer, since any particular sample of
+.I c
+ultimately involves reading from more than one place in the
+.B RAW
+field
+.IR a .
+Attempting to perform sequential reads or writes (with
+.BR GD_HERE )
+on a derived field when its I/O pointer is invalid will result in an error
+(specifically,
+.BR GD_E_DOMAIN ).
+
+The implicit
+.I INDEX
+field has an effective I/O pointer than mostly behaves like a true
+.B RAW
+field I/O pointer, except that it permits simultaneous reads from multiple
+locations.  So, given the following metadata specification:
+
+.RS
+d \fBPHASE\fR INDEX 1
+.br
+e \fBLINCOM\fR 2 INDEX 1 0 d 1 0
+.RE
+
+the I/O pointer of the derived field
+.I e
+will always be valid, unlike the similarly defined
+.I c
+above.  The virtual I/O pointer of a derived field will change in response to
+movement of the
+.B RAW
+I/O pointers underlying the derived fields inputs, and vice versa: moving the
+I/O pointer of a derived field will move the I/O pointer of the
+.B RAW
+fields from which it ultimately derives.  As a result, the I/O pointer of
+any particular field may move in unexpected ways if multiple fields are
+manipulated at the same time.
+
+When a Dirfile is first opened, the I/O pointer of every
+.B RAW
+field is set to the beginning-of-frame
+(the value returned by
+.BR gd_bof (3)),
+as is the I/O pointer of any newly-created
+.B RAW
+field.
+
+The following library calls cause I/O pointers to move:
+.TP
+.BR gd_getdata "() and " gd_putdata (3)
+These functions move the I/O pointer of affected fields to the sample
+immediately following the last sample read or written, both when performed at
+an absolutely specified position and when called for a sequential read or write
+using
+.BR GD_HERE .
+When reading a derived field which simultaneously reads from more than one place
+in a
+.B RAW
+field (such as
+.I c
+above), the position of that
+.B RAW
+field's I/O pointer is unspecified (that is: it is not specified which input
+field is read first).
+.TP
+.BR gd_seek (3)
+This function is used to manipulate I/O pointers directly.
+.TP
+.BR gd_flush "(3) and " gd_raw_close (3)
+These functions set the I/O pointer of any
+.B RAW
+field which is closed back to the beginning-of-field.
+.TP
+.I calls which result in modifications to raw data files:
+this may happen when calling any of:
+.BR gd_alter_encoding "(3), " gd_alter_endianness (3),
+.BR gd_alter_frameoffset "(3), " gd_alter_entry (3),
+.BR gd_alter_raw "(3), " gd_alter_spec "(3), " gd_malter_spec (3),
+.BR gd_move (3),
+or
+.BR gd_rename (3);
+these functions close affected
+.B RAW
+fields before making changes to the raw data files, and so reset the
+corresponding I/O pointers to the beginning-of-field.
+
+.PP
+In general, when these calls fail, the I/O pointers of affected fields may be
+anything, even out-of-bounds or invalid.  After an error, the caller should
+issue an explicit
+.BR gd_seek (3)
+to repoisition I/O pointers before attempting further sequential operations.
 
 .SH SEE ALSO
 .BR dirfile (5),

@@ -249,7 +249,7 @@ program big_test
 
 ! 1: fgd_error check
   d = fgd_open('x', GD_RDONLY)
-  call check_err(ne, 1, d, GD_E_OPEN)
+  call check_err(ne, 1, d, GD_E_IO)
   call fgd_discard(d)
 
 ! 2: fgd_open check

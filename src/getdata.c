@@ -267,7 +267,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
   else
     s0 -= E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset;
 
-  databuffer = (char *)_GD_Malloc(D, ns * E->e->u.raw.size);
+  databuffer = _GD_Malloc(D, ns * E->e->u.raw.size);
   if (databuffer == NULL) {
     dreturn("%i", 0);
     return 0;
@@ -295,7 +295,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
     if ((*_GD_ef[E->e->u.raw.file[0].subenc].seek)(E->e->u.raw.file, s0,
           E->EN(raw,data_type), GD_FILE_READ) == -1)
     {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+      _GD_SetError(D, GD_E_IO, GD_E_IO_READ, E->e->u.raw.file[0].name, 0, NULL);
       free(databuffer);
       dreturn("%i", 0);
       return 0;
@@ -306,7 +306,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
           ns);
 
     if (samples_read == -1) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+      _GD_SetError(D, GD_E_IO, GD_E_IO_READ, E->e->u.raw.file[0].name, 0, NULL);
       free(databuffer);
       dreturn("%i", 0);
       return 0;
@@ -1358,9 +1358,9 @@ static size_t _GD_DoBit(DIRFILE *restrict D, gd_entry_t *restrict E,
   }
 
   if (is_signed)
-    tmpbuf = (int64_t *)_GD_Malloc(D, num_samp * sizeof(int64_t));
+    tmpbuf = _GD_Malloc(D, num_samp * sizeof(int64_t));
   else
-    tmpbuf = (uint64_t *)_GD_Malloc(D, num_samp * sizeof(uint64_t));
+    tmpbuf = _GD_Malloc(D, num_samp * sizeof(uint64_t));
   if (tmpbuf == NULL) {
     dreturn("%i", 0);
     return 0;
@@ -1435,7 +1435,7 @@ static size_t _GD_DoLinterp(DIRFILE *restrict D, gd_entry_t *restrict E,
   }
 
   /* allocate a temporary buffer */
-  data_in = (double *)_GD_Alloc(D, GD_FLOAT64, num_samp);
+  data_in = _GD_Alloc(D, GD_FLOAT64, num_samp);
 
   if (D->error) {
     free(data_in);
@@ -1674,7 +1674,7 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
   first_samp2 = first_samp * spf2 / spf1;
 
   /* Allocate a temporary buffer for the count field */
-  tmpbuf = (int*)_GD_Alloc(D, GD_INT_TYPE, num_samp2);
+  tmpbuf = _GD_Alloc(D, GD_INT_TYPE, num_samp2);
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
@@ -1727,7 +1727,7 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
       /* the start of the next chunk */
       chunk_start -= chunk_size;
 
-      tmpbuf2 = (int*)_GD_Alloc(D, GD_INT_TYPE, chunk_size);
+      tmpbuf2 = _GD_Alloc(D, GD_INT_TYPE, chunk_size);
       if (D->error) {
         free(tmpbuf);
         dreturn("%i", 0);

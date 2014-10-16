@@ -46,13 +46,12 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
             _GD_ef[E->e->u.raw.file[0].subenc].sync != NULL &&
             (*_GD_ef[E->e->u.raw.file[0].subenc].sync)(E->e->u.raw.file))
         {
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
+          _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[0].name, 0,
               NULL);
         } else if (clo && _GD_FiniRawIO(D, E, E->fragment_index,
               GD_FINIRAW_KEEP))
         {
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
-              NULL);
+          ; /* error already set */
         }
       }
       break;
@@ -708,7 +707,7 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
           /* don't write lines that are too long
            * also, add one to length for the trailing '\n' */
           if (GD_SSIZE_T_MAX - (len + 1) <= pos) {
-            _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_TOO_LONG, NULL, 0, NULL);
+            _GD_SetError(D, GD_E_LINE_TOO_LONG, GD_E_LONG_FLUSH, E->field, 0, NULL);
             dreturn("%i", -1);
             return -1;
           }
@@ -742,7 +741,7 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
           /* don't write lines that are too long
            * also, add one to length for the trailing '\n' */
           if (GD_SSIZE_T_MAX - (len + 1) <= pos) {
-            _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_TOO_LONG, NULL, 0, NULL);
+            _GD_SetError(D, GD_E_LINE_TOO_LONG, GD_E_LONG_FLUSH, E->field, 0, NULL);
             dreturn("%i", -1);
             return -1;
           }
@@ -805,7 +804,7 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
 
 WRITE_ERR:
   if (!D->error)
-    _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_WRITE, NULL, errno, NULL);
+    _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, NULL, 0, NULL);
   dreturn("%i", -1);
   return -1;
 }
@@ -842,13 +841,13 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   /* open a temporary file */
   fd = _GD_MakeTempFile(D, dirfd, temp_file);
   if (fd == -1) {
-    _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_MKTMP, NULL, errno, NULL);
+    _GD_SetError(D, GD_E_IO, GD_E_IO_OPEN, NULL, 0, NULL);
     dreturnvoid();
     return;
   }
   stream = fdopen(fd, "wb+");
   if (stream == NULL) {
-    _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_OPEN, NULL, errno, NULL);
+    _GD_SetError(D, GD_E_IO, GD_E_IO_OPEN, NULL, 0, NULL);
     dreturnvoid();
     return;
   }
@@ -1090,7 +1089,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   if (ferror(stream) || fclose(stream) == EOF) {
 WRITE_ERR:
     if (!D->error)
-      _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_WRITE, NULL, errno, NULL);
+      _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, NULL, 0, NULL);
     fclose(stream);
   }
 
@@ -1101,7 +1100,7 @@ WRITE_ERR:
   if (D->error != GD_E_OK)
     gd_UnlinkAt(D, dirfd, temp_file, 0);
   else if (gd_RenameAt(D, dirfd, temp_file, dirfd, D->fragment[i].bname)) {
-    _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_RENAME, NULL, errno, NULL);
+    _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, NULL, 0, NULL);
     gd_UnlinkAt(D, dirfd, temp_file, 0);
   } else
     D->fragment[i].modified = 0;

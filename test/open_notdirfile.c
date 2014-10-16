@@ -40,7 +40,7 @@ int main(void)
 
   rmdir(filedir);
   error = gd_error(D);
-  CHECKI(error, GD_E_OPEN);
+  CHECKI(error, GD_E_IO);
   gd_discard(D);
 
   return r;

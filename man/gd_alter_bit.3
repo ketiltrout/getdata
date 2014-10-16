@@ -1,6 +1,6 @@
 .\" gd_alter_bit.3.  The gd_alter_bit man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2012, 2013 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_bit 3 "1 October 2013" "Version 0.9.0" "GETDATA"
+.TH gd_alter_bit 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_alter_bit, gd_alter_carray, gd_alter_clincom, gd_alter_const,
 gd_alter_cpolynom, gd_alter_crecip, gd_alter_divide, gd_alter_lincom,
@@ -197,7 +197,8 @@ If
 .I recode
 is non-zero, the binary file associated with the
 .B RAW
-field will be re-encoded to reflect the new field parameters.
+field will be re-encoded to reflect the new field parameters.  In this case,
+the field's I/O pointer will be reset to the beginning-of-frame.
 
 If
 .BR gd_alter_carray ()
@@ -248,19 +249,19 @@ The
 .IR data_type " or " const_type
 argument was invalid.
 .TP
-.B GD_E_PROTECTED
-The metadata of the fragment was protected from change.  Or, a request to
-translate the binary file associated with a
-.B RAW
-field was attempted, but the data of the fragment was protected.
-.TP
-.B GD_E_RAW_IO
+.B GD_E_IO
 An I/O error occurred while translating the binary file associated with a
 modified
 .B RAW
 field, or an I/O error occurred while attempting to rename a
 .B LINTERP
 table file.
+.TP
+.B GD_E_PROTECTED
+The metadata of the fragment was protected from change.  Or, a request to
+translate the binary file associated with a
+.B RAW
+field was attempted, but the data of the fragment was protected.
 .TP
 .B GD_E_UNKNOWN_ENCODING
 The encoding scheme of the indicated format specification fragment is not known

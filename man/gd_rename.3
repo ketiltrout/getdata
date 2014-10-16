@@ -1,6 +1,6 @@
 .\" gd_rename.3.  The gd_rename man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_rename 3 "7 December 2013" "Version 0.9.0" "GETDATA"
+.TH gd_rename 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_rename \(em change the name of a dirfile field or alias
 .SH SYNOPSIS
@@ -35,7 +35,8 @@ specified by
 .IR dirfile
 to
 .IR new_name .
-If the new name is the same as the old name, this function does nothing.
+If the new name is the same as the old name, this function does nothing and
+returns no error.
 
 When renaming a metafield, the metafield should be specified in
 .I old_code
@@ -72,7 +73,8 @@ if
 specifies a
 .B RAW
 field, the binary file associated with the field will be renamed as well.
-Without this flag, no changes are made to the binary file.  If
+Without this flag, no changes are made to the binary file.  In this case, the
+field's I/O pointer will be reset to the beginning-of-frame.  If
 .I field_code
 specifies a field of type other than
 .BR RAW ,
@@ -123,14 +125,14 @@ field.
 .B GD_E_DUPLICATE
 The new name specified is already in use by another entry.
 .TP
+.B GD_E_IO
+An I/O error occurred while attempting to rename the binary file.
+.TP
 .B GD_E_PROTECTED
 The metadata of the format specification fragment containing the renamed entry,
 or another entry affected by this change, was protected from change, or the
 binary data of the fragment was protected from change and a binary file move
 was requested.
-.TP
-.B GD_E_RAW_IO
-An I/O error occurred while attempting to rename the binary file.
 .TP
 .B GD_E_UNKNOWN_ENCODING
 The encoding scheme of the specified field could not be determined or was not

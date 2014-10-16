@@ -70,7 +70,7 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, GD_E_OPEN_LINFILE);
+  CHECKI(error, GD_E_LUT);
   CHECKI(n, 0);
 
   return r;

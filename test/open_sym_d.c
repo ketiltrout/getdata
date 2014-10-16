@@ -51,8 +51,8 @@ int main(void)
   D = gd_open(filedir, GD_RDONLY);
   error = gd_error(D);
   ptr = gd_error_string(D, NULL, 0);
-  CHECKI(error, GD_E_OPEN);
-  CHECKEOS(ptr, "dirfile/non_existent/dirfile");
+  CHECKI(error, GD_E_IO);
+  CHECKSS(ptr, "dirfile/non_existent/dirfile");
   free(ptr);
 
   gd_discard(D);

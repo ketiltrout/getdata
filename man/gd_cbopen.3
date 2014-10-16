@@ -1,6 +1,6 @@
 .\" gd_cbopen.3.  The gd_cbopen man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_cbopen 3 "5 May 2014" "Version 0.9.0" "GETDATA"
+.TH gd_cbopen 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_cbopen, gd_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -668,25 +668,18 @@ A syntax error occurred in the format specification.  See also
 .B The Callback Function
 section above.
 .TP
+.B GD_E_IO
+The dirfile format file, or another file that it includes, could not be opened,
+or
+.I dirfilename
+does not specify a valid dirfile.
+.TP
 .B GD_E_LINE_TOO_LONG
 The parser encountered a line in the format specification longer than it was
 able to deal with.  Lines are limited by the storage size of
 .BR ssize_t .
 On 32-bit systems, this limits format specification lines to 2**31 bytes.  The
 limit is larger on 64-bit systems.
-.TP
-.B GD_E_OPEN
-The dirfile format specification could not be opened, or
-.I dirfilename
-does not specify a valid dirfile.
-.TP
-.B GD_E_OPEN_FRAGMENT
-A file specified in an
-.B /INCLUDE
-directive could not be opened.
-.TP
-.B GD_E_TRUNC
-The library was unable to truncate the dirfile.
 .PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).

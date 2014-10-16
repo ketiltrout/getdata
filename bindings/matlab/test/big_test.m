@@ -85,7 +85,7 @@ try
   try
     D = gd_open('x');
   catch exc
-    ne = ne + check_exc(exc, 1, 'Open');
+    ne = ne + check_exc(exc, 1, 'IO');
   end
 
   % 2: gd_open check

@@ -93,8 +93,7 @@ char *_GD_MungeCode(DIRFILE *D, const gd_entry_t *P, const char *old_prefix,
   if (P)
     plen = strlen(P->field) + 1;
 
-  if ((new_code = (char*)_GD_Malloc(D, plen + nplen + len + nslen + mlen + 1))
-      == NULL)
+  if ((new_code = _GD_Malloc(D, plen + nplen + len + nslen + mlen + 1)) == NULL)
   {
     dreturn("%p", NULL);
     return NULL;
@@ -271,8 +270,8 @@ int _GD_MakeNewCode(DIRFILE *D, const char *old_code, int frag,
 
   dtrace("%p, \"%s\", %i, %p, %i, %i, %p", D, old_code, frag, E, repr, c, rdat);
 
-  if ((ptr = (char**)_GD_Realloc(D, rdat->code_list, sizeof(char *) *
-          (rdat->n_code + 1))) == NULL)
+  if ((ptr = _GD_Realloc(D, rdat->code_list, sizeof(*ptr) * (rdat->n_code + 1)))
+      == NULL)
   {
     dreturn("%i", -1);
     return -1;
@@ -674,8 +673,8 @@ struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict D,
    * not a big deal if something else fails later: it will just be slightly too
    * big */
   if (new_dot && !old_dot) {
-    gd_entry_t** ptr = (gd_entry_t **)_GD_Realloc(D, D->dot_list,
-        sizeof(gd_entry_t*) * (D->n_dot + 1));
+    gd_entry_t** ptr = _GD_Realloc(D, D->dot_list, sizeof(*ptr) *
+        (D->n_dot + 1));
 
     if (ptr == NULL) {
       dreturn("%p", NULL);
@@ -685,8 +684,7 @@ struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict D,
     D->dot_list = ptr;
   }
 
-  rdat = (struct gd_rename_data_ *)_GD_Malloc(D,
-      sizeof(struct gd_rename_data_));
+  rdat = _GD_Malloc(D, sizeof(*rdat));
   if (rdat == NULL) {
     dreturn("%p", NULL);
     return NULL;
@@ -722,7 +720,7 @@ struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict D,
     /* compose all the new meta field names under a top-level field.  We must do
      * this now in a temporary location in case it fails and/or subsequent stuff
      * fails */
-    rdat->meta_name = (char**)_GD_Malloc(D, sizeof(char *) * rdat->n_meta);
+    rdat->meta_name = _GD_Malloc(D, sizeof(*rdat->meta_name) * rdat->n_meta);
     if (!rdat->meta_name) {
       _GD_CleanUpRename(rdat, 1);
       dreturn("%p", NULL);
@@ -731,9 +729,8 @@ struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict D,
 
     memset(rdat->meta_name, 0, sizeof(char *) * rdat->n_meta);
     for (i = 0; i < rdat->n_meta; ++i) {
-      rdat->meta_name[i] = (char*)_GD_Malloc(D,
-          strlen(rdat->meta_entry[i]->field) + rdat->new_len - rdat->old_len
-          + 1);
+      rdat->meta_name[i] = _GD_Malloc(D, strlen(rdat->meta_entry[i]->field)
+          + rdat->new_len - rdat->old_len + 1);
       if (rdat->meta_name[i] == NULL)
         break;
       sprintf(rdat->meta_name[i], "%s/%s", new_code, rdat->meta_entry[i]->field
@@ -769,8 +766,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
   }
 
   if (E->e->n_meta == -1) {
-    name = (char*)_GD_Malloc(D, strlen(E->e->p.parent->field) + strlen(new_name)
-        + 2);
+    name = _GD_Malloc(D, strlen(E->e->p.parent->field) + strlen(new_name) + 2);
     if (name == NULL) {
       dreturn("%i", -1);
       return -1;
@@ -879,7 +875,8 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
             D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
             D->fragment[E->fragment_index].dirfd, temp.name))
       {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+        _GD_SetError(D, GD_E_IO, GD_E_IO_RENAME, E->e->u.raw.file[0].name, 0,
+            NULL);
         free(filebase);
         dreturn("%i", -1);
         return -1;

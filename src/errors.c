@@ -26,15 +26,8 @@ static const struct {
   int error;
   int suberror; /* 0 = any */
   const char* format; /* 1 = suberror, 2 = file, 3 = line, 4 = string */
-  int adderr; /* 1 = append strerror(line), 2 = append sterror(suberror) */
+  int adderr; /* 1 = append strerror(errno) */
 } error_string[] = {
-  /* GD_E_OPEN: 1 = suberror, 2 = filename, 3 = errno */
-  { GD_E_OPEN, GD_E_OPEN_NOT_DIRFILE, "Not a dirfile: {2}", 0 },
-  { GD_E_OPEN, GD_E_OPEN_NO_ACCESS,
-    "Cannot open dirfile {2}: permission denied", 0 },
-  { GD_E_OPEN, GD_E_OPEN_NOT_EXIST, "Dirfile does not exist: {2}", 0 },
-  { GD_E_OPEN, GD_E_OPEN_PATH, "Bad path: {2}", 0 },
-  { GD_E_OPEN, GD_E_OPEN_IO, "Error accessing {2}: ", 1 },
   /* GD_E_FORMAT: 1 = suberror, 2 = formatfile, 3 = line number, 4 = token */
   { GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, "Bad data type on line {3} of {2}: {4}",
     0 },
@@ -80,9 +73,7 @@ static const struct {
     "Cannot use alias {4} as parent to a meta field on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_MPLEXVAL,
     "Bad MPLEX period ({4}) on line {3} of {2}", 0 },
-  /* GD_E_TRUNC: 1 = suberror, 2 = filename. 3 = errno */
-  { GD_E_TRUNC, 0, "Error truncating {2}: ", 1 },
-  /* GD_E_CREAT: 1 = suberror, 2 = filename, 3 = errno */
+  /* GD_E_CREAT: 1 = suberror, 2 = filename */
   { GD_E_CREAT, GD_E_CREAT_DIR, "Unable to create directory {2}: ", 1 },
   { GD_E_CREAT, GD_E_CREAT_OPEN, "Unable to open directory {2}: ", 1 },
   { GD_E_CREAT, GD_E_CREAT_FORMAT, "Unable to create format file {2}: ", 1 },
@@ -92,11 +83,16 @@ static const struct {
   { GD_E_BAD_CODE, GD_E_CODE_AMBIGUOUS, "Ambiguous field code: {4}", 0 },
   /* GD_E_BAD_TYPE: 1 = data type */
   { GD_E_BAD_TYPE, 0, "Bad data type: {1}", 0 },
-  /* GD_E_RAW_IO: 2 = filename, 3 = errno */
-  { GD_E_RAW_IO, 0, "Error accessing {2}: ", 1 },
-  /* GD_E_OPEN_FRAGMENT: 1 = errno, 2 = format file, 3 = line, 4 = includefile*/
-  { GD_E_OPEN_FRAGMENT, 0,
-    "Unable to open fragment {4} on line {3} of {2}: ", 2 },
+  /* GD_E_IO: 2 = filename; 3 = line; 4 = included file */
+  { GD_E_IO, GD_E_IO_OPEN, "Error opening {2}: ", 1 },
+  { GD_E_IO, GD_E_IO_READ, "Error reading {2}: ", 1 },
+  { GD_E_IO, GD_E_IO_WRITE, "Error writing {2}: ", 1 },
+  { GD_E_IO, GD_E_IO_CLOSE, "Error closing {2}: ", 1 },
+  { GD_E_IO, GD_E_IO_UNLINK, "Error unlinking {2}: ", 1 },
+  { GD_E_IO, GD_E_IO_RENAME, "Error renaming {2}: ", 1 },
+  { GD_E_IO, GD_E_IO_INCL, "Error opening {4} included on line {3} of {2}: ", 
+    1 },
+  { GD_E_IO, 0, "Error accessing {2}: ", 1 },
   /* GD_E_INTERNAL_ERROR: 2 = source file, 3 = line */
   { GD_E_INTERNAL_ERROR, 0, "Internal error at [{2},{3}]; "
     "please report to " PACKAGE_BUGREPORT , 0 },
@@ -105,9 +101,10 @@ static const struct {
   /* GD_E_RANGE: (nothing) */
   { GD_E_RANGE, GD_E_OUT_OF_RANGE, "Request out of range", 0 },
   { GD_E_RANGE, GD_E_SINGULAR_RANGE, "Singular range", 0 },
-  /* GD_E_OPEN_LINFILE: 1 = suberror, 2 = errno, 4 = lutfile */
-  { GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, "LINTERP table {4} too short", 0 },
-  { GD_E_OPEN_LINFILE, 0, "Error opening LINTERP table {4}: ", 2 },
+  /* GD_E_LUT: 1 = suberror, 2 = lutfile, 3 = line */
+  { GD_E_LUT, GD_E_LUT_LENGTH, "LINTERP table {2} too short", 0 },
+  { GD_E_LUT, GD_E_LUT_SYNTAX, "Malfomed data on line {3} of LINTERP table {2}",
+    0 },
   /* GD_E_RECURSE_LEVEL: 2 = file; 3 = line; 4 = name */
   { GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE,
     "Recursion too deep resolving field {4}", 0 },
@@ -189,7 +186,7 @@ static const struct {
   { GD_E_CALLBACK, 0, "Unrecognised response from callback function: {3}", 0 },
   /* GD_E_ExISTS: (nothing) */
   { GD_E_EXISTS, 0, "Dirfile exists", 0 },
-  /* GD_E_UNCLEAN_DB: 2 = fragment, 3 = errno; 4 = call */
+  /* GD_E_UNCLEAN_DB: 2 = fragment, 4 = call */
   { GD_E_UNCLEAN_DB, GD_E_UNCLEAN_CALL,
     "Unexpected system error processing {2}; database unclean: {4}: ", 1 },
   { GD_E_UNCLEAN_DB, 0,
@@ -203,16 +200,10 @@ static const struct {
   { GD_E_BAD_REPR, GD_E_REPR_UNKNOWN, "Unknown field representation: .{4}", 0 },
   { GD_E_BAD_REPR, GD_E_REPR_PUT, "Unable to write to field reprentation: .{4}",
     0 },
-  /* GD_E_FLUSH: 3 = suberror */
-  { GD_E_FLUSH, GD_E_FLUSH_MKTMP, "I/O error creating temporary file: ", 1 },
-  { GD_E_FLUSH, GD_E_FLUSH_OPEN, "I/O error opening temporary file: ", 1 },
-  { GD_E_FLUSH, GD_E_FLUSH_RENAME, "I/O error replacing format metadata: ", 1 },
-  { GD_E_FLUSH, GD_E_FLUSH_WRITE, "I/O error writing format metadata: ", 1 },
-  { GD_E_FLUSH, GD_E_FLUSH_TOO_LONG, "Line too long writing format metadata",
-    0 },
   /* GD_E_BOUNDS: (nothing) */
-  { GD_E_BOUNDS, 0, "CARRAY length out of bounds", 0 },
-  /* GD_E_LINE_TOO_LONG: 2 = fragment, 3 = line number */
+  { GD_E_BOUNDS, 0, "Array length out of bounds", 0 },
+  /* GD_E_LINE_TOO_LONG */
+  { GD_E_LINE_TOO_LONG, GD_E_LONG_FLUSH, "Line too long writing {2}", 0 },
   { GD_E_LINE_TOO_LONG, 0, "Line {3} of {2} too long", 0 },
   /* GD_E_OK: (nothing) */
   { 0, 0, "Success", 0} /* this must be the last error string defined */
@@ -220,16 +211,17 @@ static const struct {
 
 /* _GD_SetError: Sets the global error variables for a library error
 */
-void _GD_SetError(DIRFILE* D, int error, int suberror,
-    const char* format_file, int line, const char* token)
+void _GD_SetError2(DIRFILE* D, int error, int suberror,
+    const char* format_file, int line, const char* token, int stdlib_errno)
 {
-  dtrace("%p, %i, %i, \"%s\", %i, \"%s\"", D, error, suberror, format_file,
-      line, token);
+  dtrace("%p, %i, %i, \"%s\", %i, \"%s\", %i", D, error, suberror, format_file,
+      line, token, stdlib_errno);
 
   D->error = error;
   if (error != GD_E_OK)
     D->n_error++;
   D->suberror = suberror;
+  D->stdlib_errno = stdlib_errno;
   D->error_line = line;
   if (format_file != NULL) {
     free(D->error_file);
@@ -246,6 +238,17 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
         D->error_prefix ? D->error_prefix : "", error_string);
     free(error_string);
   }
+
+  dreturnvoid();
+}
+
+void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
+    int line, const char* token)
+{
+  dtrace("%p, %i, %i, \"%s\", %i, \"%s\"", D, error, suberror, format_file,
+      line, token);
+
+  _GD_SetError2(D, error, suberror, format_file, line, token, errno);
 
   dreturnvoid();
 }
@@ -342,13 +345,11 @@ char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen) gd_nothrow
     *op = '\0';
     if (op < bufend - 1 && error_string[s].adderr) {
 #ifdef STRERROR_R_CHAR_P
-      char *ptr = strerror_r((error_string[s].adderr == 2) ? D->suberror :
-          D->error_line, op, bufend - op);
+      char *ptr = strerror_r(D->stdlib_errno, op, bufend - op);
       if (ptr != op)
         strncpy(op, ptr, bufend - op);
 #else
-      strerror_r((error_string[s].adderr == 2) ? D->suberror : D->error_line,
-          op, bufend - op);
+      strerror_r(D->stdlib_errno, op, bufend - op);
 #endif
     }
   }

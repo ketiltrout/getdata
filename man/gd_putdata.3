@@ -1,6 +1,6 @@
 .\" gd_putdata.3.  The gd_putdata man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011, 2012 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_putdata 3 "21 April 2012" "Version 0.8.0" "GETDATA"
+.TH gd_putdata 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_putdata \(em write data to a dirfile database
 .SH SYNOPSIS
@@ -84,7 +84,7 @@ as
 .IR first_frame .
 This will result in the write occurring at the current position of the I/O
 pointer for the field (see
-.BR gd_seek (3)
+.BR gd_getdata (3)
 for a discussion of I/O pointers).  In this case, the value of
 .I first_sample
 is ignored.
@@ -139,8 +139,8 @@ appropriate type.  The argument
 must point to a valid memory location of containing all the data to be written.
 
 Upon successful completion, the I/O pointer of the field will be on the sample
-immediately following the last sample written.  On error, the position of the
-I/O pointer is not specified.
+immediately following the last sample written, if possible.  On error, the
+position of the I/O pointer is not specified.
 
 .SH RETURN VALUE
 In all cases,
@@ -215,10 +215,16 @@ An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
 .TP
-.B GD_E_OPEN_LINFILE
-An error occurred while trying to read a
+.B GD_E_IO
+An error occurred while trying to open, read from, or write to a file on disk
+containing a raw field or
 .B LINTERP
-table from disk.
+table.
+.TP
+.B GD_E_LUT
+A
+.B LINTERP
+table was malformed.
 .TP
 .B GD_E_PROTECTED
 The data of the
@@ -231,10 +237,6 @@ was protected from change by a /PROTECT directive.
 An attempt was made to write data before the beginning-of-frame marker for
 .IR field_code ,
 or the raw field it depends on.
-.TP
-.B GD_E_RAW_IO
-An error occurred while trying to open, read from, or write to a file on disk
-containing a raw field.
 .TP
 .B GD_E_RECURSE_LEVEL
 Too many levels of recursion were encountered while trying to resolve

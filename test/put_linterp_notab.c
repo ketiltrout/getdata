@@ -61,6 +61,6 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(n,0);
-  CHECKI(error,GD_E_OPEN_LINFILE);
+  CHECKI(error,GD_E_IO);
   return r;
 }

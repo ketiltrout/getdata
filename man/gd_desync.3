@@ -1,6 +1,6 @@
 .\" gd_desync.3.  The gd_desync man page.
 .\"
-.\" Copyright (C) 2012 D. V. Wiebe
+.\" Copyright (C) 2012, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_desync 3 "15 March 2012" "Version 0.8.0" "GETDATA"
+.TH gd_desync 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_desync \(em check for a change of metadata on disk
 .SH SYNOPSIS
@@ -88,7 +88,7 @@ The library was unable to allocate memory.
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .TP
-.B GD_E_RAW_IO
+.B GD_E_IO
 An error occurred while trying to obtain the modification time of a fragment.
 .PP
 Additionally, if

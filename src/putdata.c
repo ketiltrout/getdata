@@ -84,7 +84,7 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   if (_GD_WriteSeek(D, E, _GD_ef + E->e->u.raw.file[0].subenc, s0,
         GD_FILE_WRITE) == -1)
   {
-    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+    _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[0].name, 0, NULL);
     free(databuffer);
     dreturn("%i", 0);
     return 0;
@@ -94,7 +94,7 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
       E->EN(raw,data_type), ns, 0);
 
   if (n_wrote < 0) {
-    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+    _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[0].name, 0, NULL);
     n_wrote = 0;
   }
 
@@ -159,7 +159,7 @@ static size_t _GD_DoLinterpOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  tmpbuf = (double *)_GD_Alloc(D, GD_FLOAT64, num_samp);
+  tmpbuf = _GD_Alloc(D, GD_FLOAT64, num_samp);
   if (tmpbuf == NULL) {
     free(tmpbuf);
     dreturn("%i", 0);
@@ -175,8 +175,7 @@ static size_t _GD_DoLinterpOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   }
 
   /* Make the reverse lut */
-  tmp_lut = (struct gd_lut_ *)_GD_Malloc(D, E->e->u.linterp.table_len *
-      sizeof(struct gd_lut_));
+  tmp_lut = _GD_Malloc(D, E->e->u.linterp.table_len * sizeof(*tmp_lut));
   if (tmp_lut == NULL) {
     free(tmpbuf);
     dreturn("%i", 0);
@@ -301,8 +300,8 @@ static size_t _GD_DoBitOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  tmpbuf = (uint64_t *)_GD_Alloc(D, GD_UINT64, num_samp);
-  readbuf = (uint64_t *)_GD_Alloc(D, GD_UINT64, num_samp);
+  tmpbuf = _GD_Alloc(D, GD_UINT64, num_samp);
+  readbuf = _GD_Alloc(D, GD_UINT64, num_samp);
 
   if (tmpbuf == NULL || readbuf == NULL) {
     free(tmpbuf);
@@ -571,7 +570,7 @@ static size_t _GD_DoMplexOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   first_samp2 = first_samp * spf2 / spf1;
 
   tmpbuf = _GD_Alloc(D, data_type, num_samp);
-  cntbuf = (int*)_GD_Alloc(D, GD_INT_TYPE, num_samp2);
+  cntbuf = _GD_Alloc(D, GD_INT_TYPE, num_samp2);
 
   if (tmpbuf == NULL || cntbuf == NULL) {
     free(cntbuf);

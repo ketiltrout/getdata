@@ -1,6 +1,6 @@
 .\" gd_framenum_subset.3.  The gd_framenum man page.
 .\"
-.\" Copyright (C) 2009, 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2009, 2010, 2011, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_framenum_subset 3 "18 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_framenum_subset 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_framenum_subset, gd_framenum \(em perform a reverse look-up on a
 monotonic dirfile field
@@ -135,15 +135,15 @@ An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
 .TP
-.B GD_E_OPEN_LINFILE
-An error occurred while trying to read a LINTERP table from disk.
+.B GD_E_IO
+An error occurred while trying to open or read from a file on disk containing
+a raw field or LINTERP table.
+.TP
+.B GD_E_LUT
+A LINTERP table was malformed.
 .TP
 .B GD_E_RANGE
 The specified field is constant between the supplied limits.
-.TP
-.B GD_E_RAW_IO
-An error occurred while trying to open or read from a file on disk containing
-a raw field.
 .TP
 .B GD_E_RECURSE_LEVEL
 Too many levels of recursion were encountered while trying to resolve

@@ -42,8 +42,8 @@ static int _GD_SetFieldAffixes(DIRFILE *D, int me, const char *prefix_in,
     if (D->fragment[me].suffix == NULL)
       *suffix = _GD_Strdup(D, suffix_in);
     else {
-      *suffix = (char*)_GD_Malloc(D, strlen(D->fragment[me].suffix) +
-          strlen(suffix_in) + 1);
+      *suffix = _GD_Malloc(D, strlen(D->fragment[me].suffix) + strlen(suffix_in)
+          + 1);
       if (*suffix)
         sprintf(*suffix, "%s%s", suffix_in, D->fragment[me].suffix);
     }
@@ -68,8 +68,8 @@ static int _GD_SetFieldAffixes(DIRFILE *D, int me, const char *prefix_in,
     if (D->fragment[me].prefix == NULL)
       *prefix = _GD_Strdup(D, prefix_in);
     else {
-      *prefix = (char*)_GD_Malloc(D, strlen(D->fragment[me].prefix) +
-          strlen(prefix_in) + 1);
+      *prefix = _GD_Malloc(D, strlen(D->fragment[me].prefix) + strlen(prefix_in)
+          + 1);
       if (*prefix)
         sprintf(*prefix, "%s%s", D->fragment[me].prefix, prefix_in);
     }
@@ -135,7 +135,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   /* Open the containing directory */
   dirfd = _GD_GrabDir(D, D->fragment[parent].dirfd, ename);
   if (dirfd == -1 && D->error == GD_E_OK)
-    _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum, ename);
+    _GD_SetError(D, GD_E_IO, GD_E_IO_INCL, format_file, linenum, ename);
   if (D->error)
     goto include_error;
 
@@ -148,20 +148,20 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   /* Reject weird stuff */
   if (gd_StatAt(D, dirfd, base, &statbuf, 0)) {
     if (!(*flags & GD_CREAT)) {
-      _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum,
+      _GD_SetError(D, GD_E_IO, GD_E_IO_INCL, format_file, linenum,
           temp_buf1);
       _GD_ReleaseDir(D, dirfd);
       goto include_error;
     }
   } else {
     if (S_ISDIR(statbuf.st_mode)) {
-      _GD_SetError(D, GD_E_OPEN_FRAGMENT, EISDIR, format_file, linenum,
-          temp_buf1);
+      _GD_SetError2(D, GD_E_IO, GD_E_IO_INCL, format_file, linenum,
+          temp_buf1, EISDIR);
       _GD_ReleaseDir(D, dirfd);
       goto include_error;
     } else if (!S_ISREG(statbuf.st_mode)) {
-      _GD_SetError(D, GD_E_OPEN_FRAGMENT, EINVAL, format_file, linenum,
-          temp_buf1);
+      _GD_SetError2(D, GD_E_IO, GD_E_IO_INCL, format_file, linenum,
+          temp_buf1, EINVAL);
       _GD_ReleaseDir(D, dirfd);
       goto include_error;
     }
@@ -174,8 +174,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
       | O_BINARY, 0666);
 
   if (i < 0) {
-    _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum,
-        temp_buf1);
+    _GD_SetError(D, GD_E_IO, GD_E_IO_INCL, format_file, linenum, temp_buf1);
     _GD_ReleaseDir(D, dirfd);
     goto include_error;
   }
@@ -184,7 +183,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
 
   /* If opening the file failed, set the error code and abort parsing. */
   if (new_fp == NULL) {
-    _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum, temp_buf1);
+    _GD_SetError(D, GD_E_IO, GD_E_IO_INCL, format_file, linenum, temp_buf1);
     _GD_ReleaseDir(D, dirfd);
     goto include_error;
   }
@@ -194,15 +193,14 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
     mtime = statbuf.st_mtime;
 
   /* If we got here, we managed to open the included file; parse it */
-  ptr = _GD_Realloc(D, D->fragment,
-      (++D->n_fragment) * sizeof(struct gd_fragment_t));
+  ptr = _GD_Realloc(D, D->fragment, (++D->n_fragment) * sizeof(D->fragment[0]));
   if (ptr == NULL) {
     fclose(new_fp);
     _GD_ReleaseDir(D, dirfd);
     D->n_fragment--;
     goto include_error;
   }
-  D->fragment = (struct gd_fragment_t *)ptr;
+  D->fragment = ptr;
 
   D->fragment[me].bname = base;
   D->fragment[me].cname = temp_buf1;
@@ -236,7 +234,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   } else if (D->fragment[parent].sname && _GD_AbsPath(sname)) {
     /* have both a relative dirname and the parent's sname; squish them
      * together */
-    D->fragment[me].sname = (char*)_GD_Malloc(D, strlen(sname) +
+    D->fragment[me].sname = _GD_Malloc(D, strlen(sname) +
         strlen(D->fragment[parent].sname) + 2);
     if (D->fragment[me].sname)
       sprintf(D->fragment[me].sname, "%s%c%s", D->fragment[parent].sname,
@@ -401,7 +399,7 @@ static int _GD_CollectFragments(DIRFILE* D, int** f, int fragment, int nf)
 
   dtrace("%p, %p, %i, %i", D, f, fragment, nf);
 
-  new_f = (int *)_GD_Realloc(D, *f, sizeof(int) * ++nf);
+  new_f = _GD_Realloc(D, *f, sizeof(*new_f) * ++nf);
   if (new_f == NULL) {
     dreturn("%i", -1);
     return -1;

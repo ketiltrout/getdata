@@ -1,6 +1,6 @@
 .\" gd_getdata.3.  The gd_getdata man page.
 .\"
-.\" Copyright (C) 2011 D. V. Wiebe
+.\" Copyright (C) 2011, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_tell 3 "14 October 2011" "Version 0.8.0" "GETDATA"
+.TH gd_tell 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_tell \(em reposition a dirfile field pointer
 .SH SYNOPSIS
@@ -69,16 +69,17 @@ or in one of the field codes it uses for input, was invalid.
 The specified field or one of its inputs wasn't of vector type.
 .TP
 .B GD_E_DOMAIN
-The field position couldn't be determined due to a mismatch in the I/O pointer
-of field reading simultaneously
-from more than one place in an input field.
+The I/O position of a derived field wasn't well defined because its input fields
+simultaneously read from different places in the same
+.B RAW
+field.
 .TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
 .TP
-.B GD_E_RAW_IO
+.B GD_E_IO
 An error occurred while trying to open or read from a file on disk containing
 a raw field.
 .TP

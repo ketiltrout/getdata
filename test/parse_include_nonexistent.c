@@ -50,6 +50,6 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error,GD_E_OPEN_INCLUDE);
+  CHECKI(error,GD_E_IO);
   return r;
 }

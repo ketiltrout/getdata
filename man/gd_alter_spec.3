@@ -1,6 +1,6 @@
 .\" gd_alter_spec.3.  The gd_alter_spec man page.
 .\"
-.\" Copyright (C) 2008, 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2011, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_spec 3 "5 May 2014" "Version 0.9.0" "GETDATA"
+.TH gd_alter_spec 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_alter_spec, gd_malter_spec \(em modify a field in a dirfile
 .SH SYNOPSIS
@@ -55,7 +55,8 @@ If the modified field is of type
 and the
 .I recode
 argument is non-zero, the binary file associated with the field will be
-converted for changes in data type and samples-per-frame.  If
+converted for changes in data type and samples-per-frame.  In this case,
+the field's I/O pointer will be reset to the beginning-of-frame.  If
 .I recode
 is zero, no binary file conversion will take place.
 
@@ -110,6 +111,14 @@ The supplied dirfile was invalid.
 A syntax error was encountered in
 .IR line .
 .TP
+.B GD_E_IO
+An I/O error occurred while translating the binary file associated with a
+modified
+.B RAW
+field, or an I/O error occurred while attempting to rename a
+.B LINTERP
+table file.
+.TP
 .B GD_E_LINE_TOO_LONG
 The supplied
 .I line
@@ -125,14 +134,6 @@ The metadata of the fragment was protected from change.  Or, a request to
 translate the binary file associated with a
 .B RAW
 field was attempted, but the data of the fragment was protected.
-.TP
-.B GD_E_RAW_IO
-An I/O error occurred while translating the binary file associated with a
-modified
-.B RAW
-field, or an I/O error occurred while attempting to rename a
-.B LINTERP
-table file.
 .TP
 .B GD_E_UNKNOWN_ENCODING
 The encoding scheme of the indicated format specification fragment is not known

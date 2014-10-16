@@ -731,16 +731,6 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 /* Suberror codes */
 /* GD_E_FORMAT suberrors are in getdata.h */
 
-#define GD_E_OPEN_NOT_EXIST    1
-#define GD_E_OPEN_NOT_DIRFILE  2
-#define GD_E_OPEN_NO_ACCESS    3
-#define GD_E_OPEN_PATH         4
-#define GD_E_OPEN_IO           5
-
-#define GD_E_TRUNC_STAT        1
-#define GD_E_TRUNC_UNLINK      2
-#define GD_E_TRUNC_DIR         3
-
 #define GD_E_CREAT_FORMAT      1
 #define GD_E_CREAT_DIR         2
 #define GD_E_CREAT_OPEN        3
@@ -749,8 +739,13 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_CODE_INVALID      2
 #define GD_E_CODE_AMBIGUOUS    3
 
-#define GD_E_LINFILE_LENGTH    1
-#define GD_E_LINFILE_OPEN      2
+#define GD_E_IO_OPEN           1
+#define GD_E_IO_READ           2
+#define GD_E_IO_WRITE          3
+#define GD_E_IO_CLOSE          4
+#define GD_E_IO_UNLINK         5
+#define GD_E_IO_RENAME         6
+#define GD_E_IO_INCL           7
 
 #define GD_E_RECURSE_CODE       1
 #define GD_E_RECURSE_INCLUDE    2
@@ -799,14 +794,11 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_OUT_OF_RANGE       1
 #define GD_E_SINGULAR_RANGE     2
 
+#define GD_E_LUT_LENGTH         1
+#define GD_E_LUT_SYNTAX         2
+
 #define GD_E_DIM_FORMAT         1
 #define GD_E_DIM_CALLER         2
-
-#define GD_E_FLUSH_MKTMP        1
-#define GD_E_FLUSH_OPEN         2
-#define GD_E_FLUSH_RENAME       3
-#define GD_E_FLUSH_WRITE        4
-#define GD_E_FLUSH_TOO_LONG     5
 
 #define GD_E_UNENC_UNDET        1
 #define GD_E_UNENC_TARGET       2
@@ -817,6 +809,8 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_ARG_NODATA         4
 #define GD_E_ARG_NO_VERS        5
 #define GD_E_ARG_BAD_VERS       6
+
+#define GD_E_LONG_FLUSH         1
 
 /* the size of the memory buffer used for various bulk I/O operations */
 #define BUFFER_SIZE 9000000
@@ -1058,6 +1052,7 @@ struct gd_dirfile_ {
   char* error_string;
   char* error_file;
   int error_line;
+  int stdlib_errno;
 
   /* global data */
   unsigned long int flags;
@@ -1244,6 +1239,7 @@ void _GD_ReleaseDir(DIRFILE *D, int dirfd);
 int _GD_Seek(DIRFILE *restrict, gd_entry_t *restrict, off64_t offset,
     unsigned int mode);
 void _GD_SetError(DIRFILE*, int, int, const char*, int, const char*);
+void _GD_SetError2(DIRFILE*, int, int, const char*, int, const char*, int);
 int _GD_SetTablePath(DIRFILE *restrict, const gd_entry_t *restrict,
     struct gd_private_entry_ *restrict);
 int _GD_ShutdownDirfile(DIRFILE*, int, int);

@@ -39,7 +39,7 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
     /* only need to duplicate the fd of the root directory; otherwise this
      * function will close the fd */
     if (root && (fd = dup(dirfd)) == -1) {
-      _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, dirfile, errno, NULL);
+      _GD_SetError(D, GD_E_IO, GD_E_IO_OPEN, dirfile, 0, NULL);
       dreturn("%i", -1);
       return -1;
     }
@@ -66,12 +66,12 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
 #endif
 
   if (dir == NULL) {
-    _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, dirfile, errno, NULL);
+    _GD_SetError(D, GD_E_IO, GD_E_IO_OPEN, dirfile, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
 
-  if ((lamb = (struct dirent*)_GD_Malloc(D, dirent_len)) == NULL) {
+  if ((lamb = _GD_Malloc(D, dirent_len)) == NULL) {
     closedir(dir);
     dreturn("%i", -1);
     return -1;
@@ -88,7 +88,7 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
       continue; /* skip parent dir */
     }
 
-    name = (char *)_GD_Malloc(D, dirfile_len + strlen(lamb->d_name) + 2);
+    name = _GD_Malloc(D, dirfile_len + strlen(lamb->d_name) + 2);
     if (name == NULL) {
       free(lamb);
       closedir(dir);
@@ -106,7 +106,7 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
 #endif
        )
     {
-      _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_STAT, name, errno, NULL);
+      _GD_SetError(D, GD_E_IO, 0, name, 0, NULL);
       free(name);
       closedir(dir);
       dreturn("%i", -1);
@@ -139,7 +139,7 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
 #endif
             )
         {
-          _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_UNLINK, name, errno, NULL);
+          _GD_SetError(D, GD_E_IO, GD_E_IO_UNLINK, name, 0, NULL);
           free(lamb);
           free(name);
           closedir(dir);
@@ -162,7 +162,7 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
 #endif
               ) < 0)
           {
-            _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_STAT, name, errno, NULL);
+            _GD_SetError(D, GD_E_IO, 0, name, 0, NULL);
             free(lamb);
             closedir(dir);
             free(name);
@@ -181,7 +181,7 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
               rmdir(name)
 #endif
              ) {
-            _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_UNLINK, name, errno, NULL);
+            _GD_SetError(D, GD_E_IO, GD_E_IO_UNLINK, name, 0, NULL);
             free(lamb);
             free(name);
             closedir(dir);
@@ -197,7 +197,7 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
   closedir(dir);
 
   if (ret) {
-    _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, dirfile, errno, NULL);
+    _GD_SetError(D, GD_E_IO, GD_E_IO_READ, dirfile, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -219,7 +219,7 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
 
   /* naively try to open the format file */
   if (dirfd < 0)
-    format_error = ENOENT;
+    ; /* Directory error */
   else if ((fd = gd_OpenAt(D, dirfd, "format", O_RDONLY | O_BINARY, 0666)) < 0)
   {
     format_error = errno;
@@ -235,39 +235,32 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   } else
     dir_error = 0;
 
-  /* First, cast out our four failure modes */
+  /* First, cast out our failure modes */
 
-  /* unable to read the format file */
-  if (format_error == EACCES || dir_error == EACCES) {
+  /* Error reading the directory, and we weren't asked to create it */
+  if (dir_error == EACCES || (dirfd < 0 && !(D->flags & GD_CREAT))) {
+    _GD_SetError2(D, GD_E_IO, GD_E_IO_OPEN, dirfile, 0, NULL, dir_error);
+    free(dirfile);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  /* Error reading the format file, and we weren't asked to create it; do
+   * nothing else. */
+  if (format_error == EACCES || (format_error && !(D->flags & GD_CREAT))) {
     char *format_file = (char *)malloc(strlen(dirfile) + 8);
     sprintf(format_file, "%s%cformat", dirfile, GD_DIRSEP);
-    _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_NO_ACCESS, format_file, 0, NULL);
-    free(dirfile);
+    _GD_SetError2(D, GD_E_IO, GD_E_IO_OPEN, format_file, 0, NULL, format_error);
     free(format_file);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  /* the directory exists, but it's not a dirfile, do nothing else -- even if we
-   * were asked to truncate it */
-  if (!dir_error && format_error) {
-    _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_NOT_DIRFILE, dirfile, 0, NULL);
-    free(dirfile);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  /* Couldn't open the file, and we weren't asked to create it */
-  if (format_error && !(D->flags & GD_CREAT)) {
-    _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_NOT_EXIST, dirfile, format_error,
-        NULL);
     free(dirfile);
     dreturn("%p", NULL);
     return NULL;
   }
 
   /* It does exist, but we were asked to exclusively create it */
-  if (!format_error && (D->flags & GD_CREAT) && (D->flags & GD_EXCL)) {
+  if (!format_error && dirfd >= 0 && (D->flags & GD_CREAT)
+      && (D->flags & GD_EXCL))
+  {
     _GD_SetError(D, GD_E_EXISTS, 0, NULL, 0, NULL);
     free(dirfile);
     close(fd);
@@ -285,7 +278,7 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
    * Note that the rather lame definition of a dirfile at this point
    * (specifically, we haven't bothered to see if the format file is parsable)
    * could be problematic if users use GD_TRUNC cavalierly. */
-  if (D->flags & GD_TRUNC && !format_error) {
+  if (D->flags & GD_TRUNC && !format_error && dirfd >= 0) {
     close(fd);
 
     /* can't truncate a read-only dirfile */
@@ -305,7 +298,8 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   }
 
   /* Create, if needed */
-  if ((D->flags & GD_CREAT && format_error) || (D->flags & GD_TRUNC))
+  if ((D->flags & GD_CREAT && (dirfd < 0 || format_error))
+      || (D->flags & GD_TRUNC))
   {
     /* can't create a read-only dirfile */
     if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
@@ -316,9 +310,9 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
     }
 
     /* attempt to create the dirfile directory, if not present */
-    if (dir_error) {
+    if (dirfd < 0) {
       if (mkdir(dirfile, 0777) < 0) {
-        _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_DIR, dirfile, errno, NULL);
+        _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_DIR, dirfile, 0, NULL);
         free(dirfile);
         dreturn("%p", NULL);
         return NULL;
@@ -330,7 +324,7 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
       dirfd = 0;
 #else
       if ((dirfd = open(dirfile, O_RDONLY)) < 0) {
-        _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_OPEN, dirfile, errno, NULL);
+        _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_OPEN, dirfile, 0, NULL);
         free(dirfile);
         dreturn("%p", NULL);
         return NULL;
@@ -343,8 +337,8 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
             (format_trunc ? O_TRUNC : O_EXCL), 0666)) < 0)
     {
       char *format_file = (char *)malloc(strlen(dirfile) + 8);
-      sprintf(dirfile, "%s/format", dirfile);
-      _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, errno, NULL);
+      sprintf(format_file, "%s/format", dirfile);
+      _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, 0, NULL);
       free(dirfile);
       free(format_file);
 #ifndef GD_NO_DIR_OPEN
@@ -363,8 +357,8 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   /* associate a stream with the format file */
   if ((fp = fdopen(fd, "rb")) == NULL) {
     char *format_file = (char *)malloc(strlen(dirfile) + 8);
-    sprintf(dirfile, "%s/format", dirfile);
-    _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, errno, NULL);
+    sprintf(format_file, "%s/format", dirfile);
+    _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, 0, NULL);
     free(dirfile);
     free(format_file);
     close(fd);
@@ -489,7 +483,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   D->lookback = GD_DEFAULT_LOOKBACK;
 
   if (dirfile == NULL) {
-    _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_IO, filedir, dirfd_error, NULL);
+    _GD_SetError2(D, GD_E_IO, 0, filedir, 0, NULL, dirfd_error);
 #ifndef GD_NO_DIR_OPEN
     if (dirfd >= 0)
       close(dirfd);
@@ -501,9 +495,9 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   /* Add the INDEX entry */
   D->n_entries = 1;
 
-  D->entry = (gd_entry_t **)_GD_Malloc(D, sizeof(gd_entry_t*));
+  D->entry = _GD_Malloc(D, sizeof(*D->entry));
   if (D->entry)
-    D->entry[0] = (gd_entry_t *)_GD_Malloc(D, sizeof(gd_entry_t));
+    D->entry[0] = _GD_Malloc(D, sizeof(**D->entry));
 
   if (D->error) {
     free(dirfile);
@@ -516,8 +510,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
 
   memset(D->entry[0], 0, sizeof(gd_entry_t));
   D->entry[0]->field_type = GD_INDEX_ENTRY;
-  D->entry[0]->e =
-    (struct gd_private_entry_ *)_GD_Malloc(D, sizeof(struct gd_private_entry_));
+  D->entry[0]->e = _GD_Malloc(D, sizeof(*D->entry[0]->e));
   D->entry[0]->field = _GD_Strdup(D, "INDEX");
   if (D->error) {
     free(dirfile);
@@ -556,8 +549,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   /* Parse the file.  This will take care of any necessary inclusions */
   D->n_fragment = 1;
 
-  D->fragment = (struct gd_fragment_t *)_GD_Malloc(D,
-      sizeof(struct gd_fragment_t));
+  D->fragment = _GD_Malloc(D, sizeof(*D->fragment));
   if (D->error) {
     dreturn("%p", D);
     return D;
@@ -568,7 +560,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
     if (errno == ENOMEM)
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     else
-      _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_PATH, dirfile, 0, NULL);
+      _GD_SetError(D, GD_E_IO, 0, dirfile, 0, NULL);
   }
 
   D->fragment[0].bname = _GD_Strdup(D, "format");

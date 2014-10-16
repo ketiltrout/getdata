@@ -55,18 +55,18 @@
 static const char *gdmx_msgid[GD_N_ERROR_CODES] =
 {
   NULL, /* GD_E_OK */
-  GD_LIBCOMP "Open",
+  GD_LIBCOMP "Error01", /* unused */
   GD_LIBCOMP "Format",
-  GD_LIBCOMP "Trunc",
+  GD_LIBCOMP "Error03", /* unused */
   GD_LIBCOMP "Creat",
   GD_LIBCOMP "BadCode",
   GD_LIBCOMP "BadType",
-  GD_LIBCOMP "RawIO",
-  GD_LIBCOMP "OpenFragment",
+  GD_LIBCOMP "IO",
+  GD_LIBCOMP "Error08", /* unused */
   GD_LIBCOMP "InternalError",
   GD_LIBCOMP "Alloc",
   GD_LIBCOMP "Range",
-  GD_LIBCOMP "OpenLinfile",
+  GD_LIBCOMP "LUT",
   GD_LIBCOMP "RecurseLevel",
   GD_LIBCOMP "BadDirfile",
   GD_LIBCOMP "BadFieldType",
@@ -88,7 +88,7 @@ static const char *gdmx_msgid[GD_N_ERROR_CODES] =
   GD_LIBCOMP "Domain",
   GD_LIBCOMP "BadRepr",
   GD_LIBCOMP "Error33", /* unused */
-  GD_LIBCOMP "Flush",
+  GD_LIBCOMP "Error34", /* unused */
   GD_LIBCOMP "Bounds",
   GD_LIBCOMP "LineTooLong"
 };

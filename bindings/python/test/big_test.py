@@ -132,7 +132,7 @@ file.close()
 try:
   d = pygetdata.dirfile("x", pygetdata.RDONLY)
 except:
-  CheckException(1, pygetdata.OpenError)
+  CheckException(1, pygetdata.IOError)
 
 # 2: dirfile check
 try:

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,23 +18,24 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Opening a non-existent dirfile should fail cleanly */
 #include "test.h"
 
 #include <string.h>
 
+#define DIRFILENAME "a non-existant dirfile"
 int main(void)
 {
-  char string[1000];
+  char *string;
   int error, r = 0;
-  DIRFILE *D = gd_open("a non_existant dirfile", 0);
+  DIRFILE *D = gd_open(DIRFILENAME, 0);
 
-  gd_error_string(D, string, 1000);
+  string = gd_error_string(D, NULL, 0);
   error = gd_error(D);
   gd_discard(D);
 
-  CHECKI(error, GD_E_OPEN);
-  CHECKSp(string, "Dirfile does not exist");
+  CHECKI(error, GD_E_IO);
+  CHECKSS(string, DIRFILENAME);
 
+  free(string);
   return r;
 }

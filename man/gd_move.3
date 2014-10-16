@@ -1,6 +1,6 @@
 .\" gd_move.3.  The gd_move man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2012, 2013 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_move 3 "7 Decmeber 2013" "Version 0.9.0" "GETDATA"
+.TH gd_move 3 "16 October 2014" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_move \(em move a dirfile entry between format specification fragments
 .SH SYNOPSIS
@@ -37,12 +37,13 @@ from it's current format specification fragment to the fragment indexed by
 .IR new_fragment .
 If the field is already defined in the fragment index by
 .IR new_fragment ,
-this function does nothing.
+this function does nothing and returns no error.
 
 If the new fragment has different affixes, the field will be renamed as part of
 the move.  See
 .BR gd_rename (3)
-for details on field renaming.
+for details on field renaming.  The field is closed before moving, resulting
+in it's I/O pointer being reset to the beginning-of-field.
 
 The
 .I flags
@@ -64,9 +65,9 @@ specifies a
 field, the binary file associated with the field will be translated to account
 for the possibly different encoding, endianness, and frame offset of the
 new format specification fragment.  It will also be moved to a new directory, if
-necessary.  If
-.I move_data
-is zero, no changes will be made to the binary file.  If
+necessary.
+
+If this flag is not specified, no changes will be made to the binary file.  If
 .I field_code
 specifies a field of type other than
 .BR RAW ,
@@ -122,13 +123,13 @@ The
 .I new_fragment
 argument did not index a valid format specification fragment.
 .TP
+.B GD_E_IO
+An I/O error occurred while attempting to translate a binary file.
+.TP
 .B GD_E_PROTECTED
 The metadata of the source or destination format specification fragments was
 protected from change, or the binary data of the source or destination fragments
 was protected from change and binary file translation was requested.
-.TP
-.B GD_E_RAW_IO
-An I/O error occurred while attempting to translate a binary file.
 .TP
 .B GD_E_UNKNOWN_ENCODING
 The encoding scheme of the source or destination fragment is unknown.
