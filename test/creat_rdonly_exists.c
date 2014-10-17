@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -31,24 +31,25 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int e1, e2, unlink_ret, rmdir_ret, r = 0;
+  int e1, e2, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  D = gd_open(filedir, GD_RDONLY | GD_CREAT | GD_VERBOSE);
+  mkdir(filedir, 0777);
+  close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
+
+  D = gd_open(filedir, GD_RDONLY | GD_CREAT);
   e1 = gd_error(D);
   CHECKI(e1, 0);
 
-  e2 = gd_add_spec(D, "test CONST UINT8 1", 0);
-  CHECKI(e2, 0);
+  gd_add_spec(D, "test CONST UINT8 1", 0);
+  e2 = gd_error(D);
+  CHECKI(e2, GD_E_ACCMODE);
 
   gd_discard(D);
 
-  unlink_ret = unlink(format);
-  rmdir_ret = rmdir(filedir);
-
-  CHECKI(unlink_ret, 0);
-  CHECKI(rmdir_ret, 0);
+  unlink(format);
+  rmdir(filedir);
 
   return r;
 }

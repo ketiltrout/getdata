@@ -30,6 +30,11 @@ New in verison 0.9.0a:
     gzip-encoded data works.  See the gzip discussion in the 0.8.0 section below
     for important notes.
 
+  * A newly-created dirfile is now always opened in read-write mode, ignoring the
+    access mode specified in the call.  Previously, specifying both GD_RDONLY and
+    GD_CREAT in open calls would result in an access mode (GD_E_ACCMODE) error if
+    the dirfile didn't already exist.
+
   * BUG FIX: In addition to the addition of write support mentioned above, a
     number of problems with reading LZMA files has been fixed, which should
     result in fewer segmentaion faults.

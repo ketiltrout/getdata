@@ -1,3 +1,8 @@
+2014-10-16     D. V. Wiebe <g etdata@ketiltrout.net> svn:929
+	* src/open.c (_GD_CreateDirfile): Force GD_RDWR when creating a dirfile.
+	* test/creat_rdonly.c: Updated.
+	* test/creat_rdonly_exists.c: Added.
+
 2014-10-16     D. V. Wiebe <g etdata@ketiltrout.net> svn:928
 	* bindings/make_parameters.c: Replace numeric type literals with CPP macros
 	for legibility.

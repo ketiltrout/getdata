@@ -301,13 +301,9 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   if ((D->flags & GD_CREAT && (dirfd < 0 || format_error))
       || (D->flags & GD_TRUNC))
   {
-    /* can't create a read-only dirfile */
-    if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
-      _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-      free(dirfile);
-      dreturn("%p", NULL);
-      return NULL;
-    }
+    /* a newly created dirfile ignores the specified access mode */
+    if ((D->flags & GD_ACCMODE) == GD_RDONLY)
+      D->flags |= GD_RDWR;
 
     /* attempt to create the dirfile directory, if not present */
     if (dirfd < 0) {

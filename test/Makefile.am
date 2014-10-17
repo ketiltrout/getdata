@@ -131,7 +131,7 @@ CONVERT_TESTS=convert_complex128_complex64 convert_complex128_float64 \
 							convert_uint8_int64 convert_uint8_int8 convert_uint8_uint16 \
 							convert_uint8_uint32 convert_uint8_uint64
 
-CREAT_TESTS=creat creat_excl creat_rdonly
+CREAT_TESTS=creat creat_excl creat_rdonly creat_rdonly_exists
 
 DEL_TESTS=del_alias del_carray del_carray_deref del_const del_const_deref \
 					del_const_force del_data del_data_enoent del_data_open del_derived \

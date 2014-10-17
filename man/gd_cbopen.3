@@ -118,6 +118,13 @@ is also specified.
 An empty dirfile will be created, if one does not already exist.  This will
 create both the dirfile directory and an empty format specification file called
 .IR format .
+If the call creates a dirfile, then the specified access mode is ignored: a
+newly-created DIRFILE is always opened with access mode
+.BR GD_RDWR ,
+even if
+.B GD_RDONLY
+had been specified.
+
 The directory will have have mode
 .BR S_IRWXU " | " S_IRWXG " | "  S_IRWXO 
 (0777), modified by the caller's umask value (see
@@ -127,7 +134,6 @@ The
 file will have mode
 .BR S_IRUSR " | " S_IWUSR " | "  S_IRGRP " | "  S_IWGRP " | " S_IROTH " | " S_IWOTH
 (0666), also modified by the caller's umask.
-
 The owner of the dirfile directory and
 .I format
 file will be the effective user ID of the caller.  Group ownership follows the
@@ -629,9 +635,7 @@ error will be set to a non-zero error value.  The DIRFILE object will also
 be internally flagged as invalid.  Possible error values are:
 .TP 8
 .B GD_E_ACCMODE
-The library was asked to create or truncate a dirfile opened read-only (i.e.
-.B GD_CREAT
-or
+The library was asked to truncate a dirfile opened read-only (i.e.
 .B GD_TRUNC
 was specified in
 .I flags
