@@ -794,7 +794,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (j & GD_AS_ERROR)
         break;
       if (j & GD_AS_FREE_SCALAR)
-        scalar_free |= 1;
+        scalar_free |= 2;
       if (j & GD_AS_NEED_RECALC)
         Qe.calculated = 0;
       if (j & GD_AS_MODIFIED)
@@ -808,7 +808,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (j & GD_AS_ERROR)
         break;
       if (j & GD_AS_FREE_SCALAR)
-        scalar_free |= 2;
+        scalar_free |= 1;
       if (j & GD_AS_NEED_RECALC)
         Qe.calculated = 0;
       if (j & GD_AS_MODIFIED)

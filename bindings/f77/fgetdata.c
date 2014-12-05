@@ -25,6 +25,16 @@
 #include <stdio.h>
 #include <string.h>
 
+/* convert scalar_ind from C to FORTRAN */
+#define GDF_SCIND_C2F(out,in) do { \
+  (out) = (in); if ((out) >= 0) (out)++; \
+} while (0)
+
+/* convert scalar ind from FORTRAN to C */
+#define GDF_SCIND_F2C(out,in) do { \
+  (out) = (in); if ((out) > 0) (out)--; \
+} while (0)
+
 /* Fortran 77 has no facility to take a pointer to a DIRFILE* object.
  * Instead, we keep a list of them here.  If we ever run out of these,
  * the caller will be abort()ed. */
@@ -3115,7 +3125,7 @@ void F77_FUNC(gdgsca, GDGSCA) (char *scalar, int32_t *scalar_l,
     ok = 0;
 
   _GDF_FString(scalar, scalar_l, (ok) ? E.scalar[*index - 1] : "");
-  *scalar_index = E.scalar_ind[*index - 1];
+  GDF_SCIND_C2F(*scalar_index, E.scalar_ind[*index - 1]);
 
   gd_free_entry_strings(&E);
 
@@ -3189,7 +3199,7 @@ void F77_FUNC(gdasca, GDASCA) (const int32_t *dirfile, const char *field_code,
 
   free(E.scalar[*index - 1]);
   _GDF_CString(E.scalar + *index - 1, scalar, *scalar_l);
-  E.scalar_ind[*index - 1] = *scalar_index;
+  GDF_SCIND_F2C(E.scalar_ind[*index - 1], *scalar_index);
 
   gd_alter_entry(D, fc, &E, *recode);
 

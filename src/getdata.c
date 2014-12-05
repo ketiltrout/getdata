@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2012 D. V. Wiebe
+ * Copyright (C) 2005-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1845,8 +1845,8 @@ static size_t _GD_DoConst(DIRFILE *restrict D, const gd_entry_t *restrict E,
     return 0;
   }
 
-  dreturn("%i", 1);
-  return 1;
+  dreturn("%i", len);
+  return len;
 }
 
 /* _GD_DoField: Locate the field in the database and read it.

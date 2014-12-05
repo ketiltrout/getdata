@@ -1,6 +1,31 @@
-2014-12-05   D. V. Wiebe <getdata@ketiltrout.net> svn:930
-	Backport fixes from trunk.  Update build system for autotools bump.
+2014-12-06   D. V. Wiebe <getdata@ketiltrout.net> svn:931
+	Backport more bugfixes from trunk:
 
+	* src/getdata.c (_GD_DoConst): Return len instead of 1. (r848)
+	* src/field_list.c (gd_carrays gd_mcarrays): Update _GD_DoField calls to
+	deal with the above. (r848)
+	* test/get_carray_c2r.c: Added. (r848)
+
+	* src/add.c (_GD_CopyScalars): Added. (r848)
+	* src/add.c (_GD_Change): Fix scalar copying for GD_POLYNOM_ENTRY.  Don't
+	throw errors for passed members which will be ignored due to scalars (spf,
+	numbits, bitnum). (r848)
+	* test/add_bit_scalars.c test/add_mplex_scalars.c test/add_raw_spf_scalar.c
+	* test/add_polynom_scalar.c: Added. (r848)
+
+	* src/mod.c (_GD_Change): Fix MPLEX scalar modifying. (r848)
+
+2014-12-05   D. V. Wiebe <getdata@ketiltrout.net> svn:930
+	Backport bugfixes from trunk:
+
+	* bindings/cxx/rawentry.cpp (RawEntry::RawEntry): Initialise filename.
+	Patch from S. J. Benton. (r862)
+
+	* src/add.c (_GD_Change): Don't throw an error on mplex.count_val < 0.
+	(r848)
+	* src/errors.c src/internal.h: Remove unused GD_E_ENTRY_CNTVAL. (r848)
+	* test/add_mplex_val.c: Deleted. (r848)
+	
 2013-09-05   D. V. Wiebe <getdata@ketiltrout.net> svn:845
 	GetData-0.8.5 released.
 

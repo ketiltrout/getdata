@@ -1,6 +1,20 @@
-New in version 0.8.6a:
+New in verison 0.8.6a:
 
   Library Changes:
+
+  * BUG FIX: The gd_[m]add() functions now ignore zero-length scalar strings.
+    Previously they would store these invalid field codes, causing problems
+    later.
+
+  * BUG FIX: Returning complex-valued CARRAYs as purely real now works.
+    Previously only the first element requested would be returned, the remaining
+    output buffer containing uninitialised data.
+
+  * BUG FIX: Entry members spf, bitnum, numbits, and period are now completely
+    ignored by gd_[m]add() when corresponding named scalars are specified.
+    Previously, an invalid value in these members would result in the entry
+    being rejected, even though the rest of GetData ignored the invalid, unsued
+    value.
 
   * BUG FIX: The parsing of the \x and \u escape sequences is now correct.
 
@@ -57,6 +71,9 @@ New in version 0.8.6a:
     being returned from valid calls.
 
   Bindings Changes:
+
+  * F77 and F95 BUG FIX: Named scalar indices are now indexed from one instead
+    of zero, like all other array indices are in the Fortran GetData bindings.
 
   * C++ BUG FIX: Fixed segfault in RawEntry destructor.  Reported by S. J.
     Benton.
