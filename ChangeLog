@@ -1,3 +1,46 @@
+2014-12-06   D. V. Wiebe <getdata@ketiltrout.net> svn:932
+	Backport more bugfixes from trunk:
+
+	* src/native.c (_GD_NativeType): Don't always return GD_FLOAT64 for LINCOMs.
+	(r867)
+
+	* src/putdata.c (_GD_MplexOutData): Fix computation of complex data. (r867)
+
+	* src/open.c (_GD_CreateDirfile _GD_Open): Close descriptors on error.
+	(r877)
+
+	* src/types.c (_GD_ConvertType): Add missing break. (r877)
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getentry gdpy_dirfile_getstring
+	gdpy_dirfile_putcarray gdpy_dirfile_putdata) src/include.c (_GD_Include)
+	src/putdata.c (_GD_DoMplexOut): Deallocate buffers on error. (r877)
+
+	* src/parse.c (_GD_ParseCarray): Return on error. (r877)
+
+	* src/parse.c (_GD_ParseFieldSpec): Only resize the dot_list when necessary.
+	Also, clean up if the resize doesn't work. (r877)
+
+	* src/getdata.h.in: Remove __nonnull__ from parameter two of
+	gd_verbose_prefix. (r877)
+
+	* src/common.c (_GD_CanonicalPath): Don't let readlink overrun the buffer.
+	Also fix double free. (r877)
+	
+	* bindings/python/pygetdata.h (PYGD_REPORT_ERROR): Added. (r877)
+
+	* bindings/python/pyentry.c (gdpy_entry_seta): Set a[i] if the pyobj is
+	complex. (r877)
+
+	* bindings/cxx/entry.cpp (Entry::Entry): Zero E if gd_entry call fails.
+	(r877)
+
+	* bindings/cxx/fragment.cpp (Fragment::Fragment): Handle error in
+	gd_fragment_affixes call. (r877)
+
+	* bindings/f77/fgetdata.c (GDASCA): Handle error in gd_entry call. (r877)
+
+	* util/dirfile2ascii.c (main): Fix check for too many fields. (r877)
+
 2014-12-06   D. V. Wiebe <getdata@ketiltrout.net> svn:931
 	Backport more bugfixes from trunk:
 
@@ -19,13 +62,62 @@
 	Backport bugfixes from trunk:
 
 	* bindings/cxx/rawentry.cpp (RawEntry::RawEntry): Initialise filename.
-	Patch from S. J. Benton. (r862)
+	Patch from S. J. Benton. (r863)
+
+	* src/add.c (_GD_Add): Set the right suberror (GD_E_ENTRY_POLYORD) for
+	poly_ord out of range. (r867)
+
+	* src/flimits.c (_GD_GetBOF): Also zero *ds if we're before sample zero.
+	(r867)
+
+	* src/flush.c (_GD_Flush): Don't flush the second lincom field if it's not
+	used. (r867)
+
+	* src/fpos.c (_GD_Seek): Fix sign on PHASE shift. (r867)
+
+	* src/fpos.c (gd_seek64): Pass index_pos=-1 to _GD_GetFilePos. (r867)
+
+	* src/getdata.c (_GD_CDivideData): Fix computation of complex division.
+	(r867)
+
+	* src/index.c (_GD_GetIndex): Fix extrapolations performed when required to
+	search for the EOF. (r867)
+	* src/index.c (gd_framenum_subset64): Fix conversion of field_end from
+	frames to samples. (r867)
 
 	* src/add.c (_GD_Change): Don't throw an error on mplex.count_val < 0.
 	(r848)
 	* src/errors.c src/internal.h: Remove unused GD_E_ENTRY_CNTVAL. (r848)
 	* test/add_mplex_val.c: Deleted. (r848)
-	
+
+	* src/legacy.c (GetFormat): Allocate Format.mplexEntries. (r867)
+
+	* src/mod.c (gd_alter_spec gd_malter_spec): Set move flags for POLYNOM
+	entries to ensure co-efficients are updated. (r867)
+
+	* src/parse.c (_GD_Tokenise): Fix parsing of \x and \u.  Don't unnecessarily
+	overwrite earlier errors with GD_E_FORMAT_UNTERM. (r867)
+
+	* bindings/idl/getdata.c (gdidl_rename): Fix handling of UPDATEDB. (r867)
+
+	* bindings/cxx/getdata/entry.h (Entry::CompScal): Allow non-zero for
+	RECIP, too. (r868)
+
+	* src/common.c (_GD_CInvertData): Correct algebra in C89 INVERT macro.
+	(r872)
+	* src/getdata.c (_GD_PolynomData): Implement correct C89 POLYNOMC macro.
+	(r872)
+	* src/getdata.c (_GD_CDivideData): Correct algebra in C89 DIVIDEC macro.
+	(r872)
+
+	* src/internal.h: Fix pointer arithmetic in C89 gd_cap_ macro. (r872)
+
+	* bindings/python/pyfragment.c (gdpy_fragment_init): Fix typo in keyword
+	names. (r876)
+
+	* Makefile.am: Auotmake version bumped to 1.13. (r915)
+	* configure.ac: Autoconf version bumped to 2.65. (r915)
+
 2013-09-05   D. V. Wiebe <getdata@ketiltrout.net> svn:845
 	GetData-0.8.5 released.
 

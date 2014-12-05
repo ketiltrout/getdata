@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -197,6 +197,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   ptr = _GD_Realloc(D, D->fragment,
       (++D->n_fragment) * sizeof(struct gd_fragment_t));
   if (ptr == NULL) {
+    fclose(new_fp);
     _GD_ReleaseDir(D, dirfd);
     D->n_fragment--;
     goto include_error;

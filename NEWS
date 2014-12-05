@@ -2,6 +2,10 @@ New in verison 0.8.6a:
 
   Library Changes:
 
+  * BUG FIX: Computation of LINCOMs with complex valued input fields now
+    correctly happens in the complex plane.  As a side effect, gd_native_type()
+    now also correctly reports such LINCOM fields to be complex valued.
+
   * BUG FIX: The gd_[m]add() functions now ignore zero-length scalar strings.
     Previously they would store these invalid field codes, causing problems
     later.
@@ -31,6 +35,9 @@ New in verison 0.8.6a:
 
   * BUG FIX: gd_alter_entry() no longer corrupts the DIRFILE when modifying
     named scalars of MPLEX fields.
+
+  * BUG FIX: Writing complex-valued MPLEX fields no longer corrupts the stored
+    data.
 
   * BUG FIX: gd_bof() now returns the correct number (i.e.: zero) when reporting
     the beginning of field of derived fields shifted to before the start of the

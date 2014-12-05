@@ -62,12 +62,6 @@ int main(void)
   n = gd_getdata(D, "polynom", 5, 0, 8, 0, GD_COMPLEX128, &c);
   error = gd_error(D);
 
-  gd_discard(D);
-
-  unlink(data);
-  unlink(format);
-  rmdir(filedir);
-
   CHECKI(error, 0);
   CHECKI(n, 8);
   for (i = 0; i < 8; ++i) {
@@ -76,6 +70,12 @@ int main(void)
     CHECKFi(i, c[i * 2], 3 + 2 * a + a * a - b * b);
     CHECKFi(i, c[i * 2 + 1], 2 * b + 2 * a * b);
   }
+
+  gd_discard(D);
+
+  unlink(data);
+  unlink(format);
+  rmdir(filedir);
 
   return r;
 }

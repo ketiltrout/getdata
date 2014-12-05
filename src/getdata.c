@@ -386,10 +386,10 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
 #ifdef GD_NO_C99_API
 #define POLYNOMC(t) \
   switch (n) { \
-    case 2: POLYNOMC2(t,2 * npts); break; \
-    case 3: POLYNOMC3(t,2 * npts); break; \
-    case 4: POLYNOMC4(t,2 * npts); break; \
-    case 5: POLYNOMC5(t,2 * npts); break; \
+    case 2: POLYNOMC2(t,npts); break; \
+    case 3: POLYNOMC3(t,npts); break; \
+    case 4: POLYNOMC4(t,npts); break; \
+    case 5: POLYNOMC5(t,npts); break; \
     default: _GD_InternalError(D); \
   }
 
@@ -1845,7 +1845,7 @@ static size_t _GD_DoConst(DIRFILE *restrict D, const gd_entry_t *restrict E,
     return 0;
   }
 
-  dreturn("%i", len);
+  dreturn("%" PRNsize_t, len);
   return len;
 }
 

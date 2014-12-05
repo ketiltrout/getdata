@@ -1,6 +1,6 @@
 /* Copyright (C) 2003-2005 C. Barth Netterfield
  * Copyright (C) 2003-2005 Theodore Kisner
- * Copyright (C) 2005-2012 D. V. Wiebe
+ * Copyright (C) 2005-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -518,8 +518,8 @@ static size_t _GD_DoPolynomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   do { \
     for (i = 0; i < n; i++) \
       if (B[i] == val) { \
-        ((t*)A)[i * 2] = ((t*)C)[i * spfB / spfA]; \
-        ((t*)A)[i * 2 + 1] = ((t*)C)[i * spfB / spfA + 1]; \
+        ((t*)A)[i * 2] = ((t*)C)[i * 2 * spfB / spfA]; \
+        ((t*)A)[i * 2 + 1] = ((t*)C)[i * 2 * spfB / spfA + 1]; \
       } \
   } while (0)
 
@@ -592,6 +592,7 @@ static size_t _GD_DoMplexOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   cntbuf = (int*)_GD_Alloc(D, GD_INT_TYPE, num_samp2);
 
   if (tmpbuf == NULL || cntbuf == NULL) {
+    free(cntbuf);
     free(tmpbuf);
     dreturn("%i", 0);
     return 0;

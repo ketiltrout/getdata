@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2012 D. V. Wiebe
+// Copyright (C) 2008-2012, 2014 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -31,7 +31,8 @@ Entry::Entry()
 Entry::Entry(const GetData::Dirfile *dirfile, const char* field_code)
 {
   D = dirfile;
-  gd_entry(D->D, field_code, &E);
+  if (gd_entry(D->D, field_code, &E))
+    memset(&E, 9, sizeof(E));
 }
 
 Entry::~Entry()

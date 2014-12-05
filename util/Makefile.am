@@ -1,4 +1,4 @@
-# Copyright (C) 2008, 2010 D. V. Wiebe
+# Copyright (C) 2008, 2010, 2014 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -29,7 +29,7 @@ WEXTRA=-Wextra
 endif
 
 LDADD=../src/libgetdata.la
-INCLUDES=${WALL} $(WEXTRA) -I$(top_srcdir)/src
+AM_CPPFLAGS=${WALL} $(WEXTRA) -I$(top_srcdir)/src
 
 bin_PROGRAMS=checkdirfile dirfile2ascii
 checkdirfile_SOURCES=checkdirfile.c

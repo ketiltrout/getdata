@@ -268,9 +268,9 @@ off64_t _GD_Bzip2Size(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
       ptr->pos = 0;
       ptr->end = n;
     } else {
-      free(ptr);
       BZ2_bzReadClose(&ptr->bzerror, ptr->bzfile);
       fclose(ptr->stream);
+      free(ptr);
       dreturn("%i", -1);
       return -1;
     }

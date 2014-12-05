@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2013 D. V. Wiebe
+/* Copyright (C) 2009-2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1825,6 +1825,8 @@ static int gdpy_entry_seta(struct gdpy_entry_t *self, PyObject *value,
     PyObject *obj = PyTuple_GetItem(value, i);
     if (PyComplex_Check(obj)) {
       comp_scal = 1;
+      gdpy_as_complex(gd_csp_(ca[i]), obj);
+      a[i] = creal(ca[i]);
       scalar[i] = NULL;
     } else if (comp_scal) {
       gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, scalar + i, ca + i);

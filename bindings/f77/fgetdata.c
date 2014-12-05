@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2008-2014 D. V. Wiebe
  *
  *************************************************************************
  *
@@ -3152,7 +3152,10 @@ void F77_FUNC(gdasca, GDASCA) (const int32_t *dirfile, const char *field_code,
     return;
   }
 
-  gd_entry(D, _GDF_CString(&fc, field_code, *field_code_l), &E);
+  if (gd_entry(D, _GDF_CString(&fc, field_code, *field_code_l), &E) == -1) {
+    dreturnvoid();
+    return;
+  }
 
   switch (E.field_type) {
     case GD_NO_ENTRY:
