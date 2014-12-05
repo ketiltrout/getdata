@@ -45,7 +45,7 @@ F95_LIB=libf95getdata.la
 endif
 
 FCFLAGS += $(FC_WALL) $(FC_WEXTRA)
-INCLUDES = -I$(top_srcdir)/src
+AM_CPPFLAGS = -I$(top_srcdir)/src
 EXTRA_DIST=getdata.f.in getdata.f90.in
 
 SUBDIRS = test

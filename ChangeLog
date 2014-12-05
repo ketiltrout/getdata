@@ -1,7 +1,10 @@
+2014-12-05   D. V. Wiebe <getdata@ketiltrout.net> svn:930
+	Backport fixes from trunk.  Update build system for autotools bump.
+
 2013-09-05   D. V. Wiebe <getdata@ketiltrout.net> svn:845
 	GetData-0.8.5 released.
 
-	* src/zzslim.c: 
+	* src/zzslim.c: Fix for rename of gd_raw_file_.
 
 2013-07-17   D. V. Wiebe <getdata@ketiltrout.net> svn:835
 	

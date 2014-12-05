@@ -155,7 +155,7 @@ typedef gd_off64_t off64_t;
 /* imaginary part of (*z) */
 #  define cimagp(z) cimag(z)
 /* a pointer to element i of GD_DCOMPLEXP_t array a */
-#  define gd_cap_(a,i) ((GD_DCOMPLEXP_t)(a + 2 * i))
+#  define gd_cap_(a,i) (((GD_DCOMPLEXP_t)(a)) + 2 * i)
 /* a pointer to a complex scalar */
 #  define gd_csp_(a) ((GD_DCOMPLEXP_t)a)
 /* assign real two-element array b to scalar a */

@@ -3487,7 +3487,7 @@ void gdidl_rename(int argc, IDL_VPTR argv[], char *argk)
   const char* new_code = IDL_VarGetString(argv[2]);
 
   gd_rename(D, field_code, new_code, (kw.move_data ? GD_REN_DATA : 0) |
-      (kw.move_data ? GD_REN_UPDB : 0));
+      (kw.updatedb ? GD_REN_UPDB : 0));
 
   GDIDL_SET_ERROR(D);
 

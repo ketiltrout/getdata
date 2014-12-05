@@ -839,6 +839,10 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
         }
         /* reset encoding subscheme. */
         D->entry[i]->e->u.raw.file[0].subenc = GD_ENC_UNKNOWN;
+
+        /* delete name */
+        free(D->entry[i]->e->u.raw.file[0].name);
+        D->entry[i]->e->u.raw.file[0].name = NULL;
       }
   }
 

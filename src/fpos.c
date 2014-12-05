@@ -296,7 +296,7 @@ int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode)
       break;
     case GD_PHASE_ENTRY:
       if (!_GD_BadInput(D, E, 0, 1))
-        _GD_Seek(D, E->e->entry[0], offset + E->EN(phase,shift), mode);
+        _GD_Seek(D, E->e->entry[0], offset - E->EN(phase,shift), mode);
       break;
     case GD_INDEX_ENTRY:
       E->e->u.index_pos = offset;
@@ -370,7 +370,7 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code_in, off64_t frame_num,
   if (whence == GD_SEEK_SET)
     pos = 0;
   else if (whence == GD_SEEK_CUR)
-    pos = _GD_GetFilePos(D, entry, 1);
+    pos = _GD_GetFilePos(D, entry, -1);
   else if (whence == GD_SEEK_END) {
     pos = _GD_GetEOF(D, entry, NULL, &is_index);
     if (is_index)
@@ -387,7 +387,7 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code_in, off64_t frame_num,
   if (D->error)
     pos = -1;
   else
-    pos = _GD_GetFilePos(D, entry, 1);
+    pos = _GD_GetFilePos(D, entry, -1);
 
   dreturn("%lli", (long long)pos);
   return pos;

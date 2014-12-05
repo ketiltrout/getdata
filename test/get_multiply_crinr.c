@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -33,29 +33,30 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data = "mult MULTIPLY data data\n";
-  unsigned char c = 0;
-  unsigned char data_data[256];
-  int fd, n, error, r = 0;
+  const char *format_data = "mult MULTIPLY data INDEX\ndata RAW COMPLEX128 1\n";
+  double c[8];
+  double data_data[512];
+  int i, n, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
   mkdir(filedir, 0777);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
+  for (i = 0; i < 256; ++i) {
+    data_data[i * 2] = (double)i;
+    data_data[i * 2 + 1] = (double)i / 256.;
+  }
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  i = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(i, format_data, strlen(format_data));
+  close(i);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  i = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
+  write(i, data_data, 512 * sizeof(double));
+  close(i);
 
-  D = gd_open(filedir, GD_RDONLY);
-  n = gd_getdata(D, "mult", 5, 0, 1, 0, GD_UINT8, &c);
-
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_getdata(D, "mult", 5, 0, 8, 0, GD_FLOAT64, &c);
   error = gd_error(D);
 
   gd_discard(D);
@@ -64,8 +65,11 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(n, 0);
-  CHECKI(error, GD_E_BAD_CODE);
+  CHECKI(error, 0);
+  CHECKI(n, 8);
+
+  for (i = 0; i < 8; ++i)
+    CHECKFi(i, c[i], (5. + i) * (5 + i));
 
   return r;
 }

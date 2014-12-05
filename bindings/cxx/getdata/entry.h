@@ -101,7 +101,8 @@ namespace GetData {
 
       virtual int ComplexScalars() const {
         return (E.field_type == GD_LINCOM_ENTRY ||
-            E.field_type == GD_POLYNOM_ENTRY) ? E.comp_scal : 0;
+            E.field_type == GD_POLYNOM_ENTRY ||
+            E.field_type == GD_RECIP_ENTRY) ? E.comp_scal : 0;
       }
 
       virtual const char *Scalar(int index = 0) const;

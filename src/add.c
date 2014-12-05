@@ -444,9 +444,6 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       if (entry->EN(mplex,period) < 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_PERIOD, NULL,
             entry->EN(mplex,period), NULL);
-      else if (entry->EN(mplex,count_val) < 0)
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_CNTVAL, NULL,
-            entry->EN(mplex,count_val), NULL);
 
       copy_scalar[0] = copy_scalar[1] = 1;
       break;
@@ -494,7 +491,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       if (E->EN(polynom,poly_ord) < 1 || E->EN(polynom,poly_ord) >
           GD_MAX_POLYORD)
       {
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NFIELDS, NULL,
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_POLYORD, NULL,
             E->EN(polynom,poly_ord), NULL);
       } else {
         _GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
@@ -526,7 +523,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
 
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
 
-      for (i = 0; i < E->EN(polynom,poly_ord); ++i)
+      for (i = 0; i <= E->EN(polynom,poly_ord); ++i)
         copy_scalar[i] = 1;
       break;
     case GD_ALIAS_ENTRY:

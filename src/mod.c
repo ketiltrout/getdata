@@ -787,8 +787,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
     case GD_MPLEX_ENTRY:
       j = _GD_AlterScalar(D, N->EN(mplex,period) != -1 &&
           E->EN(mplex,period) != N->EN(mplex,period), GD_INT_TYPE,
-          &Q.EN(mplex,period), &N->EN(mplex,period), Q.scalar,
-          Q.scalar_ind, N->scalar[0], N->scalar_ind[0], E->e->calculated,
+          &Q.EN(mplex,period), &N->EN(mplex,period), Q.scalar + 1,
+          Q.scalar_ind + 1, N->scalar[1], N->scalar_ind[1], E->e->calculated,
           E->fragment_index);
 
       if (j & GD_AS_ERROR)
@@ -802,7 +802,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       j = _GD_AlterScalar(D, E->EN(mplex,count_val) != N->EN(mplex,count_val),
           GD_INT_TYPE, &Q.EN(mplex,count_val), &N->EN(mplex,count_val),
-          Q.scalar, Q.scalar_ind, N->scalar[1], N->scalar_ind[1],
+          Q.scalar, Q.scalar_ind, N->scalar[0], N->scalar_ind[0],
           E->e->calculated, E->fragment_index);
 
       if (j & GD_AS_ERROR)
@@ -1738,7 +1738,7 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
   free(N->field);
   N->field = new_code;
 
-  if (N->field_type == GD_LINCOM_ENTRY)
+  if (N->field_type == GD_LINCOM_ENTRY || N->field_type == GD_POLYNOM_ENTRY)
     move = 7;
 
   /* Change the entry */
@@ -1814,7 +1814,7 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
     return -1;
   }
 
-  if (N->field_type == GD_LINCOM_ENTRY)
+  if (N->field_type == GD_LINCOM_ENTRY || N->field_type == GD_POLYNOM_ENTRY)
     move = 7;
 
   /* Change the entry */

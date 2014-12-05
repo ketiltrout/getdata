@@ -29,7 +29,7 @@ if CXX_WEXTRA
 WEXTRA=-Wextra
 endif
 
-INCLUDES = ${WALL} $(WEXTRA) -I$(top_srcdir)/src
+AM_CPPFLAGS = ${WALL} $(WEXTRA) -I$(top_srcdir)/src
 LIBS=
 
 SUBDIRS=test

@@ -57,9 +57,9 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
       }
       break;
     case GD_LINCOM_ENTRY:
-      for (i = 2; i < E->EN(lincom,n_fields); ++i)
+      for (i = 0; i < E->EN(lincom,n_fields); ++i)
         _GD_Flush(D, E->e->entry[i], syn, clo);
-      /* fallthrough */
+      break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:

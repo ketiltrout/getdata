@@ -461,6 +461,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
   free(Format.rawEntries);
   free(Format.lincomEntries);
   free(Format.linterpEntries);
+  free(Format.mplexEntries);
   free(Format.multiplyEntries);
   free(Format.bitEntries);
   free(Format.phaseEntries);
@@ -471,6 +472,8 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
       sizeof(struct LincomEntryType));
   Format.linterpEntries = (struct LinterpEntryType *)malloc(Format.n_linterp *
       sizeof(struct LinterpEntryType));
+  Format.mplexEntries = (struct MPlexEntryType *)malloc(Format.n_mplex *
+      sizeof(struct MPlexEntryType));
   Format.multiplyEntries = (struct MultiplyEntryType *)malloc(Format.n_multiply
       * sizeof(struct MultiplyEntryType));
   Format.bitEntries = (struct BitEntryType *)malloc(Format.n_bit *
@@ -479,8 +482,9 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
       sizeof(struct PhaseEntryType));
 
   if (Format.rawEntries == NULL || Format.lincomEntries == NULL ||
-      Format.linterpEntries == NULL || Format.multiplyEntries == NULL || 
-      Format.bitEntries == NULL || Format.phaseEntries == NULL)
+      Format.linterpEntries == NULL || Format.mplexEntries == NULL ||
+      Format.multiplyEntries == NULL || Format.bitEntries == NULL ||
+      Format.phaseEntries == NULL)
   {
     D->error = GD_E_ALLOC;
     *error_code = _GD_CopyGlobalError(D);

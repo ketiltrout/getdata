@@ -448,7 +448,7 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
 
         /* The beginning-of-frame may not be before frame zero */
         if (bof < 0)
-          bof = 0;
+          bof = *ds = 0;
       }
 
       break;

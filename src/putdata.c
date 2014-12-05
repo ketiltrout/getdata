@@ -672,18 +672,21 @@ size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
     return 0;
   }
 
-  if (!E->e->calculated)
+  if (!E->e->calculated) {
     _GD_CalculateEntry(D, E, 1);
 
-  if (D->error) {
-    dreturn("%i", 0);
-    return 0;
+    if (D->error) {
+      D->recurse_level--;
+      dreturn("%i", 0);
+      return 0;
+    }
   }
 
   /* writing to representations is prohibited */
   if (repr != GD_REPR_NONE) {
     const char r[2] = {(char)repr, 0};
     _GD_SetError(D, GD_E_BAD_REPR, GD_E_REPR_PUT, NULL, 0, r);
+    D->recurse_level--;
     dreturn("%i", 0);
     return 0;
   }

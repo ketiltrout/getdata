@@ -18,7 +18,7 @@
 # along with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = foreign serial-tests
 
 if TEST_PYTHON
 TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../../src/.libs PYTHONPATH=../.libs/ ${PYTHON}

@@ -1726,9 +1726,9 @@ int _GD_Tokenise(DIRFILE *restrict D, const char *restrict instring,
           if (*ip >= '0' && *ip <= '9')
             accumulator = accumulator * 16 + *ip - '0';
           else if (*ip >= 'A' && *ip <= 'F')
-            accumulator = accumulator * 16 + *ip - 'A';
+            accumulator = accumulator * 16 + *ip - 'A' + 10;
           else
-            accumulator = accumulator * 16 + *ip - 'a';
+            accumulator = accumulator * 16 + *ip - 'a' + 10;
         }
 
         if (acc_mode == ACC_MODE_HEX && (n_acc == 2 || !isxdigit(*ip))) {
@@ -1745,7 +1745,7 @@ int _GD_Tokenise(DIRFILE *restrict D, const char *restrict instring,
           escaped_char = 0;
           acc_mode = ACC_MODE_NONE;
         } else if (acc_mode == ACC_MODE_UTF8 && (n_acc == 7 ||
-              accumulator > 0x10FF || !isxdigit(*ip)))
+              accumulator > 0x10FFFF || !isxdigit(*ip)))
         {
           if (_GD_UTF8Encode(D, format_file, linenum, &op, accumulator))
             break; /* syntax error */

@@ -44,7 +44,7 @@ AC_SUBST([GETDATA_MINOR], [getdata_minor])
 AC_SUBST([GETDATA_REVISION], [getdata_revision])
 AC_SUBST([GETDATA_VERSION_SUFFIX], [getdata_extra])
 
-AC_PREREQ([2.63])
+AC_PREREQ([2.65])
 AC_CONFIG_MACRO_DIR([m4])
 
 LT_PREREQ([2.2.6b])

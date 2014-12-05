@@ -18,7 +18,7 @@
 # along with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = foreign serial-tests
 
 if CC_WALL
 WALL=-Wall
@@ -29,7 +29,7 @@ WEXTRA=-Wextra
 endif
 
 LDADD=../src/libgetdata.la
-INCLUDES=${WALL} $(WEXTRA) -I$(top_srcdir)/src
+AM_CPPFLAGS=${WALL} $(WEXTRA) -I$(top_srcdir)/src
 
 EXTRA_DIST=test.h
 
@@ -175,7 +175,10 @@ FRAGMENT_TESTS=fragment_affix fragment_affix_alter fragment_affix_alter2 \
 GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_carray_slice get_char get_clincom get_complex128 \
 					get_complex64 get_const get_const_complex get_const_repr \
-					get_cpolynom get_divide get_endian8 get_endian16 get_endian32 \
+					get_cpolynom get_cpolynom1 get_cpolynom_int get_divide \
+					get_divide_ccin get_divide_crin \
+					get_divide_crinr get_divide_rcin get_divide_s get_endian8 \
+					get_endian16 get_endian32 \
 					get_endian64 get_endian_complex128_arm get_endian_complex128_big \
 					get_endian_complex128_little get_endian_complex64_arm \
 					get_endian_complex64_big get_endian_complex64_little \
@@ -188,8 +191,11 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_lincom_null get_lincom_spf get_linterp get_linterp_noin \
 					get_linterp_notab get_linterp_sort get_mplex get_mplex_bof \
 					get_mplex_lb get_mplex_lball get_mplex_nolb get_multiply \
-					get_multiply_noin get_nonexistent get_null get_off64 get_phase \
-					get_phase_affix get_polynom get_polynom_noin get_recip \
+					get_multiply_ccin get_multiply_crin get_multiply_crinr \
+					get_multiply_noin get_multiply_rcin get_multiply_s get_nonexistent \
+					get_null get_off64 get_phase \
+					get_phase_affix get_polynom get_polynom_cmpin \
+					get_polynom_noin get_recip \
 					get_recip_const get_recurse get_rofs get_sbit get_sf get_ss get_type \
 					get_uint16 get_uint32 get_uint64 get_window get_window_clr \
 					get_window_ge get_window_gt get_window_le get_window_lt \
@@ -261,7 +267,7 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_double parse_duplicate parse_duplicate_ignore \
 						parse_endian_bad parse_endian_big parse_endian_force \
 						parse_endian_little parse_endian_slash parse_eol parse_foffs \
-						parse_foffs_include parse_foffs_slash parse_hidden \
+						parse_foffs_include parse_foffs_slash parse_hex parse_hidden \
 						parse_hidden_field parse_hidden_meta parse_include \
 						parse_include_absolute parse_include_absrel \
 						parse_include_affix_ref parse_include_dir parse_include_loop \
@@ -287,7 +293,8 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_quote_mismatch parse_raw parse_raw_char parse_raw_ncols \
 						parse_raw_scalar parse_raw_spf parse_raw_type parse_recip \
 						parse_ref parse_ref_nonexistent parse_sbit parse_sort parse_string \
-						parse_string_ncols parse_string_null parse_version \
+						parse_string_ncols parse_string_null parse_utf8 parse_utf8_invalid \
+						parse_utf8_zero parse_version \
 						parse_version_89 parse_version_98 parse_version_include \
 						parse_version_permissive parse_version_p8 parse_version_p9 \
 						parse_version_slash parse_whitespace parse_window \

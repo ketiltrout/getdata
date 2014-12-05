@@ -125,7 +125,7 @@ static double _GD_GetIndex(DIRFILE* D, gd_entry_t *E, int repr, double value,
           }
 
           /* low is the EOF -- so, extrapolate */
-          sample = _GD_Extrapolate(D, E, repr, value, low - 1, 1);
+          sample = _GD_Extrapolate(D, E, repr, value, low, 1);
           dreturn("%g", sample);
           return sample;
         } else {
@@ -147,7 +147,7 @@ static double _GD_GetIndex(DIRFILE* D, gd_entry_t *E, int repr, double value,
               (dir && field_start_v < value))
           {
             /* extrapolate BOF */
-            sample = _GD_Extrapolate(D, E, repr, value, field_start_v, 0);
+            sample = _GD_Extrapolate(D, E, repr, value, low, 0);
             dreturn("%g", sample);
             return sample;
           }
@@ -255,7 +255,7 @@ double gd_framenum_subset64(DIRFILE* D, const char* field_code_in,
   if (field_end == 0)
     field_end = (gd_nframes64(D) + 1) * spf - 1;
   else
-    field_end = field_end * spf - 1;
+    field_end = (field_end + 1) * spf - 1;
 
   if (field_end - field_start < 2)
     _GD_SetError(D, GD_E_DOMAIN, GD_E_DOMAIN_EMPTY, NULL, 0, NULL);

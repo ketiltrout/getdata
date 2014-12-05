@@ -18,7 +18,7 @@
 # along with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = foreign serial-tests
 
 if CXX_WALL
 WALL=-Wall
@@ -28,7 +28,7 @@ if CXX_WEXTRA
 WEXTRA=-Wextra
 endif
 
-INCLUDES = ${WALL} $(WEXTRA) -I$(srcdir)/.. -I$(top_srcdir)/src
+AM_CPPFLAGS = ${WALL} $(WEXTRA) -I$(srcdir)/.. -I$(top_srcdir)/src
 LDADD=../libgetdata++.la
 TESTS=big_test
 
