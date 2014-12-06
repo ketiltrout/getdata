@@ -119,8 +119,8 @@ AC_MSG_RESULT([$IDL_CFLAGS])
 AC_SUBST([IDL_CFLAGS])
 
 AC_SUBST([IDL_CFLAGS])
-IDL_LIBS=`(echo 'print,"@@@"+!MAKE_DLL.LD' | $IDL 2>&1) | $GREP '@@@' | sed -e 's/@@@@<:@^ @:>@* \(.*\?\) -o.*/\1/' | sed -e 's/-m \?[\w]*//g'`
 AC_MSG_CHECKING([IDL linker flags])
+IDL_LIBS=`(echo 'print,"@@@"+!MAKE_DLL.LD' | $IDL 2>&1) | $GREP '@@@' | sed -e 's/@@@@<:@^ @:>@* \(.*\?\) -o.*/\1/' | sed -e 's/-m \?[\w]*//g'`
 AC_MSG_RESULT([$IDL_LIBS])
 AC_SUBST([IDL_LIBS])
 

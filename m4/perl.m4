@@ -167,7 +167,7 @@ if test "x${have_perl}" != "xno"; then
   if test $perl_inst_type = "vendor"; then
     GD_PERL_CONFIG([perldir], [vendorarchexp])
     GD_PERL_CONFIG([perlmandir], [vendorman3direxp])
-    if test perldir = "UNKNOWN"; then
+    if test $perldir = "UNKNOWN"; then
       perl_inst_type = "site";
     fi
   fi
@@ -180,7 +180,7 @@ if test "x${have_perl}" != "xno"; then
     perlmandir="${man3dir}"
   fi
 
-  if test $perlmandir = "UNKNOWN"; then
+  if test "x$perlmandir" = "xUNKNOWN"; then
     perlmandir="${mandir}"
   fi
 
