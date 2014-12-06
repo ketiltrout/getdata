@@ -2,7 +2,7 @@
 .\"
 .\" @configure_input@
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2014 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -15,7 +15,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_encoding 3 "20 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_encoding 3 "16 October 2014" "Version 0.8.6" "GETDATA"
 .SH NAME
 gd_alter_encoding \(em modify the binary encoding of data in a dirfile
 .SH SYNOPSIS
@@ -32,8 +32,8 @@ The
 .BR gd_alter_encoding ()
 function sets the binary encoding of the format specification fragment given by
 .I fragment_index
-to
-.I byte_sex
+to the encoding specified by
+.I encoding
 in the dirfile(5) database specified by
 .IR dirfile .
 The binary encoding of a fragment indicate the encoding of data stored in binary
@@ -45,13 +45,14 @@ no
 fields is ignored.
 
 The
-.I byte_sex
+.I encoding
 argument should be one of the following:
 .IP
 .nh
 .ad l
 .BR GD_UNENCODED ,\~ GD_BZIP2_ENCODED ,\~ GD_GZIP_ENCODED ,\~
-.BR GD_LZMA_ENCODED ,\~ GD_SLIM_ENCODED  ,\~ GD_TEXT_ENCODED .
+.BR GD_LZMA_ENCODED ,\~ GD_SLIM_ENCODED  ,\~ GD_SIE_ENCODED ,\~
+.BR GD_TEXT_ENCODED .
 .ad n
 .hy
 .PP
@@ -73,7 +74,11 @@ argument is non-zero, this call will recode the binary data of affected
 .B RAW
 fields to account for the change in binary encoding.  If the encoding of the
 fragment is encoding insensitive, or if the data type is only one byte in
-size, no change is made.  If
+size, no change is made.  The I/O pointer of all affected
+.B RAW
+fields is reset to the beginning-of-frame.
+
+If
 .I recode
 is zero, affected binary files are left untouched.
 

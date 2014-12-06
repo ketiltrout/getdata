@@ -1,6 +1,6 @@
 .\" gd_add_bit.3.  The gd_add_bit man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2012 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add_bit 3 "26 July 2012" "Version 0.8.1" "GETDATA"
+.TH gd_add_bit 3 "1 October 2013" "Version 0.8.6" "GETDATA"
 .SH NAME
 gd_add_bit, gd_add_carray gd_add_clincom, gd_add_const, gd_add_cpolynom,
 gd_add_crecip, gd_add_divide, gd_add_lincom, gd_add_linterp, gd_add_multiply,
@@ -328,10 +328,10 @@ and
 .HP
 .BI "int gd_add_cpolynom(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "int " poly_ord ", const char *" in_fields ", const double *" ca ,
-.BI int " fragment_index );
+.BI "int " fragment_index );
 .HP
 .BI "int gd_add_crecip(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "const char *" in_field ", double " cdividend [2],
+.BI "const char *" in_field ", const double " cdividend [2],
 .BI "int " fragment_index );
 .hy
 .ad n
@@ -341,7 +341,7 @@ In this case, the array pointers passed as
 or
 .IR ca
 should have twice as many (purely real) elements, consisting of alternating
-real and imaginary parts for the complex data.  For example,
+real and imaginary parts for the complex data.  That is, for example,
 .IR ca [0]
 should be the real part of the first co-efficient,
 .IR ca [1]
@@ -352,6 +352,23 @@ the real part of the second co-efficient,
 the imaginary part of the second co-efficient, and so on.  Similarly, the
 .I cdividend
 parameter becomes a double precision array of length two.
+.PP
+For
+.BR gd_add_clincom ()
+and
+.BR gd_add_cpolynom (),
+these are simply different (but equivalent) declarations of the C99 function
+entry point.  For
+.BR gd_add_crecip (),
+however, a different entry point is needed (since the
+.I cdividend
+parameter is passed by reference instead of by value).  In the interests of
+portability, the C89 version of
+.BR gd_add_crecip ()
+is always available, and may be accessed as
+.BR gd_add_crecip89 (),
+with the C89 prototype, in both the C99 and C89 APIs.
+
 
 .SH SEE ALSO
 .BR gd_add (3),

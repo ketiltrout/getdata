@@ -1,6 +1,6 @@
 .\" gd_alter_bit.3.  The gd_alter_bit man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2012 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_bit 3 "26 July 2012" "Version 0.8.1" "GETDATA"
+.TH gd_alter_bit 3 "1 October 2013" "Version 0.8.6" "GETDATA"
 .SH NAME
 gd_alter_bit, gd_alter_carray, gd_alter_clincom, gd_alter_const,
 gd_alter_cpolynom, gd_alter_crecip, gd_alter_divide, gd_alter_lincom,
@@ -167,7 +167,9 @@ any of the string parameters, also
 .IR m ", " b ", " a ", " cm ", " cb ", or " ca ;
 .TP
 .B 0\fR:
-.IR spf ", " n_fields ", " numbits ", " cdividend ", or " dividend ;
+.IR spf ", " n_fields ", " numbits ", " cdividend ", " dividend ,
+or
+.IR array_len ;
 .TP
 .B -1\fR:
 .IR bitnum " or " period ;
@@ -197,7 +199,16 @@ If
 .I recode
 is non-zero, the binary file associated with the
 .B RAW
-field will be re-encoded to reflect the new field parameters.
+field will be re-encoded to reflect the new field parameters.  In this case,
+the field's I/O pointer will be reset to the beginning-of-frame.
+
+If
+.BR gd_alter_carray ()
+is used to increase the length of a
+.B CARRAY
+field, the added elements will be uninitialised.  Use
+.BR gd_put_carray_slice (3)
+or equivalent to initialise them.
 
 See
 .B NOTES
@@ -294,7 +305,7 @@ and
 .BI "int " poly_ord ", const char *" in_fields ", const double *" ca );
 .HP
 .BI "int gd_alter_crecip(DIRFILE *" dirfile ", const char *" field_code ,
-.BI "const char *" in_field ", double " cdividend [2]);
+.BI "const char *" in_field ", const double " cdividend [2]);
 .hy
 .ad n
 .PP
@@ -303,7 +314,7 @@ In this case, the array pointers passed as
 or
 .IR ca
 should have twice as many (purely real) elements, consisting of alternating
-real and imaginary parts for the complex data.  For example,
+real and imaginary parts for the complex data.  That is, for example,
 .IR ca [0]
 should be the real part of the first co-efficient,
 .IR ca [1]
@@ -314,6 +325,22 @@ the real part of the second co-efficient,
 the imaginary part of the second co-efficient, and so on.  Similarly, the
 .I cdividend
 parameter becomes a double precision array of length two.
+.PP
+For
+.BR gd_alter_clincom ()
+and
+.BR gd_alter_cpolynom (),
+these are simply different (but equivalent) declarations of the C99 function
+entry point.  For
+.BR gd_alter_crecip (),
+however, a different entry point is needed (since the
+.I cdividend
+parameter is passed by reference instead of by value).  In the interests of
+portability, the C89 version of
+.BR gd_alter_crecip ()
+is always available, and may be accessed as
+.BR gd_alter_crecip89 (),
+with the C89 prototype, in both the C99 and C89 APIs.
 
 .SH SEE ALSO
 .BR gd_alter_entry (3),

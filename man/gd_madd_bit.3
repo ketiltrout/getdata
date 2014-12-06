@@ -1,6 +1,6 @@
 .\" gd_madd_bit.3.  The gd_madd_bit man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2012 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_madd_bit 3 "1 April 2012" "Version 0.8.0" "GETDATA"
+.TH gd_madd_bit 3 "30 September 2013" "Version 0.8.6" "GETDATA"
 .SH NAME
 gd_madd_bit, gd_madd_carray, gd_madd_clincom, gd_madd_const, gd_madd_cpolynom,
 gd_madd_crecip, gd_madd_divide, gd_madd_lincom, gd_madd_linterp,
@@ -283,7 +283,7 @@ In this case, the array pointers passed as
 or
 .IR ca
 should have twice as many (purely real) elements, consisting of alternating
-real and imaginary parts for the complex data.  For example,
+real and imaginary parts for the complex data.  That is, for example,
 .IR ca [0]
 should be the real part of the first co-efficient,
 .IR ca [1]
@@ -294,6 +294,22 @@ the real part of the second co-efficient,
 the imaginary part of the second co-efficient, and so on.  Similarly, the
 .I cdividend
 parameter becomes a double precision array of length two.
+.PP
+For
+.BR gd_madd_clincom ()
+and
+.BR gd_madd_cpolynom (),
+these are simply different (but equivalent) declarations of the C99 function
+entry point.  For
+.BR gd_madd_crecip (),
+however, a different entry point is needed (since the
+.I cdividend
+parameter is passed by reference instead of by value).  In the interests of
+portability, the C89 version of
+.BR gd_madd_crecip ()
+is always available, and may be accessed as
+.BR gd_madd_crecip89 (),
+with the C89 prototype, in both the C99 and C89 APIs.
 
 .SH SEE ALSO
 .BR gd_add_bit (3),
