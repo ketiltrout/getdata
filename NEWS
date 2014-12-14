@@ -30,10 +30,10 @@ New in verison 0.9.0a:
     gzip-encoded data works.  See the gzip discussion in the 0.8.0 section below
     for important notes.
 
-  * A newly-created dirfile is now always opened in read-write mode, ignoring the
-    access mode specified in the call.  Previously, specifying both GD_RDONLY and
-    GD_CREAT in open calls would result in an access mode (GD_E_ACCMODE) error if
-    the dirfile didn't already exist.
+  * A newly-created dirfile is now always opened in read-write mode, ignoring
+    the access mode specified in the call.  Previously, specifying both
+    GD_RDONLY and GD_CREAT in open calls would result in an access mode
+    (GD_E_ACCMODE) error if the dirfile didn't already exist.
 
   * BUG FIX: In addition to the addition of write support mentioned above, a
     number of problems with reading LZMA files has been fixed, which should
@@ -43,8 +43,6 @@ New in verison 0.9.0a:
     codes that contain an umatched opening < (e.g. "scalar<3").  This is now
     interpreted as a simple field code (which may be rejected later due to the
     presence of the invalid '<' character).
-
-  * BUG FIX: The parsing of the \x and \u escape sequences is now correct.
 
   * BUG FIX: The parser no-longer interprets various numbers as field codes
     when it shouldn't (e.g. when specifying a PHASE shift as "1." instead of
@@ -64,10 +62,6 @@ New in verison 0.9.0a:
     represented in the metadata on disk.  For the behaviour with later Versions,
     and in permissive mode, see the previous.
 
-  * BUG FIX: Computation of LINCOMs with complex valued input fields now
-    correctly happens in the complex plane.  As a side effect, gd_native_type()
-    now also correctly reports such LINCOM fields to be complex valued.
-
   * BUG FIX: If performing a metadata update due to renaming fields (perhaps
     by passing GD_REN_UPDB to gd_rename()) results in an invalid field code
     due to affix restrictions, the update now fails (but see GD_REN_FORCE).
@@ -78,64 +72,12 @@ New in verison 0.9.0a:
     codes containing subfields of the renamed field are now also updated,
     including field codes specifying meta subfields which do not exist.
 
-  * BUG FIX: The gd_[m]add() functions now ignore zero-length strings in the
-    scalar[] member (i.e., they treat them as if they were NULL).  Previously
-    they would store these invalid field codes, causing problems later.
-
-  * BUG FIX: Fetching complex-valued CARRAYs as purely real data now works.
-    Previously only the first element requested would be returned, the remaining
-    output buffer containing uninitialised data.
-
-  * BUG FIX: A scalar field code specified for the last factor in a POLYNOM
-    entry is no longer ignored by gd_[m]add().
-
-  * BUG FIX: Entry members spf, bitnum, numbits, and period are now completely
-    ignored by gd_[m]add() if corresponding named scalars are specified.
-    Previously, an invalid value in these members would result in the entry
-    being rejected, even though the invalid value was immediately discarded
-    when the field was added.
-
-  * BUG FIX: gd_[m]add() no longer rejects MPLEX fields with negative count_val.
-
-  * BUG FIX: gd_alter_entry() no longer corrupts the DIRFILE when modifying
-    named scalars of MPLEX fields.
-
   * BUG FIX: reading a LINTERP table with fewer than two lines no longer results
     in a segfault on close/discard.
   
-  * BUG FIX: DIVIDE fields with complex-valued divisors are now properly
-    computed.
-
-  * BUG FIX: Complex-valued DIVIDE, POLYNOM, and RECIP fields are now computed
-    properly when the library is built in ANSI C mode.
-
-  * BUG FIX: Writing complex-valued MPLEX fields no longer corrupts the stored
-    data.
-
   * BUG FIX: Several fixes have been made to the sample index encoding (SIE)
     engine, which should now produce properly encoded data when performing
     random writes.
-
-  * BUG FIX: gd_bof() now returns the correct number (i.e.: zero) when reporting
-    the beginning of field of derived fields shifted to before the start of the
-    dirfile.  Previously, this function incorrectly returned values ranging from
-    zero to one less than the samples-per-frame of the requested field.
-
-  * BUG FIX: gd_flush(), gd_sync(), gd_raw_close() no longer segfault when
-    operating on a LINCOM with only one input field.
-  
-  * BUG FIX: gd_seek() now works correctly on PHASE fields; previously, the
-    sign of the PHASE shift was flipped.
-
-  * BUG FIX: gd_seek() now correctly positions the virtual I/O pointer of the
-    INDEX field.
-
-  * BUG FIX: gd_framenum_subset() now returns the correct value when passed a
-    field_end which is beyond the end of field, and then is required to
-    extrapolate outside of the specified frame range.
-
-  * BUG FIX: gd_error_string() now produces the correct string when reporting
-    an out-of-range poly_ord encountered by gd_add_polynom() and similar.
 
   * BUG FIX: gd_alter_raw() and similar no longer fail when asked to re-encode
     the data file of a RAW field which has not been previously accessed.
@@ -144,19 +86,6 @@ New in verison 0.9.0a:
     changing table paths with gd_alter_linterp() or similar.  Previously these
     obsolete, cached LUTs would sometimes linger, causing incorrect LINTERP
     computation.
-
-  * BUG FIX: gd_[m]alter_spec() no longer ignore co-efficients specified for
-    POLYNOM entries.
-
-  * BUG FIX: gd_alter_encoding() now deletes the internal cache of RAW filenames
-    of the affected fragment; previously, these old, cached filenames could lead
-    to I/O errors when reading and writing the re-encoded RAW data files.
-
-  * BUG FIX: Calling the Legacy API function GetFormat() on a Dirfile with MPLEX
-    or WINDOW fields no longer results in a segmentation fault.
-
-  * BUG FIX: Attempts to read past the EOF of a gzipped field no longer results
-    in an I/O error, but successfully returns no data.
 
   API Changes:
   
@@ -198,11 +127,11 @@ New in verison 0.9.0a:
     alias points to.
 
   * A number of different error codes which indicated the same problem (an
-    I/O error returned by the filesystem) have been merged into one.  The error
-    codes GD_E_OPEN, GD_E_TRUNC, GD_E_RAW_IO, GD_E_OPEN_FRAGMENT, GD_E_FLUSH
-    are replaced by the new error GD_E_IO.  The old symbols remain as aliases
-    but are deprecated.  There is one exception to this merge: attempts to
-    flush metadata lines which are too long are now reported using
+    I/O error returned by the operating system) have been merged into one.  The
+    error codes GD_E_OPEN, GD_E_TRUNC, GD_E_RAW_IO, GD_E_OPEN_FRAGMENT,
+    GD_E_FLUSH are replaced by the new error GD_E_IO.  The old symbols remain as
+    aliases but are deprecated.  There is one exception to this merge: attempts
+    to flush metadata lines which are too long are now reported using
     GD_E_LINE_TOO_LONG.  Previously, these errors used GD_E_FLUSH.
 
   * The error code GD_E_OPEN_LINFILE has also been removed.  It has been split
@@ -260,24 +189,8 @@ New in verison 0.9.0a:
     error codes (such as OpenError).  These deprecated exceptions are simply
     aliases for the current ones and are never returned by the bindings.
 
-  * C++ BUG FIX: Fixed segfault in RawEntry destructor.  Reported by S. J.
-    Benton.
-
-  * C++ BUG FIX: Entry::ComplexScalars() now returns non-zero for RECIP
-    entries when appropriate, instead of always returning zero.  (The
-    RecipEntry::ComplexScalars() method always returned the correct value.)
-
-  * F77 and F95 BUG FIX: Named scalar indices are now indexed from one instead
-    of zero, like all other array indices are in the Fortran GetData bindings.
-
   * F95 BUG FIX: fgd_add and fgd_alter_entry no longer ignore named scalar
     parameters provided in supplied entry structures.
-
-  * IDL BUG FIX: the /UPDATEDB flag to gd_rename now operates as expected.
-    Previously it would act like /MOVE_DATA.
-
-  * PYTHON BUG FIX: The keyword for the "dirfile" parameter in the
-    getdata.fragment constructor is now properly spelled.
 
   Miscellaneous:
 
@@ -288,6 +201,104 @@ New in verison 0.9.0a:
     tools to build GetData; the autotools are only needed if changes need to be
     made to the configure script or Makefile input files provided in the
     release or if building from the repository.
+
+|==============================================================================|
+
+New in version 0.8.6:
+
+  Library Changes:
+
+  * BUG FIX: Computation of LINCOMs with complex valued input fields now
+    correctly happens in the complex plane.  As a side effect, gd_native_type()
+    now also correctly reports such LINCOM fields to be complex valued.
+
+  * BUG FIX: The gd_[m]add() functions now ignore zero-length scalar strings.
+    Previously they would store these invalid field codes, causing problems
+    later.
+
+  * BUG FIX: Returning complex-valued CARRAYs as purely real now works.
+    Previously only the first element requested would be returned, the remaining
+    output buffer containing uninitialised data.
+
+  * BUG FIX: Entry members spf, bitnum, numbits, and period are now completely
+    ignored by gd_[m]add() when corresponding named scalars are specified.
+    Previously, an invalid value in these members would result in the entry
+    being rejected, even though the rest of GetData ignored the invalid, unsued
+    value.
+
+  * BUG FIX: The parsing of the \x and \u escape sequences is now correct.
+
+  * BUG FIX: A scalar field code specified for the last factor in a POLYNOM
+    entry is no longer ignored by gd_[m]add().
+
+  * BUG FIX: gd_[m]add() no longer rejects MPLEX fields with negative count_val.
+
+  * BUG FIX: DIVIDE fields with complex-valued divisors are now properly
+    computed.
+
+  * BUG FIX: Complex-valued POLYNOM and RECIP fields are now computed properly
+    when the library is built in ANSI C mode.
+
+  * BUG FIX: gd_alter_entry() no longer corrupts the DIRFILE when modifying
+    named scalars of MPLEX fields.
+
+  * BUG FIX: Writing complex-valued MPLEX fields no longer corrupts the stored
+    data.
+
+  * BUG FIX: gd_bof() now returns the correct number (i.e.: zero) when reporting
+    the beginning of field of derived fields shifted to before the start of the
+    dirfile.  Previously, this function incorrectly returned values ranging from
+    zero to one less than the samples-per-frame of the requested field.
+
+  * BUG FIX: gd_flush(), gd_sync(), gd_raw_close() no longer segfault when
+    operating on a LINCOM with only one input field.
+  * BUG FIX: gd_seek() now works correctly on PHASE fields; previously, the
+    sign of the PHASE shift was flipped.
+
+  * BUG FIX: gd_seek() now correctly positions the virtual I/O pointer of the
+    INDEX field.
+
+  * BUG FIX: gd_framenum_subset() now returns the correct value when passed a
+    field_end which is beyond the end of field, and then is required to
+    extrapolate outside of the specified frame range.
+
+  * BUG FIX: gd_error_string() now produces the correct string when reporting
+    an out-of-range poly_ord encountered by gd_add_polynom() and similar.
+
+  * BUG FIX: gd_[m]alter_spec() no longer ignore co-efficients specified for
+    POLYNOM entries.
+
+  * BUG FIX: gd_alter_encoding() now deletes the internal cache of RAW filenames
+    of the affected fragment; previously, these old, cached filenames could lead
+    to I/O errors when reading and writing the re-encoded RAW data files.
+
+  * BUG FIX: Calling the Legacy API function GetFormat() on a Dirfile with MPLEX
+    or WINDOW fields no longer results in a segmentation fault.
+
+  * BUG FIX: Attempts to read past the EOF of a gzipped field no longer results
+    in an I/O error, but successfully returns no data.
+
+  * BUG FIX: The internal recursion counter wasn't being properly reset on
+    certain error conditions, leading to spurious GD_E_RECURSE_LEVEL errors
+    being returned from valid calls.
+
+  Bindings Changes:
+
+  * F77 and F95 BUG FIX: Named scalar indices are now indexed from one instead
+    of zero, like all other array indices are in the Fortran GetData bindings.
+
+  * C++ BUG FIX: Fixed segfault in RawEntry destructor.  Reported by S. J.
+    Benton.
+
+  * C++ BUG FIX: Entry::ComplexScalars() now returns non-zero for RECIP
+    entries when appropriate, instead of always returning zero.  (The
+    RecipEntry::ComplexScalars() method always returned the correct value.)
+
+  * IDL BUG FIX: The /UPDATEDB flag to gd_rename is no longer ignored; also, the
+    /MOVE_DATA flag no longer also acts as if /UPDATEDB had been specified.
+
+  * PYTHON BUG FIX: The keyword for the "dirfile" parameter in the
+    getdata.fragment constructor is now properly spelled.
 
 |==============================================================================|
 
