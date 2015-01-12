@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,7 +21,6 @@
 #include "test.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -32,44 +31,31 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  int error, r = 0;
+  const char *format_data =
+    "/NAMESPACE ns\n"
+    "parent RAW UINT8 1\n"
+    "/META parent meta CONST UINT8 2\n";
+  int fd, e1, e2, r = 0;
   DIRFILE *D;
-  gd_entry_t E, e;
 
   rmdirfile();
-  memset(&E, 0, sizeof(E));
-  E.field = "dat.a";
-  E.field_type = GD_PHASE_ENTRY;
-  E.in_fields[0] = "INDEX";
-  E.EN(phase,shift) = 0;
-  E.scalar[0] = NULL;
+  mkdir(filedir, 0777);
 
-  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE | GD_PERMISSIVE);
-  gd_dirfile_standards(D, 2);
-  gd_add(D, &E);
-  error = gd_error(D);
+  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format_data, strlen(format_data));
+  close(fd);
 
-  /* check */
-  gd_entry(D, "dat.a", &e);
-  if (gd_error(D))
-    r = 1;
-  else {
-    CHECKI(e.field_type, GD_PHASE_ENTRY);
-    CHECKS(e.in_fields[0], "INDEX");
-    CHECKI(e.fragment_index, 0);
-    CHECKI(e.EN(phase,shift), 0);
-    CHECKP(e.scalar[0]);
-    gd_free_entry_strings(&e);
-  }
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  e1 = gd_error(D);
+  CHECKI(e1,0);
 
+  gd_validate(D, "ns.parent/meta");
+  e2 = gd_error(D);
+  CHECKI(e2,0);
   gd_discard(D);
 
-  unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, GD_E_OK);
 
   return r;
 }

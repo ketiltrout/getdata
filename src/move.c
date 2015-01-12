@@ -322,7 +322,7 @@ int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
 {
   char *new_filebase, *new_code;
   struct gd_rename_data_ *rdat = NULL;
-  int i, dummy;
+  int i;
 
   dtrace("%p, %p, %i, 0x%X", D, E, new_fragment, flags);
 
@@ -344,8 +344,12 @@ int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
   }
 
   /* Compose the field's new name */
-  new_filebase = _GD_MungeCode(D, NULL, D->fragment[E->fragment_index].prefix,
-      D->fragment[E->fragment_index].suffix, NULL, NULL, E->field, &dummy, 0);
+
+  /* remove the old affixes */
+  new_filebase = _GD_MungeCode(D, NULL, 0,
+      D->fragment[E->fragment_index].prefix,
+      D->fragment[E->fragment_index].suffix, NULL, NULL, E->field, NULL,
+      NULL, GD_MC_RQ_PARTS);
   
   if (!new_filebase) {
     _GD_InternalError(D); /* the prefix/suffix wasn't found */
@@ -353,7 +357,10 @@ int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
     return -1;
   }
 
-  new_code = _GD_MungeFromFrag(D, NULL, new_fragment, new_filebase, &dummy);
+  /* add the new affixes */
+  new_code = _GD_MungeCode(D, NULL, 0, NULL, NULL,
+      D->fragment[new_fragment].prefix, D->fragment[new_fragment].suffix,
+      new_filebase, NULL, NULL, GD_MC_RQ_PARTS);
 
   if (strcmp(new_code, E->field)) {
     /* duplicate check */

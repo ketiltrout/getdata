@@ -355,14 +355,13 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
   return ns;
 }
 
-off64_t gd_eof64(DIRFILE* D, const char *field_code_in)
+off64_t gd_eof64(DIRFILE* D, const char *field_code)
 {
   off64_t ns;
   gd_entry_t *entry;
-  int repr, is_index;
-  char* field_code;
+  int is_index;
 
-  dtrace("%p, \"%s\"", D, field_code_in);
+  dtrace("%p, \"%s\"", D, field_code);
 
   _GD_ClearError(D);
 
@@ -372,8 +371,7 @@ off64_t gd_eof64(DIRFILE* D, const char *field_code_in)
     return -1;
   }
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
-      1);
+  entry = _GD_FindEntry(D, field_code, NULL, 1, 1);
 
   if (D->error) {
     dreturn("%i", -1);
@@ -384,9 +382,6 @@ off64_t gd_eof64(DIRFILE* D, const char *field_code_in)
 
   if (is_index)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   dreturn("%lli", (unsigned long long)ns);
   return ns;
@@ -549,16 +544,14 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
   return bof;
 }
 
-off64_t gd_bof64(DIRFILE* D, const char *field_code_in) gd_nothrow
+off64_t gd_bof64(DIRFILE* D, const char *field_code) gd_nothrow
 {
   off64_t bof;
   gd_entry_t *entry;
-  int repr;
-  char *field_code;
   unsigned int spf;
   long long ds;
 
-  dtrace("%p, \"%s\"", D, field_code_in);
+  dtrace("%p, \"%s\"", D, field_code);
 
   _GD_ClearError(D);
 
@@ -568,8 +561,7 @@ off64_t gd_bof64(DIRFILE* D, const char *field_code_in) gd_nothrow
     return -1;
   }
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
-      1);
+  entry = _GD_FindEntry(D, field_code, NULL, 1, 1);
 
   if (D->error) {
     dreturn("%i", -1);
@@ -580,9 +572,6 @@ off64_t gd_bof64(DIRFILE* D, const char *field_code_in) gd_nothrow
 
   if (bof != -1)
     bof = bof * spf + ds;
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   dreturn("%lli", (unsigned long long)bof);
   return bof;

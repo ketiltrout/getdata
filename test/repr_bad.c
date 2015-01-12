@@ -64,7 +64,7 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, GD_E_BAD_REPR);
+  CHECKI(error, GD_E_BAD_CODE);
   CHECKI(n, 0);
 
   return r;

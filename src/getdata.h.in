@@ -149,17 +149,17 @@ extern "C" {
 #define GD_E_EXISTS           29
 #define GD_E_UNCLEAN_DB       30
 #define GD_E_DOMAIN           31
-#define GD_E_BAD_REPR         32
-/* unused                     33, 34 */
+/* unused                     32, 33, 34 */
 #define GD_E_BOUNDS           35
 #define GD_E_LINE_TOO_LONG    36
 
-#define GD_N_ERROR_CODES      37
+#define GD_N_ERROR_CODES      37 /* including unused codes */
 
 /* Deprecated error codes */
 #define GD_E_BAD_ENDIANNESS   GD_E_ARGUMENT
 #define GD_E_BAD_PROTECTION   GD_E_ARGUMENT
 #define GD_E_BAD_VERSION      GD_E_ARGUMENT
+#define GD_E_BAD_REPR         GD_E_BAD_CODE
 #define GD_E_OPEN_LINFILE     GD_E_LUT
 #define GD_E_FLUSH            GD_E_IO
 #define GD_E_OPEN             GD_E_IO
@@ -168,6 +168,7 @@ extern "C" {
 #define GD_E_RAW_IO           GD_E_IO
 #define GD_E_TRUNC            GD_E_IO
 
+/* the maximum number of input vectors in a LINCOM */
 #define GD_MAX_LINCOM 3
 
 /* the following MUST be at least one less than twice GD_MAX_LINCOM */
@@ -351,6 +352,9 @@ typedef union {
 #define GD_EN_COMPSCAL 0x1 /* entry has complex scalar parameters */
 #define GD_EN_CALC     0x2 /* scalar field codes have been resolved */
 #define GD_EN_HIDDEN   0x4 /* entry is hidden */
+#define GD_EN_DOTTED   0x8 /* the field's name contains a dot (.) which isn't
+                              part of a namespace specificiation (i.e. Standards
+                              Version 5 or earlier) */
 
 /* ANSI C does not permit anonymous structs/unions */
 #ifdef GD_C89_API
@@ -714,8 +718,6 @@ extern const void *gd_constants(DIRFILE *dirfile,
 extern const gd_carray_t *gd_carrays(DIRFILE *dirfile,
     gd_type_t return_type) gd_nothrow gd_nonnull ((1));
 
-extern gd_entry_t *gd_free_entry_strings(gd_entry_t *entry) gd_nothrow;
-
 extern unsigned long int gd_encoding(DIRFILE *dirfile,
     int fragment) gd_nothrow gd_nonnull ((1));
 
@@ -756,6 +758,11 @@ extern int gd_fragment_index(DIRFILE *dirfile,
 
 extern const char *gd_fragmentname(DIRFILE *dirfile,
     int index) gd_nothrow gd_nonnull ((1));
+
+extern const char *gd_fragment_namespace(DIRFILE *D, int index,
+    const char *ns) gd_nothrow;
+
+extern gd_entry_t *gd_free_entry_strings(gd_entry_t *entry) gd_nothrow;
 
 extern int gd_hidden(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull ((1,2));

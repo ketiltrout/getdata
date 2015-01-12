@@ -1,9 +1,64 @@
-2014-10-16     D. V. Wiebe <g etdata@ketiltrout.net> svn:929
+2014-12-31     D. V. Wiebe <getdata@ketiltrout.net> svn:???
+	* src/getdata.c (_GD_DoField) src/putdata.c (_GD_DoFieldOut): Fix recursion
+	counting on error.
+
+	* src/getdata.h.in src/errors.c: Merge GD_E_BAD_REPR into GD_E_BAD_CODE.
+
+	* src/common.c (_GD_FindEntry): Added.
+	* src/entry.c (gd_raw_filename gd_entry, gd_entry_type gd_linterp_tablename)
+	src/flush.c (_GD_SyncOrClose) src/spf.c (_GD_GetSPF) src/constant.c
+	(gd_put_carray_slice gd_put_carray) src/putdata.c (gd_putdata64)
+	src/flimits.c (gd_eof64 gd_bof64) src/fpos.c (gd_tell64 gd_seek64):
+	Use _GD_FindEntry instead of _GD_FindFieldAndRepr.
+	* src/constant.c (_GD_PutCarraySlice) src/putdata.c (_GD_DoFieldOut):
+	Remove repr parameter.
+	* src/putdata.c (_GD_DoLinterpOut _GD_DoLincomOut _GD_DoBitOut
+	_GD_DoPhaseOut _GD_DoRecipOut _GD_DoPolynomOut _GD_DoMplexOut
+	_GD_DoConstOut): Return error if input field has a repr.
+
+	* src/parse.c: Use struct parser_state to pass around parser data rather
+	than passing bits and pieces individually.
+	* src/internal.h: Define struct parser_state.
+	* src/parse.c (_GD_SimpleParserInit): Added.
+	* src/open.c (_GD_Open): Initialise the parser proto-state; set or clear
+	GD_PEDANTIC in the dirfile flags after parsing completes.
+
+	* src/mod.c (gd_alter_spec gd_malter_spec) src/parse.c (gd_strtok) src/add.c
+	(_GD_FixName gd_madd_spec gd_add_spec): Call _GD_SimpleParserInit().
+
+	* src/parse.c (_GD_ParseFieldSpec): Speed up strcmps.
+
+	* src/common.c (_GD_GrabDir): Let callers (i.e. _GD_Include) skip
+	canonicalisation, if they've already done it.
+
+	* src/internal.h: Add ns and nsl to gd_fragment_t.
+	* src/name.c (_GD_MungeCode): Remove subfield munging (the P parameter).
+	Replace err_ok with flags parameter.  Don't malloc the buffer it the caller
+	doesn't want it.
+	* src/name.c (_GD_ValidateField): Replaced affix parameter with flags.
+	* src/parse.c (_GD_SubfieldCode _GD_CodeFromFrag _GD_InputCode _GD_SetField):
+	Added.
+
+	* src/name.c (_GD_MungeCode _GD_CheckCodeAffixes _GD_ValidateField)
+	src/include.c (_GD_SetFieldAffixes _GD_Include): Handle
+	namespaces.
+	* src/parse.c (_GD_ParseNamespace): Added.
+	* src/parse.c (_GD_ParseDirective): Handle "/NAMESPACE"
+
+	* src/name,c (_GD_MakeNewCode): Handle errors better.
+
+	* src/getdata.h.in: Declare GD_EN_DOTTED.
+	* src/name.c (_GD_PerformRename) src/add.c (_GD_Add): Set or clear GD_EN_DOTTED.
+
+	* src/fragment.c (_GD_SubFragmentList _GD_CheckChangeNamespace
+	gd_fragment_namespace): Added.
+
+2014-10-16     D. V. Wiebe <getdata@ketiltrout.net> svn:929
 	* src/open.c (_GD_CreateDirfile): Force GD_RDWR when creating a dirfile.
 	* test/creat_rdonly.c: Updated.
 	* test/creat_rdonly_exists.c: Added.
 
-2014-10-16     D. V. Wiebe <g etdata@ketiltrout.net> svn:928
+2014-10-16     D. V. Wiebe <getdata@ketiltrout.net> svn:928
 	* bindings/make_parameters.c: Replace numeric type literals with CPP macros
 	for legibility.
 
@@ -22,7 +77,7 @@
 	* bindings/python/pygetdata.c: Define deprecated Exceptions as aliases for
 	current ones.
 
-2014-07-30     D. V. Wiebe <g etdata@ketiltrout.net> svn:921
+2014-07-30     D. V. Wiebe <getdata@ketiltrout.net> svn:921
 	* src/del.c (gd_delete_alias): Deleted.
 	* src/del.c (gd_delete): Don't dereference the field code.
 
@@ -41,11 +96,11 @@
 	test 225.
 
 
-2014-07-25     D. V. Wiebe <g etdata@ketiltrout.net> svn:915
+2014-07-25     D. V. Wiebe <getdata@ketiltrout.net> svn:915
 	* Makefile.am: Auotmake version bumped to 1.13.
 	* configure.ac: Autoconf version bumped to 2.65.
 
-2014-07-25     D. V. Wiebe <g etdata@ketiltrout.net> svn:914
+2014-07-25     D. V. Wiebe <getdata@ketiltrout.net> svn:914
 	* src/parse.c (_GD_TokToNum): Added.
 	* src/parse.c (_GD_SetScalar): Call _GD_TokToNum to parse numbers.
 
@@ -69,14 +124,14 @@
 	* test/add_amb_code7.c test/alter_entry_scalar_amb.c test/flush_amb_code.c
 	test/parse_scalar1.c test/parse_scalar2.c test/parse_scalar_repr.c: Added.
 
-2014-07-17     D. V. Wiebe <g etdata@ketiltrout.net> svn:912
+2014-07-17     D. V. Wiebe <getdata@ketiltrout.net> svn:912
 	* bindings/f77/fgetdata.c (_GDF_SetDirfile): Don't abort on error, just
 	return -1 (optionally discarding the dirfile first).
 
 	* bindings/f77/fgetdata.c (_GDF_Callback GDCOPN): Handle running out of
 		DUNs.
 
-2014-07-17     D. V. Wiebe <g etdata@ketiltrout.net> svn:911
+2014-07-17     D. V. Wiebe <getdata@ketiltrout.net> svn:911
 	* src/getdata.c (_GD_DoSindir): Renamed from gd_getstrdata64 and
 	internalised.  Do return_type checks, and handle num_samp = 0.
 	* src/getdata.c (gd_getstrdata): Deleted.
@@ -374,7 +429,8 @@
 
 	* bindings/f77/fgetdata.c (GDASCA): Handle error in gd_entry call.
 
-	* bindings/php/getdata.c (gdphp_data_to_array): Add missing break.
+	* bindings/php/getdata.c (gdphp_data_to_array) src/types.c (_GD_ConvertType):
+	Add missing break.
 
 	* bindings/php/getdata.c (gd_error_string): Handle error in gd_error_string
 	call.
@@ -384,7 +440,7 @@
 	* bindings/python/pydirfile.c (gdpy_dirfile_getentry gdpy_dirfile_getstring
 	gdpy_dirfile_putcarray gdpy_dirfile_putdata) src/include.c (_GD_Include)
 	src/name.c (_GD_PrepareRename) src/putdata.c (_GD_DoMplexOut) src/sie.c
-	(_GD_SampIndWrite) src/types.c (_GD_ConvertType): Deallocate buffers on error.
+	(_GD_SampIndWrite): Deallocate buffers on error.
 
 	* bindings/python/pyentry.c (gdpy_entry_seta): Set a[i] if the pyobj is
 	complex.
@@ -437,7 +493,7 @@
 2013-12-12   D. V. Wiebe <getdata@ketiltrout.net> svn:874
 	* src/endian.c (_GD_CheckByteSex): Added.
 	* src/endian.c (_GD_FileSwapBytes): Added (replacing macro in internal.h).
-	* src/endian.c (_GD_FixEndianness): Call _GD_CheckByteSex() to check wether
+	* src/endian.c (_GD_FixEndianness): Call _GD_CheckByteSex() to check whether
 	correction is needed.
 
 	* src/getdata.c (_GD_DoRaw) src/move.c (_GD_MogrifyFile) src/putdata.c
@@ -474,8 +530,8 @@
 
 	* test/cvlist_meta0.c: Check error.
 
-	* bindings/cxx/ getdata/entry.h (Entry::CompScal): Allow non-zero for
-		RECIP, too.
+	* bindings/cxx/getdata/entry.h (Entry::CompScal): Allow non-zero for
+	RECIP, too.
 
 2013-12-06   D. V. Wiebe <getdata@ketiltrout.net> svn:867
 	* test/add_dot.c test/alter_clincom.c test/alter_const_r2c.c test/sie_sync.c

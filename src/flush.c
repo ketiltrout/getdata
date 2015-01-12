@@ -295,7 +295,6 @@ WRITE_ERR:
 static ssize_t _GD_WriteFieldCode(DIRFILE *D, FILE *stream, int me,
     const char *code, int index, int permissive, int standards, unsigned flags)
 {
-  int dummy;
   ssize_t len;
   char *ptr;
 
@@ -305,8 +304,8 @@ static ssize_t _GD_WriteFieldCode(DIRFILE *D, FILE *stream, int me,
   dtrace("%p, %p, %i, \"%s\", %i, %i, %i, 0x%X", D, stream, me, code, index,
       permissive, standards, flags);
 
-  ptr = _GD_MungeCode(D, NULL, D->fragment[me].prefix, D->fragment[me].suffix,
-      NULL, NULL, code, &dummy, 0);
+  ptr = _GD_MungeCode(D, NULL, 0, D->fragment[me].prefix,
+      D->fragment[me].suffix, NULL, NULL, code, NULL, NULL, GD_MC_RQ_PARTS);
 
   len = _GD_StringEscapeise(stream, ptr, 0, permissive, standards);
 
@@ -817,7 +816,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   char temp_file[] = "format_XXXXXX";
   char* ptr;
   struct tm now;
-  int fd, dummy;
+  int fd;
   int pretty = 0;
   ssize_t max_len = 0;
   unsigned int u;
@@ -1017,10 +1016,10 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   if (permissive || D->standards >= 3)
     for (j = 0; j < D->n_fragment; ++j)
       if (D->fragment[j].parent == i) {
-        char *prefix = _GD_MungeCode(D, NULL, D->fragment[i].prefix, NULL, NULL,
-            NULL, D->fragment[j].prefix, &dummy, 0);
-        char *suffix = _GD_MungeCode(D, NULL, NULL, D->fragment[i].suffix, NULL,
-            NULL, D->fragment[j].suffix, &dummy, 0);
+        char *prefix = _GD_MungeCode(D, NULL, 0, D->fragment[i].prefix, NULL,
+            NULL, NULL, D->fragment[j].prefix, NULL, NULL, GD_MC_RQ_PARTS);
+        char *suffix = _GD_MungeCode(D, NULL, 0, NULL, D->fragment[i].suffix,
+            NULL, NULL, D->fragment[j].suffix, NULL, NULL, GD_MC_RQ_PARTS);
 
         if (fprintf(stream, "%sINCLUDE ", (D->standards >= 5) ? "/" : "") < 0 ||
             _GD_StringEscapeise(stream, D->fragment[j].ename, 0, permissive,
@@ -1185,8 +1184,6 @@ int gd_rewrite_fragment(DIRFILE* D, int fragment)
 static int _GD_SyncOrClose(DIRFILE* D, const char* field_code, int syn, int clo)
 {
   unsigned int i;
-  int repr;
-  char *simple_field_code;
   gd_entry_t *E;
 
   dtrace("%p, \"%s\", %i, %i", D, field_code, syn, clo);
@@ -1202,15 +1199,10 @@ static int _GD_SyncOrClose(DIRFILE* D, const char* field_code, int syn, int clo)
         if (D->entry[i]->field_type == GD_RAW_ENTRY)
           _GD_Flush(D, D->entry[i], syn, clo);
   } else {
-    /* discard representation */
-    E = _GD_FindFieldAndRepr(D, field_code, &simple_field_code, &repr, NULL, 1,
-        1);
+    E = _GD_FindEntry(D, field_code, NULL, 1, 1);
 
     if (!D->error)
       _GD_Flush(D, E, syn, clo);
-
-    if (field_code != simple_field_code)
-      free(simple_field_code);
   }
 
   dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
@@ -1411,7 +1403,10 @@ uint64_t _GD_FindVersion(DIRFILE *D)
           D->av &= GD_VERS_GE_6;
           break;
         case '.':
-          D->av &= GD_VERS_LE_5;
+          if (D->entry[i]->flags & GD_EN_DOTTED)
+            D->av &= GD_VERS_LE_5;
+          else
+            D->av &= GD_VERS_GE_10;
           break;
         case '&':
         case ';':

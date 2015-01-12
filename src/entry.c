@@ -342,13 +342,12 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
   return !e;
 }
 
-char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
+char* gd_raw_filename(DIRFILE* D, const char* field_code) gd_nothrow
 {
-  int repr;
-  char *field_code, *filename;
+  char *filename;
   gd_entry_t *E;
 
-  dtrace("%p, \"%s\"", D, field_code_in);
+  dtrace("%p, \"%s\"", D, field_code);
 
   _GD_ClearError(D);
 
@@ -359,7 +358,7 @@ char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
   }
 
   /* Check field */
-  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1, 1);
+  E = _GD_FindEntry(D, field_code, NULL, 1, 1);
 
   if (D->error) {
     dreturn("%p", NULL);
@@ -371,9 +370,6 @@ char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
     dreturn("%p", NULL);
     return NULL;
   }
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   if (E->e->u.raw.file[0].name == NULL) {
     /* ensure encoding sybtype is known */
@@ -402,14 +398,12 @@ char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
   return filename;
 }
 
-int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
-  gd_nothrow
+int gd_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry) gd_nothrow
 {
-  int i, repr;
+  int i;
   gd_entry_t *E;
-  char* field_code;
 
-  dtrace("%p, \"%s\", %p", D, field_code_in, entry);
+  dtrace("%p, \"%s\", %p", D, field_code, entry);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -419,16 +413,13 @@ int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
 
   _GD_ClearError(D);
 
-  /* get rid of the represenation, if any */
-  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1, 1);
+  E = _GD_FindEntry(D, field_code, NULL, 1, 1);
 
   if (D->error) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%i", -1);
     return -1;
   }
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   /* Calculate the entry, if necessary */
   if (!(E->flags & GD_EN_CALC))
@@ -630,13 +621,11 @@ unsigned int gd_naliases(DIRFILE *D, const char *field_code) gd_nothrow
   return n;
 }
 
-gd_entype_t gd_entry_type(DIRFILE* D, const char* field_code_in) gd_nothrow
+gd_entype_t gd_entry_type(DIRFILE* D, const char* field_code) gd_nothrow
 {
   gd_entry_t* E;
-  char* field_code;
-  int repr;
 
-  dtrace("%p, \"%s\"", D, field_code_in);
+  dtrace("%p, \"%s\"", D, field_code);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -646,16 +635,12 @@ gd_entype_t gd_entry_type(DIRFILE* D, const char* field_code_in) gd_nothrow
 
   _GD_ClearError(D);
 
-  /* get rid of the represenation, if any */
-  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1, 1);
+  E = _GD_FindEntry(D, field_code, NULL, 1, 1);
 
   if (D->error) {
     dreturn("%i", GD_NO_ENTRY);
     return GD_NO_ENTRY;
   }
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   dreturn("%i", E->field_type);
   return E->field_type;
@@ -813,7 +798,6 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
 
   _GD_ClearError(D);
 
-  /* get rid of the representation, if any */
   E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1, 1);
 
   if (D->error) {
@@ -876,13 +860,12 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
   return 0;
 }
 
-char *gd_linterp_tablename(DIRFILE *D, const char *field_code_in) gd_nothrow
+char *gd_linterp_tablename(DIRFILE *D, const char *field_code) gd_nothrow
 {
-  int repr;
   gd_entry_t *E;
-  char *field_code, *table;
+  char *table;
 
-  dtrace("%p, \"%s\"", D, field_code_in);
+  dtrace("%p, \"%s\"", D, field_code);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -892,19 +875,15 @@ char *gd_linterp_tablename(DIRFILE *D, const char *field_code_in) gd_nothrow
 
   _GD_ClearError(D);
 
-  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1, 1);
+  E = _GD_FindEntry(D, field_code, NULL, 1, 1);
 
   if (D->error) {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  if (field_code != field_code_in)
-    free(field_code);
-
   if (E->field_type != GD_LINTERP_ENTRY) {
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0,
-        field_code_in);
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
     dreturn("%p", NULL);
     return NULL;
   }

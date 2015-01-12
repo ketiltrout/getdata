@@ -419,6 +419,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   gd_entry_t* E;
   int dirfd_error = 0;
   time_t mtime = 0;
+  struct parser_state p;
 
 #ifdef GD_NO_DIR_OPEN
   gd_stat64_t statbuf;
@@ -587,14 +588,30 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   D->fragment[0].vers = (flags & GD_PEDANTIC) ? GD_DIRFILE_STANDARDS_VERSION :
     0;
   D->fragment[0].suffix = D->fragment[0].prefix = NULL;
+  D->fragment[0].ns = NULL;
 
-  ref_name = _GD_ParseFragment(fp, D, 0, &D->standards, &D->flags, 1);
+  /* parser proto-state */
+  p.line = 0;
+  p.file = NULL;
+  p.standards = GD_DIRFILE_STANDARDS_VERSION;
+  p.pedantic = flags & GD_PEDANTIC;
+  p.flags = D->flags;
+  p.ns = NULL;
+  p.nsl = 0;
+  ref_name = _GD_ParseFragment(fp, D, &p, 0, 1);
   fclose(fp);
 
   if (D->error != GD_E_OK) {
     dreturn("%p", D);
     return D;
   }
+
+  /* export the parser data */
+  D->standards = p.standards;
+  if (p.pedantic)
+    D->flags |= GD_PEDANTIC;
+  else
+    D->flags &= ~GD_PEDANTIC;
 
   /* Find the reference field */
   if (ref_name != NULL) {

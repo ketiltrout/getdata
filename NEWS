@@ -35,6 +35,13 @@ New in verison 0.9.0a:
     GD_RDONLY and GD_CREAT in open calls would result in an access mode
     (GD_E_ACCMODE) error if the dirfile didn't already exist.
 
+  * Many functions which used to silently ignore representation suffixes in
+    field codes passed to them no longer do that.  Most of these will report
+    an error (GD_E_BAD_CODE) if passed a representation suffix.  The affected
+    functions are: gd_bof, gd_entry, gd_entry_type, gd_eof, gd_flush,
+    gd_linterp_tablename, gd_put_carray, gd_put_carray_slice, gd_putdata,
+    gd_raw_close, gd_raw_filename, gd_seek, gd_spf, gd_sync, gd_tell.
+
   * BUG FIX: In addition to the addition of write support mentioned above, a
     number of problems with reading LZMA files has been fixed, which should
     result in fewer segmentaion faults.

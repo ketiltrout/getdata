@@ -43,11 +43,12 @@ static gd_entry_t *_GD_FixName(DIRFILE *restrict D, char **restrict buffer,
 {
   gd_entry_t *P;
   char *ptr;
+  struct parser_state p;
 
   dtrace("%p, %p, \"%s\", %i, %p", D, buffer, name, frag, offset);
 
   /* Check prefix and suffix */
-  if (_GD_CheckCodeAffixes(D, NULL, name, frag, 1)) {
+  if (_GD_CheckCodeAffixes(D, name, frag, 1)) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -60,7 +61,8 @@ static gd_entry_t *_GD_FixName(DIRFILE *restrict D, char **restrict buffer,
     return NULL;
   }
 
-  P = _GD_CheckParent(D, &ptr, -1, 0);
+  _GD_SimpleParserInit(D, NULL, &p);
+  P = _GD_CheckParent(D, &p, &ptr, -1);
 
   if (D->error) {
     free(*buffer);
@@ -109,11 +111,8 @@ static unsigned _GD_CopyScalars(DIRFILE *restrict D,
       E->scalar[i] = NULL;
     } else {
       /* check for correct affixes */
-      if (_GD_CheckCodeAffixes(D, NULL, entry->scalar[i], entry->fragment_index,
-            1))
-      {
+      if (_GD_CheckCodeAffixes(D, entry->scalar[i], entry->fragment_index, 1))
         break;
-      }
 
       /* when using early Standards, reject ambiguous field codes */
       if (entry->scalar_ind[i] == -1 && !(D->flags & GD_NOSTANDARD) &&
@@ -267,7 +266,9 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
                                              added field this way */
 
   /* Check */
-  if (_GD_ValidateField(E->field + offset, D->standards, 1, 0, &is_dot)) {
+  if (_GD_ValidateField(E->field + offset, D->standards, 1, GD_VF_CODE,
+        &is_dot))
+  {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, entry->field);
     _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
@@ -300,10 +301,10 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       E->e->u.raw.file[0].idata = E->e->u.raw.file[1].idata = -1;
       E->e->u.raw.file[0].subenc = GD_ENC_UNKNOWN;
 
-      E->e->u.raw.filebase = _GD_MungeCode(D, NULL,
+      E->e->u.raw.filebase = _GD_MungeCode(D, NULL, 0,
           D->fragment[entry->fragment_index].prefix,
           D->fragment[entry->fragment_index].suffix, NULL, NULL, E->field,
-          &offset, 0);
+          NULL, NULL, GD_MC_RQ_PARTS);
       if (D->error)
         break;
 
@@ -331,8 +332,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
             E->EN(lincom,n_fields), NULL);
       
       for (i = 0; i < E->EN(lincom,n_fields); ++i)
-        _GD_CheckCodeAffixes(D, NULL, entry->in_fields[i],
-            entry->fragment_index, 1);
+        _GD_CheckCodeAffixes(D, entry->in_fields[i], entry->fragment_index, 1);
 
       if (D->error)
         break;
@@ -369,8 +369,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     case GD_LINTERP_ENTRY:
       E->e->u.linterp.table_len = -1;
 
-      if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index, 1))
+      if (_GD_CheckCodeAffixes(D, entry->in_fields[0], entry->fragment_index,
+            1))
       {
         break;
       }
@@ -382,9 +382,9 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     case GD_DIVIDE_ENTRY:
     case GD_INDIR_ENTRY:
     case GD_SINDIR_ENTRY:
-      if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index, 1) || _GD_CheckCodeAffixes(D, NULL,
-              entry->in_fields[1], entry->fragment_index, 1))
+      if (_GD_CheckCodeAffixes(D, entry->in_fields[0], entry->fragment_index,
+            1) || _GD_CheckCodeAffixes(D, entry->in_fields[1],
+              entry->fragment_index, 1))
       {
         break;
       }
@@ -393,8 +393,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       E->in_fields[1] = _GD_Strdup(D, entry->in_fields[1]);
       break;
     case GD_RECIP_ENTRY:
-      if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index, 1))
+      if (_GD_CheckCodeAffixes(D, entry->in_fields[0], entry->fragment_index,
+            1))
       {
         break;
       }
@@ -418,8 +418,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       E->EN(bit,numbits) = entry->EN(bit,numbits);
       E->EN(bit,bitnum) = entry->EN(bit,bitnum);
 
-      if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index, 1))
+      if (_GD_CheckCodeAffixes(D, entry->in_fields[0], entry->fragment_index,
+            1))
       {
         break;
       }
@@ -441,8 +441,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     case GD_PHASE_ENTRY:
       E->EN(phase,shift) = entry->EN(phase,shift);
 
-      if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index, 1))
+      if (_GD_CheckCodeAffixes(D, entry->in_fields[0], entry->fragment_index,
+            1))
       {
         break;
       }
@@ -455,9 +455,9 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       E->EN(window,windop) = entry->EN(window,windop);
       E->EN(window,threshold) = entry->EN(window,threshold);
 
-      if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index, 1) || _GD_CheckCodeAffixes(D, NULL,
-              entry->in_fields[1], entry->fragment_index, 1))
+      if (_GD_CheckCodeAffixes(D, entry->in_fields[0], entry->fragment_index,
+            1) || _GD_CheckCodeAffixes(D, entry->in_fields[1],
+              entry->fragment_index, 1))
       {
         break;
       }
@@ -474,9 +474,9 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       E->EN(mplex,count_val) = entry->EN(mplex,count_val);
       E->EN(mplex,period) = entry->EN(mplex,period);
 
-      if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index, 1) || _GD_CheckCodeAffixes(D, NULL,
-              entry->in_fields[1], entry->fragment_index, 1))
+      if (_GD_CheckCodeAffixes(D, entry->in_fields[0], entry->fragment_index,
+            1) || _GD_CheckCodeAffixes(D, entry->in_fields[1],
+              entry->fragment_index, 1))
       {
         break;
       }
@@ -545,10 +545,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_POLYORD, NULL,
             E->EN(polynom,poly_ord), NULL);
       } else {
-        _GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
-            entry->fragment_index, 1);
-        _GD_CheckCodeAffixes(D, NULL, entry->in_fields[1],
-            entry->fragment_index, 1);
+        _GD_CheckCodeAffixes(D, entry->in_fields[0], entry->fragment_index, 1);
+        _GD_CheckCodeAffixes(D, entry->in_fields[1], entry->fragment_index, 1);
       }
 
       if (D->error)
@@ -607,6 +605,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       dreturn("%p", NULL);
       return NULL;
     }
+    E->flags |= GD_EN_DOTTED;
     D->dot_list = (gd_entry_t **)new_list;
   }
 
@@ -680,6 +679,7 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
   int n_cols;
   int me;
   gd_entry_t* E = NULL;
+  struct parser_state p;
 
   dtrace("%p, \"%s\", \"%s\"", D, line, parent);
 
@@ -718,13 +718,14 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
   }
 
   /* start parsing */
-  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, MAX_IN_COLS, in_cols,
-      "dirfile_madd_spec()", 0, D->standards, D->flags & GD_NOSTANDARD);
+  _GD_SimpleParserInit(D, "gd_madd_spec()", &p);
+  n_cols = _GD_Tokenise(D, &p, line, &outstring, &tok_pos, MAX_IN_COLS,
+      in_cols);
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
   if (!D->error)
-    _GD_ParseFieldSpec(D, n_cols, in_cols, E, "dirfile_madd_spec()", 0, me,
-        D->standards, 1, GD_PEDANTIC, 1, &outstring, tok_pos);
+    _GD_ParseFieldSpec(D, &p, n_cols, in_cols, E,  me, 1, 1, &outstring,
+        tok_pos);
 
   free(outstring);
 
@@ -749,6 +750,7 @@ int gd_add_spec(DIRFILE* D, const char* line, int fragment_index)
   const char *tok_pos = NULL;
   char *in_cols[MAX_IN_COLS];
   int n_cols;
+  struct parser_state p;
 
   dtrace("%p, \"%s\", %i", D, line, fragment_index);
 
@@ -782,14 +784,23 @@ int gd_add_spec(DIRFILE* D, const char* line, int fragment_index)
 
   _GD_ClearError(D);
 
+  if (~D->flags & GD_HAVE_VERSION)
+    _GD_FindVersion(D);
+
+  if (D->av) {
+    p.standards = D->standards;
+    p.pedantic = 1;
+  }
+
   /* start parsing */
-  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, MAX_IN_COLS, in_cols,
-      "dirfile_add_spec()", 0, D->standards, D->flags & GD_NOSTANDARD);
+  _GD_SimpleParserInit(D, "gd_add_spec()", &p);
+  n_cols = _GD_Tokenise(D, &p, line, &outstring, &tok_pos, MAX_IN_COLS,
+      in_cols);
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
   if (!D->error)
-    _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_spec()", 0,
-        fragment_index, D->standards, 1, GD_PEDANTIC, 1, &outstring, tok_pos);
+    _GD_ParseFieldSpec(D, &p, n_cols, in_cols, NULL, fragment_index, 1, 1,
+        &outstring, tok_pos);
 
   free(outstring);
 
@@ -1425,7 +1436,7 @@ int gd_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
 
   /* Actually store the constant, now */
   if (entry)
-    _GD_DoFieldOut(D, entry, 0, 0, 1, data_type, value);
+    _GD_DoFieldOut(D, entry, 0, 1, data_type, value);
 
   dreturn("%i", D->error ? -1 : 0);
   return D->error ? -1 : 0;
@@ -1458,7 +1469,7 @@ int gd_add_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
 
   /* Actually store the carray, now */
   if (entry)
-    _GD_DoFieldOut(D, entry, 0, 0, array_len, data_type, values);
+    _GD_DoFieldOut(D, entry, 0, array_len, data_type, values);
 
   dreturn("%i", D->error ? -1 : 0);
   return D->error ? -1 : 0;
@@ -2120,7 +2131,7 @@ int gd_madd_const(DIRFILE* D, const char* parent, const char* field_code,
 
   /* Actually store the constant, now */
   if (entry)
-    _GD_DoFieldOut(D, entry, 0, 0, 1, data_type, value);
+    _GD_DoFieldOut(D, entry, 0, 1, data_type, value);
 
   dreturn("%i", D->error ? -1 : 0);
   return D->error ? -1 : 0;
@@ -2153,7 +2164,7 @@ int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
 
   /* Actually store the carray, now */
   if (entry)
-    _GD_DoFieldOut(D, entry, 0, 0, array_len, data_type, values);
+    _GD_DoFieldOut(D, entry, 0, array_len, data_type, values);
 
   dreturn("%i", D->error ? -1 : 0);
   return D->error ? -1 : 0;
@@ -2282,12 +2293,14 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
   }
 
   /* check alias name */
-  if (_GD_ValidateField(munged_code + offset, D->standards, 1, 0, NULL))
+  if (_GD_ValidateField(munged_code + offset, D->standards, 1, GD_VF_CODE,
+        NULL))
+  {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, field_code);
-  else if (_GD_FindField(D, munged_code, D->entry, D->n_entries, 1, &u))
+  } else if (_GD_FindField(D, munged_code, D->entry, D->n_entries, 1, &u))
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, munged_code);
   else
-    _GD_CheckCodeAffixes(D, NULL, target, fragment_index, 1); /* check target */
+    _GD_CheckCodeAffixes(D, target, fragment_index, 1); /* check target */
 
   if (D->error)
     goto add_alias_error;

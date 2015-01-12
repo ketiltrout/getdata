@@ -218,7 +218,7 @@ int _GD_SetTablePath(DIRFILE *restrict D, const gd_entry_t *restrict E,
   dtrace("%p, %p, %p", D, E, e);
 
   e->u.linterp.table_dirfd = _GD_GrabDir(D,
-      D->fragment[E->fragment_index].dirfd, E->EN(linterp,table));
+      D->fragment[E->fragment_index].dirfd, E->EN(linterp,table), 0);
 
   temp_buffer = _GD_Strdup(D, E->EN(linterp,table));
   if (temp_buffer == NULL) {
@@ -840,8 +840,8 @@ int _GD_GetRepr(DIRFILE *restrict D, const char *restrict field_code_in,
         break;
       default:
         if (err)
-          _GD_SetError(D, GD_E_BAD_REPR, GD_E_REPR_UNKNOWN, NULL, 0,
-              field_code_in + field_code_len - 1);
+          _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_REPR, NULL, 0,
+              field_code_in);
         dreturn("%i", 0);
         return 0;
     }
@@ -894,6 +894,28 @@ int _GD_BadInput(DIRFILE *D, const gd_entry_t *E, int i, gd_entype_t t, int err)
 
   dreturn("%i", 0);
   return 0;
+}
+
+/* Find an entry without a representation */
+gd_entry_t *_GD_FindEntry(DIRFILE *restrict D, const char *restrict field_code,
+    unsigned int *restrict index, int set, int err)
+{
+  gd_entry_t *E = NULL;
+
+  dtrace("%p, \"%s\", %p, %i, %i", D, field_code, index, set, err);
+
+  if (D->n_dot > 0)
+    E = _GD_FindField(D, field_code, D->dot_list, D->n_dot, 1, NULL);
+
+  if (E == NULL || index != NULL)
+    E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, index);
+
+  if (E == NULL && set)
+    if (err)
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+
+  dreturn("%p", E);
+  return E;
 }
 
 /* Find the entry and the representation */
@@ -1306,15 +1328,18 @@ char *_GD_MakeFullPathOnly(const DIRFILE *D, int dirfd, const char *name)
   return filepath;
 }
 
-int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name)
+int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name, int canonical)
 {
   unsigned int i;
   char *path, *dir = NULL;
   void *ptr;
 
-  dtrace("%p, %i, \"%s\"", D, dirfd, name);
+  dtrace("%p, %i, \"%s\", %i", D, dirfd, name, canonical);
 
-  path = _GD_MakeFullPath(D, dirfd, name, 1);
+  if (canonical)
+    path = _GD_Strdup(D, name);
+  else
+    path = _GD_MakeFullPath(D, dirfd, name, 1);
 
   if (path == NULL) {
     dreturn("%i", -1);

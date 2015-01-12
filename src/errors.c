@@ -49,8 +49,7 @@ static const struct {
     "Field name is reserved on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
     "Unrecognised endianness on line {3} of {2}", 0 },
-  { GD_E_FORMAT, GD_E_FORMAT_BAD_NAME,
-    "Bad field name on line {3} of {2}: {4}", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, "Bad name on line {3} of {2}: {4}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_UNTERM,
     "Unterminated token on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_METARAW,
@@ -79,8 +78,10 @@ static const struct {
   { GD_E_CREAT, GD_E_CREAT_FORMAT, "Unable to create format file {2}: ", 1 },
   /* GD_E_BAD_CODE: 4 = field code */
   { GD_E_BAD_CODE, GD_E_CODE_MISSING, "Field not found: {4}", 0 },
-  { GD_E_BAD_CODE, GD_E_CODE_INVALID, "Bad field name: {4}", 0 },
+  { GD_E_BAD_CODE, GD_E_CODE_INVALID, "Bad field code: {4}", 0 },
   { GD_E_BAD_CODE, GD_E_CODE_AMBIGUOUS, "Ambiguous field code: {4}", 0 },
+  { GD_E_BAD_CODE, GD_E_CODE_INVALID_NS, "Bad namespace: {4}", 0 },
+  { GD_E_BAD_CODE, GD_E_CODE_REPR, "Invalid representation suffix in: {4}", 0 },
   /* GD_E_BAD_TYPE: 1 = data type */
   { GD_E_BAD_TYPE, 0, "Bad data type: {1}", 0 },
   /* GD_E_IO: 2 = filename; 3 = line; 4 = included file */
@@ -196,10 +197,6 @@ static const struct {
   { GD_E_DOMAIN, GD_E_DOMAIN_EMPTY, "Improper domain: empty set", 0 },
   { GD_E_DOMAIN, GD_E_DOMAIN_ANTITONIC, "Improper domain: not monotonic", 0 },
   { GD_E_DOMAIN, GD_E_DOMAIN_MULTIPOS, "I/O position mismatch in inputs", 0 },
-  /* GD_E_UNCLEAN_DB: 4 = repr */
-  { GD_E_BAD_REPR, GD_E_REPR_UNKNOWN, "Unknown field representation: .{4}", 0 },
-  { GD_E_BAD_REPR, GD_E_REPR_PUT, "Unable to write to field reprentation: .{4}",
-    0 },
   /* GD_E_BOUNDS: (nothing) */
   { GD_E_BOUNDS, 0, "Array length out of bounds", 0 },
   /* GD_E_LINE_TOO_LONG */

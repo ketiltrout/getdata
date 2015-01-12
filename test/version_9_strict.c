@@ -91,6 +91,7 @@ int main(void)
   D = gd_cbopen(filedir, GD_RDONLY | GD_PEDANTIC, cb, ll);
   error = gd_error(D);
   v = gd_dirfile_standards(D, GD_VERSION_CURRENT);
+  CHECKI(v,GD_DIRFILE_STANDARDS_VERSION);
   n = gd_getdata(D, "ar", 4, 0, 8, 0, GD_UINT16, c);
 
   gd_discard(D);
@@ -112,7 +113,6 @@ int main(void)
   }
 
   CHECKI(n,8);
-  CHECKI(v,GD_DIRFILE_STANDARDS_VERSION);
 
   for (i = 0; i < n; ++i)
     CHECKUi(i,c[i], (i & 1) ? 4 + i : 0);

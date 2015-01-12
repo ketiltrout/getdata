@@ -80,14 +80,14 @@ AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 
 dnl Legacy API
-AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--disable-legacy-api],
-              [don't include the legacy API wrapper in the library]), dnl'
+AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--enaable-legacy-api],
+              [include the legacy API wrapper in the library]), dnl'
               [
                case "${enableval}" in
                  no) include_legacy_api="no" ;;
                  *) include_legacy_api="yes" ;;
                esac
-              ], [ include_legacy_api="yes" ])
+              ], [ include_legacy_api="no" ])
 AC_MSG_CHECKING([whether to include the legacy API])
 AC_MSG_RESULT([$include_legacy_api])
 

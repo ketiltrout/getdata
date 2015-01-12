@@ -89,7 +89,8 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
     /* 2: set a new CONST field from sout; if this is a RAW field, and we've
      *    been asked to move the raw file, _GD_Change is going to need to
      *    recalculate the entry; no need to change lout: it's ignored. */
-    if (_GD_CheckCodeAffixes(D, NULL, sin, fragment_index, 1))
+
+    if (_GD_CheckCodeAffixes(D, sin, fragment_index, 1))
       ; /* reject codes with bad affixes */
     else if (iin == -1 && !(D->flags & GD_NOSTANDARD) && D->standards <= 7 &&
         _GD_TokToNum(sin, D->standards, 1, NULL, NULL, NULL, NULL) != -1)
@@ -211,7 +212,7 @@ static int _GD_AlterInField(DIRFILE *D, int i, char **Q, char *const *N,
   dtrace("%p, %i, %p, %p, %p, %i, %i", D, i, Q, N, E, fragment_index, force);
 
   if (force || (N[i] != NULL && strcmp(E[i], N[i]))) {
-    if (_GD_CheckCodeAffixes(D, NULL, N[i], fragment_index, 1)) {
+    if (_GD_CheckCodeAffixes(D, N[i], fragment_index, 1)) {
       dreturn("%i", -1);
       return -1;
     } else if ((Q[i] = _GD_Strdup(D, N[i])) == NULL) {
@@ -1704,8 +1705,8 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
   char *outstring = NULL, *new_code;
   char *in_cols[MAX_IN_COLS];
   int n_cols, ret;
-  int standards = GD_DIRFILE_STANDARDS_VERSION;
   gd_entry_t *N = NULL;
+  struct parser_state p;
 
   dtrace("%p, \"%s\", %i", D, line, move);
 
@@ -1724,15 +1725,10 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
 
   _GD_ClearError(D);
 
-  if (~D->flags & GD_HAVE_VERSION)
-    _GD_FindVersion(D);
-
-  if (D->av)
-    standards = D->standards;
-
   /* start parsing */
-  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, MAX_IN_COLS, in_cols,
-      "dirfile_alter_spec()", 0, standards, D->flags & GD_NOSTANDARD);
+  _GD_SimpleParserInit(D, "gd_alter_spec()", &p);
+  n_cols = _GD_Tokenise(D, &p, line, &outstring, &tok_pos, MAX_IN_COLS,
+      in_cols);
 
   if (D->error) {
     free(outstring);
@@ -1765,8 +1761,8 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
   }
 
   /* Let the parser compose the entry */
-  N = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_alter_spec()", 0,
-      N->fragment_index, standards, 0, GD_PEDANTIC, 0, &outstring, tok_pos);
+  N = _GD_ParseFieldSpec(D, &p, n_cols, in_cols, NULL, N->fragment_index, 0, 0,
+      &outstring, tok_pos);
 
   free(outstring);
 
@@ -1797,8 +1793,8 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
   const char *tok_pos;
   char *in_cols[MAX_IN_COLS];
   int n_cols, ret;
-  int standards = GD_DIRFILE_STANDARDS_VERSION;
   gd_entry_t *N = NULL;
+  struct parser_state p;
 
   dtrace("%p, \"%s\", \"%s\", %i", D, line, parent, move);
 
@@ -1824,20 +1820,15 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
     return -1;
   }
 
-  if (~D->flags & GD_HAVE_VERSION)
-    _GD_FindVersion(D);
-
-  if (D->av)
-    standards = D->standards;
-
   /* start parsing */
-  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, MAX_IN_COLS, in_cols,
-      "dirfile_malter_spec()", 0, standards, D->flags & GD_NOSTANDARD);
+  _GD_SimpleParserInit(D, "gd_malter_spec()", &p);
+  n_cols = _GD_Tokenise(D, &p, line, &outstring, &tok_pos, MAX_IN_COLS,
+      in_cols);
 
   if (!D->error) {
     /* Let the parser compose the entry */
-    N = _GD_ParseFieldSpec(D, n_cols, in_cols, N, "dirfile_malter_spec()", 0,
-        N->fragment_index, standards, 0, GD_PEDANTIC, 0, &outstring, tok_pos);
+    N = _GD_ParseFieldSpec(D, &p, n_cols, in_cols, N, N->fragment_index, 0, 0,
+        &outstring, tok_pos);
 
     /* The parse will have re-applied the prefix and suffix, undo that */
     free(N->field);

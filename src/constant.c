@@ -170,14 +170,13 @@ size_t gd_carray_len(DIRFILE *D, const char *field_code) gd_nothrow
   return gd_array_len(D, field_code);
 }
 
-static int _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, int repr,
-    unsigned long first, size_t n, gd_type_t data_type, const void *data_in)
-  gd_nothrow
+static int _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, unsigned long first,
+    size_t n, gd_type_t data_type, const void *data_in) gd_nothrow
 {
   int i;
 
-  dtrace("%p, %p, %i, %lu, %" PRNsize_t ", 0x%X, %p", D, E, repr, first, n,
-      data_type, data_in);
+  dtrace("%p, %p, %lu, %" PRNsize_t ", 0x%X, %p", D, E, first, n, data_type,
+      data_in);
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
@@ -190,7 +189,7 @@ static int _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, int repr,
   {
     _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
   } else
-    _GD_DoFieldOut(D, E, repr, first, n, data_type, data_in);
+    _GD_DoFieldOut(D, E, first, n, data_type, data_in);
 
   if (D->error) {
     dreturn("%i", -1);
@@ -210,15 +209,13 @@ static int _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, int repr,
   return 0;
 }
 
-int gd_put_carray_slice(DIRFILE* D, const char *field_code_in,
-    unsigned long first, size_t n, gd_type_t data_type, const void *data_in)
-gd_nothrow
+int gd_put_carray_slice(DIRFILE* D, const char *field_code, unsigned long first,
+    size_t n, gd_type_t data_type, const void *data_in) gd_nothrow
 {
   gd_entry_t *entry;
-  int repr, r = -1;
-  char* field_code;
+  int r = -1;
 
-  dtrace("%p, \"%s\", %lu, %" PRNsize_t ", 0x%X, %p", D, field_code_in, first,
+  dtrace("%p, \"%s\", %lu, %" PRNsize_t ", 0x%X, %p", D, field_code, first,
       n, data_type, data_in);
 
   if (D->flags & GD_INVALID) {
@@ -229,10 +226,10 @@ gd_nothrow
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
-      1);
+  entry = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
 
-  if (D->error) {
+  if (entry == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%i", -1);
     return -1;
   }
@@ -242,23 +239,19 @@ gd_nothrow
   {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   } else
-    r = _GD_PutCarraySlice(D, entry, repr, first, n, data_type, data_in);
-
-  if (field_code != field_code_in)
-    free(field_code);
+    r = _GD_PutCarraySlice(D, entry, first, n, data_type, data_in);
 
   dreturn("%i", r);
   return r;
 }
 
-int gd_put_carray(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
+int gd_put_carray(DIRFILE* D, const char *field_code, gd_type_t data_type,
     const void *data_in) gd_nothrow
 {
   gd_entry_t *entry;
-  int repr, r = -1;
-  char* field_code;
+  int r = -1;
 
-  dtrace("%p, \"%s\", 0x%x, %p", D, field_code_in, data_type, data_in);
+  dtrace("%p, \"%s\", 0x%x, %p", D, field_code, data_type, data_in);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -268,10 +261,10 @@ int gd_put_carray(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
-      1);
+  entry = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
 
-  if (D->error) {
+  if (entry == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%i", -1);
     return -1;
   }
@@ -281,21 +274,18 @@ int gd_put_carray(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
   {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   } else
-    r = _GD_PutCarraySlice(D, entry, repr, 0,
+    r = _GD_PutCarraySlice(D, entry, 0,
         (entry->field_type == GD_CONST_ENTRY) ? 1 : entry->EN(scalar,array_len),
         data_type, data_in);
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   dreturn("%i", r);
   return r;
 }
 
-int gd_put_constant(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
+int gd_put_constant(DIRFILE* D, const char *field_code, gd_type_t data_type,
     const void *data_in) gd_nothrow
 {
-  return gd_put_carray_slice(D, field_code_in, 0, 1, data_type, data_in);
+  return gd_put_carray_slice(D, field_code, 0, 1, data_type, data_in);
 }
 
 /* vim: ts=2 sw=2 et tw=80

@@ -20,32 +20,68 @@
  */
 #include "internal.h"
 
-/* add/remove/modify the prefix and suffix from a field code */
-char *_GD_MungeCode(DIRFILE *D, const gd_entry_t *P, const char *old_prefix,
-    const char *old_suffix, const char *new_prefix, const char *new_suffix,
-    const char *code, int *offset, int err_ok)
+/* compose/modify a field code.  This function takes care of adding and
+ * removing affixes and namespaces */
+char *_GD_MungeCode(DIRFILE *D, const char *ns, size_t len_newns,
+    const char *old_prefix, const char *old_suffix, const char *new_prefix,
+    const char *new_suffix, const char *code, char **nso, int *offset,
+    unsigned flags)
 {
-  size_t len, oplen = 0, oslen = 0, nplen = 0, nslen = 0, plen = 0, mlen = 0;
-  const char *ptr, *slash;
-  char *new_code;
+  size_t len, len_oldpx = 0, len_oldsx = 0, len_newpx, len_newsx;
+  size_t len_sub = 0, len_oldns;
+  const char *ptr, *slash, *old_ns;
+  char *new_code, *nptr;
 
-  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", %p, %i", D, P,
-      old_prefix, old_suffix, new_prefix, new_suffix, code, offset, err_ok);
+  dtrace("%p, \"%s\", %" PRNsize_t ", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", "
+      "%p, 0x%X", D, ns, len_newns, old_prefix, old_suffix, new_prefix,
+      new_suffix, code, nso, flags);
 
   if (code == NULL) {
     dreturn("%p", NULL);
     return NULL;
   }
 
+  old_ns = code;
   len = strlen(code);
+
+  /* Check for a required namespace.  In this case, the supplied 'ns' is the
+   * namespace to check for and is not later prepended */
+  if (flags & GD_MC_CHECK_NS && ns) {
+    if (len <= len_newns || strncmp(ns, code, len_newns) ||
+        code[len_newns] != '.')
+    {
+      /* namespace missing */
+      if (flags & GD_MC_RQ_PARTS) {
+        if (flags & GD_MC_ERROR_OK)
+          _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID_NS, NULL, 0, code);
+        else
+          _GD_InternalError(D);
+      }
+      dreturn("%p", NULL);
+      return NULL;
+    }
+    /* don't re-add it if it's there already */
+    ns = NULL;
+  }
+
+  /* find the length of the current namespace tag */
+  if (flags & GD_MC_NO_NS)
+    len_oldns = 0;
+  else
+    for (len_oldns = len; len_oldns > 0; --len_oldns)
+      if (code[len_oldns - 1] == '.')
+        break;
+
+  code += len_oldns;
+  len -= len_oldns;
 
   /* Verify the old prefix is present */
   if (old_prefix) {
-    oplen = strlen(old_prefix);
-    if (strncmp(old_prefix, code, oplen)) {
+    len_oldpx = strlen(old_prefix);
+    if (strncmp(old_prefix, code, len_oldpx)) {
       /* prefix missing */
-      if (err_ok != 2) {
-        if (err_ok)
+      if (flags & GD_MC_RQ_PARTS) {
+        if (flags & GD_MC_ERROR_OK)
           _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, code);
         else
           _GD_InternalError(D);
@@ -53,27 +89,29 @@ char *_GD_MungeCode(DIRFILE *D, const gd_entry_t *P, const char *old_prefix,
       dreturn("%p", NULL);
       return NULL;
     }
-    ptr = code + oplen;
-    len -= oplen;
-  } else
+    ptr = code + len_oldpx;
+    len -= len_oldpx;
+  } else {
     ptr = code;
+    len_oldpx = 0;
+  }
 
   /* look for a /, which could indicate this is a metafield code.  If it is
    * just an illegal name with a / in it, mungeing will screw up, but
    * validation will catch the illegal name later anyways.
    */
   if ((slash = (char*)memchr(ptr, '/', len))) {
-    mlen = len + (ptr - slash);
+    len_sub = len + (ptr - slash);
     len = slash++ - ptr;
   }
 
   /* Verify the suffix is present */
   if (old_suffix) {
-    oslen = strlen(old_suffix);
-    if (strncmp(old_suffix, ptr + len - oslen, oslen)) {
+    len_oldsx = strlen(old_suffix);
+    if (strncmp(old_suffix, ptr + len - len_oldsx, len_oldsx)) {
       /* suffix missing */
-      if (err_ok != 2) {
-        if (err_ok)
+      if (flags & GD_MC_RQ_PARTS) {
+        if (flags & GD_MC_ERROR_OK)
           _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, code);
         else
           _GD_InternalError(D);
@@ -81,106 +119,149 @@ char *_GD_MungeCode(DIRFILE *D, const gd_entry_t *P, const char *old_prefix,
       dreturn("%p", NULL);
       return NULL;
     }
-    len -= oslen;
+    len -= len_oldsx;
+  } else
+    len_oldsx = 0;
+
+  /* In this case, we're using MungeCode to verify affixes are present, so
+   * nothing more to do, return input code */
+  if (flags & GD_MC_NO_ALLOC) {
+    dreturn("%p", code);
+    return (char*)code;
   }
 
   if (new_prefix)
-    nplen = strlen(new_prefix);
+    len_newpx = strlen(new_prefix);
+  else
+    len_newpx = 0;
 
   if (new_suffix)
-    nslen = strlen(new_suffix);
+    len_newsx = strlen(new_suffix);
+  else
+    len_newsx = 0;
 
-  if (P)
-    plen = strlen(P->field) + 1;
+  if (ns == NULL)
+    len_newns = 0;
 
-  if ((new_code = _GD_Malloc(D, plen + nplen + len + nslen + mlen + 1)) == NULL)
+  /* for the '.' */
+  if (len_newns)
+    len_newns++;
+
+  if ((new_code = _GD_Malloc(D, len_newns + len_oldns + len_newpx + len +
+          len_newsx + len_sub + 1)) == NULL)
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  if (P) {
-    strcpy(new_code, P->field);
-    new_code[plen - 1] = '/';
-    strcpy(new_code + plen, ptr);
-  } else {
-    if (nplen > 0)
-      strcpy(new_code, new_prefix);
-
-    strncpy(new_code + nplen, ptr, len);
-
-    if (nslen > 0)
-      strcpy(new_code + nplen + len, new_suffix);
-
-    if (slash) {
-      new_code[nplen + len + nslen] = '/';
-      strcpy(new_code + nplen + len + nslen + 1, slash);
-    }
-
-    new_code[nplen + len + nslen + mlen] = '\0';
+  /* compose the new code */
+  nptr = new_code;
+  if (len_newns > 0) {
+    strcpy(nptr, ns);
+    nptr[len_newns - 1] = '.';
+    nptr += len_newns;
   }
 
-  *offset = plen;
+  if (len_oldns > 0) {
+    strncpy(nptr, old_ns, len_oldns);
+    nptr += len_oldns;
+  }
 
-  dreturn("\"%s\" (%i)", new_code, *offset);
+  if (len_newpx > 0) {
+    strcpy(nptr, new_prefix);
+    nptr += len_newpx;
+  }
+
+  strncpy(nptr, ptr, len);
+  nptr += len;
+
+  if (len_newsx > 0) {
+    strcpy(nptr, new_suffix);
+    nptr += len_newsx;
+  }
+
+  if (slash) {
+    *(nptr++) = '/';
+    new_code[len_newpx + len + len_newsx] = '/';
+    strcpy(nptr, slash);
+    nptr += len_sub;
+  }
+
+  *nptr = '\0';
+
+  /* A field called "INDEX" can never take a namespace.   We have to check this
+   * late because the field name "INDEX" could be built up via /INCLUDE affixes
+   * (as crazy as that may be) */
+  if (len_newns + len_oldns > 0 &&
+      strncmp(new_code + len_newns + len_oldns, "INDEX", 5) == 0
+      && (new_code[len_newns + len_oldns + 5] == '\0'
+        || new_code[len_newns + len_oldns + 5] == '/'))
+  {
+    char *index = _GD_Strdup(D, new_code + len_newns + len_oldns);
+    free(new_code);
+    if (index == NULL) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    new_code = index;
+  }
+
+  if (nso)
+    *nso = new_code + len_newns + len_oldns;
+  
+  if (offset)
+    *offset = len_newns + len_oldns;
+
+  dreturn("\"%s\" (%i, %p)", new_code, offset ? *offset : -1,
+      nso ? *nso : NULL);
   return new_code;
 }
 
-/* Munge a field code or field name using the prefix and suffix of the given
- * fragment.  Returns a newly malloc'd munged code, or NULL on error */
-char *_GD_MungeFromFrag(DIRFILE *D, const gd_entry_t *P, int me,
-    const char *code, int *offset)
+/* Return non-zero if the a field code doesn't contain the correct affixes or
+ * namespace. */
+int _GD_CheckCodeAffixes(DIRFILE *D, const char *field_code, int fragment,
+    int set_error)
 {
-  char *new_code;
-  dtrace("%p, %p, %i, \"%s\", %p", D, P, me, code, offset);
-
-  new_code = _GD_MungeCode(D, P, NULL, NULL, D->fragment[me].prefix,
-      D->fragment[me].suffix, code, offset, 1);
-
-  dreturn("\"%s\"", new_code);
-  return new_code;
-}
-
-/* Return non-zero if the a field codes doesn't contain the correct affixes. */
-int _GD_CheckCodeAffixes(DIRFILE *D, const gd_entry_t *P,
-    const char *field_code, int fragment, int set_error)
-{
-  int dummy, r = 1;
-  void *ptr;
-
-  dtrace("%p, %p, \"%s\", %i, %i", D, P, field_code, fragment, set_error);
+  dtrace("%p, \"%s\", %i, %i", D, field_code, fragment, set_error);
 
   if (field_code == NULL) {
     dreturn("%i", 0);
     return 0;
   }
 
-  ptr = _GD_MungeCode(D, P, D->fragment[fragment].prefix,
-        D->fragment[fragment].suffix, NULL, NULL, field_code, &dummy,
-        set_error ? 1 : 2);
-  if (ptr) { /* success */
-    r = 0;
-    free(ptr);
+  if (_GD_MungeCode(D, D->fragment[fragment].ns, D->fragment[fragment].nsl,
+      D->fragment[fragment].prefix, D->fragment[fragment].suffix, NULL, NULL,
+      field_code, NULL, NULL, GD_MC_NO_ALLOC | GD_MC_CHECK_NS |
+      (set_error ? (GD_MC_RQ_PARTS | GD_MC_ERROR_OK) : 0)))
+  {
+    /* success */
+    dreturn("%i", 0);
+    return 0;
   }
 
-  dreturn("%i", r);
-  return r;
+  dreturn("%i", 1);
+  return 1;
 }
 
-/* Check for a valid field name -- returns 1 on error */
+/* Check for a valid name -- returns 1 on error */
 int _GD_ValidateField(const char* field_code, int standards, int strict,
-    int affix, int* is_dot)
+    unsigned type, int* is_dot)
 {
   const size_t len = strlen(field_code);
-  size_t i, local_dot = 0;
+  size_t i;
+  int local_dot = 0, last_dot;
 
-  dtrace("\"%s\", %i, %i, %i, %p", field_code, standards, strict, affix,
+  dtrace("\"%s\", %i, %i, %u, %p", field_code, standards, strict, type,
       is_dot);
+
+  /* field codes may not start with a dot */
+  last_dot = (type == GD_VF_CODE && (!strict || standards >= 10)) ? 1 : 0;
 
   if (is_dot)
     *is_dot = 0;
 
-  if (!affix && (field_code[0] == '\0' || (strict &&
+  if ((type == GD_VF_NAME) && (field_code[0] == '\0' || (strict &&
           ((len > 50 && standards < 5) || (len > 16 && standards < 3)))))
   {
     dreturn("%i", 1);
@@ -201,14 +282,32 @@ int _GD_ValidateField(const char* field_code, int standards, int strict,
       dreturn("%i", 1);
       return 1;
     } else if (field_code[i] == '.') {
-      if (affix || is_dot == NULL || (standards >= 6 && strict)) {
+      if (type == GD_VF_NS ||
+          (type == GD_VF_CODE && (!strict || standards >= 10)))
+      {
+        if (last_dot) { /* multiple consecutive dots are forbidden */
+          dreturn("%i", 1);
+          return 1;
+        }
+        last_dot = 1;
+      } else if (type == GD_VF_AFFIX || is_dot == NULL ||
+          (standards >= 6 && strict))
+      {
         dreturn("%i", 1);
         return 1;
       } else
         local_dot = 1;
-    }
+    } else
+      last_dot = 0;
 
-  if (!affix) {
+  /* Field codes may not end in a dot */
+  if (type == GD_VF_CODE && last_dot) {
+    dreturn("%i", 1);
+    return 1;
+  }
+
+  /* forbidden field names */
+  if (type == GD_VF_NAME) {
     if (strict && standards < 8)
       if ((strcmp("FRAMEOFFSET", field_code) == 0 && standards >= 1)
           || (strcmp("ENCODING", field_code) == 0 && standards >= 6)
@@ -222,12 +321,12 @@ int _GD_ValidateField(const char* field_code, int standards, int strict,
         dreturn("%i", 1);
         return 1;
       }
-
-    if (is_dot)
-      *is_dot = local_dot;
   }
 
-  dreturn("%i", 0);
+  if (is_dot)
+    *is_dot = local_dot;
+
+  dreturn("%i [%i]", 0, local_dot);
   return 0;
 }
 
@@ -280,22 +379,34 @@ int _GD_MakeNewCode(DIRFILE *D, const char *old_code, int frag,
 
   /* extract representation suffix, if necessary (if c is nil, we already
    * know there's no representation) */
-  if (E == NULL && (c == '.' || c == '/'))
+  if (E == NULL && (c == '.' || c == '/')) {
     repr = _GD_GetRepr(D, old_code, &base_code, 0);
-  else
+    if (D->error) {
+      dreturn("%i", -1);
+      return -1;
+    }
+  } else
     base_code = (char*)old_code;
 
   if (c == '/') { /* a meta subfield of the field we're renaming */
     size_t base_len = strlen(base_code);
     rdat->code_list[rdat->n_code] = (char*)_GD_Malloc(D, base_len +
-        rdat->new_len - rdat->old_len + ((repr == GD_REPR_NONE) ? 1 : 4));
+        rdat->new_len - rdat->old_len + ((repr == GD_REPR_NONE) ? 1 : 3));
+    if (D->error) {
+      ret = -1;
+      goto DONE;
+    }
     sprintf(rdat->code_list[rdat->n_code], "%s%s%s", rdat->new_code,
         base_code + rdat->old_len,
         (repr == GD_REPR_NONE) ? "" : (repr == GD_REPR_REAL) ? ".r" :
         (repr == GD_REPR_IMAG) ? ".i" : (repr == GD_REPR_MOD) ? ".m" : ".a");
   } else {
     rdat->code_list[rdat->n_code] = (char*)_GD_Malloc(D, rdat->new_len +
-        ((repr == GD_REPR_NONE) ? 1 : 4));
+        ((repr == GD_REPR_NONE) ? 1 : 3));
+    if (D->error) {
+      ret = -1;
+      goto DONE;
+    }
     sprintf(rdat->code_list[rdat->n_code], "%s%s", rdat->new_code,
         (repr == GD_REPR_NONE) ? "" : (repr == GD_REPR_REAL) ? ".r" :
         (repr == GD_REPR_IMAG) ? ".i" : (repr == GD_REPR_MOD) ? ".m" : ".a");
@@ -303,7 +414,7 @@ int _GD_MakeNewCode(DIRFILE *D, const char *old_code, int frag,
   /* check that we haven't made a code that's invalid in the destination
    * fragment
    */
-  if (_GD_CheckCodeAffixes(D, NULL, rdat->code_list[rdat->n_code], frag,
+  if (_GD_CheckCodeAffixes(D, rdat->code_list[rdat->n_code], frag,
         !(rdat->flags & GD_REN_FORCE)))
   {
     free(rdat->code_list[rdat->n_code]);
@@ -315,6 +426,7 @@ int _GD_MakeNewCode(DIRFILE *D, const char *old_code, int frag,
   } else
     rdat->n_code++;
 
+DONE:
   /* clean up after GetRepr */
   if (base_code != old_code)
     free(base_code);
@@ -333,7 +445,6 @@ static void _GD_SetNewCode(DIRFILE *D, char **code, int frag,
    */
   if (rdat->code_list[rdat->n_code]) {
     D->fragment[frag].modified = 1;
-    dprintf("%s -> %s", *code, rdat->code_list[rdat->n_code]);
     free(*code);
     *code = rdat->code_list[rdat->n_code];
   }
@@ -539,8 +650,8 @@ static int _GD_UpdateInputs(DIRFILE *D, struct gd_rename_data_ *rdat,
         case GD_SBIT_ENTRY:
         case GD_MPLEX_ENTRY:
           if (_GD_UpdateScalar(D,D->entry[u], rdat, 1, search_meta, mode)) {
-              dreturn("%i", -1);
-              return -1;
+            dreturn("%i", -1);
+            return -1;
           }
           /* Fallthrough */
         case GD_PHASE_ENTRY:
@@ -548,8 +659,8 @@ static int _GD_UpdateInputs(DIRFILE *D, struct gd_rename_data_ *rdat,
         case GD_RECIP_ENTRY:
         case GD_WINDOW_ENTRY:
           if (_GD_UpdateScalar(D,D->entry[u], rdat, 0, search_meta, mode)) {
-              dreturn("%i", -1);
-              return -1;
+            dreturn("%i", -1);
+            return -1;
           }
           break;
         case GD_NO_ENTRY:
@@ -629,11 +740,14 @@ void _GD_PerformRename(DIRFILE *restrict D,
   _GD_UpdateInputs(D, rdat, 1);
 
   /* Update the dot list */
-  if (rdat->old_dot && !rdat->new_dot)
+  if (rdat->old_dot && !rdat->new_dot) {
     memmove(D->dot_list + rdat->dot_ind, D->dot_list + rdat->dot_ind + 1,
         sizeof(gd_entry_t*) * (--D->n_dot - rdat->dot_ind));
-  else if (rdat->new_dot && !rdat->old_dot)
+    rdat->E->flags &= ~GD_EN_DOTTED;
+  } else if (rdat->new_dot && !rdat->old_dot) {
     D->dot_list[D->n_dot++] = rdat->E;
+    rdat->E->flags |= GD_EN_DOTTED;
+  }
 
   /* re-sort the lists */
   qsort(D->entry, D->n_entries, sizeof(gd_entry_t*), _GD_EntryCmp);
@@ -759,7 +873,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
   dtrace("%p, %p, \"%s\", %i, %u, 0x%X", D, E, new_name, old_dot, dot_ind,
       flags);
 
-  if (_GD_ValidateField(new_name, D->standards, 1, 0, &new_dot)) {
+  if (_GD_ValidateField(new_name, D->standards, 1, GD_VF_CODE, &new_dot)) {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, new_name);
     dreturn("%i", -1);
     return -1;
@@ -774,7 +888,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
     sprintf(name, "%s/%s", E->e->p.parent->field, new_name);
   } else {
     /* Verify prefix and suffix */
-    if (_GD_CheckCodeAffixes(D, NULL, new_name, E->fragment_index, 1)) {
+    if (_GD_CheckCodeAffixes(D, new_name, E->fragment_index, 1)) {
       dreturn("%i", -1);
       return -1;
     }
@@ -897,6 +1011,8 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
 
   /* Update database metadata */
   _GD_PerformRename(D, rdat);
+
+  D->flags &= ~GD_HAVE_VERSION;
 
   dreturn("%i", 0);
   return 0;

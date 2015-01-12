@@ -120,6 +120,12 @@ static size_t _GD_DoLinterpOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     dreturn("%i", 0);
     return 0;
   }
+  
+  if (E->e->repr[0] != GD_REPR_NONE) { /* can't write to representaions */
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_REPR, NULL, 0, E->in_fields[0]);
+    dreturn("%i", 0);
+    return 0;
+  }
 
   /* if the table is complex valued, we can't invert it */
   if (E->e->u.linterp.complex_table) {
@@ -197,8 +203,8 @@ static size_t _GD_DoLinterpOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp,
-      num_samp, GD_FLOAT64, tmpbuf);
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], first_samp, num_samp, GD_FLOAT64,
+      tmpbuf);
 
   free(tmpbuf);
 
@@ -226,6 +232,12 @@ static size_t _GD_DoLincomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   }
 
   if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (E->e->repr[0] != GD_REPR_NONE) { /* can't write to representaions */
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_REPR, NULL, 0, E->in_fields[0]);
     dreturn("%i", 0);
     return 0;
   }
@@ -274,8 +286,8 @@ static size_t _GD_DoLincomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp,
-      num_samp, data_type, tmpbuf);
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], first_samp, num_samp, data_type,
+      tmpbuf);
   free(tmpbuf);
 
   dreturn("%" PRNsize_t, n_wrote);
@@ -296,6 +308,12 @@ static size_t _GD_DoBitOut(DIRFILE *restrict D, gd_entry_t *restrict E,
       num_samp, data_type, data_in);
 
   if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (E->e->repr[0] != GD_REPR_NONE) { /* can't write to representaions */
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_REPR, NULL, 0, E->in_fields[0]);
     dreturn("%i", 0);
     return 0;
   }
@@ -331,8 +349,8 @@ static size_t _GD_DoBitOut(DIRFILE *restrict D, gd_entry_t *restrict E,
       (tmpbuf[i] & mask) << E->EN(bit,bitnum);
 
   /* write the modified data out */
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp,
-      num_samp, GD_UINT64, (void*)readbuf);
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], first_samp, num_samp, GD_UINT64,
+      (void*)readbuf);
 
   free(readbuf);
   free(tmpbuf);
@@ -355,8 +373,14 @@ static size_t _GD_DoPhaseOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp +
-      E->EN(phase,shift), num_samp, data_type, data_in);
+  if (E->e->repr[0] != GD_REPR_NONE) { /* can't write to representaions */
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_REPR, NULL, 0, E->in_fields[0]);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], first_samp + E->EN(phase,shift),
+      num_samp, data_type, data_in);
 
   dreturn("%" PRNsize_t, n_wrote);
 
@@ -374,6 +398,12 @@ static size_t _GD_DoRecipOut(DIRFILE *restrict D, gd_entry_t *restrict E,
       num_samp, data_type, data_in);
 
   if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (E->e->repr[0] != GD_REPR_NONE) { /* can't write to representaions */
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_REPR, NULL, 0, E->in_fields[0]);
     dreturn("%i", 0);
     return 0;
   }
@@ -400,8 +430,8 @@ static size_t _GD_DoRecipOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp,
-      num_samp, data_type, tmpbuf);
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], first_samp, num_samp, data_type,
+      tmpbuf);
   free(tmpbuf);
 
   dreturn("%" PRNsize_t, n_wrote);
@@ -428,6 +458,12 @@ static size_t _GD_DoPolynomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   }
 
   if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (E->e->repr[0] != GD_REPR_NONE) { /* can't write to representaions */
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_REPR, NULL, 0, E->in_fields[0]);
     dreturn("%i", 0);
     return 0;
   }
@@ -482,8 +518,8 @@ static size_t _GD_DoPolynomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp,
-      num_samp, data_type, tmpbuf);
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], first_samp, num_samp, data_type,
+      tmpbuf);
   free(tmpbuf);
 
   dreturn("%" PRNsize_t, n_wrote);
@@ -552,6 +588,12 @@ static size_t _GD_DoMplexOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
+  if (E->e->repr[0] != GD_REPR_NONE) { /* can't write to representaions */
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_REPR, NULL, 0, E->in_fields[0]);
+    dreturn("%i", 0);
+    return 0;
+  }
+
   if (_GD_BadInput(D, E, 1, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
@@ -602,8 +644,8 @@ static size_t _GD_DoMplexOut(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   /* and write it. */
   if (!D->error)
-    n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp,
-        num_samp, data_type, tmpbuf);
+    n_wrote = _GD_DoFieldOut(D, E->e->entry[0], first_samp, num_samp, data_type,
+        tmpbuf);
   free(tmpbuf);
 
   dreturn("%" PRNsize_t, n_wrote);
@@ -638,14 +680,14 @@ static size_t _GD_DoConstOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   return 1;
 }
 
-size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
+size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     off64_t first_samp, size_t num_samp, gd_type_t data_type,
     const void *restrict data_in)
 {
   size_t n_wrote = 0;
 
-  dtrace("%p, %p, %i, %lli, %" PRNsize_t ", 0x%X, %p", D, E, repr,
-      (long long)first_samp, num_samp, data_type, data_in);
+  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
+      num_samp, data_type, data_in);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
@@ -654,20 +696,14 @@ size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
     return 0;
   }
 
-  if (!(E->flags & GD_EN_CALC))
+  if (!(E->flags & GD_EN_CALC)) {
     _GD_CalculateEntry(D, E, 1);
 
-  if (D->error) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  /* writing to representations is prohibited */
-  if (repr != GD_REPR_NONE) {
-    const char r[2] = {(char)repr, 0};
-    _GD_SetError(D, GD_E_BAD_REPR, GD_E_REPR_PUT, NULL, 0, r);
-    dreturn("%i", 0);
-    return 0;
+    if (D->error) {
+      D->recurse_level--;
+      dreturn("%i", 0);
+      return 0;
+    }
   }
 
   /* this call will throw GD_E_DOMAIN if a problem arises; however, that only
@@ -731,18 +767,16 @@ size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
 }
 
 /* this function is little more than a public boilerplate for _GD_DoFieldOut */
-size_t gd_putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
+size_t gd_putdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
     off64_t first_samp, size_t num_frames, size_t num_samp, gd_type_t data_type,
     const void *data_in)
 {
   size_t n_wrote = 0;
   gd_entry_t *entry;
-  char* field_code;
-  int repr;
   unsigned int spf = 0;
 
   dtrace("%p, \"%s\", %lli, %lli, %" PRNsize_t ", %" PRNsize_t ", 0x%X, %p", D,
-      field_code_in, (long long)first_frame, (long long)first_samp, num_frames,
+      field_code, (long long)first_frame, (long long)first_samp, num_frames,
       num_samp, data_type, data_in);
 
   if (D->flags & GD_INVALID) {/* don't crash */
@@ -759,19 +793,16 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
-      1);
+  entry = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
 
-  if (D->error) {
+  if (entry == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%i", 0);
     return 0;
   }
 
   if (entry->field_type & GD_SCALAR_ENTRY_BIT)
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   if (D->error) {
     dreturn("%i", 0);
@@ -808,8 +839,7 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
     return 0;
   }
  
-  n_wrote = _GD_DoFieldOut(D, entry, repr, first_samp, num_samp, data_type,
-      data_in);
+  n_wrote = _GD_DoFieldOut(D, entry, first_samp, num_samp, data_type, data_in);
 
   dreturn("%" PRNsize_t, n_wrote);
   return n_wrote;

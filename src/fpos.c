@@ -123,14 +123,12 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
 
 /* Get the current I/O position of the given field
 */
-off64_t gd_tell64(DIRFILE *D, const char *field_code_in) gd_nothrow
+off64_t gd_tell64(DIRFILE *D, const char *field_code) gd_nothrow
 {
   off64_t pos = -1;
   gd_entry_t* entry;
-  char* field_code;
-  int repr;
 
-  dtrace("%p, \"%s\"", D, field_code_in);
+  dtrace("%p, \"%s\"", D, field_code);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -140,8 +138,7 @@ off64_t gd_tell64(DIRFILE *D, const char *field_code_in) gd_nothrow
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
-      1);
+  entry = _GD_FindEntry(D, field_code, NULL, 1, 1);
 
   if (D->error) {
     dreturn("%u", 0);
@@ -152,9 +149,6 @@ off64_t gd_tell64(DIRFILE *D, const char *field_code_in) gd_nothrow
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
   else
     pos = _GD_GetFilePos(D, entry, -1);
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   dreturn("%lli", (long long)pos);
   return pos;
@@ -335,17 +329,16 @@ int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode)
 
 /* Set the I/O position of the given field
 */
-off64_t gd_seek64(DIRFILE *D, const char *field_code_in, off64_t frame_num,
+off64_t gd_seek64(DIRFILE *D, const char *field_code, off64_t frame_num,
     off64_t sample_num, int whence)
 {
   unsigned int spf = 0;
   off64_t pos = 0;
   gd_entry_t* entry;
-  char* field_code;
-  int repr, is_index = 0;
+  int is_index = 0;
   unsigned int mode = (whence & GD_SEEK_WRITE) ? GD_FILE_WRITE : GD_FILE_READ;
 
-  dtrace("%p, \"%s\", %lli, %lli, 0x%X", D, field_code_in, (long long)frame_num,
+  dtrace("%p, \"%s\", %lli, %lli, 0x%X", D, field_code, (long long)frame_num,
       (long long)sample_num, whence);
 
   if (D->flags & GD_INVALID) {/* don't crash */
@@ -356,8 +349,7 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code_in, off64_t frame_num,
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
-      1);
+  entry = _GD_FindEntry(D, field_code, NULL, 1, 1);
 
   if (D->error) {
     dreturn("%i", -1);
@@ -366,8 +358,6 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code_in, off64_t frame_num,
 
   if (entry->field_type & GD_SCALAR_ENTRY_BIT) {
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
-    if (field_code != field_code_in)
-      free(field_code);
     dreturn("%i", -1);
     return -1;
   }
@@ -376,8 +366,6 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code_in, off64_t frame_num,
     spf = _GD_GetSPF(D, entry);
 
     if (D->error) {
-      if (field_code != field_code_in)
-        free(field_code);
       dreturn("%i", -1);
       return -1;
     }
@@ -399,9 +387,6 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code_in, off64_t frame_num,
 
   if (!D->error)
     _GD_Seek(D, entry, sample_num + pos, mode);
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   if (D->error)
     pos = -1;

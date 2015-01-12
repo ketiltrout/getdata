@@ -29,11 +29,12 @@ ADD_TESTS=add_add add_affix add_alias add_alias_affix add_alias_meta \
 					add_amb_code7 add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 					add_bit_numbits add_bit_scalars add_carray add_clincom add_code \
 					add_const add_cpolynom add_crecip add_crecip89 add_divide \
-					add_divide_invalid add_dot add_duplicate add_format add_indir \
-					add_invalid add_lincom add_lincom_affix add_lincom_invalid \
-					add_lincom_nfields add_linterp add_linterp_invalid add_meta \
-					add_meta_alias add_mplex add_mplex_scalars add_multiply \
-					add_multiply_invalid add_phase add_phase_invalid add_polynom \
+					add_divide_invalid add_dot5 add_dot6 add_dot10 add_duplicate \
+					add_format add_indir add_invalid add_lincom add_lincom_affix \
+					add_lincom_invalid add_lincom_nfields add_linterp \
+					add_linterp_invalid add_meta add_meta_alias add_mplex \
+					add_mplex_scalars add_multiply add_multiply_invalid add_ns \
+					add_ns_frag add_ns_frag2 add_phase add_phase_invalid add_polynom \
 					add_polynom_scalar add_protect add_raw add_raw_include \
 					add_raw_invalid add_raw_spf add_raw_spf_scalar add_raw_sub \
 					add_raw_type add_rdonly add_recip add_resolv add_sarray \
@@ -228,8 +229,8 @@ HIDE_TESTS=hide hide_hidden hide_unhide
 
 INCLUDE_TESTS=include_accmode include_affix include_auto include_cb \
 							include_creat include_ignore include_include include_index \
-							include_invalid include_nonexistent include_pc include_ref \
-							include_sub include_syntax
+							include_invalid include_ns include_nonexistent include_pc \
+							include_ref include_sub include_syntax
 
 INDEX_TESTS=index_domain index_index index_range index_s index_subset
 
@@ -258,10 +259,12 @@ MOVE_TESTS=move_affix move_affix_dup move_affix_meta move_affix_updb \
 					 move_data_foffs move_data_foffs_neg move_data_nop move_index \
 					 move_meta move_move move_protect move_subdir
 
-NAME_TESTS=name_affix name_affix_bad name_alias name_dangle name_dot name_dup \
-					 name_meta name_move name_move_alias name_name name_updb \
-					 name_updb_affix name_updb_alias name_updb_carray name_updb_const \
-					 name_updb_const_alias name_updb_sarray
+NAME_TESTS=name_affix name_affix_bad name_alias name_dangle name_dot5 \
+					 name_dot5r name_dot9 name_dot10 name_dup \
+					 name_meta name_move name_move_alias name_name name_ns name_ns2 \
+					 name_nsdot name_updb name_updb_affix name_updb_alias \
+					 name_updb_carray name_updb_const name_updb_const_alias \
+					 name_updb_sarray
 
 NATIVE_TESTS=native_bit native_const native_index native_lincom \
 						 native_lincom_cmpin native_lincom_cmpscal native_linterp \
@@ -302,37 +305,47 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_hidden_field parse_hidden_meta parse_include \
 						parse_include_absolute parse_include_absrel \
 						parse_include_affix_bad parse_include_affix_ref parse_include_dir \
-						parse_include_loop parse_include_nonexistent parse_include_prefix \
-						parse_include_prefix_dup parse_include_preprefix parse_include_ref \
-						parse_include_relabs parse_include_relrel parse_include_slash \
-						parse_include_suffix parse_include_sufsuffix parse_index \
-						parse_indir parse_lincom parse_lincom_ncols1 parse_lincom_ncols2 \
-						parse_lincom_nfields parse_lincom_nofields parse_lincom_non \
-						parse_lincom_non_ncols parse_lincom_scalar parse_linterp \
-						parse_linterp_ncols parse_literal_cmpbad parse_literal_fltcmp \
-						parse_literal_fltcmp0 parse_literal_intcmp parse_literal_intcmp0 \
-						parse_literal_uintcmp parse_literal_uintcmp0 parse_malias \
-						parse_malias_dup parse_malias_meta parse_meta parse_meta_affix \
-						parse_meta_alias parse_meta_frag parse_meta_implicit \
-						parse_meta_implicit2 parse_meta_implicit_affix parse_meta_index \
-						parse_meta_index2 parse_meta_jump parse_meta_malias \
-						parse_meta_meta parse_meta_parent parse_meta_raw parse_mplex \
-						parse_mplex_ncols parse_mplex_nomax parse_mplex_scalar \
-						parse_multiply parse_multiply_ncols parse_name parse_name_dot \
-						parse_name_ext parse_name_pedantic parse_ncols parse_octal_zero \
-						parse_phase parse_phase_ncols parse_phase_scalar parse_polynom \
-						parse_polynom_ncols1 parse_polynom_ncols2 parse_polynom_scalar \
-						parse_protect_all parse_protect_bad parse_protect_data \
-						parse_protect_format parse_protect_none parse_quote \
-						parse_quote_mismatch parse_raw parse_raw_char parse_raw_char_bad \
-						parse_raw_ncols parse_raw_scalar parse_raw_spf parse_raw_type \
-						parse_recip parse_ref parse_ref_nonexistent parse_sarray \
-						parse_sarray_long parse_sbit parse_scalar1 parse_scalar2 \
-						parse_scalar_repr parse_sindir parse_sort parse_string \
-						parse_string_ncols parse_string_null parse_utf8 parse_utf8_invalid \
-						parse_utf8_zero parse_version parse_version_89 parse_version_98 \
-						parse_version_include parse_version_permissive parse_version_p8 \
-						parse_version_p9 parse_version_slash parse_whitespace parse_window \
+						parse_include_loop parse_include_nonexistent \
+						parse_include_ns parse_include_ns2 parse_include_nsabs \
+						parse_include_nsinh parse_include_nspop parse_include_nsrabs \
+						parse_include_nsrainh parse_include_nsrinh parse_include_nsroot \
+						parse_include_prefix parse_include_prefix_dup \
+						parse_include_preprefix parse_include_ref parse_include_relabs \
+						parse_include_relrel parse_include_slash parse_include_suffix \
+						parse_include_sufsuffix parse_index parse_indir parse_lincom \
+						parse_lincom_ncols1 parse_lincom_ncols2 parse_lincom_nfields \
+						parse_lincom_nofields parse_lincom_non parse_lincom_non_ncols \
+						parse_lincom_scalar parse_linterp parse_linterp_ncols \
+						parse_literal_cmpbad parse_literal_fltcmp parse_literal_fltcmp0 \
+						parse_literal_intcmp parse_literal_intcmp0 parse_literal_uintcmp \
+						parse_literal_uintcmp0 parse_malias parse_malias_dup \
+						parse_malias_meta parse_meta parse_meta_affix parse_meta_alias \
+						parse_meta_frag parse_meta_implicit parse_meta_implicit2 \
+						parse_meta_implicit_affix parse_meta_index parse_meta_index2 \
+						parse_meta_jump parse_meta_malias parse_meta_meta \
+						parse_meta_parent parse_meta_raw parse_mplex parse_mplex_ncols \
+						parse_mplex_nomax parse_mplex_scalar parse_multiply \
+						parse_multiply_ncols parse_name parse_name_dot parse_name_ext \
+						parse_name_pedantic parse_ncols parse_ns parse_ns_dot \
+						parse_ns_dotdot parse_ns_dotdotns parse_ns_dotns parse_ns_ndotdots \
+						parse_ns_ndots parse_ns_nsdot parse_ns_nsdotdot parse_nsf \
+						parse_nsf_abs parse_nsf_dot parse_nsf_hide parse_nsf_index \
+						parse_nsf_meta parse_nsf_meta2 parse_nsf_par parse_nsf_ref \
+						parse_nsf_refabs parse_nsf_refrel parse_nsf_root parse_nsf_rpar \
+						parse_nsf_sub parse_octal_zero parse_phase parse_phase_ncols \
+						parse_phase_scalar parse_polynom parse_polynom_ncols1 \
+						parse_polynom_ncols2 parse_polynom_scalar parse_protect_all \
+						parse_protect_bad parse_protect_data parse_protect_format \
+						parse_protect_none parse_quote parse_quote_mismatch parse_raw \
+						parse_raw_char parse_raw_char_bad parse_raw_ncols parse_raw_scalar \
+						parse_raw_spf parse_raw_type parse_recip parse_ref \
+						parse_ref_nonexistent parse_sarray parse_sarray_long parse_sbit \
+						parse_scalar1 parse_scalar2 parse_scalar_repr parse_sindir \
+						parse_sort parse_string parse_string_ncols parse_string_null \
+						parse_utf8 parse_utf8_invalid parse_utf8_zero parse_version \
+						parse_version_89 parse_version_98 parse_version_include \
+						parse_version_permissive parse_version_p8 parse_version_p9 \
+						parse_version_slash parse_whitespace parse_window \
 						parse_window_ncols parse_window_op parse_window_scalar
 
 PROTECT_TESTS=protect_alter protect_alter_all protect_get
@@ -396,7 +409,8 @@ VERSION_TESTS=version_0 version_0_write version_1 version_1_write version_2 \
 							version_4_write version_5 version_5_strict version_5_write \
 							version_6 version_6_strict version_6_write version_7 \
 							version_7_strict version_7_write version_8 version_8_strict \
-							version_8_write version_9 version_9_strict version_9_write
+							version_8_write version_9 version_9_strict version_9_write \
+							version_10
 
 VLIST_TESTS=vlist vlist_alias vlist_hidden vlist_invalid vlist_meta \
 						vlist_meta_hidden vlist_meta_invalid

@@ -49,21 +49,23 @@ int main(void)
   D = gd_open(filedir, GD_RDWR);
   t1 = gd_entry_type(D, "alias");
   error1 = gd_error(D);
+  CHECKI(error1, GD_E_OK);
+  CHECKU(t1, GD_RAW_ENTRY);
+
   ret = gd_delete(D, "alias", 0);
   error2 = gd_error(D);
+  CHECKI(error2, GD_E_OK);
+  CHECKI(ret, 0);
+
   t2 = gd_entry_type(D, "alias");
   error3 = gd_error(D);
+  CHECKU(t2, GD_NO_ENTRY);
+  CHECKI(error3, GD_E_BAD_CODE);
+
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error1, GD_E_OK);
-  CHECKU(t1, GD_RAW_ENTRY);
-  CHECKI(error2, GD_E_OK);
-  CHECKI(ret, 0);
-  CHECKU(t2, GD_NO_ENTRY);
-  CHECKI(error3, GD_E_BAD_CODE);
 
   return r;
 }

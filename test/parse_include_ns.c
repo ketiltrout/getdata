@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,26 +20,16 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "da.ta RAW UINT8 8\n";
-  int fd, r1, r2, e1, e2, r = 0;
-  const char **fl;
-#define NFIELDS 2
-  const char *field_list1[NFIELDS] = { "INDEX", "data" };
-  const char *field_list2[NFIELDS] = { "INDEX", "d.ata" };
-  unsigned nf, i;
+  const char *format1 = "dirfile/format1";
+  const char *format_data = "INCLUDE format1 ns.pre post\n";
+  const char *format1_data = "data RAW UINT8 11\n";
+  int fd, r = 0;
   DIRFILE *D;
+  unsigned int spf, spfaff;
 
   rmdirfile();
   mkdir(filedir, 0777);
@@ -48,40 +38,20 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDWR);
+  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format1_data, strlen(format1_data));
+  close(fd);
 
-  r1 = gd_rename(D, "da.ta", "data", 0);
-  e1 = gd_error(D);
-  CHECKI(r1,0);
-  CHECKI(e1,0);
-
-  nf = gd_nfields(D);
-  CHECKI(nf, NFIELDS);
-  if (nf > NFIELDS)
-    nf = NFIELDS;
-
-  fl = gd_field_list(D);
-  for (i = 0; i < nf; ++i)
-    CHECKSi(i, fl[i], field_list1[i]);
-
-  r2 = gd_rename(D, "data", "d.ata", 0);
-  e2 = gd_error(D);
-  CHECKI(r2,0);
-  CHECKI(e2,0);
-
-  nf = gd_nfields(D);
-  CHECKI(nf, NFIELDS);
-  if (nf > NFIELDS)
-    nf = NFIELDS;
-
-  fl = gd_field_list(D);
-  for (i = 0; i < nf; ++i)
-    CHECKSi(i + NFIELDS, fl[i], field_list2[i]);
-
+  D = gd_open(filedir, GD_RDONLY);
+  spf = gd_spf(D, "data");
+  spfaff = gd_spf(D, "ns.predatapost");
   gd_discard(D);
 
+  unlink(format1);
   unlink(format);
   rmdir(filedir);
 
+  CHECKU(spf, 0);
+  CHECKU(spfaff, 11);
   return r;
 }

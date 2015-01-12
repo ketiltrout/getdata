@@ -1930,6 +1930,7 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
     _GD_CalculateEntry(D, E, 1);
 
     if (D->error) {
+      D->recurse_level--;
       dreturn("%i", 0);
       return 0;
     }
@@ -1939,6 +1940,7 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
   ntype = _GD_NativeType(D, E, GD_REPR_NONE);
 
   if (D->error) {
+    D->recurse_level--;
     dreturn("%i", 0);
     return 0;
   }
@@ -1946,6 +1948,7 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
   if (first_samp == GD_HERE) {
     first_samp = _GD_GetFilePos(D, E, -1);
     if (D->error) {
+      D->recurse_level--;
       dreturn("%i", 0);
       return 0;
     }

@@ -182,12 +182,6 @@ type with more than one input fields.  In this case, GetData has no knowledge on
 how to partition the input data.  Alternately, the caller may have attempted to
 write to the implicit INDEX field, which is not possible.
 .TP
-.B GD_E_BAD_REPR
-The representation suffix specified in
-.I field_code
-was not recognised, or an attempt was made to write to a field representation,
-instead of the underlying field.
-.TP
 .B GD_E_BAD_TYPE
 An invalid
 .I data_type
