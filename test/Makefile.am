@@ -409,8 +409,7 @@ VERSION_TESTS=version_0 version_0_write version_1 version_1_write version_2 \
 							version_4_write version_5 version_5_strict version_5_write \
 							version_6 version_6_strict version_6_write version_7 \
 							version_7_strict version_7_write version_8 version_8_strict \
-							version_8_write version_9 version_9_strict version_9_write \
-							version_10
+							version_8_write version_9 version_9_strict version_9_write
 
 VLIST_TESTS=vlist vlist_alias vlist_hidden vlist_invalid vlist_meta \
 						vlist_meta_hidden vlist_meta_invalid

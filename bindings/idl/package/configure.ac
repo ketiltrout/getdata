@@ -1,4 +1,4 @@
-dnl Copyright (C) 2008-2013 D. V. Wiebe
+dnl Copyright (C) 2008-2015 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -29,10 +29,10 @@ AC_DEFINE([GETDATA_REVISION], [getdata_revision], [ The revision number ])
 AC_DEFINE([GETDATA_VERSION_SUFFIX], ["getdata_extra"],
           [ Other qualifiers on the version number triplet (if any) ])
 
-AC_PREREQ([2.63])
+AC_PREREQ([2.65])
 AC_CONFIG_MACRO_DIR([m4])
 
-LT_PREREQ([2.2.6b])
+LT_PREREQ([2.2.7b])
 
 AC_ARG_VAR([BUILDCC],
            [C compiler command on the build system (only needed if cross-compiling)])
@@ -68,6 +68,7 @@ AC_PROG_SED
 echo
 echo "*** Checking C compiler characteristics"
 echo
+AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC
 AC_PROG_CC_C_O
 AC_PROG_CC_C99
@@ -111,22 +112,16 @@ dnl compiler checks
 echo
 echo "*** Checking additional compiler characteristics"
 echo
+AC_DEFINE([GD_EXTERNAL], [1], [ Define to 1 if building the GetData bindings outside the GetData source tree ])
+AC_SYS_LARGEFILE
 AC_C_INLINE
 GD_PROG_CC_WALL
-
-dnl Declare a few feature test macros
-AC_DEFINE([GD_EXTERNAL], [1], [ Define to 1 if building the GetData bindings outside the GetData source tree ])
-AC_DEFINE([_BSD_SOURCE], [], [ Expose BSD-derived definitions ])
-AC_DEFINE([_SVID_SOURCE], [], [ Expose System V-derived definitions ])
-AC_DEFINE([_POSIX_SOURCE], [], [ Expose POSIX.1-1990 conforming definitions ])
-AC_DEFINE([_POSIX_C_SOURCE], [200809L],
-          [ Expose POSIX:2008 conforming definitions ])
 
 dnl libraries
 echo
 echo "*** Looking for getdata"
 echo
-PKG_CHECK_MODULES([GETDATA], [getdata >= 0.8.4])
+PKG_CHECK_MODULES([GETDATA], [getdata >= 0.8.6])
 
 dnl headers
 echo
@@ -147,29 +142,10 @@ AC_TYPE_UINT32_T
 AC_TYPE_INT32_T
 AC_TYPE_UINT64_T
 AC_TYPE_INT64_T
-AC_CHECK_TYPES([_Complex float, _Complex double])
-
-GD_CHECK_LFS_TYPE([off64_t],[
-#ifdef STDC_HEADERS
-#include <sys/types.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-])
+AC_CHECK_TYPES([_Complex float, _Complex double, off64_t])
 AC_CHECK_SIZEOF([int])
 AC_CHECK_SIZEOF([unsigned int])
-
-if test "x$gd_cv_c_need_lfs_defined" = "xyes"; then
-  AC_DEFINE([_LARGEFILE64_SOURCE], [1],
-            [ Additional functionality from LFS for large files. ])
-fi
-
-if test "x$gd_cv_type_off64_t" = "xyes"; then
-  dnl Assume we have the entire LFS defined transitional API
-  AC_DEFINE([HAVE_OFF64_T], [1],
-            [ Define to 1 if the system has the type `off64_t'. ]) dnl `
-fi
+AC_CHECK_SIZEOF([void *])
 
 echo
 echo "*** Configuring interactive data language (IDL) bindings"
@@ -203,7 +179,6 @@ AM_CONDITIONAL(CC_WALL, [test "x$gd_cv_prog_cc_wall" == "xyes"])
 AM_CONDITIONAL(INTEL_F77_COMPILER,
                [test "x$gd_cv_f77_compiler_intel" == "xyes"])
 AM_CONDITIONAL(INTEL_FC_COMPILER, [test "x$gd_cv_fc_compiler_intel" == "xyes"])
-AM_CONDITIONAL(LFS_TRANSITIONAL_API, [test "x$gd_cv_type_off64_t" = "xyes"])
 AM_CONDITIONAL(TEST_IDL, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(HAVE_DIFF, [test "x$DIFF" != "x"])
 AM_CONDITIONAL(GD_EXTERNAL, [true])
