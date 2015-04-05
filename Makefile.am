@@ -145,4 +145,4 @@ dist-post: $(SIGS)
 
 dist-push: $(PACKAGES) $(SIGS) README.txt
 	@if [ -z "${SFUSER}" ]; then echo "ERROR: SFUSER unset"; false; fi
-	rsync -avP -e ssh $^ $(SFUSER),getdata@frs.sourceforge.net:/home/frs/project/g/ge/getdata/getdata/$(PACKAGE_VERSION)/
+	rsync -avP -e ssh $^ $(SFUSER)@frs.sourceforge.net:/home/frs/project/g/ge/getdata/getdata/$(PACKAGE_VERSION)/
