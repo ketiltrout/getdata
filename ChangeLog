@@ -1,3 +1,7 @@
+2014-04-05   D. V. Wiebe <getdata@ketiltrout.net> svn:939
+	* src/include.c (_GD_Include): Only open the file read-write if it's being
+	truncated or created.
+
 2014-12-07   D. V. Wiebe <getdata@ketiltrout.net> svn:935
 	GetData-0.8.6 released.
 

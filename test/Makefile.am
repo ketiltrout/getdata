@@ -257,8 +257,8 @@ NMETA_TESTS=nmeta nmeta_hidden nmeta_invalid nmeta_parent nmeta_type \
 
 OPEN_TESTS=open open_abs open_cb_abort open_cb_cont open_cb_ignore \
 					 open_cb_invalid open_cb_rescan open_eaccess open_nonexistent \
-					 open_notdirfile open_sym_a open_sym_al open_sym_at open_sym_c \
-					 open_sym_cl open_sym_ct open_sym_p open_sym_pl open_sym_pt
+					 open_notdirfile open_rofs open_sym_a open_sym_al open_sym_at \
+					 open_sym_c open_sym_cl open_sym_ct open_sym_p open_sym_pl open_sym_pt
 
 PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_alias_missing parse_badline parse_bit parse_bit4 \

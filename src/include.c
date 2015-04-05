@@ -168,10 +168,11 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   }
 
   /* Try to open the file */
-  i = gd_OpenAt(D, dirfd, base, (((D->flags & GD_ACCMODE) == GD_RDWR) ? O_RDWR :
-        O_RDONLY) | ((*flags & GD_CREAT) ? O_CREAT : 0) |
-      ((*flags & GD_TRUNC) ? O_TRUNC : 0) | ((*flags & GD_EXCL) ? O_EXCL : 0)
-      | O_BINARY, 0666);
+  i = gd_OpenAt(D, dirfd, base,
+      ((*flags & (GD_CREAT | GD_TRUNC)) ? O_RDWR : O_RDONLY) |
+      ((*flags & GD_CREAT) ? O_CREAT : 0) |
+      ((*flags & GD_TRUNC) ? O_TRUNC : 0) |
+      ((*flags & GD_EXCL) ? O_EXCL : 0) | O_BINARY, 0666);
 
   if (i < 0) {
     _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum,
@@ -180,7 +181,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
     goto include_error;
   }
 
-  new_fp = fdopen(i, ((D->flags & GD_ACCMODE) == GD_RDWR) ? "rb+" : "rb");
+  new_fp = fdopen(i, (*flags & (GD_CREAT | GD_TRUNC)) ? "rb+" : "rb");
 
   /* If opening the file failed, set the error code and abort parsing. */
   if (new_fp == NULL) {
