@@ -34,7 +34,8 @@ clean-local:
 %.sig: %
 	gpg --use-agent -abo $@ $<
 
-DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl" \
+DISTCHECK_CONFIGURE_FLAGS = --enable-legacy-api --enable-modules \
+														--with-idl-dlm-dir="$$dc_install_base/idl" \
 														--with-perl-dir="$$dc_install_base/perl" \
 														--with-php-dir="$$dc_install_base/php" \
 														--with-python-module-dir="$$dc_install_base/python"

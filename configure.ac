@@ -937,7 +937,7 @@ dnl external encodings
 GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2],[])
 GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip],[])
 GD_CHECK_ENCODING([lzma],[lzma],[lzma_auto_decoder],[lzma.h],[xz],[],[])
-GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h], [slim slimdata],
+GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h], [slimdata slim],
                   [unslim],[slimdopen slimdrawsize])
 GD_CHECK_ENCODING([zzip],[zzip],[zzip_open],[zzip/lib.h],[zip],[unzip],[])
 
