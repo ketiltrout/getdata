@@ -131,11 +131,11 @@ ssize_t _GD_Bzip2Read(struct gd_raw_file_ *restrict file, void *restrict data,
 {
   char* output = (char*)data;
   struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
-  unsigned long long nbytes = nmemb * GD_SIZE(data_type);
+  uint64_t nbytes = nmemb * GD_SIZE(data_type);
 
   dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
 
-  while (nbytes > (unsigned long long)(ptr->end - ptr->pos)) {
+  while (nbytes > (uint64_t)(ptr->end - ptr->pos)) {
     int n;
 
     memcpy(output, ptr->data + ptr->pos, ptr->end - ptr->pos);
@@ -168,7 +168,7 @@ ssize_t _GD_Bzip2Read(struct gd_raw_file_ *restrict file, void *restrict data,
     }
   }
 
-  if (nbytes > (unsigned long long)(ptr->end - ptr->pos)) {
+  if (nbytes > (uint64_t)(ptr->end - ptr->pos)) {
     memcpy(output, ptr->data + ptr->pos, ptr->end - ptr->pos);
     ptr->pos = ptr->end;
     nbytes -= ptr->end;

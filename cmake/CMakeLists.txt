@@ -76,6 +76,7 @@ if(MSVC)
     -DHAVE_SYS_STAT_H
     -DGD_DIRSEP='\\\\'
     -DMKDIR_NO_MODE
+    -Dmode_t=int
     -Drestrict=
     -DSIZEOF_INT=4
     -DSIZEOF_UNSIGNED_INT=4

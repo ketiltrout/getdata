@@ -111,7 +111,6 @@ typedef int ssize_t;
 #define PRNssize_t "i"
 #define PRNsize_t  "u"
 #endif
-typedef int mode_t;
 #else
 #define PRNssize_t "zi"
 #define PRNsize_t  "zu"

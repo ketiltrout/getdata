@@ -1,3 +1,10 @@
+2015-04-15     D. V. Wiebe <getdata@ketiltrout.net> svn:952
+	* configure.ac: Call AC_TYPE_MODE_T and AC_TYPE_SSIZE_T.
+	* src/internal.h [_MSC_VER]: Don't typedef mode_t.
+	* cmake/CMakeLists.txt: Define mode_t.
+	* src/bzip.c (_GD_Bzip2Read) src/flimits.c (_GD_GetBOF gd_bof64)
+	src/parse.c (_GD_TokToNum): Use stdint types instead of "long long" directly.
+
 2015-04-03     D. V. Wiebe <getdata@ketiltrout.net> svn:947
 	* configure.ac bindings/idl/package/configure.ac
 	bindings/matlab/package/configure.ac: Use AC_USE_SYSTEM_EXTENSIONS and

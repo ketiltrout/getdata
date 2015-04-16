@@ -115,8 +115,8 @@ static gd_windop_t _GD_WindOp(const char *op)
 int _GD_TokToNum(const char *restrict token, int standards, int pedantic,
     double *re, double *im, uint64_t *u, int64_t *i)
 {
-  long long ir = 0, ii = 0;
-  unsigned long long ur = 0, ui = 0;
+  int64_t ir = 0, ii = 0;
+  uint64_t ur = 0, ui = 0;
   double dr = 0, di = 0;
   char *endptr = NULL;
   gd_type_t rt = GD_UNKNOWN, it = GD_UNKNOWN;
@@ -1534,7 +1534,7 @@ static gd_entry_t *_GD_ParseString(DIRFILE *restrict D,
 static int _GD_UTF8Encode(DIRFILE *restrict D, const char *restrict format_file,
     int linenum, char **restrict op, uint32_t value)
 {
-  dtrace("%p, %p, %llx", D, op, (long long)value);
+  dtrace("%p, %p, %llx", D, op, (unsigned long long)value);
 
   if (value > 0x10FFFF || value == 0) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_CHARACTER, format_file, linenum,
