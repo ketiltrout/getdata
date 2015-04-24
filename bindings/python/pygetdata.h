@@ -134,11 +134,13 @@ union gdpy_quadruple_value {
 #define gdpy_from_complexp(c) PyComplex_FromDoubles((c)[0], (c)[1])
 #define gdpy_from_complex(c) PyComplex_FromDoubles(creal(c), cimag(c))
 
+extern int gdpylist_append(PyObject *, PyObject *);
 extern int gdpy_convert_from_pyobj(PyObject*, union gdpy_quadruple_value*,
     gd_type_t);
 extern gd_type_t gdpy_convert_from_pylist(PyObject*, void*, gd_type_t, size_t);
 extern PyObject *gdpy_convert_to_pyobj(const void*, gd_type_t);
 extern PyObject *gdpy_convert_to_pylist(const void*, gd_type_t, size_t);
+extern PyObject *gdpy_to_pystringlist(const char **list);
 extern int gdpy_npytype_from_type(gd_type_t type);
 extern gd_type_t gdpy_type_from_npytype(int npytype);
 PyMODINIT_FUNC initpygetdata(void);

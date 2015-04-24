@@ -62,6 +62,40 @@ static const char *gdpy_exception_list[GD_N_ERROR_CODES] = {
 };
 PyObject *gdpy_exceptions[GD_N_ERROR_CODES];
 
+/* Like PyList_Append, but steal the object's reference */
+int gdpylist_append(PyObject *list, PyObject *item)
+{
+  dtrace("%p, %p", list, item);
+  int ret;
+
+  ret = PyList_Append(list, item);
+  Py_DECREF(item);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+/* Create an array of strings from a NULL-terminated string list */
+PyObject *gdpy_to_pystringlist(const char **list)
+{
+  PyObject *pyobj;
+  size_t i;
+
+  dtrace("%p", list);
+
+  pyobj = PyList_New(0);
+  if (pyobj)
+    for (i = 0; list[i] != NULL; ++i)
+      if (gdpylist_append(pyobj, PyString_FromString(list[i]))) {
+        Py_DECREF(pyobj);
+        pyobj = NULL;
+        break;
+      }
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
 int gdpy_convert_from_pyobj(PyObject *value, union gdpy_quadruple_value *data,
     gd_type_t type)
 {
@@ -372,65 +406,66 @@ PyObject *gdpy_convert_to_pylist(const void *data, gd_type_t type, size_t ns)
       return Py_None;
     case GD_UINT8:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pyobj, PyInt_FromLong((long)((uint8_t*)data)[i])))
+        if (gdpylist_append(pyobj, PyInt_FromLong((long)((uint8_t*)data)[i])))
           return NULL;
       break;
     case GD_INT8:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pyobj, PyInt_FromLong((long)((int8_t*)data)[i])))
+        if (gdpylist_append(pyobj, PyInt_FromLong((long)((int8_t*)data)[i])))
           return NULL;
       break;
     case GD_UINT16:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pyobj, PyInt_FromLong((long)((uint16_t*)data)[i])))
+        if (gdpylist_append(pyobj, PyInt_FromLong((long)((uint16_t*)data)[i])))
           return NULL;
       break;
     case GD_INT16:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pyobj, PyInt_FromLong((long)((int16_t*)data)[i])))
+        if (gdpylist_append(pyobj, PyInt_FromLong((long)((int16_t*)data)[i])))
           return NULL;
       break;
     case GD_UINT32:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pyobj,
+        if (gdpylist_append(pyobj,
               PyLong_FromUnsignedLong((unsigned long)((uint32_t*)data)[i])))
           return NULL;
       break;
     case GD_INT32:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pyobj, PyInt_FromLong((long)((int32_t*)data)[i])))
+        if (gdpylist_append(pyobj, PyInt_FromLong((long)((int32_t*)data)[i])))
           return NULL;
       break;
     case GD_UINT64:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pyobj, PyLong_FromUnsignedLongLong(
+        if (gdpylist_append(pyobj, PyLong_FromUnsignedLongLong(
                 (unsigned long long)((uint64_t*)data)[i])))
           return NULL;
       break;
     case GD_INT64:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pyobj,
+        if (gdpylist_append(pyobj,
               PyLong_FromLongLong((long long)((int64_t*)data)[i])))
           return NULL;
       break;
     case GD_FLOAT32:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pyobj, PyFloat_FromDouble((double)((float*)data)[i])))
+        if (gdpylist_append(pyobj,
+              PyFloat_FromDouble((double)((float*)data)[i])))
           return NULL;
       break;
     case GD_FLOAT64:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pyobj, PyFloat_FromDouble(((double*)data)[i])))
+        if (gdpylist_append(pyobj, PyFloat_FromDouble(((double*)data)[i])))
           return NULL;
       break;
     case GD_COMPLEX64:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pyobj, gdpy_from_complexp(((float*)data) + 2 * i)))
+        if (gdpylist_append(pyobj, gdpy_from_complexp(((float*)data) + 2 * i)))
           return NULL;
       break;
     case GD_COMPLEX128:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pyobj, gdpy_from_complexp(((double*)data) + 2 * i)))
+        if (gdpylist_append(pyobj, gdpy_from_complexp(((double*)data) + 2 * i)))
           return NULL;
       break;
     case GD_UNKNOWN: /* prevent compiler warning */

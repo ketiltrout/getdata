@@ -50,6 +50,7 @@ int main(void)
   sprintf(targ, "%s/dirfile", cwd);
 
   symlink(targ, "dirfile/link");
+  free(targ);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   error = gd_error(D);

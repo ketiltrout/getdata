@@ -65,5 +65,8 @@ int main(void)
   CHECKS(tok2,"STRING");
   CHECKS(tok3," value");
   CHECKP(tok4);
+  free(tok1);
+  free(tok2);
+  free(tok3);
   return r;
 }
