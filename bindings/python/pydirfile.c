@@ -596,7 +596,7 @@ static PyObject *gdpy_dirfile_carrays(struct gdpy_dirfile_t *self,
 #endif
       pydata = gdpy_convert_to_pylist(carrays[i].d, return_type, carrays[i].n);
 
-    PyList_Append(pyobj, Py_BuildValue("sN", fields[i], pydata));
+    gdpylist_append(pyobj, Py_BuildValue("sN", fields[i], pydata));
   }
 
   dreturn("%p", pyobj);
@@ -662,7 +662,7 @@ static PyObject *gdpy_dirfile_getconstants(struct gdpy_dirfile_t *self,
   pyobj = PyList_New(0);
 
   for (i = 0; fields[i] != NULL; ++i)
-    PyList_Append(pyobj, Py_BuildValue("sN", fields[i],
+    gdpylist_append(pyobj, Py_BuildValue("sN", fields[i],
           gdpy_convert_to_pyobj(values + i * GD_SIZE(return_type),
             return_type)));
 
@@ -988,7 +988,6 @@ static PyObject *gdpy_dirfile_geterrorstring(struct gdpy_dirfile_t *self,
 static PyObject *gdpy_dirfile_getvectorlist(struct gdpy_dirfile_t *self)
 {
   const char **vectors;
-  int i;
   PyObject *pyobj;
 
   dtrace("%p", self);
@@ -997,10 +996,7 @@ static PyObject *gdpy_dirfile_getvectorlist(struct gdpy_dirfile_t *self)
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  pyobj = PyList_New(0);
-
-  for (i = 0; vectors[i] != NULL; ++i)
-    PyList_Append(pyobj, PyString_FromString(vectors[i]));
+  pyobj = gdpy_to_pystringlist(vectors);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1011,7 +1007,7 @@ static PyObject *gdpy_dirfile_getfieldlist(struct gdpy_dirfile_t *self,
 {
   const char **fields;
   char *keywords[] = { "type", NULL };
-  int i, type = (int)GD_NO_ENTRY;
+  int type = (int)GD_NO_ENTRY;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
@@ -1030,10 +1026,7 @@ static PyObject *gdpy_dirfile_getfieldlist(struct gdpy_dirfile_t *self,
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  pyobj = PyList_New(0);
-
-  for (i = 0; fields[i] != NULL; ++i)
-    PyList_Append(pyobj, PyString_FromString(fields[i]));
+  pyobj = gdpy_to_pystringlist(fields);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1271,7 +1264,7 @@ static PyObject *gdpy_dirfile_mcarrays(struct gdpy_dirfile_t *self,
 #endif
       pydata = gdpy_convert_to_pylist(carrays[i].d, return_type, carrays[i].n);
 
-    PyList_Append(pyobj, Py_BuildValue("sN", fields[i], pydata));
+    gdpylist_append(pyobj, Py_BuildValue("sN", fields[i], pydata));
   }
 
   dreturn("%p", pyobj);
@@ -1348,7 +1341,7 @@ static PyObject *gdpy_dirfile_getmconstants(struct gdpy_dirfile_t *self,
   pyobj = PyList_New(0);
 
   for (i = 0; fields[i] != NULL; ++i)
-    PyList_Append(pyobj, Py_BuildValue("sN", fields[i],
+    gdpylist_append(pyobj, Py_BuildValue("sN", fields[i],
           gdpy_convert_to_pyobj(values + i * GD_SIZE(return_type),
             return_type)));
 
@@ -1376,7 +1369,6 @@ static PyObject *gdpy_dirfile_getmfieldlist(struct gdpy_dirfile_t *self,
   char *keywords[] = { "parent", "type", NULL };
   const char *parent = NULL;
   gd_entype_t type = GD_NO_ENTRY;
-  int i;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
@@ -1395,10 +1387,7 @@ static PyObject *gdpy_dirfile_getmfieldlist(struct gdpy_dirfile_t *self,
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  pyobj = PyList_New(0);
-
-  for (i = 0; fields[i] != NULL; ++i)
-    PyList_Append(pyobj, PyString_FromString(fields[i]));
+  pyobj = gdpy_to_pystringlist(fields);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1452,7 +1441,7 @@ static PyObject *gdpy_dirfile_getmstrings(struct gdpy_dirfile_t *self,
   pyobj = PyList_New(0);
 
   for (i = 0; fields[i] != NULL; ++i)
-    PyList_Append(pyobj, Py_BuildValue("ss", fields[i], values[i]));
+    gdpylist_append(pyobj, Py_BuildValue("ss", fields[i], values[i]));
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1461,7 +1450,6 @@ static PyObject *gdpy_dirfile_getmstrings(struct gdpy_dirfile_t *self,
 static PyObject *gdpy_dirfile_getmvectorlist(struct gdpy_dirfile_t *self,
     void *args, void *keys)
 {
-  int i;
   char *keywords[] = {"parent", NULL};
   const char *parent = NULL;
   const char **fields;
@@ -1480,10 +1468,7 @@ static PyObject *gdpy_dirfile_getmvectorlist(struct gdpy_dirfile_t *self,
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  pyobj = PyList_New(0);
-
-  for (i = 0; fields[i] != NULL; ++i)
-    PyList_Append(pyobj, PyString_FromString(fields[i]));
+  pyobj = gdpy_to_pystringlist(fields);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1841,7 +1826,7 @@ static PyObject *gdpy_dirfile_getstring(struct gdpy_dirfile_t *self,
 
   gd_get_string(self->D, field_code, len, data);
 
-  PYGD_CHECK_ERROR2(self->D, NULL, free(data));
+  PYGD_CHECK_ERROR(self->D, NULL);
 
   pyobj = PyString_FromString(data);
 
@@ -1862,7 +1847,7 @@ static PyObject *gdpy_dirfile_getstrings(struct gdpy_dirfile_t *self)
 
   fields = gd_field_list_by_type(self->D, GD_STRING_ENTRY);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  PYGD_CHECK_ERROR2(self->D, NULL, free(data));
 
   values = gd_strings(self->D);
 
@@ -1871,7 +1856,7 @@ static PyObject *gdpy_dirfile_getstrings(struct gdpy_dirfile_t *self)
   pyobj = PyList_New(0);
 
   for (i = 0; fields[i] != NULL; ++i)
-    PyList_Append(pyobj, Py_BuildValue("ss", fields[i], values[i]));
+    gdpylist_append(pyobj, Py_BuildValue("ss", fields[i], values[i]));
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -2635,7 +2620,6 @@ static PyObject *gdpy_dirfile_aliaslist(struct gdpy_dirfile_t *self,
 {
   const char **fields;
   char *keywords[] = { "field_code", NULL };
-  int i;
   const char *field_code;
   PyObject *pyobj;
 
@@ -2652,10 +2636,7 @@ static PyObject *gdpy_dirfile_aliaslist(struct gdpy_dirfile_t *self,
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  pyobj = PyList_New(0);
-
-  for (i = 0; fields[i] != NULL; ++i)
-    PyList_Append(pyobj, PyString_FromString(fields[i]));
+  pyobj = gdpy_to_pystringlist(fields);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -2913,7 +2894,7 @@ static PyObject *gdpy_dirfile_entrylist(struct gdpy_dirfile_t *self,
 {
   const char **entries;
   char *keywords[] = { "parent", "type", "flags", NULL };
-  int i, type = 0;
+  int type = 0;
   unsigned int flags = 0;
   const char *parent = NULL;
   PyObject *pyobj;
@@ -2931,10 +2912,7 @@ static PyObject *gdpy_dirfile_entrylist(struct gdpy_dirfile_t *self,
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  pyobj = PyList_New(0);
-
-  for (i = 0; entries[i] != NULL; ++i)
-    PyList_Append(pyobj, PyString_FromString(entries[i]));
+  pyobj = gdpy_to_pystringlist(entries);
 
   dreturn("%p", pyobj);
   return pyobj;

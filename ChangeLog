@@ -1,3 +1,22 @@
+2014-04-24   D. V. Wiebe <getdata@ketiltrout.net> svn:954
+
+	Merge in bugfixes from 0.8 branch, rev.953:
+
+	* bindings/python/pygetdata.c (gdpylist_append gdpy_to_pystringlist): Added.
+	* bindings/python/pydirfile.c (gdpy_dirfile_getvectorlist
+	gdpy_dirfile_getfieldlist gdpy_dirfile_getmfieldlist
+	gdpy_dirfile_getmvectorlist gdpy_dirfile_aliaslist gdpy_dirfile_entrylist(:
+	Call gdpy_to_pystringlist();
+	* bindings/python/pygetdata.c (gdpy_convert_to_pylist)
+	bindings/python/pydirfile.c (gdpy_dirfile_carrays gdpy_dirfile_getconstants
+	gdpy_dirfile_mcarrays gdpy_dirfile_getstrings): Call gdpylist_append().
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getstring): Fix clean-up on
+	error.
+
+	* test/add_raw_spf_scalar.c: Initialise E.
+	* test/open_sym_a.c: Free string.
+
 2015-04-15     D. V. Wiebe <getdata@ketiltrout.net> svn:952
 	* configure.ac: Call AC_TYPE_MODE_T and AC_TYPE_SSIZE_T.
 	* src/internal.h [_MSC_VER]: Don't typedef mode_t.
