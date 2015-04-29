@@ -1,6 +1,6 @@
 ; vim: ft=idlang
 ;
-; Copyright (C) 2009-2013 D. V. Wiebe
+; Copyright (C) 2009-2013, 2015 D. V. Wiebe
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -790,8 +790,9 @@ nume += check_ok(116, d)
 nume += check_eostring(116, n, "test_dirfile/data")
 
 ;  117: gd_reference
-gd_reference, d, "new1"
+n = gd_reference(d, "new1")
 nume += check_ok(117, d)
+nume += check_simple(117, n, "new1");
 
 ;  118: gd_eof
 n = gd_eof(d, "lincom")

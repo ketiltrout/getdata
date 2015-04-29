@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2014 D. V. Wiebe
+/* Copyright (C) 2009-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -3495,23 +3495,33 @@ void gdidl_alter_protection(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_reference GD_REFERENCE 2 2 KEYWORDS */
-void gdidl_reference(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: F gdidl_reference GD_REFERENCE 1 2 KEYWORDS */
+IDL_VPTR gdidl_reference(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
+
+  const char *field_code = NULL;
+  IDL_VPTR r;
 
   GDIDL_KW_ONLY_ERROR;
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
-  const char* field_code = IDL_VarGetString(argv[1]);
+  if (argc > 1)
+    field_code = IDL_VarGetString(argv[1]);
 
-  gd_reference(D, field_code);
+  field_code = gd_reference(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
   IDL_KW_FREE;
 
-  dreturnvoid();
+  if (field_code)
+    r = IDL_StrToSTRING((char*)field_code);
+  else
+    r = IDL_StrToSTRING("");
+
+  dreturn("%p", r);
+  return r;
 }
 
 /* @@DLM: P gdidl_rename GD_RENAME 3 3 KEYWORDS */

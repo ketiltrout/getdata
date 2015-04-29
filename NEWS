@@ -196,6 +196,12 @@ New in verison 0.9.0a:
     omitted, and will be calculated from the supplied data.  A scalar
     IN_FIELDS is treated like an single element array.
 
+  * IDL: GD_REFERENCE is now a function, instead of a procedure, as the
+    documentation has always claimed it was.  It returns the current
+    reference field (or the empty string, if there is none).  The second
+    parameter, the new reference field, is optional. (Previously the
+    second parameter was required.)
+
   * PERL: The entry hash parser has been rewritten.  It no longer requires
     keys which it doesn't need.
 

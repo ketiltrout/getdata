@@ -879,10 +879,12 @@ FUNCTION GD_RAW_FILENAME(dirfile_unit, field_code)
   This function returns the pathname of the data file backing the RAW field
   specified by 'field_code'.  See gd_raw_filename(3).
 
-FUNCTION GD_REFERENCE(dirfile_unit)
+FUNCTION GD_REFERENCE(dirfile_unit, [new_reference])
 
   This function returns the name of the RAW field used as the reference field
-  for the dirfile.  See gd_reference(3).
+  for the dirfile, after optionally changing it to new_reference.  If the
+  dirfile contains no reference field, the empty string is returned.  See
+  gd_reference(3).
 
 PROCEDURE GD_RENAME, dirfile_unit, field_code, new_name, /MOVE_DATA, /UPDATEDB
 

@@ -1,3 +1,8 @@
+2014-04-29   D. V. Wiebe <getdata@ketiltrout.net> svn:955
+	* bindings/idl/getdata.c (gdidl_reference): Converted from procedure to
+	function returning the string returned by gd_reference(), or the empty
+	string if gd_reference returns NULL.
+
 2014-04-24   D. V. Wiebe <getdata@ketiltrout.net> svn:954
 
 	Merge in bugfixes from 0.8 branch, rev.953:
