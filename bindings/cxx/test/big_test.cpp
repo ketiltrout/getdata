@@ -130,14 +130,15 @@ CheckT<const char*>('s', i, t, -1, v, g, (strcmp((v), (g))))
 #define CHECK_COMPLEX_ARRAY(t,m,v,g) \
   for (i = 0; i < m; ++i) CheckFloat<complex<double> >('c', i, t, -1, v, g)
 
+#define FILEDIR "dirfile"
 int main(void)
 {
-  const char* filedir = "dirfile";
-  const char* format = "dirfile/format";
-  const char* format1 = "dirfile/format1";
-  const char* form2 = "dirfile/form2";
-  const char* new1 = "dirfile/new1";
-  const char* data = "dirfile/data";
+  const char* filedir = FILEDIR;
+  const char* format = FILEDIR "/format";
+  const char* format1 = FILEDIR "/format1";
+  const char* form2 = FILEDIR "/form2";
+  const char* new1 = FILEDIR "/new1";
+  const char* data = FILEDIR "/data";
   const char* format_data =
     "/ENDIAN little\n"
     "data RAW INT8 8\n"
@@ -1772,7 +1773,7 @@ int main(void)
   CHECK_INT2(242,5,carrays[2].n,0);
 
   // 243: NULL return from gd_reference
-  id = new Dirfile("dirfile/empty", GD_RDWR | GD_CREAT | GD_EXCL);
+  id = new Dirfile(FILEDIR "/empty", GD_RDWR | GD_CREAT | GD_EXCL);
   CHECK_OK2(243, 1);
 
   rep = id->Reference();
@@ -1790,6 +1791,8 @@ int main(void)
   // ===================================================================
   d->Discard();
   delete d;
+  unlink(FILEDIR "/empty/format");
+  rmdir(FILEDIR "/empty");
   unlink(data);
   unlink(new1);
   unlink(format);
