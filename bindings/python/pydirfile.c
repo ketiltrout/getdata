@@ -1616,6 +1616,13 @@ static PyObject *gdpy_dirfile_getreference(struct gdpy_dirfile_t *self,
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
+  /* Empty dirfile */
+  if (ref == NULL) {
+    Py_INCREF(Py_None);
+    dreturn("%p", Py_None);
+    return Py_None;
+  }
+
   pyobj = PyString_FromString(ref);
 
   dreturn("%p", pyobj);
@@ -2838,8 +2845,10 @@ static PyGetSetDef gdpy_dirfile_getset[] = {
     "The number of frames in the dirfile.  See gd_nframes(3).", NULL },
   { "reference", (getter)gdpy_dirfile_getreference,
     (setter)gdpy_dirfile_setreference,
-    "The reference field for the dirfile, which may be modified.  See\n"
-      "gd_reference(3).",
+    "The reference field for the dirfile, which may be set to any existing\n"
+      "RAW field.  If no RAW fields are defined in the dirfile, this will\n"
+      "be None.  See gd_reference(3).",
+      /* ------- handy ruler ---------------------------------------------| */
     NULL },
   { "standards", (getter)gdpy_dirfile_getstandards,
     (setter)gdpy_dirfile_setstandards,
@@ -3070,7 +3079,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     METH_VARARGS | METH_KEYWORDS,
     "linterp_tablename(field_code)\n\n"
       "Return the pathname of the look-up table (LUT) on disk used by the\n"
-      /* ------- handy ruler ---------------------------------------------| */
       "LINTERP field specified by 'field_code'.  See\n"
       "gd_linterp_tablename(3)."
   },

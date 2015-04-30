@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1317;
+use Test::More tests => 1320;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -1716,6 +1716,17 @@ CheckOK2(242, 1);
 CheckNum2(242, 2, $#a, 1);
 CheckArray2(242, 3, $a[0], 1.9, 2.8, 3.7, 4.6, 5.5 );
 CheckArray2(242, 4, $a[1], 1.8, 18 );
+
+# 243: NULL return from gd_reference
+{
+  local $_ = &GetData::open("dirfile/empty",
+    $GetData::RDWR | $GetData::CREAT | $GetData::EXCL);
+  CheckOK2(243, 1);
+
+  $s = $_->reference();
+  CheckOK2(243, 2);
+  CheckString(243, $s, undef);
+}
 
 
 

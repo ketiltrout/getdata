@@ -2011,7 +2011,18 @@ if (pygetdata.__numpy_supported__):
 else:
   CheckSimple(242,n,[("mcarray", [1.9, 2.8, 3.7, 4.6, 5.5]), ("mnew17", [0,0])])
 
+# 243: check NULL return from gd_reference
+try:
+  m = pygetdata.dirfile("dirfile/empty",
+      pygetdata.RDWR | pygetdata.CREAT | pygetdata.EXCL)
+except:
+  CheckOK2(243, 1)
 
+try:
+  n = m.reference;
+  CheckSimple(243, n, None);
+except:
+  CheckOK2(243, 2)
 
 
 

@@ -895,7 +895,7 @@ program big_test
 ! 39: fgd_fragmentname check
   str = fgd_fragmentname(d, 0)
   call check_ok(ne, 39, d)
-  call check_eos(ne, 39, str, 'test95_dirfile'//DIRSEP//'format')
+  call check_eos(ne, 39, str, fildir//DIRSEP//'format')
 
 ! 40: fgd_nfragments check
   n = fgd_nfragments(d)
@@ -1466,7 +1466,7 @@ program big_test
   call fgd_dirfilename(path, l, d, 0)
   call check_ok(ne, 80, d)
   call check_int(ne, 80, l, 4096)
-  call check_eos(ne, 80, path, 'test95_dirfile')
+  call check_eos(ne, 80, path, fildir)
 
 ! 81: fgd_parent_fragment check
   n = fgd_parent_fragment(d, 1)
@@ -1485,7 +1485,7 @@ program big_test
 ! 84: fgd_raw_filename check
   str = fgd_raw_filename(d, "data")
   call check_ok(ne, 84, d)
-  call check_eos(ne, 84, str, 'test95_dirfile'//DIRSEP//'data')
+  call check_eos(ne, 84, str, fildir//DIRSEP//'data')
 
 ! 85: fgd_reference check
   str = fgd_reference(d, "new1")
@@ -2563,7 +2563,17 @@ program big_test
 ! 241: fgd_raw_filename check
   str = fgd_linterp_tablename(d, "linterp")
   call check_ok(ne, 241, d)
-  call check_eos(ne, 241, str, 'test95_dirfile'//DIRSEP//'lut')
+  call check_eos(ne, 241, str, fildir//DIRSEP//'lut')
+
+! 243: NULL return from gd_reference
+  l = fgd_open(fildir//DIRSEP//'empty', GD_RDWR + GD_CREAT + GD_EXCL)
+  call check_ok2(ne, 243, 1, l)
+
+  str = fgd_reference(l, "")
+  call check_ok2(ne, 243, 2, l)
+  call check_str(ne, 243, str, '')
+
+  call fgd_discard(l);
 
 
  

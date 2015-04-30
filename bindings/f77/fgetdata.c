@@ -2805,8 +2805,15 @@ void F77_FUNC(gdrefe, GDREFE) (char *name, int32_t *name_l,
   dtrace("%p, %p, %i, %p, %i", name, name_l, *dirfile, field_code,
       *field_code_l);
 
-  ref = gd_reference(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
-        *field_code_l));
+  _GDF_CString(&fc, field_code, *field_code_l);
+
+  /* F95 bindings pass an empty string instead of NULL */
+  if (*field_code_l == 0) {
+    free(fc);
+    fc = NULL;
+  }
+
+  ref = gd_reference(_GDF_GetDirfile(*dirfile), fc);
 
   _GDF_FString(name, name_l, ref);
 

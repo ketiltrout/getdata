@@ -726,7 +726,7 @@ C     39: GDFRGN check
 
       CALL CHKEOK(ne, 39, d)
       CALL CHKINT(ne, 39, l, plen)
-      CALL CHKEOS(ne, 39, path, 'test_dirfile'//DIRSEP//'format')
+      CALL CHKEOS(ne, 39, path, fildir//DIRSEP//'format')
 
 C     40: GDNFRG check
       CALL GDNFRG(n, d)
@@ -1267,7 +1267,7 @@ C     80: GDNAME check
       CALL GDNAME(path, l, d, 0)
       CALL CHKEOK(ne, 80, d)
       CALL CHKINT(ne, 80, l, plen)
-      CALL CHKEOS(ne, 80, path, 'test_dirfile')
+      CALL CHKEOS(ne, 80, path, fildir)
 
 C     81: GDPFRG check
       CALL GDPFRG(n, d, 1)
@@ -1288,7 +1288,7 @@ C     84: GDRWFN check
       CALL GDRWFN(path, l, d, "data", 4)
       CALL CHKEOK(ne, 84, d)
       CALL CHKINT(ne, 84, l, plen)
-      CALL CHKEOS(ne, 84, path, 'test_dirfile'//DIRSEP//'data')
+      CALL CHKEOS(ne, 84, path, fildir//DIRSEP//'data')
 
 C     85: GDREFE check
       l = slen
@@ -2145,7 +2145,17 @@ C     241: GDLTTN check
       CALL GDLTTN(path, l, d, "linterp", 7)
       CALL CHKEOK(ne, 241, d)
       CALL CHKINT(ne, 241, l, plen)
-      CALL CHKEOS(ne, 241, path, 'test_dirfile'//DIRSEP//'lut')
+      CALL CHKEOS(ne, 241, path, fildir//DIRSEP//'lut')
+
+C     243: NULL return from gd_reference
+      CALL GDOPEN(m, fildir//DIRSEP//'empty', 18, GD_RW + GD_CR + GD_EX)
+      CALL CHKOK2(ne, 243, 1, m)
+
+      CALL GDREFE(str, l, m, "", -1)
+      CALL CHKOK2(ne, 243, 2, m)
+      CALL CHKINT(ne, 243, l, 0);
+
+      CALL GDDSCD(m);
 
 
 

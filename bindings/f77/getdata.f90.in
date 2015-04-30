@@ -1490,6 +1490,10 @@ function fgd_reference (dirfile, field_code)
   integer :: l = GD_FIELD_LEN
 
   call gdrefe(fgd_reference, l, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+
+  if (l .LE. 0) then
+    fgd_reference = ""
+  endif
 end function 
 
 subroutine fgd_parser_callback (dirfile, sehandler)

@@ -97,8 +97,8 @@ template <class T> static void CheckFloat(char c, int i, int t, int n, T v, T g)
 
 #define CHECK_NONNULL(t,v) CheckT<const void*>('p', -1, t, -1, v, NULL, !(v))
 
-#define CHECK_NULL(t,v) CheckT<const void*>('p', -1, t, -1, v, NULL, v)
-#define CHECK_NULL2(t,n,v) CheckT<const void*>('p', -1, t, n, v, NULL, v)
+#define CHECK_NULL(t,v) CheckT<const void*>('p', -1, t, -1, v, NULL, !(!(v)))
+#define CHECK_NULL2(t,n,v) CheckT<const void*>('p', -1, t, n, v, NULL, !(!(v)))
 
 #define CHECK_INT(t,v,g) CheckInt(-1, t, -1, v, g)
 #define CHECK_INT2(t,n,v,g) CheckInt(-1, t, n, v, g)
@@ -1770,6 +1770,16 @@ int main(void)
   CHECK_INT2(242,3,carrays[1].n,2);
   CHECK_DOUBLE_ARRAY(242,4,2,((double*)carrays[1].d)[i],0);
   CHECK_INT2(242,5,carrays[2].n,0);
+
+  // 243: NULL return from gd_reference
+  id = new Dirfile("dirfile/empty", GD_RDWR | GD_CREAT | GD_EXCL);
+  CHECK_OK2(243, 1);
+
+  rep = id->Reference();
+  CHECK_OK2(243, 2);
+  CHECK_NULL(243, rep);
+
+  id->Discard();
 
 
 

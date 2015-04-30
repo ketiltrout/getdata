@@ -7,11 +7,19 @@ New in verison 0.8.7a:
 
   Bindings Changes:
 
-  * PYTHON BUG FIX: Memory leaks have been fixed in functions returning lists of
-    field names or other metadata lists.  Reported by Alexandra Rahlin.
+  * F95 BUG FIX: Passing the empty string to fgd_reference() now returns
+    the current reference field instead without modifying it, instead of
+    crashing.
 
-  * PYTHON BUG FIX: On error, dirfile.get_string() no longer segfaults or leaks
-    memory.
+  * PYTHON BUG FIX: Querying dirfile.reference no longer causes a crash on
+    an empty dirfile.  Reported by Alexandra Rahlin.
+
+  * PYTHON BUG FIX: Memory leaks have been fixed in functions returning
+    lists of field names or other metadata lists.  Reported by Alexandra
+    Rahlin.
+
+  * PYTHON BUG FIX: On error, dirfile.get_string() no longer segfaults or
+    leaks memory.
 
 |==============================================================================|
 

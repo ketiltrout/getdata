@@ -254,4 +254,5 @@
 239 F9CIpPm gd_entry_list
 240 F9CIpPm gd_mplex_lookback
 241 F9CIpPm gd_linterp_tablename
-242 ..C-pP- gd_mcarrays
+242 ..C-pPm gd_mcarrays
+243 F9C.pPm NULL return from gd_reference

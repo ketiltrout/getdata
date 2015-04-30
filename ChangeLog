@@ -1,3 +1,16 @@
+2014-04-30   D. V. Wiebe <getdata@ketiltrout.net> svn:956
+	* bindings/f77/fgetdata.c (GDREFE): Convert a passed empty string to NULL.
+
+	* bindings/f77/getdata.f90.in (fgd_reference): Handle empty string from
+	GDREFE.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getreference): Handle NULL from
+	gd_reference.
+
+	* bindings/cxx/test/big_test.cpp bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/matlab/test/big_test.m
+	bindings/perl/t/big_test.t bindings/python/test/big_test.py: Add test 243.
+
 2014-04-24   D. V. Wiebe <getdata@ketiltrout.net> svn:953
 	* bindings/python/pygetdata.c (gdpylist_append gdpy_to_pystringlist): Added.
 	* bindings/python/pydirfile.c (gdpy_dirfile_getvectorlist
