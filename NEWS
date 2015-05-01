@@ -5,11 +5,14 @@ New in verison 0.8.7a:
   * BUG FIX: Opening a Dirfile read-write (GD_RDWR) no longer fails if
     /INCLUDEd fragments are read-only.  Reported by Alexandra Rahlin.
 
+  * BUG FIX: Several fixes have been made to the sample index encoding
+    (SIE) engine, which should now produce properly encoded data when
+    performing random writes.
+
   Bindings Changes:
 
   * F95 BUG FIX: Passing the empty string to fgd_reference() now returns
-    the current reference field instead without modifying it, instead of
-    crashing.
+    the current reference field without modifying it, instead of crashing.
 
   * PYTHON BUG FIX: Querying dirfile.reference no longer causes a crash on
     an empty dirfile.  Reported by Alexandra Rahlin.

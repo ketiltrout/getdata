@@ -1,4 +1,29 @@
-2014-04-30   D. V. Wiebe <getdata@ketiltrout.net> svn:956
+2015-04-30   D. V. Wiebe <getdata@ketiltrout.net> svn:957
+	Backport SIE fixes from trunk:
+
+	* test/sie_put_append.c test/sie_put_append2.c test/sie_put_back.c
+	test/sie_put_pad.c test/sie_put_pad0.c test/sie_put_trunc.c
+	test/sie_put_trunc2.c test/sie_sync.c: Added. (r867)
+
+	* src/sie.c (_GD_SampIndWrite): Deallocate buffers on error. (r877)
+
+	* src/sie.c: Added l, have_l and bof to struct gd_siedata.  Also, f->d[0]
+	is no longer endianness corrected (ie. f->d is now simply the raw record),
+	which means we use f->s in most places where we used f->d[0] previously.
+	(r867)
+
+	* src/sie.c (_GD_Advance): remember the previous record in f->l.  Also set
+	f->bof. (r867)
+
+	* src/sie.c (_GD_SampIndSeek): check stdio calls for failure.  Correctly
+	format a padding record when write seeking past the EOF. (r867)
+
+	* src/sie.c (_GD_SampIndWrite): Correctly deal with appending data,
+	including backing up a record when necessary to check whether we need to
+	combine the start of the new data with that record.  Compose p with the
+	output endianness. (r867)
+
+2015-04-30   D. V. Wiebe <getdata@ketiltrout.net> svn:956
 	* bindings/f77/fgetdata.c (GDREFE): Convert a passed empty string to NULL.
 
 	* bindings/f77/getdata.f90.in (fgd_reference): Handle empty string from
@@ -11,7 +36,7 @@
 	bindings/f77/test/big_test95.f90 bindings/matlab/test/big_test.m
 	bindings/perl/t/big_test.t bindings/python/test/big_test.py: Add test 243.
 
-2014-04-24   D. V. Wiebe <getdata@ketiltrout.net> svn:953
+2015-04-24   D. V. Wiebe <getdata@ketiltrout.net> svn:953
 	* bindings/python/pygetdata.c (gdpylist_append gdpy_to_pystringlist): Added.
 	* bindings/python/pydirfile.c (gdpy_dirfile_getvectorlist
 	gdpy_dirfile_getfieldlist gdpy_dirfile_getmfieldlist
@@ -28,7 +53,7 @@
 	* test/open_sym_a.c test/open_sym_al.c test/open_sym_at.c test/tok_escape.c
 	test/tok_quote.c: Free strings.
 
-2014-04-05   D. V. Wiebe <getdata@ketiltrout.net> svn:939
+2015-04-05   D. V. Wiebe <getdata@ketiltrout.net> svn:939
 	* src/include.c (_GD_Include): Only open the file read-write if it's being
 	truncated or created.
 
