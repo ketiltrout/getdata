@@ -1,4 +1,19 @@
-2015-04-30   D. V. Wiebe <getdata@ketiltrout.net> svn:957
+2015-05-01   D. V. Wiebe <getdata@ketiltrout.net> svn:960
+	Steve's SIE fixes:
+
+	* src/sie.c (_GD_SampIndSeek): Behave when seeking on an empty file.
+
+	* src/sie.c (_GD_SampIndWrite): Update cur_end when reallocing p.
+
+	* src/sie.c (_GD_SampIndWrite): Fix fence-post error in memcpy.
+
+	* test/sie_put_steve.c: Added.
+
+	Also:
+
+	* src/sie.c (_GD_SampIndDoOpen): Initialise fd from fdin.
+
+2015-04-30   D. V. Wiebe <getdata@ketiltrout.net> svn:959
 	Backport SIE fixes from trunk:
 
 	* test/sie_put_append.c test/sie_put_append2.c test/sie_put_back.c

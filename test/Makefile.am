@@ -333,8 +333,8 @@ SEEK_TESTS=seek64 seek_cur seek_end seek_foffs seek_neg seek_set
 
 SIE_TESTS=sie_get_big sie_get_little sie_move_from sie_move_to sie_nframes_big \
 					sie_nframes_little sie_put_big sie_put_append sie_put_append2 \
-					sie_put_back sie_put_little sie_put_pad sie_put_pad0 sie_put_trunc \
-					sie_put_trunc2 sie_sync
+					sie_put_back sie_put_little sie_put_pad sie_put_pad0 sie_put_steve \
+					sie_put_trunc sie_put_trunc2 sie_sync
 
 SLIM_TESTS=slim_get slim_nframes
 
