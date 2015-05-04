@@ -27,10 +27,9 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data.sie";
-  uint8_t check[9];
   uint8_t c[60], d[60];
   DIRFILE *D;
-  int fd, i, j, n1, n2, n3, e1, e2, e3, r = 0;
+  int i, n1, n2, n3, e1, e2, e3, r = 0;
 
   rmdirfile();
 
@@ -60,26 +59,8 @@ int main(void)
 
   gd_discard(D);
 
-  fd = open(data, O_RDONLY | O_BINARY);
-
-  /* Records are 1 + 8 = nine bytes long.  The first byte should be the
-   * sample offset (10 + j).  The last byte should be the value (j) and the
-   * other bytes should be zero
-   */
-  j = 0;
-  while (read(fd, check, 9) == 9) {
-    CHECKIi(j * 10 + 0, check[0], 10 + j);
-    for (i = 1; i < 8; ++i)
-      CHECKIi(j * 10 + i, check[i], 0);
-    CHECKIi(j * 10 + 8, check[8], j);
-    j++;
-  }
-  CHECKI(j, 60);
-
-  close(fd);
-
-  return r;
   unlink(data);
   unlink(format);
   rmdir(filedir);
+  return r;
 }

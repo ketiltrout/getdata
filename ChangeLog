@@ -1,3 +1,7 @@
+2015-05-04   D. V. Wiebe <getdata@ketiltrout.net> svn:961
+	* test/sie.put_many.c test/sie_put_newo.c test/sie_put_newo0.c: Added.
+	* test/sie_put_steve.c: Deleted.
+
 2015-05-01   D. V. Wiebe <getdata@ketiltrout.net> svn:960
 	Steve's SIE fixes:
 
