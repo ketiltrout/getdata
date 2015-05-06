@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2011 D. V. Wiebe
+# Copyright (C) 2008-2011, 2015 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -18,7 +18,7 @@
 # along with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-AUTOMAKE_OPTIONS = foreign dist-bzip2 check-news 1.10
+AUTOMAKE_OPTIONS = foreign dist-bzip2 check-news 1.13
 
 ACLOCAL_AMFLAGS = -I m4
 

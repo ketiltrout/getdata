@@ -68,6 +68,9 @@ matlabdist: $(DISTFILES)
 		) )
 	rm -rf svn_export
 
+matlab_$(distdir).tar.gz:
+	${MAKE} matlabdist
+
 matlabdistcheck: matlab_$(distdir).tar.gz
 	tar -zxvf $<
 	cd matlab_$(distdir) && ./configure && make dist && make distcheck
@@ -99,6 +102,9 @@ idldist: $(DISTFILES)
 		cp idl_${distdir}* ../.. \
 		) )
 	rm -rf svn_export
+
+idl_$(distdir).tar.gz:
+	${MAKE} idldist
 
 idldistcheck: idl_$(distdir).tar.gz
 	tar -zxvf $<

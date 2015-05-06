@@ -1,4 +1,4 @@
-dnl Copyright (C) 2008-2013 D. V. Wiebe
+dnl Copyright (C) 2008-2015 D. V. Wiebe
 dnl
 dnllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -25,7 +25,7 @@ AC_INIT([GetData],[getdata_version],[getdata-devel@lists.sourceforge.net],,
         [http://getdata.sourceforge.net/])
 
 AC_COPYRIGHT(
-[Parts of this program are copyright (C) 2008-2013 D. V. Wiebe.
+[Parts of this program are copyright (C) 2008-2015 D. V. Wiebe.
 
 These parts may be redistributed and/or modified under the terms of the GNU
 Lesser General Public License as published by the Free Software Foundation;
@@ -409,6 +409,7 @@ esac
 echo
 echo "*** Checking C compiler characteristics"
 echo
+AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC
 AC_PROG_CC_C_O
 
@@ -542,6 +543,7 @@ dnl compiler checks
 echo
 echo "*** Checking additional compiler characteristics"
 echo
+AC_SYS_LARGEFILE
 AC_C_INLINE
 AC_C_RESTRICT
 GD_C_RESTRICT_ARRAY
@@ -591,14 +593,6 @@ if test "$gd_msvcrt" = "yes"; then
             [ If compiling aginst the MSVCRT, define to 0x601 ])
 fi
 
-dnl Declare a few feature test macros
-AC_DEFINE([_GNU_SOURCE], [1], [ Expose GNU extensions ])
-AC_DEFINE([_BSD_SOURCE], [1], [ Expose BSD-derived definitions ])
-AC_DEFINE([_SVID_SOURCE], [1], [ Expose System V-derived definitions ])
-AC_DEFINE([_POSIX_SOURCE], [1], [ Expose POSIX.1-1990 conforming definitions ])
-AC_DEFINE([_POSIX_C_SOURCE], [200809L],
-          [ Expose POSIX:2008 conforming definitions ])
-
 dnl libraries
 echo
 echo "*** Looking for additional libraries"
@@ -643,44 +637,7 @@ if test "x$disable_c99" = "xno"; then
 AC_CHECK_TYPES([_Complex float, _Complex double])
 fi
 
-GD_CHECK_LFS_TYPE([struct stat64],[
-#ifdef STDC_HEADERS
-#include <sys/types.h>
-#include <sys/stat.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-])
-
-GD_CHECK_LFS_TYPE([struct _stat64],[
-#ifdef STDC_HEADERS
-#include <sys/types.h>
-#include <sys/stat.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-])
-
-GD_CHECK_LFS_TYPE([struct __stat64],[
-#ifdef STDC_HEADERS
-#include <sys/types.h>
-#include <sys/stat.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-])
-
-GD_CHECK_LFS_TYPE([off64_t],[
-#ifdef STDC_HEADERS
-#include <sys/types.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-])
+AC_CHECK_TYPES([struct stat64, struct _stat64, struct __stat64, off64_t])
 
 dnl integer sizes
 AC_CHECK_SIZEOF([short int])

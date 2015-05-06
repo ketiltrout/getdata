@@ -1,3 +1,13 @@
+2015-05-06   D. V. Wiebe <getdata@ketiltrout.net> svn:962
+	GetData-0.8.7rc1:
+
+	Backport build system fixes from trunk, rev 947:
+
+	* configure.ac bindings/idl/package/configure.ac
+	bindings/matlab/package/configure.ac: Use AC_USE_SYSTEM_EXTENSIONS and
+	AC_SYS_LARGEFILE instead of definining feature macros explicitly.
+	* m4/compiler.m4 (GD_CHECK_LFS_TYPE): Deleted.
+
 2015-05-04   D. V. Wiebe <getdata@ketiltrout.net> svn:961
 	* test/sie.put_many.c test/sie_put_newo.c test/sie_put_newo0.c: Added.
 	* test/sie_put_steve.c: Deleted.

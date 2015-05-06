@@ -1,4 +1,4 @@
-dnl Copyright (C) 2008-2012 D. V. Wiebe
+dnl Copyright (C) 2008-2015 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -31,10 +31,10 @@ AC_DEFINE([GETDATA_VERSION_SUFFIX], ["getdata_extra"],
           [ Other qualifiers on the version number triplet (if any) ])
 AC_SUBST(MATLABGETDATA_VERSION, [matlabgetdata_version])
 
-AC_PREREQ([2.63])
+AC_PREREQ([2.65])
 AC_CONFIG_MACRO_DIR([m4])
 
-LT_PREREQ([2.2.6b])
+LT_PREREQ([2.2.7b])
 
 AC_ARG_VAR([BUILDCC],
            [C compiler command on the build system (only needed if cross-compiling)])
@@ -80,6 +80,7 @@ AC_CHECK_PROGS([PRINTF], [printf], [not found])
 echo
 echo "*** Checking C compiler characteristics"
 echo
+AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC
 AC_PROG_CC_C_O
 AC_HEADER_STDC
@@ -121,16 +122,10 @@ dnl compiler checks
 echo
 echo "*** Checking additional compiler characteristics"
 echo
+AC_DEFINE([GD_EXTERNAL], [1], [ Define to 1 if building the GetData bindings outside the GetData source tree ])
+AC_SYS_LARGEFILE
 AC_C_INLINE
 GD_PROG_CC_WALL
-
-dnl Declare a few feature test macros
-AC_DEFINE([GD_EXTERNAL], [1], [ Define to 1 if building the GetData bindings outside the GetData source tree ])
-AC_DEFINE([_BSD_SOURCE], [], [ Expose BSD-derived definitions ])
-AC_DEFINE([_SVID_SOURCE], [], [ Expose System V-derived definitions ])
-AC_DEFINE([_POSIX_SOURCE], [], [ Expose POSIX.1-1990 conforming definitions ])
-AC_DEFINE([_POSIX_C_SOURCE], [200809L],
-          [ Expose POSIX:2008 conforming definitions ])
 
 dnl libraries
 echo
@@ -151,26 +146,8 @@ AC_TYPE_UINT32_T
 AC_TYPE_INT32_T
 AC_TYPE_UINT64_T
 AC_TYPE_INT64_T
-
-GD_CHECK_LFS_TYPE([off64_t],[
-#ifdef STDC_HEADERS
-#include <sys/types.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-])
-
-if test "x$gd_cv_c_need_lfs_defined" = "xyes"; then
-  AC_DEFINE([_LARGEFILE64_SOURCE], [1],
-            [ Additional functionality from LFS for large files. ])
-fi
-
-if test "x$gd_cv_type_off64_t" = "xyes"; then
-  dnl Assume we have the entire LFS defined transitional API
-  AC_DEFINE([HAVE_OFF64_T], [1],
-            [ Define to 1 if the system has the type `off64_t'. ]) dnl `
-fi
+AC_CHECK_TYPES([off64_t])
+AC_CHECK_SIZEOF([void *])
 
 dnl matlab
 echo
