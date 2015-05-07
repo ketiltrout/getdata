@@ -1,4 +1,4 @@
-dnl Copyright (C) 2009-2010 D. V. Wiebe
+dnl Copyright (C) 2009-2011, 2013, 2015 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -105,6 +105,7 @@ if test -x $PYTHON-config; then
   else
     PYTHON_LIBS=""
   fi
+  PYTHON_CFLAGS=`$PYTHON-config --cflags 2>/dev/null`
   PYTHON_CPPFLAGS=`$PYTHON-config --includes 2>/dev/null`
   PYTHON_LIBS="${PYTHON_LIBS}`$PYTHON-config --ldflags 2>/dev/null`"
 else
@@ -114,6 +115,7 @@ else
   python_syslibs=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('SYSLIBS')"`
   python_shlibs=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('SHLIBS')"`
   python_modlibs=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('MODLIBS')"`
+  PYTHON_CFLAGS=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('CFLAGS')"`
 
   PYTHON_CPPFLAGS="-I${python_prefix}/include/python${PYTHON_VERSION} -I${python_exec_prefix}/include/python${PYTHON_VERSION}"
   if test -n "$user_python"; then
@@ -123,6 +125,9 @@ else
   fi
   PYTHON_LIBS="${PYTHON_LIBS}$python_syslibs $python_shlibs $python_modlibs -lpython${PYTHON_VERSION}"
 fi
+AC_MSG_CHECKING([Python CFLAGS])
+AC_MSG_RESULT([$PYTHON_CFLAGS])
+AC_SUBST([PYTHON_CFLAGS])
 AC_MSG_CHECKING([Python includes])
 AC_MSG_RESULT([$PYTHON_CPPFLAGS])
 AC_SUBST([PYTHON_CPPFLAGS])
@@ -155,6 +160,8 @@ fi
 AC_SUBST([pythondir])
 AC_MSG_RESULT([$pythondir])
 
+saved_CFLAGS=${CPPFLAGS}
+CFLAGS="${CFLAGS} ${PYTHON_CFLAGS}"
 saved_CPPFLAGS=${CPPFLAGS}
 CPPFLAGS="${CPPFLAGS} ${PYTHON_CPPFLAGS}"
 saved_LIBS=$LIBS
@@ -164,6 +171,7 @@ AC_MSG_CHECKING([if we can compile a simple Python extension module])
 AC_TRY_LINK_FUNC([Py_Initialize], [ AC_MSG_RESULT([yes]) ],
 [ AC_MSG_RESULT([no]); have_python="no" ])
 CPPFLAGS=$saved_CPPFLAGS
+CFLAGS=$saved_CFLAGS
 LIBS=$saved_LIBS
 
 fi

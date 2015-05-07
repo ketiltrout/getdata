@@ -1,3 +1,7 @@
+2015-05-07   D. V. Wiebe <getdata@ketiltrout.net> svn:963
+	* m4/python.m4: Set PYTHON_CFLAGS from distutils/python-config.
+	* bindings/python/Makefile.am: Use PYTHON_CFLAGS.
+
 2015-05-06   D. V. Wiebe <getdata@ketiltrout.net> svn:962
 	GetData-0.8.7rc1:
 

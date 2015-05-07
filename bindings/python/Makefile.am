@@ -1,4 +1,4 @@
-# Copyright (C) 2009 D. V. Wiebe
+# Copyright (C) 2009-2011, 2015 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -34,7 +34,7 @@ python_LTLIBRARIES = pygetdata.la
 LIBS=
 
 BUILT_SOURCES = pyconstants.c
-AM_CFLAGS = ${WALL} -fno-strict-aliasing
+AM_CFLAGS = ${WALL} ${PYTHON_CFLAGS}
 AM_CPPFLAGS = $(CPPFLAGS) $(PYTHON_CPPFLAGS) $(NUMPY_CPPFLAGS)
 pygetdata_la_LDFLAGS = -module -avoid-version \
 											 -export-symbols-regex initpygetdata
