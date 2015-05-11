@@ -98,33 +98,21 @@ PYTHON_VERSION=`$PYTHON -c "import sys; print sys.version[[:3]]"`
 AC_MSG_RESULT([$PYTHON_VERSION])
 
 dnl calculate python CPPFLAGS and LIBS
-if test -x $PYTHON-config; then
-  if test -n "$user_python"; then
-    python_exec_prefix=`$PYTHON-config --exec-prefix`
-    PYTHON_LIBS="-L${python_exec_prefix}/lib "
-  else
-    PYTHON_LIBS=""
-  fi
-  PYTHON_CFLAGS=`$PYTHON-config --cflags 2>/dev/null`
-  PYTHON_CPPFLAGS=`$PYTHON-config --includes 2>/dev/null`
-  PYTHON_LIBS="${PYTHON_LIBS}`$PYTHON-config --ldflags 2>/dev/null`"
-else
-  python_prefix=`$PYTHON -c "import sys; print sys.prefix"`
-  python_exec_prefix=`$PYTHON -c "import sys; print sys.exec_prefix"`
-  python_libdir=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('LIBDIR')"`
-  python_syslibs=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('SYSLIBS')"`
-  python_shlibs=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('SHLIBS')"`
-  python_modlibs=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('MODLIBS')"`
-  PYTHON_CFLAGS=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('CFLAGS')"`
+python_prefix=`$PYTHON -c "import sys; print sys.prefix"`
+python_exec_prefix=`$PYTHON -c "import sys; print sys.exec_prefix"`
+python_libdir=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('LIBDIR')"`
+python_syslibs=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('SYSLIBS')"`
+python_shlibs=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('SHLIBS')"`
+python_modlibs=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('MODLIBS')"`
+PYTHON_CFLAGS=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('CFLAGS')"`
 
-  PYTHON_CPPFLAGS="-I${python_prefix}/include/python${PYTHON_VERSION} -I${python_exec_prefix}/include/python${PYTHON_VERSION}"
-  if test -n "$user_python"; then
-    PYTHON_LIBS="-L${python_libdir} "
-  else
-    PYTHON_LIBS=""
-  fi
-  PYTHON_LIBS="${PYTHON_LIBS}$python_syslibs $python_shlibs $python_modlibs -lpython${PYTHON_VERSION}"
+PYTHON_CPPFLAGS="-I${python_prefix}/include/python${PYTHON_VERSION} -I${python_exec_prefix}/include/python${PYTHON_VERSION}"
+if test -n "$user_python"; then
+  PYTHON_LIBS="-L${python_libdir} "
+else
+  PYTHON_LIBS=""
 fi
+PYTHON_LIBS="${PYTHON_LIBS}$python_syslibs $python_shlibs $python_modlib"
 AC_MSG_CHECKING([Python CFLAGS])
 AC_MSG_RESULT([$PYTHON_CFLAGS])
 AC_SUBST([PYTHON_CFLAGS])
@@ -160,19 +148,19 @@ fi
 AC_SUBST([pythondir])
 AC_MSG_RESULT([$pythondir])
 
-saved_CFLAGS=${CPPFLAGS}
-CFLAGS="${CFLAGS} ${PYTHON_CFLAGS}"
-saved_CPPFLAGS=${CPPFLAGS}
-CPPFLAGS="${CPPFLAGS} ${PYTHON_CPPFLAGS}"
-saved_LIBS=$LIBS
-LIBS="$LIBS ${PYTHON_LIBS}"
+dnl saved_CFLAGS=${CPPFLAGS}
+dnl CFLAGS="${CFLAGS} ${PYTHON_CFLAGS}"
+dnl saved_CPPFLAGS=${CPPFLAGS}
+dnl CPPFLAGS="${CPPFLAGS} ${PYTHON_CPPFLAGS}"
+dnl saved_LIBS=$LIBS
+dnl LIBS="$LIBS ${PYTHON_LIBS}"
 dnl try to compile a module
-AC_MSG_CHECKING([if we can compile a simple Python extension module])
-AC_TRY_LINK_FUNC([Py_Initialize], [ AC_MSG_RESULT([yes]) ],
-[ AC_MSG_RESULT([no]); have_python="no" ])
-CPPFLAGS=$saved_CPPFLAGS
-CFLAGS=$saved_CFLAGS
-LIBS=$saved_LIBS
+dnl AC_MSG_CHECKING([if we can compile a simple Python extension module])
+dnl AC_TRY_LINK_FUNC([Py_Initialize], [ AC_MSG_RESULT([yes]) ],
+dnl [ AC_MSG_RESULT([no]); have_python="no" ])
+dnl CPPFLAGS=$saved_CPPFLAGS
+dnl CFLAGS=$saved_CFLAGS
+dnl LIBS=$saved_LIBS
 
 fi
 ])

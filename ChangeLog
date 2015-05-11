@@ -1,3 +1,12 @@
+2015-05-08   D. V. Wiebe <getdata@ketiltrout.net> svn:965
+	GetData-0.8.7rc3:
+
+	* bindings/python/test/Makefile.am: Don't clobber an existing PYTHONPATH.
+	* m4/python.m4: python-config lies.  Don't use it.  Always use
+	distutils.sysconfig instead.  Don't hardcode -lpython
+
+	* m4/python.m4: dnl the simple module check.
+
 2015-05-07   D. V. Wiebe <getdata@ketiltrout.net> svn:964
 	GetData-0.8.7rc2.
 
