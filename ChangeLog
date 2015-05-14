@@ -1,3 +1,19 @@
+2015-05-13   D. V. Wiebe <getdata@ketiltrout.net> svn:969
+	GetData-0.8.8 released:
+
+	* src/getdata.h.in: Delete all the __REDIRECTs.
+
+	* test/get_uint32.c test/get_uint64.c: Fix signed integer overflow.
+
+	* bindings/idl/Makefile.am bindings/python/Makefile.am: Fix VPATH builds
+	again.
+
+	* bindings/matlab/package/Makefile.am bindings/idl/package/Makefile.am: Deal
+	with non-standard GETDATA_CFLAGS.
+
+	* Makefile.am: Don't run matlabdistcheck and idldistcheck against an
+	installed GetData.
+
 2015-05-11   D. V. Wiebe <getdata@ketiltrout.net> svn:966
 	GetData-0.8.7 released.
 

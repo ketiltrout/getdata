@@ -1,3 +1,15 @@
+New in verison 0.8.8:
+
+  Library Changes:
+
+  * BUG FIX: The incorrect handling of the explicit 64-bit API declarations
+    in getdata.h (those associated with the GD_64BIT_API symbol), which
+    prevented GetData-0.8.7 from compiling on 32-bit systems, has been fixed.
+
+  GetData-0.8.8 is ABI compatible with GetData-0.8.7.
+
+|==============================================================================|
+
 New in verison 0.8.7:
 
   Library Changes:

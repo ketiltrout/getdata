@@ -38,14 +38,15 @@ int main(void)
   uint32_t c[8], i;
   uint32_t data_data[128];
   int fd, n, error, r = 0;
+  unsigned j;
   DIRFILE *D;
 
   memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0777);
 
-  for (fd = 0; fd < 128; ++fd)
-    data_data[fd] = fd * (0x02000001);
+  for (j = 0; j < 128; ++j)
+    data_data[j] = j * 0x02000001LU;
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));

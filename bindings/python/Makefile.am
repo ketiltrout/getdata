@@ -35,7 +35,7 @@ LIBS=
 
 BUILT_SOURCES = pyconstants.c
 AM_CFLAGS = ${WALL} ${PYTHON_CFLAGS}
-AM_CPPFLAGS = $(CPPFLAGS) $(PYTHON_CPPFLAGS) $(NUMPY_CPPFLAGS)
+AM_CPPFLAGS = $(CPPFLAGS) $(PYTHON_CPPFLAGS) $(NUMPY_CPPFLAGS) -I$(top_srcdir)/src
 pygetdata_la_LDFLAGS = -module -avoid-version \
 											 -export-symbols-regex initpygetdata
 pygetdata_la_LIBADD = $(PYTHON_LIBS) ../../src/libgetdata.la

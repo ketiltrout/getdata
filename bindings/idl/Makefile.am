@@ -37,6 +37,7 @@ nodist_idl_HEADERS = idl_getdata.dlm
 
 # idl makes heavy use of type punning, ergo -fno-strict-aliasing
 AM_CFLAGS = ${WALL} $(IDL_CFLAGS) -fno-strict-aliasing $(GETDATA_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)/src
 BUILT_SOURCES=sublist.c constants.c
 idl_getdata_la_LDFLAGS = -module -avoid-version -export-symbols-regex IDL_Load \
 												 -precious-files-regex 'idl_getdata\.dlm' $(IDL_LIBS)
