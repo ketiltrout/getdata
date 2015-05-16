@@ -207,7 +207,9 @@ off64_t _GD_SampIndSeek(struct gd_raw_file_ *file, off64_t sample,
     memset(zero, 0, 16);
 
     /* does the last record have a value of zero? */
-    if (memcmp(f->d + 1, &zero, GD_SIZE(data_type)) == 0) {
+    if (memcmp(f->d + 1, &zero, GD_SIZE(data_type)) == 0
+        && ftell(f->fp) > 0)
+    {
       /* in this case, just increase the current record's end */
       f->s = sample;
       f->d[0] = FIXSEX(f->swap, sample);
@@ -468,7 +470,7 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
       dprintf_sie("mismatch on sample %zu:", i);
       if (++rin == plen) {
         void *p2;
-        plen += 10;
+        plen *= 2;
         p2 = realloc(p, plen * size);
         if (p2 == NULL) {
           free(p);
@@ -476,6 +478,7 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
           return -1;
         }
         p = p2;
+        cur_end = (int64_t*)((char*)p + size * (rin - 1));
       }
       end = f->p + i - 1;
       dprintf_sie("*cur_end:   %llX -> %llX", FIXSEX(f->swap, *cur_end), end);
@@ -485,8 +488,8 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
       dprintf_sie(" cur_datum: %p -> %p", cur_datum, cur_end + 1);
       cur_datum = cur_end + 1;
       dprintf_sie("*cur_datum: %X -> %X", *((char*)cur_datum),
-          *(((const char*)ptr) + (i + 1) * dlen));
-      memcpy(cur_datum, ((const char*)ptr) + (i + 1) * dlen, dlen);
+          *(((const char*)ptr) + i * dlen));
+      memcpy(cur_datum, ((const char*)ptr) + i * dlen, dlen);
     }
   }
   end = f->p + nelem - 1;

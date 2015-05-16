@@ -259,8 +259,9 @@ int _GD_Include(DIRFILE *D, struct parser_state *p, const char *ename,
   }
 
   /* Try to open the file */
-  i = gd_OpenAt(D, dirfd, base, (((D->flags & GD_ACCMODE) == GD_RDWR) ? O_RDWR :
-        O_RDONLY) | ((p->flags & GD_CREAT) ? O_CREAT : 0) |
+  i = gd_OpenAt(D, dirfd, base,
+      ((p->flags & (GD_CREAT | GD_TRUNC)) ? O_RDWR : O_RDONLY) |
+      ((p->flags & GD_CREAT) ? O_CREAT : 0) |
       ((p->flags & GD_TRUNC) ? O_TRUNC : 0) |
       ((p->flags & GD_EXCL) ? O_EXCL : 0) | O_BINARY, 0666);
 
@@ -270,7 +271,7 @@ int _GD_Include(DIRFILE *D, struct parser_state *p, const char *ename,
     goto include_error;
   }
 
-  new_fp = fdopen(i, ((D->flags & GD_ACCMODE) == GD_RDWR) ? "rb+" : "rb");
+  new_fp = fdopen(i, (p->flags & (GD_CREAT | GD_TRUNC)) ? "rb+" : "rb");
 
   /* If opening the file failed, set the error code and abort parsing. */
   if (new_fp == NULL) {

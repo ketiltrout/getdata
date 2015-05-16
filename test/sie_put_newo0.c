@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,59 +18,67 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read UINT32 */
 #include "test.h"
 
-#include <inttypes.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT32 8\n";
-  uint32_t c[8], i;
-  uint32_t data_data[128];
-  int fd, n, error, r = 0;
-  unsigned j;
+  const char *data = "dirfile/data.sie";
+  uint8_t check[9];
+  uint8_t c[6], d[16];
   DIRFILE *D;
+  int fd, i, j, n1, n2, n3, e1, e2, e3, r = 0;
 
-  memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
 
-  for (j = 0; j < 128; ++j)
-    data_data[j] = j * (0x02000001U);
+  for (i = 0; i < 6; ++i)
+    c[i] = i;
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 128 * sizeof(uint32_t));
-  close(fd);
+  D = gd_open(filedir, GD_RDWR | GD_SIE_ENCODED | GD_CREAT | GD_LITTLE_ENDIAN
+      | GD_VERBOSE);
+  n1 = gd_add_raw(D, "data", GD_UINT8, 20, 0);
+  e1 = gd_error(D);
+  CHECKI(n1, 0);
+  CHECKI(e1, 0);
+  n2 = gd_putdata(D, "data", 0, 10, 0, 6, GD_UINT8, c);
+  e2 = gd_error(D);
+  CHECKI(n2, 6);
+  CHECKI(e2, 0);
+  gd_close(D);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT32, c);
+  n3 = gd_getdata(D, "data", 0, 0, 0, 16, GD_UINT8, d);
+  e3 = gd_error(D);
+  CHECKI(n3, 16);
+  CHECKI(e3, 0);
 
-  error = gd_error(D);
-  CHECKI(error, 0);
-  CHECKI(n, 8);
-
-  for (i = 0; i < 8; ++i)
-    CHECKUi(i,c[i], 0x50000028 + i * 0x02000001);
+  for (i = 0; i < 16; ++i)
+    if (i < 10)
+      CHECKIi(i, d[i], 0);
+    else
+      CHECKIi(i, d[i], c[i - 10]);
 
   gd_discard(D);
+
+  fd = open(data, O_RDONLY | O_BINARY);
+
+  j = 0;
+  while (read(fd, check, 9) == 9) {
+    CHECKIi(j * 10 + 0, check[0], 10 + j);
+    for (i = 1; i < 8; ++i)
+      CHECKIi(j * 10 + i, check[i], 0);
+    CHECKIi(j * 10 + 8, check[8], j);
+    j++;
+  }
+  CHECKI(j, 6);
+
+  close(fd);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
-
   return r;
 }

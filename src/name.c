@@ -102,7 +102,7 @@ char *_GD_MungeCode(DIRFILE *D, const char *ns, size_t len_newns,
    */
   if ((slash = (char*)memchr(ptr, '/', len))) {
     len_sub = len + (ptr - slash);
-    len = slash++ - ptr;
+    len = slash - ptr;
   }
 
   /* Verify the suffix is present */
@@ -181,8 +181,6 @@ char *_GD_MungeCode(DIRFILE *D, const char *ns, size_t len_newns,
   }
 
   if (slash) {
-    *(nptr++) = '/';
-    new_code[len_newpx + len + len_newsx] = '/';
     strcpy(nptr, slash);
     nptr += len_sub;
   }

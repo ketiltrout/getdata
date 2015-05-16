@@ -43,7 +43,10 @@ int main(void)
   uint16_t c[8];
   char command[4096];
   uint16_t data_data[256];
-  int fd, i, n, error, r = 0;
+  int fd, n, error, r = 0;
+#ifdef USE_SLIM
+  int i;
+#endif
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -62,7 +65,7 @@ int main(void)
   close(fd);
 
   /* compress */
-  snprintf(command, 4096, "%s -k %s > /dev/null", SLIM, data);
+  snprintf(command, 4096, "%s -k %s > /dev/null", SLIMDATA, data);
   if (gd_system(command)) {
     perror("command");
     r = 1;

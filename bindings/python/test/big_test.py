@@ -2191,6 +2191,19 @@ except:
   CheckOK(295)
 CheckSimple(295,n,[ "eka", "eka", "eka", "eka", "eka", "eka", "eka", "eka"])
 
+# 299: check NULL return from gd_reference
+try:
+  m = pygetdata.dirfile("dirfile/empty",
+      pygetdata.RDWR | pygetdata.CREAT | pygetdata.EXCL)
+except:
+  CheckOK2(299, 1)
+
+try:
+  n = m.reference;
+  CheckSimple(299, n, None);
+except:
+  CheckOK2(299, 2)
+
 
 
 

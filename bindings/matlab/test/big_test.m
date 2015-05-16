@@ -2271,6 +2271,20 @@ try
     ne = ne + check_ok(exc, 295);
   end
 
+  % 299: NULL return from gd_reference
+  try
+    d = gd_open('dirfile/empty', GD.RDWR + GD.CREAT + GD.EXCL);
+  catch exc
+    ne = ne + check_ok2(exc, 299, 1);
+  end
+
+  try
+    d = gd_reference(d);
+    ne = ne + check_string(299, d, '');
+  catch exc
+    ne = ne + check_ok2(exc, 299, 1);
+  end
+
 
 
 

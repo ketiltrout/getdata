@@ -4846,10 +4846,14 @@ PHP_FUNCTION(gd_reference)
   dtracephp();
 
   GDPHP_PARSED("|s", &field_code, &field_code_len);
-  if ((s = gd_reference(D, field_code)) == NULL)
-    GDPHP_RETURN_F;
+  s = gd_reference(D, field_code);
+
+  GDPHP_CHECK_ERROR(D);
 
   dreturn("\"%s\"", s);
+  if (s == NULL)
+    RETURN_NULL();
+
   RETURN_STRING(s, 1);
 }
 

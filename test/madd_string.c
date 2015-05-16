@@ -34,7 +34,7 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int error, ge_error, r = 0;
+  int error, mf_error, ge_error, r = 0;
   gd_entry_t e;
   char val[1000];
   DIRFILE *D;
@@ -44,6 +44,11 @@ int main(void)
   gd_add_phase(D, "new", "in", 3, 0);
   gd_madd_string(D, "new", "meta", "A string.");
   error = gd_error(D);
+  CHECKI(error, GD_E_OK);
+
+  gd_metaflush(D);
+  mf_error = gd_error(D);
+  CHECKI(mf_error, GD_E_OK);
 
   /* check */
   gd_entry(D, "new/meta", &e);
@@ -62,6 +67,5 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, GD_E_OK);
   return r;
 }

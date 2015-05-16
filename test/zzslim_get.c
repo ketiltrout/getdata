@@ -36,7 +36,10 @@ int main(void)
   uint16_t c[8];
   char command[4096];
   uint16_t data_data[256];
-  int i, fd, n, error, r = 0;
+  int fd, n, error, r = 0;
+#ifdef USE_ZZSLIM
+  int i;
+#endif
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -55,7 +58,7 @@ int main(void)
   close(fd);
 
   /* compress, twice */
-  snprintf(command, 4096, "%s -k %s > /dev/null", SLIM, data);
+  snprintf(command, 4096, "%s -k %s > /dev/null", SLIMDATA, data);
   if (gd_system(command))
     return 1;
   chdir(filedir);

@@ -68,7 +68,7 @@ C     An invalid response
       WRITE (1,REC=1) datdat
       CLOSE(1, STATUS='KEEP')
 
-      CALL GDCOPN(d, fildir, 12, GD_RW, CALBCK)
+      CALL GDCOPN(d, fildir, 12, GD_RW + GD_VB, CALBCK)
       CALL GDEROR(e1, d)
       CALL GDINCL(d, "format2", 7, 0, 0)
       CALL GDEROR(e2, d)

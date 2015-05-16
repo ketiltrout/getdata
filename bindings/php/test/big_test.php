@@ -1835,6 +1835,16 @@ check_ok(295, $D);
 check_var(295, $v, array('eka', 'eka', 'eka', 'eka', 'eka', 'eka', 'eka',
   'eka'));
 
+# 299: NULL return from gd_reference
+$D2 = gd_open('dirfile/empty', GD_RDWR | GD_CREAT | GD_EXCL);
+check_ok2(299, 1, $D2);
+
+$v = gd_reference($D2);
+check_ok2(299, 2, $D2);
+check_var(299, $v, null);
+
+gd_discard($D2);
+
 
 
 
@@ -1842,6 +1852,8 @@ check_var(295, $v, array('eka', 'eka', 'eka', 'eka', 'eka', 'eka', 'eka',
 # ===========================================
 
 gd_discard($D);
+unlink('dirfile/empty/format');
+rmdir('dirfile/empty');
 unlink('dirfile/data');
 unlink('dirfile/new1');
 unlink('dirfile/new135');

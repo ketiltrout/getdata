@@ -289,9 +289,9 @@ NMETA_TESTS=nmeta nmeta_hidden nmeta_invalid nmeta_parent nmeta_type \
 
 OPEN_TESTS=open_abs open_cb_abort open_cb_cont open_cb_ignore open_cb_invalid \
 					 open_cb_rescan open_cb_rescan_alloc open_eaccess open_invalid \
-					 open_nonexistent open_notdirfile open_open open_sym_al open_sym_at \
-					 open_sym_c open_sym_cl open_sym_ct open_sym_d open_sym_l open_sym_p \
-					 open_sym_pl open_sym_pt
+					 open_nonexistent open_notdirfile open_open open_rofs open_sym_al \
+					 open_sym_at open_sym_c open_sym_cl open_sym_ct open_sym_d \
+					 open_sym_l open_sym_p open_sym_pl open_sym_pt
 
 PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_alias_missing parse_badline parse_bit parse_bit4 \
@@ -382,8 +382,8 @@ SEEK_TESTS=seek64 seek_cur seek_end seek_foffs seek_index seek_lincom \
 
 SIE_TESTS=sie_get_big sie_get_little sie_move_from sie_move_to sie_nframes_big \
 					sie_nframes_little sie_put_append sie_put_append2 sie_put_back \
-					sie_put_big sie_put_little sie_put_pad sie_put_pad0 sie_put_trunc \
-					sie_put_trunc2 sie_sync
+					sie_put_big sie_put_little sie_put_many sie_put_newo sie_put_newo0 \
+					sie_put_pad sie_put_pad0 sie_put_trunc sie_put_trunc2 sie_sync
 
 SLIM_TESTS=slim_get slim_nframes
 

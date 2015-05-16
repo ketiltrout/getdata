@@ -61,7 +61,7 @@ int main(void)
   close(i);
 
   /* compress, twice */
-  snprintf(command, 4096, "%s -k %s > /dev/null", SLIM, data);
+  snprintf(command, 4096, "%s -k %s > /dev/null", SLIMDATA, data);
   if (gd_system(command))
     return 1;
   chdir(filedir);

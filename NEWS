@@ -85,10 +85,6 @@ New in verison 0.9.0a:
   * BUG FIX: reading a LINTERP table with fewer than two lines no longer
     results in a segfault on close/discard.
   
-  * BUG FIX: Several fixes have been made to the sample index encoding
-    (SIE) engine, which should now produce properly encoded data when
-    performing random writes.
-
   * BUG FIX: gd_alter_raw() and similar no longer fail when asked to re-
     encode the data file of a RAW field which has not been previously
     accessed.
@@ -225,6 +221,47 @@ New in verison 0.9.0a:
     release don't need the tools to build GetData; the autotools are only
     needed if changes need to be made to the configure script or Makefile
     input files provided in the release or if building from the repository.
+
+|=========================================================================|
+
+New in verison 0.8.8:
+
+  Library Changes:
+
+  * BUG FIX: The incorrect handling of the explicit 64-bit API declarations
+    in getdata.h (those associated with the GD_64BIT_API symbol), which
+    prevented GetData-0.8.7 from compiling on 32-bit systems, has been
+    fixed.
+
+  GetData-0.8.8 is ABI compatible with GetData-0.8.7.
+
+|=========================================================================|
+
+New in verison 0.8.7:
+
+  Library Changes:
+
+  * BUG FIX: Opening a Dirfile read-write (GD_RDWR) no longer fails if
+    /INCLUDEd fragments are read-only.  Reported by Alexandra Rahlin.
+
+  * BUG FIX: Several fixes have been made to the sample index encoding
+    (SIE) engine, which should now produce properly encoded data when
+    performing random writes.
+
+  Bindings Changes:
+
+  * F95 BUG FIX: Passing the empty string to fgd_reference() now returns
+    the current reference field without modifying it, instead of crashing.
+
+  * PYTHON BUG FIX: Querying dirfile.reference no longer causes a crash on
+    an empty dirfile.  Reported by Alexandra Rahlin.
+
+  * PYTHON BUG FIX: Memory leaks have been fixed in functions returning
+    lists of field names or other metadata lists.  Reported by Alexandra
+    Rahlin.
+
+  * PYTHON BUG FIX: On error, dirfile.get_string() no longer segfaults or
+    leaks memory.
 
 |=========================================================================|
 

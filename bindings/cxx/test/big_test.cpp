@@ -136,6 +136,8 @@ void run_tests(void)
 {
   const char* filedir = "dirfile";
   const char* format = "dirfile/format";
+  const char* empty = "dirfile/empty";
+  const char* eformat = "dirfile/empty/format";
   const char* format1 = "dirfile/format1";
   const char* form2 = "dirfile/form2";
   const char* new1 = "dirfile/new1";
@@ -1988,6 +1990,17 @@ void run_tests(void)
   CHECK_INT(295,n,8);
   CHECK_STRING_ARRAY(295,8,list[i],"eka");
 
+  // 299: NULL return from gd_reference
+  id = new Dirfile("dirfile/empty", GD_RDWR | GD_CREAT | GD_EXCL);
+  CHECK_OK2(299, 1);
+
+  rep = id->Reference();
+  CHECK_OK2(299, 2);
+  CHECK_NULL(299, rep);
+
+  id->Discard();
+
+
 
 
 
@@ -1997,6 +2010,8 @@ void run_tests(void)
   // ===================================================================
   d->Discard();
   delete d;
+  unlink(eformat);
+  rmdir(empty);
   unlink(data);
   unlink(new1);
   unlink(format);

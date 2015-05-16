@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,59 +18,51 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read UINT32 */
+/* Truncating a read-only dirfile should fail cleanly */
 #include "test.h"
 
-#include <inttypes.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
-#include <errno.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT32 8\n";
-  uint32_t c[8], i;
-  uint32_t data_data[128];
-  int fd, n, error, r = 0;
-  unsigned j;
+  const char *format1 = "dirfile/format1";
+  const char *format_data = "/INCLUDE format1\n";
+  int error, fd, r = 0;
   DIRFILE *D;
 
-  memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0777);
 
-  for (j = 0; j < 128; ++j)
-    data_data[j] = j * (0x02000001U);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0444);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 128 * sizeof(uint32_t));
-  close(fd);
+  close(open(format1, O_CREAT | O_EXCL | O_WRONLY, 0444));
+  chmod(filedir, 0555);
 
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT32, c);
+  /* ensure filesystem honours read-onlyness */
+  if (!unlink(format1) || errno != EACCES) {
+    unlink(format);
+    rmdir(filedir);
+    return 77;
+  }
 
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   error = gd_error(D);
-  CHECKI(error, 0);
-  CHECKI(n, 8);
-
-  for (i = 0; i < 8; ++i)
-    CHECKUi(i,c[i], 0x50000028 + i * 0x02000001);
-
   gd_discard(D);
 
-  unlink(data);
+  chmod(filedir, 0777);
+  unlink(format1);
   unlink(format);
   rmdir(filedir);
 
+  CHECKI(error, 0);
   return r;
 }

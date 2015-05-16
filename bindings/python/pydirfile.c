@@ -1766,6 +1766,13 @@ static PyObject *gdpy_dirfile_getreference(struct gdpy_dirfile_t *self,
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
+  /* Empty dirfile */
+  if (ref == NULL) {
+    Py_INCREF(Py_None);
+    dreturn("%p", Py_None);
+    return Py_None;
+  }
+
   pyobj = PyString_FromString(ref);
 
   dreturn("%p", pyobj);
@@ -1847,7 +1854,7 @@ static PyObject *gdpy_dirfile_getstrings(struct gdpy_dirfile_t *self)
 
   fields = gd_field_list_by_type(self->D, GD_STRING_ENTRY);
 
-  PYGD_CHECK_ERROR2(self->D, NULL, free(data));
+  PYGD_CHECK_ERROR(self->D, NULL);
 
   values = gd_strings(self->D);
 
@@ -2977,8 +2984,9 @@ static PyGetSetDef gdpy_dirfile_getset[] = {
     "The number of frames in the dirfile.  See gd_nframes(3).", NULL },
   { "reference", (getter)gdpy_dirfile_getreference,
     (setter)gdpy_dirfile_setreference,
-    "The reference field for the dirfile, which may be modified.  See\n"
-      "gd_reference(3).",
+    "The reference field for the dirfile, which may be set to any existing\n"
+      "RAW field.  If no RAW fields are defined in the dirfile, this will\n"
+      "be None.  See gd_reference(3).",
     NULL },
   { "standards", (getter)gdpy_dirfile_getstandards,
     (setter)gdpy_dirfile_setstandards,

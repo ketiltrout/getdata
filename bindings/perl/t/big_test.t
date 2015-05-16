@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1727;
+use Test::More tests => 1730;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -2217,6 +2217,17 @@ CheckSArray2(294, 7, $h{'in_fields'}, qw(in5 in3));
 $s = $_->getdata("sindir", 0, 0, 1, 0);
 CheckOK(295);
 CheckSArray(295, $s, qw(eka eka eka eka eka eka eka eka));
+
+# 296: NULL return from gd_reference
+{
+  local $_ = &GetData::open("dirfile/empty",
+    $GetData::RDWR | $GetData::CREAT | $GetData::EXCL);
+  CheckOK2(243, 1);
+
+  $s = $_->reference();
+  CheckOK2(243, 2);
+  CheckString(243, $s, undef);
+}
 
 
 

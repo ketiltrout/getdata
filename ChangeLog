@@ -1,3 +1,46 @@
+2015-05-15   D. V. Wiebe <getdata@ketiltrout.net> svn:972
+	
+	* src/name.c (_GD_MungeCode): Fix buffer overrun.  Don't write spurious
+	slash.  Patch from Seth Hillbrand.
+
+	Merge in bugfixes from 0.8 branch:
+
+	* src/include.c )_GD_Include): Only open the file read-write if it's being
+	  truncated or created. (r949)
+	* test/open_rofs.c: Added. (r949)
+
+	* bindings/f77/fgetdata.c (GDREFE): Convert a passed empty string to NULL.
+	(r956)
+
+	* bindings/f77/getdata.f90.in (fgd_reference): Handle empty string from
+	GDREFE. (r956)
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getreference): Handle NULL from
+	gd_reference. (r956)
+
+	* bindings/cxx/test/big_test.cpp bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/matlab/test/big_test.m
+	bindings/perl/t/big_test.t bindings/python/test/big_test.py: Add test 299.
+	(r956, where it is test 243).
+
+	* src/sie.c (_GD_SampIndSeek): Behave when seeking on an empty file. (r960)
+	* src/sie.c (_GD_SampIndWrite): Update cur_end when reallocing p. (r960)
+	* src/sie.c (_GD_SampIndWrite): Fix fence-post error in memcpy. (r960)
+
+	* test/sie.put_many.c test/sie_put_newo.c test/sie_put_newo0.c: Added.
+	(r961)
+
+	* src/getdata.h.in: Delete all the __REDIRECTs. (r969)
+
+	* test/get_uint32.c test/get_uint64.c: Fix signed integer overflow.
+
+	Also:
+
+	* bindings/php/getdata.c (gd_reference): Handle NULL from gd_reference.
+	* bindings/php/test/big_test/php: Add test 299.
+	* bindings/python/pydirfile.c (gdpy_dirfile_getstrings): Fix error call.
+
+
 2014-04-29   D. V. Wiebe <getdata@ketiltrout.net> svn:955
 	* bindings/idl/getdata.c (gdidl_reference): Converted from procedure to
 	function returning the string returned by gd_reference(), or the empty
