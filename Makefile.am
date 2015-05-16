@@ -132,6 +132,14 @@ windist: $(DISTFILES)
 	)
 	rm -rf crlf_export
 
+# coverity scan target
+cov-scan:
+	rm -rf cov-int
+	make clean
+	./config.status --recheck
+	cov-build --dir cov-int make
+	tar -zcvf getdata-cov-int-${PACKAGE_VERSION}.tgz cov-int/
+
 # package lists
 PACKAGES=$(distdir).tar.gz $(distdir).tar.xz idl_$(distdir).tar.gz \
 				 idl_$(distdir).tar.xz getdata_win-$(PACKAGE_VERSION).zip \
