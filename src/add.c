@@ -196,7 +196,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   }
 
   /* check for duplicate field */
-  if (_GD_FindField(D, temp_buffer, D->entry, D->n_entries, 1, &u)) {
+  if (_GD_FindField(D, temp_buffer, D->entry, D->n_entries, 0, &u)) {
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, temp_buffer);
     free(temp_buffer);
     dreturn("%p", NULL);
@@ -2067,7 +2067,7 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
   /* check alias name */
   if (_GD_ValidateField(munged_code + offset, D->standards, 1, 0, NULL))
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, field_code);
-  else if (_GD_FindField(D, munged_code, D->entry, D->n_entries, 1, &u))
+  else if (_GD_FindField(D, munged_code, D->entry, D->n_entries, 0, &u))
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, munged_code);
   else
     _GD_CheckCodeAffixes(D, NULL, target, fragment_index); /* check target */

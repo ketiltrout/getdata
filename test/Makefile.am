@@ -36,9 +36,9 @@ EXTRA_DIST=test.h
 ADD_TESTS=add add_affix add_alias add_alias_affix add_alias_meta add_bit \
 					add_bit_bitnum add_bit_bitsize add_bit_invalid add_bit_numbits \
 					add_bit_scalars add_carray add_clincom add_code add_const \
-					add_cpolynom add_crecip add_crecip89 add_divide add_divide_invalid \
-					add_duplicate add_format add_invalid add_lincom add_lincom_affix \
-					add_lincom_invalid add_lincom_nfields add_linterp \
+					add_cpolynom add_crecip add_crecip89 add_dangle_dup add_divide \
+					add_divide_invalid add_duplicate add_format add_invalid add_lincom \
+					add_lincom_affix add_lincom_invalid add_lincom_nfields add_linterp \
 					add_linterp_invalid add_meta add_meta_alias add_mplex \
 					add_mplex_scalars add_multiply add_multiply_invalid add_phase \
 					add_phase_invalid add_polynom add_polynom_scalar add_protect add_raw \

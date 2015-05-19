@@ -1,3 +1,8 @@
+2015-05-13   D. V. Wiebe <getdata@ketiltrout.net> svn:973
+	* src/add.c (_GD_Add _GD_AddAlias) src/fragment.c (_GD_CheckAffixes):
+	Don't dealias during the duplicate field name check.
+	* test/add_dangle_dup.c: Added.
+
 2015-05-13   D. V. Wiebe <getdata@ketiltrout.net> svn:969
 	GetData-0.8.8 released:
 
@@ -117,7 +122,7 @@
 	* test/open_sym_a.c test/open_sym_al.c test/open_sym_at.c test/tok_escape.c
 	test/tok_quote.c: Free strings.
 
-2015-04-05   D. V. Wiebe <getdata@ketiltrout.net> svn:939
+2015-04-05   D. V. Wiebe <getdata@ketiltrout.net> svn:949
 	* src/include.c (_GD_Include): Only open the file read-write if it's being
 	truncated or created.
 
