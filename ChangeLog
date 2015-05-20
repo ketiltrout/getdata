@@ -1,4 +1,11 @@
-2015-05-13   D. V. Wiebe <getdata@ketiltrout.net> svn:973
+2015-05-20   D. V. Wiebe <getdata@ketiltrout.net> svn:976
+	* cmake/test/CMakeLists.txt: blacklist gzip tests.
+
+	* src/getdata.h.in: Don't attempt to use __nonnull.
+
+	* configure.ac: Fix cygwin check.
+
+2015-05-19   D. V. Wiebe <getdata@ketiltrout.net> svn:973
 	* src/add.c (_GD_Add _GD_AddAlias) src/fragment.c (_GD_CheckAffixes):
 	Don't dealias during the duplicate field name check.
 	* test/add_dangle_dup.c: Added.

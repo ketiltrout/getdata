@@ -400,7 +400,7 @@ case "${host}" in
   *-pc-mingw*)
   NO_UNDEFINED=" -no-undefined"
   NO_DLOPEN_TESTS=1 ;;
-  *-pc-cygwin*)
+  *-*-cygwin*)
   NO_UNDEFINED=" -no-undefined -enable-auto-import"
   NO_DLOPEN_TESTS=1 ;;
   *) NO_DLOPEN_TESTS=0 ;;
