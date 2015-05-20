@@ -18,6 +18,35 @@ dnl You should have received a copy of the GNU Lesser General Public License
 dnl along with GetData; if not, write to the Free Software Foundation, Inc.,
 dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+dnl GD_C_CAST_COMPLEX
+dnl -------------------------------------------------------------
+dnl Check wether the compiler requires explicit cast from real types to
+dnl _Complex
+AC_DEFUN([GD_C_CAST_COMPLEX],
+[AC_CACHE_CHECK([if implicit _Complex conversion works],
+[gd_cv_c_cast_complex],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+AC_INCLUDES_DEFAULT
+[[
+#ifdef HAVE__COMPLEX_DOUBLE
+extern double creal(_Complex double z);
+#else
+not applicable
+#endif
+]],
+[[
+double a;
+int b;
+a = creal(b);
+]])],
+[gd_cv_c_cast_complex=yes],
+[gd_cv_c_cast_complex=no])])
+if test "x$gd_cv_c_cast_complex" = "xyes"; then
+AC_DEFINE([GD_COMPLEX_CONV_OK], [1],
+[Define to 1 if implicit conversion from real to _Complex works])
+fi
+])
+
 dnl GD_LANG_COMPILER_INTEL
 dnl -------------------------------------------------------------
 dnl Check whether the compiler for the current language is Intel.

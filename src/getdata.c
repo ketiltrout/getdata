@@ -23,8 +23,8 @@
 
 #include "nan.h"
 
-#define EXTRACT_REPR(it,ot,f) \
-  for (i = 0; i < n; ++i) ((ot *)rdata)[i] = (ot)f(((it *)cdata)[i])
+#define EXTRACT_REPR(it,ot,f,cc) \
+  for (i = 0; i < n; ++i) ((ot *)rdata)[i] = (ot)f(cc(((it *)cdata)[i]))
 
 #ifdef GD_NO_C99_API
 #define fargs(x) (((x) < 0) ? M_PI : 0)
@@ -43,10 +43,10 @@
 
 #define EXTRACT_REPRR2(it,ot,f) \
   switch (repr) { \
-    case GD_REPR_REAL: EXTRACT_REPR(it,ot,); break; \
-    case GD_REPR_IMAG: EXTRACT_REPR(it,ot,0 *); break; \
-    case GD_REPR_MOD:  EXTRACT_REPR(it,ot,fabs); break; \
-    case GD_REPR_ARG:  EXTRACT_REPR(it,ot,f); break; \
+    case GD_REPR_REAL: EXTRACT_REPR(it,ot,,); break; \
+    case GD_REPR_IMAG: EXTRACT_REPR(it,ot,0 *,); break; \
+    case GD_REPR_MOD:  EXTRACT_REPR(it,ot,fabs,); break; \
+    case GD_REPR_ARG:  EXTRACT_REPR(it,ot,f,); break; \
   }
 
 #define EXTRACT_REPRS(ot) \
@@ -69,28 +69,28 @@
       _GD_SetError(D, GD_E_BAD_TYPE, in_type, NULL, 0, NULL); \
   }
 #else
-#define EXTRACT_REPR2(it,ot) \
+#define EXTRACT_REPR2(it,ot,cc) \
   switch (repr) { \
-    case GD_REPR_REAL: EXTRACT_REPR(it,ot,creal); break; \
-    case GD_REPR_IMAG: EXTRACT_REPR(it,ot,cimag); break; \
-    case GD_REPR_MOD:  EXTRACT_REPR(it,ot,cabs); break; \
-    case GD_REPR_ARG:  EXTRACT_REPR(it,ot,carg); break; \
+    case GD_REPR_REAL: EXTRACT_REPR(it,ot,creal,cc); break; \
+    case GD_REPR_IMAG: EXTRACT_REPR(it,ot,cimag,cc); break; \
+    case GD_REPR_MOD:  EXTRACT_REPR(it,ot,cabs,cc); break; \
+    case GD_REPR_ARG:  EXTRACT_REPR(it,ot,carg,cc); break; \
   }
 
 #define EXTRACT_REPRS(ot) \
   switch (in_type) { \
-    case GD_UINT8:      EXTRACT_REPR2(       uint8_t, ot); break; \
-    case GD_INT8:       EXTRACT_REPR2(        int8_t, ot); break; \
-    case GD_UINT16:     EXTRACT_REPR2(      uint16_t, ot); break; \
-    case GD_INT16:      EXTRACT_REPR2(       int16_t, ot); break; \
-    case GD_UINT32:     EXTRACT_REPR2(      uint32_t, ot); break; \
-    case GD_INT32:      EXTRACT_REPR2(       int32_t, ot); break; \
-    case GD_UINT64:     EXTRACT_REPR2(      uint64_t, ot); break; \
-    case GD_INT64:      EXTRACT_REPR2(       int64_t, ot); break; \
-    case GD_FLOAT32:    EXTRACT_REPR2(         float, ot); break; \
-    case GD_FLOAT64:    EXTRACT_REPR2(        double, ot); break; \
-    case GD_COMPLEX64:  EXTRACT_REPR2( complex float, ot); break; \
-    case GD_COMPLEX128: EXTRACT_REPR2(complex double, ot); break; \
+    case GD_UINT8:      EXTRACT_REPR2(       uint8_t, ot, GD_RTOC); break; \
+    case GD_INT8:       EXTRACT_REPR2(        int8_t, ot, GD_RTOC); break; \
+    case GD_UINT16:     EXTRACT_REPR2(      uint16_t, ot, GD_RTOC); break; \
+    case GD_INT16:      EXTRACT_REPR2(       int16_t, ot, GD_RTOC); break; \
+    case GD_UINT32:     EXTRACT_REPR2(      uint32_t, ot, GD_RTOC); break; \
+    case GD_INT32:      EXTRACT_REPR2(       int32_t, ot, GD_RTOC); break; \
+    case GD_UINT64:     EXTRACT_REPR2(      uint64_t, ot, GD_RTOC); break; \
+    case GD_INT64:      EXTRACT_REPR2(       int64_t, ot, GD_RTOC); break; \
+    case GD_FLOAT32:    EXTRACT_REPR2(         float, ot, GD_RTOC); break; \
+    case GD_FLOAT64:    EXTRACT_REPR2(        double, ot, GD_RTOC); break; \
+    case GD_COMPLEX64:  EXTRACT_REPR2( complex float, ot,        ); break; \
+    case GD_COMPLEX128: EXTRACT_REPR2(complex double, ot,        ); break; \
     case GD_NULL: \
       break; \
     default: \

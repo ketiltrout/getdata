@@ -1,3 +1,11 @@
+2015-05-15   D. V. Wiebe <getdata@ketiltrout.net> svn:974
+	* m4/compiler.m4 (GD_C_CAST_COMPLEX): Added.
+	* configure.ac: Call GD_C_CAST_COMPLEX in C99 mode.
+
+	* src/internal.h: Define GD_RTOC to handle GD_COMPLEX_CONV_OK.
+	* src/getdata.c (EXTRACT_REPRS EXTRACT_REPR2 EXTRACT_REPRR2 EXTRACT_REPR):
+	Use GD_RTOC when appropriate.
+
 2015-05-15   D. V. Wiebe <getdata@ketiltrout.net> svn:972
 	
 	* src/name.c (_GD_MungeCode): Fix buffer overrun.  Don't write spurious

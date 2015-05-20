@@ -201,6 +201,12 @@ typedef gd_off64_t off64_t;
 /* compare a to b */
 #  define gd_ccmpc_(a,b) ((a)[0] == (b)[0] && (a)[1] == (b)[1])
 #else
+#  ifdef GD_COMPLEX_CONV_OK
+#    define GD_RTOC(z) (z)
+#  else
+#    define GD_RTOC(z) (double _Complex)(z)
+#  endif
+
 #  define GD_DCOMPLEXP_t double _Complex *
 #  define GD_DCOMPLEXA(v) double _Complex v
 #  define GD_DCOMPLEXV(v) double _Complex *restrict v

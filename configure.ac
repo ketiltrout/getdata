@@ -686,6 +686,7 @@ AC_TYPE_UINT64_T
 
 if test "x$disable_c99" = "xno"; then
 AC_CHECK_TYPES([_Complex float, _Complex double])
+GD_C_CAST_COMPLEX
 fi
 
 AC_CHECK_TYPES([struct stat64, struct _stat64, struct __stat64, off64_t])
