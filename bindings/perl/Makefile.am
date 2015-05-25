@@ -94,10 +94,10 @@ uninstall-hook:
 
 if TEST_PERL
 check: $(PERL_TESTS)
-	${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../src/.libs $(PERL) ./Build test ${TEST_VERBOSE}
+	${DL_LIBRARY_PATH}=../../src/.libs:${${DL_LIBRARY_PATH}} $(PERL) ./Build test ${TEST_VERBOSE}
 
 testdb testcover: $(PERL_TESTS)
-	${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../src/.libs $(PERL) ./Build $@ ${TEST_VERBOSE}
+	${DL_LIBRARY_PATH}=../../src/.libs:${${DL_LIBRARY_PATH}} $(PERL) ./Build $@ ${TEST_VERBOSE}
 
 .PHONY: check testdb testcover
 endif

@@ -274,17 +274,27 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
   }
 
   if (zero_pad > 0) {
-    n_read = _GD_FillZero(databuffer, E->EN(raw,data_type), (zero_pad > ns) ?
-        ns :
-        zero_pad);
-    ns -= n_read;
-    E->e->u.raw.file[0].pos = s0 + n_read - E->EN(raw,spf) *
+    /* frame offset in samples */
+    off64_t foffs = E->EN(raw,spf) *
       D->fragment[E->fragment_index].frame_offset;
+
+    n_read = _GD_FillZero(databuffer, E->EN(raw,data_type),
+        (zero_pad > ns) ? ns : zero_pad);
+    ns -= n_read;
+
+    /* Padding up to the end of the frameoffset, results in a "real" file
+     * position.  In this case we need to make sure the underlying file is
+     * actually at the BOF, for consistency.
+     */
+    if (s0 + (off64_t)n_read == foffs) /* ie. file->pos is zero */
+      _GD_Seek(D, E, foffs, GD_SEEK_SET);
+    else 
+      E->e->u.raw.file[0].pos = s0 + n_read - foffs;
     s0 = 0;
   }
 
   if (ns > 0) {
-    /** open the file (and cache the fp) if it hasn't been opened yet. */
+    /* open the file (and cache the fp) if it hasn't been opened yet. */
     if (_GD_InitRawIO(D, E, NULL, 0, NULL, GD_EF_SEEK | GD_EF_READ,
           GD_FILE_READ, 0))
     {

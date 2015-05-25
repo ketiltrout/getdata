@@ -1,3 +1,19 @@
+2015-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:977
+	* src/getdata.c (_GD_DoRaw): Rewind RAW file if necessary after
+	zero-padding.
+	* test/get_foffs2.c test/seek_foffs2.c: Added.
+
+	* src/raw.c (_GD_RawSeek): Handle landing in the middle of a sample.
+
+	* src/raw.c (_GD_RawSeek): Remember the actual position, not the
+	requested position.
+
+	* bindings/idl/test/Makefile.am bindings/matlab/test/Makefile.am
+	bindings/perl/Makefile.am bindings/python/test/Makefile.am: Fix
+	DL_LIBRARY_PATH ordering.
+
+	* bindings/perl/GetData.pm.in: Fix perldoc markup.
+
 2015-05-20   D. V. Wiebe <getdata@ketiltrout.net> svn:976
 	* cmake/test/CMakeLists.txt: blacklist gzip tests.
 

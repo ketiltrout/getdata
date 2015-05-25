@@ -1,3 +1,18 @@
+New in verison 0.8.9a:
+
+  Library Changes:
+
+  * BUG FIX: Attempting to create a new field or alias with the name of
+    an existing dangling alias now fails with error GD_E_DUPLICATE, as it
+    should.  Reported by Alexandra Rahlin.
+
+  * BUG FIX: Random-access reads on a RAW field with a frame offset no
+    longer result in mispositioning of the field's I/O pointer, which
+    previously would result in returning data from the wrong part of a
+    field.  Reported by S. J. Benton.
+
+|==============================================================================|
+
 New in verison 0.8.8:
 
   Library Changes:

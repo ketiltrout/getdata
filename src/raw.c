@@ -59,15 +59,21 @@ off64_t _GD_RawSeek(struct gd_raw_file_* file, off64_t count,
 
   pos = lseek64(file->idata, count * GD_SIZE(data_type), SEEK_SET);
 
+  /* If we've landed in the middle of a sample, we have to back up */
+  if (pos > 0 && (pos % GD_SIZE(data_type)))
+    pos = lseek64(file->idata, -(pos % GD_SIZE(data_type)), SEEK_CUR);
+
   if (pos == -1) {
     dreturn("%i", -1);
     return -1;
   }
 
-  file->pos = count;
+  pos /= GD_SIZE(data_type);
 
-  dreturn("%lli", (long long)count);
-  return count;
+  file->pos = pos;
+
+  dreturn("%lli", (long long)pos);
+  return pos;
 }
 
 ssize_t _GD_RawRead(struct gd_raw_file_ *restrict file, void *restrict ptr,

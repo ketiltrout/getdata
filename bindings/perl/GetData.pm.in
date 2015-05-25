@@ -595,7 +595,7 @@ Returns data from the field specified by C<$FIELD_CODE> after converting them
 to the return type C<$RETURN_TYPE>, which should be one of the symbols listed
 under L</"Data Types"> above.  The first sample returned is C<$FIRST_SAMP>
 samples after the start of C<$FIRST_FRAME> and the amount of data returned is
-L<$NUM_FRAMES> frames plus L<$NUM_SAMP> samples.  If called in scalar context
+C<$NUM_FRAMES> frames plus C<$NUM_SAMP> samples.  If called in scalar context
 returns a string of packed data.  If called in array context, the data will be
 unpacked and returned as an array.  Complex data are returned as
 C<Math::Complex> objects.  See gd_getdata(3).

@@ -186,7 +186,8 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_endian_float32_arm get_endian_float32_big \
 					get_endian_float32_little get_endian_float64_arm \
 					get_endian_float64_big get_endian_float64_little get_ff get_float32 \
-					get_float64 get_foffs get_fs get_here get_here_foffs get_heres \
+					get_float64 get_foffs get_foffs2 get_fs get_here get_here_foffs \
+					get_heres \
 					get_int8 get_int16 get_int32 get_int64 get_invalid get_lincom1 \
 					get_lincom2 get_lincom3 get_lincom_noin get_lincom_non \
 					get_lincom_null get_lincom_spf get_linterp get_linterp_noin \
@@ -329,7 +330,7 @@ REPR_TESTS=repr_a repr_float32 repr_float64 repr_i repr_int16 repr_int32 \
 					 repr_real_m repr_real_r repr_uint16 repr_uint32 repr_uint64 \
 					 repr_uint8
 
-SEEK_TESTS=seek64 seek_cur seek_end seek_foffs seek_neg seek_set
+SEEK_TESTS=seek64 seek_cur seek_end seek_foffs seek_foffs2 seek_neg seek_set
 
 SIE_TESTS=sie_get_big sie_get_little sie_move_from sie_move_to sie_nframes_big \
 					sie_nframes_little sie_put_big sie_put_append sie_put_append2 \
