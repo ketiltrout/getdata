@@ -85,3 +85,17 @@ void zend_error(int type, const char *format, ...)
 {
   __coverity_panic__();
 }
+
+/* may not return */
+#define IDL_MSG_LONGJMP 2
+void IDL_Message(int code, int action, ...)
+{
+  if (action == IDL_MSG_LONGJMP)
+    __coverity_panic__();
+}
+
+/* doesn't return */
+void croak(const char *pat, ...)
+{
+  __coverity_panic__();
+}
