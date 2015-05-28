@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -312,6 +312,7 @@ static PyObject *gdpy_fragment_getprefix(struct gdpy_fragment_t *self,
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
+  free(suffix);
   if (prefix == NULL) {
     Py_INCREF(Py_None);
     dreturn("%p", Py_None);
@@ -358,6 +359,7 @@ static PyObject *gdpy_fragment_getsuffix(struct gdpy_fragment_t *self,
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
+  free(prefix);
   if (suffix == NULL) {
     Py_INCREF(Py_None);
     dreturn("%p", Py_None);

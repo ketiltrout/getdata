@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2008-2012, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -102,8 +102,6 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
       *(int32_t *)lout = *(int32_t *)lin;
     else if (type == GD_UINT32)
       *(uint32_t *)lout = *(uint32_t *)lin;
-    else if (type == GD_INT64)
-      *(int64_t *)lout = *(int64_t *)lin;
     else if (type == GD_UINT64)
       *(uint64_t *)lout = *(uint64_t *)lin;
     else
@@ -1708,17 +1706,17 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
     return -1;
   }
 
-  /* the parser will modifiy in_cols[0] if it contains a metafield code */
-  if ((new_code = _GD_Strdup(D, in_cols[0])) == NULL) {
-    dreturn("%i", -1);
-    return -1;
-  }
-
   N = _GD_FindField(D, in_cols[0], D->entry, D->n_entries, 1, NULL);
 
   if (N == NULL) {
     free(outstring);
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, in_cols[0]);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* the parser will modifiy in_cols[0] if it contains a metafield code */
+  if ((new_code = _GD_Strdup(D, in_cols[0])) == NULL) {
     dreturn("%i", -1);
     return -1;
   }
@@ -1730,11 +1728,12 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
   free(outstring);
 
   if (D->error) {
+    free(new_code);
     dreturn("%i", -1); /* field spec parser threw an error */
     return -1;
   }
 
-  /* The parse will have re-applied the prefix and suffix, undo that */
+  /* The parser will have re-applied the prefix and suffix, undo that */
   free(N->field);
   N->field = new_code;
 

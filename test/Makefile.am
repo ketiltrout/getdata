@@ -164,8 +164,8 @@ FLIST_TESTS=flist flist_hidden flist_invalid flist_meta flist_meta_hidden \
 						flist_meta_invalid flist_type flist_type_hidden flist_type_invalid \
 						flist_type_meta flist_type_meta_hidden flist_type_meta_invalid
 
-FLUSH_TESTS=flush flush_all flush_bad_code flush_invalid flush_meta flush_ref \
-						flush_spec
+FLUSH_TESTS=flush flush_all flush_bad_code flush_hex flush_invalid flush_meta \
+						flush_ref flush_spec
 
 FOFFS_TESTS=foffs_alter foffs_get foffs_move
 

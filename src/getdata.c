@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2013 D. V. Wiebe
+ * Copyright (C) 2005-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1414,7 +1414,7 @@ static size_t _GD_DoBit(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   /* extract bits */
   if (is_signed) {
-    uint64_t sign = -1 << (E->EN(bit,numbits) - 1);
+    uint64_t sign = -1LL << (E->EN(bit,numbits) - 1);
     for (i = 0; i < n_read; i++)
       ((int64_t *)tmpbuf)[i] =
         (((((uint64_t *)tmpbuf)[i] >> E->EN(bit,bitnum)) & mask) + sign) ^ sign;

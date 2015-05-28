@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2014 D. V. Wiebe
+ * Copyright (C) 2005-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -138,7 +138,7 @@ static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
     /* there were trailing characters in the double or real part of complex */
     if (ptr != semicolon) {
       ptr = _GD_Strdup(D, token);
-      if (D->error) {
+      if (ptr == NULL) {
         dreturn("%p", NULL);
         return NULL;
       }
@@ -1300,8 +1300,6 @@ static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
     for (c = first; c < n_cols; ++c) {
       ptr = _GD_SetScalar(D, in_cols[c], (char *)data + s * n++, t, me,
           format_file, line, &offset, &offset, standards, pedantic);
-      if (n == GD_MAX_CARRAY_LENGTH)
-        break;
 
       if (ptr) {
         free(ptr);
@@ -1312,6 +1310,9 @@ static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
         dreturn("%p", NULL);
         return NULL;
       }
+
+      if (n == GD_MAX_CARRAY_LENGTH)
+        break;
     }
 
     if (n_cols < MAX_IN_COLS)

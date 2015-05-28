@@ -2,6 +2,12 @@ New in verison 0.8.9a:
 
   Library Changes:
 
+  * BUG FIX: The metadata writer now correctly stores bytes in the range 0x01
+    through 0x1F to the format files (encoded as hex escape sequences: \x##).
+
+  * BUG FIX: A number of memory leaks associated with error returns from libary
+    functions have been fixed.
+
   * BUG FIX: Attempting to create a new field or alias with the name of
     an existing dangling alias now fails with error GD_E_DUPLICATE, as it
     should.  Reported by Alexandra Rahlin.
@@ -10,6 +16,18 @@ New in verison 0.8.9a:
     longer result in mispositioning of the field's I/O pointer, which
     previously would result in returning data from the wrong part of a
     field.  Reported by S. J. Benton.
+
+  Bindings Changes:
+
+  * F77 and F95 BUG FIX: Passing zero as the field code length (F77) to
+    GDFLSH GDSYNC GDRCLO, or, equivalently, an empty string as the field code to
+    fgd_flush, fgd_sync, fgd_raw_close now causes operation on all fields, as
+    with passing NULL to the corresponding C API functions does.  This is what
+    the documentation said these functions did all along.
+
+  * PYTHON BUG FIX: Accessing the prefix or suffix member of fragment objects
+    no longer leaks memory if the other affix is non-NULL.
+
 
 |==============================================================================|
 

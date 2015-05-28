@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2013 D. V. Wiebe
+/* Copyright (C) 2008-2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -850,7 +850,8 @@ char *gd_linterp_tablename(DIRFILE *D, const char *field_code_in) gd_nothrow
     free(field_code);
 
   if (E->field_type != GD_LINTERP_ENTRY) {
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0,
+        field_code_in);
     dreturn("%p", NULL);
     return NULL;
   }

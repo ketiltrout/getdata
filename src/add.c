@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2014 D. V. Wiebe
+/* Copyright (C) 2008-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -215,6 +215,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   /* New entry */
   E = (gd_entry_t *)_GD_Malloc(D, sizeof(gd_entry_t));
   if (E == NULL) {
+    free(temp_buffer);
     dreturn("%p", NULL);
     return NULL;
   }

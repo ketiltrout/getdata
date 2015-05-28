@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2008-2012, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -541,6 +541,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
 
       if (ptr == NULL) {
         free(name);
+        free(filebase);
         dreturn("%i", -1);
         return -1;
       }

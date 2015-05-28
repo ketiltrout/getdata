@@ -1,3 +1,26 @@
+2015-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:979
+	* bindings/f77/fgetdata.c (GDFLSH GDSYNC GDRCLO): Fix zero-length string
+	checks.
+
+	* bindings/python/pyfragment.c (gdpy_fragment_getprefix
+	gdpy_fragment_getsuffix): Fix memory leaks.
+
+	* src/add.c (_GD_Add) src/legacy.c (_GD_GetDirfile) src/mod.c
+	(gd_alter_spec) src/name.c (_GD_Rename) src/parse.c (_GD_ParseCarray): Fix
+	on-error memory leaks.
+
+	* src/common.c (_GD_GetRepr): Only set field_code to field_code_in if
+	necessary.
+
+	* src/entry.c (gd_linterp_tablename): Fix error reporting.
+
+	* src/flush.c (_GD_StringEscapeise): Fix upper nibble of hex encoding.
+	* test/flush_hex.c: Added.
+
+	* src/getdata.c (_GD_DoBit): Fix sign mask.
+
+	* src/mod.c (_GD_AlterScalar): Remove duplicate case.
+
 2015-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:977
 	* src/getdata.c (_GD_DoRaw): Rewind RAW file if necessary after
 	zero-padding.

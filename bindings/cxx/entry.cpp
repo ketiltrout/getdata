@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2012, 2014 D. V. Wiebe
+// Copyright (C) 2008-2012, 2014, 2015 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -102,6 +102,11 @@ int Entry::Rename(const char* new_name, int move_data)
     if (E.field == NULL) {
       E.field = strdup(new_name);
     } else {
+      /* For a metafield, the length of the string that ends up in nn cannot
+       * be larger than the following, because E.field must have at least one
+       * character after the / which will be deleted (and it's space used for
+       * the terminating NUL).
+       */
       char* nn = (char*)malloc(strlen(E.field) + strlen(new_name));
       strcpy(nn, E.field);
       ptr = strchr(nn, '/');
