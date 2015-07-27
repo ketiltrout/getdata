@@ -45,6 +45,8 @@ int main(void)
   CHECKI(e2, 0);
   CHECKS(s, in);
 
+  gd_discard(D);
+
   unlink(format);
   rmdir(filedir);
 

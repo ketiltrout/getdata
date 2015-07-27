@@ -42,7 +42,7 @@ int main(void)
   rmdirfile();
   mkdir(filedir, 0777);
 
-  memset(data_data, 256, 0);
+  memset(data_data, 0, 256);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));

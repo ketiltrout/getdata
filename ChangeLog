@@ -1,3 +1,14 @@
+2015-07-24   D. V. Wiebe <getdata@ketiltrout.net> svn:980
+	* src/sie.c (_GD_SampIndSize): Fix return value.
+
+	* src/sie.c (_GD_SampIndWrite): Flush stdio buffer before truncating to
+	avoid having a partially written file on disk.
+	* test/sie_put_trunc_nf.c: Added.
+
+	* test/flush_hex.c: Call gd_discard() before exit.
+
+	* test/seek_foffs2.c: Fix memset call.
+
 2015-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:979
 	* bindings/f77/fgetdata.c (GDFLSH GDSYNC GDRCLO): Fix zero-length string
 	checks.
