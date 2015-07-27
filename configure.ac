@@ -471,7 +471,9 @@ if test "x${cross_compiling}" != "xno"; then
     AC_CHECK_PROGS([BUILDCC], [gcc cc cl])
   fi
 else
-  BUILDCC=$CC
+  if test -z "$BUILDCC"; then
+    BUILDCC=$CC
+  fi
   AC_SUBST([BUILDCC])
 fi
 
