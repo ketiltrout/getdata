@@ -35,7 +35,7 @@ clean-local:
 	rm -rf *~  m4/*~ README.txt $(distdir) idl_$(distdir) matlab_$(distdir)
 
 %.sig: %
-	gpg --use-agent -abo $@ $<
+	gpg -abo $@ $<
 
 DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl" \
 														--with-perl-dir="$$dc_install_base/perl" \

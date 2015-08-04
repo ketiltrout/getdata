@@ -1,3 +1,6 @@
+2015-08-04   D. V. Wiebe <getdata@ketiltrout.net> svn:982
+	GetData-0.8.9 released.
+
 2015-07-24   D. V. Wiebe <getdata@ketiltrout.net> svn:980
 	* src/sie.c (_GD_SampIndSize): Fix return value.
 

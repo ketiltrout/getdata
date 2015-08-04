@@ -1,9 +1,9 @@
 Four packages are available:
-* getdata-0.8.8.tar.bz2/.gz: the full source code to the library, with
+* getdata-0.8.9.tar.bz2/.gz: the full source code to the library, with
     bindings.  This package uses the GNU autotools build system, and is
     designed for POSIX systems (UNIX, Linux, BSD, MacOS X, Cygwin, MSys,
     &c.)
-* getdata_win-0.8.8.zip: a reduced source code package, with the CMake
+* getdata_win-0.8.9.zip: a reduced source code package, with the CMake
     build system designed to be built on Microsoft Windows, either using
     the free MinGW compiler, or else Microsoft's Visual C++ compiler.
     (The full source package above can also be built using MinGW, if the
@@ -12,12 +12,12 @@ Four packages are available:
     package lacks support for compressed dirfiles, the Legacy API, and a
     few other features.  This build is used in native Microsoft Windows
     builds of kst2.
-* idl_getdata-0.8.8.tar.bz2/.gz: the Interactive Data Language (IDL)
+* idl_getdata-0.8.9.tar.bz2/.gz: the Interactive Data Language (IDL)
     bindings, packaged separately with an autotools build system, designed
     to be built against an already installed version of GetData.  Due to
     licensing restrictions, pre-built packages rarely come with these
     bindings, and this package allows end-users to add support for IDL
-* matlab_getdata-0.8.8.tar.bz2/.gz: the MATLAB bindings, packaged separately
+* matlab_getdata-0.8.9.tar.bz2/.gz: the MATLAB bindings, packaged separately
     with an autotools build system, designed to be built against an already
     installed version of GetData.  Due to licensing restrictions, pre-built
     packages rarely come with these bindings, and this package allows end-users
