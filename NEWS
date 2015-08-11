@@ -1,3 +1,12 @@
+New in version 0.8.10a:
+  
+  Bindings Changes:
+
+  * PYTHON BUG FIX: Several memory leaks have been plugged.  Patch from
+    Matthew Petroff.
+
+|=========================================================================|
+
 New in verison 0.8.9:
 
   Library Changes:

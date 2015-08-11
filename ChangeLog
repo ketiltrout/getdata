@@ -1,3 +1,14 @@
+2015-08-04   D. V. Wiebe <getdata@ketiltrout.net> svn:985
+	Patch from Matthew Petroff:
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_delete)
+	bindings/python/pyentry.c (gdpy_entry_delete) bindings/python/pyfragment.c
+	(gdpy_fragment_delete): Free the object.
+	
+	* bindings/python/pydirfile.c (gdpy_dirfile_getrawfilename)
+	bindings/python/pyfragment.c (gdpy_fragment_getprefix
+	gdpy_fragment_getsuffix): Free C strings after calling PyString_FromString.
+
 2015-08-04   D. V. Wiebe <getdata@ketiltrout.net> svn:982
 	GetData-0.8.9 released.
 

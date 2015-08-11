@@ -27,6 +27,7 @@ static void gdpy_fragment_delete(struct gdpy_fragment_t *self)
   dtrace("%p", self);
 
   Py_XDECREF(self->dirfile);
+  free(self);
 
   dreturnvoid();
 }
@@ -320,6 +321,7 @@ static PyObject *gdpy_fragment_getprefix(struct gdpy_fragment_t *self,
   }
 
   pyobj = PyString_FromString(prefix);
+  free(prefix);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -367,6 +369,7 @@ static PyObject *gdpy_fragment_getsuffix(struct gdpy_fragment_t *self,
   }
 
   pyobj = PyString_FromString(suffix);
+  free(suffix);
 
   dreturn("%p", pyobj);
   return pyobj;

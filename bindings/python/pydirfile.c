@@ -124,6 +124,9 @@ static void gdpy_dirfile_delete(struct gdpy_dirfile_t *self)
 
   gd_close(self->D);
   free(self->verbose_prefix);
+  Py_XDECREF(self->callback);
+  Py_XDECREF(self->callback_data);
+  free(self);
 
   dreturnvoid();
 }
@@ -1329,7 +1332,7 @@ static PyObject *gdpy_dirfile_getrawfilename(struct gdpy_dirfile_t *self,
 {
   char *keywords[] = { "field_code", NULL };
   const char *field_code;
-  const char *filename;
+  char *filename;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
@@ -1346,6 +1349,7 @@ static PyObject *gdpy_dirfile_getrawfilename(struct gdpy_dirfile_t *self,
   PYGD_CHECK_ERROR(self->D, NULL);
 
   pyobj = PyString_FromString(filename);
+  free(filename);
   dreturn("%p", pyobj);
   return pyobj;
 }
