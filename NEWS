@@ -1,4 +1,11 @@
 New in version 0.8.10a:
+
+  Library Changes:
+
+  * BUG FIX: The library now properly recovers from an I/O error while trying
+    to open an unencoded datafile.  Previously, such an error would poison the
+    library's bookkeeping data, preventing all subsequent attempts to open
+    that file unless the Dirfile was re-opened.  Reported by Alexandra Rahlin.
   
   Bindings Changes:
 

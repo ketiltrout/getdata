@@ -126,7 +126,6 @@ static void gdpy_dirfile_delete(struct gdpy_dirfile_t *self)
   free(self->verbose_prefix);
   Py_XDECREF(self->callback);
   Py_XDECREF(self->callback_data);
-  free(self);
 
   dreturnvoid();
 }

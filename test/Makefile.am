@@ -317,7 +317,7 @@ PUT_TESTS=put64 put_bad_code put_bit put_bof put_carray put_carray_slice \
 					put_int32 put_int64 put_invalid put_lincom1 put_lincom2 \
 					put_lincom_noin put_linterp put_linterp_noin put_linterp_nomono \
 					put_linterp_notab put_linterp_reverse put_mplex put_multiply \
-					put_null put_off64 put_phase put_phase_noin put_polynom1 \
+					put_nofile put_null put_off64 put_phase put_phase_noin put_polynom1 \
 					put_polynom2 put_polynom_noin put_protect put_rdonly put_recip \
 					put_recurse put_repr put_rofs put_sbit put_sf put_ss put_string \
 					put_string_protect put_type put_uint16 put_uint32 put_uint64 \

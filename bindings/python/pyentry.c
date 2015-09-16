@@ -70,7 +70,6 @@ static void gdpy_entry_delete(struct gdpy_entry_t *self)
 
   gd_free_entry_strings(self->E);
   free(self->E);
-  free(self);
 
   dreturnvoid();
 }

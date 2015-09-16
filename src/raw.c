@@ -37,11 +37,16 @@ int _GD_RawOpen(int fd, struct gd_raw_file_* file, int swap gd_unused_,
   } else
     file->idata = fd;
 
+  if (file->idata < 0) {
+    dreturn("%i", 1);
+    return 1;
+  }
+
   file->pos = 0;
   file->mode = mode | GD_FILE_READ;
 
-  dreturn("%i", file->idata < 0);
-  return (file->idata < 0);
+  dreturn("%i", 0);
+  return 0;
 }
 
 off64_t _GD_RawSeek(struct gd_raw_file_* file, off64_t count,

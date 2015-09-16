@@ -27,7 +27,6 @@ static void gdpy_fragment_delete(struct gdpy_fragment_t *self)
   dtrace("%p", self);
 
   Py_XDECREF(self->dirfile);
-  free(self);
 
   dreturnvoid();
 }

@@ -1,3 +1,12 @@
+2015-09-16   D. V. Wiebe <getdata@ketiltrout.net> svn:988
+	* bindings/python/pydirfile.c (gdpy_dirfile_delete)
+	bindings/python/pyentry.c (gdpy_entry_delete) bindings/python/pyfragment.c
+	(gdpy_fragment_delete): Don't free the object. (Reverting previous commit:
+	python objects aren't allocated on the libc heap.)
+
+	* src/raw.c (_GD_RawOpen): Don't set the mode if open fails.
+	* test/put_nofile.c: Added.
+
 2015-08-11   D. V. Wiebe <getdata@ketiltrout.net> svn:985
 	Patch from Matthew Petroff:
 
