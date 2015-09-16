@@ -3338,7 +3338,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "If they are both omitted, the field pointer is set to sample zero.\n"
       "The 'flags' parameter must contain one of pygetdata.SEEK_SET,\n"
       "pygetdata.SEEK_CUR and pygetdata.SEEK_END, which may be bitwise or'd\n"
-      "with pygetdata.SEEK_PAD.  See gd_seek(3)."
+      "with pygetdata.SEEK_WRITE.  See gd_seek(3)."
   },
   {"set_callback", (PyCFunction)gdpy_dirfile_callback,
     METH_VARARGS | METH_KEYWORDS,

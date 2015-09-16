@@ -1,3 +1,8 @@
+2015-09-16   D. V. Wiebe <getdata@ketiltrout.net> svn:990
+	* src/fpos.c (_GD_WriteSeek): In OOP mode, subtract the current position
+	before iterating to the destination.
+	* test/gzip_seek_put.c: Added.
+
 2015-09-16   D. V. Wiebe <getdata@ketiltrout.net> svn:989
 	* src/fpos.c (_GD_WriteSeek): Don't overrun the buffer when doing OOP
 	seeks.

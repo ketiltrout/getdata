@@ -166,58 +166,63 @@ off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
 
   dtrace("%p, %p, %p, %lli, 0x%X", D, E, enc, (long long)offset, mode);
 
-  /* in this case we need to close and then re-open the file */
-  if ((offset < E->e->u.raw.file[which].pos) && oop_write) {
-    if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP)) {
-      dreturn("%i", -1);
-      return -1;
-    } else if (_GD_InitRawIO(D, E, NULL, 0, NULL, GD_EF_SEEK, GD_FILE_WRITE, 0))
-    {
-      dreturn("%i", -1);
-      return -1;
-    }
-  }
-
-  if (oop_write && E->e->u.raw.file[0].idata >= 0) {
-    /* read from the old file until we reach the point we're interested in or
-     * run out of data */
-    char buffer[GD_BUFFER_SIZE];
-    ssize_t n_read, n_wrote;
-    const off64_t chunk_size = GD_BUFFER_SIZE / GD_SIZE(E->EN(raw,data_type));
-
-    while (offset > chunk_size) {
-      n_read = (*enc->read)(E->e->u.raw.file, buffer, E->EN(raw,data_type),
-          chunk_size);
-      if (n_read > 0) {
-        n_wrote = (*enc->write)(E->e->u.raw.file + 1, buffer,
-            E->EN(raw,data_type), n_read);
-        if (n_wrote != n_read) {
-          dreturn("%i", -1);
-          return -1;
-        }
-        offset -= n_wrote;
-        pos += n_wrote;
-      } else if (n_read < 0) {
+  if (oop_write) {
+    /* in this case we need to close and then re-open the file */
+    if ((offset < E->e->u.raw.file[which].pos)) {
+      if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP)) {
+        dreturn("%i", -1);
+        return -1;
+      } else if (_GD_InitRawIO(D, E, NULL, 0, NULL, GD_EF_SEEK, GD_FILE_WRITE,
+            0))
+      {
         dreturn("%i", -1);
         return -1;
       }
     }
 
-    if (offset > 0) {
-      n_read = (*enc->read)(E->e->u.raw.file, buffer, E->EN(raw,data_type),
-            offset);
-      if (n_read > 0) {
-        n_wrote = (*enc->write)(E->e->u.raw.file + 1, buffer,
-            E->EN(raw,data_type), n_read);
-        if (n_wrote != n_read) {
+    if (E->e->u.raw.file[0].idata >= 0) {
+      /* read from the old file until we reach the point we're interested in or
+       * run out of data */
+      char buffer[GD_BUFFER_SIZE];
+      ssize_t n_read, n_wrote;
+      const off64_t chunk_size = GD_BUFFER_SIZE / GD_SIZE(E->EN(raw,data_type));
+
+      offset -= E->e->u.raw.file[which].pos;
+
+      while (offset > chunk_size) {
+        n_read = (*enc->read)(E->e->u.raw.file, buffer, E->EN(raw,data_type),
+            chunk_size);
+        if (n_read > 0) {
+          n_wrote = (*enc->write)(E->e->u.raw.file + 1, buffer,
+              E->EN(raw,data_type), n_read);
+          if (n_wrote != n_read) {
+            dreturn("%i", -1);
+            return -1;
+          }
+          offset -= n_wrote;
+          pos += n_wrote;
+        } else if (n_read < 0) {
           dreturn("%i", -1);
           return -1;
         }
-        offset -= n_wrote;
-        pos += n_wrote;
-      } else if (n_read < 0) {
-        dreturn("%i", -1);
-        return -1;
+      }
+
+      if (offset > 0) {
+        n_read = (*enc->read)(E->e->u.raw.file, buffer, E->EN(raw,data_type),
+            offset);
+        if (n_read > 0) {
+          n_wrote = (*enc->write)(E->e->u.raw.file + 1, buffer,
+              E->EN(raw,data_type), n_read);
+          if (n_wrote != n_read) {
+            dreturn("%i", -1);
+            return -1;
+          }
+          offset -= n_wrote;
+          pos += n_wrote;
+        } else if (n_read < 0) {
+          dreturn("%i", -1);
+          return -1;
+        }
       }
     }
   } else {

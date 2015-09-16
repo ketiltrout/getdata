@@ -17,6 +17,10 @@ New in version 0.8.10a:
   * BUG FIX: If the reference field is being written to, gd_nframes() now
     flushes it first before calculating the size of the dirfile.  Previously
     a short count could result for some encodings in this case.
+
+  * BUG FIX: Calling gd_putdata() to write gzip data with a non-zero starting
+    offset equal to the field's current I/O position, no longer result in the
+    call hanging.
   
   Bindings Changes:
 
