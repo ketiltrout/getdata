@@ -55,6 +55,18 @@ off64_t gd_nframes64(DIRFILE* D)
     return 0;
   }
 
+  /* If the reference field is open for writing, close it first to flush the
+   * data
+   */
+  if (D->reference_field->e->u.raw.file[0].mode & GD_FILE_WRITE) {
+    _GD_FiniRawIO(D, D->reference_field, D->reference_field->fragment_index,
+        GD_FINIRAW_KEEP);
+    if (D->error) {
+      dreturn("%i", 0);
+      return 0;
+    }
+  }
+
   nf = (*gd_ef_[D->reference_field->e->u.raw.file[0].subenc].size)(
       D->fragment[D->reference_field->fragment_index].dirfd,
       D->reference_field->e->u.raw.file,

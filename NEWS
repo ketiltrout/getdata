@@ -2,10 +2,21 @@ New in version 0.8.10a:
 
   Library Changes:
 
-  * BUG FIX: The library now properly recovers from an I/O error while trying
-    to open an unencoded datafile.  Previously, such an error would poison the
-    library's bookkeeping data, preventing all subsequent attempts to open
-    that file unless the Dirfile was re-opened.  Reported by Alexandra Rahlin.
+  * BUG FIX: The library now properly recovers from an I/O error while
+    trying to open an unencoded datafile.  Previously, such an error would
+    poison the library's bookkeeping data, preventing all subsequent
+    attempts to open that file unless the Dirfile was re-opened.  Reported
+    by Alexandra Rahlin.
+
+  * BUG FIX: GetData no longer segfaults when trying to do a large forward
+    seek before a write to a gzipped file.  Reported by Joy Didier.
+
+  * BUG FIX: gd_putdata() no longer ignores I/O errors while seeking to the
+    first sample of a write.
+
+  * BUG FIX: If the reference field is being written to, gd_nframes() now
+    flushes it first before calculating the size of the dirfile.  Previously
+    a short count could result for some encodings in this case.
   
   Bindings Changes:
 

@@ -1,3 +1,16 @@
+2015-09-16   D. V. Wiebe <getdata@ketiltrout.net> svn:989
+	* src/fpos.c (_GD_WriteSeek): Don't overrun the buffer when doing OOP
+	seeks.
+	* src/fpos.c (_GD_WriteSeek): Don't call (*enc->seek) in OOP mode.
+	* test/gzip_put_off.c: Added.
+
+	* src/fpos.c (_GD_WriteSeek): Don't ignore (*enc->seek) errors when not in
+	OOP mode.
+
+	* src/nframes.c (gd_nframes64): Close the reference field if it's open for
+	writing to ensure everything is on disk before we check its size.
+	* test/gzip_put_nframes.c: Added.
+
 2015-09-16   D. V. Wiebe <getdata@ketiltrout.net> svn:988
 	* bindings/python/pydirfile.c (gdpy_dirfile_delete)
 	bindings/python/pyentry.c (gdpy_entry_delete) bindings/python/pyfragment.c

@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2012 D. V. Wiebe
+/* Copyright (C) 2011-2012, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -183,10 +183,11 @@ off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
      * run out of data */
     char buffer[GD_BUFFER_SIZE];
     ssize_t n_read, n_wrote;
+    const off64_t chunk_size = GD_BUFFER_SIZE / GD_SIZE(E->EN(raw,data_type));
 
-    while (offset * GD_SIZE(E->EN(raw,data_type)) > GD_BUFFER_SIZE) {
+    while (offset > chunk_size) {
       n_read = (*enc->read)(E->e->u.raw.file, buffer, E->EN(raw,data_type),
-            GD_BUFFER_SIZE);
+          chunk_size);
       if (n_read > 0) {
         n_wrote = (*enc->write)(E->e->u.raw.file + 1, buffer,
             E->EN(raw,data_type), n_read);
@@ -219,10 +220,15 @@ off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
         return -1;
       }
     }
-  }
+  } else {
+    off64_t pos0 = (*enc->seek)(E->e->u.raw.file + which, offset,
+        E->EN(raw,data_type), mode);
 
-  pos += (*enc->seek)(E->e->u.raw.file + which, offset, E->EN(raw,data_type),
-      mode);
+    if (pos0 < 0)
+      pos = -1;
+    else
+      pos += pos0;
+  }
 
   dreturn("%lli", (long long)pos);
   return pos;
