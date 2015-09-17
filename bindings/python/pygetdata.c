@@ -331,7 +331,7 @@ gd_type_t gdpy_type_from_npytype(int npytype)
       break;
   }
 
-  dreturn("0x%03x\n", type);
+  dreturn("0x%03x", type);
   return type;
 }
 

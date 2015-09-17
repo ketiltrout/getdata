@@ -1,3 +1,7 @@
+2015-09-17   D. V. Wiebe <getdata@ketiltrout.net> svn:992
+	* src/fpos.c (_GD_WriteSeek): Conditionally restore the call to (*enc->seek)
+	for OOP writes: it performs the padding.
+
 2015-09-16   D. V. Wiebe <getdata@ketiltrout.net> svn:990
 	* src/fpos.c (_GD_WriteSeek): In OOP mode, subtract the current position
 	before iterating to the destination.
