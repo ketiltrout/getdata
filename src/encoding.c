@@ -409,13 +409,20 @@ int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
     if (oop_write && E->e->u.raw.file[1].idata >= 0) {
       if (E->e->u.raw.file[0].idata >= 0) {
         /* copy the rest of the input to the output */
-        char buffer[GD_BUFFER_SIZE];
+        char *buffer;
         int n_read, n_wrote, n_to_write;
+
+        buffer = _GD_Malloc(D, GD_BUFFER_SIZE);
+        if (buffer == NULL) {
+          dreturn("%i", -1);
+          return -1;
+        }
 
         do {
           n_to_write = n_read = (*_GD_ef[E->e->u.raw.file[0].subenc].read)(
               E->e->u.raw.file, buffer, E->EN(raw,data_type), GD_BUFFER_SIZE);
           if (n_read < 0) {
+            free(buffer);
             _GD_SetError(D, GD_E_IO, GD_E_IO_READ, E->e->u.raw.file[0].name, 0,
                 NULL);
             dreturn("%i", -1);
@@ -424,6 +431,7 @@ int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
             n_wrote = (*_GD_ef[E->e->u.raw.file[0].subenc].write)(
                 E->e->u.raw.file + 1, buffer, E->EN(raw,data_type), n_to_write);
             if (n_wrote < 0) {
+              free(buffer);
               _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[0].name,
                   0, NULL);
               dreturn("%i", -1);
@@ -432,6 +440,8 @@ int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
             n_to_write -= n_wrote;
           }
         } while (n_read == GD_BUFFER_SIZE);
+
+        free(buffer);
       }
 
       if ((*_GD_ef[E->e->u.raw.file[0].subenc].close)(E->e->u.raw.file + 1)) {

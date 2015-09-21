@@ -1,3 +1,7 @@
+2015-09-20   D. V. Wiebe <getdata@ketiltrout.net> svn:995
+	* src/encoding.c (_GD_FiniRawIO) src/fpos.c (_GD_WriteSeek): Place large
+	buffers on the heap.
+
 2015-09-20   D. V. Wiebe <getdata@ketiltrout.net> svn:993
 	Merge in bugfixes from GetData-0.8:
 
