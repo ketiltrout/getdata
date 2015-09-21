@@ -1,4 +1,4 @@
-2015-05-15   D. V. Wiebe <getdata@ketiltrout.net> svn:974
+2015-09-20   D. V. Wiebe <getdata@ketiltrout.net> svn:993
 	Merge in bugfixes from GetData-0.8:
 
 	* src/add.c (_GD_Add _GD_AddAlias) src/fragment.c (_GD_CheckAffixes):
