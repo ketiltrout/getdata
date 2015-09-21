@@ -263,7 +263,7 @@ void F77_FUNC(gdflsh, GDFLSH) (const int32_t *dirfile, const char *field_code,
 {
   dtrace("%i, %p, %i", *dirfile, field_code, *field_code_l);
 
-  if (field_code_l == 0)
+  if (*field_code_l == 0)
     gd_flush(_GDF_GetDirfile(*dirfile), NULL);
   else {
     char *out;
@@ -4083,7 +4083,7 @@ void F77_FUNC(gdsync, GDSYNC) (const int32_t *dirfile, const char *field_code,
 {
   dtrace("%i, %p, %i", *dirfile, field_code, *field_code_l);
 
-  if (field_code_l == 0)
+  if (*field_code_l == 0)
     gd_sync(_GDF_GetDirfile(*dirfile), NULL);
   else {
     char *out;
@@ -4101,7 +4101,7 @@ void F77_FUNC(gdrclo, GDRCLO) (const int32_t *dirfile, const char *field_code,
 {
   dtrace("%i, %p, %i", *dirfile, field_code, *field_code_l);
 
-  if (field_code_l == 0)
+  if (*field_code_l == 0)
     gd_sync(_GDF_GetDirfile(*dirfile), NULL);
   else {
     char *out;

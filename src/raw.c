@@ -1,4 +1,4 @@
-/* Copyright (C) 2008, 2010, 2011 D. V. Wiebe
+/* Copyright (C) 2008, 2010, 2011, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -39,11 +39,16 @@ int _GD_RawOpen(int fd, struct gd_raw_file_* file, int swap gd_unused_,
     file->idata = _GD_MakeTempFile(file->D, fd, file->name);
   }
 
+  if (file->idata < 0) {
+    dreturn("%i", 1);
+    return 1;
+  }
+
   file->pos = 0;
   file->mode = mode | GD_FILE_READ;
 
-  dreturn("%i", file->idata < 0);
-  return (file->idata < 0);
+  dreturn("%i", 0);
+  return 0;
 }
 
 off64_t _GD_RawSeek(struct gd_raw_file_* file, off64_t count,
@@ -61,15 +66,20 @@ off64_t _GD_RawSeek(struct gd_raw_file_* file, off64_t count,
 
   pos = lseek64(file->idata, count * GD_SIZE(data_type), SEEK_SET);
 
+  /* If we've landed in the middle of a sample, we have to back up */
+  if (pos > 0 && (pos % GD_SIZE(data_type)))
+    pos = lseek64(file->idata, -(pos % GD_SIZE(data_type)), SEEK_CUR);
+
   if (pos == -1) {
     dreturn("%i", -1);
     return -1;
   }
 
-  file->pos = count;
+  pos /= GD_SIZE(data_type);
+  file->pos = pos;
 
-  dreturn("%lli", (long long)count);
-  return count;
+  dreturn("%lli", (long long)pos);
+  return pos;
 }
 
 ssize_t _GD_RawRead(struct gd_raw_file_ *restrict file, void *restrict ptr,

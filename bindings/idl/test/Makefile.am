@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2010 D. V. Wiebe
+# Copyright (C) 2009-2010, 2015 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -21,7 +21,7 @@
 AUTOMAKE_OPTIONS = foreign serial-tests
 
 if TEST_IDL
-TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../../src/.libs IDL_PATH="${srcdir}" IDL_DLM_PATH=../.libs ${IDL}
+TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=../../../src/.libs:${${DL_LIBRARY_PATH}} IDL_PATH="${srcdir}" IDL_DLM_PATH=../.libs ${IDL}
 idlTESTS=big_test.pro
 TESTS=$(addprefix ${srcdir}/,$(idlTESTS))
 endif

@@ -1,4 +1,79 @@
 2015-05-15   D. V. Wiebe <getdata@ketiltrout.net> svn:974
+	Merge in bugfixes from GetData-0.8:
+
+	* src/add.c (_GD_Add _GD_AddAlias) src/fragment.c (_GD_CheckAffixes):
+	Don't dealias during the duplicate field name check. (r973)
+	* test/add_dangle_dup.c: Added. (r973)
+
+	* cmake/test/CMakeLists.txt: blacklist gzip tests. (r976)
+
+	* src/getdata.h.in: Don't attempt to use __nonnull. (r976)
+
+	* configure.ac: Fix cygwin check. (r976)
+
+	* src/getdata.c (_GD_DoRaw): Rewind RAW file if necessary after
+	zero-padding. (r977)
+	* test/get_foffs2.c test/seek_foffs2.c: Added. (r977)
+
+	* src/raw.c (_GD_RawSeek): Handle landing in the middle of a sample. (r977)
+
+	* src/raw.c (_GD_RawSeek): Remember the actual position, not the
+	requested position. (r977)
+
+	* bindings/idl/test/Makefile.am bindings/matlab/test/Makefile.am
+	bindings/perl/Makefile.am bindings/python/test/Makefile.am: Fix
+	DL_LIBRARY_PATH ordering. (r977)
+
+	* bindings/perl/GetData.pm.in: Fix perldoc markup. (r977)
+
+	* bindings/f77/fgetdata.c (GDFLSH GDSYNC GDRCLO): Fix zero-length string
+	checks. (r979)
+
+	* bindings/python/pyfragment.c (gdpy_fragment_getprefix
+	gdpy_fragment_getsuffix): Fix memory leaks. (r979)
+
+	* src/add.c (_GD_Add) src/legacy.c (_GD_GetDirfile) src/mod.c
+	(gd_alter_spec): Fix on-error memory leaks. (r979)
+
+	* src/common.c (_GD_GetRepr): Only set field_code to field_code_in if
+	necessary. (r979)
+
+	* src/flush.c (_GD_StringEscapeise): Fix upper nibble of hex encoding.
+	* test/flush_hex.c: Added. (r979)
+
+	* src/getdata.c (_GD_DoBit): Fix sign mask. (r979)
+
+	* src/sie.c (_GD_SampIndSize): Fix return value. (r980)
+
+	* src/sie.c (_GD_SampIndWrite): Flush stdio buffer before truncating to
+	avoid having a partially written file on disk. (r980)
+	* test/sie_put_trunc_nf.c: Added. (r980)
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getrawfilename)
+	bindings/python/pyfragment.c (gdpy_fragment_getprefix
+	gdpy_fragment_getsuffix): Free C strings after calling PyString_FromString.
+	Patch from Matthew Petroff.  (r985)
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_delete)
+	bindings/python/pyentry.c (gdpy_entry_delete) bindings/python/pyfragment.c
+	(gdpy_fragment_delete): Free the object. (r985)
+
+	* src/raw.c (_GD_RawOpen): Don't set the mode if open fails. (r988)
+	* test/put_nofile.c: Added. (r988)
+
+	* src/fpos.c (_GD_WriteSeek): Don't overrun the buffer when doing OOP
+	seeks. (r989, r990, r992)
+	* test/gzip_put_off.c * test/gzip_seek_put.c: Added. (r989, r990)
+
+	* src/nframes.c (gd_nframes64): Close the reference field if it's open for
+	writing to ensure everything is on disk before we check its size. (r989)
+	* test/gzip_put_nframes.c: Added. (r989)
+
+	Also:
+
+	* src/internal.h: Merge BUFFER_SIZE and GD_BUFFER_SIZE.
+
+2015-05-15   D. V. Wiebe <getdata@ketiltrout.net> svn:974
 	* m4/compiler.m4 (GD_C_CAST_COMPLEX): Added.
 	* configure.ac: Call GD_C_CAST_COMPLEX in C99 mode.
 

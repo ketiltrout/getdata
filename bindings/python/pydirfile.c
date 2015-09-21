@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2014 D. V. Wiebe
+/* Copyright (C) 2009-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -124,6 +124,9 @@ static void gdpy_dirfile_delete(struct gdpy_dirfile_t *self)
 
   gd_close(self->D);
   free(self->verbose_prefix);
+  Py_XDECREF(self->callback);
+  Py_XDECREF(self->callback_data);
+  PyObject_Del(self);
 
   dreturnvoid();
 }
@@ -1479,7 +1482,7 @@ static PyObject *gdpy_dirfile_getrawfilename(struct gdpy_dirfile_t *self,
 {
   char *keywords[] = { "field_code", NULL };
   const char *field_code;
-  const char *filename;
+  char *filename;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
@@ -1496,6 +1499,7 @@ static PyObject *gdpy_dirfile_getrawfilename(struct gdpy_dirfile_t *self,
   PYGD_CHECK_ERROR(self->D, NULL);
 
   pyobj = PyString_FromString(filename);
+  free(filename);
   dreturn("%p", pyobj);
   return pyobj;
 }
@@ -3511,7 +3515,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "If they are both omitted, the field pointer is set to sample zero.\n"
       "The 'flags' parameter must contain one of pygetdata.SEEK_SET,\n"
       "pygetdata.SEEK_CUR and pygetdata.SEEK_END, which may be bitwise or'd\n"
-      "with pygetdata.SEEK_PAD.  See gd_seek(3)."
+      "with pygetdata.SEEK_WRITE.  See gd_seek(3)."
   },
   {"set_callback", (PyCFunction)gdpy_dirfile_callback,
     METH_VARARGS | METH_KEYWORDS,

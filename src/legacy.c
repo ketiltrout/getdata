@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
  * Copyright (C) 2003-2005 Theodore Kisner
- * Copyright (C) 2005-2012, 2014 D. V. Wiebe
+ * Copyright (C) 2005-2012, 2014, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -161,6 +161,7 @@ static DIRFILE *_GD_GetDirfile(const char *filename_in, int mode,
   ptr = realloc(_GD_Dirfiles.D, (_GD_Dirfiles.n + 1) * sizeof(*_GD_Dirfiles.D));
   if (ptr == NULL) {
     *error_code = _GD_GlobalErrors.error = GD_E_ALLOC;
+    free(filedir);
     dreturn("%p", NULL);
     return NULL;
   }

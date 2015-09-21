@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2010 D. V. Wiebe
+# Copyright (C) 2009-2010, 2015 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -21,7 +21,7 @@
 AUTOMAKE_OPTIONS = foreign serial-tests
 
 if TEST_PYTHON
-TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../../src/.libs PYTHONPATH=.. ${PYTHON}
+TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=../../../src/.libs:${${DL_LIBRARY_PATH}} PYTHONPATH=..:${PYTHONPATH} ${PYTHON}
 pyTESTS=callback.py big_test.py
 TESTS=$(addprefix ${srcdir}/,$(pyTESTS))
 endif

@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013, 2015 D. V. Wiebe
+/* Copyright (C) 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read little-endian SIE data */
 #include "test.h"
 
 #include <stdlib.h>
@@ -28,15 +27,10 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data.sie";
-  const char *format_data = "data RAW UINT8 1\n/ENCODING sie\n/ENDIAN little\n";
-  const uint8_t data_data[] = {
-    0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12,
-    0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22,
-    0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x32
-  };
+  const char *format_data = "/ENCODING sie\n/ENDIAN little\n";
+  unsigned char c[] = {1, 1, 2, 1};
   DIRFILE *D;
-  off_t n;
-  int fd, error, r = 0;
+  int fd, n1, n2, r = 0;
 
   rmdirfile();
   mkdir(filedir, 0777); 
@@ -45,18 +39,22 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 9 * 3 * sizeof(uint8_t));
-  close(fd);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  gd_add_raw(D, "data", GD_UINT8, 1, 0);
+  gd_putdata(D, "data", 0, 0, 0, 4, GD_UINT8, c);
+  gd_raw_close(D, "data");
+  n1 = gd_nframes(D);
+  CHECKI(n1, 4);
 
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  n = gd_nframes(D);
-  error = gd_error(D);
+  gd_putdata(D, "data", 0, 2, 0, 2, GD_UINT8, c);
+  n2 = gd_nframes(D);
+  CHECKI(n2, 4);
 
   gd_discard(D);
 
-  CHECKI(error, 0);
-  CHECKI(n, 0x31);
+  unlink(data);
+  unlink(format);
+  rmdir(filedir);
 
   return r;
 }

@@ -32,7 +32,7 @@ clean-local:
 	rm -rf *~  m4/*~ README.txt
 
 %.sig: %
-	gpg --use-agent -abo $@ $<
+	gpg -abo $@ $<
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-legacy-api --enable-modules \
 														--with-idl-dlm-dir="$$dc_install_base/idl" \

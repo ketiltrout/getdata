@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2012, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2012, 2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -571,6 +571,11 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
 
   /* truncate the file if necessary */
   if (rin < rout) {
+    if (fflush(f->fp)) {
+      free(p);
+      dreturn("%i", -1);
+      return -1;
+    }
     if (gd_truncate(fileno(f->fp), (nrec - rout + rin) * size)) {
       free(p);
       dreturn("%i", -1);
@@ -673,6 +678,6 @@ off64_t _GD_SampIndSize(int dirfd, struct gd_raw_file_* file,
 
   fclose(f.fp);
 
-  dreturn("%llx", (long long unsigned)n);
-  return (off64_t)n;
+  dreturn("%llx", (long long unsigned)n + 1);
+  return (off64_t)n + 1;
 }

@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2014 D. V. Wiebe
+ * Copyright (C) 2005-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -819,7 +819,6 @@ int _GD_GetRepr(DIRFILE *restrict D, const char *restrict field_code_in,
 
   dtrace("%p, \"%s\", %p, %i", D, field_code_in, field_code, err);
 
-  *field_code = (char *)field_code_in;
   /* find the representation, if any */
   if (field_code_len > 2 && field_code_in[field_code_len - 2] == '.') {
     switch (field_code_in[field_code_len - 1]) {
@@ -850,7 +849,8 @@ int _GD_GetRepr(DIRFILE *restrict D, const char *restrict field_code_in,
     *field_code = _GD_Strdup(D, field_code_in);
     if (*field_code)
       (*field_code)[field_code_len - 2] = '\0';
-  }
+  } else
+    *field_code = (char *)field_code_in;
 
   dreturn("%i", repr);
   return repr;

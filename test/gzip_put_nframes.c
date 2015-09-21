@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013, 2015 D. V. Wiebe
+/* Copyright (C) 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,45 +18,61 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read little-endian SIE data */
 #include "test.h"
 
-#include <stdlib.h>
+uint32_t d[100];
 
 int main(void)
 {
+#ifndef TEST_GZIP
+  return 77;
+#else
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data.sie";
-  const char *format_data = "data RAW UINT8 1\n/ENCODING sie\n/ENDIAN little\n";
-  const uint8_t data_data[] = {
-    0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12,
-    0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22,
-    0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x32
-  };
+  const char *data = "dirfile/data.gz";
+  int i, e1, e2, r = 0;
+  size_t n1, n2;
+  off_t nf1, nf2;
   DIRFILE *D;
-  off_t n;
-  int fd, error, r = 0;
+
+  for (i = 0; i < 100; ++i)
+    d[i] = i;
 
   rmdirfile();
-  mkdir(filedir, 0777); 
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  D = gd_open(filedir,
+      GD_RDWR | GD_GZIP_ENCODED | GD_CREAT | GD_EXCL | GD_VERBOSE);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 9 * 3 * sizeof(uint8_t));
-  close(fd);
+  gd_add_raw(D, "data", GD_UINT32, 1, 0);
 
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  n = gd_nframes(D);
-  error = gd_error(D);
+  n1 = gd_putdata(D, "data", 0, 0, 0, 100, GD_UINT32, d);
+  CHECKU(n1, 100);
+
+  e1 = gd_error(D);
+  CHECKI(e1, GD_E_OK);
+
+  nf1 = gd_nframes(D);
+  CHECKU(nf1, 100);
+
+  gd_close(D);
+
+  D = gd_open(filedir, GD_RDWR | GD_GZIP_ENCODED | GD_VERBOSE);
+
+  n2 = gd_putdata(D, "data", 0, 100, 0, 100, GD_UINT32, d);
+  CHECKU(n2, 100);
+
+  e2 = gd_error(D);
+  CHECKI(e2, GD_E_OK);
+
+  nf2 = gd_nframes(D);
+  CHECKU(nf2, 200);
 
   gd_discard(D);
 
-  CHECKI(error, 0);
-  CHECKI(n, 0x31);
+  unlink(data);
+  unlink(format);
+  rmdir(filedir);
 
   return r;
+#endif
 }

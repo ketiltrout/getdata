@@ -1,4 +1,4 @@
-# Copyright (C) 2013 D. V. Wiebe
+# Copyright (C) 2013, 2015 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -21,7 +21,7 @@
 AUTOMAKE_OPTIONS = foreign serial-tests
 
 if TEST_PHP
-TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../../src/.libs \
+TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=../../../src/.libs:${${DL_LIBRARY_PATH}} \
 	${PHP} -n -d "output_handler=" -d "open_basedir=" -d "safe_mode=0" \
 	-d "disable_functions=" -d "output_buffering=Off" -d "error_reporting=32767" \
 	-d "display_errors=1" -d "display_startup_errors=1" -d "log_errors=0" \

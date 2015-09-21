@@ -426,7 +426,7 @@ case "${host}" in
   *-pc-mingw*)
   NO_UNDEFINED=" -no-undefined"
   NO_DLOPEN_TESTS=1 ;;
-  *-pc-cygwin*)
+  *-*-cygwin*)
   NO_UNDEFINED=" -no-undefined -enable-auto-import"
   NO_DLOPEN_TESTS=1 ;;
   *) NO_DLOPEN_TESTS=0 ;;
@@ -523,7 +523,9 @@ if test "x${cross_compiling}" != "xno"; then
   make_perlbindings=no
   make_matlabbindings=no
 else
-  BUILDCC=$CC
+  if test -z "$BUILDCC"; then
+    BUILDCC=$CC
+  fi
   AC_SUBST([BUILDCC])
 fi
 
@@ -658,7 +660,8 @@ echo
 AC_CHECK_HEADERS([asm/unaligned.h Availability.h byteswap.h direct.h fcntl.h \
                   float.h inttypes.h io.h libgen.h libkern/OSByteOrder.h \
                   math.h stddef.h stdint.h sys/endian.h sys/file.h sys/param.h \
-                  sys/stat.h sys/types.h sys/wait.h unistd.h])
+                  sys/resource.h sys/stat.h sys/time.h sys/types.h sys/wait.h \
+                  unistd.h])
 if test "x$disable_c99" = "xno"; then
 AC_CHECK_HEADERS([complex.h])
 fi
@@ -769,9 +772,9 @@ AC_CHECK_FUNCS([basename _chsize _chsize_s _commit fchmod _fdopen fdopendir \
                 fstatat fstatat64 fsync ftello ftello64 ftruncate ftruncate64 \
                 getcwd _getcwd getdelim gmtime_r isnan _isnan lseek64 \
                 _lseeki64 lstat lstat64 _mkdir mkfifo nan _open openat \
-                pathconf _read readdir_r readlink renameat _rmdir snprintf \
-                _snprintf stat64 _stat64 _strtoi64 strtoll strtoq _strtoui64 \
-                strtoull strtouq symlink _unlink unlinkat _write])
+                pathconf _read readdir_r readlink renameat _rmdir setrlimit \
+                snprintf _snprintf stat64 _stat64 _strtoi64 strtoll strtoq \
+                _strtoui64 strtoull strtouq symlink _unlink unlinkat _write])
 if test "x$disable_c99" = "xno"; then
   AC_CHECK_FUNCS([cabs])
 fi

@@ -28,10 +28,10 @@ EXTRA_DIST=test.h
 ADD_TESTS=add_add add_affix add_alias add_alias_affix add_alias_meta \
 					add_amb_code7 add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 					add_bit_numbits add_bit_scalars add_carray add_clincom add_code \
-					add_const add_cpolynom add_crecip add_crecip89 add_divide \
-					add_divide_invalid add_dot5 add_dot6 add_dot10 add_duplicate \
-					add_format add_indir add_invalid add_lincom add_lincom_affix \
-					add_lincom_invalid add_lincom_nfields add_linterp \
+					add_const add_cpolynom add_crecip add_crecip89 add_dangle_dup \
+					add_divide add_divide_invalid add_dot5 add_dot6 add_dot10 \
+					add_duplicate add_format add_indir add_invalid add_lincom \
+					add_lincom_affix add_lincom_invalid add_lincom_nfields add_linterp \
 					add_linterp_invalid add_meta add_meta_alias add_mplex \
 					add_mplex_scalars add_multiply add_multiply_invalid add_ns \
 					add_ns_frag add_ns_frag2 add_phase add_phase_invalid add_polynom \
@@ -74,12 +74,6 @@ BZIP_TESTS=bzip_add bzip_get bzip_get_far bzip_get_get bzip_get_get2 \
 					 bzip_get_put bzip_move_from bzip_move_to bzip_nframes bzip_put \
 					 bzip_put_back bzip_put_endian bzip_put_get bzip_put_pad \
 					 bzip_put_sub bzip_sync
-
-CVLIST_TESTS=cvlist cvlist_array cvlist_array0 cvlist_array_free \
-						 cvlist_array_hidden cvlist_array_meta cvlist_array_meta0 \
-						 cvlist_array_meta_free cvlist_array_meta_hidden cvlist_hidden \
-						 cvlist_invalid cvlist_meta cvlist_meta0 cvlist_meta_hidden \
-						 cvlist_meta_invalid
 
 CLOSE_TESTS=close_bad close_close close_discard close_null
 
@@ -134,15 +128,21 @@ CONVERT_TESTS=convert_complex128_complex64 convert_complex128_float64 \
 
 CREAT_TESTS=creat creat_excl creat_rdonly creat_rdonly_exists
 
+CVLIST_TESTS=cvlist cvlist_array cvlist_array0 cvlist_array_free \
+						 cvlist_array_hidden cvlist_array_meta cvlist_array_meta0 \
+						 cvlist_array_meta_free cvlist_array_meta_hidden cvlist_hidden \
+						 cvlist_invalid cvlist_meta cvlist_meta0 cvlist_meta_hidden \
+						 cvlist_meta_invalid
+
 DEL_TESTS=del_alias del_carray del_carray_deref del_const del_const_deref \
 					del_const_force del_data del_data_enoent del_data_open del_derived \
 					del_derived_after del_derived_force del_del del_meta del_meta_force \
 					del_ref
 
+DESYNC_TESTS=desync desync_flush desync_path desync_reopen desync_reopen_inv
+
 DFES_TESTS=dfes_bit dfes_divide dfes_lincom dfes_linterp dfes_multiply \
 					 dfes_null dfes_phase dfes_raw dfes_recip dfes_zero
-
-DESYNC_TESTS=desync desync_flush desync_path desync_reopen desync_reopen_inv
 
 ELIST_TESTS=elist_alias elist_hidden elist_noalias elist_scalar
 
@@ -172,9 +172,9 @@ FLIST_TESTS=flist flist0 flist2 flist_hidden flist_invalid flist_meta \
 						flist_type_hidden flist_type_invalid flist_type_meta \
 						flist_type_meta_hidden flist_type_meta_invalid
 
-FLUSH_TESTS=flush_all flush_amb_code flush_bad_code flush_flush flush_invalid \
-						flush_lincom flush_lincom1 flush_meta flush_mult flush_raw_close \
-						flush_ref flush_spec flush_string flush_sync
+FLUSH_TESTS=flush_all flush_amb_code flush_bad_code flush_flush flush_hex \
+						flush_invalid flush_lincom flush_lincom1 flush_meta flush_mult \
+						flush_raw_close flush_ref flush_spec flush_string flush_sync
 
 FOFFS_TESTS=foffs_alter foffs_alter_all foffs_get foffs_move
 
@@ -195,12 +195,12 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_endian_float32_arm get_endian_float32_big \
 					get_endian_float32_little get_endian_float64_arm \
 					get_endian_float64_big get_endian_float64_little get_ff get_float32 \
-					get_float64 get_foffs get_fs get_here get_here_foffs get_heres \
-					get_indir get_index_complex get_int8 get_int16 get_int32 get_int64 \
-					get_invalid get_lincom1 get_lincom2 get_lincom2s get_lincom3 \
-					get_lincom3s get_lincom_mdt get_lincom_noin get_lincom_non \
-					get_lincom_null get_lincom_spf get_linterp get_linterp1 \
-					get_linterp_abs get_linterp_complex get_linterp_empty \
+					get_float64 get_foffs get_foffs2 get_fs get_here get_here_foffs \
+					get_heres get_indir get_index_complex get_int8 get_int16 get_int32 \
+					get_int64 get_invalid get_lincom1 get_lincom2 get_lincom2s \
+					get_lincom3 get_lincom3s get_lincom_mdt get_lincom_noin \
+					get_lincom_non get_lincom_null get_lincom_spf get_linterp \
+					get_linterp1 get_linterp_abs get_linterp_complex get_linterp_empty \
 					get_linterp_noin get_linterp_notab get_linterp_sort get_mplex \
 					get_mplex_bof get_mplex_complex get_mplex_lb get_mplex_lball \
 					get_mplex_nolb get_mplex_s get_mplex_saved get_multiply \
@@ -220,8 +220,8 @@ GLOBAL_TESTS=global_flags global_name global_ref global_ref_empty global_ref_set
 
 GZIP_TESTS=gzip_add gzip_del gzip_get gzip_get_far gzip_get_get gzip_get_get2 \
 					 gzip_get_put gzip_move_from gzip_move_to gzip_nframes gzip_put \
-					 gzip_put_back gzip_put_endian gzip_put_get gzip_put_pad \
-					 gzip_put_sub gzip_sync
+					 gzip_put_back gzip_put_endian gzip_put_get gzip_put_nframes \
+					 gzip_put_off gzip_put_pad gzip_put_sub gzip_seek_put gzip_sync
 
 HEADER_TESTS=header_complex
 
@@ -364,7 +364,7 @@ PUT_TESTS=put64 put_bad_code put_bit put_bof put_carray put_carray_client \
 					put_int16 put_int32 put_int64 put_invalid put_lincom1 put_lincom2 \
 					put_lincom_noin put_linterp put_linterp_noin put_linterp_nomono \
 					put_linterp_notab put_linterp_reverse put_mplex put_mplex_complex \
-					put_multiply put_null put_off64 put_phase put_phase_noin \
+					put_multiply put_nofile put_null put_off64 put_phase put_phase_noin \
 					put_polynom1 put_polynom2 put_polynom_noin put_protect put_rdonly \
 					put_recip put_recurse put_repr put_rofs put_sarray put_sarray_slice \
 					put_sbit put_sf put_sindir put_ss put_string put_string_protect \
@@ -377,13 +377,14 @@ REPR_TESTS=repr_a repr_bad repr_float32 repr_float64 repr_i repr_int16 \
 					 repr_real_i repr_real_m repr_real_r repr_uint16 repr_uint32 \
 					 repr_uint64 repr_uint8
 
-SEEK_TESTS=seek64 seek_cur seek_end seek_foffs seek_index seek_lincom \
-					 seek_mult seek_neg seek_phase seek_set seek_sub
+SEEK_TESTS=seek64 seek_cur seek_end seek_foffs seek_foffs2 seek_index \
+					 seek_lincom seek_mult seek_neg seek_phase seek_set seek_sub
 
 SIE_TESTS=sie_get_big sie_get_little sie_move_from sie_move_to sie_nframes_big \
 					sie_nframes_little sie_put_append sie_put_append2 sie_put_back \
 					sie_put_big sie_put_little sie_put_many sie_put_newo sie_put_newo0 \
-					sie_put_pad sie_put_pad0 sie_put_trunc sie_put_trunc2 sie_sync
+					sie_put_pad sie_put_pad0 sie_put_trunc sie_put_trunc2 \
+					sie_put_trunc_nf sie_sync
 
 SLIM_TESTS=slim_get slim_nframes
 

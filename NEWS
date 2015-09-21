@@ -44,6 +44,26 @@ New in verison 0.9.0a:
     gd_putdata, gd_raw_close, gd_raw_filename, gd_seek, gd_spf, gd_sync,
     gd_tell.
 
+  * BUG FIX: The library now properly recovers from an I/O error while
+    trying to open an unencoded datafile.  Previously, such an error would
+    poison the library's bookkeeping data, preventing all subsequent
+    attempts to open that file unless the Dirfile was re-opened.  Reported
+    by Alexandra Rahlin.
+
+  * BUG FIX: GetData no longer segfaults when trying to do a large forward
+    seek before a write to a gzipped file.  Reported by Joy Didier.
+
+  * BUG FIX: gd_putdata() no longer ignores I/O errors while seeking to the
+    first sample of a write.
+
+  * BUG FIX: If the reference field is being written to, gd_nframes() now
+    flushes it first before calculating the size of the dirfile.
+    Previously a short count could result for some encodings in this case.
+
+  * BUG FIX: Calling gd_putdata() to write gzip data with a non-zero
+    starting offset equal to the field's current I/O position, no longer
+    result in the call hanging.
+  
   * BUG FIX: In addition to the addition of write support mentioned above,
     a number of problems with reading LZMA files has been fixed, which
     should result in fewer segmentaion faults.
@@ -166,6 +186,16 @@ New in verison 0.9.0a:
   * BUG FIX: gd_naliases() now returns an unsigned int, and zero on error,
     as documented.
 
+  * BUG FIX: The library now properly recovers from an I/O error while
+    trying to open an unencoded datafile.  Previously, such an error would
+    poison the library's bookkeeping data, preventing all subsequent
+    attempts to open that file unless the Dirfile was re-opened.  Reported
+    by Alexandra Rahlin.
+
+  * BUG FIX: Calling gd_putdata() to write gzip data with a non-zero
+    starting offset equal to the field's current I/O position, no longer
+    result in the call hanging.
+
   Bindings Changes:
 
   * PHP bindings have been added.
@@ -212,6 +242,12 @@ New in verison 0.9.0a:
   * F95 BUG FIX: fgd_add and fgd_alter_entry no longer ignore named scalar
     parameters provided in supplied entry structures.
 
+  * PYTHON BUG FIX: Several memory leaks have been plugged.  Patch from
+    Matthew Petroff.
+
+  * PYTHON BUG FIX: Several memory leaks have been plugged.  Patch from
+    Matthew Petroff.
+
   Miscellaneous:
 
   * The minimum autotools versions have been bumped.  Autoconf-2.65 or
@@ -221,6 +257,46 @@ New in verison 0.9.0a:
     release don't need the tools to build GetData; the autotools are only
     needed if changes need to be made to the configure script or Makefile
     input files provided in the release or if building from the repository.
+
+|=========================================================================|
+
+New in verison 0.8.9:
+
+  Library Changes:
+
+  * BUG FIX: The metadata writer now correctly stores bytes in the range
+    0x01 through 0x1F to the format files (encoded as hex escape sequences:
+    \x##).
+
+  * BUG FIX: A number of memory leaks associated with error returns from
+    libary functions have been fixed.
+
+  * BUG FIX: Attempting to create a new field or alias with the name of
+    an existing dangling alias now fails with error GD_E_DUPLICATE, as it
+    should.  Reported by Alexandra Rahlin.
+
+  * BUG FIX: Random-access reads on a RAW field with a frame offset no
+    longer result in mispositioning of the field's I/O pointer, which
+    previously would result in returning data from the wrong part of a
+    field.  Reported by S. J. Benton.
+
+  * BUG FIX: The return value of gd_nframes() is now correct when using a
+    sample-index encoded field as the reference field.
+
+  * BUG FIX: The sample-index encoding no longer creates sequential records
+    with the same value.
+
+  Bindings Changes:
+
+  * F77 and F95 BUG FIX: Passing zero as the field code length (F77) to
+    GDFLSH GDSYNC GDRCLO, or, equivalently, an empty string as the field
+    code to fgd_flush, fgd_sync, fgd_raw_close now causes operation on all
+    fields, as with passing NULL to the corresponding C API functions does.
+    This is what the documentation said these functions did all along.
+
+  * PYTHON BUG FIX: Accessing the prefix or suffix member of fragment
+    objects no longer leaks memory if the other affix is non-NULL.
+
 
 |=========================================================================|
 

@@ -323,7 +323,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           if (!_GD_CalculateEntry(D, E, 1))
             break;
 
-        nf = BUFFER_SIZE / gd_max_(E->e->u.raw.size,
+        nf = GD_BUFFER_SIZE / gd_max_(E->e->u.raw.size,
             GD_SIZE(Q.EN(raw,data_type))) / gd_max_(E->EN(raw,spf),
             Q.EN(raw,spf));
 
@@ -366,8 +366,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           break;
         }
 
-        buffer1 = _GD_Malloc(D, BUFFER_SIZE);
-        buffer2 = _GD_Malloc(D, BUFFER_SIZE);
+        buffer1 = _GD_Malloc(D, GD_BUFFER_SIZE);
+        buffer2 = _GD_Malloc(D, GD_BUFFER_SIZE);
 
         if (D->error) {
           free(buffer1);
@@ -1745,17 +1745,17 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
     return -1;
   }
 
-  /* the parser will modifiy in_cols[0] if it contains a metafield code */
-  if ((new_code = _GD_Strdup(D, in_cols[0])) == NULL) {
-    dreturn("%i", -1);
-    return -1;
-  }
-
   N = _GD_FindField(D, in_cols[0], D->entry, D->n_entries, 1, NULL);
 
   if (N == NULL) {
     free(outstring);
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, in_cols[0]);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* the parser will modifiy in_cols[0] if it contains a metafield code */
+  if ((new_code = _GD_Strdup(D, in_cols[0])) == NULL) {
     dreturn("%i", -1);
     return -1;
   }
@@ -1767,6 +1767,7 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
   free(outstring);
 
   if (D->error) {
+    free(new_code);
     dreturn("%i", -1); /* field spec parser threw an error */
     return -1;
   }

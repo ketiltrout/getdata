@@ -293,7 +293,7 @@ double cimag(double complex z);
 #if SIZEOF_INT < 4
 #define GD_BUFFER_SIZE 32767
 #else
-#define GD_BUFFER_SIZE 1000000
+#define GD_BUFFER_SIZE 9000000
 #endif
 
 /* the default mplex cycle length */
@@ -815,9 +815,6 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_ARG_BAD_VERS       6
 
 #define GD_E_LONG_FLUSH         1
-
-/* the size of the memory buffer used for various bulk I/O operations */
-#define BUFFER_SIZE 9000000
 
 /* number of lines chunked-in from a LINTERP table at a time */
 #define GD_LUT_CHUNK 100

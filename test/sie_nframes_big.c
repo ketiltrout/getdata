@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -28,7 +28,7 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data.sie";
-  const char *format_data = "data RAW UINT8 8\n/ENCODING sie\n/ENDIAN big\n";
+  const char *format_data = "data RAW UINT8 1\n/ENCODING sie\n/ENDIAN big\n";
   const uint8_t data_data[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x12,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x22,
@@ -56,7 +56,7 @@ int main(void)
   gd_discard(D);
 
   CHECKI(error, 0);
-  CHECKI(n, 6);
+  CHECKI(n, 0x31);
 
   return r;
 }

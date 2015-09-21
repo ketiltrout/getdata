@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2014 D. V. Wiebe
+/* Copyright (C) 2011-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -162,15 +162,15 @@ off_t gd_tell(DIRFILE *D, const char *field_code) gd_nothrow
 off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
     off64_t offset, unsigned int mode)
 {
-  off64_t pos = 0;
+  off64_t pos;
   const int which = (mode & GD_FILE_TEMP) ? 1 : 0;
   const int oop_write = ((enc->flags & GD_EF_OOP) && (mode & GD_FILE_WRITE))
     ? 1 : 0;
 
   dtrace("%p, %p, %p, %lli, 0x%X", D, E, enc, (long long)offset, mode);
 
-  /* in this case we need to close and then re-open the file */
   if (oop_write) {
+    /* in this case we need to close and then re-open the file */
     if (offset < E->e->u.raw.file[which].pos) {
       if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP)) {
         dreturn("%i", -1);
@@ -188,10 +188,13 @@ off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
        * run out of data */
       char buffer[GD_BUFFER_SIZE];
       ssize_t n_read, n_wrote;
+      const off64_t chunk_size = GD_BUFFER_SIZE / GD_SIZE(E->EN(raw,data_type));
 
-      while (offset * GD_SIZE(E->EN(raw,data_type)) > GD_BUFFER_SIZE) {
+      off64_t remaining = offset - E->e->u.raw.file[which].pos;
+
+      while (remaining > chunk_size) {
         n_read = (*enc->read)(E->e->u.raw.file, buffer, E->EN(raw,data_type),
-            GD_BUFFER_SIZE);
+            chunk_size);
         if (n_read > 0) {
           n_wrote = (*enc->write)(E->e->u.raw.file + 1, buffer,
               E->EN(raw,data_type), n_read);
@@ -199,17 +202,16 @@ off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
             dreturn("%i", -1);
             return -1;
           }
-          offset -= n_wrote;
-          pos += n_wrote;
+          remaining -= n_wrote;
         } else if (n_read < 0) {
           dreturn("%i", -1);
           return -1;
         }
       }
 
-      if (offset > 0) {
+      if (remaining > 0) {
         n_read = (*enc->read)(E->e->u.raw.file, buffer, E->EN(raw,data_type),
-            offset);
+            remaining);
         if (n_read > 0) {
           n_wrote = (*enc->write)(E->e->u.raw.file + 1, buffer,
               E->EN(raw,data_type), n_read);
@@ -217,8 +219,7 @@ off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
             dreturn("%i", -1);
             return -1;
           }
-          offset -= n_wrote;
-          pos += n_wrote;
+          remaining -= n_wrote;
         } else if (n_read < 0) {
           dreturn("%i", -1);
           return -1;
@@ -227,8 +228,8 @@ off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
     }
   }
 
-  pos = (*enc->seek)(E->e->u.raw.file + which, pos + offset,
-      E->EN(raw,data_type), mode);
+  pos = (*enc->seek)(E->e->u.raw.file + which, offset, E->EN(raw,data_type),
+      mode);
 
   dreturn("%lli", (long long)pos);
   return pos;

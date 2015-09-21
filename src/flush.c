@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012, 2014 D. V. Wiebe
+/* Copyright (C) 2008-2012, 2014, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -264,7 +264,7 @@ static ssize_t _GD_StringEscapeise(FILE *stream, const char *in, int meta,
       if (stream) {
         if (fputs("\\x", stream) == EOF)
           goto WRITE_ERR;
-        if (fputc(HexDigit[*in >> 8], stream) == EOF)
+        if (fputc(HexDigit[*in >> 4], stream) == EOF)
           goto WRITE_ERR;
         if (fputc(HexDigit[*in & 0xF], stream) == EOF)
           goto WRITE_ERR;

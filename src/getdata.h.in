@@ -102,8 +102,6 @@ extern "C" {
 /* ICC complains that it ignores the __nonnull__ attribute */
 #ifdef __INTEL_COMPILER
 # define gd_nonnull(...) /**/
-#elif defined __nonnull
-# define gd_nonnull __nonnull
 #elif gd_gnu_enough
 # define gd_nonnull(...) __attribute__ ((__nonnull__ __VA_ARGS__))
 #else

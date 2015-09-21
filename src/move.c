@@ -26,7 +26,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
 {
   const struct encoding_t* enc_in;
   const struct encoding_t* enc_out;
-  const size_t ns = BUFFER_SIZE / E->e->u.raw.size;
+  const size_t ns = GD_BUFFER_SIZE / E->e->u.raw.size;
   ssize_t nread, nwrote;
   int subencoding = GD_ENC_UNKNOWN;
   int i, ef_swap;
@@ -196,7 +196,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
     return -1;
   }
 
-  if ((buffer = _GD_Malloc(D, BUFFER_SIZE)) == NULL) {
+  if ((buffer = _GD_Malloc(D, GD_BUFFER_SIZE)) == NULL) {
     free(new_filebase);
     dreturn("%i", -1);
     return -1;

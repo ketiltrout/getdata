@@ -1,4 +1,4 @@
-# Copyright (C) 2011 D. V. Wiebe
+# Copyright (C) 2011-2013, 2015 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -595,7 +595,7 @@ Returns data from the field specified by C<$FIELD_CODE> after converting them
 to the return type C<$RETURN_TYPE>, which should be one of the symbols listed
 under L</"Data Types"> above.  The first sample returned is C<$FIRST_SAMP>
 samples after the start of C<$FIRST_FRAME> and the amount of data returned is
-L<$NUM_FRAMES> frames plus L<$NUM_SAMP> samples.  If called in scalar context
+C<$NUM_FRAMES> frames plus C<$NUM_SAMP> samples.  If called in scalar context
 returns a string of packed data.  If called in array context, the data will be
 unpacked and returned as an array.  Complex data are returned as
 C<Math::Complex> objects.  See gd_getdata(3).
@@ -1220,7 +1220,7 @@ If C<$PREFIX> is omitted or undef, the prefix is removed.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2012 D. V. Wiebe
+Copyright (C) 2012-2015 D. V. Wiebe
 
 GetData is free software; you can redistribute it and/or modify it under the
 terms of the GNU Lesser General Public License as published by the Free Software

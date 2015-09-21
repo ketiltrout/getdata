@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013, 2015 D. V. Wiebe
+/* Copyright (C) 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,45 +18,62 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read little-endian SIE data */
 #include "test.h"
 
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data.sie";
-  const char *format_data = "data RAW UINT8 1\n/ENCODING sie\n/ENDIAN little\n";
-  const uint8_t data_data[] = {
-    0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12,
-    0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22,
-    0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x32
-  };
+  const char *data = "dirfile/data";
+  const char *format_data = "FRAMEOFFSET 2\ndata RAW UINT8 1\n";
+  unsigned char c1[5], c2[5];
+  unsigned char data_data[256];
+  int i, fd, n1, n2, e1, e2, r = 0;
   DIRFILE *D;
-  off_t n;
-  int fd, error, r = 0;
 
   rmdirfile();
-  mkdir(filedir, 0777); 
+  mkdir(filedir, 0777);
+
+  for (i = 0; i < 256; ++i)
+    data_data[i] = (unsigned char)i;
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
   fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 9 * 3 * sizeof(uint8_t));
+  write(fd, data_data, 256);
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  n = gd_nframes(D);
-  error = gd_error(D);
+  n1 = gd_getdata(D, "data", 0, 0, 5, 0, GD_UINT8, c1);
+  e1 = gd_error(D);
+  CHECKI(n1, 5);
+  CHECKI(e1, 0);
 
-  gd_discard(D);
+  for (i = 0; i < 5; ++i)
+    CHECKUi(i, c1[i], (i < 2) ? 0 : i - 2);
 
-  CHECKI(error, 0);
-  CHECKI(n, 0x31);
+  n2 = gd_getdata(D, "data", 0, 0, 5, 0, GD_UINT8, c2);
+  e2 = gd_error(D);
+  CHECKI(n2, 5);
+  CHECKI(e2, 0);
+
+  for (i = 0; i < 5; ++i)
+    CHECKUi(i, c2[i], (i < 2) ? 0 : i - 2);
+
+  gd_close(D);
+
+  unlink(data);
+  unlink(format);
+  rmdir(filedir);
 
   return r;
 }

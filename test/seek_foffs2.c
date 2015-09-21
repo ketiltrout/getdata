@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013, 2015 D. V. Wiebe
+/* Copyright (C) 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,45 +18,56 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read little-endian SIE data */
 #include "test.h"
 
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data.sie";
-  const char *format_data = "data RAW UINT8 1\n/ENCODING sie\n/ENDIAN little\n";
-  const uint8_t data_data[] = {
-    0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12,
-    0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22,
-    0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x32
-  };
+  const char *data = "dirfile/data";
+  const char *format_data = "FRAMEOFFSET 2\ndata RAW UINT8 1\n";
+  unsigned char c1[5], c2[5];
+  unsigned char data_data[256];
+  int i, fd, e, r = 0;
+  off_t t, s;
   DIRFILE *D;
-  off_t n;
-  int fd, error, r = 0;
 
   rmdirfile();
-  mkdir(filedir, 0777); 
+  mkdir(filedir, 0777);
+
+  memset(data_data, 0, 256);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
   fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 9 * 3 * sizeof(uint8_t));
+  write(fd, data_data, 256);
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  n = gd_nframes(D);
-  error = gd_error(D);
+
+  for (i = 0; i < 10; ++i) {
+    s = gd_seek(D, "data", i, 0, GD_SEEK_SET);
+    e = gd_error(D);
+    t = gd_tell(D, "data"); 
+    CHECKIi(i, s, i);
+    CHECKIi(i, e, GD_E_OK);
+    CHECKIi(i, t, i);
+  }
 
   gd_discard(D);
 
-  CHECKI(error, 0);
-  CHECKI(n, 0x31);
+  unlink(data);
+  unlink(format);
+  rmdir(filedir);
 
   return r;
 }

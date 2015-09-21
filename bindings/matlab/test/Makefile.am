@@ -1,4 +1,4 @@
-# Copyright (C) 2013 D. V. Wiebe
+# Copyright (C) 2013, 2015 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -21,7 +21,7 @@
 AUTOMAKE_OPTIONS = foreign serial-tests
 
 if TEST_MATLAB
-TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../../src/.libs:../.libs MATLABPATH=${srcdir}:..:${srcdir}/.. ${srcdir}/test.sh ${MATLAB}
+TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=../../../src/.libs:../.libs:${${DL_LIBRARY_PATH}} MATLABPATH=${srcdir}:..:${srcdir}/.. ${srcdir}/test.sh ${MATLAB}
 
 matlabTESTS=big_test.m
 

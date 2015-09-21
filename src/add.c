@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2014 D. V. Wiebe
+/* Copyright (C) 2008-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -212,7 +212,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   }
 
   /* check for duplicate field */
-  if (_GD_FindField(D, temp_buffer, D->entry, D->n_entries, 1, &u)) {
+  if (_GD_FindField(D, temp_buffer, D->entry, D->n_entries, 0, &u)) {
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, temp_buffer);
     free(temp_buffer);
     dreturn("%p", NULL);
@@ -231,6 +231,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   /* New entry */
   E = (gd_entry_t *)_GD_Malloc(D, sizeof(gd_entry_t));
   if (E == NULL) {
+    free(temp_buffer);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -2297,7 +2298,7 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
         NULL))
   {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, field_code);
-  } else if (_GD_FindField(D, munged_code, D->entry, D->n_entries, 1, &u))
+  } else if (_GD_FindField(D, munged_code, D->entry, D->n_entries, 0, &u))
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, munged_code);
   else
     _GD_CheckCodeAffixes(D, target, fragment_index, 1); /* check target */

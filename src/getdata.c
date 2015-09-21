@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2014 D. V. Wiebe
+ * Copyright (C) 2005-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -274,16 +274,27 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
   }
 
   if (zero_pad > 0) {
+    /* frame offset in samples */
+    const off64_t foffs = E->EN(raw,spf) *
+      D->fragment[E->fragment_index].frame_offset;
+
     zeroed_samples = _GD_FillZero(databuffer, E->EN(raw,data_type),
         (zero_pad > ns) ? ns : zero_pad);
     ns -= zeroed_samples;
-    E->e->u.raw.file[0].pos = s0 + zeroed_samples - E->EN(raw,spf) *
-      D->fragment[E->fragment_index].frame_offset;
+
+     /* Padding up to the end of the frameoffset, results in a "real" file
+      * position.  In this case we need to make sure the underlying file is
+      * actually at the BOF, for consistency.
+      */
+    if (s0 + (off64_t)zeroed_samples == foffs) /* ie. file->pos is zero */
+      _GD_Seek(D, E, foffs, GD_SEEK_SET);
+    else 
+      E->e->u.raw.file[0].pos = s0 + zeroed_samples - foffs;
     s0 = 0;
   }
 
   if (ns > 0) {
-    /** open the file (and cache the fp) if it hasn't been opened yet. */
+    /* open the file (and cache the fp) if it hasn't been opened yet. */
     if (_GD_InitRawIO(D, E, NULL, -1, NULL, GD_EF_SEEK | GD_EF_READ,
           GD_FILE_READ, _GD_FileSwapBytes(D, E)))
     {
@@ -1377,7 +1388,7 @@ static size_t _GD_DoBit(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   /* extract bits */
   if (is_signed) {
-    uint64_t sign = -1 << (E->EN(bit,numbits) - 1);
+    uint64_t sign = -1LL << (E->EN(bit,numbits) - 1);
     for (i = 0; i < n_read; i++)
       ((int64_t *)tmpbuf)[i] =
         (((((uint64_t *)tmpbuf)[i] >> E->EN(bit,bitnum)) & mask) + sign) ^ sign;

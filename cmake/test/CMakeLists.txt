@@ -6,7 +6,7 @@ add_definitions(-DGD_C89_API)
 
 set(tests_ignored
   bzip_get bzip_get_get bzip_move_from bzip_nframes bzip_put
-  gzip_add gzip_get gzip_get_get gzip_get_put gzip_move_from gzip_move_to gzip_nframes gzip_put gzip_put_get
+  gzip_add gzip_get gzip_get_get gzip_get_get2 gzip_get_put gzip_move_from gzip_move_to gzip_nframes gzip_put gzip_put_get 
   lzma_get lzma_nframes
   legacy_get legacy_get_put legacy_get_rofs legacy_nframes legacy_nonexistent legacy_put legacy_spf
   open_eaccess
