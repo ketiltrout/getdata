@@ -1,3 +1,9 @@
+2015-09-22   D. V. Wiebe <getdata@ketiltrout.net> svn:1000
+	* bindings/python/pydirfile.c bindings/python/pygetdata.c configure.ac: Make
+	NumPy support mandatory.
+
+	* src/common.c (_GD_GetRepr): Remove DSV 10 features.
+
 2015-09-22   D. V. Wiebe <getdata@ketiltrout.net> svn:999
 	* src/fragment.c (_GD_SubFragmentList): Removed (part of DSV 10).
 

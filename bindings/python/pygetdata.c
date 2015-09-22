@@ -283,7 +283,6 @@ gd_type_t gdpy_convert_from_pylist(PyObject *value, void *data, gd_type_t type,
 }
 
 /* generic utitily functions */
-#ifdef USE_NUMPY
 gd_type_t gdpy_type_from_npytype(int npytype)
 {
   gd_type_t type;
@@ -407,7 +406,6 @@ int gdpy_npytype_from_type(gd_type_t type)
   dreturn("%i", npytype);
   return npytype;
 }
-#endif
 
 PyObject *gdpy_convert_to_pylist(const void *data, gd_type_t type, size_t ns)
 {
@@ -614,11 +612,9 @@ PyMODINIT_FUNC initpygetdata(void)
   if (PyType_Ready(&gdpy_fragment) < 0)
     return;
 
-#ifdef USE_NUMPY
   /* The following macro will cause this function to return if importing numpy
    * fails */
   import_array()
-#endif
 
   mod = Py_InitModule3("pygetdata", GetDataMethods,
       "Bindings to the GetData library for Dirfile access\n\n"
@@ -693,13 +689,7 @@ PyMODINIT_FUNC initpygetdata(void)
     PyModule_AddIntConstant(mod, gdpy_constant_list[i].name,
         gdpy_constant_list[i].value);
 
-  PyModule_AddIntConstant(mod, "__numpy_supported__",
-#ifdef USE_NUMPY
-      1
-#else
-      0
-#endif
-      );
+  PyModule_AddIntConstant(mod, "__numpy_supported__", 1);
 
   /* add exceptions */
   GdPy_DirfileError = PyErr_NewException("pygetdata.DirfileError",

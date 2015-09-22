@@ -901,7 +901,7 @@ if test "x$make_pybindings" = "xyes"; then
   echo "*** Configuring python bindings"
   echo
   GD_PYTHON([2.3])
-  have_numpy="no"
+  have_numpy="no (required for python bindings)"
   if test "x$have_python" = "xno"; then
     make_pybindings="no"
   else
@@ -929,11 +929,8 @@ EOF
 #include<Python.h>
 ])
     CPPFLAGS=$saved_cppflags
-  fi
-
-  if test "x$have_numpy" = "xyes"; then
-    AC_DEFINE([USE_NUMPY], [],
-              [ Define to enable NumPy support in the Python bindings ])
+  else
+    make_pybindings=no
   fi
 fi
 
@@ -1206,7 +1203,4 @@ echo "  Unsupported encodings:        ${ENCODINGS_LEFT}"
 echo
 echo "  Bindings built:               ${BINDINGS_BUILT}"
 echo "  Bindings not built:           ${BINDINGS_LEFT}"
-if test "x$make_pybindings" != "xno"; then
-  echo "  NumPy support in Python:       ${have_numpy}"
-fi
 echo

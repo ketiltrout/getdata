@@ -36,11 +36,8 @@ srcdir = '@srcdir@'
 #include paths
 includes = [ libbuild_dir ]
 
-try:
-  import numpy
-  includes.append(numpy.get_include())
-except ImportError:
-  pass
+import numpy
+includes.append(numpy.get_include())
 
 sources = [ 'pydirfile.c', 'pyentry.c', 'pyfragment.c', 'pygetdata.c' ]
 

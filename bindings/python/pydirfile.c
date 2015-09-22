@@ -380,9 +380,7 @@ static PyObject *gdpy_dirfile_getcarray(struct gdpy_dirfile_t *self,
   int as_list = 0;
   gd_type_t return_type;
   PyObject *pyobj = NULL;
-#ifdef USE_NUMPY
   npy_intp dims[] = { 0 };
-#endif
 
   dtrace("%p, %p, %p", self, args, keys);
 
@@ -403,32 +401,25 @@ static PyObject *gdpy_dirfile_getcarray(struct gdpy_dirfile_t *self,
   }
 
   if (len == 0) {
-#ifdef USE_NUMPY
     if (!as_list)
       pyobj = PyArray_ZEROS(1, dims, NPY_INT, 0);
     else
-#endif
       pyobj = Py_BuildValue("[]");
   } else {
     void *data;
-#ifdef USE_NUMPY
     if (!as_list) {
       dims[0] = (npy_intp)len;
       pyobj = PyArray_SimpleNew(1, dims, gdpy_npytype_from_type(return_type));
       data = PyArray_DATA(pyobj);
     } else
-#endif
       data = malloc(len * GD_SIZE(return_type));
 
     gd_get_carray_slice(self->D, field_code, start, (size_t)len, return_type,
         data);
 
-#ifdef USE_NUMPY
     if (!as_list)
       PYGD_CHECK_ERROR(self->D, NULL);
-    else
-#endif
-    {
+    else {
       PYGD_CHECK_ERROR2(self->D, NULL, free(data));
       pyobj = gdpy_convert_to_pylist(data, return_type, len);
 
@@ -519,9 +510,7 @@ static PyObject *gdpy_dirfile_carrays(struct gdpy_dirfile_t *self,
   gd_type_t return_type;
   const gd_carray_t *carrays;
   PyObject *pyobj;
-#ifdef USE_NUMPY
   npy_intp dims[] = { 0 };
-#endif
 
   dtrace("%p, %p, %p", self, args, keys);
 
@@ -542,14 +531,12 @@ static PyObject *gdpy_dirfile_carrays(struct gdpy_dirfile_t *self,
 
   for (i = 0; carrays[i].n != 0; ++i) {
     PyObject *pydata;
-#ifdef USE_NUMPY
     if (!as_list) {
       dims[0] = (npy_intp)carrays[i].n;
       pydata = PyArray_SimpleNew(1, dims, gdpy_npytype_from_type(return_type));
       memcpy(PyArray_DATA(pydata), carrays[i].d, GD_SIZE(return_type) *
           carrays[i].n);
     } else
-#endif
       pydata = gdpy_convert_to_pylist(carrays[i].d, return_type, carrays[i].n);
 
     gdpylist_append(pyobj, Py_BuildValue("sN", fields[i], pydata));
@@ -612,9 +599,7 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
   gd_type_t return_type = GD_NULL;
   unsigned int spf = 1;
   PyObject *pyobj = NULL;
-#ifdef USE_NUMPY
   npy_intp dims[] = { 0 };
-#endif
 
   dtrace("%p, %p, %p", self, args, keys);
 
@@ -690,27 +675,22 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
   }
 
   if (num_samples == 0) {
-#ifdef USE_NUMPY
     if (!as_list)
       pyobj = PyArray_ZEROS(1, dims, gdpy_npytype_from_type(return_type), 0);
     else
-#endif
       pyobj = Py_BuildValue("[]");
   } else {
     void *data;
-#ifdef USE_NUMPY
     if (!as_list) {
       dims[0] = (npy_intp)num_samples;
       pyobj = PyArray_SimpleNew(1, dims, gdpy_npytype_from_type(return_type));
       data = PyArray_DATA(pyobj);
     } else
-#endif
       data = malloc(num_samples * GD_SIZE(return_type));
 
     ns = gd_getdata64(self->D, field_code, first_frame, first_sample, 0,
         (size_t)num_samples, return_type, data);
 
-#ifdef USE_NUMPY
     if (!as_list) {
       PYGD_CHECK_ERROR(self->D, NULL);
       /* resize, if necessary */
@@ -729,9 +709,7 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
         Py_DECREF(check); /* Despite the docs, PyArray_Resize returns an
                              INCREF'd Py_None on success */
       }
-    } else
-#endif
-    {
+    } else {
       PYGD_CHECK_ERROR2(self->D, NULL, free(data));
       pyobj = gdpy_convert_to_pylist(data, return_type, ns);
 
@@ -1140,9 +1118,7 @@ static PyObject *gdpy_dirfile_mcarrays(struct gdpy_dirfile_t *self,
   gd_type_t return_type;
   const gd_carray_t *carrays;
   PyObject *pyobj;
-#ifdef USE_NUMPY
   npy_intp dims[] = { 0 };
-#endif
 
   dtrace("%p, %p, %p", self, args, keys);
 
@@ -1164,14 +1140,12 @@ static PyObject *gdpy_dirfile_mcarrays(struct gdpy_dirfile_t *self,
 
   for (i = 0; carrays[i].n != 0; ++i) {
     PyObject *pydata;
-#ifdef USE_NUMPY
     if (!as_list) {
       dims[0] = (npy_intp)carrays[i].n;
       pydata = PyArray_SimpleNew(1, dims, gdpy_npytype_from_type(return_type));
       memcpy(PyArray_DATA(pydata), carrays[i].d, GD_SIZE(return_type) *
           carrays[i].n);
     } else
-#endif
       pydata = gdpy_convert_to_pylist(carrays[i].d, return_type, carrays[i].n);
 
     gdpylist_append(pyobj, Py_BuildValue("sN", fields[i], pydata));
@@ -1792,9 +1766,7 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
   unsigned int start = 0, len;
   gd_type_t type = GD_UNKNOWN;
   PyObject *pyobj;
-#ifdef USE_NUMPY
   int have_ndarray = 0;
-#endif
 
   dtrace("%p, %p, %p", self, args, keys);
 
@@ -1806,7 +1778,6 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
   }
 
   /* we only handle list or ndarray data */
-#ifdef USE_NUMPY
   if (PyArray_Check(pyobj)) {
     if (PyArray_NDIM(pyobj) != 1) {
       PyErr_SetString(PyExc_ValueError,
@@ -1816,16 +1787,11 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
     }
     have_ndarray = 1;
     len = PyArray_DIM(pyobj, 0);
-  } else
-#endif
-  {
+  } else {
     if (!PyList_Check(pyobj)) {
       PyErr_SetString(PyExc_TypeError,
-          "pygetdata.dirfile.put_carray() argument 2 must be list"
-#ifdef USE_NUMPY
-          " or NumPy array"
-#endif
-          ".");
+          "pygetdata.dirfile.put_carray() argument 2 must be list or NumPy "
+          "array.");
       dreturn("%p", NULL);
       return NULL;
     }
@@ -1836,7 +1802,6 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
   if (len > 0) {
     void *data;
 
-#ifdef USE_NUMPY
     if (have_ndarray) {
       type = gdpy_type_from_npytype(PyArray_TYPE(pyobj));
 
@@ -1862,9 +1827,7 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
       }
 
       data = PyArray_DATA(pyobj);
-    } else
-#endif
-    {
+    } else {
       data = malloc(len * 16);
       type = gdpy_convert_from_pylist(pyobj, data, type, len);
 
@@ -1879,12 +1842,9 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
 
     gd_put_carray_slice(self->D, field_code, start, len, type, data);
 
-#ifdef USE_NUMPY
     if (have_ndarray)
       PYGD_CHECK_ERROR(self->D, NULL);
-    else
-#endif
-    {
+    else {
       PYGD_CHECK_ERROR2(self->D, NULL, free(data));
 
       free(data);
@@ -1906,9 +1866,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
   gd_type_t type = GD_UNKNOWN;
   PyObject *pyobj;
   size_t ns;
-#ifdef USE_NUMPY
   int have_ndarray = 0;
-#endif
 
   dtrace("%p, %p, %p", self, args, keys);
 
@@ -1920,7 +1878,6 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
   }
 
   /* we only handle list or ndarray data */
-#ifdef USE_NUMPY
   if (PyArray_Check(pyobj)) {
     if (PyArray_NDIM(pyobj) != 1) {
       PyErr_SetString(PyExc_ValueError,
@@ -1930,16 +1887,11 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
     }
     have_ndarray = 1;
     ns = PyArray_DIM(pyobj, 0);
-  } else
-#endif
-  {
+  } else {
     if (!PyList_Check(pyobj)) {
       PyErr_SetString(PyExc_TypeError,
-          "pygetdata.dirfile.putdata() argument 2 must be list"
-#ifdef USE_NUMPY
-          " or NumPy array"
-#endif
-          ".");
+          "pygetdata.dirfile.putdata() argument 2 must be list or NumPy "
+          "array.");
       dreturn("%p", NULL);
       return NULL;
     }
@@ -1950,7 +1902,6 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
   if (ns > 0) {
     void *data;
 
-#ifdef USE_NUMPY
     if (have_ndarray) {
       type = gdpy_type_from_npytype(PyArray_TYPE(pyobj));
 
@@ -1976,9 +1927,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
       }
 
       data = PyArray_DATA(pyobj);
-    } else
-#endif
-    {
+    } else {
       data = malloc(ns * 16);
       type = gdpy_convert_from_pylist(pyobj, data, type, ns);
 
@@ -1994,12 +1943,9 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
     ns = gd_putdata64(self->D, field_code, first_frame, first_sample, 0, ns,
         type, data);
 
-#ifdef USE_NUMPY
     if (have_ndarray)
       PYGD_CHECK_ERROR(self->D, NULL);
-    else
-#endif
-    {
+    else {
       PYGD_CHECK_ERROR2(self->D, NULL, free(data));
 
       free(data);
