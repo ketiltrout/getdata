@@ -623,8 +623,6 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
-    case GD_INDIR_ENTRY:
-    case GD_SINDIR_ENTRY:
       j = _GD_AlterInField(D, 0, Q.in_fields, N->in_fields, E->in_fields,
           E->fragment_index, 0);
       if (j < 0)
@@ -960,30 +958,6 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         free(E->e->u.scalar.d);
       } else
         Qe.u.scalar.d = E->e->u.scalar.d;
-      break;
-    case GD_SARRAY_ENTRY:
-      if (N->EN(scalar,array_len) == 0) {
-        Q.EN(scalar,array_len) = E->EN(scalar,array_len);
-        Qe.u.scalar.d = E->e->u.scalar.d;
-      } else {
-        Q.EN(scalar,array_len) = N->EN(scalar,array_len);
-
-        if (Q.EN(scalar,array_len) != E->EN(scalar,array_len)) {
-          modified = 1;
-
-          Qe.u.scalar.d = _GD_Realloc(D, E->e->u.scalar.d,
-              sizeof(const char *) * Q.EN(scalar,array_len));
-          if (Qe.u.scalar.d == NULL)
-            break;
-
-          if (Q.EN(scalar,array_len) > E->EN(scalar,array_len)) {
-            size_t i;
-            for (i = E->EN(scalar,array_len); i < Q.EN(scalar,array_len); ++i)
-              ((const char**)Qe.u.scalar.d)[i] = _GD_Strdup(D, "");
-          }
-        } else
-          Qe.u.scalar.d = E->e->u.scalar.d;
-      }
       break;
     case GD_INDEX_ENTRY:
       /* INDEX may not be modified */
@@ -1416,18 +1390,6 @@ int gd_alter_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
   return _GD_AlterYoke(D, GD_MULTIPLY_ENTRY, field_code, in_field1, in_field2);
 }
 
-int gd_alter_indir(DIRFILE* D, const char* field_code, const char* in_field1,
-    const char* in_field2) gd_nothrow
-{
-  return _GD_AlterYoke(D, GD_INDIR_ENTRY, field_code, in_field1, in_field2);
-}
-
-int gd_alter_sindir(DIRFILE* D, const char* field_code, const char* in_field1,
-    const char* in_field2) gd_nothrow
-{
-  return _GD_AlterYoke(D, GD_SINDIR_ENTRY, field_code, in_field1, in_field2);
-}
-
 int gd_alter_phase(DIRFILE* D, const char* field_code, const char* in_field,
     gd_shift_t shift) gd_nothrow
 {
@@ -1495,30 +1457,6 @@ int gd_alter_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
   memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_CARRAY_ENTRY;
   N.EN(scalar,const_type) = const_type;
-  N.EN(scalar,array_len) = array_len;
-
-  ret = _GD_Change(D, field_code, &N, 0);
-
-  dreturn("%i", ret);
-  return ret;
-}
-
-int gd_alter_sarray(DIRFILE* D, const char* field_code, size_t array_len)
-  gd_nothrow
-{
-  int ret;
-  gd_entry_t N;
-
-  dtrace("%p, \"%s\", %" PRNsize_t, D, field_code, array_len);
-
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  memset(&N, 0, sizeof(gd_entry_t));
-  N.field_type = GD_SARRAY_ENTRY;
   N.EN(scalar,array_len) = array_len;
 
   ret = _GD_Change(D, field_code, &N, 0);

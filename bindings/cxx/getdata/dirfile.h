@@ -53,14 +53,11 @@
 #include <getdata/constentry.h>
 #include <getdata/carrayentry.h>
 #include <getdata/stringentry.h>
-#include <getdata/sarrayentry.h>
 #include <getdata/mplexentry.h>
 #include <getdata/multiplyentry.h>
 #include <getdata/divideentry.h>
 #include <getdata/recipentry.h>
 #include <getdata/windowentry.h>
-#include <getdata/indirentry.h>
-#include <getdata/sindirentry.h>
 
 namespace GetData {
   
@@ -83,11 +80,8 @@ namespace GetData {
     friend class PolynomEntry;
     friend class WindowEntry;
     friend class MplexEntry;
-    friend class IndirEntry;
-    friend class SindirEntry;
     friend class ConstEntry;
     friend class CarrayEntry;
-    friend class SarrayEntry;
     friend class StringEntry;
     friend class IndexEntry;
     friend class Fragment;
@@ -172,13 +166,6 @@ namespace GetData {
           gd_off64_t first_sample, size_t num_frames, size_t num_samples,
           DataType type, void* data_out) const;
 
-      size_t GetData(const char *field_code, gd_off64_t first_frame,
-          gd_off64_t first_sample, size_t num_frames, size_t num_samples,
-          const char** data_out) const;
-
-      int GetSarray(const char *field_code, const char**data_out,
-          unsigned int start = 0, size_t len = 0) const;
-
       size_t GetString(const char *field_code, size_t len, char *data_out)
         const;
 
@@ -217,8 +204,6 @@ namespace GetData {
       const char **MFieldListByType(const char *parent, EntryType type) const;
 
       void MplexLookback(int lookback) const;
-
-      const char*** MSarrays(const char *parent) const;
 
       const char **MStrings(const char *parent) const;
 
@@ -259,9 +244,6 @@ namespace GetData {
           gd_off64_t first_sample, size_t num_frames, size_t num_samples,
           DataType type, const void* data_in) const;
 
-      int PutSarray(const char *field_code, const char **data_in,
-          unsigned int start = 0, size_t len = 0) const;
-
       size_t PutString(const char *field_code, const char *data_in) const;
 
       int RawClose(const char *field_code = NULL) const;
@@ -271,8 +253,6 @@ namespace GetData {
       const char *ReferenceFilename();
 
       unsigned int SamplesPerFrame(const char *field_code) const;
-
-      const char*** Sarrays() const;
 
       gd_off64_t Seek(const char* field_code, gd_off64_t frame_num,
           gd_off64_t sample_num, int flags) const;

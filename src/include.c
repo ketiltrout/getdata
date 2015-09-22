@@ -59,67 +59,6 @@ static int _GD_SetFieldAffixes(DIRFILE *D, const struct parser_state *p, int me,
 
   /* now the prefix */
   if (prefix_in && prefix_in[0] != '\0') {
-    if (GD_PVERS_GE(*p, 10)) {
-      int i, root_space = 0;
-
-      /* try to find a namespace */
-      for (i = strlen(prefix_in); i > 0; --i)
-        if (prefix_in[i - 1] == '.')
-          break;
-
-      if (i > 0) { /* found a namespace */
-        if (prefix_in[0] == '.') { /* absolute -- ignore current p->ns */
-          root_space = 1;
-          prefix_in++;
-          i--;
-          if (i == 0) { /* revert to rootspace */
-            if (D->fragment[me].ns) {
-              *ns = _GD_Strdup(D, D->fragment[me].ns);
-              *nsl = D->fragment[me].nsl;
-            } else
-              *ns = _GD_Strdup(D, ""); /* NULL space */
-            goto NO_NS;
-          }
-        }
-
-        if (!root_space && p->ns)
-          *nsl = i + p->nsl;
-        else if (D->fragment[me].ns)
-          *nsl = i + D->fragment[me].nsl;
-        else 
-          *nsl = i - 1;
-
-        if ((*ns = _GD_Malloc(D, *nsl + 1)) == NULL) {
-          dreturn("%i", 1);
-          return 1;
-        }
-
-        if (!root_space && p->ns) {
-          strcpy(*ns, p->ns);
-          (*ns)[p->nsl] = '.';
-          strncpy(*ns + p->nsl + 1, prefix_in, i - 1);
-        } else if (D->fragment[me].ns) {
-          strcpy(*ns, D->fragment[me].ns);
-          (*ns)[D->fragment[me].nsl] = '.';
-          strncpy(*ns + D->fragment[me].nsl + 1, prefix_in, i - 1);
-        } else
-          strncpy(*ns, prefix_in, i - 1);
-        (*ns)[*nsl] = '\0';
-        prefix_in += i;
-
-        if (_GD_ValidateField(*ns, p->standards, p->pedantic, GD_VF_NS, NULL)) {
-          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, p->file, p->line,
-              *ns);
-          dreturn("%i", 1);
-          return 1;
-        }
-NO_NS:
-
-        if (prefix_in[0] == '\0')
-          goto NO_PREFIX;
-      }
-    }
-
     if (_GD_ValidateField(prefix_in, p->standards, p->pedantic, GD_VF_AFFIX,
           NULL))
     {
@@ -138,7 +77,6 @@ NO_NS:
         sprintf(*prefix, "%s%s", D->fragment[me].prefix, prefix_in);
     }
   } else {
-NO_PREFIX:
     if (D->fragment[me].prefix)
       *prefix = _GD_Strdup(D, D->fragment[me].prefix);
   }
@@ -148,7 +86,7 @@ NO_PREFIX:
     return 1;
   }
 
-  dreturn("%i [\"%s\"/%" PRNsize_t ", \"%s\", \"%s\"]", 0, *ns, *nsl, *prefix,
+  dreturn("%i (\"%s\"/%" PRNsize_t ", \"%s\", \"%s\")", 0, *ns, *nsl, *prefix,
       *suffix);
   return 0;
 }

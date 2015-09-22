@@ -49,17 +49,13 @@ try
   'window WINDOW linterp mult LT 4.1\n'...
   '/ALIAS alias data\n'...
   'string STRING "Zaphod Beeblebrox"\n'...
-  'sarray SARRAY one two three four five six seven\n'...
-  'data/msarray SARRAY eight nine ten eleven twelve\n'...
-  'indir INDIR data carray\n'...
-  'sindir SINDIR data sarray\n'...
   ];
   form2_data = 'const2 CONST INT8 -19\n';
 
   fields = {'INDEX'; 'alias'; 'bit'; 'carray'; 'const'; 'data'; 'div'; ...
-  'indir'; 'lincom'; 'linterp'; 'mplex'; 'mult'; 'phase'; 'polynom'; 'recip';...
-  'sarray'; 'sbit'; 'sindir'; 'string'; 'window'};
-  nfields = 20;
+  'lincom'; 'linterp'; 'mplex'; 'mult'; 'phase'; 'polynom'; 'recip'; ...
+  'sbit'; 'string'; 'window'};
+  nfields = 17;
 
   % Create the dirfile
   mkdir(filedir);
@@ -140,7 +136,7 @@ try
   % 26: gd_nmfields check
   try
     d = gd_nmfields(D, 'data');
-    ne = ne + check_num(26, d, 5);
+    ne = ne + check_num(26, d, 4);
   catch exc
     ne = ne + check_ok(exc, 26);
   end
@@ -149,7 +145,7 @@ try
   try
     d = gd_mfield_list(D, 'data');
     ne = ne + check_sarray(27, d, ...
-    { 'mstr'; 'mconst'; 'mcarray'; 'mlut'; 'msarray' });
+    { 'mstr'; 'mconst'; 'mcarray'; 'mlut'; });
   catch exc
     ne = ne + check_ok(exc, 27);
   end
@@ -569,7 +565,7 @@ try
   % 69: nfields_by_type
   try
     d = gd_nvectors(D);
-    ne = ne + check_num(69, d, 24);
+    ne = ne + check_num(69, d, 22);
   catch exc
     ne = ne + check_ok(exc, 69);
   end
@@ -578,9 +574,9 @@ try
   try
     d = gd_vector_list(D);
     ne = ne + check_sarray(70, d, ...
-    {'INDEX'; 'alias'; 'bit'; 'data'; 'div'; 'indir'; 'lincom'; 'linterp'; ...
+    {'INDEX'; 'alias'; 'bit'; 'data'; 'div'; 'lincom'; 'linterp'; ...
     'mplex'; 'mult'; 'new1'; 'new10'; 'new2'; 'new5'; 'new6'; 'new7'; ...
-    'new8'; 'new9'; 'phase'; 'polynom'; 'recip'; 'sbit'; 'sindir'; 'window'});
+    'new8'; 'new9'; 'phase'; 'polynom'; 'recip'; 'sbit'; 'window'});
   catch exc
     ne = ne + check_ok(exc, 70);
   end
@@ -1949,7 +1945,7 @@ try
   try
     d = gd_nentries(D, 'data', GD.SCALAR_ENTRIES, ...
     GD.ENTRIES_HIDDEN + GD.ENTRIES_NOALIAS);
-    ne = ne + check_num(237, d, 7);
+    ne = ne + check_num(237, d, 6);
   catch exc
     ne = ne + check_ok(exc, 237);
   end
@@ -1958,7 +1954,7 @@ try
   try
     d = gd_entry_list(D, 'data', GD.SCALAR_ENTRIES, ...
     GD.ENTRIES_HIDDEN + GD.ENTRIES_NOALIAS);
-    ne = ne + check_sarray(239, d, {'mstr', 'mconst', 'mcarray', 'msarray', ...
+    ne = ne + check_sarray(239, d, {'mstr', 'mconst', 'mcarray', ...
     'mnew11', 'mnew12', 'mnew17'});
   catch exc
     ne = ne + check_ok(exc, 239);
@@ -1993,296 +1989,18 @@ try
   d = gd_encoding_support(GD.SIE_ENCODED);
   ne = ne + check_num(271, d, GD.RDWR);
 
-  % 274: gd_entry (SARRAY)
-  try
-    d = gd_entry(D, 'sarray');
-    ne = ne + check_string2(274, 1, d.field, 'sarray');
-    ne = ne + check_num2(274, 2, d.field_type, GD.SARRAY_ENTRY);
-    ne = ne + check_num2(274, 3, d.fragment_index, 0);
-    ne = ne + check_num2(274, 4, d.array_len, 7);
-  catch exc
-    ne = ne + check_ok(exc, 274);
-  end
-
-  % 275: get_sarray
-  try
-    d = gd_get_sarray(D, 'sarray');
-    ne = ne + check_sarray(275, d, {'one'; 'two'; 'three'; 'four'; 'five'; ...
-    'six'; 'seven'});
-  catch exc
-    ne = ne + check_ok(exc, 275);
-  end
-
-  % 276: gd_sarray_slice
-  try
-    d = gd_get_sarray_slice(D, 'sarray', 2, 2);
-    ne = ne + check_sarray(276, d, {'three'; 'four'});
-  catch exc
-    ne = ne + check_ok(exc, 276);
-  end
-
-  % 277: gd_sarrays
-  try
-    d = gd_sarrays(D);
-    ne = ne + check_num(277, length(d), 1);
-    ne = ne + check_sarray(277, d{1}, {'one'; 'two'; 'three'; 'four'; ...
-    'five'; 'six'; 'seven'});
-  catch exc
-    ne = ne + check_ok(exc, 277);
-  end
-
-  % 278: gd_put_sarray
-  try
-    gd_put_sarray(D, 'sarray', ...
-    {'eka'; 'dvi'; 'tri'; 'catur'; 'panca'; 'sas'; 'sapta'});
-  catch exc
-    ne = ne + check_ok2(exc, 278, 0);
-  end
-
-  try
-    d = gd_get_sarray(D, 'sarray');
-    ne = ne + check_sarray(278, d, ...
-    {'eka'; 'dvi'; 'tri'; 'catur'; 'panca'; 'sas'; 'sapta'});
-  catch exc
-    ne = ne + check_ok2(exc, 278, 1);
-  end
-
-  % 279: gd_put_sarray
-  try
-    gd_put_sarray_slice(D, 'sarray', 2, {'asta'; 'nava'});
-  catch exc
-    ne = ne + check_ok2(exc, 279, 0);
-  end
-
-  try
-    d = gd_get_sarray(D, 'sarray');
-    ne = ne + check_sarray(279, d, ...
-    {'eka'; 'dvi'; 'asta'; 'nava'; 'panca'; 'sas'; 'sapta'});
-  catch exc
-    ne = ne + check_ok2(exc, 279, 1);
-  end
-
-  % 280: add_sarray
-  try
-    gd_add_sarray(D, 'new280', {'eins'; 'zwei'; 'drei'}, 0);
-  catch exc
-    ne = ne + check_ok2(exc, 280, 1);
-  end
-
-  try
-    d = gd_entry(D, 'new280');
-    ne = ne + check_string2(280, 1, d.field, 'new280');
-    ne = ne + check_num2(280, 2, d.field_type, GD.SARRAY_ENTRY);
-    ne = ne + check_num2(280, 3, d.fragment_index, 0);
-    ne = ne + check_num2(280, 4, d.array_len, 3);
-  catch exc
-    ne = ne + check_ok2(exc, 280, 2);
-  end
-
-  try
-    d = gd_get_sarray(D, 'new280');
-    ne = ne + check_sarray(280, d, {'eins'; 'zwei'; 'drei'});
-  catch exc
-    ne = ne + check_ok2(exc, 280, 3);
-  end
-
-  % 282: madd_sarray
-  try
-    gd_madd_sarray(D, 'data', 'mnew282', {'un'; 'deux'; 'trois'});
-  catch exc
-    ne = ne + check_ok2(exc, 282, 1);
-  end
-
-  try
-    d = gd_entry(D, 'data/mnew282');
-    ne = ne + check_string2(282, 1, d.field, 'data/mnew282');
-    ne = ne + check_num2(282, 2, d.field_type, GD.SARRAY_ENTRY);
-    ne = ne + check_num2(282, 3, d.fragment_index, 0);
-    ne = ne + check_num2(282, 4, d.array_len, 3);
-  catch exc
-    ne = ne + check_ok2(exc, 282, 2);
-  end
-
-  try
-    d = gd_get_sarray(D, 'data/mnew282');
-    ne = ne + check_sarray(282, d, {'un'; 'deux'; 'trois'});
-  catch exc
-    ne = ne + check_ok2(exc, 282, 3);
-  end
-
-  % 283: alter_sarray
-  try
-    gd_alter_sarray(D, 'new280', 2);
-  catch exc
-    ne = ne + check_ok2(exc, 283, 1);
-  end
-
-  try
-    d = gd_entry(D, 'new280');
-    ne = ne + check_string2(283, 1, d.field, 'new280');
-    ne = ne + check_num2(283, 2, d.field_type, GD.SARRAY_ENTRY);
-    ne = ne + check_num2(283, 3, d.fragment_index, 0);
-    ne = ne + check_num2(283, 4, d.array_len, 2);
-  catch exc
-    ne = ne + check_ok2(exc, 283, 2);
-  end
-
-  % 284: gd_msarrays
-  try
-    d = gd_msarrays(D, 'data');
-    ne = ne + check_num(284, length(d), 2);
-    ne = ne + check_sarray2(284, 1, d{1}, ...
-    {'eight'; 'nine'; 'ten'; 'eleven'; 'twelve'});
-    ne = ne + check_sarray2(284, 2, d{2}, {'un'; 'deux'; 'trois'});
-  catch exc
-    ne = ne + check_ok(exc, 284);
-  end
-
-  % 285: entry (INDIR) check
-  try
-    d = gd_entry(D, 'indir');
-    ne = ne + check_string2(285, 1, d.field, 'indir');
-    ne = ne + check_num2(285, 2, d.field_type, GD.INDIR_ENTRY);
-    ne = ne + check_num2(285, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(285, 4, d.in_fields, { 'data'; 'carray'; });
-  catch exc
-    ne = ne + check_ok(exc, 285);
-  end
-
-  % 286: add entry (INDIR) check
-  try
-    gd_add_indir(D, 'new286', 'in1', 'in2', 0);
-  catch exc
-    ne = ne + check_ok2(exc, 286, 1);
-  end
-
-  try
-    d = gd_entry(D, 'new286');
-    ne = ne + check_string2(286, 1, d.field, 'new286');
-    ne = ne + check_num2(286, 2, d.field_type, GD.INDIR_ENTRY);
-    ne = ne + check_num2(286, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(286, 4, d.in_fields, { 'in1'; 'in2'; });
-  catch exc
-    ne = ne + check_ok2(exc, 286, 2);
-  end
-
-  % 288: madd entry (INDIR) check
-  try
-    gd_madd_indir(D, 'data', 'mnew288', 'in1', 'in2');
-  catch exc
-    ne = ne + check_ok2(exc, 288, 1);
-  end
-
-  try
-    d = gd_entry(D, 'data/mnew288');
-    ne = ne + check_string2(288, 1, d.field, 'data/mnew288');
-    ne = ne + check_num2(288, 2, d.field_type, GD.INDIR_ENTRY);
-    ne = ne + check_num2(288, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(288, 4, d.in_fields, { 'in1'; 'in2'; });
-  catch exc
-    ne = ne + check_ok2(exc, 288, 2);
-  end
-
-  % 289: gd_alter_indir
-  try
-    gd_alter_indir(D, 'new286', 0, 'in6');
-  catch exc
-    ne = ne + check_ok2(exc, 289, 1);
-  end
-
-  try
-    d = gd_entry(D, 'new286');
-    ne = ne + check_string2(289, 1, d.field, 'new286');
-    ne = ne + check_num2(289, 2, d.field_type, GD.INDIR_ENTRY);
-    ne = ne + check_num2(289, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(289, 4, d.in_fields, { 'in1'; 'in6'; });
-  catch exc
-    ne = ne + check_ok2(exc, 289, 2);
-  end
-
-  % 290: entry (SINDIR) check
-  try
-    d = gd_entry(D, 'sindir');
-    ne = ne + check_string2(290, 1, d.field, 'sindir');
-    ne = ne + check_num2(290, 2, d.field_type, GD.SINDIR_ENTRY);
-    ne = ne + check_num2(290, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(290, 4, d.in_fields, { 'data'; 'sarray'; });
-  catch exc
-    ne = ne + check_ok(exc, 290);
-  end
-
-  % 291: add entry (SINDIR) check
-  try
-    gd_add_sindir(D, 'new291', 'in1', 'in2', 0);
-  catch exc
-    ne = ne + check_ok2(exc, 291, 1);
-  end
-
-  try
-    d = gd_entry(D, 'new291');
-    ne = ne + check_string2(291, 1, d.field, 'new291');
-    ne = ne + check_num2(291, 2, d.field_type, GD.SINDIR_ENTRY);
-    ne = ne + check_num2(291, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(291, 4, d.in_fields, { 'in1'; 'in2'; });
-  catch exc
-    ne = ne + check_ok2(exc, 291, 2);
-  end
-
-  % 293: madd entry (SINDIR) check
-  try
-    gd_madd_sindir(D, 'data', 'mnew293', 'in1', 'in2');
-  catch exc
-    ne = ne + check_ok2(exc, 293, 1);
-  end
-
-  try
-    d = gd_entry(D, 'data/mnew293');
-    ne = ne + check_string2(293, 1, d.field, 'data/mnew293');
-    ne = ne + check_num2(293, 2, d.field_type, GD.SINDIR_ENTRY);
-    ne = ne + check_num2(293, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(293, 4, d.in_fields, { 'in1'; 'in2'; });
-  catch exc
-    ne = ne + check_ok2(exc, 293, 2);
-  end
-
-  % 294: gd_alter_sindir
-  try
-    gd_alter_sindir(D, 'new291', 0, 'in6');
-  catch exc
-    ne = ne + check_ok2(exc, 294, 1);
-  end
-
-  try
-    d = gd_entry(D, 'new291');
-    ne = ne + check_string2(294, 1, d.field, 'new291');
-    ne = ne + check_num2(294, 2, d.field_type, GD.SINDIR_ENTRY);
-    ne = ne + check_num2(294, 3, d.fragment_index, 0);
-    ne = ne + check_sarray2(294, 4, d.in_fields, { 'in1'; 'in6'; });
-  catch exc
-    ne = ne + check_ok2(exc, 294, 2);
-  end
-
-  % 295: gd_getdata (SINDIR)
-  try
-    d = gd_getdata(D, 'sindir', 0, 0, 1, 0);
-    ne = ne + check_sarray(295, d, ...
-    {'eka'; 'eka'; 'eka'; 'eka'; 'eka'; 'eka'; 'eka'; 'eka';});
-  catch exc
-    ne = ne + check_ok(exc, 295);
-  end
-
-  % 299: NULL return from gd_reference
+  % 272: NULL return from gd_reference
   try
     d = gd_open('dirfile/empty', GD.RDWR + GD.CREAT + GD.EXCL);
   catch exc
-    ne = ne + check_ok2(exc, 299, 1);
+    ne = ne + check_ok2(exc, 272, 1);
   end
 
   try
     d = gd_reference(d);
-    ne = ne + check_string(299, d, '');
+    ne = ne + check_string(272, d, '');
   catch exc
-    ne = ne + check_ok2(exc, 299, 1);
+    ne = ne + check_ok2(exc, 272, 1);
   end
 
 

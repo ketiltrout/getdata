@@ -55,8 +55,6 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
-    case GD_INDIR_ENTRY:
-    case GD_SINDIR_ENTRY:
       free(entry->in_fields[1]);
       free(entry->in_fields[0]);
       break;
@@ -79,13 +77,6 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
     case GD_STRING_ENTRY:
       if (priv)
         free(entry->e->u.string);
-      break;
-    case GD_SARRAY_ENTRY:
-      if (priv) {
-        for (n = 0; n < entry->EN(scalar,array_len); ++n)
-          free(((char **)entry->e->u.scalar.d)[n]);
-        free(entry->e->u.scalar.d);
-      }
       break;
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
@@ -132,12 +123,6 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
       for (i = 0; entry->e->carray_value_list[i].n != 0; ++i)
         free(entry->e->carray_value_list[i].d);
       free(entry->e->carray_value_list);
-    }
-
-    if (entry->e->sarray_value_list) {
-      for (i = 0; entry->e->sarray_value_list[i] != NULL; ++i)
-        free(entry->e->sarray_value_list[i]);
-      free(entry->e->sarray_value_list);
     }
 
     if (entry->e->n_meta > -1)
@@ -322,9 +307,6 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
     case GD_STRING_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
-    case GD_SARRAY_ENTRY:
-    case GD_INDIR_ENTRY:
-    case GD_SINDIR_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_ALIAS_ENTRY:
       break;
@@ -455,8 +437,6 @@ int gd_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry) gd_nothrow
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
-    case GD_INDIR_ENTRY:
-    case GD_SINDIR_ENTRY:
       entry->in_fields[0] = strdup(E->in_fields[0]);
       entry->in_fields[1] = strdup(E->in_fields[1]);
       break;
@@ -495,7 +475,6 @@ int gd_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry) gd_nothrow
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
-    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_NO_ENTRY:
     case GD_ALIAS_ENTRY:
@@ -818,14 +797,6 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
       for (i = 0; i < E->EN(lincom,n_fields); ++i)
         _GD_BadInput(D, E, i, GD_NO_ENTRY, 1);
       break;
-    case GD_INDIR_ENTRY:
-      _GD_BadInput(D, E, 0, GD_NO_ENTRY, 1);
-      _GD_BadInput(D, E, 0, GD_CARRAY_ENTRY, 1);
-      break;
-    case GD_SINDIR_ENTRY:
-      _GD_BadInput(D, E, 0, GD_NO_ENTRY, 1);
-      _GD_BadInput(D, E, 0, GD_SARRAY_ENTRY, 1);
-      break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
     case GD_WINDOW_ENTRY:
@@ -843,7 +814,6 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
     case GD_RAW_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
-    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:

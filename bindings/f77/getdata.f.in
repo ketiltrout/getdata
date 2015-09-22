@@ -47,8 +47,6 @@ C     Corresponding to gd_add_crecip(3)
       EXTERNAL GDADCR
 C     Corresponding to gd_add_divide(3)
       EXTERNAL GDADDV
-C     Corresponding to gd_add_indir(3)
-      EXTERNAL GDADID
 C     Corresponding to gd_add_lincom(3)
       EXTERNAL GDADLC
 C     Corresponding to gd_add_linterp(3)
@@ -65,12 +63,8 @@ C     Corresponding to gd_add_recip(3)
       EXTERNAL GDADRC
 C     Corresponding to gd_add_raw(3)
       EXTERNAL GDADRW
-C     Corresponding to gd_add_sarray(3)
-      EXTERNAL GDADSA
 C     Corresponding to gd_add_sbit(3)
       EXTERNAL GDADSB
-C     Corresponding to gd_add_sindir(3)
-      EXTERNAL GDADSD
 C     Corresponding to gd_add_spec(3)
       EXTERNAL GDADSP
 C     Corresponding to gd_add_string(3)
@@ -97,8 +91,6 @@ C     Correpsonding to gd_alter_crecip(3)
       EXTERNAL GDALCR
 C     Correpsonding to gd_alter_divide(3)
       EXTERNAL GDALDV
-C     Correpsonding to gd_alter_indir(3)
-      EXTERNAL GDALID
 C     Correpsonding to gd_alter_lincom(3)
       EXTERNAL GDALLC
 C     Correpsonding to gd_alter_linterp(3)
@@ -115,12 +107,8 @@ C     Correpsonding to gd_alter_recip(3)
       EXTERNAL GDALRC
 C     Correpsonding to gd_alter_raw(3)
       EXTERNAL GDALRW
-C     Correpsonding to gd_alter_sarray(3)
-      EXTERNAL GDALSA
 C     Correpsonding to gd_alter_sbit(3)
       EXTERNAL GDALSB
-C     Correpsonding to gd_alter_sindir(3)
-      EXTERNAL GDALSD
 C     Correpsonding to gd_alter_spec(3)
       EXTERNAL GDALSP
 C     Correpsonding to gd_aliases(3)
@@ -233,8 +221,6 @@ C     Corresponding to gd_entry(3) for complex-valued POLYNOM fields
       EXTERNAL GDGECP
 C     Corresponding to gd_entry(3) for complex-valued RECIP fields
       EXTERNAL GDGECR
-C     Corresponding to gd_entry(3) for INDIR fields
-      EXTERNAL GDGEID
 C     Corresponding to gd_entry(3) for LINCOM fields
       EXTERNAL GDGELC
 C     Corresponding to gd_entry(3) for LINTERP fields
@@ -255,12 +241,8 @@ C     Corresponding to gd_entry(3) for RECIP fields
       EXTERNAL GDGERC
 C     Corresponding to gd_entry(3) for RAW fields
       EXTERNAL GDGERW
-C     Corresponding to gd_entry(3) for SARRAY fields
-      EXTERNAL GDGESA
 C     Corresponding to gd_entry(3) for SBIT fields
       EXTERNAL GDGESB
-C     Corresponding to gd_entry(3) for SINDIR fields
-      EXTERNAL GDGESD
 C     Corresponding to gd_getdata(3)
       EXTERNAL GDGETD
 C     Corresponding to gd_entry(3) for WINDOW fields
@@ -273,17 +255,10 @@ C     Retrieve a scalar parameter
       EXTERNAL GDGSCA
 C     Corresponding to gd_spf(3)
       EXTERNAL GDGSPF
-C     Gets one sample of a SINDIR via gd_getstrdata(3)
-      EXTERNAL GDGSTD
-C     Gets a packed array of SINDIR data via gd_getstrdata(3)
-C     see also GDXSTP and GDDSTP and the GDPKSZ parameter above
-      EXTERNAL GDGSTP
 C     Corresponding to gd_get_carray(3)
       EXTERNAL GDGTCA
 C     Corresponding to gd_get_constant(3)
       EXTERNAL GDGTCO
-C     Gets a single SARRAY element via gd_get_sarray_slice(3)
-      EXTERNAL GDGTSA
 C     Corresponding to gd_get_string(3)
       EXTERNAL GDGTST
 C     Corresponding to gd_hide(3)
@@ -340,8 +315,6 @@ C     Corresponding to gd_madd_crecip(3)
       EXTERNAL GDMDCR
 C     Corresponding to gd_madd_divide(3)
       EXTERNAL GDMDDV
-C     Corresponding to gd_madd_indir(3)
-      EXTERNAL GDMDID
 C     Corresponding to gd_madd_lincom(3)
       EXTERNAL GDMDLC
 C     Corresponding to gd_madd_linterp(3)
@@ -356,12 +329,8 @@ C     Corresponding to gd_madd_polynom(3)
       EXTERNAL GDMDPN
 C     Corresponding to gd_madd_recip(3)
       EXTERNAL GDMDRC
-C     Corresponding to gd_madd_sarray(3)
-      EXTERNAL GDMDSA
 C     Corresponding to gd_madd_sbit(3)
       EXTERNAL GDMDSB
-C     Corresponding to gd_madd_sindir(3)
-      EXTERNAL GDMDSD
 C     Corresponding to gd_madd_spec(3)
       EXTERNAL GDMDSP
 C     Corresponding to gd_madd_string(3)
@@ -380,8 +349,6 @@ C     Correpsonding to gd_malter_spec(3)
       EXTERNAL GDMLSP
 C     Correpsonding to gd_move(3)
       EXTERNAL GDMOVE
-C     Returns the maximum meta sarray value length
-      EXTERNAL GDMSAX
 C     Corresponding to gd_mstrings(3) (sort of)
       EXTERNAL GDMSTS
 C     Returns the maximum length of the longest string metafield for a
@@ -427,8 +394,6 @@ C     Corresponding to gd_put_carray(3)
       EXTERNAL GDPTCA
 C     Corresponding to gd_put_constant(3)
       EXTERNAL GDPTCO
-C     Puts a single SARRAY element via gd_put_sarray_slice(3)
-      EXTERNAL GDPTSA
 C     Corresponding to gd_put_string(3)
       EXTERNAL GDPTST
 C     Corresponding to gd_putdata(3)
@@ -443,8 +408,6 @@ C     Corresponding to gd_rewrite_fragment(3)
       EXTERNAL GDRFRG
 C     Corresponding to gd_raw_filename(3)
       EXTERNAL GDRWFN
-C     Returns the maximum sarray value length
-      EXTERNAL GDSARX
 C     Corresponding to gd_seek(3)
       EXTERNAL GDSEEK
 C     Corresponding to gd_dirfile_standards(3)
@@ -469,5 +432,3 @@ C     Corresponding to gd_vector_list(3) (sort of)
       EXTERNAL GDVECN
 C     Corresponding to gd_validate(3)
       EXTERNAL GDVLDT
-C     Extracts one sample from the data returned by GDGSTP
-      EXTERNAL GDXSTP

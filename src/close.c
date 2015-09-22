@@ -59,12 +59,6 @@ static void _GD_FreeD(DIRFILE *D, int keep_dirfile)
       free(D->carray_value_list[i].d);
     free(D->carray_value_list);
   }
-
-  if (D->sarray_value_list) {
-    for (i = 0; D->sarray_value_list[i] != NULL; ++i)
-      free(D->sarray_value_list[i]);
-    free(D->sarray_value_list);
-  }
   
   free(D->fragment);
   free(D->name);

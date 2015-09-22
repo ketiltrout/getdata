@@ -146,8 +146,7 @@ size_t gd_array_len(DIRFILE *D, const char *field_code_in) gd_nothrow
     return 0;
   }
 
-  if (entry->field_type == GD_CARRAY_ENTRY ||
-      entry->field_type == GD_SARRAY_ENTRY)
+  if (entry->field_type == GD_CARRAY_ENTRY)
   {
     len = entry->EN(scalar,array_len);
   } else if (entry->field_type == GD_CONST_ENTRY ||

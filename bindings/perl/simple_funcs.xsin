@@ -153,16 +153,3 @@ unsigned long int flags(DIRFILE *dirfile, unsigned long int set=0,
 int verbose_prefix(DIRFILE *dirfile, gdp_char *prefix=NULL)
 void mplex_lookback(DIRFILE *dirfile, int lookback)
 char *linterp_tablename(DIRFILE *dirfile, const char *field_code)
-int alter_sarray(DIRFILE* dirfile, const char* field_code, size_t array_len)
-int add_indir(DIRFILE *dirfile, const char *field_code, const char *in_field1,
-    const char *in_field2, int fragment_index=0)
-int add_sindir(DIRFILE *dirfile, const char *field_code, const char *in_field1,
-    const char *in_field2, int fragment_index=0)
-int alter_indir(DIRFILE *dirfile, const char *field_code,
-    gdp_char *in_field1=NULL, gdp_char *in_field2=NULL)
-int alter_sindir(DIRFILE *dirfile, const char *field_code,
-    gdp_char *in_field1=NULL, gdp_char *in_field2=NULL)
-int madd_indir(DIRFILE *dirfile, const char *parent, const char *field_code,
-    const char *in_field1, const char *in_field2)
-int madd_sindir(DIRFILE *dirfile, const char *parent, const char *field_code,
-    const char *in_field1, const char *in_field2)

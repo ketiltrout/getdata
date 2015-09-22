@@ -34,7 +34,7 @@ int main(void)
   const char *format = "dirfile/format";
   int error, r = 0;
   DIRFILE *D;
-  gd_entry_t E, e;
+  gd_entry_t E;
 
   rmdirfile();
   memset(&E, 0, sizeof(E));
@@ -44,7 +44,7 @@ int main(void)
   E.EN(phase,shift) = 0;
   E.scalar[0] = NULL;
 
-  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT);
   gd_dirfile_standards(D, 6);
   gd_add(D, &E);
   error = gd_error(D);

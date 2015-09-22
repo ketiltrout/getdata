@@ -215,8 +215,6 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
     case GD_SBIT_ENTRY:
     case GD_POLYNOM_ENTRY:
     case GD_RECIP_ENTRY:
-    case GD_INDIR_ENTRY:
-    case GD_SINDIR_ENTRY:
       if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
         break;
 
@@ -334,7 +332,6 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
       break;
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
-    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
       if (parent)
         _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_FORMAT, parent, 0, E->field);
@@ -422,8 +419,6 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
     case GD_LINTERP_ENTRY:
     case GD_POLYNOM_ENTRY:
     case GD_RECIP_ENTRY:
-    case GD_INDIR_ENTRY:
-    case GD_SINDIR_ENTRY:
       if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
         break;
 
@@ -525,7 +520,6 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
       break;
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
-    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
       if (parent)
         _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_FORMAT, parent, 0, E->field);

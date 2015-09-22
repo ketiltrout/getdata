@@ -1,3 +1,101 @@
+2015-09-21   D. V. Wiebe <getdata@ketiltrout.net> svn:997
+	* src/add.c (_GD_InvalidEntype _GD_Add) src/close.c (_GD_FreeD)
+	src/constant.c (gd_array_len) src/del.c (_GD_ClearDerived _GD_DeReference)
+	src/entry.c (_GD_FreeE _GD_CalculateEntry gd_entry gd_validate)
+	src/field_list.c (_GD_EntryIndex) src/flimits.c (_GD_GetEOF _GD_GetBOF)
+	src/flush.c (_GD_Flush _GD_FieldSpec _GD_FindVersion) src/fpos.c
+	(_GD_GetFilePos _GD_Seek) src/getdata.c (_GD_DoField gd_getdata64)
+	src/getdata.h.in src/internal.h src/mod.c (_GD_Change) src/name.c
+	(_GD_UpdateInputs) src/native.c (_GD_NativeType) src/parse.c
+	(_GD_ParseArray _GD_ParseFieldSpec _GD_ParseDirective) src/putdata.c
+	(_GD_DoFieldOut) src/spf.c (_GD_GetSPF) src/include.c (_GD_SetFieldAffixes):
+	Remove DSV 10 features.
+
+	* src/add.c (gd_add_indir gd_add_sindir gd_add_sarray gd_madd_indir
+	gd_madd_sindir gd_madd_sarray) src/field_list.c (gd_sarrays gd_msarrays)
+	src/getdata.c (_GD_IndirData _GD_DoIndir _GD_DoSindir) src/mod.c
+	(gd_alter_indir gd_alter_sindir gd_alter_sarray) src/parse.c
+	(_GD_ParseNamespace) src/string.c (gd_get_sarray gd_put_sarray_slice
+	gd_put_sarray) src/fragment.c (_GD_CheckChangeNamespace
+	gd_fragment_namespace): Removed.
+	* src/string.c (gd_get_sarray_slice): Made static.
+
+	* test/add_dot10.c test/add_indir.c test/add_sarray.c test/add_sarray_nil.c
+	test/add_sindir.c test/alter_entry_sarray.c test/alter_indir.c
+	test/alter_sarray.c test/alter_sindir.c test/get_indir.c test/get_sarray.c
+	test/get_sarray_len.c test/get_sarray_slice.c test/get_sindir.c
+	test/get_sindir_none.c test/get_sindir_null.c test/get_sindir_type.c
+	test/get_type_string.c test/madd_indir.c test/madd_sarray.c
+	test/madd_sindir.c test/name_updb_sarray.c test/parse_include_ns2.c
+	test/parse_include_nsabs.c test/parse_include_nsinh.c
+	test/parse_include_nspop.c test/parse_include_nsrabs.c
+	test/parse_include_nsrainh.c test/parse_include_nsrinh.c
+	test/parse_include_nsroot.c test/parse_indir.c test/parse_ns.c
+	test/parse_ns_abs.c test/parse_ns_dot.c test/parse_ns_dotdot.c
+	test/parse_ns_dotdotns.c test/parse_ns_dotns.c test/parse_ns_ndotdots.c
+	test/parse_ns_ndots.c test/parse_ns_nsdot.c test/parse_ns_nsdotdot.c
+	test/parse_ns_par.c test/parse_ns_sub.c test/parse_nsf.c
+	test/parse_nsf_abs.c test/parse_nsf_alias.c test/parse_nsf_dot.c
+	test/parse_nsf_hide.c test/parse_nsf_index.c test/parse_nsf_meta.c
+	test/parse_nsf_meta2.c test/parse_nsf_par.c test/parse_nsf_ref.c
+	test/parse_nsf_refabs.c test/parse_nsf_refrel.c test/parse_nsf_root.c
+	test/parse_nsf_rpar.c test/parse_nsf_sub.c test/parse_sarray.c
+	test/parse_sarray_long.c test/parse_sindir.c put_indir.c test/put_sarray.c
+	test/put_sarray_slice.c test/put_sindir.c test/svlist_array.c
+	test/svlist_array_meta.c test/add_ns.c test/add_ns_frag.c
+	test/add_ns_frag2.c test/include_ns.c test/name_ns.c test/name_ns2.c
+	test/name_nsdot.c test/parse_include_ns.c: Deleted.
+	* test/name_updb.c test/name_updb_carray.c test/native_string.c: Remove DSV 10
+	tests.
+
+	* bindings/make_parameters.c bindings/cxx/dirfile.cpp (Dirfile::Entry
+	Dirfile::GetData) bindings/cxx/entry.cpp (Entry::CheckIndex scalar_ok)
+	bindings/cxx/getdata/entry.h bindings/f77/fgetdata.c (GDGSCA GDASCA)
+	bindings/f77/getdata.f90.in (fgd_entry fgd_add fgd_madd fgd_alter_entry)
+	bindings/idl/getdata.c (gdidl_make_idl_entry gdidl_convert_entry_num
+	gdidl_read_idl_entry gdidl_getdata) bindings/matlab/gd_getdata.c
+	bindings/matlab/matlab.c (gdmx_from_entry gdmx_to_entry)
+	bindings/perl/GetData.xs (gdp_to_entry entry getdata)
+	bindings/perl/simple_funcs.xsin bindings/php/getdata.c (gdphp_from_entry
+	gdphp_to_entry gd_getdata) bindings/python/pydirfile.c
+	(gdpy_dirfile_getdata) bindings/python/pyentry.c (gdpy_set_entry_from_tuple
+	gdpy_entry_getinfields gdpy_entry_setinfields gdpy_entry_getarraylen
+	gdpy_entry_setarraylen gdpy_entry_getparms) bindings/python/pygetdata.c
+	(gdpy_convert_to_pylist gdpy_convert_to_pyobj): Remove DSV 10 features.
+
+	* bindings/cxx/dirfile.cpp (Dirfile::GetSarray Dirfile::Sarrays
+	Dirfile::MSarrays Dirfile::PutSarray) bindings/f77/fgetdata.c (GDGEID GDGESD
+	GDGESA GDADID GDADSD GDMDID GDMDSD GDADSA GDMDSA GDALID GDALSD GDSARX GDMSAX
+	GDGTSA GDPTSA GDALSA GDGSTD GDGSTP GDXSTP) bindings/f77/getdata.f90.in
+	(fgd_sarray_value_max fgd_msarray_value_max fgd_get_sarray
+	fgd_get_sarray_slice fgd_put_sarray fgd_put_sarray_slice fgd_add_sarray
+	fgd_madd_sarray fgd_alter_sarray fgd_add_indir fgd_add_sindir fgd_madd_indir
+	fgd_madd_sindir fgd_alter_indir fgd_alter_sindir fgd_getstrdata)
+	bindings/idl/getdata.c (gdidl_add_sarray gdidl_get_sarray gdidl_get_sarray
+	gdidl_alter_sarray gdidl_add_indir gdidl_alter_indir gdidl_add_sindir
+	gdidl_alter_sindir) bindings/matlab/matlab.c (gdmx_from_sarrays)
+	bindings/perl/GetData.xs (get_sarray get_sarray_slice sarrays put_sarray
+	put_sarray_slice add_sarray madd_sarray msarrays) bindings/php/getdata.c
+	(gdphp_convert_sarray gd_add_sarray gd_add_indir gd_add_sindir
+	gd_alter_sarray gd_alter_indir gd_alter_sindir gd_sarrays gd_get_sarray
+	gd_madd_sarray gd_madd_indir gd_madd_sindir gd_msarrays gd_put_sarray)
+	bindings/python/pydirfile.c (gdpy_dirfile_getsarray gdpy_dirfile_sarrays
+	gdpy_dirfile_msarrays gdpy_dirfile_putsarray): Removed.
+
+	* bindings/cxx/getdata/indirentry.h bindings/cxx/getdata/sarrayentry.h
+	bindings/cxx/getdata/sindirentry.h bindings/cxx/indirentry.cpp
+	bindings/cxx/sarrayentry.cpp bindings/cxx/sindirentry.cpp
+	bindings/matlab/gd_add_sarray.c bindings/matlab/gd_alter_sarray.m
+	bindings/matlab/gd_get_sarray.c bindings/matlab/gd_get_sarray_slice.c
+	bindings/matlab/gd_madd_sarray.c bindings/matlab/gd_put_sarray.m
+	bindings/matlab/gd_put_sarray_slice.c bindings/matlab/gd_sarrays.c: Deleted.
+
+	* bindings/cxx/test/big_test.cpp bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro
+	bindings/matlab/test/big_test.m bindings/perl/t/big_test.t
+	bindings/php/test/big_test.php bindings/python/test/big_test.py
+	doc/list.tests: Deleted tests 272-298.  Renumbered test 299 to 272.
+
 2015-09-20   D. V. Wiebe <getdata@ketiltrout.net> svn:995
 	* src/encoding.c (_GD_FiniRawIO) src/fpos.c (_GD_WriteSeek): Place large
 	buffers on the heap.

@@ -27,8 +27,7 @@ int _GD_InvalidEntype(gd_entype_t t) {
       t != GD_BIT_ENTRY && t != GD_MULTIPLY_ENTRY && t != GD_PHASE_ENTRY &&
       t != GD_CONST_ENTRY && t != GD_POLYNOM_ENTRY && t != GD_SBIT_ENTRY &&
       t != GD_DIVIDE_ENTRY && t != GD_RECIP_ENTRY && t != GD_WINDOW_ENTRY &&
-      t != GD_MPLEX_ENTRY && t != GD_CARRAY_ENTRY && t != GD_STRING_ENTRY &&
-      t != GD_SARRAY_ENTRY && t != GD_INDIR_ENTRY && t != GD_SINDIR_ENTRY)
+      t != GD_MPLEX_ENTRY && t != GD_CARRAY_ENTRY && t != GD_STRING_ENTRY)
   {
     dreturn("%i", -1);
     return -1;
@@ -145,7 +144,6 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   int i, is_dot, offset;
   void *new_list;
   void *new_ref = NULL;
-  size_t z;
   unsigned int u;
   unsigned mask;
   gd_entry_t *E;
@@ -381,8 +379,6 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
-    case GD_INDIR_ENTRY:
-    case GD_SINDIR_ENTRY:
       if (_GD_CheckCodeAffixes(D, entry->in_fields[0], entry->fragment_index,
             1) || _GD_CheckCodeAffixes(D, entry->in_fields[1],
               entry->fragment_index, 1))
@@ -524,15 +520,6 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
         if (E->e->u.scalar.d)
           memset(E->e->u.scalar.d, 0, size);
       }
-      break;
-    case GD_SARRAY_ENTRY:
-      E->EN(scalar,array_len) = entry->EN(scalar,array_len);
-
-      E->e->u.scalar.d = _GD_Malloc(D,
-          sizeof(const char *) * E->EN(scalar,array_len));
-      if (E->e->u.scalar.d)
-        for (z = 0; z < E->EN(scalar,array_len); ++z)
-          ((const char**)E->e->u.scalar.d)[z] = _GD_Strdup(D, "");
       break;
     case GD_STRING_ENTRY:
       E->e->u.string = _GD_Strdup(D, "");
@@ -1096,20 +1083,6 @@ int gd_add_divide(DIRFILE* D, const char* field_code, const char* in_field1,
       fragment_index);
 }
 
-int gd_add_indir(DIRFILE* D, const char* field_code, const char* in_field1,
-    const char* in_field2, int fragment_index) gd_nothrow
-{
-  return _GD_AddYoke(D, GD_INDIR_ENTRY, field_code, in_field1, in_field2,
-      fragment_index);
-}
-
-int gd_add_sindir(DIRFILE* D, const char* field_code, const char* in_field1,
-    const char* in_field2, int fragment_index) gd_nothrow
-{
-  return _GD_AddYoke(D, GD_SINDIR_ENTRY, field_code, in_field1, in_field2,
-      fragment_index);
-}
-
 /* add a RECIP entry */
 int gd_add_recip(DIRFILE* D, const char* field_code, const char* in_field,
     double dividend, int fragment_index) gd_nothrow
@@ -1474,66 +1447,6 @@ int gd_add_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
 
   dreturn("%i", D->error ? -1 : 0);
   return D->error ? -1 : 0;
-}
-
-/* add a SARRAY entry */
-int gd_add_sarray(DIRFILE* D, const char* field_code, size_t array_len,
-    const char **values, int fragment_index) gd_nothrow
-{
-  size_t i;
-  gd_entry_t *entry;
-  gd_entry_t E;
-  char **data;
-
-  dtrace("%p, \"%s\", %" PRNsize_t ", %p, %i", D, field_code, array_len, values,
-      fragment_index);
-
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  memset(&E, 0, sizeof(gd_entry_t));
-  E.field = (char *)field_code;
-  E.field_type = GD_SARRAY_ENTRY;
-  E.EN(scalar,array_len) = array_len;
-  E.fragment_index = fragment_index;
-
-  /* duplicate early, in case of failure */
-  data = _GD_Malloc(D, array_len * sizeof(char *));
-  if (data == NULL) {
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  memset(data, 0, array_len * sizeof(char*));
-  for (i = 0; i < array_len; ++i)
-    data[i] = _GD_Strdup(D, values[i]);
-
-  if (D->error) {
-    for (i = 0; i < array_len; ++i)
-      free(data[i]);
-    free(data);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  entry = _GD_Add(D, &E, NULL);
-
-  if (D->error) {
-    for (i = 0; i < array_len; ++i)
-      free(data[i]);
-    free(data);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  free(entry->e->u.scalar.d);
-  entry->e->u.scalar.d = data;
-
-  dreturn("%i", 0);
-  return 0;
 }
 
 int gd_madd(DIRFILE* D, const gd_entry_t* entry, const char* parent) gd_nothrow
@@ -1908,20 +1821,6 @@ int gd_madd_divide(DIRFILE* D, const char *parent, const char* field_code,
       in_field2);
 }
 
-int gd_madd_indir(DIRFILE* D, const char *parent, const char* field_code,
-    const char* in_field1, const char* in_field2) gd_nothrow
-{
-  return _GD_MAddYoke(D, GD_INDIR_ENTRY, parent, field_code, in_field1,
-      in_field2);
-}
-
-int gd_madd_sindir(DIRFILE *D, const char *parent, const char* field_code,
-    const char* in_field1, const char* in_field2) gd_nothrow
-{
-  return _GD_MAddYoke(D, GD_SINDIR_ENTRY, parent, field_code, in_field1,
-      in_field2);
-}
-
 /* add a RECIP entry */
 int gd_madd_recip(DIRFILE* D, const char *parent, const char* field_code,
     const char* in_field, double dividend) gd_nothrow
@@ -2169,65 +2068,6 @@ int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
 
   dreturn("%i", D->error ? -1 : 0);
   return D->error ? -1 : 0;
-}
-
-/* Add META SARRAY */
-int gd_madd_sarray(DIRFILE* D, const char *parent, const char *field_code,
-    size_t array_len, const char **values) gd_nothrow
-{
-  size_t i;
-  gd_entry_t *entry;
-  gd_entry_t E;
-  char **data;
-
-  dtrace("%p, \"%s\", \"%s\", %" PRNsize_t ", %p", D, parent, field_code,
-      array_len, values);
-
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  memset(&E, 0, sizeof(gd_entry_t));
-  E.field = (char *)field_code;
-  E.field_type = GD_SARRAY_ENTRY;
-  E.EN(scalar,array_len) = array_len;
-
-  /* duplicate early, in case of failure */
-  data = _GD_Malloc(D, array_len * sizeof(char *));
-  if (data == NULL) {
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  memset(data, 0, array_len * sizeof(char*));
-  for (i = 0; i < array_len; ++i)
-    data[i] = _GD_Strdup(D, values[i]);
-
-  if (D->error) {
-    for (i = 0; i < array_len; ++i)
-      free(data[i]);
-    free(data);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  entry = _GD_Add(D, &E, parent);
-
-  if (D->error) {
-    for (i = 0; i < array_len; ++i)
-      free(data[i]);
-    free(data);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  free(entry->e->u.scalar.d);
-  entry->e->u.scalar.d = data;
-
-  dreturn("%i", 0);
-  return 0;
 }
 
 /* add an alias */

@@ -111,18 +111,12 @@ Entry *Dirfile::Entry(const char* field_code) const
       return new GetData::CarrayEntry(this, field_code);
     case StringEntryType:
       return new GetData::StringEntry(this, field_code);
-    case SarrayEntryType:
-      return new GetData::SarrayEntry(this, field_code);
     case IndexEntryType:
       return new GetData::IndexEntry(this, field_code);
     case WindowEntryType:
       return new GetData::WindowEntry(this, field_code);
     case MplexEntryType:
       return new GetData::MplexEntry(this, field_code);
-    case IndirEntryType:
-      return new GetData::IndirEntry(this, field_code);
-    case SindirEntryType:
-      return new GetData::SindirEntry(this, field_code);
     case NoEntryType:
       break;
   }
@@ -311,14 +305,6 @@ size_t Dirfile::GetData(const char* field_code, gd_off64_t first_frame,
 {
   return gd_getdata64(D, field_code, first_frame, first_sample, num_frames,
       num_samples, (gd_type_t)type, data_out);
-}
-
-size_t Dirfile::GetData(const char* field_code, gd_off64_t first_frame,
-    gd_off64_t first_sample, size_t num_frames, size_t num_samples,
-    const char** data_out) const
-{
-  return gd_getdata64(D, field_code, first_frame, first_sample, num_frames,
-      num_samples, GD_STRING, data_out);
 }
 
 size_t Dirfile::GetString(const char *field_code, size_t len, char* data_out)
@@ -585,32 +571,4 @@ const char** Dirfile::EntryList(const char *parent, int type,
 char* Dirfile::LinterpTableName(const char *field_code)
 {
   return gd_linterp_tablename(D, field_code);
-}
-
-int Dirfile::GetSarray(const char *field_code, const char **data_out,
-    unsigned int start, size_t len) const
-{
-  if (len == 0)
-    return gd_get_sarray(D, field_code, data_out);
-  else
-    return gd_get_sarray_slice(D, field_code, start, len, data_out);
-}
-
-const char*** Dirfile::Sarrays() const
-{
-  return gd_sarrays(D);
-}
-
-const char*** Dirfile::MSarrays(const char* parent) const
-{
-  return gd_msarrays(D, parent);
-}
-
-int Dirfile::PutSarray(const char *field_code, const char **data_in,
-    unsigned int start, size_t len) const
-{
-  if (len == 0)
-    return gd_put_sarray(D, field_code, data_in);
-  else
-    return gd_put_sarray_slice(D, field_code, start, len, data_in);
 }

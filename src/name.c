@@ -324,7 +324,7 @@ int _GD_ValidateField(const char* field_code, int standards, int strict,
   if (is_dot)
     *is_dot = local_dot;
 
-  dreturn("%i [%i]", 0, local_dot);
+  dreturn("%i (%i)", 0, local_dot);
   return 0;
 }
 
@@ -591,36 +591,11 @@ static int _GD_UpdateInputs(DIRFILE *D, struct gd_rename_data_ *rdat,
             return -1;
           }
         break;
-      case GD_INDIR_ENTRY:
-        if (update_vectors)
-          if (_GD_UpdateInField(D, D->entry[u], rdat, 0, search_meta, mode)) {
-            dreturn("%i", -1);
-            return -1;
-          }
-        if (rdat->E->field_type == GD_CARRAY_ENTRY || search_meta)
-          if (_GD_UpdateInField(D, D->entry[u], rdat, 1, search_meta, mode)) {
-            dreturn("%i", -1);
-            return -1;
-          }
-        break;
-      case GD_SINDIR_ENTRY:
-        if (update_vectors)
-          if (_GD_UpdateInField(D, D->entry[u], rdat, 0, search_meta, mode)) {
-            dreturn("%i", -1);
-            return -1;
-          }
-        if (rdat->E->field_type == GD_SARRAY_ENTRY || search_meta)
-          if (_GD_UpdateInField(D, D->entry[u], rdat, 1, search_meta, mode)) {
-            dreturn("%i", -1);
-            return -1;
-          }
-        break;
       case GD_INDEX_ENTRY:
       case GD_RAW_ENTRY:
       case GD_NO_ENTRY:
       case GD_CONST_ENTRY:
       case GD_CARRAY_ENTRY:
-      case GD_SARRAY_ENTRY:
       case GD_STRING_ENTRY:
       case GD_ALIAS_ENTRY:
         break;
@@ -669,9 +644,6 @@ static int _GD_UpdateInputs(DIRFILE *D, struct gd_rename_data_ *rdat,
         case GD_STRING_ENTRY:
         case GD_CONST_ENTRY:
         case GD_CARRAY_ENTRY:
-        case GD_SARRAY_ENTRY:
-        case GD_INDIR_ENTRY:
-        case GD_SINDIR_ENTRY:
         case GD_ALIAS_ENTRY:
           break;
       }

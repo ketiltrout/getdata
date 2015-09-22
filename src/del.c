@@ -42,8 +42,6 @@ static void _GD_ClearDerived(DIRFILE *restrict D, gd_entry_t *restrict E,
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
-    case GD_INDIR_ENTRY:
-    case GD_SINDIR_ENTRY:
       if (strcmp(E->in_fields[1], C->field) == 0) {
         if (check)
           _GD_SetError(D, GD_E_DELETE, GD_E_DEL_DERIVED, E->field, 0,
@@ -73,7 +71,6 @@ static void _GD_ClearDerived(DIRFILE *restrict D, gd_entry_t *restrict E,
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
-    case GD_SARRAY_ENTRY:
       break;
     case GD_ALIAS_ENTRY:
       if (E->e->entry[0] == C) {
@@ -215,9 +212,6 @@ static void _GD_DeReference(DIRFILE *restrict D, gd_entry_t *restrict E,
     case GD_STRING_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
-    case GD_SARRAY_ENTRY:
-    case GD_INDIR_ENTRY:
-    case GD_SINDIR_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_ALIAS_ENTRY:
       break;

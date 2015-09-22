@@ -27,9 +27,8 @@ int main(void)
   const char *format_data = 
     "phase PHASE INDEX data<3>\n"
     "data CARRAY UINT8 8 9 10 11 12\n"
-    "lincom LINCOM INDEX data data<1>\n"
-    "indir INDIR index data\n";
-  int fd, e1, e2, e3, e4, r = 0;
+    "lincom LINCOM INDEX data data<1>\n";
+  int fd, e1, e2, e3, r = 0;
   DIRFILE *D;
   gd_entry_t E;
 
@@ -60,13 +59,6 @@ int main(void)
   CHECKS(E.scalar[GD_MAX_LINCOM], "zata");
   CHECKI(E.scalar_ind[0], 0);
   CHECKI(E.scalar_ind[GD_MAX_LINCOM], 1);
-  gd_free_entry_strings(&E);
-
-  gd_entry(D, "indir", &E);
-  e4 = gd_error(D);
-  CHECKI(e4, 0);
-  CHECKS(E.in_fields[0], "index");
-  CHECKS(E.in_fields[1], "zata");
   gd_free_entry_strings(&E);
 
   gd_discard(D);

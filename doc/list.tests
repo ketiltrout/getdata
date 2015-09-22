@@ -270,31 +270,4 @@
 269 F9...... gd_alter_entry (MPLEX)
 270 .......h gd_dirfilekey
 271 F9CIpPmh gd_encoding_support
-272 F9...... fgd_sarray_value_max
-273 F9...... fgd_msarray_value_max
-274 F9CIpPmh gd_entry (SARRAY)
-275 .9CIpPmh gd_get_sarray
-276 F9CIpPmh gd_get_sarray_slice
-277 ..C.pPmh gd_sarrays
-278 .9CIpPmh gd_put_sarray
-279 F9CIpPmh gd_put_sarray_slice
-280 F9CIpPmh gd_add_sarray
-281 ...I.P.h gd_add (SARRAY)
-282 F9CIpPmh gd_madd_sarray
-283 F9CI.Pmh gd_alter_sarray
-284 ..C.pPmh gd_msarrays
-285 F9CIpPmh gd_entry (INDIR)
-286 F9CIpPmh gd_add_indir
-287 ........ (unused)
-288 F...pPmh gd_madd_indir
-289 F9CI.Pmh gd_alter_indir
-290 F9CIpPmh gd_entry (SINDIR)
-291 F9CIpPmh gd_add_sindir
-292 ........ (unused)
-293 F...pPmh gd_madd_sindir
-294 F9CI.Pmh gd_alter_sindir
-295 F9CIpPmh gd_getstrdata
-296 F....... GDGSTP
-297 F....... GDXSTP
-298 F....... GDDSTP
-299 F9C.pPm- NULL return from gd_reference
+272 F9C.pPm- NULL return from gd_reference

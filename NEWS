@@ -122,13 +122,6 @@ New in verison 0.9.0a:
     around since GetData-0.3.0, but has only been documented since
     GetData-0.8.3.
 
-  * A new data type code, GD_STRING, has been declared.  It is needed in
-    gd_getdata() calls to retrieve SINDIR data.  Purely for convenience, it
-    has the property: GD_SIZE(GD_STRING) == sizeof(char*).
-
-  * get_native_type() now returns GD_STRING for string type fields (STRING,
-    SARRAY, SINDIR).  Formerly it would return GD_NULL.
-
   * The comp_scal member of the gd_entry_t object has been replaced with a
     flags member, containing a flag (GD_EN_COMPSCAL) with the meaning of
     the former comp_scal member.  There are also flags for hiddenness
@@ -175,7 +168,7 @@ New in verison 0.9.0a:
     of supported encodings.
 
   * gd_array_len() is the new name for gd_carray_len().  It now also
-    handles STRING and SARRAY field types.  The gd_carray_len() name
+    handles STRINGs (which have a length of one).  The gd_carray_len() name
     remains in the library, but has been marked deprecated.
 
   * BUG FIX: If the dirfile path provided cannot be resolved (due to, for
