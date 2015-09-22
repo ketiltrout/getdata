@@ -1,3 +1,8 @@
+2015-09-22   D. V. Wiebe <getdata@ketiltrout.net> svn:999
+	* src/fragment.c (_GD_SubFragmentList): Removed (part of DSV 10).
+
+	* bindings/f77/test/gdcopn.f: remove GD_VB
+
 2015-09-22   D. V. Wiebe <getdata@ketiltrout.net> svn:998
 	* bindings/idl/getdata.c bindings/python/pydirfile.c bindings/perl/typemap
 	bindings/perl/simple_funcs.pl bindings/perl/GetData.xs: Use gd_off64_t in

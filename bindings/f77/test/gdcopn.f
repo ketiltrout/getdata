@@ -68,40 +68,41 @@ C     An invalid response
       WRITE (1,REC=1) datdat
       CLOSE(1, STATUS='KEEP')
 
-      CALL GDCOPN(d, fildir, 12, GD_RW + GD_VB, CALBCK)
+      CALL GDCOPN(d, fildir, 12, GD_RW, CALBCK)
       CALL GDEROR(e1, d)
+      IF (e1 .NE. GD_EOK) THEN
+        r = 1
+        WRITE(*, 9001) 1, e1, GD_EOK
+      ENDIF
+
       CALL GDINCL(d, "format2", 7, 0, 0)
       CALL GDEROR(e2, d)
+      IF (e2 .NE. GD_EOK) THEN
+        r = 1
+        WRITE(*, 9001) 2, e2, GD_EOK
+      ENDIF
 
 C     Change callback
       CALL GDCLBK(d, CALBK2)
       CALL GDINCL(d, "format3", 7, 0, 0)
       CALL GDEROR(e3, d)
+      IF (e3 .NE. GD_ECB) THEN
+        r = 1
+        WRITE(*, 9001) 3, e3, GD_ECB
+      ENDIF
 
 C     Delete callback
       CALL GDNOCB(d)
       CALL GDINCL(d, "format3", 7, 0, 0)
       CALL GDEROR(e4, d)
-      CALL GDDSCD(d)
-
-      CALL SYSTEM ( 'rm -rf ' // fildir )
-
-      IF (e1 .NE. GD_EOK) THEN
-        r = 1
-        WRITE(*, 9001) 1, e1, GD_EOK
-      ENDIF
-      IF (e2 .NE. GD_EOK) THEN
-        r = 1
-        WRITE(*, 9001) 2, e2, GD_EOK
-      ENDIF
-      IF (e3 .NE. GD_ECB) THEN
-        r = 1
-        WRITE(*, 9001) 3, e3, GD_ECB
-      ENDIF
       IF (e4 .NE. GD_EFO) THEN
         r = 1
         WRITE(*, 9001) 3, e4, GD_EFO
       ENDIF
+
+      CALL GDDSCD(d)
+
+      CALL SYSTEM ( 'rm -rf ' // fildir )
 
       IF (r .GT. 0) CALL ExIT(1)
 
