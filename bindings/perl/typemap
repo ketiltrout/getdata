@@ -21,13 +21,13 @@ TYPEMAP
 # basic C types
 const char ** T_CONST_AVPV
 _Complex double T_COMPLEX
-off64_t T_IV
 unsigned long int T_UV
 
 # GetData types
 DIRFILE * T_DIRFILE
 gd_entry_t T_ENTRY
 gd_entype_t T_UV
+gd_off64_t T_IV
 gd_shift_t T_IV
 gd_triplet_t T_TRIPLET
 gd_type_t T_IV

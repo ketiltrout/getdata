@@ -41,14 +41,6 @@
 
 #define undef &PL_sv_undef
 
-/* lfs hackery */
-#if defined _LARGEFILE64_SOURCE || (defined _FILE_OFFSET_BITS && \
-    _FILE_OFFSET_BITS == 64) || (defined __CYGWIN__) || (defined __APPLE__)
-# define gdp64(x) x ## 64
-#else
-# define gdp64(x) x
-#endif
-
 /* fake data types to simplify our typemap */
 typedef GD_DCOMPLEXP_t gdp_complex_in;
 typedef GD_DCOMPLEXA(gdp_complex);
@@ -1704,8 +1696,8 @@ void
 getdata(dirfile, field_code, first_frame, first_samp, num_frames, num_samp, return_type=GD_UNKNOWN)
   DIRFILE * dirfile
   const char * field_code
-  off64_t first_frame
-  off64_t first_samp
+  gd_off64_t first_frame
+  gd_off64_t first_samp
   size_t num_frames
   size_t num_samp
   gd_type_t return_type
@@ -1739,7 +1731,7 @@ getdata(dirfile, field_code, first_frame, first_samp, num_frames, num_samp, retu
       
     data_out = safemalloc(GD_SIZE(return_type) * num_samp);
 
-    len = gdp64(gd_getdata)(dirfile, field_code, first_frame, first_samp, 0,
+    len = gd_getdata64(dirfile, field_code, first_frame, first_samp, 0,
         num_samp, return_type, data_out);
 
     GDP_UNDEF_ON_ERROR(safefree(data_out));
@@ -2056,7 +2048,7 @@ int
 put_carray_slice(dirfile, field_code, start, d, ...)
     DIRFILE * dirfile
     const char * field_code
-    off64_t start
+    gd_off64_t start
     SV *d;
   PREINIT:
     GDP_DIRFILE_ALIAS;
@@ -2145,8 +2137,8 @@ size_t
 putdata(dirfile, field_code, first_frame, first_sample, d, ...)
     DIRFILE * dirfile
     const char * field_code
-    off64_t first_frame
-    off64_t first_sample
+    gd_off64_t first_frame
+    gd_off64_t first_sample
     SV *d;
   PREINIT:
     GDP_DIRFILE_ALIAS;

@@ -202,12 +202,12 @@ static PyObject *gdpy_fragment_rewrite(struct gdpy_fragment_t *self)
 static PyObject *gdpy_fragment_getoffset(struct gdpy_fragment_t *self,
     void *closure)
 {
-  off_t offset;
+  gd_off64_t offset;
   PyObject *pyobj;
 
   dtrace("%p, %p", self, closure);
 
-  offset = gd_frameoffset(self->dirfile->D, self->n);
+  offset = gd_frameoffset64(self->dirfile->D, self->n);
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
@@ -233,7 +233,7 @@ static PyObject *gdpy_fragment_setoffset(struct gdpy_fragment_t *self,
     return NULL;
   }
 
-  gd_alter_frameoffset(self->dirfile->D, (off_t)offset, self->n,
+  gd_alter_frameoffset64(self->dirfile->D, (gd_off64_t)offset, self->n,
       recode);
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);

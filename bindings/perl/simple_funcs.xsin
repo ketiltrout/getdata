@@ -107,18 +107,18 @@ int rename(DIRFILE *dirfile, const char *old_code, const char *new_name,
     int move_data=0)
 int rewrite_fragment(DIRFILE *dirfile, int fragment)
 int uninclude(DIRFILE *dirfile, int fragment_index, int del=0)
-int alter_frameoffset64(DIRFILE *dirfile, off64_t offset, int fragment=0,
+int alter_frameoffset64(DIRFILE *dirfile, gd_off64_t offset, int fragment=0,
     int recode=0)
-off64_t frameoffset64(DIRFILE *dirfile, int fragment)
+gd_off64_t frameoffset64(DIRFILE *dirfile, int fragment)
 double framenum_subset64:framenum(DIRFILE *dirfile, const char* field_code_in,
-    double value, off64_t field_start=0, off64_t field_end=0)
-off64_t nframes64(DIRFILE *dirfile)
-off64_t bof64(DIRFILE *dirfile, const char* field_code)
-off64_t eof64(DIRFILE *dirfile, const char* field_code)
+    double value, gd_off64_t field_start=0, gd_off64_t field_end=0)
+gd_off64_t nframes64(DIRFILE *dirfile)
+gd_off64_t bof64(DIRFILE *dirfile, const char* field_code)
+gd_off64_t eof64(DIRFILE *dirfile, const char* field_code)
 int error_count(DIRFILE *dirfile)
-off64_t seek(DIRFILE *dirfile, const char* field_code, off64_t frame_num,
-    off64_t sample_num, int flags=GD_SEEK_SET)
-off64_t tell(DIRFILE *dirfile, const char* field_code)
+gd_off64_t seek(DIRFILE *dirfile, const char* field_code, gd_off64_t frame_num,
+    gd_off64_t sample_num, int flags=GD_SEEK_SET)
+gd_off64_t tell(DIRFILE *dirfile, const char* field_code)
 int hide(DIRFILE *dirfile, const char *field_code)
 int hidden(DIRFILE *dirfile, const char *field_code)
 int unhide(DIRFILE *dirfile, const char *field_code)

@@ -1007,15 +1007,28 @@ extern int gd_sync(DIRFILE *dirfile, const char *field_code) gd_nonnull ((1));
 extern int gd_uninclude(DIRFILE *dirfile, int fragment_index,
     int del) gd_nonnull ((1));
 
-/* if required, declare the LFS transitional extension */
-#if defined _LARGEFILE64_SOURCE || (defined _FILE_OFFSET_BITS && \
-    _FILE_OFFSET_BITS == 64) || (defined __CYGWIN__) || (defined __APPLE__)
-#if ! defined GD_64BIT_API
+#if defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64
+
+/* Expose the 64-bit API */
+#ifndef GD_64BIT_API
 #define GD_64BIT_API
 #endif
-#endif
 
-/* the following functions are _FILE_OFFSET_BITS sensitive */
+/* Force the use of the 64-bit API */
+#define gd_alter_frameoffset gd_alter_frameoffset64
+#define gd_getdata gd_getdata64
+#define gd_putdata gd_putdata64
+#define gd_framenum_subset gd_framenum_subset64
+#define gd_frameoffset gd_frameoffset64
+#define gd_nframes gd_nframes64
+#define gd_bof gd_bof64
+#define gd_eof gd_eof64
+#define gd_seek gd_seek64
+#define gd_tell gd_tell64
+
+#else
+
+/* the following functions are _FILE_OFFSET_BITS sensitive.  */
 extern int gd_alter_frameoffset(DIRFILE *dirfile, off_t offset, int fragment,
     int recode) gd_nonnull ((1));
 
@@ -1048,6 +1061,15 @@ extern off_t gd_seek(DIRFILE *dirfile, const char *field_code, off_t frame_num,
 extern off_t gd_tell(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull ((1,2));
 
+#endif 
+
+#ifdef _LARGEFILE64_SOURCE
+#ifndef GD_64BIT_API
+#define GD_64BIT_API
+#endif
+#endif
+
+/* This is the explicitly 64-bit API */
 #ifdef GD_64BIT_API
 #ifdef __off64_t_defined
 typedef __off64_t gd_off64_t;

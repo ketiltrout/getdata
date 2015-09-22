@@ -100,7 +100,7 @@ off64_t _GD_ZzslimSeek(struct gd_raw_file_* file, off64_t count,
 
   dtrace("%p, %lli, 0x%X, <unused>", file, (long long)count, data_type);
 
-  n = (off64_t)slimseek((SLIMFILE *)file->edata, (off_t)count *
+  n = (off64_t)slimseek((SLIMFILE *)file->edata, (long)count *
       GD_SIZE(data_type), SEEK_SET);
 
   if (n == -1) {

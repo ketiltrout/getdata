@@ -678,7 +678,7 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
     PYGD_CHECK_ERROR(self->D, NULL);
 
     if (read_to_end) {
-      num_samples = gd_nframes(self->D) * spf;
+      num_samples = gd_nframes64(self->D) * spf;
       PYGD_CHECK_ERROR(self->D, NULL);
 
       /* don't read past the frame indicated by nframes */
@@ -707,7 +707,7 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
 #endif
       data = malloc(num_samples * GD_SIZE(return_type));
 
-    ns = gd_getdata(self->D, field_code, first_frame, first_sample, 0,
+    ns = gd_getdata64(self->D, field_code, first_frame, first_sample, 0,
         (size_t)num_samples, return_type, data);
 
 #ifdef USE_NUMPY
@@ -1482,12 +1482,12 @@ static PyObject *gdpy_dirfile_getnfragments(struct gdpy_dirfile_t *self,
 static PyObject *gdpy_dirfile_getnframes(struct gdpy_dirfile_t *self,
     void *closure)
 {
-  off_t nframes;
+  gd_off64_t nframes;
   PyObject *pyobj;
 
   dtrace("%p, %p", self, closure);
 
-  nframes = gd_nframes(self->D);
+  nframes = gd_nframes64(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1560,7 +1560,7 @@ static PyObject *gdpy_dirfile_getbof(struct gdpy_dirfile_t *self,
 {
   char *keywords[] = { "field_code", NULL };
   const char *field_code;
-  off_t bof;
+  gd_off64_t bof;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
@@ -1572,7 +1572,7 @@ static PyObject *gdpy_dirfile_getbof(struct gdpy_dirfile_t *self,
     return NULL;
   }
 
-  bof = gd_bof(self->D, field_code);
+  bof = gd_bof64(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1588,7 +1588,7 @@ static PyObject *gdpy_dirfile_geteof(struct gdpy_dirfile_t *self,
   char *keywords[] = { "field_code", NULL };
   const char *field_code;
   PyObject *pyobj;
-  off_t eof;
+  gd_off64_t eof;
 
   dtrace("%p, %p, %p", self, args, keys);
 
@@ -1599,7 +1599,7 @@ static PyObject *gdpy_dirfile_geteof(struct gdpy_dirfile_t *self,
     return NULL;
   }
 
-  eof = gd_eof(self->D, field_code);
+  eof = gd_eof64(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1902,7 +1902,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
   char *keywords[] = { "field_code", "data", "type", "first_frame",
     "first_sample", NULL };
   const char *field_code;
-  off_t first_frame = 0, first_sample = 0;
+  PY_LONG_LONG first_frame = 0, first_sample = 0;
   gd_type_t type = GD_UNKNOWN;
   PyObject *pyobj;
   size_t ns;
@@ -1991,8 +1991,8 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
       }
     }
 
-    ns = gd_putdata(self->D, field_code, first_frame, first_sample, 0, ns, type,
-        data);
+    ns = gd_putdata64(self->D, field_code, first_frame, first_sample, 0, ns,
+        type, data);
 
 #ifdef USE_NUMPY
     if (have_ndarray)
@@ -2091,21 +2091,22 @@ static PyObject *gdpy_dirfile_getframenum(struct gdpy_dirfile_t *self,
   char *keywords[] = { "field_code", "value", "start", "end", NULL };
   const char *field_code;
   double value, frame;
-  off_t frame_start = 0;
-  off_t frame_end = 0;
+  PY_LONG_LONG frame_start = 0;
+  PY_LONG_LONG frame_end = 0;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "sd|KK:pygetdata.dirfile.framenum", keywords, &field_code, &value,
+        "sd|LL:pygetdata.dirfile.framenum", keywords, &field_code, &value,
         &frame_start, &frame_end))
   {
     dreturn ("%p", NULL);
     return NULL;
   }
 
- frame = gd_framenum_subset(self->D, field_code, value, frame_start, frame_end);
+ frame = gd_framenum_subset64(self->D, field_code, value, frame_start,
+     frame_end);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -2276,7 +2277,7 @@ static PyObject *gdpy_dirfile_seek(struct gdpy_dirfile_t *self, PyObject *args,
   const char *field_code;
   PY_LONG_LONG frame_num = 0, sample_num = 0;
   int flags;
-  off_t pos;
+  gd_off64_t pos;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
@@ -2288,8 +2289,7 @@ static PyObject *gdpy_dirfile_seek(struct gdpy_dirfile_t *self, PyObject *args,
     return NULL;
   }
 
-  pos = gd_seek(self->D, field_code, (off_t)frame_num, (off_t)sample_num,
-      flags);
+  pos = gd_seek64(self->D, field_code, frame_num, sample_num, flags);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -2304,7 +2304,7 @@ static PyObject *gdpy_dirfile_tell(struct gdpy_dirfile_t *self, PyObject *args,
 {
   char *keywords[] = { "field_code", NULL };
   const char *field_code;
-  off_t pos;
+  gd_off64_t pos;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
@@ -2316,7 +2316,7 @@ static PyObject *gdpy_dirfile_tell(struct gdpy_dirfile_t *self, PyObject *args,
     return NULL;
   }
 
-  pos = gd_tell(self->D, field_code);
+  pos = gd_tell64(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 

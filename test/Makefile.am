@@ -223,7 +223,7 @@ GZIP_TESTS=gzip_add gzip_del gzip_get gzip_get_far gzip_get_get gzip_get_get2 \
 					 gzip_put_back gzip_put_endian gzip_put_get gzip_put_nframes \
 					 gzip_put_off gzip_put_pad gzip_put_sub gzip_seek_put gzip_sync
 
-HEADER_TESTS=header_complex
+HEADER_TESTS=header_complex header_off64t
 
 HIDE_TESTS=hide hide_hidden hide_unhide
 

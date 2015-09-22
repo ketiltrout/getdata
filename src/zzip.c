@@ -121,7 +121,7 @@ off64_t _GD_ZzipSeek(struct gd_raw_file_* file, off64_t count,
   dtrace("%p, %lli, 0x%X, <unused>", file, (long long)count, data_type);
 
   n = file->pos = (off64_t)zzip_seek((ZZIP_FILE*)file->edata,
-      (off_t)(count * GD_SIZE(data_type)), SEEK_SET);
+      (zzip_off_t)(count * GD_SIZE(data_type)), SEEK_SET);
 
   if (n >= 0)
     n /= GD_SIZE(data_type);

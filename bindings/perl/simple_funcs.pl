@@ -41,7 +41,7 @@ sub printmunge {
   my ($t, $n) = @$_;
 
   return "&$n" if ($t =~ /&$/);
-  return "(long long)$n" if ($t eq "off64_t" or $t eq "gd_shift_t" or
+  return "(long long)$n" if ($t eq "gd_off64_t" or $t eq "gd_shift_t" or
     $t eq "gdp_shift_t" or $t eq "int64_t");
   return "(unsigned long long)$n" if ($t eq "uint64_t");
   return "creal($n), cimag($n)" if ($t eq "_Complex double" or
@@ -77,7 +77,7 @@ sub printfmt {
     return "%03x";
   } elsif ($_ eq "int" or $_ eq "gdp_int") {
     return "%i";
-  } elsif ($_ eq "off64_t") {
+  } elsif ($_ eq "gd_off64_t") {
     return "%lli";
   } elsif ($_ eq "size_t") {
     return "%zi";
@@ -140,7 +140,7 @@ while (<>) {
   if ($ret ne "void") {
     print "RETVAL = ";
   }
-  print (($lfs) ? "gdp64(gd_$func)" : "gd_$func");
+  print "gd_$func" . (($lfs) ? "64" : "");
   print "($arglist);\n";
 
   if ($ret ne "void") {

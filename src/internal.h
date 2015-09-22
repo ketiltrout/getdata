@@ -22,6 +22,10 @@
 #ifndef GETDATA_INTERNAL_H
 #define GETDATA_INTERNAL_H
 
+#ifndef _LARGEFILE64_SOURCE
+#define _LARGEFILE64_SOURCE
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include "gd_config.h"
 #endif

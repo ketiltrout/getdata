@@ -23,7 +23,6 @@
 void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
 {
   int i;
-  size_t n;
 
   dtrace("%p, %p, %i", D, entry, priv);
 

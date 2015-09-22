@@ -79,13 +79,13 @@ off64_t _GD_GzipSeek(struct gd_raw_file_* file, off64_t count,
   count *= GD_SIZE(data_type);
 
   if (count >= 0) {
-    n = (off64_t)gzseek((gzFile)file[(mode == GD_FILE_WRITE) ? 1 : 0].edata,
-        (off_t)count, SEEK_SET);
+    n = (off64_t)gzseek64((gzFile)file[(mode == GD_FILE_WRITE) ? 1 : 0].edata,
+        (z_off64_t)count, SEEK_SET);
 
     if (n == -1) {
       /* gzseek returns error on attempts to seek past the EOF in read mode */
       if (mode != GD_FILE_WRITE && gzeof((gzFile)file[0].edata))
-        n = gztell((gzFile)file[0].edata);
+        n = gztell64((gzFile)file[0].edata);
       else {
         dreturn("%i", -1);
         return -1;

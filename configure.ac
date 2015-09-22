@@ -597,7 +597,6 @@ dnl compiler checks
 echo
 echo "*** Checking additional compiler characteristics"
 echo
-AC_SYS_LARGEFILE
 AC_C_INLINE
 AC_C_RESTRICT
 GD_C_RESTRICT_ARRAY

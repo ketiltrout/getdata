@@ -29,6 +29,8 @@ ifelse(`x$3', `x',,[
   if test "x${$1}" = "x"; then
     $1="$3";
     have_php="no";
+  elif test "x${$1}" = "xNONE"; then
+    have_php="no";
   fi
 ])
 ])
@@ -78,10 +80,10 @@ if test "x${have_php}" != "xno"; then
   AC_MSG_CHECKING([PHP interpreter path])
   GD_PHP_CONFIG([PHP], [php-binary], [UNKNOWN])
   AC_MSG_RESULT([$PHP])
-  AC_SUBST([PHP])
 fi
 
 if test "x${have_php}" != "xno"; then
+  AC_SUBST([PHP])
   AC_MSG_CHECKING([the PHP extension directory])
   if test "x${phpdir}" = "xUNKNOWN"; then
     GD_PHP_CONFIG([phpdir], [extension-dir], [UNKNOWN])

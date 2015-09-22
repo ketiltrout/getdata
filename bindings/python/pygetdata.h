@@ -19,9 +19,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include <Python.h>
-#define NO_GETDATA_LEGACY_API
 
-#define _FILE_OFFSET_BITS 64
 #undef _BSD_SOURCE
 #undef _POSIX_SOURCE
 #undef _SVID_SOURCE

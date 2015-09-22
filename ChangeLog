@@ -1,3 +1,31 @@
+2015-09-22   D. V. Wiebe <getdata@ketiltrout.net> svn:998
+	* bindings/idl/getdata.c bindings/python/pydirfile.c bindings/perl/typemap
+	bindings/perl/simple_funcs.pl bindings/perl/GetData.xs: Use gd_off64_t in
+	place of off64_t or off_t.
+
+	* bindings/perl/GetData.xs bindings/perl/simple_funcs.pl (gdp64): Deleted;
+	use the 64-bit API always.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getdata gdpy_dirfile_getnframes
+	gdpy_dirfile_getbof gdpy_dirfile_getbof gdpy_dirfile_geteof
+	gdpy_dirfile_putdata gdpy_dirfile_getframenum gdpy_dirfile_seek
+	gdpy_dirfile_tell) bindings/python/pyfragment.c (gdpy_fragment_getoffset
+	gdpy_fragment_setoffset): Call the 64-bit API.
+
+	* configure.ac: Remove AC_SYS_LARGEFILE
+	* src/internal.h: Define _LARGEFILE64_SOURCE.
+
+	* test/header_off64t: Added.
+
+	* m4/php.m4: Handle NONE for php-binary.
+
+	* src/getdata.h.in: Do 64-bit API redirection if _FILE_OFFSET_BITS == 64.
+
+	* src/zzslim.c (_GD_ZzslimSeek) src/zzip.c (_GD_ZzipSeek) src/slim.c
+	(_GD_SlimSeek): Cast count to the correct type.
+
+	* src/gzip.c (_GD_GzipSeek): Use the 64-bit zlib API.
+
 2015-09-21   D. V. Wiebe <getdata@ketiltrout.net> svn:997
 	* src/add.c (_GD_InvalidEntype _GD_Add) src/close.c (_GD_FreeD)
 	src/constant.c (gd_array_len) src/del.c (_GD_ClearDerived _GD_DeReference)

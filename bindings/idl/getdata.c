@@ -3704,7 +3704,7 @@ IDL_VPTR gdidl_get_bof(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char *field_code = IDL_VarGetString(argv[1]);
 
-  off64_t bof = gd_bof64(D, field_code);
+  gd_off64_t bof = gd_bof64(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
@@ -4064,7 +4064,7 @@ IDL_VPTR gdidl_get_eof(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char *field_code = IDL_VarGetString(argv[1]);
 
-  off64_t eof = gd_eof64(D, field_code);
+  gd_off64_t eof = gd_eof64(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
@@ -4269,7 +4269,7 @@ IDL_VPTR gdidl_get_frameoffset(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  off64_t foffs = gd_frameoffset64(D, kw.fragment_index);
+  gd_off64_t foffs = gd_frameoffset64(D, kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
 
@@ -4405,7 +4405,7 @@ IDL_VPTR gdidl_get_nframes(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  off64_t nframes = gd_nframes64(D);
+  gd_off64_t nframes = gd_nframes64(D);
 
   GDIDL_SET_ERROR(D);
 
@@ -4783,7 +4783,7 @@ void gdidl_putdata(int argc, IDL_VPTR argv[], char *argk)
   if (argv[2]->value.arr->n_dim != 1)
     GDIDL_KW_ABORT("data must be a vector, not a multidimensional array");
 
-  off64_t n_samples = argv[2]->value.arr->n_elts;
+  gd_off64_t n_samples = argv[2]->value.arr->n_elts;
 
   gd_putdata64(D, field_code, kw.first_frame, kw.first_sample, 0, n_samples,
       gdidl_gd_type(argv[2]->type), argv[2]->value.arr->data);
@@ -4943,8 +4943,8 @@ IDL_VPTR gdidl_seek(int argc, IDL_VPTR argv[], char *argk)
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
-    off64_t frame_num;
-    off64_t sample_num;
+    gd_off64_t frame_num;
+    gd_off64_t sample_num;
     int whence;
     int write;
   } KW_RESULT;
@@ -4970,7 +4970,7 @@ IDL_VPTR gdidl_seek(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE *D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  off64_t pos = gd_seek64(D, field_code, kw.frame_num, kw.sample_num,
+  gd_off64_t pos = gd_seek64(D, field_code, kw.frame_num, kw.sample_num,
       (kw.whence & (GD_SEEK_SET | GD_SEEK_CUR | GD_SEEK_END)) |
       (kw.write ? GD_SEEK_WRITE : 0));
 
@@ -4995,7 +4995,7 @@ IDL_VPTR gdidl_tell(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  off64_t pos = gd_tell64(D, field_code);
+  gd_off64_t pos = gd_tell64(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
