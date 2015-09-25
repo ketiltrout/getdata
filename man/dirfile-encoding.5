@@ -1,6 +1,6 @@
 .\" dirfile-encoding.5.  The dirfile-encoding man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2012, 2013, 2014 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013, 2014, 2015 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile-encoding 5 "16 October 2014" "Standards Version 10" "DATA FORMATS"
+.TH dirfile-encoding 5 "24 September 2015" "Standards Version 9" "DATA FORMATS"
 .SH NAME
 dirfile-encoding \(em dirfile database encoding schemes
 .SH DESCRIPTION
@@ -142,11 +142,34 @@ size, and may take some time to complete.
 The file extension of the BZip2 Encoding is
 .BR .bz2 .
 
+.SS FLAC Encoding
+
+The FLAC Encoding compresses raw binary files using the Free Lossless Audio
+Codec.  GetData's FLAC Encoding scheme is implemented through the libFLAC
+reference implementation developed by Josh Coalson and the Xiph.Org Foundation.
+All operations are supported by the FLAC Encdoing, but writing occurs
+out-of-place.  See the
+.B Out-of-place writes
+section above for details.
+
+The FLAC format only permits samples up to 32-bits, but the libFLAC reference
+codec can only handle samples up to 24-bits.  GetData gets around this by
+slicing data that is wider than 16-bits into multiple channels (2, 4, or 8,
+depending on width), and puts the most-significant 16-bits into channel 0, the
+second 16-bits into channel, 1, &c.  All data is encoded as signed values,
+even unsigned types.
+
+The sample rate specified in the FLAC header is ignored and may be any valid
+value.  FLAC files written by GetData use a sample rate of 1 Hz.  The file
+extension of the FLAC Encoding is
+.BR .flac .
+The Ogg container format is not supported.
+
 .SS GZip Encoding
 
 The GZip Encoding compresses raw binary files using Lempel-Ziv coding (LZ77) as
 implemented in the gzip format.  GetData's GZip Encoding scheme is implemented
-through the the
+through the
 .I zlib compression library
 written by Jean-loup Gailly and Mark Adler. All operations are supported by the
 GZip Encoding, but writing occurs out-of-place.  See the

@@ -936,6 +936,8 @@ fi
 
 dnl external encodings
 GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2],[])
+GD_CHECK_ENCODING([flac],[FLAC],[FLAC__stream_decoder_init_FILE],[FLAC/all.h],
+                  [flac],[],[])
 GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip],[])
 GD_CHECK_ENCODING([lzma],[lzma],[lzma_auto_decoder],[lzma.h],[xz],[],[])
 GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h], [slimdata slim],

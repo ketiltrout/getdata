@@ -31,6 +31,11 @@ New in verison 0.9.0a:
     writing gzip-encoded data works.  See the gzip discussion in the 0.8.0
     section below for important notes.
 
+  * A new encoding scheme using the Free Lossless Audio Codec (FLAC) to
+    compress data has been implemented.  For some datasets, it provides a
+    good trade-off between speed and compression.  Like gzip, bzip2, and
+    lzma, is also uses out-of-place writes (see previous point).
+
   * A newly-created dirfile is now always opened in read-write mode, ignor-
     ing the access mode specified in the call.  Previously, specifying both
     GD_RDONLY and GD_CREAT in open calls would result in an access mode
@@ -43,6 +48,11 @@ New in verison 0.9.0a:
     gd_flush, gd_linterp_tablename, gd_put_carray, gd_put_carray_slice,
     gd_putdata, gd_raw_close, gd_raw_filename, gd_seek, gd_spf, gd_sync,
     gd_tell.
+
+  * Attempts to seek past the end-of-field with gd_seek() now always
+    succeed, although the resultant position is encoding specific.
+    Previously, attempting to seek past the end-of-field on some encodings
+    would return an error.
 
   * BUG FIX: The library now properly recovers from an I/O error while
     trying to open an unencoded datafile.  Previously, such an error would
@@ -124,6 +134,9 @@ New in verison 0.9.0a:
     starting offset equal to the field's current I/O position, no longer
     result in the call hanging.
 
+  * BUG FIX: The I/O position reported by gd_tell and gd_seek for slim, zzip,
+    and zzslim encoded data is now correct.
+
   API Changes:
   
   * CLARIFICATION: The macro GD_SIZE() declared in getdata.h is indeed part
@@ -162,10 +175,11 @@ New in verison 0.9.0a:
     I/O error returned by the operating system) have been merged into one.
     The error codes GD_E_OPEN, GD_E_TRUNC, GD_E_RAW_IO, GD_E_OPEN_FRAGMENT,
     GD_E_FLUSH are replaced by the new error GD_E_IO.  The old symbols
-    remain as aliases but are deprecated.  There is one exception to this
-    merge: attempts to flush metadata lines which are too long are now
-    reported using GD_E_LINE_TOO_LONG.  Previously, these errors used
-    GD_E_FLUSH.
+    remain as aliases but are deprecated.  The corresponding error strings
+    also now include information from the underlying encoding library,
+    where possible.  There is one exception to this merge: attempts to
+    flush metadata lines which are too long are now reported using
+    GD_E_LINE_TOO_LONG.  Previously, these errors used GD_E_FLUSH.
 
   * The error code GD_E_OPEN_LINFILE has also been removed.  It has been
     split into two parts:

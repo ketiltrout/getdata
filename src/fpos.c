@@ -156,7 +156,7 @@ off_t gd_tell(DIRFILE *D, const char *field_code) gd_nothrow
   return (off_t)gd_tell64(D, field_code);
 }
 
-off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
+off64_t _GD_DoSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
     off64_t offset, unsigned int mode)
 {
   off64_t pos;
@@ -183,11 +183,11 @@ off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
     if (E->e->u.raw.file[0].idata >= 0) {
       /* read from the old file until we reach the point we're interested in or
        * run out of data */
-      char *buffer;
+      char *buffer, *ptr;
       ssize_t n_read, n_wrote;
       const off64_t chunk_size = GD_BUFFER_SIZE / GD_SIZE(E->EN(raw,data_type));
 
-      off64_t remaining = offset - E->e->u.raw.file[which].pos;
+      off64_t count, remaining = offset - E->e->u.raw.file[which].pos;
 
       buffer = _GD_Malloc(D, GD_BUFFER_SIZE);
       if (buffer == NULL) {
@@ -195,41 +195,36 @@ off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
         return -1;
       }
 
-      while (remaining > chunk_size) {
-        n_read = (*enc->read)(E->e->u.raw.file, buffer, E->EN(raw,data_type),
-            chunk_size);
-        if (n_read > 0) {
-          n_wrote = (*enc->write)(E->e->u.raw.file + 1, buffer,
-              E->EN(raw,data_type), n_read);
-          if (n_wrote != n_read) {
-            free(buffer);
-            dreturn("%i", -1);
-            return -1;
-          }
-          remaining -= n_wrote;
-        } else if (n_read < 0) {
-          free(buffer);
-          dreturn("%i", -1);
-          return -1;
-        }
-      }
+      while (remaining > 0) {
+        if (remaining > chunk_size)
+          count = chunk_size;
+        else
+          count = remaining;
 
-      if (remaining > 0) {
         n_read = (*enc->read)(E->e->u.raw.file, buffer, E->EN(raw,data_type),
-            remaining);
-        if (n_read > 0) {
-          n_wrote = (*enc->write)(E->e->u.raw.file + 1, buffer,
+            count);
+
+        if (n_read < 0) {
+          _GD_SetEncIOError(D, GD_E_IO_READ, E->e->u.raw.file + 0);
+          free(buffer);
+          dreturn("%i", -1);
+          return -1;
+        } else if (n_read == 0) /* EOF */
+          break;
+
+        ptr = buffer;
+        while (n_read > 0) {
+          n_wrote = (*enc->write)(E->e->u.raw.file + 1, ptr,
               E->EN(raw,data_type), n_read);
-          if (n_wrote != n_read) {
+          if (n_wrote < 0) {
+            _GD_SetEncIOError(D, GD_E_IO_WRITE, E->e->u.raw.file + 1);
             free(buffer);
             dreturn("%i", -1);
             return -1;
           }
           remaining -= n_wrote;
-        } else if (n_read < 0) {
-          free(buffer);
-          dreturn("%i", -1);
-          return -1;
+          n_read -= n_wrote;
+          ptr += n_wrote;
         }
       }
 
@@ -239,6 +234,9 @@ off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
 
   pos = (*enc->seek)(E->e->u.raw.file + which, offset, E->EN(raw,data_type),
       mode);
+  if (pos < 0)
+    _GD_SetEncIOError(D, (mode & GD_FILE_WRITE) ? GD_E_IO_WRITE : GD_E_IO_READ,
+        E->e->u.raw.file + 0);
 
   dreturn("%lli", (long long)pos);
   return pos;
@@ -282,13 +280,8 @@ int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode)
         break;
       }
 
-      if (_GD_WriteSeek(D, E, _GD_ef + E->e->u.raw.file[0].subenc, offset -
-            E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset, mode)
-          == -1)
-      {
-        _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[0].name, 0,
-            NULL);
-      }
+      _GD_DoSeek(D, E, _GD_ef + E->e->u.raw.file[0].subenc, offset -
+          E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset, mode);
       break;
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->EN(lincom,n_fields); ++i)

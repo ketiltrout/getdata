@@ -76,6 +76,7 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct gd_raw_file_* file,
   }
 
   if ((ptr = (struct gd_bzdata *)malloc(sizeof(struct gd_bzdata))) == NULL) {
+    fclose(stream);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -96,6 +97,7 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct gd_raw_file_* file,
       BZ2_bzWriteClose(&ptr->bzerror, ptr->bzfile, 0, NULL, NULL);
     fclose(stream);
     free(ptr);
+    file->error = ptr->bzerror;
     dreturn("%p", NULL);
     return NULL;
   }
@@ -108,10 +110,11 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct gd_raw_file_* file,
   return ptr;
 }
 
-int _GD_Bzip2Open(int dirfd, struct gd_raw_file_* file, int swap gd_unused_,
+int _GD_Bzip2Open(int dirfd, struct gd_raw_file_* file,
+    gd_type_t type gd_unused_, int swap gd_unused_,
     unsigned int mode)
 {
-  dtrace("%i, %p, <unused>, 0x%X", dirfd, file, mode);
+  dtrace("%i, %p, <unused>, <unused>, 0x%X", dirfd, file, mode);
 
   file->edata = _GD_Bzip2DoOpen(dirfd, file, mode);
 
@@ -157,6 +160,7 @@ ssize_t _GD_Bzip2Read(struct gd_raw_file_ *restrict file, void *restrict data,
       ptr->pos = 0;
       ptr->end = n;
     } else {
+      file->error = ptr->bzerror;
       dreturn("%i", -1);
       return -1;
     }
@@ -198,9 +202,10 @@ ssize_t _GD_Bzip2Write(struct gd_raw_file_ *file, const void *data,
 
   BZ2_bzWrite(&ptr->bzerror, ptr->bzfile, (void*)data, (int)n);
 
-  if (ptr->bzerror)
+  if (ptr->bzerror) {
+    file->error = ptr->bzerror;
     n = -1;
-  else {
+  } else {
     ptr->base += n;
     n /= GD_SIZE(data_type);
     file->pos += n;
@@ -246,6 +251,7 @@ off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t count,
       ptr->bzerror = 0;
       BZ2_bzReadClose(&ptr->bzerror, ptr->bzfile);
       if (ptr->bzerror != BZ_OK) {
+        file->error = ptr->bzerror;
         fclose(ptr->stream);
         dreturn("%i", -1);
         return -1;
@@ -255,6 +261,7 @@ off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t count,
       ptr->bzfile = BZ2_bzReadOpen(&ptr->bzerror, ptr->stream, 0, 0, NULL, 0);
 
       if (ptr->bzerror != BZ_OK) {
+        file->error = ptr->bzerror;
         BZ2_bzReadClose(&ptr->bzerror, ptr->bzfile);
         fclose(ptr->stream);
         dreturn("%i", -1);
@@ -282,6 +289,7 @@ off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t count,
         if (ptr->bzerror == BZ_STREAM_END)
           ptr->stream_end = 1;
       } else {
+        file->error = ptr->bzerror;
         dreturn("%i", -1);
         return -1;
       }
@@ -318,7 +326,9 @@ int _GD_Bzip2Close(struct gd_raw_file_ *file)
     BZ2_bzWriteClose(&ptr->bzerror, ptr->bzfile, 0, NULL, NULL);
 
   if (ptr->bzerror || fclose(ptr->stream)) {
+    file->error = ptr->bzerror;
     dreturn("%i", 1);
+
     return 1;
   }
 
@@ -357,6 +367,7 @@ off64_t _GD_Bzip2Size(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
       ptr->pos = 0;
       ptr->end = n;
     } else {
+      file->error = ptr->bzerror;
       BZ2_bzReadClose(&ptr->bzerror, ptr->bzfile);
       fclose(ptr->stream);
       free(ptr);
@@ -372,4 +383,39 @@ off64_t _GD_Bzip2Size(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 
   dreturn("%lli", (long long)n);
   return n;
+}
+
+int _GD_Bzip2Strerr(struct gd_raw_file_ *file, char *buf, size_t buflen)
+{
+  int r = 0;
+
+  dtrace("%p, %p, %" PRNsize_t, file, buf, buflen);
+
+  switch (file->error) {
+    case BZ_OK:
+    case BZ_IO_ERROR:
+      r = gd_strerror(errno, buf, buflen);
+      break;
+    case BZ_SEQUENCE_ERROR:
+    case BZ_PARAM_ERROR:
+      /* these indicate bugs in the code */
+      strncpy(buf, "Internal error in Bzip2 encoding", buflen);
+      break;
+    case BZ_MEM_ERROR:
+      strncpy(buf, "libbz2: Out of memory", buflen);
+      break;
+    case BZ_DATA_ERROR:
+      strncpy(buf, "libbz2: Data integrity error", buflen);
+      break;
+    case BZ_UNEXPECTED_EOF:
+      strncpy(buf, "libbz2: Unexpected EOF", buflen);
+      break;
+    default:
+      snprintf(buf, buflen, "libbz2: Unkown error %i", file->error);
+      break;
+  }
+  buf[buflen - 1] = 0;
+
+  dreturn("%i", r);
+  return r;
 }

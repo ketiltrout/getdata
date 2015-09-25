@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,49 +20,52 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
+#if !defined TEST_LZMA || !defined USE_LZMA
+  return 77;
+#else
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "data RAW UINT8 8\n";
-  int fd, r1, e1, r = 0;
+  const char *data = "dirfile/data";
+  const char *xzdata = "dirfile/data.xz";
+  const char *format_data = "data RAW UINT16 8\n";
+  char command[4096];
+  uint16_t data_data[256];
+  int fd, n, error, r = 0;
   DIRFILE *D;
-  gd_entry_t E1;
 
   rmdirfile();
   mkdir(filedir, 0777);
+
+  for (fd = 0; fd < 256; ++fd)
+    data_data[fd] = (unsigned char)fd;
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDWR);
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
+  write(fd, data_data, 256 * sizeof(uint16_t));
+  close(fd);
 
-  /* In DSV 10 and later, this gives the field the name "ata" and puts it in the
-   * namespace "d" */
-  gd_dirfile_standards(D, 10);
-  r1 = gd_rename(D, "data", "d.ata", 0);
-  e1 = gd_error(D);
-  CHECKI(r1,0);
-  CHECKI(e1,0);
-  if (gd_entry(D, "d.ata", &E1) == 0) {
-    CHECKI(E1.flags & GD_EN_DOTTED, 0);
-    gd_free_entry_strings(&E1);
-  } else
-    r = 1;
+  snprintf(command, 4096, "%s -f %s > /dev/null", XZ, data);
+  if (gd_system(command))
+    return 1;
+
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_seek(D, "data", 5, 0, GD_SEEK_SET);
+  CHECKI(n,40);
+
+  error = gd_error(D);
+  CHECKI(error,0);
 
   gd_discard(D);
 
+  unlink(xzdata);
   unlink(format);
   rmdir(filedir);
 
   return r;
+#endif
 }

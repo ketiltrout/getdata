@@ -347,8 +347,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         } else if ((*enc->seek)(E->e->u.raw.file, 0, E->EN(raw,data_type),
               GD_FILE_READ) == -1)
         {
-          _GD_SetError(D, GD_E_IO, GD_E_IO_READ, E->e->u.raw.file[0].name, 0,
-              NULL);
+          _GD_SetEncIOError(D, GD_E_IO_READ, E->e->u.raw.file + 0);
         }
 
         if (D->error)
@@ -358,9 +357,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         if (_GD_InitRawIO(D, E, NULL, -1, enc, 0, GD_FILE_WRITE | GD_FILE_TEMP,
               _GD_FileSwapBytes(D, E)))
           break;
-        else if (_GD_WriteSeek(D, E, enc, 0, GD_FILE_WRITE | GD_FILE_TEMP)
-            == -1)
-        {
+        else if (_GD_DoSeek(D, E, enc, 0, GD_FILE_WRITE | GD_FILE_TEMP) == -1) {
           _GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_DISCARD |
               GD_FINIRAW_CLOTEMP);
           break;
@@ -380,8 +377,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
               nf * E->EN(raw,spf));
 
           if (nread < 0) {
-            _GD_SetError(D, GD_E_IO, GD_E_IO_READ, E->e->u.raw.file[1].name, 0,
-                NULL);
+            _GD_SetEncIOError(D, GD_E_IO_READ, E->e->u.raw.file + 1);
             break;
           }
 
@@ -414,8 +410,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
               1);
 
           if (nwrote < ns_out) {
-            _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[1].name, 0,
-                NULL);
+            _GD_SetEncIOError(D, GD_E_IO_WRITE, E->e->u.raw.file + 1);
             break;
           }
         }

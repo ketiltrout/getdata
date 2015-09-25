@@ -81,10 +81,9 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  if (_GD_WriteSeek(D, E, _GD_ef + E->e->u.raw.file[0].subenc, s0,
-        GD_FILE_WRITE) == -1)
+  if (_GD_DoSeek(D, E, _GD_ef + E->e->u.raw.file[0].subenc, s0, GD_FILE_WRITE)
+      == -1)
   {
-    _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[0].name, 0, NULL);
     free(databuffer);
     dreturn("%i", 0);
     return 0;
@@ -94,7 +93,7 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
       E->EN(raw,data_type), ns, 0);
 
   if (n_wrote < 0) {
-    _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[0].name, 0, NULL);
+    _GD_SetEncIOError(D, GD_E_IO_WRITE, E->e->u.raw.file + 0);
     n_wrote = 0;
   }
 

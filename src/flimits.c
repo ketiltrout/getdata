@@ -203,7 +203,7 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
           E->EN(raw,data_type), _GD_FileSwapBytes(D, E));
 
       if (ns < 0) {
-        _GD_SetError(D, GD_E_IO, 0, E->e->u.raw.file[0].name, 0, NULL);
+        _GD_SetEncIOError(D, GD_E_IO_READ, E->e->u.raw.file + 0);
         ns = -1;
         break;
       }

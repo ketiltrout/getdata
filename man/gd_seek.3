@@ -1,6 +1,6 @@
 .\" gd_getdata.3.  The gd_getdata man page.
 .\"
-.\" Copyright (C) 2011, 2012, 2013, 2014 D. V. Wiebe
+.\" Copyright (C) 2011, 2012, 2013, 2014, 2015 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_seek 3 "16 October 2014" "Version 0.9.0" "GETDATA"
+.TH gd_seek 3 "25 September 2015" "Version 0.9.0" "GETDATA"
 .SH NAME
 gd_seek \(em reposition a dirfile field pointer
 .SH SYNOPSIS
@@ -52,20 +52,23 @@ In addition to one of the symbols above, the
 .I flags
 parameter may also, optionally, be bitwise or'd with
 .BR GD_SEEK_WRITE ,
-which will result in the field being padded (with zero for integer types or a
+which will result in the field being padded (with zero for integer types, or a
 IEEE-754 conforming not-a-number otherwise) in the event of seeking past the
-end-of-field marker.  Note: for some data encodings, the padding may be deferred
-until a write occurs.  The result of calling
-.BR gd_seek ()
-with
-.BR GD_SEEK_WRITE ,
-but without a subsequent call to
-.BR gd_putdata (3),
-is encoding specific, and may not actually advance the end of field.  Attempting
-to seek past the end-of-field marker without specifying
+end-of-field marker.
+
+The effect of attempting to seek past the end-of-field is encoding specific.
+Some encodings don't actually add the padding requested by
 .B GD_SEEK_WRITE
+unless a subsequent
+.BR gd_putdata (3)
+call is used to add more data to the field at the new end-of-field.  Other
+encodings add the padding, advancing the end-of-field, regardless of subsequent
+writes.  Similarly, attempting to seek past the end-of-field marker in read mode
+(without specifying
+.BR GD_SEEK_WRITE )
 is also encoding specific: in some encodings the field pointer will be moved
-past the end-of-field marker, while in others, it will result in an error.
+past the end-of-field marker, while in others, it will be repositioned to the
+end of field.  Check the return value to determine the result.
 
 In general,
 .B GD_SEEK_WRITE

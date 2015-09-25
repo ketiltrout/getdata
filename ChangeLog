@@ -1,3 +1,70 @@
+2015-09-24   D. V. Wiebe <getdata@ketiltrout.net> svn:1001
+	* src/flac.c: Added.
+	* configure.ac src/Makefile.am src/encoding.c (_GD_EncodingUnderstood)
+	src/flush.c (_GD_FlushFragment): Deal with FLAC.
+	* bindings/make_parameters.c src/getdata.h.in: Add GD_FLAC_ENCODED.
+	* man/dirfile-encoding.5: Updated.
+
+	* src/internal.h: data_type added to gd_ef_open_t.
+
+	* src/bzip2.c (_GD_Bzip2DoOpen): Clean up after errors.
+
+	* src/internal.h: Abstractify strerror stuff.
+	* src/compat.c (gd_sterror): Added.
+	* src/errors.c (gd_error_string): Call gd_sterrror.
+
+	* src/fpos.c (_GD_DoSeek): Renamed from _GD_WriteSeek.  Handle short writes.
+
+	* src/slim.c: Handle ZZSLIM.
+
+	* src/slim.c (Seek) src/zzip.c (_GD_ZzipSeek): Deal with seeks past the EOF.
+	Properly update and report file->pos.
+
+	* src/slim.c (DoOpen): Record full path name along with SLIMFILE in
+	file->edata.  Renamed from _GD_SlimOpen.
+	* src/slim.c (Open): Added.
+
+	* src/zzip.c (_GD_ZzipName): Put both .zip name and field name in
+	file->name.
+	* src/zzip.c (_GD_ZzipDoOpen): Renamed from _GD_ZzipOpen.  Open containing
+	archive (ZZIP_DIR) separately from the data file (ZZIP_FILE).
+	* src/zzip.c (_GD_ZzipOpen): Added.
+	* src/zzip.c (_GD_ZzipDoOpen): Call _GD_DoOpen.
+
+	* src/zzslim.c (_GD_ZzslimOpen _GD_ZzslimSeek _GD_ZzslimRead _GD_ZzslimClose
+	_GD_ZzslimSize): Removed.  Instead, define ZZSLIM and include slim.c.
+
+	* src/internal.h: Added error to gd_raw_file_.  Added strerr to encoding_t.
+	Added GD_EF_STRERR.
+	* src/bzip2.c src/gzip.c src/lzma.c src/zzip.c: Record errors in file->error.
+	* src/errors.c (_GD_SetEncIOError) src/bzip2.c (_GD_Bzip2Strerr) src/gzip.c
+	(_GD_GzipStrerr) src/lzma.c (_GD_LzmaStrerr) src/slim.c (Strerr) src/zzip.c
+	(_GD_ZzipStrerr): Added.
+	* src/del.c (_GD_Delete) src/encoding.c (_GD_FiniRawIO _GD_InitRawIO)
+	src/flimits.c (_GD_GetEOF) src/fpos.c (_GD_DoSeek gd_tell) src/getdata.c
+	(_GD_DoRaw) src/mod.c (_GD_Change) src/move.c (_GD_MogrifyFile) src/name.c
+	(_GD_Rename) src/nframes.c (gd_nframes64) src/putdata.c (_GD_DoRawOut): Set error via _GD_SetEncIOError.
+	* src/encoding.c (_GD_MissingFramework): Deal with GD_EF_STRERR
+	* src/fpos.c (_GD_Seek): _GD_DoSeek has already set the error.
+	* src/errors.c: Added GD_E_IO_ENC_*.
+	* src/errors.c (_GD_SetEncIOError): Added.
+
+	* src/getdata.h.in: Fix GD_DIRFILE_STANDARDS_VERSION.
+
+	* test/name_dot10.c: Deleted.
+
+	* test/ascii_get_here.c test/ascii_put_here.c test/ascii_seek.c
+	test/ascii_seek_far.c test/bzip_seek.c test/bzip_seek_far.c test/flac_add.c
+	test/flac_get_big.c test/flac_get_far.c test/flac_get_get.c
+	test/flac_get_get2.c test/flac_get_little.c test/flac_nframes.c
+	test/flac_put_big.c test/flac_put_float64.c test/flac_put_int32.c
+	test/flac_put_little.c test/flac_seek.c test/flac_seek_far.c
+	test/flac_sync.c test/gzip_seek.c test/gzip_seek_far.c test/lzma_xz_seek.c
+	test/lzma_xz_seek_far.c test/seek_far.c test/sie_seek.c test/sie_seek_far.c
+	test/slim_seek.c test/slim_seek_far.c test/zzip_seek.c test/zzip_seek_far.c
+	test/zzslim_seek.c test/zzslim_seek_far.c: Added.
+
+
 2015-09-22   D. V. Wiebe <getdata@ketiltrout.net> svn:1000
 	* bindings/python/pydirfile.c bindings/python/pygetdata.c configure.ac: Make
 	NumPy support mandatory.

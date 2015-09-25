@@ -357,8 +357,7 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
             D->fragment[E->fragment_index].dirfd, E->e->u.raw.file))
       {
         if (errno != ENOENT) {
-          _GD_SetError(D, GD_E_IO, GD_E_IO_UNLINK, E->e->u.raw.file[0].name, 0,
-              NULL);
+          _GD_SetEncIOError(D, GD_E_IO_UNLINK, E->e->u.raw.file + 0);
           free(del_list);
           dreturn("%i", -1);
           return -1;

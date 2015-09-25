@@ -27,11 +27,11 @@
 /* The gzip encoding scheme uses edata as a gzFile object.  If a file is
  * open, idata >= 0 otherwise idata = -1.  Writes occur out-of-place. */
 
-int _GD_GzipOpen(int fd, struct gd_raw_file_* file, int swap gd_unused_,
-    unsigned int mode)
+int _GD_GzipOpen(int fd, struct gd_raw_file_* file,
+    gd_type_t data_type gd_unused_, int swap gd_unused_, unsigned int mode)
 {
   const char *gzmode = "w";
-  dtrace("%i, %p, <unused>, 0x%X", fd, file, mode);
+  dtrace("%i, %p, <unused>, <unused>, 0x%X", fd, file, mode);
 
   if (mode & GD_FILE_READ) {
     file->idata = gd_OpenAt(file->D, fd, file->name, O_RDONLY | O_BINARY, 0666);
@@ -212,4 +212,25 @@ off64_t _GD_GzipSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 
   dreturn("%lli", (long long)size);
   return size;
+}
+
+int _GD_GzipStrerr(struct gd_raw_file_ *file, char *buf, size_t buflen)
+{
+  int r = 0;
+  int gzerrnum = 0;
+  const char *gzerr;
+
+  dtrace("%p, %p, %" PRNsize_t, file, buf, buflen);
+
+  gzerr = gzerror((gzFile)file->edata, &gzerrnum);
+
+  if (gzerrnum == Z_ERRNO)
+    r = gd_strerror(errno, buf, buflen);
+  else {
+    strncpy(buf, gzerr, buflen);
+    buf[buflen - 1] = 0;
+  }
+
+  dreturn("%i", r);
+  return r;
 }

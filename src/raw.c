@@ -20,10 +20,10 @@
  */
 #include "internal.h"
 
-int _GD_RawOpen(int fd, struct gd_raw_file_* file, int swap gd_unused_,
-    unsigned int mode)
+int _GD_RawOpen(int fd, struct gd_raw_file_* file,
+    gd_type_t data_type gd_unused_, int swap gd_unused_, unsigned int mode)
 {
-  dtrace("%i, %p, <unused>, 0x%X", fd, file, mode);
+  dtrace("%i, %p, <unused>, <unused>, 0x%X", fd, file, mode);
 
   if (!(mode & GD_FILE_TEMP)) {
     if (file->mode & mode) {

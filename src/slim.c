@@ -1,4 +1,4 @@
-/* Copyright (C) 2008, 2010, 2011, 2014 D. V. Wiebe
+/* Copyright (C) 2008, 2010, 2011, 2014, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,19 +18,27 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#ifdef ZZSLIM
+#define GD_SLIM(x) _GD_Zzslim ## x
+#else
+#define GD_SLIM(x) _GD_Slim ## x
 #include "internal.h"
+#endif
 
 #ifdef HAVE_SLIMLIB_H
 #include <slimlib.h>
 #endif
 
-/* The slim encoding scheme uses edata as a slimfile pointer.  If a file is
- * open, idata = 0 otherwise idata = -1. */
+struct gd_slimdata {
+  SLIMFILE *f;
+  char *filepath;
+};
 
-int _GD_SlimOpen(int dirfd, struct gd_raw_file_* file, int swap gd_unused_,
-    unsigned int mode gd_unused_)
+static struct gd_slimdata *GD_SLIM(DoOpen)(int dirfd, struct gd_raw_file_* file)
 {
-  dtrace("%i, %p, <unused>, <unused>", dirfd, file);
+  struct gd_slimdata *gdsl;
+
+  dtrace("%i, %p", dirfd, file);
 
   /* slimdopen in slimlib-2.6.7 and earlier contains a bug resulting in a SEGV,
    * so disable this for now */
@@ -53,23 +61,49 @@ int _GD_SlimOpen(int dirfd, struct gd_raw_file_* file, int swap gd_unused_,
   }
 #else
   {
-    char *filepath;
+    gdsl = malloc(sizeof *gdsl);
+    if (gdsl == NULL) {
+      file->error = ENOMEM;
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
     /* this is easily broken, but the best we can do in this case */
-    filepath = gd_MakeFullPathOnly(file->D, dirfd, file->name);
-    if (filepath == NULL) {
-      dreturn("%i", 1);
-      return 1;
+    gdsl->filepath = gd_MakeFullPathOnly(file->D, dirfd, file->name);
+    if (gdsl->filepath == NULL) {
+      file->error = errno;
+      free(gdsl);
+      dreturn("%p", NULL);
+      return NULL;
     }
 
-    file->edata = slimopen(filepath, "r");
-    free(filepath);
-
-    if (file->edata == NULL) {
-      dreturn("%i", 1);
-      return 1;
-    }
+    gdsl->f = slimopen(gdsl->filepath, "r");
   }
 #endif
+
+  if (gdsl->f == NULL) {
+    free(gdsl->filepath);
+    free(gdsl);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  dreturn("%p", gdsl);
+  return gdsl;
+}
+
+int GD_SLIM(Open)(int dirfd, struct gd_raw_file_* file,
+    gd_type_t data_type gd_unused_, int swap gd_unused_,
+    unsigned int mode gd_unused_)
+{
+  dtrace("%i, %p, <unused>, <unused>, <unused>", dirfd, file);
+
+  file->edata = GD_SLIM(DoOpen)(dirfd, file);
+
+  if (file->edata == NULL) {
+    dreturn("%i", 1);
+    return 1;
+  }
 
   file->mode = GD_RDONLY;
   file->idata = 0;
@@ -77,47 +111,56 @@ int _GD_SlimOpen(int dirfd, struct gd_raw_file_* file, int swap gd_unused_,
   return 0;
 }
 
-off64_t _GD_SlimSeek(struct gd_raw_file_* file, off64_t count,
+off64_t GD_SLIM(Seek)(struct gd_raw_file_* file, off64_t count,
     gd_type_t data_type, unsigned int mode gd_unused_)
 {
-  off64_t n;
+  struct gd_slimdata *gdsl = file->edata;
 
   dtrace("%p, %lli, 0x%X, <unused>", file, (long long)count, data_type);
 
-  n = (off64_t)slimseek((SLIMFILE *)file->edata, (long)count *
-      GD_SIZE(data_type), SEEK_SET);
-
-  if (n == -1) {
-    dreturn("%i", -1);
-    return -1;
+  /* slimlib appears to do a rewind before every SEEK_SET ! */
+  if (slimseek(gdsl->f, (long)count * GD_SIZE(data_type), SEEK_SET))
+  {
+    /* Handle seeks past the EOF */
+    off64_t size = slimrawsize(gdsl->filepath) / GD_SIZE(data_type);
+    if (count < size || slimseek(gdsl->f, size, SEEK_SET)) {
+      dreturn("%i", -1);
+      return -1;
+    }
+    count = size;
   }
 
-  dreturn("%lli", (long long)(n / GD_SIZE(data_type)));
-  return n;
+  file->pos = count;
+  dreturn("%lli", (long long)count);
+  return count;
 }
 
-ssize_t _GD_SlimRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
+ssize_t GD_SLIM(Read)(struct gd_raw_file_ *restrict file, void *restrict ptr,
     gd_type_t data_type, size_t nmemb)
 {
   ssize_t n;
+  struct gd_slimdata *gdsl = file->edata;
 
   dtrace("%p, %p, 0x%X, %" PRNsize_t, file, ptr, data_type, nmemb);
 
-  n = slimread(ptr, GD_SIZE(data_type), nmemb, (SLIMFILE *)file->edata);
+  n = slimread(ptr, GD_SIZE(data_type), nmemb, gdsl->f);
 
   dreturn("%" PRNsize_t, n);
   return n;
 }
 
-int _GD_SlimClose(struct gd_raw_file_ *file)
+int GD_SLIM(Close)(struct gd_raw_file_ *file)
 {
   int ret;
+  struct gd_slimdata *gdsl = file->edata;
 
   dtrace("%p", file);
 
-  ret = slimclose((SLIMFILE *)file->edata);
+  ret = slimclose(gdsl->f);
   if (!ret) {
     file->idata = -1;
+    free(gdsl->filepath);
+    free(file->edata);
     file->edata = NULL;
     file->mode = 0;
   }
@@ -126,7 +169,7 @@ int _GD_SlimClose(struct gd_raw_file_ *file)
   return ret;
 }
 
-off64_t _GD_SlimSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
+off64_t GD_SLIM(Size)(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
     int swap gd_unused_)
 {
   off64_t size;
@@ -170,4 +213,19 @@ off64_t _GD_SlimSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 
   dreturn("%lli", (long long)size);
   return size;
+}
+
+int GD_SLIM(Strerr)(struct gd_raw_file_ *file, char *buf, size_t buflen)
+{
+  int r = 0;
+
+  dtrace("%p, %p, %" PRNsize_t, file, buf, buflen);
+
+  if (file->error)
+    r = gd_strerror(file->error, buf, buflen);
+  else /* the slimlib C API has no error reporting */
+    strncpy(buf, "SLIMLIB: Unspecified error", buflen);
+
+  dreturn("%i", r);
+  return r;
 }

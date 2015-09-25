@@ -46,8 +46,7 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
             _GD_ef[E->e->u.raw.file[0].subenc].sync != NULL &&
             (*_GD_ef[E->e->u.raw.file[0].subenc].sync)(E->e->u.raw.file))
         {
-          _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[0].name, 0,
-              NULL);
+          _GD_SetEncIOError(D, GD_E_IO_WRITE, E->e->u.raw.file + 0);
         } else if (clo && _GD_FiniRawIO(D, E, E->fragment_index,
               GD_FINIRAW_KEEP))
         {
@@ -933,6 +932,9 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
       case GD_ZZSLIM_ENCODED:
         encoding = "zzslim";
         use_encdat = 1;
+        break;
+      case GD_FLAC_ENCODED:
+        encoding = "flac";
         break;
       case GD_AUTO_ENCODED: /* an unresolved, auto-encoded fragment */
         break;

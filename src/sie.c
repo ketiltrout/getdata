@@ -86,10 +86,10 @@ static int _GD_SampIndDoOpen(int fdin, struct gd_raw_file_ *file,
   return fd;
 }
 
-int _GD_SampIndOpen(int fd, struct gd_raw_file_ *file, int swap,
-    unsigned int mode)
+int _GD_SampIndOpen(int fd, struct gd_raw_file_ *file,
+    gd_type_t data_type gd_unused_, int swap, unsigned int mode)
 {
-  dtrace("%i, %p, %i, 0x%X", fd, file, swap, mode);
+  dtrace("%i, %p, <unused>, %i, 0x%X", fd, file, swap, mode);
 
   if (file->mode & mode) {
     dreturn("%i", 0);

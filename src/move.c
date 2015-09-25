@@ -175,19 +175,17 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
     if ((*enc_in->seek)(E->e->u.raw.file, 0, E->EN(raw,data_type),
           GD_FILE_WRITE) == -1)
     {
-      _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[0].name, 0,
-          NULL);
+      _GD_SetEncIOError(D, GD_E_IO_WRITE, E->e->u.raw.file + 0);
     } else
-      _GD_WriteSeek(D, E, enc_out, -offset * E->EN(raw,spf), GD_FILE_WRITE
+      _GD_DoSeek(D, E, enc_out, -offset * E->EN(raw,spf), GD_FILE_WRITE
           | GD_FILE_TEMP);
   } else { /* new offset is more, truncate old file */
     if ((*enc_in->seek)(E->e->u.raw.file, offset * E->EN(raw,spf),
           E->EN(raw,data_type), GD_FILE_READ) == -1)
     {
-      _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[0].name, 0,
-          NULL);
+      _GD_SetEncIOError(D, GD_E_IO_WRITE, E->e->u.raw.file + 0);
     } else
-      _GD_WriteSeek(D, E, enc_out, 0, GD_FILE_WRITE | GD_FILE_TEMP);
+      _GD_DoSeek(D, E, enc_out, 0, GD_FILE_WRITE | GD_FILE_TEMP);
   }
 
   if (D->error) {
@@ -208,7 +206,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
         ns);
 
     if (nread < 0) {
-      _GD_SetError(D, GD_E_IO, GD_E_IO_READ, E->e->u.raw.file[0].name, 0, NULL);
+      _GD_SetEncIOError(D, GD_E_IO_READ, E->e->u.raw.file + 0);
       break;
     }
 
@@ -222,8 +220,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
     nwrote = _GD_WriteOut(E, enc_out, buffer, E->EN(raw,data_type), nread, 1);
 
     if (nwrote < nread) {
-      _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[1].name, 0,
-          NULL);
+      _GD_SetEncIOError(D, GD_E_IO_WRITE, E->e->u.raw.file + 1);
       break;
     }
   }

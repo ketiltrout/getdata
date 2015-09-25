@@ -959,8 +959,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
             D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
             D->fragment[E->fragment_index].dirfd, temp.name))
       {
-        _GD_SetError(D, GD_E_IO, GD_E_IO_RENAME, E->e->u.raw.file[0].name, 0,
-            NULL);
+        _GD_SetEncIOError(D, GD_E_IO_RENAME, E->e->u.raw.file + 0);
         free(filebase);
         dreturn("%i", -1);
         return -1;

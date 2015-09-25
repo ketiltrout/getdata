@@ -306,7 +306,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
     if ((*_GD_ef[E->e->u.raw.file[0].subenc].seek)(E->e->u.raw.file, s0,
           E->EN(raw,data_type), GD_FILE_READ) == -1)
     {
-      _GD_SetError(D, GD_E_IO, GD_E_IO_READ, E->e->u.raw.file[0].name, 0, NULL);
+      _GD_SetEncIOError(D, GD_E_IO_READ, E->e->u.raw.file + 0);
       free(databuffer);
       dreturn("%i", 0);
       return 0;
@@ -317,7 +317,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
           ns);
 
     if (samples_read == -1) {
-      _GD_SetError(D, GD_E_IO, GD_E_IO_READ, E->e->u.raw.file[0].name, 0, NULL);
+      _GD_SetEncIOError(D, GD_E_IO_READ, E->e->u.raw.file + 0);
       free(databuffer);
       dreturn("%i", 0);
       return 0;

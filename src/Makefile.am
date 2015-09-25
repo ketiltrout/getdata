@@ -29,6 +29,15 @@ SLIM_C=slim.c
 endif
 endif
 
+if USE_FLAC
+if USE_MODULES
+LIBGETDATAFLAC_LA=libgetdataflac.la
+DLOPEN_LIBGETDATAFLAC_LA=-dlopen libgetdataflac.la
+else
+FLAC_C=flac.c
+endif
+endif
+
 if USE_GZIP
 if USE_MODULES
 LIBGETDATAGZIP_LA=libgetdatagzip.la
@@ -79,10 +88,11 @@ EXPORT_DYNAMIC=-export-dynamic
 DGETDATA_MODULEDIR=-DGETDATA_MODULEDIR="\"$(moduledir)\""
 else
 EXTERNAL_CPPFLAGS=$(SLIM_CPPFLAGS) $(GZIP_CPPFLAGS) $(BZIP2_CPPFLAGS) \
-									$(LZMA_CPPFLAGS) $(ZZIP_CPPFLAGS)
+									$(LZMA_CPPFLAGS) $(ZZIP_CPPFLAGS) $(FLAC_CPPFLAGS)
 EXTERNAL_LDFLAGS=$(SLIM_LDFLAGS) $(GZIP_LDFLAGS) $(BZIP2_LDFLAGS) \
-								 $(LZMA_LDFLAGS) $(ZZIP_LDFLAGS)
-EXTERNAL_LIBS=$(SLIM_LIBS) $(GZIP_LIBS) $(BZIP2_LIBS) $(LZMA_LIBS) $(ZZIP_LIBS)
+								 $(LZMA_LDFLAGS) $(ZZIP_LDFLAGS) $(FLAC_LDFLAGS)
+EXTERNAL_LIBS=$(SLIM_LIBS) $(GZIP_LIBS) $(BZIP2_LIBS) $(LZMA_LIBS) \
+							$(ZZIP_LIBS) $(FLAC_LIBS)
 endif
 
 if INCLUDE_LEGACY_API
@@ -112,18 +122,19 @@ include_HEADERS = ${GETDATA_LEGACY_H}
 pkgconfig_DATA = getdata.pc
 
 lib_LTLIBRARIES = libgetdata.la
-module_LTLIBRARIES = ${LIBGETDATASLIM_LA} ${LIBGETDATAGZIP_LA} \
-									${LIBGETDATABZIP2_LA} ${LIBGETDATALZMA_LA} \
-									${LIBGETDATAZZIP_LA} ${LIBGETDATAZZSLIM_LA}
+module_LTLIBRARIES = ${LIBGETDATABZIP2_LA} ${LIBGETDATAFLAC_LA} \
+										 ${LIBGETDATAGZIP_LA} ${LIBGETDATALZMA_LA} \
+										 ${LIBGETDATASLIM_LA} ${LIBGETDATAZZIP_LA} \
+										 ${LIBGETDATAZZSLIM_LA}
 libgetdata_la_SOURCES = add.c ascii.c ${BZIP2_C} close.c common.c compat.c \
 												constant.c ${DEBUG_C} del.c encoding.c endian.c \
-												entry.c errors.c field_list.c flimits.c flush.c fpos.c \
-												fragment.c getdata.c globals.c ${GZIP_C} index.c \
-												include.c ${LEGACY_C} ${LZMA_C} mod.c move.c name.c \
-												native.c nfields.c nframes.c open.c parse.c protect.c \
-												putdata.c raw.c sie.c ${SLIM_C} spf.c string.c types.c \
-												${ZZIP_C} ${ZZSLIM_C} ${GETDATA_LEGACY_H} internal.h \
-												nan.h
+												entry.c errors.c field_list.c ${FLAC_C} flimits.c \
+												flush.c fpos.c fragment.c getdata.c globals.c \
+												${GZIP_C} index.c include.c ${LEGACY_C} ${LZMA_C} \
+												mod.c move.c name.c native.c nfields.c nframes.c \
+												open.c parse.c protect.c putdata.c raw.c sie.c \
+												${SLIM_C} spf.c string.c types.c ${ZZIP_C} ${ZZSLIM_C} \
+												${GETDATA_LEGACY_H} internal.h nan.h
 libgetdata_la_LDFLAGS = $(EXPORT_DYNAMIC) -export-symbols-regex '^[^_]' \
 												-version-info \
 												${GETDATA_IFACE_VERSION}:${GETDATA_IMPL_REVISION}:${GETDATA_IFACE_AGE} \
@@ -132,12 +143,17 @@ libgetdata_la_LIBADD = $(LIBLTDL) $(DLOPEN_LIBGETDATASLIM_LA) \
 											 $(DLOPEN_LIBGETDATAGZIP_LA) 
 											 $(DLOPEN_LIBGETDATABZIP2_LA) \
 											 $(DLOPEN_LIBGETDATALZMA_LA) $(DLOPEN_LIBGETDATAZZIP_LA) \
-											 $(DLOPEN_LIBGETDATAZZSLIM_LA)
+											 $(DLOPEN_LIBGETDATAZZSLIM_LA) $(DLOPEN_LIBGETDATAFLAC_LA) 
 
 libgetdataslim_la_SOURCES = slim.c
 libgetdataslim_la_LDFLAGS = $(SLIM_LDFLAGS) -release $(PACKAGE_VERSION) \
 														-module $(SLIM_LIBS)
 libgetdataslim_la_CPPFLAGS = $(AM_CPPFLAGS) $(SLIM_CPPFLAGS)
+
+libgetdataflac_la_SOURCES = flac.c
+libgetdataflac_la_LDFLAGS = $(FLAC_LDFLAGS) -release $(PACKAGE_VERSION) \
+														-module $(FLAC_LIBS)
+libgetdataflac_la_CPPFLAGS = $(AM_CPPFLAGS) $(FLAC_CPPFLAGS)
 
 libgetdatagzip_la_SOURCES = gzip.c
 libgetdatagzip_la_LDFLAGS = $(GZIP_LDFLAGS) -release $(PACKAGE_VERSION) \

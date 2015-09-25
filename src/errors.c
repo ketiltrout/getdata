@@ -84,7 +84,7 @@ static const struct {
   { GD_E_BAD_CODE, GD_E_CODE_REPR, "Invalid representation suffix in: {4}", 0 },
   /* GD_E_BAD_TYPE: 1 = data type */
   { GD_E_BAD_TYPE, 0, "Bad data type: {1}", 0 },
-  /* GD_E_IO: 2 = filename; 3 = line; 4 = included file */
+  /* GD_E_IO: 2 = filename; 3 = line; 4 = included file/encoding error */
   { GD_E_IO, GD_E_IO_OPEN, "Error opening {2}: ", 1 },
   { GD_E_IO, GD_E_IO_READ, "Error reading {2}: ", 1 },
   { GD_E_IO, GD_E_IO_WRITE, "Error writing {2}: ", 1 },
@@ -93,6 +93,12 @@ static const struct {
   { GD_E_IO, GD_E_IO_RENAME, "Error renaming {2}: ", 1 },
   { GD_E_IO, GD_E_IO_INCL, "Error opening {4} included on line {3} of {2}: ", 
     1 },
+  { GD_E_IO, GD_E_IO_ENC_OPEN, "Error opening {2}: {4}", 0 },
+  { GD_E_IO, GD_E_IO_ENC_READ, "Error reading {2}: {4}", 0 },
+  { GD_E_IO, GD_E_IO_ENC_WRITE, "Error writing {2}: {4}", 0 },
+  { GD_E_IO, GD_E_IO_ENC_CLOSE, "Error closing {2}: {4}", 0 },
+  { GD_E_IO, GD_E_IO_ENC_UNLINK, "Error unlinking {2}: {4} ", 0 },
+  { GD_E_IO, GD_E_IO_ENC_RENAME, "Error renaming {2}: {4} ", 0 },
   { GD_E_IO, 0, "Error accessing {2}: ", 1 },
   /* GD_E_INTERNAL_ERROR: 2 = source file, 3 = line */
   { GD_E_INTERNAL_ERROR, 0, "Internal error at [{2},{3}]; "
@@ -206,8 +212,7 @@ static const struct {
   { 0, 0, "Success", 0} /* this must be the last error string defined */
 };
 
-/* _GD_SetError: Sets the global error variables for a library error
-*/
+/* _GD_SetError: Sets the global error variables for a library error */
 void _GD_SetError2(DIRFILE* D, int error, int suberror,
     const char* format_file, int line, const char* token, int stdlib_errno)
 {
@@ -248,6 +253,23 @@ void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
   _GD_SetError2(D, error, suberror, format_file, line, token, errno);
 
   dreturnvoid();
+}
+
+/* Set an appropriate error message for encoding framework errors */
+void _GD_SetEncIOError(DIRFILE *D, int suberror, const struct gd_raw_file_ *f)
+{
+  dtrace("%p, %i, %p", D, suberror, f);
+
+  /* If the encoding has no strerr function, fallback on strerr */
+  if (_GD_MissingFramework(f->subenc, GD_EF_STRERR))
+    _GD_SetError(D, GD_E_IO, suberror, f->name, 0, NULL);
+  else {
+    char buffer[GD_MAX_LINE_LENGTH];
+    if ((*_GD_ef[f->subenc].strerr)(f, buffer, GD_MAX_LINE_LENGTH))
+      strcpy(buffer, "Unknown error");
+    _GD_SetError2(D, GD_E_IO, GD_E_IO_ENC_OFFSET + suberror, f->name, 0,
+        buffer, 0);
+  }
 }
 
 /* Return the error */
@@ -340,15 +362,8 @@ char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen) gd_nothrow
     }
 
     *op = '\0';
-    if (op < bufend - 1 && error_string[s].adderr) {
-#ifdef STRERROR_R_CHAR_P
-      char *ptr = strerror_r(D->stdlib_errno, op, bufend - op);
-      if (ptr != op)
-        strncpy(op, ptr, bufend - op);
-#else
-      strerror_r(D->stdlib_errno, op, bufend - op);
-#endif
-    }
+    if (op < bufend - 1 && error_string[s].adderr)
+      gd_strerror(D->stdlib_errno, op, bufend - op);
   }
 
   dreturn("\"%s\"", buffer);

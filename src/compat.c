@@ -470,3 +470,28 @@ double gd_strtod(const char *nptr, char **endptr)
   return r;
 }
 #endif
+
+/* There are two versions of this function: one deals with no strerror_r,
+ * the other with GNU's non XSI-conforming strerror_r */
+#if !defined HAVE_STRERROR_R || defined STRERROR_R_CHAR_P
+int gd_strerror(int errnum, char *buf, size_t buflen)
+{
+  char *ptr;
+
+  dtrace("%i, %p, %" PRNsize_t, errnum, buf, buflen);
+  
+#ifdef STRERROR_R_CHAR_P
+  ptr = strerror_r(errnum, buf, buflen);
+  if (ptr != buf)
+#else
+    ptr = strerror(errnum);
+#endif
+  {
+    strncpy(buf, ptr, buflen);
+    buf[buflen - 1] = 0;
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+#endif

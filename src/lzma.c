@@ -111,6 +111,7 @@ static struct gd_lzmadata *_GD_LzmaDoOpen(int dirfd, struct gd_raw_file_* file,
   }
 
   if (e != LZMA_OK) {
+    file->error = e;
     fclose(lzd->stream);
     free(lzd);
     dreturn("%p", NULL);
@@ -121,10 +122,10 @@ static struct gd_lzmadata *_GD_LzmaDoOpen(int dirfd, struct gd_raw_file_* file,
   return lzd;
 }
 
-int _GD_LzmaOpen(int dirfd, struct gd_raw_file_* file, int swap gd_unused_,
-    unsigned int mode)
+int _GD_LzmaOpen(int dirfd, struct gd_raw_file_* file,
+    gd_type_t data_type gd_unused_, int swap gd_unused_, unsigned int mode)
 {
-  dtrace("%i, %p, <unused>, 0x%X", dirfd, file, mode);
+  dtrace("%i, %p, <unused>, <unused>, 0x%X", dirfd, file, mode);
 
   file->edata = _GD_LzmaDoOpen(dirfd, file, mode);
 
@@ -146,12 +147,12 @@ int _GD_LzmaOpen(int dirfd, struct gd_raw_file_* file, int swap gd_unused_,
  * This doesn't update next_out, so we don't have to worry about updating
  * offset.
  */
-static int _GD_LzmaReady(struct gd_lzmadata *lzd, size_t nreq)
+static int _GD_LzmaReady(struct gd_lzmadata *lzd, size_t nreq, int *errnum)
 {
   lzma_ret e;
   int ready = READY(*lzd);
 
-  dtrace("%p, %" PRNsize_t, lzd, nreq);
+  dtrace("%p, %" PRNsize_t " %p", lzd, nreq, errnum);
 
   /* already have enough data, or no more data to read */
   if (LZEOF(*lzd) || (size_t)ready >= nreq) {
@@ -180,6 +181,7 @@ static int _GD_LzmaReady(struct gd_lzmadata *lzd, size_t nreq)
     /* code */
     e = lzma_code(&lzd->xz, LZMA_RUN);
     if (e != LZMA_OK && e != LZMA_STREAM_END) {
+      *errnum = e;
       dreturn("%i", -1);
       return -1;
     }
@@ -259,6 +261,7 @@ ssize_t _GD_LzmaWrite(struct gd_raw_file_ *file, const void *data,
   while (lzd->xz.avail_in > 0) {
     e = lzma_code(&lzd->xz, LZMA_RUN);
     if (e != LZMA_OK) {
+      file->error = e;
       dreturn("%i", -1);
       return -1;
     }
@@ -309,6 +312,7 @@ off64_t _GD_LzmaSeek(struct gd_raw_file_* file, off64_t count,
       lzd->xz.next_out = lzd->data_out;
       e = lzma_auto_decoder(&lzd->xz, UINT64_MAX, 0);
       if (e != LZMA_OK) {
+        file->error = e;
         file->idata = -1;
         free(lzd);
         file->edata = NULL;
@@ -325,7 +329,7 @@ off64_t _GD_LzmaSeek(struct gd_raw_file_* file, off64_t count,
       /* discard output */
       _GD_LzmaClear(lzd);
 
-      if (_GD_LzmaReady(lzd, lzd->xz.avail_out) < 0) {
+      if (_GD_LzmaReady(lzd, lzd->xz.avail_out, &file->error) < 0) {
         dreturn("%i", -1);
         return -1;
       }
@@ -381,7 +385,7 @@ ssize_t _GD_LzmaRead(struct gd_raw_file_ *file, void *data, gd_type_t data_type,
     if (lzd->xz.avail_out == 0)
       _GD_LzmaClear(lzd);
     
-    bready = _GD_LzmaReady(lzd, bcount);
+    bready = _GD_LzmaReady(lzd, bcount, &file->error);
     if (bready < 0) {
       dreturn("%i", -1);
       return -1;
@@ -422,6 +426,7 @@ int _GD_LzmaClose(struct gd_raw_file_ *file)
     for (;;) {
       e = lzma_code(&lzd->xz, LZMA_FINISH);
       if (e != LZMA_OK && e != LZMA_STREAM_END) {
+        file->error = e;
         dreturn("%i", 1);
         return 1;
       }
@@ -484,7 +489,7 @@ off64_t _GD_LzmaSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 
   /* read until EOF */
   while (!LZEOF(*lzd)) {
-    if (_GD_LzmaReady(lzd, GD_LZMA_DATA_OUT) < 0) {
+    if (_GD_LzmaReady(lzd, GD_LZMA_DATA_OUT, &file->error) < 0) {
       dreturn("%i", -1);
       return -1;
     }
@@ -504,4 +509,43 @@ off64_t _GD_LzmaSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 
   dreturn("%lli", (long long)n);
   return n;
+}
+
+int _GD_LzmaStrerr(struct gd_raw_file_ *file, char *buf, size_t buflen)
+{
+  int r = 0;
+
+  dtrace("%p, %p, %" PRNsize_t, file, buf, buflen);
+
+  switch(file->error) {
+    case LZMA_OK:
+      r = gd_strerror(errno, buf, buflen);
+      break;
+    case LZMA_MEM_ERROR:
+    case LZMA_MEMLIMIT_ERROR:
+      strncpy(buf, "LZMA: Out of memory", buflen);
+      break;
+    case LZMA_FORMAT_ERROR:
+      strncpy(buf, "LZMA: File format not recognized", buflen);
+      break;
+    case LZMA_OPTIONS_ERROR:
+      strncpy(buf, "LZMA: Invalid or unsupported options", buflen);
+      break;
+    case LZMA_DATA_ERROR:
+      strncpy(buf, "LZMA: Data is corrupt", buflen);
+      break;
+    case LZMA_BUF_ERROR:
+      strncpy(buf, "LZMA: No progress is possible", buflen);
+      break;
+    case LZMA_PROG_ERROR:
+      /* this indicate bugs in the code */
+      strncpy(buf, "Internal error in LZMA encoding", buflen);
+      break;
+    default:
+      snprintf(buf, buflen, "LZMA: Unkown error %i", file->error);
+      break;
+  }
+
+  dreturn("%i", r);
+  return r;
 }
