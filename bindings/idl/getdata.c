@@ -1145,6 +1145,8 @@ unsigned long gdidl_convert_encoding(IDL_VPTR idl_enc)
       encoding = GD_BZIP2_ENCODED;
     else if (strcasecmp(enc, "GZIP"))
       encoding = GD_GZIP_ENCODED;
+    else if (strcasecmp(enc, "FLAC"))
+      encoding = GD_FLAC_ENCODED;
     else if (strcasecmp(enc, "LZMA"))
       encoding = GD_LZMA_ENCODED;
     else if (strcasecmp(enc, "SLIM"))
