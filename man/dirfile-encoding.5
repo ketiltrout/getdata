@@ -155,9 +155,9 @@ section above for details.
 The FLAC format only permits samples up to 32-bits, but the libFLAC reference
 codec can only handle samples up to 24-bits.  GetData gets around this by
 slicing data that is wider than 16-bits into multiple channels (2, 4, or 8,
-depending on width), and puts the most-significant 16-bits into channel 0, the
-second 16-bits into channel, 1, &c.  All data is encoded as signed values,
-even unsigned types.
+depending on width).  For big-ended data, the most-significant 16-bits are
+in channel 0, the second 16-bits in channel 1, &c.  For little-ended data, this
+is reversed, with the least significant word in channel 0.
 
 The sample rate specified in the FLAC header is ignored and may be any valid
 value.  FLAC files written by GetData use a sample rate of 1 Hz.  The file

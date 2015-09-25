@@ -322,11 +322,10 @@ ssize_t _GD_FlacWrite(struct gd_raw_file_ *file, const void *data,
   ssize_t n = nmemb;
   const int size = GD_SIZE(data_type);
   size_t i, remaining;
+  unsigned c;
   int32_t *buffer[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
   const int8_t *i8 = data;
   const int16_t *i16 = data;
-  const int16_t *i32 = data;
-  const int16_t *i64 = data;
 
   dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
 
@@ -339,39 +338,14 @@ ssize_t _GD_FlacWrite(struct gd_raw_file_ *file, const void *data,
       }
 
     /* Data marshalling -- split into 32-bit-wide channels of
-     * 8- or 16-bit signed data -- the most significant 16-bits end
-     * up in channel 0 */
-    for (i = 0; i < nmemb; ++i) {
-      switch (size) {
-        case 1:
-          buffer[0][i] = i8[i];
-          break;
-        case 2:
-          buffer[0][i] = i16[i];
-          break;
-        case 4:
-          buffer[0][i] = i32[i] >> 16;
-          buffer[1][i] = i32[i] & 0xFFFF;
-          break;
-        case 8:
-          buffer[0][i] = i64[i] >> 48;
-          buffer[1][i] = (i64[i] >> 32) & 0xFFFF;
-          buffer[2][i] = (i64[i] >> 16) & 0xFFFF;
-          buffer[3][i] = i64[i] & 0xFFFF;
-          break;
-        case 16:
-          buffer[0][i] = i64[i * 2] >> 48;
-          buffer[1][i] = (i64[i * 2] >> 32) & 0xFFFF;
-          buffer[2][i] = (i64[i * 2] >> 16) & 0xFFFF;
-          buffer[3][i] = i64[i * 2] & 0xFFFF;
-
-          buffer[4][i] = i64[i * 2 + 1] >> 48;
-          buffer[5][i] = (i64[i * 2 + 1] >> 32) & 0xFFFF;
-          buffer[6][i] = (i64[i * 2 + 1] >> 16) & 0xFFFF;
-          buffer[7][i] = i64[i * 2 + 1] & 0xFFFF;
-          break;
-      }
-    }
+     * 8- or 16-bit signed data */
+    if (gdfl->bps == 8)
+      for (i = 0; i < nmemb; ++i)
+        buffer[0][i] = *(i8++);
+    else
+      for (i = 0; i < nmemb; ++i)
+        for (c = 0; c < gdfl->cps; ++c)
+          buffer[c][i] = *(i16++);
 
     /* Write the data -- we have to loop here because libFLAC uses
      * unsigned int for sample count */

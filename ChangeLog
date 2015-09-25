@@ -1,3 +1,7 @@
+2015-09-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1002
+	* src/flac.c (_GD_FlacWrite): Fix data marshalling for little-ended data.
+	* test/flac_put_complex128.c: Added.
+
 2015-09-24   D. V. Wiebe <getdata@ketiltrout.net> svn:1001
 	* src/flac.c: Added.
 	* configure.ac src/Makefile.am src/encoding.c (_GD_EncodingUnderstood)
