@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2013 D. V. Wiebe
+# Copyright (C) 2008-2015 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -43,7 +43,7 @@ libgetdata___la_SOURCES = dirfile.cpp bitentry.cpp carrayentry.cpp \
 													linterpentry.cpp mplexentry.cpp multiplyentry.cpp \
 													phaseentry.cpp polynomentry.cpp rawentry.cpp \
 													recipentry.cpp sbitentry.cpp \
-													stringentry.cpp windowentry.cpp
+													stringentry.cpp windowentry.cpp \
 													${getdata_include_HEADERS} internal.h
 libgetdata___la_LIBADD=../../src/libgetdata.la
 libgetdata___la_LDFLAGS = -version-info @GETDATAXX_VERSION@

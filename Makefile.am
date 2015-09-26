@@ -1,4 +1,4 @@
-# Copyright (C) 2008, 2011, 2014 D. V. Wiebe
+# Copyright (C) 2008-2015 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -29,7 +29,10 @@ SUBDIRS = src . test bindings util man doc
 dist_doc_DATA = COPYING.DOC
 
 clean-local:
-	rm -rf *~  m4/*~ README.txt
+	if [ -e $(distdir) ]; then chmod -R u+w $(distdir); fi
+	if [ -e idl_$(distdir) ]; then chmod -R u+w idl_$(distdir); fi
+	if [ -e matlab_$(distdir) ]; then chmod -R u+w matlab_$(distdir); fi
+	rm -rf *~  m4/*~ README.txt $(distdir) idl_$(distdir) matlab_$(distdir)
 
 %.sig: %
 	gpg -abo $@ $<
@@ -40,10 +43,20 @@ DISTCHECK_CONFIGURE_FLAGS = --enable-legacy-api --enable-modules \
 														--with-php-dir="$$dc_install_base/php" \
 														--with-python-module-dir="$$dc_install_base/python"
 
+# a locally-installed library for building and testing the IDL and matlab packages
+$(distdir)/_inst/lib/pkgconfig: $(distdir).tar.gz
+	tar -zxvf $(distdir).tar.gz
+	cd $(distdir) && \
+	mkdir _inst && \
+	./configure --enable-legacy-api --disable-bindings --prefix=`pwd`/_inst && \
+		${MAKE} && \
+		${MAKE} install
+
 # matlab-only package
-matlabdist: $(DISTFILES)
+matlabdist: $(DISTFILES) $(distdir)/_inst/lib/pkgconfig
 	rm -rf svn_export
 	svn export $(top_srcdir) svn_export
+	PKG_CONFIG_PATH=`pwd`/$(distdir)/_inst/lib/pkgconfig && \
 	( cd svn_export && \
 		mkdir matlab_getdata && \
 		mkdir matlab_getdata/m4 && \
@@ -65,20 +78,27 @@ matlabdist: $(DISTFILES)
 		autoheader && \
 		automake --add-missing --force-missing && \
 		./configure && \
-		make dist && \
+		${MAKE} dist && \
 		cp matlab_${distdir}* ../.. \
 		) )
 	rm -rf svn_export
 
-matlabdistcheck: matlab_$(distdir).tar.gz
+matlabdistcheck: matlab_$(distdir).tar.gz $(distdir)/_inst/lib/pkgconfig
+	if [ -e matlab_$(distdir) ]; then \
+		chmod -R u+w matlab_$(distdir); rm -rf matlab_$(distdir); \
+	fi
 	tar -zxvf $<
+	PKG_CONFIG_PATH=`pwd`/$(distdir)/_inst/lib/pkgconfig && \
+	${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:`pwd`/$(distdir)/_inst/lib && \
 	cd matlab_$(distdir) && ./configure && make dist && make distcheck
 	rm -rf matlab_$(distdir)
+	rm -rf $(distdir)
 
 # idl-only package
-idldist: $(DISTFILES)
+idldist: $(DISTFILES) $(distdir)/_inst/lib/pkgconfig
 	rm -rf svn_export
 	svn export $(top_srcdir) svn_export
+	PKG_CONFIG_PATH=`pwd`/$(distdir)/_inst/lib/pkgconfig && \
 	( cd svn_export && \
 		mkdir idl_getdata && \
 		mkdir idl_getdata/m4 && \
@@ -97,15 +117,21 @@ idldist: $(DISTFILES)
 		autoheader && \
 		automake --add-missing --force-missing && \
 		./configure && \
-		make dist && \
+		${MAKE} dist && \
 		cp idl_${distdir}* ../.. \
 		) )
 	rm -rf svn_export
 
-idldistcheck: idl_$(distdir).tar.gz
+idldistcheck: idl_$(distdir).tar.gz $(distdir)/_inst/lib/pkgconfig
+	if [ -e idl_$(distdir) ]; then \
+		chmod -R u+w idl_$(distdir); rm -rf idl_$(distdir); \
+	fi
 	tar -zxvf $<
+	PKG_CONFIG_PATH=`pwd`/$(distdir)/_inst/lib/pkgconfig && \
+	${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:`pwd`/$(distdir)/_inst/lib && \
 	cd idl_$(distdir) && ./configure && make dist && make distcheck
 	rm -rf idl_$(distdir)
+	rm -rf $(distdir)
 
 # windows source package
 windist: $(DISTFILES)

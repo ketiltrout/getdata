@@ -1185,6 +1185,7 @@ fi
 
 echo
 echo "Configuration summary: "
+echo "  Build platform:                ${build}"
 if test "x${cross_compiling}" != "xno"; then
   echo "  Cross compiling for:           ${host}"
 fi

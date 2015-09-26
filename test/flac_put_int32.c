@@ -31,8 +31,9 @@ int main(void)
   uint32_t c[8];
   uint32_t d[13];
   off_t nf;
-  int r = 0, i, e1, e2, e3;
+  int r = 0, e1, e2, e3;
   size_t n1, n2;
+  unsigned i;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -68,7 +69,7 @@ int main(void)
     if (i < 5)
       CHECKXi(i, d[i], 0);
     else
-      CHECKXi(i, d[i], 0x01020304 * (i - 5));
+      CHECKXi(i, d[i], 0x01020304U * (i - 5));
   }
 
   unlink(data);

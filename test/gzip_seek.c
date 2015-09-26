@@ -32,7 +32,7 @@ int main(void)
   const char *format_data = "data RAW UINT16 8\n";
   char command[4096];
   uint16_t data_data[256];
-  int fd, i, error, r = 0;
+  int fd, error, r = 0;
   off_t n;
   DIRFILE *D;
 

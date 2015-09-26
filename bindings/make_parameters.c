@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2013 D. V. Wiebe
+/* Copyright (C) 2008-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -392,7 +392,6 @@ void Fortran(void)
     printf("/\n");
   }
   printf("s/@GD_MAX_LINE_LENGTH@/%i/\n", GD_MAX_LINE_LENGTH);
-  printf("s/@SIZEOF_VOID_P@/%i/\n", SIZEOF_VOID_P);
 }
 
 void Python(void)

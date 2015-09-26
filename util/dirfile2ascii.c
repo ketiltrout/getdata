@@ -1,5 +1,5 @@
 /* Copyright (C) 2010, 2011 Matthew Truch
- * Copyright (C) 2010, 2014 D. V. Wiebe
+ * Copyright (C) 2010, 2012, 2014 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -17,24 +17,9 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef HAVE_CONFIG_H
-#include "gd_config.h"
-#endif
+#include "internal.h"
 
-#define _XOPEN_SOURCE 1000
-#define __STDC_FORMAT_MACROS
-#define __STDC_LIMIT_MACROS
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <limits.h>
-#include <stdint.h>
-#include <inttypes.h>
 #include <getopt.h>
-#include <math.h>
-#include "nan.h"
-#include "getdata.h"
 
 #ifndef HAVE_OFF64_T
 #define off64_t off_t
@@ -61,7 +46,7 @@ struct field
 void version(void)
 {
   printf("dirfile2ascii (%s)\n"
-      "Copyright (C) 2010, 2011, 2014 Matthew Truch and others\n\n"
+      "Copyright (C) 2010, 2011, 2012, 2014 Matthew Truch and others\n\n"
       "Please send reports of bugs and other communication to:\n  %s\n\n"
       "This program comes with NO WARRANTY, not even for MERCHANTABILITY "
       "or FITNESS\n"

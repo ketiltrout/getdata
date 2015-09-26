@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2015 D. V. Wiebe
+/* Copyright (C) 2011, 2012, 2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -34,7 +34,7 @@ struct gd_zzipdata {
  *
  * <enc_data>.zip\0<base>
  */
-int _GD_ZzipName(DIRFILE *restrict D, const char *restrict enc_data,
+int _GD_ZzipName(DIRFILE *restrict D gd_unused_, const char *restrict enc_data,
     struct gd_raw_file_ *restrict file, const char *restrict base,
     int temp gd_unused_, int resolv gd_unused_)
 {
@@ -235,7 +235,7 @@ off64_t _GD_ZzipSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
   return size;
 }
 
-int _GD_ZzipStrerr(struct gd_raw_file_ *file, char *buf, size_t buflen)
+int _GD_ZzipStrerr(const struct gd_raw_file_ *file, char *buf, size_t buflen)
 {
   int r = 0;
 

@@ -60,14 +60,14 @@ struct gd_flacdata {
 
 /* The decoder callback */
 static FLAC__StreamDecoderWriteStatus _GD_FlacWriteCallback(
-    const FLAC__StreamDecoder *decoder, const FLAC__Frame *frame,
+    const FLAC__StreamDecoder *decoder gd_unused_, const FLAC__Frame *frame,
     const FLAC__int32 *const buffer[], void *client_data)
 {
   struct gd_flacdata *gdfl = client_data;
   unsigned u, c;
   int16_t *ptr;
 
-  dtrace("%p, %p, %p, %p", decoder, frame, buffer, client_data);
+  dtrace("<unused>, %p, %p, %p", frame, buffer, client_data);
 
   /* Advance base for previous frame */
   gdfl->base += gdfl->dlen;
@@ -120,12 +120,12 @@ static FLAC__StreamDecoderWriteStatus _GD_FlacWriteCallback(
 }
 
 /* The decoder error callback */
-static void _GD_FlacErrorCallback(const FLAC__StreamDecoder *decoder,
+static void _GD_FlacErrorCallback(const FLAC__StreamDecoder *decoder gd_unused_,
     FLAC__StreamDecoderErrorStatus status, void *client_data)
 {
   struct gd_flacdata *gdfl = client_data;
 
-  dtrace("%p, %i, %p", decoder, (int)status, client_data);
+  dtrace("<unused>, %i, %p", (int)status, client_data);
 
   gdfl->error = 1;
   *gdfl->errnum = GD_FLAC_E_SDES | status;
@@ -508,7 +508,7 @@ off64_t _GD_FlacSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
   return n;
 }
 
-int _GD_FlacStrerr(struct gd_raw_file_ *file, char *buf, size_t buflen)
+int _GD_FlacStrerr(const struct gd_raw_file_ *file, char *buf, size_t buflen)
 {
   int r = 0;
 

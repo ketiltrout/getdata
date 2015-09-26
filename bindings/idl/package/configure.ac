@@ -121,7 +121,7 @@ dnl libraries
 echo
 echo "*** Looking for getdata"
 echo
-PKG_CHECK_MODULES([GETDATA], [getdata >= 0.8.6])
+PKG_CHECK_MODULES([GETDATA], [getdata >= 0.9.0])
 
 dnl headers
 echo

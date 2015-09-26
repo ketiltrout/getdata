@@ -1,4 +1,4 @@
-/* Copyright (C) 2008, 2010, 2011, 2014, 2015 D. V. Wiebe
+/* Copyright (C) 2008, 2010-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -215,7 +215,7 @@ off64_t GD_SLIM(Size)(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
   return size;
 }
 
-int GD_SLIM(Strerr)(struct gd_raw_file_ *file, char *buf, size_t buflen)
+int GD_SLIM(Strerr)(const struct gd_raw_file_ *file, char *buf, size_t buflen)
 {
   int r = 0;
 

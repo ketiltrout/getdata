@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2014 D. V. Wiebe
+/* Copyright (C) 2008-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -214,7 +214,7 @@ off64_t _GD_GzipSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
   return size;
 }
 
-int _GD_GzipStrerr(struct gd_raw_file_ *file, char *buf, size_t buflen)
+int _GD_GzipStrerr(const struct gd_raw_file_ *file, char *buf, size_t buflen)
 {
   int r = 0;
   int gzerrnum = 0;

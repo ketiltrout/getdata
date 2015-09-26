@@ -1,4 +1,4 @@
-C     Copyright (C) 2008-2013 D. V. Wiebe
+C     Copyright (C) 2008-2014 D. V. Wiebe
 C
 C     CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C
@@ -23,10 +23,6 @@ C     Fortran 77 parameters for GetData.  This file defines handy
 C     constants useful to Fortran programs.
 
       @PARAMETERS@
-
-C     The length of the opaque packed data string returned by GDGSTP
-      INTEGER GDPKSZ
-      PARAMETER (GDPKSZ=@SIZEOF_VOID_P@)
 
 C Externals
 C     Corresponding to gd_alter_affixes(3)

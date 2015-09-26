@@ -18,7 +18,7 @@
 # along with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-AUTOMAKE_OPTIONS = foreign dist-bzip2 check-news 1.13
+AUTOMAKE_OPTIONS = foreign dist-xz check-news 1.13
 
 ACLOCAL_AMFLAGS = -I m4
 
@@ -35,7 +35,8 @@ SUBDIRS = . src
 EXTRA_DIST = ChangeLog README.idl
 
 make_parameters$(EXEEXT): $(make_parameters_SOURCES)
-	${BUILDCC} $(DEFS) -Isrc -o make_parameters$(EXEEXT) $(srcdir)/$(make_parameters_SOURCES)
+	${BUILDCC} $(DEFS) $(GETDATA_CFLAGS) -Isrc \
+		-o make_parameters$(EXEEXT) $(srcdir)/$(make_parameters_SOURCES)
 
 clean-local:
 	rm -rf *~ 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2009-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -511,7 +511,7 @@ off64_t _GD_LzmaSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
   return n;
 }
 
-int _GD_LzmaStrerr(struct gd_raw_file_ *file, char *buf, size_t buflen)
+int _GD_LzmaStrerr(const struct gd_raw_file_ *file, char *buf, size_t buflen)
 {
   int r = 0;
 

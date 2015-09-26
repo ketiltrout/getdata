@@ -1,4 +1,34 @@
-2015-09-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1002
+2015-09-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1004
+	GetData-0.9.0rc1:
+
+	* src/internal.h (gd_ef_strerr_t): Mark first argument const.
+
+	* src/include.c (_GD_SetFieldAffixes): Remove unused ns and nsl arguments.
+
+	* src/legacy.c (GetFormat): Remove DSV 10 stuff.
+
+	* test/ascii_get_here.c: Fix e1 check.
+	* test/flac_put_int32.c: Fix signedness.
+
+	* bindings/matlab/gd_add_indir.m bindings/matlab/gd_add_sindir.m
+	bindings/matlab/gd_alter_indir.m bindings/matlab/gd_alter_sindir.m
+	bindings/matlab/gd_madd_indir.m bindings/matlab/gd_madd_sindir.m
+	bindings/matlab/gd_msarrays.c: Deleted.
+	
+	* src/nan.h: Deleted.
+	* src/internal.h: Merged in nan.h content.
+
+	* test/gzip_put_off.c test/gzip_seek_put.c: Halve the amount of data used.
+
+	Merge in build system fixes from GetData-0.8 branch, revision 969:
+
+	* Makefile.am: Don't run matlabdistcheck and idldistcheck against an
+	installed GetData.
+
+	* bindings/idl/Makefile.am bindings/python/Makefile.am: Fix VPATH builds
+	again.
+
+2015-09-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1003
 	* src/flac.c (_GD_FlacWrite): Fix data marshalling for little-ended data.
 	* test/flac_put_complex128.c: Added.
 

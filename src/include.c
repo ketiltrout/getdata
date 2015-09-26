@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2014 D. V. Wiebe
+/* Copyright (C) 2008, 2010-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,11 +24,10 @@
  * on a /INCLUDE line.  Also, change the root namespace, if necessary.  The
  * caller is responsible for freeing strings on error */
 static int _GD_SetFieldAffixes(DIRFILE *D, const struct parser_state *p, int me,
-    const char *prefix_in, const char *suffix_in, char **prefix, char **suffix,
-    char **ns, size_t *nsl)
+    const char *prefix_in, const char *suffix_in, char **prefix, char **suffix)
 {
-  dtrace("%p, %p, %i, \"%s\", \"%s\", %p, %p, %p, %p", D, p, me,
-      prefix_in, suffix_in, prefix, suffix, ns, nsl);
+  dtrace("%p, %p, %i, \"%s\", \"%s\", %p, %p", D, p, me, prefix_in, suffix_in,
+      prefix, suffix);
 
   /* suffix first, for some reason */
   if (suffix_in && suffix_in[0] != '\0') {
@@ -118,8 +117,7 @@ int _GD_Include(DIRFILE *D, struct parser_state *p, const char *ename,
     goto include_error;
   }
 
-  if (_GD_SetFieldAffixes(D, p, parent, prefix_in, suffix_in, &prefix, &suffix,
-        &ns, &nsl))
+  if (_GD_SetFieldAffixes(D, p, parent, prefix_in, suffix_in, &prefix, &suffix))
   {
     goto include_error;
   }

@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2014 D. V. Wiebe
+# Copyright (C) 2013-2015 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -24,25 +24,22 @@ SUBDIRS=test
 
 matlabdir=$(matlabbasedir)/getdata
 
-matlabfiles=gd_add_bit.m gd_add_divide.m gd_add_indir.m gd_add_lincom.m \
-						gd_add_linterp.m gd_add_mplex.m gd_add_multiply.m gd_add_phase.m \
-						gd_add_polynom.m gd_add_raw.m gd_add_recip.m gd_add_sbit.m \
-						gd_add_sindir.m gd_add_window.m \
+matlabfiles=gd_add_bit.m gd_add_divide.m gd_add_lincom.m gd_add_linterp.m \
+						gd_add_mplex.m gd_add_multiply.m gd_add_phase.m gd_add_polynom.m \
+						gd_add_raw.m gd_add_recip.m gd_add_sbit.m gd_add_window.m \
 						gd_alter_bit.m gd_alter_carray.m gd_alter_const.m \
-						gd_alter_divide.m gd_alter_indir.m \
-						gd_alter_lincom.m gd_alter_linterp.m \
+						gd_alter_divide.m gd_alter_lincom.m gd_alter_linterp.m \
 						gd_alter_mplex.m gd_alter_multiply.m gd_alter_phase.m \
-						gd_alter_polynom.m gd_alter_raw.m gd_alter_recip.m \
-						gd_alter_sbit.m gd_alter_sindir.m \
+						gd_alter_polynom.m gd_alter_raw.m gd_alter_recip.m gd_alter_sbit.m \
 						gd_alter_window.m gd_field_list_by_type.m gd_field_list.m \
-						gd_get_constant.m gd_madd_bit.m gd_madd_divide.m gd_madd_indir.m \
-						gd_madd_lincom.m gd_madd_linterp.m gd_madd_mplex.m \
-						gd_madd_multiply.m gd_madd_phase.m gd_madd_polynom.m \
-						gd_madd_recip.m gd_madd_sbit.m gd_madd_sindir.m gd_madd_window.m \
-						gd_mfield_list_by_type.m gd_mfield_list.m gd_mvector_list.m \
-						gd_nfields_by_type.m gd_nfields.m gd_nmfields_by_type.m \
-						gd_nmfields.m gd_nmvectors.m gd_nvectors.m gd_put_carray.m \
-						gd_put_constant.m gd_vector_list.m getdata_constants.m
+						gd_get_constant.m gd_madd_bit.m gd_madd_divide.m gd_madd_lincom.m \
+						gd_madd_linterp.m gd_madd_mplex.m gd_madd_multiply.m \
+						gd_madd_phase.m gd_madd_polynom.m gd_madd_recip.m gd_madd_sbit.m \
+						gd_madd_window.m gd_mfield_list_by_type.m gd_mfield_list.m \
+						gd_mvector_list.m gd_nfields_by_type.m gd_nfields.m \
+						gd_nmfields_by_type.m gd_nmfields.m gd_nmvectors.m gd_nvectors.m \
+						gd_put_carray.m gd_put_constant.m gd_vector_list.m \
+						getdata_constants.m
 mexfiles=gd_add gd_add_alias \
 				 gd_add_carray gd_add_const \
 				 gd_add_spec gd_add_string gd_aliases \

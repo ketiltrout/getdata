@@ -49,7 +49,7 @@ int main(void)
   e1 = gd_error(D);
 
   CHECKI(n1, 40);
-  CHECKI(e2, 0);
+  CHECKI(e1, 0);
 
   n2 = gd_getdata(D, "data", GD_HERE, 0, 1, 0, GD_UINT8, c);
   e2 = gd_error(D);

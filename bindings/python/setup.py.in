@@ -1,4 +1,4 @@
-# Copyright (C) 2012 D. V. Wiebe
+# Copyright (C) 2012, 2015 D. V. Wiebe
 #
 # @configure_input@
 #
@@ -34,7 +34,7 @@ libbuild_dir = '../../src'
 srcdir = '@srcdir@'
 
 #include paths
-includes = [ libbuild_dir ]
+includes = [ libbuild_dir, libsrc_dir ]
 
 import numpy
 includes.append(numpy.get_include())
@@ -46,7 +46,7 @@ cmdclass = {}
 
 class gd_clean(clean):
   def run(self):
-    if '@srcdir@' != '.':
+    if srcdir != '.':
       for x in sources:
         unlink(x)
     clean.run(self)
@@ -79,7 +79,6 @@ sources.append('pyconstants.c')
 if @GETDATA_DEBUG@:
   copy(join(libsrc_dir, 'debug.c'), 'debug.c') # see comment above
   sources.append('debug.c')
-  includes.append(libsrc_dir) # to find internal.h
 
 setup(
     name = 'pygetdata',

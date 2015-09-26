@@ -21,8 +21,6 @@
  */
 #include "internal.h"
 
-#include "nan.h"
-
 #define EXTRACT_REPR(it,ot,f,cc) \
   for (i = 0; i < n; ++i) ((ot *)rdata)[i] = (ot)f(cc(((it *)cdata)[i]))
 

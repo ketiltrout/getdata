@@ -33,7 +33,6 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *format_data = "FRAMEOFFSET 2\ndata RAW UINT8 1\n";
-  unsigned char c1[5], c2[5];
   unsigned char data_data[256];
   int i, fd, e, r = 0;
   off_t t, s;
