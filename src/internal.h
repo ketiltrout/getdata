@@ -33,7 +33,7 @@
 #define GD_64BIT_API
 #include "getdata.h"
 
-/* OS X 10.6 deprecates lstat64 */
+/* MacOS 10.6 deprecates the LFS transitional API */
 #ifdef HAVE_AVAILABILITY_H
 #include <Availability.h>
 #endif
@@ -205,12 +205,6 @@ typedef gd_off64_t off64_t;
 /* compare a to b */
 #  define gd_ccmpc_(a,b) ((a)[0] == (b)[0] && (a)[1] == (b)[1])
 #else
-#  ifdef GD_COMPLEX_CONV_OK
-#    define GD_RTOC(z) (z)
-#  else
-#    define GD_RTOC(z) (double _Complex)(z)
-#  endif
-
 #  define GD_DCOMPLEXP_t double _Complex *
 #  define GD_DCOMPLEXA(v) double _Complex v
 #  define GD_DCOMPLEXV(v) double _Complex *restrict v
@@ -574,6 +568,7 @@ typedef struct stat gd_stat64_t;
 #ifdef GD_NO_64BIT_STAT
 # define gd_stat64 stat
 # define gd_fstat64 fstat
+# define gd_StatAt64 gd_StatAt
 #else
 # if HAVE_STAT64
 #  define gd_stat64 stat64
@@ -591,6 +586,12 @@ typedef struct stat gd_stat64_t;
 #  define gd_fstat64 _fstat
 # else
 #  define gd_fstat64 fstat
+# endif
+
+# ifdef HAVE_FSTATAT64
+#  define gd_StatAt64(d,...) fstatat64(__VA_ARGS__)
+# else
+int gd_StatAt64(const DIRFILE*, int, const char*, gd_stat64_t*, int);
 # endif
 #endif
 
@@ -627,26 +628,18 @@ int gd_RenameAt(const DIRFILE *D, int, const char*, int, const char*);
 int gd_UnlinkAt(const DIRFILE*, int, const char*, int);
 #endif
 
-#ifdef HAVE_FSTATAT64
-# define gd_StatAt64(d,...) fstatat64(__VA_ARGS__)
-#else
-int gd_StatAt64(const DIRFILE*, int, const char*, gd_stat64_t*, int);
+#if defined HAVE_STERROR_R && ! defined HAVE_DECL_STRERROR_R
+# if ! HAVE_DECL_STRERROR_R
+char* strerror_r(int, char*, size_t);
+# else
+int strerror_r(int, char*, size_t);
+# endif
 #endif
 
-#ifdef HAVE_STERROR_R
-#ifdef STRERROR_R_CHAR_P
-#if ! HAVE_DECL_STRERROR_R
-char* strerror_r(int, char*, size_t);
-#endif
+#if !defined HAVE_STRERROR_R || defined STRERROR_R_CHAR_P
 int gd_strerror(int errnum, char *buf, size_t buflen);
-#else /* ! STRERROR_R_CHAR_P */
-#ifdef STRERROR_R_CHAR_P
-int strerror_r(int, char*, size_t);
-#endif
-#define gd_sterror gd_sterror_r
-#endif
-#else /* ! HAVE_STERROR_R */
-int gd_strerror(int errnum, char *buf, size_t buflen);
+#else
+# define gd_strerror strerror_r
 #endif
 
 #if defined HAVE_FTRUNCATE64

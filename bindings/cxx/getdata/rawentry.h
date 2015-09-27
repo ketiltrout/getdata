@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2012 D. V. Wiebe
+// Copyright (C) 2008-2012, 2015 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -51,9 +51,13 @@ namespace GetData {
       int SetSamplesPerFrame(const char *spf, int recode = 0);
       int SetType(DataType type, int recode = 0);
 
-      virtual const char *Scalar() const { return E.scalar[0]; };
+      virtual const char *Scalar(int index = 0) const {
+        return (index == 0) ? E.scalar[0] :  NULL;
+      };
 
-      virtual int ScalarIndex() const { return E.scalar_ind[0]; };
+      virtual int ScalarIndex(int index = 0) const {
+        return (index == 0) ? E.scalar_ind[0] :  0;
+      };
 
     private:
       RawEntry(const GetData::Dirfile *dirfile, const char* field_code) :

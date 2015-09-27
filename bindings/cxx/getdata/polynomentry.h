@@ -1,4 +1,4 @@
-// Copyright (C) 2009-2011, 2013 D. V. Wiebe
+// Copyright (C) 2009-2011, 2013, 2015 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -40,7 +40,9 @@ namespace GetData {
       PolynomEntry(const char* field_code, int poly_ord, const char* in_field,
           std::complex<double>* ca, int fragment_index = 0);
 
-      virtual const char *Input() const { return E.in_fields[0]; };
+      virtual const char *Input(int index = 0) const {
+        return (index == 0) ? E.in_fields[0] : NULL;
+      };
 
       virtual int ComplexScalars() const {
         return (E.flags & GD_EN_COMPSCAL) ? 1 : 0;
@@ -48,25 +50,26 @@ namespace GetData {
 
       virtual int PolyOrd() const { return E.u.polynom.poly_ord; };
 
-      virtual double Coefficient(int index = 0) const {
-        return (index <= E.u.polynom.poly_ord) ? E.u.polynom.a[index] : 0;
+      virtual double Coefficient(int index) const {
+        return (index >= 0 && index <= E.u.polynom.poly_ord) ?
+          E.u.polynom.a[index] : 0;
       };
 
-      virtual std::complex<double> CCoefficient(int index = 0) const {
-        return (index <= E.u.polynom.poly_ord)
-          ? std::complex<double>(E.u.polynom.ca[index][0],
+      virtual std::complex<double> CCoefficient(int index) const {
+        return (index >= 0 && index <= E.u.polynom.poly_ord) ?
+          std::complex<double>(E.u.polynom.ca[index][0],
               E.u.polynom.ca[index][1]) : 0;
       };
 
-      virtual const char *Scalar(int index = 0) const;
+      virtual const char *Scalar(int index) const;
 
-      virtual int ScalarIndex(int index = 0) const;
+      virtual int ScalarIndex(int index) const;
 
       int SetPolyOrd(int poly_ord);
       int SetInput(const char* field);
-      int SetCoefficient(double coeff, int index = 0);
-      int SetCoefficient(const char* coeff, int index = 0);
-      int SetCoefficient(std::complex<double> coeff, int index = 0);
+      int SetCoefficient(double coeff, int index);
+      int SetCoefficient(const char* coeff, int index);
+      int SetCoefficient(std::complex<double> coeff, int index);
 
     private:
       PolynomEntry(const GetData::Dirfile *dirfile, const char* field_code) :

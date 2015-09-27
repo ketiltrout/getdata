@@ -210,6 +210,12 @@ New in verison 0.9.0rc1:
 
   * PHP bindings have been added.
 
+  * C++: There is no longer a default value for the "index" argument for
+    Entry methods (including subclasses) which accept it (viz. Input,
+    Scalar, ScalarIndex, Scale, CScale, Offset COffset, Coefficient,
+    CCoefficient).  The exception to this is with Entry subclasses for which
+    zero is the only allowed value for the parameter.
+
   * F77 and F95: The bindings no longer raise SIGABRT when the dirfile
     space is exhausted.  Instead they simply return a invalid dirfile unit
     number.
@@ -251,6 +257,11 @@ New in verison 0.9.0rc1:
     error codes (such as OpenError).  These deprecated exceptions are
     simply aliases for the current ones and are never returned by the
     bindings.
+
+  * C++ BUG FIX: The Entry methods Input, Scalar, and ScalarIndex (including
+    subclasses) now return zero or NULL when passed an out-of-range index value.
+    Previously they would return, variously, zero, NULL, another value for some
+    other, valid index value, or segfault.
 
   * F95 BUG FIX: fgd_add and fgd_alter_entry no longer ignore named scalar
     parameters provided in supplied entry structures.

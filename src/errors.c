@@ -297,7 +297,7 @@ char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen) gd_nothrow
   dtrace("%p, %p, %" PRNsize_t, D, buffer, buflen);
 
   /* Sanity check */
-  if (D == NULL || (buffer && buflen < 1)) {
+  if (buffer && buflen < 1) {
     dreturn("%p", NULL);
     return NULL;
   }

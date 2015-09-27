@@ -33,7 +33,10 @@ int main(void)
   uint16_t c[8];
   char command[4096];
   uint16_t data_data[256];
-  int fd, i, n, error, r = 0;
+  int fd, n, error, r = 0;
+#if USE_FLAC
+  int i;
+#endif
   DIRFILE *D;
 
   memset(c, 0, 8);

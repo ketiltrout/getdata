@@ -688,7 +688,6 @@ AC_TYPE_UINT64_T
 
 if test "x$disable_c99" = "xno"; then
 AC_CHECK_TYPES([_Complex float, _Complex double])
-GD_C_CAST_COMPLEX
 fi
 
 AC_CHECK_TYPES([struct stat64, struct _stat64, struct __stat64, off64_t])
@@ -938,7 +937,8 @@ dnl external encodings
 GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2],[])
 GD_CHECK_ENCODING([flac],[FLAC],[FLAC__stream_decoder_init_FILE],[FLAC/all.h],
                   [flac],[],[])
-GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip],[])
+GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip],
+                  [gzseek64 gztell64])
 GD_CHECK_ENCODING([lzma],[lzma],[lzma_auto_decoder],[lzma.h],[xz],[],[])
 GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h], [slimdata slim],
                   [unslim],[slimdopen slimdrawsize])

@@ -1,3 +1,37 @@
+2015-09-26   D. V. Wiebe <getdata@ketiltrout.net> svn:1005
+	* bindings/cxx/bitentry.cpp (BitEntry::Scalar BitEntry::ScalarIndex)
+	bindings/cxx/sbitentry.cpp (SBitEntry::Scalar SBitEntry::ScalarIndex): Moved
+	to header.
+
+	* bindings/cxx/getdata/bitentry.h (Input Scalar ScalarIndex)
+	bindings/cxx/getdata/divideentry.h (Input) bindings/cxx/getdata/entry.h
+	(Input Scalar ScalarIndex Scale CScale Offset COffset Coefficient CCoefficient
+	SetInput SetScale SetOffset SetCoefficient) bindings/cxx/getdata/lincomentry.h
+	(Input Scalar ScalarIndex Scale CScale Offset COffset SetInput SetScale
+	SetOffset) bindings/cxx/getdata/linterpentry.h (Input)
+	bindings/cxx/getdata/mplexentry.h (Input Scalar ScalarIndex)
+	bindings/cxx/getdata/multiplyentry.h (Input) bindings/cxx/getdata/phaseentry.h
+	(Input Scalar ScalarIndex) bindings/cxx/getdata/polynomentry.h (Input Scalar
+	ScalarIndex Coefficient CCoefficient SetCoefficient)
+	bindings/cxx/getdata/rawentry.h (Scalar ScalarIndex)
+	bindings/cxx/getdata/recipentry.h (Index Scalar ScalarIndex)
+	bindings/cxx/getdata/sbitentry.h (Index Scalar ScalarIndex)
+	bindings/cxx/getdata/windowentry.h (Index Scalar ScalarIndex): Remove default
+	from index.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getfieldlist
+	gdpy_dirfile_getmfieldlist gdpy_dirfile_getnmfields): Fix type cast.
+
+	* configure.ac: Remove GD_C_CAST_COMPLEX
+	* src/getdata.c (_GD_ExtractRepr): Avoid calling complex functions
+	unnecessarily.
+	* src/internal.h: Remove GD_RTOC.
+
+	* configure.ac: Check for gzseek64 and gztell64
+	* src/gzip.c (_GD_GzipSeek): Abstractify gzseek and gztell.
+
+	* src/internal.h: Redirect gd_StatAt64 if GD_NO_64BIT_STAT.
+
 2015-09-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1004
 	GetData-0.9.0rc1:
 

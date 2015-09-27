@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -70,8 +70,10 @@ int main(void)
     0xb1, 0xc4, 0x67, 0xfb, 0x02, 0x00, 0x00, 0x00,
     0x00, 0x04, 0x59, 0x5a
   };
-  uint8_t b, c[8], d[8];
+  uint8_t c[8], d[8];
+#ifdef USE_LZMA
   char command[4096];
+#endif
   int fd, i, m, n, e1, e2, e3, unlink_data, unlink_dataxz, r = 0;
   DIRFILE *D;
 
@@ -109,6 +111,7 @@ int main(void)
   if (gd_system(command)) {
     r = 1;
   } else {
+    uint8_t b;
     fd = open(data, O_RDONLY | O_BINARY);
     if (fd >= 0) {
       i = 0;

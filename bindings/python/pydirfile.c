@@ -910,7 +910,7 @@ static PyObject *gdpy_dirfile_getfieldlist(struct gdpy_dirfile_t *self,
   if (type == GD_NO_ENTRY)
     fields = gd_field_list(self->D);
   else
-    fields = gd_field_list_by_type(self->D, (gd_type_t)type);
+    fields = gd_field_list_by_type(self->D, (gd_entype_t)type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1228,7 +1228,7 @@ static PyObject *gdpy_dirfile_getmfieldlist(struct gdpy_dirfile_t *self,
   if (type == GD_NO_ENTRY)
     fields = gd_mfield_list(self->D, parent);
   else
-    fields = gd_mfield_list_by_type(self->D, parent, (gd_type_t)type);
+    fields = gd_mfield_list_by_type(self->D, parent, (gd_entype_t)type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1492,7 +1492,7 @@ static PyObject *gdpy_dirfile_getnmfields(struct gdpy_dirfile_t *self,
   if (type == GD_NO_ENTRY)
     nmfields = gd_nmfields(self->D, parent);
   else
-    nmfields = gd_nmfields_by_type(self->D, parent, (gd_type_t)type);
+    nmfields = gd_nmfields_by_type(self->D, parent, (gd_entype_t)type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 

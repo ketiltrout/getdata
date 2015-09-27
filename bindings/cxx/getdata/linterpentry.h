@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2011 D. V. Wiebe
+// Copyright (C) 2008-2011, 2015 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -37,7 +37,9 @@ namespace GetData {
       LinterpEntry(const char* field_code, const char* in_field,
           const char* table, int fragment_index = 0);
 
-      virtual const char *Input() const { return E.in_fields[0]; };
+      virtual const char *Input(int index = 0) const {
+        return (index == 0) ? E.in_fields[0] : NULL;
+      };
 
       virtual const char *Table() const { return E.u.linterp.table; };
 

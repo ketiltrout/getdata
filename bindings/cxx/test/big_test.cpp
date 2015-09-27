@@ -341,7 +341,7 @@ void run_tests(void)
   CHECK_INT2(44,1,ent->Type(),PolynomEntryType);
   CHECK_INT2(44,2,ent->PolyOrd(),5);
   CHECK_INT2(44,3,ent->FragmentIndex(),0);
-  CHECK_STRING2(44,4,ent->Input(),"data");
+  CHECK_STRING2(44,4,ent->Input(0),"data");
   CHECK_INT2(44,7,ent->ComplexScalars(),1);
   CHECK_COMPLEX_ARRAY(44,6,ent->CCoefficient(i),cq[i]);
   delete ent;
@@ -351,7 +351,7 @@ void run_tests(void)
   CHECK_OK(45);
   CHECK_INT2(45,1,ent->Type(),LinterpEntryType);
   CHECK_INT2(45,2,ent->FragmentIndex(),0);
-  CHECK_STRING2(45,3,ent->Input(),"data");
+  CHECK_STRING2(45,3,ent->Input(0),"data");
   CHECK_STRING2(45,4,ent->Table(),"./lut");
   delete ent;
 
@@ -360,7 +360,7 @@ void run_tests(void)
   CHECK_OK(46);
   CHECK_INT2(46,1,ent->Type(),BitEntryType);
   CHECK_INT2(46,2,ent->FragmentIndex(),0);
-  CHECK_STRING2(46,3,ent->Input(),"data");
+  CHECK_STRING2(46,3,ent->Input(0),"data");
   CHECK_INT2(46,4,ent->NumBits(),4);
   CHECK_INT2(46,5,ent->FirstBit(),3);
   delete ent;
@@ -370,7 +370,7 @@ void run_tests(void)
   CHECK_OK(47);
   CHECK_INT2(47,1,ent->Type(),SBitEntryType);
   CHECK_INT2(47,2,ent->FragmentIndex(),0);
-  CHECK_STRING2(47,3,ent->Input(),"data");
+  CHECK_STRING2(47,3,ent->Input(0),"data");
   CHECK_INT2(47,4,ent->NumBits(),6);
   CHECK_INT2(47,5,ent->FirstBit(),5);
   delete ent;
@@ -389,7 +389,7 @@ void run_tests(void)
   CHECK_OK(49);
   CHECK_INT2(49,1,ent->Type(),PhaseEntryType);
   CHECK_INT2(49,2,ent->FragmentIndex(),0);
-  CHECK_STRING2(49,3,ent->Input(),"data");
+  CHECK_STRING2(49,3,ent->Input(0),"data");
   CHECK_INT2(49,4,ent->Shift(),11);
   delete ent;
 
@@ -509,7 +509,7 @@ void run_tests(void)
   CHECK_INT2(56,1,ent->Type(),PolynomEntryType);
   CHECK_INT2(56,2,ent->PolyOrd(),3);
   CHECK_INT2(56,3,ent->FragmentIndex(),0);
-  CHECK_STRING2(56,4,ent->Input(),"in1");
+  CHECK_STRING2(56,4,ent->Input(0),"in1");
   CHECK_INT2(56,5,ent->ComplexScalars(),0);
   CHECK_DOUBLE_ARRAY(56,6,4,ent->Coefficient(i),q[i]);
   delete ent;
@@ -536,7 +536,7 @@ void run_tests(void)
   CHECK_INT2(57,1,ent->Type(),PolynomEntryType);
   CHECK_INT2(57,2,ent->PolyOrd(),3);
   CHECK_INT2(57,3,ent->FragmentIndex(),0);
-  CHECK_STRING2(57,4,ent->Input(),"in2");
+  CHECK_STRING2(57,4,ent->Input(0),"in2");
   CHECK_INT2(57,7,ent->ComplexScalars(),1);
   CHECK_COMPLEX_ARRAY(57,4,ent->CCoefficient(i),cq[i]);
   delete ent;
@@ -553,7 +553,7 @@ void run_tests(void)
   CHECK_OK2(58,2);
   CHECK_INT2(58,1,ent->Type(),LinterpEntryType);
   CHECK_INT2(58,2,ent->FragmentIndex(),0);
-  CHECK_STRING2(58,3,ent->Input(),"in");
+  CHECK_STRING2(58,3,ent->Input(0),"in");
   CHECK_STRING2(58,4,ent->Table(),"./some/table");
   delete ent;
 
@@ -570,7 +570,7 @@ void run_tests(void)
   CHECK_OK(59);
   CHECK_INT2(59,1,ent->Type(),BitEntryType);
   CHECK_INT2(59,2,ent->FragmentIndex(),0);
-  CHECK_STRING2(59,3,ent->Input(),"in1");
+  CHECK_STRING2(59,3,ent->Input(0),"in1");
   CHECK_INT2(59,4,ent->NumBits(),12);
   CHECK_INT2(59,5,ent->FirstBit(),13);
   delete ent;
@@ -588,7 +588,7 @@ void run_tests(void)
   CHECK_OK(60);
   CHECK_INT2(60,1,ent->Type(),SBitEntryType);
   CHECK_INT2(60,2,ent->FragmentIndex(),0);
-  CHECK_STRING2(60,3,ent->Input(),"in2");
+  CHECK_STRING2(60,3,ent->Input(0),"in2");
   CHECK_INT2(60,4,ent->NumBits(),15);
   CHECK_INT2(60,5,ent->FirstBit(),14);
   delete ent;
@@ -621,7 +621,7 @@ void run_tests(void)
   CHECK_OK(62);
   CHECK_INT2(62,1,ent->Type(),PhaseEntryType);
   CHECK_INT2(62,2,ent->FragmentIndex(),0);
-  CHECK_STRING2(62,3,ent->Input(),"in1");
+  CHECK_STRING2(62,3,ent->Input(0),"in1");
   CHECK_INT2(62,4,ent->Shift(),22);
   delete ent;
 
@@ -859,7 +859,7 @@ void run_tests(void)
   CHECK_INT2(102,1,ent->Type(),PolynomEntryType);
   CHECK_INT2(102,2,ent->PolyOrd(),4);
   CHECK_INT2(102,3,ent->FragmentIndex(),0);
-  CHECK_STRING2(102,4,ent->Input(),"in4");
+  CHECK_STRING2(102,4,ent->Input(0),"in4");
   CHECK_INT2(102,5,ent->ComplexScalars(),0);
   CHECK_DOUBLE_ARRAY(102,6,5,ent->Coefficient(i),q[i]);
   delete ent;
@@ -877,7 +877,7 @@ void run_tests(void)
   CHECK_OK2(104,2);
   CHECK_INT2(104,1,ent->Type(),LinterpEntryType);
   CHECK_INT2(104,2,ent->FragmentIndex(),0);
-  CHECK_STRING2(104,3,ent->Input(),"in3");
+  CHECK_STRING2(104,3,ent->Input(0),"in3");
   CHECK_STRING2(104,4,ent->Table(),"./other/table");
   delete ent;
 
@@ -896,7 +896,7 @@ void run_tests(void)
   CHECK_OK(105);
   CHECK_INT2(105,1,ent->Type(),BitEntryType);
   CHECK_INT2(105,2,ent->FragmentIndex(),0);
-  CHECK_STRING2(105,3,ent->Input(),"in3");
+  CHECK_STRING2(105,3,ent->Input(0),"in3");
   CHECK_INT2(105,4,ent->NumBits(),2);
   CHECK_INT2(105,5,ent->FirstBit(),3);
   delete ent;
@@ -916,7 +916,7 @@ void run_tests(void)
   CHECK_OK(106);
   CHECK_INT2(106,1,ent->Type(),SBitEntryType);
   CHECK_INT2(106,2,ent->FragmentIndex(),0);
-  CHECK_STRING2(106,3,ent->Input(),"in4");
+  CHECK_STRING2(106,3,ent->Input(0),"in4");
   CHECK_INT2(106,4,ent->NumBits(),22);
   CHECK_INT2(106,5,ent->FirstBit(),1);
   delete ent;
@@ -951,7 +951,7 @@ void run_tests(void)
   CHECK_OK(108);
   CHECK_INT2(108,1,ent->Type(),PhaseEntryType);
   CHECK_INT2(108,2,ent->FragmentIndex(),0);
-  CHECK_STRING2(108,3,ent->Input(),"in2");
+  CHECK_STRING2(108,3,ent->Input(0),"in2");
   CHECK_INT2(108,4,ent->Shift(),8);
   delete ent;
 
@@ -1035,7 +1035,7 @@ void run_tests(void)
   CHECK_OK2(121,2);
   CHECK_INT2(121,1,ent->Type(),PhaseEntryType);
   CHECK_INT2(121,2,ent->FragmentIndex(),0);
-  CHECK_STRING2(121,3,ent->Input(),"in1");
+  CHECK_STRING2(121,3,ent->Input(0),"in1");
   CHECK_INT2(121,4,ent->Shift(),3);
   delete ent;
 
@@ -1055,7 +1055,7 @@ void run_tests(void)
   CHECK_OK2(123,2);
   CHECK_INT2(123,3,ent->Type(),LinterpEntryType);
   CHECK_INT2(123,4,ent->FragmentIndex(),0);
-  CHECK_STRING2(123,5,ent->Input(),"data");
+  CHECK_STRING2(123,5,ent->Input(0),"data");
   CHECK_STRING2(123,6,ent->Table(),"/new/lut");
   delete ent;
 

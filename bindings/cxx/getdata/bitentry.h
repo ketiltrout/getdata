@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2012 D. V. Wiebe
+// Copyright (C) 2008-2012, 2015 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -37,7 +37,9 @@ namespace GetData {
       BitEntry(const char* field_code, const char* in_field, int bitnum,
           int numbits = 1, int fragment_index = 0);
 
-      virtual const char *Input() const { return E.in_fields[0]; };
+      virtual const char *Input(int index = 0) const {
+        return (index == 0) ? E.in_fields[0] : NULL;
+      };
 
       virtual int FirstBit() const { return E.u.bit.bitnum; };
 
@@ -49,9 +51,13 @@ namespace GetData {
       int SetNumBits(int num_bits);
       int SetNumBits(const char* num_bits);
 
-      virtual const char *Scalar(int index = 0) const;
+      virtual const char *Scalar(int index) const {
+        return (index == 0 || index == 1) ? E.scalar[index] : NULL;
+      };
 
-      virtual int ScalarIndex(int index = 0) const;
+      virtual int ScalarIndex(int index) const {
+        return (index == 0 || index == 1) ? E.scalar_ind[index] : 0;
+      };
 
     private:
       BitEntry(const GetData::Dirfile *dirfile, const char* field_code) :

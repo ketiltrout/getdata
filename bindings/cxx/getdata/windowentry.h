@@ -1,4 +1,4 @@
-// Copyright (C) 2011, 2012 D. V. Wiebe
+// Copyright (C) 2011, 2012, 2015 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -38,13 +38,17 @@ namespace GetData {
           const char *check_Field, WindOpType windop, gd_triplet_t threshold,
           int fragment_index = 0);
 
-      virtual const char *Input(int index = 0) const {
-        return E.in_fields[(index == 0) ? 0 : 1];
+      virtual const char *Input(int index) const {
+        return (index == 0 || index == 1) ? E.in_fields[index] : NULL;
       };
 
-      virtual const char *Scalar() const { return E.scalar[0]; }
+      virtual const char *Scalar(int index = 0) const {
+        return (index == 0) ? E.scalar[0] :  NULL;
+      };
 
-      virtual int ScalarIndex() const { return E.scalar_ind[0]; };
+      virtual int ScalarIndex(int index = 0) const {
+        return (index == 0) ? E.scalar_ind[0] :  0;
+      };
 
       virtual WindOpType WindOp() const {
         return (WindOpType)E.u.window.windop;

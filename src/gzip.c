@@ -24,6 +24,18 @@
 #include <zlib.h>
 #endif
 
+#ifdef HAVE_GZSEEK64
+#define gd_gzseek gzseek64
+#else
+#define gd_gzseek gzseek
+#endif
+
+#ifdef HAVE_GZTELL64
+#define gd_gztell gztell64
+#else
+#define gd_gztell gztell
+#endif
+
 /* The gzip encoding scheme uses edata as a gzFile object.  If a file is
  * open, idata >= 0 otherwise idata = -1.  Writes occur out-of-place. */
 
@@ -79,13 +91,13 @@ off64_t _GD_GzipSeek(struct gd_raw_file_* file, off64_t count,
   count *= GD_SIZE(data_type);
 
   if (count >= 0) {
-    n = (off64_t)gzseek64((gzFile)file[(mode == GD_FILE_WRITE) ? 1 : 0].edata,
+    n = (off64_t)gd_gzseek((gzFile)file[(mode == GD_FILE_WRITE) ? 1 : 0].edata,
         (z_off64_t)count, SEEK_SET);
 
     if (n == -1) {
       /* gzseek returns error on attempts to seek past the EOF in read mode */
       if (mode != GD_FILE_WRITE && gzeof((gzFile)file[0].edata))
-        n = gztell64((gzFile)file[0].edata);
+        n = gd_gztell((gzFile)file[0].edata);
       else {
         dreturn("%i", -1);
         return -1;

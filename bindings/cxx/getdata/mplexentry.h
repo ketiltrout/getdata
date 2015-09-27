@@ -1,4 +1,4 @@
-// Copyright (C) 2012, 2013 D. V. Wiebe
+// Copyright (C) 2012, 2013, 2015 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -38,13 +38,17 @@ namespace GetData {
           const char *check_field, int count_val, int period,
           int fragment_index = 0);
 
-      virtual const char *Input(int index = 0) const {
-        return E.in_fields[(index == 0) ? 0 : 1];
+      virtual const char *Input(int index) const {
+        return (index == 0 || index == 1) ? E.in_fields[index] : NULL;
       };
 
-      virtual const char *Scalar() const { return E.scalar[0]; }
+      virtual const char *Scalar(int index) const {
+        return (index == 0 || index == 1) ? E.scalar[index] : NULL;
+      };
 
-      virtual int ScalarIndex() const { return E.scalar_ind[0]; };
+      virtual int ScalarIndex(int index) const {
+        return (index == 0 || index == 1) ? E.scalar_ind[index] : 0;
+      };
 
       virtual int CountVal() const { return E.u.mplex.count_val; };
 

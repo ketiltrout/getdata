@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -54,7 +54,7 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(error, 0);
-  CHECKF(n, 12);
+  CHECKI(n, 12);
   CHECKS(s, "String data");
 
   return r;

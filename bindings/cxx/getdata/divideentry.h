@@ -1,4 +1,4 @@
-// Copyright (C) 2010, 2011 D. V. Wiebe
+// Copyright (C) 2010, 2011, 2015 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -37,8 +37,8 @@ namespace GetData {
       DivideEntry(const char* field_code, const char* in_field1,
           const char* in_field2, int fragment_index = 0);
 
-      virtual const char *Input(int index = 0) const {
-        return E.in_fields[(index == 0) ? 0 : 1];
+      virtual const char *Input(int index) const {
+        return (index == 0 || index == 1) ? E.in_fields[index] : NULL;
       };
 
       int SetInput(const char* field, int index);

@@ -69,22 +69,6 @@ int SBitEntry::SetNumBits(int num_bits)
   return 0;
 }
 
-const char *SBitEntry::Scalar(int index) const
-{
-  if (index != 0 && index != 1)
-    return NULL;
-
-  return E.scalar[index];
-}
-
-int SBitEntry::ScalarIndex(int index) const
-{
-  if (index != 0 && index != 1)
-    return 0;
-
-  return E.scalar_ind[index];
-}
-
 int SBitEntry::SetFirstBit(const char *first_bit)
 {
   int r = 0;

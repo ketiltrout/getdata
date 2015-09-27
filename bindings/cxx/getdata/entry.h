@@ -94,7 +94,7 @@ namespace GetData {
       int Rename(const char* new_name, unsigned flags = 0);
 
       /* Specific data */
-      virtual const char *Input(int index = 0) const {
+      virtual const char *Input(int index) const {
         return (CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ?
           E.in_fields[index] : NULL;
       };
@@ -111,9 +111,9 @@ namespace GetData {
 
       unsigned int Flags() const { return E.flags; };
 
-      virtual const char *Scalar(int index = 0) const;
+      virtual const char *Scalar(int index) const;
 
-      virtual int ScalarIndex(int index = 0) const;
+      virtual int ScalarIndex(int index) const;
 
       /* RAW methods */
       virtual unsigned int SamplesPerFrame() const {
@@ -130,26 +130,26 @@ namespace GetData {
         return (E.field_type == GD_LINCOM_ENTRY) ? E.u.lincom.n_fields : 0;
       };
 
-      virtual double Scale(int index = 0) const {
+      virtual double Scale(int index) const {
         return (E.field_type == GD_LINCOM_ENTRY &&
             CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ?
           E.u.lincom.m[index] : 0;
       }
 
-      virtual std::complex<double> CScale(int index = 0) const {
+      virtual std::complex<double> CScale(int index) const {
         return (E.field_type == GD_LINCOM_ENTRY &&
             CheckIndex(E.field_type, E.u.lincom.n_fields, index))
           ? std::complex<double>(E.u.lincom.cm[index][0],
               E.u.lincom.cm[index][1]) : 0;
       }
 
-      virtual double Offset(int index = 0) const {
+      virtual double Offset(int index) const {
         return (E.field_type == GD_LINCOM_ENTRY &&
             CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ?
           E.u.lincom.b[index] : 0;
       }
 
-      virtual std::complex<double> COffset(int index = 0) const {
+      virtual std::complex<double> COffset(int index) const {
         return (E.field_type == GD_LINCOM_ENTRY &&
             CheckIndex(E.field_type, E.u.lincom.n_fields, index))
           ? std::complex<double>(E.u.lincom.cb[index][0],
@@ -191,12 +191,12 @@ namespace GetData {
         return (E.field_type == GD_POLYNOM_ENTRY) ? E.u.polynom.poly_ord : 0;
       };
 
-      virtual double Coefficient(int index = 0) const {
+      virtual double Coefficient(int index) const {
         return (E.field_type == GD_POLYNOM_ENTRY && index <=
             E.u.polynom.poly_ord) ? E.u.polynom.a[index] : 0;
       }
 
-      virtual std::complex<double> CCoefficient(int index = 0) const {
+      virtual std::complex<double> CCoefficient(int index) const {
         return (E.field_type == GD_POLYNOM_ENTRY && index <=
             E.u.polynom.poly_ord) ?
           std::complex<double>(E.u.polynom.ca[index][0],

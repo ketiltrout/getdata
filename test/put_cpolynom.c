@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -73,9 +73,9 @@ int main(void)
     i = 0;
     while (read(fd, &d, sizeof(int8_t))) {
       if (i < 40 || i > 48) {
-        CHECKFi(i,d,0);
+        CHECKIi(i,d,0);
       } else
-        CHECKFi(i,d,i);
+        CHECKIi(i,d,i);
       i++;
     }
     close(fd);

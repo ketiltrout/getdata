@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2011, 2013 D. V. Wiebe
+// Copyright (C) 2008-2011, 2013, 2015 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -41,7 +41,7 @@ namespace GetData {
           std::complex<double>* cm, std::complex<double>* cb,
           int fragment_index = 0);
 
-      virtual const char *Input(int index = 0) const {
+      virtual const char *Input(int index) const {
         return (CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ? 
             E.in_fields[index] : NULL;
       };
@@ -52,40 +52,40 @@ namespace GetData {
 
       virtual int NFields() const { return E.u.lincom.n_fields; };
 
-      virtual double Scale(int index = 0) const {
+      virtual double Scale(int index) const {
         return (CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ?
           E.u.lincom.m[index] : 0;
       };
 
-      virtual std::complex<double> CScale(int index = 0) const {
+      virtual std::complex<double> CScale(int index) const {
         return (CheckIndex(E.field_type, E.u.lincom.n_fields, index))
           ? std::complex<double>(E.u.lincom.cm[index][0],
               E.u.lincom.cm[index][1]) : 0;
       };
 
-      virtual double Offset(int index = 0) const {
+      virtual double Offset(int index) const {
         return (CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ?
           E.u.lincom.b[index] : 0;
       };
 
-      virtual std::complex<double> COffset(int index = 0) const {
+      virtual std::complex<double> COffset(int index) const {
         return (CheckIndex(E.field_type, E.u.lincom.n_fields, index))
           ? std::complex<double>(E.u.lincom.cb[index][0],
               E.u.lincom.cb[index][1]) : 0;
       };
 
-      virtual const char *Scalar(int index = 0) const;
+      virtual const char *Scalar(int index) const;
 
-      virtual int ScalarIndex(int index = 0) const;
+      virtual int ScalarIndex(int index) const;
 
       int SetNFields(int nfields);
-      int SetInput(const char* field, int index = 0);
-      int SetScale(double scale, int index = 0);
-      int SetScale(const char* scale, int index = 0);
-      int SetScale(std::complex<double> scale, int index = 0);
-      int SetOffset(double offset, int index = 0);
-      int SetOffset(const char* scale, int index = 0);
-      int SetOffset(std::complex<double> offset, int index = 0);
+      int SetInput(const char* field, int index);
+      int SetScale(double scale, int index);
+      int SetScale(const char* scale, int index);
+      int SetScale(std::complex<double> scale, int index);
+      int SetOffset(double offset, int index);
+      int SetOffset(const char* scale, int index);
+      int SetOffset(std::complex<double> offset, int index);
 
     private:
       LincomEntry(const GetData::Dirfile *dirfile, const char* field_code) :

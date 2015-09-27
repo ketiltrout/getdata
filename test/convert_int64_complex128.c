@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -77,7 +77,8 @@ int main(void)
     double v[] = {40 + i, 0};
     CHECKCi(i,c + 2 * i, v);
 #else
-    CHECKCi(i,c[i], 40 + i);
+    _Complex double v = 40 + i;
+    CHECKCi(i,c[i], v);
 #endif
   }
 
