@@ -21,18 +21,18 @@
  */
 #include "internal.h"
 
-#define EXTRACT_REPR(it,ot,f,cc) \
-  for (i = 0; i < n; ++i) ((ot *)rdata)[i] = (ot)f(cc(((it *)cdata)[i]))
+#define EXTRACT_REPR(it,ot,f) \
+  for (i = 0; i < n; ++i) ((ot *)rdata)[i] = (ot)f(((it *)cdata)[i])
 
 #define fargs(x) (((x) < 0) ? M_PI : 0)
 #define fargu(x) (((x) & (1 << sizeof((x)))) ? M_PI : 0)
 
 #define EXTRACT_REPRR2(it,ot,fb,fr) \
   switch (repr) { \
-    case GD_REPR_REAL: EXTRACT_REPR(it,ot,,); break; \
-    case GD_REPR_IMAG: EXTRACT_REPR(it,ot,0 *,); break; \
-    case GD_REPR_MOD:  EXTRACT_REPR(it,ot,fb,); break; \
-    case GD_REPR_ARG:  EXTRACT_REPR(it,ot,fr,); break; \
+    case GD_REPR_REAL: EXTRACT_REPR(it,ot,); break; \
+    case GD_REPR_IMAG: EXTRACT_REPR(it,ot,0 *); break; \
+    case GD_REPR_MOD:  EXTRACT_REPR(it,ot,fb); break; \
+    case GD_REPR_ARG:  EXTRACT_REPR(it,ot,fr); break; \
   }
 
 #define EXTRACT_REPRS(ot) \
@@ -67,7 +67,7 @@
 #define EXTRACT_REPRC(it,ot,f) \
   for (i = 0; i < n; ++i) ((ot *)rdata)[i] = (ot)f((it *)cdata + 2 * i)
 #else
-#define EXTRACT_REPRC(it,ot,f) EXTRACT_REPR(_Complex it,ot,f,)
+#define EXTRACT_REPRC(it,ot,f) EXTRACT_REPR(_Complex it,ot,f)
 #endif
 
 static void _GD_ExtractRepr(DIRFILE *restrict D, const void *restrict cdata,

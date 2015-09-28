@@ -34,7 +34,7 @@ int main(void)
   char command[4096];
   uint16_t data_data[256];
   int fd, n, error, r = 0;
-#if USE_FLAC
+#ifdef USE_FLAC
   int i;
 #endif
   DIRFILE *D;

@@ -71,7 +71,7 @@ int main(void)
     CHECKFi(i, c[i * 2 + 1], 2 * b + 2 * a * b);
   }
 
-//  gd_discard(D);
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

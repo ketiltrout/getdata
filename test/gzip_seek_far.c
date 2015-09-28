@@ -71,7 +71,10 @@ int main(void)
 
 #ifdef USE_GZIP
   CHECKI(error, 0);
-  CHECKI(n, 4000);
+
+  /* Either of these values is fine with us */
+  if (n != 256)
+    CHECKI(n, 4000);
 #else
   CHECKI(error, GD_E_UNSUPPORTED);
   CHECKI(n, 0);
