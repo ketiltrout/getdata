@@ -1,3 +1,13 @@
+2015-09-30   D. V. Wiebe <getdata@ketiltrout.net> svn:1007
+	GetData-0.9.0rc2.
+
+2015-09-27   D. V. Wiebe <getdata@ketiltrout.net> svn:1006
+	* test/gzip_seek_far.c: Allow both 256 and 4000 which can be returned by
+	different builds of zlib.
+
+	* src/getdata.c (_GD_ExtractRepr): Remove unused 4th parameter from
+	EXTRACT_REPR.
+
 2015-09-26   D. V. Wiebe <getdata@ketiltrout.net> svn:1005
 	* bindings/cxx/bitentry.cpp (BitEntry::Scalar BitEntry::ScalarIndex)
 	bindings/cxx/sbitentry.cpp (SBitEntry::Scalar SBitEntry::ScalarIndex): Moved
