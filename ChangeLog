@@ -1,3 +1,18 @@
+2015-10-05   D. V. Wiebe <getdata@ketiltrout.net> svn:1008
+	* configure.ac: Fix handling of --with-ltdl.
+	* src/encoding.c src/internal.h: Move inclusion of <ltdl.h> out of header.
+
+	* src/compat.c (gd_StatAt64): Don't define if GD_NO_64BIT_STAT is defined.
+
+	* test/gzip_put_nframes.c test/gzip_put_off.c test/gzip_seek.c
+	test/gzip_seek_far.c test/gzip_seek_put.c: Fix for !defined(USE_GZIP).
+
+	* bindings/f77/getdata.f.in: Delete GDDELA and GDDSTP.
+
+	* configure.ac: remove check for -fno-backslash
+	* m4/compiler.m4 (GD_PROG_F77_FNO_BACKSLASH): Deleted.
+	* bidnings/f77/test/big_test.f: Define backslash parameter.
+
 2015-09-30   D. V. Wiebe <getdata@ketiltrout.net> svn:1007
 	GetData-0.9.0rc2.
 

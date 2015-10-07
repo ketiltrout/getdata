@@ -556,9 +556,12 @@ if test "x${use_modules}" != "xno"; then
   fi
 
   if test "x$ltdl_prefix" != "x"; then
-    AC_CHECK_HEADERS(ltdl.h)
     LIBLTDL="-L${ltdl_prefix}/lib -lltdl"
-    LTDLINC="-I${ltdl_prefix}/include"
+    LTDLINCL="-I${ltdl_prefix}/include"
+    saved_cppflags=$CPPFLAGS
+    CPPFLAGS="${CPPFLAGS} ${LTDLINCL}"
+    AC_CHECK_HEADERS(ltdl.h)
+    CPPFLAGS=$saved_cppflags
   else
     AC_CHECK_HEADERS(ltdl.h)
     LIBLTDL="-lltdl"
@@ -611,7 +614,6 @@ fi
 if test "x$make_f77bindings" != "xno"; then
   GD_PROG_F77_WALL
   GD_PROG_F77_WEXTRA
-  GD_PROG_F77_FNO_BACKSLASH
   GD_LANG_F77_COMPILER_INTEL
 fi
 

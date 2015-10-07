@@ -116,7 +116,7 @@ int gd_StatAt(const DIRFILE* D, int dirfd, const char* name, struct stat* buf,
 }
 #endif
 
-#ifndef HAVE_FSTATAT64
+#if !defined HAVE_FSTATAT64 && !defined GD_NO_64BIT_STAT
 int gd_StatAt64(const DIRFILE* D, int dirfd, const char* name, gd_stat64_t* buf,
     int flags gd_unused_)
 {

@@ -145,25 +145,6 @@ AC_SUBST([GD_F77_WEXTRA])
 ])
 
 
-dnl GD_PROG_F77_FNO_BACKSLASH
-dnl -------------------------------------------------------------
-dnl Check whether the Fotran-77 compiler accepts -fno-backslash
-AC_DEFUN([GD_PROG_F77_FNO_BACKSLASH],
-[gd_saved_FFLAGS=$FFLAGS
-AC_CACHE_CHECK([whether $F77 accepts -fno-backslash],
-gd_cv_prog_f77_fno_backslash, [FFLAGS="-fno-backslash"
-AC_LANG_PUSH([Fortran 77])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_f77_fno_backslash=yes],
-[gd_cv_prog_f77_fno_backslash=no])
-AC_LANG_POP([Fortran 77])])
-FFLAGS=$gd_saved_FFLAGS
-if test "x$gd_cv_prog_cc_fno_backslash" = "xyes"; then
-  GD_F77_FNO_BACKSLASH=-fno-backslash
-fi
-AC_SUBST([GD_F77_FNO_BACKSLASH])
-])
-
-
 dnl GD_PROG_FC_WEXTRA
 dnl -------------------------------------------------------------
 dnl Check whether the free-form Fotran compiler accepts -Wextra

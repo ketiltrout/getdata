@@ -372,12 +372,6 @@ gd_static_inline_ int64_t gd_put_unaligned64(int64_t v, void *p)
 #  pragma warning (disable : 981)
 #endif
 
-#ifdef USE_MODULES
-# ifdef HAVE_LTDL_H
-#  include <ltdl.h>
-# endif
-#endif
-
 /* debugging macros */
 #ifdef GETDATA_DEBUG
 #define GD_COL_SIZE 100

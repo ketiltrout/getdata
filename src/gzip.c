@@ -91,8 +91,8 @@ off64_t _GD_GzipSeek(struct gd_raw_file_* file, off64_t count,
   count *= GD_SIZE(data_type);
 
   if (count >= 0) {
-    n = (off64_t)gd_gzseek((gzFile)file[(mode == GD_FILE_WRITE) ? 1 : 0].edata,
-        (z_off64_t)count, SEEK_SET);
+    n = gd_gzseek((gzFile)file[(mode == GD_FILE_WRITE) ? 1 : 0].edata, count,
+        SEEK_SET);
 
     if (n == -1) {
       /* gzseek returns error on attempts to seek past the EOF in read mode */

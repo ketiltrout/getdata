@@ -24,7 +24,7 @@ uint32_t d[GD_BUFFER_SIZE];
 
 int main(void)
 {
-#ifndef TEST_GZIP
+#ifndef USE_GZIP
   return 77;
 #else
   const char *filedir = "dirfile";

@@ -189,6 +189,13 @@ C     This is good to single precision
       INTEGER plen
       PARAMETER (plen = 4096)
 
+C     An ISO-1539 conforming Fortran-77 compiler will either consider
+C     this a single character, if it treats backslash as an escape
+C     character, or else silently truncate it to a single '\', if it
+C     doesn't.
+      CHARACTER*1 backslash
+      PARAMETER (backslash = '\\')
+
       CHARACTER*26 strings(3)
       CHARACTER*11 fields(nfields + 10)
       CHARACTER*11 fn
@@ -2077,7 +2084,8 @@ C     231: GDALMX check
 
 C     232: GDTOKE check
       l = slen
-      CALL GDTOKE(str, l, d, '"test1 test2" test3\ test4 test5', 32)
+      CALL GDTOKE(str, l, d,
+     +'"test1 test2" test3' // backslash // ' test4 test5', 32)
       CALL CHKOK2(ne, 232, 1, d)
       CALL CHKIN2(ne, 232, 2, l, slen)
       CALL CHKST2(ne, 232, 3, str, 'test1 test2')

@@ -155,14 +155,10 @@ C     Corresponding to gd_constants(3) (sort of)
       EXTERNAL GDCONS
 C     Corresponding to gd_copen(3)
       EXTERNAL GDCOPN
-C     Correpsonding to gd_delete_alias(3)
-      EXTERNAL GDDELA
 C     Correpsonding to gd_delete(3)
       EXTERNAL GDDELE
 C     Corresponding to gd_discard(3)
       EXTERNAL GDDSCD
-C     Frees the packed data returned by GDGSTP
-      EXTERNAL GDDSTP
 C     Corresponding to gd_desync(3)
       EXTERNAL GDDSYN
 C     Corresponding to gd_error_count(3)

@@ -28,6 +28,10 @@
 static pthread_mutex_t gd_mutex_ = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
+#ifdef HAVE_LTDL_H
+#include <ltdl.h>
+#endif
+
 static int framework_initialised = 0;
 #endif
 

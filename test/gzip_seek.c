@@ -74,7 +74,7 @@ int main(void)
   CHECKI(n, 40);
 #else
   CHECKI(error, GD_E_UNSUPPORTED);
-  CHECKI(n, 0);
+  CHECKI(n, -1);
 #endif
 
   return r;
