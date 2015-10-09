@@ -1,3 +1,30 @@
+2015-10-05   D. V. Wiebe <getdata@ketiltrout.net> svn:1009
+	GetData-0.9.0rc3:
+
+	* bindings/cxx/dirfile.cpp (GetData::EncodingSupport): Use
+	GetData::EncodingScheme for the encoding parameter.
+
+	* bindings/cxx/dirfile.cpp (Dirfile::Delete): Use unsigned for the flags
+	parameter.
+
+	* bindings/cxx/getdata/fragment.h: Add FlacEncoding.
+
+	* bindings/idl/getdata.c (gdidl_delete): Add missing /META flag.
+
+	* bindings/php/getdata.c (gdphp_callback): Don't accept floating point
+	response from callback.
+
+	* bindings/matlab/Contents.m.head bindings/matlab/gd_move.c
+	bindings/perl/GetData.pm.in doc/README.cxx doc/README.f77 doc/README.f95
+	doc/README.idl doc/README.php doc/README.python: Update bindings docs.
+
+	* test/put_nofile.c: Fix !defined HAVE_SETRLIMIT case.
+
+	* test/test.h (gd_pathwrite): Also escape hash and space and use in all
+	cases.
+	* test/get_linterp_abs.c: Use gd_pathwrite.  Don't double buffer
+	format_data.
+
 2015-10-05   D. V. Wiebe <getdata@ketiltrout.net> svn:1008
 	* configure.ac: Fix handling of --with-ltdl.
 	* src/encoding.c src/internal.h: Move inclusion of <ltdl.h> out of header.

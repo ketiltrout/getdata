@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -86,8 +86,11 @@ int main(void)
     0xc9, 0x14, 0xe1, 0x42, 0x42, 0xda, 0xd7, 0xba,
     0x54
   };
-  uint8_t b, c[8], d[8];
+  uint8_t c[8], d[8];
+#ifdef USE_BZIP2
+  uint8_t b;
   char command[4096];
+#endif
   int fd, i, m, n, e1, e2, e3, unlink_data, unlink_databz2, r = 0;
   DIRFILE *D;
 

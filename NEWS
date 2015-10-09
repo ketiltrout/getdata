@@ -1,4 +1,4 @@
-New in verison 0.9.0rc2:
+New in verison 0.9.0rc3:
 
   Library Changes:
 
@@ -262,6 +262,9 @@ New in verison 0.9.0rc2:
     subclasses) now return zero or NULL when passed an out-of-range index value.
     Previously they would return, variously, zero, NULL, another value for some
     other, valid index value, or segfault.
+
+  * C++ BUG FIX: The flags parameter to Dirfile::Delete() is now unsigned, as it
+    is in the C API.
 
   * F95 BUG FIX: fgd_add and fgd_alter_entry no longer ignore named scalar
     parameters provided in supplied entry structures.

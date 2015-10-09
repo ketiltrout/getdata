@@ -1757,7 +1757,7 @@ void run_tests(void)
   CHECK_INT2(242,5,carrays[2].n,0);
 
   // 271: gd_encoding_support
-  n = EncodingSupport(GD_SIE_ENCODED);
+  n = EncodingSupport(GetData::SieEncoding);
   CHECK_INT(271, n, GD_RDWR);
 
   // 272: NULL return from gd_reference

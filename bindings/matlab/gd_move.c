@@ -23,11 +23,10 @@
 /*
  % GD_MOVE  Move a field between fragments
  %
- %   GD_MOVE(DIRFILE,FIELD_CODE,NEW_FRAGMENT[,MOVE_DATA])
+ %   GD_MOVE(DIRFILE,FIELD_CODE,NEW_FRAGMENT[,FLAGS])
  %             moves the field called FIELD_CODE to the new fragment indexed by
- %             NEW_FRAGMENT.  If MOVE_DATA is given and non-zero, and the field
- %             is a RAW field, the binary file associated with it will also be
- %             moved, if necessary.
+ %             NEW_FRAGMENT.  FLAGS should be zero or more of the GD.REN_...
+ %             symbols provided by GETDATA_CONSTANTS.
  %
  %   The DIRFILE object should have previously been created with GD_OPEN.
  %

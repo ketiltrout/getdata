@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -43,8 +43,11 @@ int main(void)
   uint16_t c[8];
   char command[4096];
   uint16_t data_data[256];
-  int fd, i, n, error, r = 0;
+  int fd, n, error, r = 0;
   DIRFILE *D;
+#ifdef USE_GZIP
+  int i;
+#endif
 
   memset(c, 0, 8);
   rmdirfile();

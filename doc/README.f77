@@ -44,6 +44,19 @@ it outputs, as the C API does.
 Available Subroutines
 =====================
 
+* GDENCS(support, encoding)
+
+  Output:
+    INTEGER support
+  Input:
+    INTEGER encoding
+
+  This wraps gd_encoding_support(3).  When passed one of the GDE_xx encoding
+  parameters, this subroutine will return GD_RW if the library can read from
+  and write to that encoding, GD_RO if it can only read from the encoding,
+  or -1 if neither reading or writing is supported.
+  
+
 Subroutines interacting with the database
 -----------------------------------------
 
@@ -1176,7 +1189,7 @@ Subroutines interacting with field metadata
   is not found, or the field specified is not of CONST type, const_type will
   be set to zero.  In this case the value of the remaining data is unspecified.
 
-* GDCALN(array_len, dirfile_unit, field_code, field_code_len)
+* GDARLN(array_len, dirfile_unit, field_code, field_code_len)
 
   Output:
     INTEGER array_len
@@ -1184,7 +1197,7 @@ Subroutines interacting with field metadata
     INTEGER dirfile_unit, field_code_len
     CHARACTER*<field_code_len> field_code
 
-  This wraps gd_carray_len(3).  The field_code_len parameter should contain the
+  This wraps gd_array_len(3).  The field_code_len parameter should contain the
   string length of field_code.  The length of the field will be returned in
   array_len.
 
@@ -1286,6 +1299,22 @@ Subroutines interacting with field metadata
   This subroutine wraps gd_eof(3), and returns the location of the end-of-field
   marker for the specified field.
 
+* GDLSRW(dirfile_unit, field_code, field_code_len, data_type, spf, spf_scalar,
+  spf_scalar_len, spf_scalar_index, recode)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, data_type, spf, spf_scalar_len
+    INTEGER spf_scalar_index, recode
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<spf_scalar_len> spf_scalar
+
+  This subroutine modifies the RAW field specified according to the supplied
+  parameters.  Passing -1 as one of the spf_scalar_len will delete an existing
+  scalar field code, if one is present.  Passing 0 for this parameter indicates
+  no change to the corresponding parameter field code.  If recode is non-zero,
+  the binary file associated with this field will be modified to account for the
+  changes.
+
 * GDALRW(dirfile_unit, field_code, field_code_len, data_type, spf, recode)
 
   Input:
@@ -1296,6 +1325,30 @@ Subroutines interacting with field metadata
   metadata.  If recode is non-zero, the binary file associated with this field
   will be modified to account for the changes.
 
+* GDLSCL(dirfile_unit, field_code, field_code_len, nfields, in_field1,
+  in_field1_len, m1, m1_scalar, m1_scalar_len, m1_scalar_index, b1, b1_scalar,
+  b1_scalar_len, b1_scalar_index, in_field2, in_field2_len, m2, m2_scalar,
+  m2_scalar_len, m2_scalar_index, b2, b2_scalar, b2_scalar_len, b2_scalar_index,
+  in_field3, in_field3_len, m3, m3_scalar, m3_scalar_len, m3_scalar_index, b3,
+  b3_scalar, b3_scalar_len, b3_scalar_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, nfields, in_field1_len, m1_scalar_len
+    INTEGER m1_scalar_index, b1_scalar_len, b1_scalar_index, in_field2_len
+    INTEGER m2_scalar_len, m2_scalar_index, b2_scalar_len, b2_scalar_index
+    INTEGER in_field3_len, m3_scalar_len, m3_scalar_index, b3_scalar_len
+    INTEGER b3_scalar_index
+    COMPLEX*16 m1, b1, m2, b2, m3, b3
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field1_len> in_field1
+    CHARACTER*<in_field2_len> in_field2
+    CHARACTER*<in_field3_len> in_field3
+
+  This subroutine modifies the LINCOM field specified according to the supplied
+  parameters.  Passing -1 as one of the .._scalar_len parameters will delete
+  an existing scalar field code, if one is present.  Passing 0 for these
+  parameters indicates no change to the corresponding parameter field code.
+  
 * GDALCL(dirfile_unit, field_code, field_code_len, nfields, in_field1,
   in_field1_len, m1, b1, in_field2, in_field2_len, m2, b2, in_field3,
   in_field3_len, m3, b3)
@@ -1311,6 +1364,27 @@ Subroutines interacting with field metadata
 
   This subroutine wraps gd_alter_lincom(3), and modifies the specified field
   metadata.
+
+* GDLSLC(dirfile_unit, field_code, field_code_len, nfields, in_field1,
+  in_field1_len, m1, m1_scalar, m1_scalar_len, m1_scalar_index, b1, b1_scalar,
+  b1_scalar_len, b1_scalar_index, in_field2, in_field2_len, m2, m2_scalar,
+  m2_scalar_len, m2_scalar_index, b2, b2_scalar, b2_scalar_len, b2_scalar_index,
+  in_field3, in_field3_len, m3, m3_scalar, m3_scalar_len, m3_scalar_index, b3,
+  b3_scalar, b3_scalar_len, b3_scalar_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, nfields, in_field1_len, m1_scalar_len
+    INTEGER m1_scalar_index, b1_scalar_len, b1_scalar_index, in_field2_len
+    INTEGER m2_scalar_len, m2_scalar_index, b2_scalar_len, b2_scalar_index
+    INTEGER in_field3_len, m3_scalar_len, m3_scalar_index, b3_scalar_len
+    INTEGER b3_scalar_index
+    REAL*8 m1, b1, m2, b2, m3, b3
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field1_len> in_field1
+    CHARACTER*<in_field2_len> in_field2
+    CHARACTER*<in_field3_len> in_field3
+
+  This is equivalent to GDLSCL above, but takes purely real parameters.
 
 * GDALLC(dirfile_unit, field_code, field_code_len, nfields, in_field1,
   in_field1_len, m1, b1, in_field2, in_field2_len, m2, b2, in_field3,
@@ -1339,6 +1413,24 @@ Subroutines interacting with field metadata
   This subroutine wraps gd_alter_linterp(3), and modifies the specified field
   metadata.  If move is non-zero, the look-up table will be moved to the path
   specified by table.
+
+* GDLSBT(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  bitnum, bitnum_scalar, bitnum_scalar_len, bitnum_scalar_index,
+  numbits, numbits_scalar, numbits_scalar_len, numbits_scalar_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len, bitnum
+    INTEGER bitnum_scalar_len, bitnum_scalar_index, numbits, numbits_scalar_len
+    INTEGER numbits_scalar_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+    CHARACTER*<bitnum_scalar_len> bitnum_scalar_len
+    CHARACTER*<numbits_scalar> numbits_scalar_len
+
+  This subroutine modifies the BIT field specified according to the supplied
+  parameters.  Passing -1 as bitnum_scalar_len or numbits_scalar_len will delete
+  an existing scalar field code, if one is present.  Passing 0 for these
+  parameters indicates no change to the corresponding parameter field code.
 
 * GDALBT(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
   bitnum, numbits)
@@ -1375,6 +1467,19 @@ Subroutines interacting with field metadata
   This subroutine wraps gd_alter_multiply(3), and modifies the specified field
   metadata.
 
+* GDLSPH(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
+  shift, shift_scalar, shift_scalar_len, shift_scalar_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field1_len, shift, fragment_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+
+  This subroutine modifies the PHASE field specified according to the supplied
+  parameters.  Passing -1 as shift_scalar_len will delete an existing scalar
+  field code, if one is present.  Passing 0 for this parameter indicates no
+  change to the corresponding parameter field code.
+
 * GDALPH(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
   shift)
 
@@ -1385,6 +1490,31 @@ Subroutines interacting with field metadata
 
   This subroutine wraps gd_alter_phase(3), and modifies the specified field
   metadata.
+
+* GDLSCP(dirfile_unit, field_code, field_code_len, poly_ord, in_field,
+  in_field_len, a0, a0_scalar, a0_scalar_len, a0_scalar_index, a1, a1_scalar,
+  a1_scalar_len, a1_scalar_index, a2, a2_scalar, a2_scalar_len, a2_scalar_index,
+  a3, a3_scalar, a3_scalar_len, a3_scalar_index, a4, a4_scalar, a4_scalar_len,
+  a4_scalar_index, a5, a5_scalar, a5_scalar_len, a5_scalar_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, nfields, in_field_len, a0_scalar_len
+    INTEGER a0_scalar_index, a1_scalar_len, a1_scalar_index, a2_scalar_len
+    INTEGER a2_scalar_index, a3_scalar_len, a3_scalar_index, a4_scalar_len
+    INTEGER a4_scalar_index, a5_scalar_len, a5_scalar_index
+    COMPLEX*16 a0, a1, a2, a3, a4, a5
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<a0_scalar_len> a0_scalar
+    CHARACTER*<a1_scalar_len> a1_scalar
+    CHARACTER*<a2_scalar_len> a2_scalar
+    CHARACTER*<a3_scalar_len> a3_scalar
+    CHARACTER*<a4_scalar_len> a4_scalar
+    CHARACTER*<a5_scalar_len> a5_scalar
+
+  This subroutine modifies the POLYNOM field specified according to the supplied
+  parameters.  Passing -1 as one of the .._scalar_len parameters will delete
+  an existing scalar field code, if one is present.  Passing 0 for these
+  parameters indicates no change to the corresponding parameter field code.
 
 * GDALCP(dirfile_unit, field_code, field_code_len, poly_ord, in_field,
   in_field_len, a0, a1, a2, a3, a4, a5)
@@ -1398,6 +1528,28 @@ Subroutines interacting with field metadata
   This subroutine wraps gd_alter_polynom(3), and modifies the specified field
   metadata.
 
+* GDLSPN(dirfile_unit, field_code, field_code_len, poly_ord, in_field,
+  in_field_len, a0, a0_scalar, a0_scalar_len, a0_scalar_index, a1, a1_scalar,
+  a1_scalar_len, a1_scalar_index, a2, a2_scalar, a2_scalar_len, a2_scalar_index,
+  a3, a3_scalar, a3_scalar_len, a3_scalar_index, a4, a4_scalar, a4_scalar_len,
+  a4_scalar_index, a5, a5_scalar, a5_scalar_len, a5_scalar_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, nfields, in_field_len, a0_scalar_len
+    INTEGER a0_scalar_index, a1_scalar_len, a1_scalar_index, a2_scalar_len
+    INTEGER a2_scalar_index, a3_scalar_len, a3_scalar_index, a4_scalar_len
+    INTEGER a4_scalar_index, a5_scalar_len, a5_scalar_index
+    REAL*8 a0, a1, a2, a3, a4, a5
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<a0_scalar_len> a0_scalar
+    CHARACTER*<a1_scalar_len> a1_scalar
+    CHARACTER*<a2_scalar_len> a2_scalar
+    CHARACTER*<a3_scalar_len> a3_scalar
+    CHARACTER*<a4_scalar_len> a4_scalar
+    CHARACTER*<a5_scalar_len> a5_scalar
+
+  This is equivalent to GDLSCP, but with purely real parameters.
+
 * GDALPN(dirfile_unit, field_code, field_code_len, poly_ord, in_field,
   in_field_len, a0, a1, a2, a3, a4, a5)
 
@@ -1410,6 +1562,24 @@ Subroutines interacting with field metadata
   This subroutine is equivalent to GDALCP above, but takes purely real
   parameters.
 
+* GDLSSB(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  bitnum, bitnum_scalar, bitnum_scalar_len, bitnum_scalar_index,
+  numbits, numbits_scalar, numbits_scalar_len, numbits_scalar_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len, bitnum
+    INTEGER bitnum_scalar_len, bitnum_scalar_index, numbits, numbits_scalar_len
+    INTEGER numbits_scalar_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+    CHARACTER*<bitnum_scalar_len> bitnum_scalar_len
+    CHARACTER*<numbits_scalar> numbits_scalar_len
+
+  This subroutine modifies the SBIT field specified according to the supplied
+  parameters.  Passing -1 as bitnum_scalar_len or numbits_scalar_len will delete
+  an existing scalar field code, if one is present.  Passing 0 for these
+  parameters indicates no change to the corresponding parameter field code.
+
 * GDALSB(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
   bitnum, numbits)
 
@@ -1420,6 +1590,22 @@ Subroutines interacting with field metadata
 
   This subroutine wraps gd_alter_sbit(3), and modifies the specified field
   metadata.
+
+* GDLSCR(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  dividend, dividend_scalar, dividend_scalar_len, dividend_scalar_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len, dividend_scalar_len,
+    INTEGER dividend_scalar_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+    CHARACTER*<dividend_scalar_len> dividend_scalar
+    COMPLEX*16 dividend
+
+  This subroutine modifies the RECIP field specified according to the supplied
+  parameters.  Passing -1 as dividend_scalar_len parameters will delete
+  an existing scalar field code, if one is present.  Passing 0 for this
+  parameter indicates no change to the corresponding parameter field code.
 
 * GDALCR(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
   dividend)
@@ -1433,6 +1619,19 @@ Subroutines interacting with field metadata
   This subroutine wraps gd_alter_crecip(3), and modifies the specified field
   metadata.
 
+* GDLSRC(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  dividend, dividend_scalar, dividend_scalar_len, dividend_scalar_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len, dividend_scalar_len,
+    INTEGER dividend_scalar_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+    CHARACTER*<dividend_scalar_len> dividend_scalar
+    REAL*16 dividend
+
+  This is equivalent to GDLSCR, but with purely real parameters.
+
 * GDALRC(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
   dividend)
 
@@ -1445,6 +1644,28 @@ Subroutines interacting with field metadata
   This subroutine wraps gd_alter_recip(3), and modifies the specified field
   metadata.
 
+* GDLSWD(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  check_field, check_field_len, windop, threshold, threshold_scalar,
+  threshold_scalar_len, threshold_scalar_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len, check_field_len, windop
+    INTEGER threshold_scalar_len, threshold_scalar_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+    CHARACTER*<check_field_len> check_field
+    CHARACTER*<threshold_scalar_len> threshold_scalar
+    INTEGER threshold
+      or
+    REAL*8 threshold
+
+  This subroutine modifies the WINDOW field specified according to the supplied
+  parameters.  Passing -1 as threshold_scalar_len will delete an existing scalar
+  field code, if one is present.  Passing 0 for this parameter indicates no
+  change to the corresponding parameter field code.  If windop is one of
+  GDW_EQ, GDW_NE, GDW_ST, or GDW_CL, threshold should be of type integer,
+  otherwise it should be double precision.
+
 * GDALWD(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
   check_field, check_field_len, windop, threshold)
 
@@ -1455,11 +1676,28 @@ Subroutines interacting with field metadata
     CHARACTER*<check_field_len> check_field
     INTEGER threshold
       or
-    DOUBLE PRECISION threshold
+    REAL*8 threshold
 
   This subroutine wraps gd_alter_windop(3), and modifies the specified field
   metadata.  If windop is one of GDW_EQ, GDW_NE, GDW_ST, or GDW_CL, threshold
   should be of type integer, otherwise it should be double precision.
+
+* GDLSMX(dirfile_unit, field_code, field_code_len, infield, infield_len,
+  countfield, countfield_len, countval, countval_scalar, countval_scalar_len,
+  countval_scalar_index, period, period_scalar_len, period_scalar_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, infield_len, countfile_len, countval
+    INTEGER countval_scalar_len, countval_scalar_index, period,
+    INTEGER period_scalar_len, period_scalar_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<infield_len> infield
+    CHARACTER*<countfield_len> countfield
+
+  This subroutine modifies the MPLEX field specified according to the supplied
+  parameters.  Passing -1 as one of the .._scalar_len parameters will delete
+  an existing scalar field code, if one is present.  Passing 0 for these
+  parameters indicates no change to the corresponding parameter field code.
 
 * GDALMX(dirfile_unit, field_code, field_code_len, infield, infield_len,
   countfield, countfield_len, countval, period)
@@ -1528,24 +1766,15 @@ Subroutines interacting with field metadata
   the binary file associated with the raw field indicated by field_code.  On
   error, it sets name_len to zero.
 
-* GDMOVE(dirfile_unit, field_code, field_code_len, new_fragment, move_data)
+* GDMOVE(dirfile_unit, field_code, field_code_len, new_fragment, flags)
 
   Input:
-    INTEGER dirfile_unit, field_code_len, new_fragment, move_data
+    INTEGER dirfile_unit, field_code_len, new_fragment, flags
     CHARACTER*<field_code_len> field_code
 
-  This subroutine wraps gd_move(3), and moves the specified field to the new
-  fragment given.  If move_data is non-zero, the binary file, for RAW fields, is
-  also moved, if necessary.
-
-* GDMOVA(dirfile_unit, field_code, field_code_len, new_fragment)
-
-  Input:
-    INTEGER dirfile_unit, field_code_len, new_fragment
-    CHARACTER*<field_code_len> field_code
-
-  This subroutine wraps gd_move_alias(3), and moves the specified alias to the
-  new fragment given.
+  This subroutine wraps gd_move(3), and moves the specified field or alias to
+  indicated fragment.  The flags parameter should be zero or more of the GDR_xx
+  parameters, bitwise or'd together.
 
 * GDRENM(dirfile_unit, field_code, field_code_len, new_name, new_name_len,
   flags)
@@ -1571,17 +1800,15 @@ Subroutines interacting with field metadata
   the specified field.  The return value will be one of the data type symbols
   listed below.
 
-* GDCSCL(comp_scal, dirfile_unit, field_code, field_code_len)
+* GDENFL(flags, dirfile_unit, field_code, field_code_len)
 
   Output:
-    INTEGER comp_scal
+    INTEGER flags
   Input:
     INTEGER dirfile_unit, field_code_len
     CHARACTER*<field_code_len> field_code
 
-  This subroutine returns the comp_scal member of the specified field.  If the
-  specified field is not a LINCOM or POLYNOM, the return value will not be
-  meaningful.
+  This subroutine returns the flags member of the specified field.
 
 * GDGSCA(scalar, scalar_len, scalar_index, dirfile_unit, field_code,
   field_code_len, index)
@@ -1625,17 +1852,7 @@ Subroutines which add or delete fields and aliases
     INTEGER dirfile_unit, field_code_len, flags
     CHARACTER*<field_code_len> field_code
 
-  This subroutine wraps gd_delete(3).  It deletes the indicated field.  The
-  flags parameter should be either zero, or one or more of the delete flags
-  listed below bitwise or'd together.
-
-* GDDELA(dirfile_unit, field_code, field_code_len, flags)
-
-  Input:
-    INTEGER dirfile_unit field_code_len, flags
-    CHARACTER*<field_code_len> field_code
-
-  This subroutine wraps gd_delete_alias(3).  It deletes the indicated alias.
+  This subroutine wraps gd_delete(3).  It deletes the indicated field or alias.
   The flags parameter should be either zero, or one or more of the delete flags
   listed below bitwise or'd together.
 
@@ -1650,6 +1867,21 @@ Subroutines which add or delete fields and aliases
   This subroutine wraps gd_add_alias(3).  It adds an alias named field_code
   pointing to targ in the fragment indexed by fragment_index.
 
+* GDASRW(dirfile_unit, field_code, field_code_len, data_type, spf,
+  spf_scalar, spf_scalar_len, spf_scalar_index, fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, data_type, spf, spf_scalar_len
+    INTEGER spf_scalar_index, fragment_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<spf_scalar_len> spf_scalar
+
+  This subroutine adds a RAW field with the supplied parameters to the
+  specified fragment of the dirfile.  If spf_scalar_len is zero, spf_scalar and
+  spf_scalar_index are ignored, and the literal value spf is used for the
+  parameter.  If spf_scalar_len is non-zero, the literal spf is ignored and the
+  field code specified by spf_scalar and spf_scalar_index is used for the
+  parameter.
 
 * GDADRW(dirfile_unit, field_code, field_code_len, data_type, spf,
   fragment_index)
@@ -1658,8 +1890,43 @@ Subroutines which add or delete fields and aliases
     INTEGER dirfile_unit, field_code_len, data_type, spf, fragment_index
     CHARACTER*<field_code_len> field_code
 
-  This subroutine adds a RAW field with the supplied parameters to the
-  specified format file fragment of the dirfile.
+  This is equivalent to GDASRW with spf_scalar_len set to zero (i.e. with a
+  literal parameter only).
+
+* GDASCL(dirfile_unit, field_code, field_code_len, nfields, in_field1,
+  in_field1_len, m1, m1_scalar, m1_scalar_len, m1_scalar_index, b1, b1_scalar,
+  b1_scalar_len, b1_scalar_index, in_field2, in_field2_len, m2, m2_scalar,
+  m2_scalar_len, m2_scalar_index, b2, b2_scalar, b2_scalar_len, b2_scalar_index,
+  in_field3, in_field3_len, m3, m3_scalar, m3_scalar_len, m3_scalar_index, b3,
+  b3_scalar, b3_scalar_len, b3_scalar_index, fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, nfields, in_field1_len, m1_scalar_len
+    INTEGER m1_scalar_index, b1_scalar_len, b1_scalar_index, in_field2_len
+    INTEGER m2_scalar_len, m2_scalar_index, b2_scalar_len, b2_scalar_index
+    INTEGER in_field3_len, m3_scalar_len, m3_scalar_index, b3_scalar_len
+    INGEGER b3_scalar_index, fragment_index
+    COMPLEX*16 m1, b1, m2, b2, m3, b3
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field1_len> in_field1
+    CHARACTER*<m1_scalar_len> m1_scalar
+    CHARACTER*<b1_scalar_len> b1_scalar
+    CHARACTER*<in_field2_len> in_field2
+    CHARACTER*<m2_scalar_len> m2_scalar
+    CHARACTER*<b2_scalar_len> b2_scalar
+    CHARACTER*<in_field3_len> in_field3
+    CHARACTER*<m3_scalar_len> m3_scalar
+    CHARACTER*<b3_scalar_len> b3_scalar
+
+  This subroutine adds a LINCOM field with the supplied parameters to the
+  specified format file fragment of the dirfile.  All three sets of input
+  parameters are required to be passed to the call, but only the first
+  nfields sets will be examined.  If a .._scalar_len parameter is zero, the
+  corresponding .._scalar and .._scalar_index parameters are ignored, and the
+  literal parameter (m1, b1, &c.) is used for that parameter.  If the
+  .._scalar_len parameter is non-zero, the literal parameter is ignored, and the
+  scalar is set to the field code specified by the corresponding .._scalar and
+  .._scalar_index parameters.
 
 * GDADCL(dirfile_unit, field_code, field_code_len, nfields, in_field1,
   in_field1_len, m1, b1, in_field2, in_field2_len, m2, b2, in_field3,
@@ -1674,10 +1941,35 @@ Subroutines which add or delete fields and aliases
     CHARACTER*<in_field2_len> in_field2
     CHARACTER*<in_field3_len> in_field3
 
-  This subroutine adds a LINCOM field with the supplied parameters to the
-  specified format file fragment of the dirfile.  All three sets of input
-  parameters are required to be passed to the call, but only the first
-  nfield sets will be examined.
+  This is equivalent to GDASCL with all the .._scalar_len parameters set to
+  zero. (i.e. using literal scalars only.)
+
+* GDASLC(dirfile_unit, field_code, field_code_len, nfields, in_field1,
+  in_field1_len, m1, m1_scalar, m1_scalar_len, m1_scalar_index, b1, b1_scalar,
+  b1_scalar_len, b1_scalar_index, in_field2, in_field2_len, m2, m2_scalar,
+  m2_scalar_len, m2_scalar_index, b2, b2_scalar, b2_scalar_len, b2_scalar_index,
+  in_field3, in_field3_len, m3, m3_scalar, m3_scalar_len, m3_scalar_index, b3,
+  b3_scalar, b3_scalar_len, b3_scalar_index, fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, nfields, in_field1_len, m1_scalar_len
+    INTEGER m1_scalar_index, b1_scalar_len, b1_scalar_index, in_field2_len
+    INTEGER m2_scalar_len, m2_scalar_index, b2_scalar_len, b2_scalar_index
+    INTEGER in_field3_len, m3_scalar_len, m3_scalar_index, b3_scalar_len
+    INGEGER b3_scalar_index, fragment_index
+    REAL*8 m1, b1, m2, b2, m3, b3
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field1_len> in_field1
+    CHARACTER*<m1_scalar_len> m1_scalar
+    CHARACTER*<b1_scalar_len> b1_scalar
+    CHARACTER*<in_field2_len> in_field2
+    CHARACTER*<m2_scalar_len> m2_scalar
+    CHARACTER*<b2_scalar_len> b2_scalar
+    CHARACTER*<in_field3_len> in_field3
+    CHARACTER*<m3_scalar_len> m3_scalar
+    CHARACTER*<b3_scalar_len> b3_scalar
+
+  This is equivalent to GDASCL above, but takes purely real parameters.
 
 * GDADLC(dirfile_unit, field_code, field_code_len, nfields, in_field1,
   in_field1_len, m1, b1, in_field2, in_field2_len, m2, b2, in_field3,
@@ -1707,6 +1999,27 @@ Subroutines which add or delete fields and aliases
   This subroutine adds a LINTERP field with the supplied parameters to the
   specified format file fragment of the dirfile.
 
+* GDASBT(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  bitnum, bitnum_scalar, bitnum_scalar_len, bitnum_scalar_index,
+  numbits, numbits_scalar, numbits_scalar_len, numbits_scalar_index,
+  fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len, fragment_index
+    INTEGER bitnum, bitnum_scalar_len, bitnum_scalar_index
+    INTEGER numbits, numbits_scalar_len, numbits_scalar_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<bitnum_scalar_len> bitnum_scalar
+    CHARACTER*<numbits_scalar_len> numbits_scalar
+    CHARACTER*<in_field_len> in_field
+
+  This subroutine adds a BIT field with the supplied parameters to the
+  specified format file fragment of the dirfile.  If bitnum_scalar_len is zero,
+  the bitnum_scalar and bitnum_scalar_index values are ignored and the literal
+  value of bitnum is used.  If bitnum_scalar_len is non-zero, the value of
+  bitnum is ignored and bitnum_scalar and bitnum_scalar_index is used to form
+  a scalar field code for bitnum.  Similarly with numbits.  See also GDADBT.
+
 * GDADBT(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
   bitnum, numbits, fragment_index)
 
@@ -1716,8 +2029,29 @@ Subroutines which add or delete fields and aliases
     CHARACTER*<field_code_len> field_code
     CHARACTER*<in_field_len> in_field
 
-  This subroutine adds a BIT field with the supplied parameters to the
-  specified format file fragment of the dirfile.
+  This function is equivalent to calling GDASBT (above) with bitnum_scalar_len
+  and numbits_scalar_len set to zero (i.e. with literal parameters only).
+
+* GDASSB(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  bitnum, bitnum_scalar, bitnum_scalar_len, bitnum_scalar_index,
+  numbits, numbits_scalar, numbits_scalar_len, numbits_scalar_index,
+  fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len, fragment_index
+    INTEGER bitnum, bitnum_scalar_len, bitnum_scalar_index
+    INTEGER numbits, numbits_scalar_len, numbits_scalar_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<bitnum_scalar_len> bitnum_scalar
+    CHARACTER*<numbits_scalar_len> numbits_scalar
+    CHARACTER*<in_field_len> in_field
+
+  This subroutine adds a SBIT field with the supplied parameters to the
+  specified format file fragment of the dirfile.  If bitnum_scalar_len is zero,
+  the bitnum_scalar and bitnum_scalar_index values are ignored and the literal
+  value of bitnum is used.  If bitnum_scalar_len is non-zero, the value of
+  bitnum is ignored and bitnum_scalar and bitnum_scalar_index is used to form
+  a scalar field code for bitnum.  Similarly with numbits.  See also GDADBT.
 
 * GDADSB(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
   bitnum, numbits, fragment_index)
@@ -1728,8 +2062,27 @@ Subroutines which add or delete fields and aliases
     CHARACTER*<field_code_len> field_code
     CHARACTER*<in_field_len> in_field
 
-  This subroutine adds a SBIT field with the supplied parameters to the
-  specified format file fragment of the dirfile.
+  This function is equivalent to calling GDASSB (above) with bitnum_scalar_len
+  and numbits_scalar_len set to zero (i.e. with literal parameters only).
+
+* GDASCR(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
+  divident, divident_scalar, divident_scalar_len, divident_scalar_index,
+  fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field1_len
+    INTEGER dividend_scalar_len, dividend_scalar_index, fragment_index
+    COMPLEX*16 dividend
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+    CHARACTER*<dividend_scalar_len> dividend_scalar.
+
+  This subroutine adds a PHASE field with the supplied parameters to the
+  specified fragment of the dirfile.  If dividend_scalar_len is zero,
+  dividend_scalar and dividend_scalar_index are ignored, and the literal value
+  dividend is used for the parameter.  If dividend_scalar_len is non-zero, the
+  literal dividend is ignored and the field code specified by dividend_scalar
+  and dividend_scalar_index is used for the parameter.
 
 * GDADCR(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
   dividend, fragment_index)
@@ -1741,8 +2094,22 @@ Subroutines which add or delete fields and aliases
     CHARACTER*<in_field_len> in_field
     COMPLEX*16 dividend
 
-  This subroutine adds a RECIP field with the supplied parameters to the
-  specified format file fragment of the dirfile.
+  This is equivalent to GDASCR with dividend_scalar_len set to zero (i.e. with a
+  literal parameter only).
+
+* GDASRC(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
+  divident, divident_scalar, divident_scalar_len, divident_scalar_index,
+  fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field1_len
+    INTEGER dividend_scalar_len, dividend_scalar_index, fragment_index
+    REAL*8 dividend
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+    CHARACTER*<dividend_scalar_len> dividend_scalar.
+
+  This is equivalent to GDASCR, but with a purely real dividend.
 
 * GDADRC(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
   dividend, fragment_index)
@@ -1754,8 +2121,8 @@ Subroutines which add or delete fields and aliases
     CHARACTER*<in_field_len> in_field
     REAL*8 dividend
 
-  This subroutine adds a RECIP field with the supplied parameters to the
-  specified format file fragment of the dirfile.
+  This is equivalent to GDASRC with dividend_scalar_len set to zero (i.e. with a
+  literal parameter only).
 
 * GDADMT(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
   in_field2, in_field2_len, fragment_index)
@@ -1783,6 +2150,38 @@ Subroutines which add or delete fields and aliases
   This subroutine adds a DIVIDE field with the supplied parameters to the
   specified format file fragment of the dirfile.
 
+* GDASCP(dirfile_unit, field_code, field_code_len, poly_ord, in_field,
+  in_field_len, a0, a0_scalar, a0_scalar_len, a0_scalar_index, a1, a1_scalar,
+  a1_scalar_len, a1_scalar_index, a2, a2_scalar, a2_scalar_len, a2_scalar_index,
+  a3, a3_scalar, a3_scalar_len, a3_scalar_index, a4, a4_scalar, a4_scalar_len,
+  a4_scalar_index, a5, a5_scalar, a5_scalar_len, a5_scalar_index,
+  fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, poly_ord, in_field_len
+    INTEGER a0_scalar_len, a0_scalar_index, a1_scalar_len, a1_scalar_index
+    INTEGER a2_scalar_len, a2_scalar_index, a3_scalar_len, a3_scalar_index
+    INTEGER a4_scalar_len, a4_scalar_index, a5_scalar_len, a5_scalar_index
+    INTEGER fragment_index
+    COMPLEX*16 a0, a1, a2, a3, a4, a5
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<a0_scalar_len> a0_scalar_len
+    CHARACTER*<a1_scalar_len> a1_scalar_len
+    CHARACTER*<a2_scalar_len> a2_scalar_len
+    CHARACTER*<a3_scalar_len> a3_scalar_len
+    CHARACTER*<a4_scalar_len> a4_scalar_len
+    CHARACTER*<a5_scalar_len> a5_scalar_len
+    CHARACTER*<in_field_len> in_field
+
+  This subroutine adds a POLYNOM field with the supplied parameters to the
+  specified format file fragment of the dirfile.  All six coefficients are
+  required to be passed to the call, but only the first poly_ord + 1 will be
+  examined.  If a .._scalar_len parameter is zero, the corresponding .._scalar
+  and .._scalar_index parameters are ignored, and the literal parameter (a0, a1,
+  &c.) is used for that parameter.  If the .._scalar_len parameter is non-zero,
+  the literal parameter is ignored, and the scalar is set to the field code
+  specified by the corresponding .._scalar and .._scalar_index parameters.
+
 * GDADCP(dirfile_unit, field_code, field_code_len, poly_ord, in_field,
   in_field_len, a0, a1, a2, a3, a4, a5, fragment_index)
 
@@ -1793,10 +2192,33 @@ Subroutines which add or delete fields and aliases
     CHARACTER*<field_code_len> field_code
     CHARACTER*<in_field_len> in_field
 
-  This subroutine adds a POLYNOM field with the supplied parameters to the
-  specified format file fragment of the dirfile.  All six coefficients are
-  required to be passed to the call, but only the first poly_ord + 1 will be
-  examined.
+  This is equivalent to GDASCP with all the .._scalar_len parameters set to
+  zero. (i.e. using literal scalars only.)
+
+* GDASPN(dirfile_unit, field_code, field_code_len, poly_ord, in_field,
+  in_field_len, a0, a0_scalar, a0_scalar_len, a0_scalar_index, a1, a1_scalar,
+  a1_scalar_len, a1_scalar_index, a2, a2_scalar, a2_scalar_len, a2_scalar_index,
+  a3, a3_scalar, a3_scalar_len, a3_scalar_index, a4, a4_scalar, a4_scalar_len,
+  a4_scalar_index, a5, a5_scalar, a5_scalar_len, a5_scalar_index,
+  fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, poly_ord, in_field_len
+    INTEGER a0_scalar_len, a0_scalar_index, a1_scalar_len, a1_scalar_index
+    INTEGER a2_scalar_len, a2_scalar_index, a3_scalar_len, a3_scalar_index
+    INTEGER a4_scalar_len, a4_scalar_index, a5_scalar_len, a5_scalar_index
+    INTEGER fragment_index
+    REAL*8 a0, a1, a2, a3, a4, a5
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<a0_scalar_len> a0_scalar_len
+    CHARACTER*<a1_scalar_len> a1_scalar_len
+    CHARACTER*<a2_scalar_len> a2_scalar_len
+    CHARACTER*<a3_scalar_len> a3_scalar_len
+    CHARACTER*<a4_scalar_len> a4_scalar_len
+    CHARACTER*<a5_scalar_len> a5_scalar_len
+    CHARACTER*<in_field_len> in_field
+
+  This subroutine is equivalent GDASCP, but takes purely real parameters.
 
 * GDADPN(dirfile_unit, field_code, field_code_len, poly_ord, in_field,
   in_field_len, a0, a1, a2, a3, a4, a5, fragment_index)
@@ -1808,7 +2230,24 @@ Subroutines which add or delete fields and aliases
     CHARACTER*<field_code_len> field_code
     CHARACTER*<in_field_len> in_field
 
-  This subroutine is equivalent the GDADCP, but takes purely real parameters.
+  This subroutine is equivalent GDADCP, but takes purely real parameters.
+
+* GDASPH(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
+  shift, shift_scalar, shift_scalar_len, shift_scalar_index, fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field1_len, shift
+    INTEGER shift_scalar_len, shift_scalar_index, fragment_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+    CHARACTER*<shift_scalar_len> shift_scalar.
+
+  This subroutine adds a PHASE field with the supplied parameters to the
+  specified fragment of the dirfile.  If shift_scalar_len is zero, shift_scalar
+  and shift_scalar_index are ignored, and the literal value shift is used for
+  the parameter.  If shift_scalar_len is non-zero, the literal shift is ignored
+  and the field code specified by shift_scalar and shift_scalar_index is used
+  for the parameter.
 
 * GDADPH(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
   shift, fragment_index)
@@ -1818,25 +2257,69 @@ Subroutines which add or delete fields and aliases
     CHARACTER*<field_code_len> field_code
     CHARACTER*<in_field_len> in_field
 
-  This subroutine adds a PHASE field with the supplied parameters to the
-  specified fragment of the dirfile.
+  This is equivalent to GDASPH above with shift_scalar_len set to zer (i.e. with
+  a literal parameter only).
+
+* GDASWD(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  check_field, check_field_len, windop, threshold, threshold_scalar,
+  threshold_scalar_len, threshold_scalar_index, fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len, check_field_len
+    INTEGER threshold_scalar_len, threshold_scalar_index, windop
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+    CHARACTER*<check_field_len> check_field
+    INTEGER threshold
+      or
+    REAL*8 threshold
+
+  This subroutine adds a WINDOW field with the supplied parameters to the
+  specified fragment of the dirfile.  If threshold_scalar_len is zero,
+  threshold_scalar and threshold_scalar_index are ignored, and the literal value
+  threshold is used for the parameter.  In this case, if windop is one of
+  GDW_EQ, GDW_NE, GDW_ST, or GDW_CL, threshold should be an integer; otherwise,
+  threshold should be a real.  If threshold_scalar_len is non-zero, the literal
+  threshold is ignored and the field code specified by threshold_scalar and
+  threshold_scalar_index is used for the parameter.
 
 * GDADWD(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
   check_field, check_field_len, windop, threshold, fragment_index)
 
   Input:
     INTEGER dirfile_unit, field_code_len, in_field_len, check_field_len, windop
+    INTEGER fragment_index
     CHARACTER*<field_code_len> field_code
     CHARACTER*<in_field_len> in_field
     CHARACTER*<check_field_len> check_field
     INTEGER threshold
       or
-    DOUBLE PRECISION threshold
+    REAL*8 threshold
 
-    This subroutine adds a WINDOW field with the supplied parameters to the
-    specified fragment of the dirfile.  If windop is one of GDW_EQ, GDW_NE,
-    GDW_ST, or GDW_CL, threshold should be an integer; otherwise, threshold
-    should be of type double precision.
+  This is equivalent to GDASWD with threshold_scalar_len set to zero (i.e. with
+  a literal parameter only).
+
+* GDASMX(dirfile_unit, field_code, field_code_len, infield, infield_len,
+  countfield, countfield_len, countval, countval_scalar, countval_scalar_len,
+  countval_scalar_index, period, period_scalar, period_scalar_len,
+  period_scalar_index, fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, infield_len, countfile_len, countval
+    INTEGER countval_scalar_len, countval_scalar_index, period
+    INTEGER period_scalar_len, period_scalar_index, fragment_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<infield_len> infield
+    CHARACTER*<countfield_len> countfield
+    CHARACTER*<countval_scalar_len> countval_scalar
+    CHARACTER*<period_scalar_len> period_scalar
+
+  This subroutine adds a MPLEX field with the supplied parameters to the
+  specified fragment of the dirfile.  If countval_scalar_len is zero,
+  countval_scalar and countval_scalar_index are ignored and the literal value
+  countval is used for the parameter.  If countval_scalar_len is non-zero, the
+  literal countval is ignored, and the field code specified by countval_scalar
+  and countval_scalar_index are used for the parameter.  Similarly with period.
 
 * GDADMX(dirfile_unit, field_code, field_code_len, infield, infield_len,
   countfield, countfield_len, countval, period, fragment_index)
@@ -1848,8 +2331,8 @@ Subroutines which add or delete fields and aliases
     CHARACTER*<infield_len> infield
     CHARACTER*<countfield_len> countfield
 
-  This subroutine adds a MPLEX field with the supplied parameters to the
-  specified fragment of the dirfile.
+  This subroutine is equivalent to GDASMX above with countval_scalar_len and
+  period_scalar_len set to zero (i.e. with literal parameters only).
 
 * GDADCA(dirfile_unit, field_code, field_code_len, const_type, array_len,
   data_type, data, fragment_index)

@@ -158,6 +158,7 @@ The following encoding types are known by GetData:
 =over
 
 $GetData::BZIP2_ENCODED,
+$GetData::FLAC_ENCODED,
 $GetData::GZIP_ENCODED,
 $GetData::LZMA_ENCODED,
 $GetData::SIE_ENCODED,
@@ -337,6 +338,19 @@ Elements of the C<scalar> array which are undef indicate literal parameters
 (equivalent to C<NULL> in the C<gd_entry_t>'s C<scalar> member).  Similarly,
 undef is used in C<scalar_ind> where the C API uses -1, to indicate CONST
 fields, instead of CARRAYs.
+
+=head1 NON-MEMBER FUNCTIONS
+
+=over
+
+=item encoding_support ($ENCODING)
+
+Returns C<$GetData::RDWR> if the library can both read and write the specified
+encoding, C<$GetData::RDONLY> if it can only read, or -1 otherwise.
+C<$ENCODING> should be one of the encoding symbols listed above in the
+L</"Encoding Types"> section.
+
+=back
 
 =head1 DIRFILE CREATION METHODS
 
@@ -922,11 +936,11 @@ If C<$IN_FIELD> or C<$CHECK_FIELD> are undef, or if C<$WINDOP ==
 $GetData::WINDOP_UNK>, that paremeter is not changed. Otherwise,
 C<$WINDOP> should be one of the symbols listed under L</WINDOW Operators> above.
 
-=item $dirfile->bof ($FIELD_CODE)
+=item $dirfile->array_len ($FIELD_CODE)
 
 Z<>
 
-=item $dirfile->carray_len ($FIELD_CODE)
+=item $dirfile->bof ($FIELD_CODE)
 
 Z<>
 
@@ -943,11 +957,6 @@ $GetData::DEL_FORCE,
 $GetData::DEL_META.
 
 =back
-
-=item $dirfile->delete_alias ($FIELD_CODE, [$FLAGS])
-
-If not given, C<$FLAGS> defaults to 0; otherwise, see the description of
-L</delete> above for valid values.
 
 =item $dirfile->desync ([$FLAGS])
 
@@ -1112,11 +1121,17 @@ Z<>
 
 =item $dirfile->move ($FIELD_CODE, $NEW_FRAGMENT, [$MOVE_DATA])
 
-If not given, C<$MOVE_DATA> defaults to 0.
+If not given, C<$FLAGS> defaults to 0.  Otherwise, it should be a bitwise or'd
+collection of zero or more of the following flags:
 
-=item $dirfile->move_alias ($FIELD_CODE, $NEW_FRAGMENT)
+=over
 
-Z<>
+$GetData::REN_DANGLE,
+$GetData::REN_DATA,
+$GetData::REN_FORCE,
+$GetData::REN_UPDB.
+
+=back
 
 =item $dirfile->mplex_lookback ($LOOKBACK)
 
@@ -1163,7 +1178,9 @@ collection of zero or more of the following flags:
 
 =over
 
+$GetData::REN_DANGLE,
 $GetData::REN_DATA,
+$GetData::REN_FORCE,
 $GetData::REN_UPDB.
 
 =back

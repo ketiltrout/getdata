@@ -3048,10 +3048,11 @@ void gdidl_delete(int argc, IDL_VPTR argv[], char *argk)
     int data;
     int deref;
     int force;
+    int meta;
   } KW_RESULT;
   KW_RESULT kw;
 
-  kw.data = kw.deref = kw.force = 0;
+  kw.data = kw.deref = kw.force = kw.meta = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
@@ -3060,6 +3061,7 @@ void gdidl_delete(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "FORCE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force) },
+    { "META", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(meta) },
     { NULL }
   };
 
@@ -3069,7 +3071,8 @@ void gdidl_delete(int argc, IDL_VPTR argv[], char *argk)
   const char* field_code = IDL_VarGetString(argv[1]);
 
   gd_delete(D, field_code, (kw.data ? GD_DEL_DATA : 0) |
-      (kw.deref ? GD_DEL_DEREF : 0) | (kw.force) ? GD_DEL_FORCE : 0);
+      (kw.deref ? GD_DEL_DEREF : 0) | (kw.force ? GD_DEL_FORCE : 0) |
+      (kw.meta ? GD_DEL_META : 0));
 
   GDIDL_SET_ERROR(D);
 

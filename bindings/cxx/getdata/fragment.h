@@ -28,11 +28,17 @@
 namespace GetData {
 
   enum EncodingScheme {
-    AutoEncoding  = GD_AUTO_ENCODED, RawEncoding   = GD_UNENCODED,
-    TextEncoding  = GD_TEXT_ENCODED, SlimEncoding  = GD_SLIM_ENCODED,
-    GzipEncoding  = GD_GZIP_ENCODED, Bzip2Encoding = GD_BZIP2_ENCODED,
-    SieEncoding   = GD_SIE_ENCODED,  ZzipEncoding  = GD_ZZIP_ENCODED,
-    ZzslimEncoding = GD_ZZSLIM_ENCODED, UnsupportedEncoding = GD_ENC_UNSUPPORTED
+    AutoEncoding   = GD_AUTO_ENCODED,
+    Bzip2Encoding  = GD_BZIP2_ENCODED,
+    FlacEncoding   = GD_FLAC_ENCODED,
+    GzipEncoding   = GD_GZIP_ENCODED,
+    RawEncoding    = GD_UNENCODED,
+    SieEncoding    = GD_SIE_ENCODED,
+    SlimEncoding   = GD_SLIM_ENCODED,
+    TextEncoding   = GD_TEXT_ENCODED,
+    ZzipEncoding   = GD_ZZIP_ENCODED,
+    ZzslimEncoding = GD_ZZSLIM_ENCODED,
+    UnsupportedEncoding = GD_ENC_UNSUPPORTED
   };
 
   class Dirfile;

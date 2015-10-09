@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2014 D. V. Wiebe
+/* Copyright (C) 2010-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -66,18 +66,15 @@ int gd_system(const char* command)
 #define sleep(x) Sleep(1000 * (x))
 #endif
 
-/* path munging for WIN32/64 */
-#if defined _WIN32 || defined _WIN64
+/* path munging for format files */
 #define gd_pathwrite(x,y) do { \
   char *ptr; \
+  const char esc = '\\'; \
   for (ptr = y; *ptr != '\0'; ++ptr) { \
-    if (*ptr == '\\') write(x,ptr,1); \
+    if (*ptr == '\\' || *ptr == '#' || *ptr == ' ') write(x,&esc,1); \
     write(x,ptr,1); \
   } \
 } while (0)
-#else
-#define gd_pathwrite(x,y) write(x,y,strlen(y))
-#endif
 
 /* getcwd abstraction */
 #if defined HAVE_GETCWD || defined HAVE__GETCWD

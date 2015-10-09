@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -41,9 +41,8 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *table = "dirfile/lut/table";
-  const char *format_format =
-    "linterp LINTERP data %s/dirfile/lut/table\n"
-    "data RAW UINT8 1\n";
+  const char *format_data1 = "linterp LINTERP data ";
+  const char *format_data2 = "/dirfile/lut/table\ndata RAW UINT8 1\n";
   unsigned char c = 0;
   unsigned char data_data[64];
   int fd, i, n, error, r = 0;
@@ -51,7 +50,6 @@ int main(void)
   FILE *t;
   int cwd_size = 2048;
   char *ptr, *cwd = NULL;
-  char *format_data;
 
   rmdirfile();
   mkdir(filedir, 0777);
@@ -59,13 +57,11 @@ int main(void)
 
   gdtest_getcwd(ptr, cwd, cwd_size);
 
-  format_data = malloc(strlen(format_format) + cwd_size);
-  sprintf(format_data, format_format, cwd);
-
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
+  write(fd, format_data1, strlen(format_data1));
+  gd_pathwrite(fd, cwd);
+  write(fd, format_data2, strlen(format_data2));
   close(fd);
-  free(format_data);
 
   for (fd = 0; fd < 64; ++fd)
     data_data[fd] = (unsigned char)fd;

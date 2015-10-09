@@ -105,9 +105,10 @@ The GD_ENTRY Structure
 The GD_ENTRY structure is used in place of the C API's gd_entry_t data type.  It
 is essentially equivalent and is defined as:
 
-** Structure GD_ENTRY, 30 tags, length=512, data length=502:
+** Structure GD_ENTRY, 30 tags, length=568, data length=546:
   FIELD        STRING
   FIELD_TYPE   INT
+  FLAGS        UINT
   FRAGMENT     INT
   IN_FIELDS    STRING     Array[3]
   A            DOUBLE     Array[6]
@@ -116,7 +117,6 @@ is essentially equivalent and is defined as:
   B            DOUBLE     Array[3]
   CB           DCOMPLEX   Array[3]
   BITNUM       INT
-  COMP_SCAL    INT
   COUNT_VAL    INT
   DATA_TYPE    INT
   DIVIDEND     DOUBLE
@@ -545,12 +545,11 @@ FUNCTION GD_CONSTANTS(dirfile_unit, PARENT=parent, TYPE=type)
   for the given parent field will be returned, otherwise all non-meta CONST
   fields will be returned.  See gd_constants(3) and gd_mconstants(3).
 
-PROCEDURE GD_DELETE, dirfile_unit, field_code, /DEL_DATA, /DEREF, /FORCE, /ALIAS
+PROCEDURE GD_DELETE, dirfile_unit, field_code, /DEL_DATA, /DEREF, /FORCE, /META
 
-  This procedure delete the field specified by 'field_code' from the database.
-  If /ALIAS is specified, the alias 'field_code' is deleted instead.  The
-  meanings of the three other keyword flags are discussed in the gd_delete(3)
-  manual page.  See gd_delete(3) and gd_delete_alias(3).
+  This procedure delete the field or alias specified by 'field_code' from the
+  database.  The meanings of the keyword flags are discussed in the gd_delete(3)
+  manual page (q.v.).
 
 FUNCTION GD_DESYNC(dirfile_unit, /PATHCHECK, /REOPEN)
 
@@ -578,6 +577,11 @@ FUNCTION GD_ENCODING(dirfile_unit, FRAGMENT=fragment)
   This function returns the encoding scheme of the fragment indexed by FRAGMENT,
   or of the primary format file, if FRAGMENT is omitted.  The return value will
   be one of the !GD.*_ENCODED constants.  See gd_encoding(3).
+
+FUNCTION GD_ENCODING_SUPPORT(encoding)
+
+  This function returns !GD.RDWR, !GD.RONLY, or -1 depending on the runtime
+  support for the specified encoding.  See gd_encoding_support(3).
 
 FUNCTION GD_ENDIANNESS(dirfile_unit, FRAGMENT=fragment)
 
@@ -759,13 +763,12 @@ PROCEDURE GD_METAFLUSH, dirfile_unit
   This procedure flushes pending metadata changes to the dirfile to disk.  See
   gd_metaflush(3).
 
-PROCEDURE GD_MOVE, dirfile_unit, field_code, new_fragment, /ALIAS, /MOVE_DATA
+PROCEDURE GD_MOVE, dirfile_unit, field_code, new_fragment, /DANGLE, /FORCE,
+  /MOVE_DATA, /UPDATEDB
 
-  This procedure moves the field specified by 'field_code' to the new format
-  file fragment indexed by 'new_fragment'.  If ALIAS is specified, the alias
-  'field_code' is moved instead.  Otherwise, if MOVE_DATA is specified, and
-  'field_code' specifies a RAW file, the data file on disk will also be moved,
-  if necessary.  See gd_move(3) and gd_move_alias(3).
+  This procedure moves the field or alias specified by 'field_code' to the 
+  format file fragment indexed by 'new_fragment'.  See gd_move(3) for the
+  meaning of the flags.
 
 PROCEDURE GD_MPLEX_LOOKBACK dirfile_unit, [lookback,] /ALL
 
@@ -886,13 +889,11 @@ FUNCTION GD_REFERENCE(dirfile_unit, [new_reference])
   dirfile contains no reference field, the empty string is returned.  See
   gd_reference(3).
 
-PROCEDURE GD_RENAME, dirfile_unit, field_code, new_name, /MOVE_DATA, /UPDATEDB
+PROCEDURE GD_RENAME, dirfile_unit, field_code, new_name, /DANGLE, /FORCE,
+  /MOVE_DATA, /UPDATEDB
 
-  This function renames the field specified by 'field_code' to 'new_name'.  If
-  MOVE_DATA is specified, and the field is a RAW field, the data file on disk
-  is renamed as well.  If UPDATEDB is specified, fields whose definition depends
-  on this field are also updated to reflect the change in name.  See
-  gd_rename(3).
+  This function renames the field specified by 'field_code' to 'new_name'.  See
+  gd_rename(3) for the meaning of the flags.
 
 FUNCTION GD_SEEK(dirfile_unit, field_code, FRAME_NUM=frame_num,
   SAMPLE_NUM=sample_num, WHENCE=whence, /WRITE)

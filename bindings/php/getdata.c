@@ -242,9 +242,6 @@ static int gdphp_callback(gd_parser_data_t *pdata, void *extra)
 
   /* interpret the response */
   switch (Z_TYPE_P(response)) {
-    case IS_DOUBLE: /* I suppose */
-      sem = (int)Z_DVAL_P(response);
-      break;
     case IS_LONG:
       sem = (int)Z_LVAL_P(response);
       break;

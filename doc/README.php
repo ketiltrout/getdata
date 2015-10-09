@@ -110,11 +110,12 @@ Some functions have several ways that they can be called.
 
 * bool gd_add(resource $dirfile, array $entry)
 
-    For LINCOM and POLYNOM entries, the "n_fields" and "poly_ord" keys of $entry
-    are optional: the extension will use the other supplied parameters to
-    deterimine these if not given.  If named scalars are used for parameters,
-    the corresponding literal parameter can be omitted.  In most cases, $entry
-    members which are one-element arrays can be replaced with a scalar.
+      For LINCOM and POLYNOM entries, the "n_fields" and "poly_ord" keys of
+      $entry are optional: the extension will use the other supplied parameters
+      to deterimine these if not given.  If named scalars are used for
+      parameters, the corresponding literal parameter can be omitted.  In most
+      cases, $entry members which are one-element arrays can be replaced with a
+      scalar.
 
 * bool gd_add_alias(resource $dirfile, string $field_code, string $target,
         [ int $fragment_index = 0 ])
@@ -177,23 +178,23 @@ Some functions have several ways that they can be called.
 * bool gd_alter_affixes(resource $dirfile, int $fragment_index, string $prefix,
         string $suffix)
 
-    If $prefix and/or $suffix is null, no change will be made to that affix.  To
-    remove an affix, use the empty string (as in the C API).
+      If $prefix and/or $suffix is null, no change will be made to that affix.
+      To remove an affix, use the empty string (as in the C API).
 
 * bool gd_alter_bit(resource $dirfile, string $field_code,
         [ string $in_field = null, int $bitnum = null, int $numbits = null ])
 
-    Parameters which are null (or not given) are left unchanged.
+      Parameters which are null (or not given) are left unchanged.
 
 * bool gd_alter_carray(resource $dirfile, string $field_code,
         [ int $const_type = null, int $array_len = null ])
 
-    Parameters which are null (or not given) are left unchanged.
+      Parameters which are null (or not given) are left unchanged.
 
 * bool gd_alter_const(resource $dirfile, string $field_code,
         [ int $const_type = null ])
 
-    Parameters which are null (or not given) are left unchanged.
+      Parameters which are null (or not given) are left unchanged.
 
 * bool gd_alter_encoding(resource $dirfile, int $encoding, int $fragment_index,
         [ bool $recode = false ])
@@ -204,7 +205,7 @@ Some functions have several ways that they can be called.
 * bool gd_alter_entry(resource $dirfile, string $field_code, array $entry,
         [ bool $recode = false ])
 
-    Elements of $entry which are missing or set to null are left unchanged.
+      Elements of $entry which are missing or set to null are left unchanged.
 
 * bool gd_alter_frameoffset(resource $dirfile, int $offset, int $fragment_index,
         [ bool $recode = false ])
@@ -212,13 +213,13 @@ Some functions have several ways that they can be called.
 * bool gd_alter_divide(resource $dirfile, string $field_code,
         [ string $in_field1 = null, string $in_field2 = null ])
 
-    Parameters which are null (or not given) are left unchanged.
+      Parameters which are null (or not given) are left unchanged.
 
 * bool gd_alter_lincom(resource $dirfile, string $field_code,
         [ int $n_fields = null, array $in_fields = null, array $m = null,
         array $b = null ])
 
-    Parameters which are null (or not given) are left unchanged.
+      Parameters which are null (or not given) are left unchanged.
 
 * bool gd_alter_linterp(resource $dirfile, string $field_code,
     [ string $in_field, string $table, bool $rename = false ])
@@ -230,7 +231,7 @@ Some functions have several ways that they can be called.
 * bool gd_alter_multiply(resource $dirfile, string $field_code,
         [ string $in_field1, string $in_field2 ])
 
-    Parameters which are null (or not given) are left unchanged.
+      Parameters which are null (or not given) are left unchanged.
 
 * bool gd_alter_phase(resource $dirfile, string $field_code,
         [ string $in_field = null, int $shift = null ])
@@ -244,17 +245,17 @@ Some functions have several ways that they can be called.
 * bool gd_alter_raw(resource $dirfile, string $field_code,
         [ int $data_type = null, int $spf = null, bool $recode = false ])
 
-    Parameters which are null (or not given) are left unchanged.
+      Parameters which are null (or not given) are left unchanged.
 
 * bool gd_alter_recip(resource $dirfile, string $field_code,
         [ string $in_field = null, number $dividend = null ])
 
-    Parameters which are null (or not given) are left unchanged.
+      Parameters which are null (or not given) are left unchanged.
 
 * bool gd_alter_sbit(resource $dirfile, string $field_code,
         [ string $in_field = null, int $bitnum = null, int $numbits = null ])
 
-    Parameters which are null (or not given) are left unchanged.
+      Parameters which are null (or not given) are left unchanged.
 
 * bool gd_alter_spec(resource $dirfile, string $spec, [ bool $recode = false ])
 
@@ -262,9 +263,9 @@ Some functions have several ways that they can be called.
         [ string $in_field = null, string $check_field = null,
         int $windop = null, number $threshold = null ])
 
-* int gd_bof(resource $dirfile, string $field_code)
+* int gd_array_len(resource $dirfile, string $field_code)
 
-* int gd_carray_len(resource $dirfile, string $field_code)
+* int gd_bof(resource $dirfile, string $field_code)
 
 * array gd_carrays(resource $dirfile, int $return_type, [ bool $unpack ])
 
@@ -278,9 +279,6 @@ Some functions have several ways that they can be called.
 
 * bool gd_delete(resource $dirfile, string $field_code, [ int $flags = 0 ])
 
-* bool gd_delete_alias(resource $dirfile, string $field_code,
-        [ int $flags = 0 ])
-
 * bool gd_desync(resource $dirfile, [ int $flags = 0 ])
 
       Returns true or false, as appropriate, on success, and null on error.
@@ -290,12 +288,12 @@ Some functions have several ways that they can be called.
 
 * string gd_dirfilekey(resource $dirfile)
 
-    This function, which has no counterpart in the C API, returns the dirfile
-    key, which is simply the string passed to gd_open() or gd_popen() when
-    the dirfile was opened.  Unlike most strings returned by the extension,
-    the string returned may contain embedded NUL characters.  See gd_popen()
-    for a discussion on the use of dirfile keys.  If you simply want the
-    dirfile path, use gd_dirfilename() below.
+      This function, which has no counterpart in the C API, returns the dirfile
+      key, which is simply the string passed to gd_open() or gd_popen() when
+      the dirfile was opened.  Unlike most strings returned by the extension,
+      the string returned may contain embedded NUL characters.  See gd_popen()
+      for a discussion on the use of dirfile keys.  If you simply want the
+      dirfile path, use gd_dirfilename() below.
 
 * string gd_dirfilename(resource $dirfile)
 
@@ -304,6 +302,8 @@ Some functions have several ways that they can be called.
       On success, the resource $dirfile is deleted.
 
 * int gd_encoding(resource $dirfile, [ int $fragment_index = 0 ])
+
+* int gd_encoding_support( int $encoding )
 
 * int gd_endianness(resource $dirfile, [ int $fragment_index = 0 ])
 
@@ -376,11 +376,12 @@ Some functions have several ways that they can be called.
 
 * bool gd_madd(resource $dirfile, string $parent, array $entry)
 
-    For LINCOM and POLYNOM entries, the "n_fields" and "poly_ord" keys of $entry
-    are optional: the extension will use the other supplied parameters to
-    deterimine these if not given.  If named scalars are used for parameters,
-    the corresponding literal parameter can be omitted.  In most cases, $entry
-    members which are one-element arrays can be replaced with a scalar.
+      For LINCOM and POLYNOM entries, the "n_fields" and "poly_ord" keys of
+      $entry are optional: the extension will use the other supplied parameters
+      to deterimine these if not given.  If named scalars are used for
+      parameters, the corresponding literal parameter can be omitted.  In most
+      cases, $entry members which are one-element arrays can be replaced with a
+      scalar.
 
 * bool gd_madd_alias(resource $dirfile, string $parent, string $field_code,
         string $target)
@@ -448,8 +449,6 @@ Some functions have several ways that they can be called.
 
 * bool gd_move(resource $dirfile, string $field_code, $new_fragment,
         [ bool move_data = false ])
-
-* bool gd_move_alias(resource $dirfile, string $field_code, $new_fragment)
 
 * bool gd_mplex_lookback(resource $dirfile, int $lookback)
 
@@ -521,7 +520,9 @@ Some functions have several ways that they can be called.
 
 * int gd_protection(resource $dirfile, int $fragment_index)
 
-* bool gd_put_carray(resource $dirfile, string $field_code, array $unpacked_data)
+* bool gd_put_carray(resource $dirfile, string $field_code,
+        array $unpacked_data)
+
   bool gd_put_carray(resource $dirfile, string $field_code, int $start,
         array $unpacked_data)
   bool gd_put_carray(resource $dirfile, string $field_code, int $data_type,

@@ -474,6 +474,9 @@ int _GD_ReadDir(DIR *dirp, struct dirent *entry, struct dirent **result);
 #endif
 
 #ifdef HAVE__STRTOI64
+#if HAVE_DECL__STRTOI64 == 0
+__int64 _strtoi64(const char *nptr, char **endptr, int base);
+#endif
 #  define gd_strtoll _strtoi64
 #elif defined(HAVE_STRTOLL)
 #  define gd_strtoll strtoll
@@ -484,6 +487,9 @@ int _GD_ReadDir(DIR *dirp, struct dirent *entry, struct dirent **result);
 #endif
 
 #ifdef HAVE__STRTOUI64
+#if HAVE_DECL__STRTOUI64 == 0
+unsigned __int64 _strtoui64(const char *nptr, char **endptr, int base);
+#endif
 #  define gd_strtoull _strtoi64
 #elif defined(HAVE_STRTOULL)
 #  define gd_strtoull strtoull

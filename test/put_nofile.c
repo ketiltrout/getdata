@@ -77,7 +77,6 @@ int main(void)
       CHECKIi(i,e2,GD_E_OK);
     }
   }
-#endif
 
   gd_discard(D);
 
@@ -89,4 +88,5 @@ int main(void)
   rmdir(filedir);
 
   return r;
+#endif
 }

@@ -814,6 +814,13 @@ AC_CHECK_DECLS([isfinite],,,
 #include <math.h>
 #endif
 ])
+AC_CHECK_DECLS([_strtoi64, _strtoui64],,,
+               [
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#endif
+])
+
 AC_CHECK_DECLS([bswap16, bswap_16, OSSwapInt16],,,
               [
 #ifdef HAVE_BYTESWAP_H

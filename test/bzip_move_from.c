@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -43,11 +43,14 @@ int main(void)
     "/INCLUDE format1\ndata RAW UINT16 11\nENCODING bzip2\n";
   const char *format1_data = "ENCODING none\n";
   uint16_t data_data[128];
-  int fd, ret, e1, e2, ge_ret, unlink_data, unlink_bz2data, r = 0, i = 0;
+  int fd, ret, e1, e2, ge_ret, unlink_data, unlink_bz2data, r = 0;
   char command[4096];
   gd_entry_t E;
   DIRFILE *D;
+#ifdef USE_BZIP2
   uint16_t d;
+  int i = 0;
+#endif
 
   rmdirfile();
   mkdir(filedir, 0777);

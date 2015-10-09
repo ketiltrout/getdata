@@ -67,8 +67,7 @@
 %
 %   * A distinction is not made between real and complex data.  As a result,
 %     the entry struct for, say, a POLYNOM, stores co-efficients in the .A
-%     member, regardless of whether they are complex or purely real.  As a side
-%     effect, the structure does not contain a .COMP_SCAL member.
+%     member, regardless of whether they are complex or purely real.
 %
 %   * LINCOM entries don't provide a .N_FIELDS member, nor do POLYNOM entries
 %     provide a .POLY_ORD member; these values should be determined by

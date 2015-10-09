@@ -165,7 +165,7 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile, fragment_index, flags
   character (len=*), intent(in) :: fragmentname, prefix, suffix
 
-* integer function fgd_carray_len (dirfile_unit, field_code)
+* integer function fgd_array_len (dirfile_unit, field_code)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
 
@@ -460,12 +460,8 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
 
-* subroutine fgd_move (dirfile, field_code, new_fragment, move_data)
-  integer, intent(in) :: dirfile, new_fragment, move_data
-  character (len=*), intent(in) :: field_code
-
-* subroutine fgd_move_alias (dirfile, field_code, new_fragment)
-  integer, intent(in) :: dirfile, new_fragment
+* subroutine fgd_move (dirfile, field_code, new_fragment, flags)
+  integer, intent(in) :: dirfile, new_fragment, flags
   character (len=*), intent(in) :: field_code
 
 * subroutine fgd_alter_bit (dirfile, field_name, in_field, bitnum, numbits)
@@ -570,10 +566,6 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile, flags
   character (len=*), intent(in) :: field_code
 
-* subroutine fgd_delete_alias (dirfile, field_code, flags)
-  integer, intent(in) :: dirfile, flags
-  character (len=*), intent(in) :: field_code
-
 * integer function fgd_entry_type (dirfile, field_code)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
@@ -653,6 +645,9 @@ unit numbers in place of C's DIRFILE pointers are:
 * subroutine fgd_unhide (dirfile, field_code)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
+
+* integer function fgd_encoding_support (encoding)
+  integer, intent(in) :: encoding
 
 
 In order to respect type safety, the gd_getdata and gd_putdata analogues encode
@@ -871,7 +866,7 @@ function fgd_entry_name_max (dirfile, parent, entype, flags)
 
   type gd_entry
     integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
-    integer :: fragment_index, comp_scal, poly_ord, array_len, windop
+    integer :: fragment_index, flags, poly_ord, array_len, windop
     integer :: ithreshold, count_val, period
     character (len=GD_FIELD_LEN), dimension(3) :: field
     character (len=GD_FIELD_LEN), dimension(6) :: scalar

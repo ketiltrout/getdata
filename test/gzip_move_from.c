@@ -44,10 +44,13 @@ int main(void)
   const char *format1_data = "ENCODING none\n";
   uint16_t data_data[128];
   char command[4096];
-  int fd, ret, ge_ret, unlink_data, unlink_gzdata, e1, e2, i = 0, r = 0;
+  int fd, ret, ge_ret, unlink_data, unlink_gzdata, e1, e2, r = 0;
   DIRFILE *D;
   gd_entry_t E;
+#ifdef USE_GZIP
   uint16_t d;
+  int i = 0;
+#endif
 
   rmdirfile();
   mkdir(filedir, 0777);

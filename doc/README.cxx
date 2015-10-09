@@ -71,13 +71,31 @@ The GetData window operations (defined in getdata/entry.h):
 The GetData encoding schemes (defined in getdata/fragment.h):
 
   enum EncodingScheme {
-    AutoEncoding  = GD_AUTO_ENCODED, RawEncoding   = GD_UNENCODED,
-    TextEncoding  = GD_TEXT_ENCODED, SlimEncoding  = GD_SLIM_ENCODED,
-    GzipEncoding  = GD_GZIP_ENCODED, Bzip2Encoding = GD_BZIP2_ENCODED,
-    SieEncoding   = GD_SIE_ENCODED,  ZzipEncoding  = GD_ZZIP_ENCODED,
-    ZzslimEncoding = GD_ZZSLIM_ENCODED, UnsupportedEncoding = GD_ENC_UNSUPPORTED
+    AutoEncoding   = GD_AUTO_ENCODED, 
+    Bzip2Encoding  = GD_BZIP2_ENCODED,
+    FlacEncoding   = GD_FLAC_ENCODED,
+    GzipEncoding   = GD_GZIP_ENCODED,
+    RawEncoding    = GD_UNENCODED,
+    SieEncoding    = GD_SIE_ENCODED,  
+    SlimEncoding   = GD_SLIM_ENCODED,
+    TextEncoding   = GD_TEXT_ENCODED,
+    ZzipEncoding   = GD_ZZIP_ENCODED,
+    ZzslimEncoding = GD_ZZSLIM_ENCODED, 
+    UnsupportedEncoding = GD_ENC_UNSUPPORTED
   };
 
+NON-MEMBER FUNCTIONS
+====================
+
+The following non-member functions in the GetData namespace are defined in
+getdata/dirfile.h:
+
+* GetData::EncodingSupport(GetData::EncodingScheme encoding)
+
+  This function returns GD_RDWR if the library supports both reading from and
+  writing to the specified encoding, GD_RDONLY, if the library can only read
+  from the encoding, or -1 if the library supports neither reading nor writing
+  for the specified encoding.  See gd_encoding_support(3).
 
 
 DIRFILE CLASS
@@ -213,11 +231,10 @@ are available:
 * const char** Dirfile::Aliases(const char* field_code)
 * const char* Dirfile::AliasTarget(const char* field_code)
 * int Dirfile::AlterSpec(const char *line, int recode = 0)
+* const size_t Dirfile::ArrayLen(const char *field_code)
 * const gd_carray_t *Dirfile::Carrays(GetData::DataType type = Float64)
-* const size_t Dirfile::CarrayLen(const char *field_code)
 * const void *Dirfile::Constants(GetData::DataType type = Float64)
-* int Dirfile::Delete(const char *field_code, int flags = 0)
-* int Dirfile::DeleteAlias(const char* field_code, int flags = 0)
+* int Dirfile::Delete(const char *field_code, unsigned flags = 0)
 * const char **Dirfile::EntryList(const char *parent = NULL, int type = 0,
     unsigned int flags = 0)
 * const char **Dirfile::FieldList()
@@ -251,7 +268,6 @@ are available:
 * const char **Dirfile::MFieldListByType(const char *parent,
     GetData::EntryType type)
 * void MplexLookback(int lookback)
-* int Dirfile::MoveAlias(const char* field_code, int new_fragment)
 * const char **Dirfile::MStrings(const char *parent)
 * const char **Dirfile::MVectorList(const char *parent)
 * int Dirfile::NAliases(const char* field_code)
@@ -365,26 +381,27 @@ The following methods are available:
   Entry types listed above in the CONSTANTS section.
 
 * int Entry::SetFragmentIndex(int fragment_index)
-* int Entry::Move(int new_fragment, int move_data = 0)
+* int Entry::Move(int new_fragment, unsigned flags = 0)
 
   These will update the fragment index of the entry.  If the entry is
   associated, these will call gd_move(3) to move the field to a different
   fragment.  These two functions are equivalent, except Entry::Move allows
-  specifying the move_data flag.  Entry::SetFragmentIndex always calls gd_move
-  with move_data = 0.
+  specifying flags for the move.  Entry::SetFragmentIndex always calls gd_move
+  with flags = 0.
 
 * const char *Entry::Name()
 
   This method returns the name of the field.  
 
 * int Entry::SetName(const char *new_name)
-* int Entry::Rename(const char *new_name, int move_data = 0)
+* int Entry::Rename(const char *new_name, unsigned flags = 0)
 
   These will change the name of the field of this entry.  If the entry object
   is associated, these will also call calling gd_rename(3).  These two functions
-  are equivalent, except Entry::Rename allows specifying the move_data flag
-  explicitly.  Entry::SetName always calls gd_rename with move_data = 0.
+  are equivalent, except Entry::Rename allows specifying the flags explicitly.
+  Entry::SetName always calls gd_rename with flags = 0.
 
+* unsigned int Entry::Flags()
 * virtual int Entry::ComplexScalars()
 * virtual int Entry::FragmentIndex()
 * virtual int Entry::PolyOrd()
@@ -406,20 +423,20 @@ The following methods are available:
   Only methods reasonable to be queried for the given field type will return
   meaningful results.
 
-* virtual const char *Entry::Input(int index = 0)
-* virtual double Entry::Scale(int index = 0)
-* virtual std::complex<double> Entry::CScale(int index = 0)
-* virtual double Entry::Offset(int index = 0)
-* virtual std::complex<double> Entry::COffset(int index = 0)
-* virtual double Entry::Coefficient(int index = 0)
-* virtual std::complex<double> Entry::CCoefficient(int index = 0)
-* virtual const char *Entry::Scalar(int index = 0)
-* virtual int Entry::ScalaIndex(int index = 0)
+* virtual const char *Entry::Input(int index)
+* virtual double Entry::Scale(int index)
+* virtual std::complex<double> Entry::CScale(int index)
+* virtual double Entry::Offset(int index)
+* virtual std::complex<double> Entry::COffset(int index)
+* virtual double Entry::Coefficient(int index)
+* virtual std::complex<double> Entry::CCoefficient(int index)
+* virtual const char *Entry::Scalar(int index)
+* virtual int Entry::ScalaIndex(int index)
 
   These methods will return an element from the gd_entry_t members in_fields[],
   m[], or b[], indexed by the supplied parameter.  Attempts to access elements
-  out of range for the field that the Entry class describes will not return
-  meaningful results.
+  out of range for the field that the Entry class describes will return zero
+  or NULL.
 
 
 ENTRY CHILD CLASSES
@@ -450,7 +467,8 @@ Defined in getdata/rawentry.h
 
 * virtual unsigned int RawEntry::SamplesPerFrame()
 * virtual DataType RawEntry::RawType()
-* virtual const char *Scalar()
+* virtual const char *Scalar(int index = 0)
+* virtual int ScalarIndex(int index = 0)
 
   These methods, re-implemented from the Entry class, return the corresponding
   field parameter.
@@ -480,26 +498,26 @@ Defined in getdata/lincomentry.h
     const char **in_fields, std::complex<double> *m, std::complex<double> *b,
     int fragment_index = 0)
 
-* virtual const char *LincomEntry::Input(int index = 0)
+* virtual const char *LincomEntry::Input(int index)
 * virtual int LincomEntry::ComplexScalars()
 * virtual int LincomEntry::NFields()
-* virtual double LincomEntry::Scale(int index = 0)
-* virtual std::complex<double> LincomEntry::CScale(int index = 0)
-* virtual double LincomEntry::Offset(int index = 0)
-* virtual std::complex<double> LincomEntry::COffset(int index = 0)
-* virtual const char *LincomEntry::Scalar(int index = 0)
-* virtual int LincomEntry::ScalarIndex(int index = 0)
+* virtual double LincomEntry::Scale(int index)
+* virtual std::complex<double> LincomEntry::CScale(int index)
+* virtual double LincomEntry::Offset(int index)
+* virtual std::complex<double> LincomEntry::COffset(int index)
+* virtual const char *LincomEntry::Scalar(int index)
+* virtual int LincomEntry::ScalarIndex(int index)
 
   These methods, re-implemented from the Entry class, return the corresponding
   field parameter.
 
-* int LincomEntry::SetInput(const char *field, int index = 0)
-* int LincomEntry::SetScale(double scale, int index = 0)
-* int LincomEntry::SetScale(const char* scale, int index = 0)
-* int LincomEntry::SetScale(std::complex<double> scale, int index = 0)
-* int LincomEntry::SetOffset(double offset, int index = 0)
-* int LincomEntry::SetOffset(const char* scale, int index = 0)
-* int LincomEntry::SetOffset(std::complex<double> offset, int index = 0)
+* int LincomEntry::SetInput(const char *field, int index)
+* int LincomEntry::SetScale(double scale, int index)
+* int LincomEntry::SetScale(const char* scale, int index)
+* int LincomEntry::SetScale(std::complex<double> scale, int index)
+* int LincomEntry::SetOffset(double offset, int index)
+* int LincomEntry::SetOffset(const char* scale, int index)
+* int LincomEntry::SetOffset(std::complex<double> offset, int index)
 
   These functions will change the specified field parameter associated with the
   input field with the given index, which should be between zero and two.  To
@@ -526,7 +544,7 @@ Defined in getdata/linterpentry.h
 * LinterpEntry::LinterpEntry(const char *field_code, const char *in_field,
     const char *table, int fragment_index = 0)
 
-* virtual const char *Entry::Input()
+* virtual const char *Entry::Input(int index = 0)
 * virtual const char *LinterpEntry::Table()
 
   These methods, re-implemented from the Entry class, return the corresponding
@@ -555,10 +573,11 @@ Defined in getdata/bitentry.h and getdata/sbitentry.h
 * SBitEntry::SBitEntry(const char *field_code, const char *in_field, int bitnum,
     int numbits = 1, int fragment_index = 0)
 
-* virtual const char *Input(int __gd_unused index = 0)
+* virtual const char *Input(int index = 0)
 * virtual int FirstBit()
 * virtual int NumBits()
-* virtual const char *Scalar(int index = 0)
+* virtual const char *Scalar(int index)
+* virtual int ScalarIndex(int index)
 
   These methods, re-implemented from the Entry class, return the corresponding
   field parameter.
@@ -585,12 +604,12 @@ Defined in getdata/multiplyentry.h
 * MultiplyEntry::MultiplyEntry(const char *field_code, const char *in_field1,
     const char *in_field2, int fragment_index = 0)
 
-* virtual const char *MultiplyEntry::Input(int index = 0)
+* virtual const char *MultiplyEntry::Input(int index)
 
   This method, re-implemented from the Entry class, returns one of the input
   fields.
 
-* int MultiplyEntry::SetInput(const char *field, int index = 0)
+* int MultiplyEntry::SetInput(const char *field, int index)
 
   This function will change the specified input field with the given index,
   which should be zero or one.
@@ -608,8 +627,10 @@ Defined in getdata/phaseentry.h
 * PhaseEntry::PhaseEntry(const char *field_code, const char *in_field,
     int shift, int fragment_index = 0)
 
-* virtual const char *PhaseEntry::Input()
+* virtual const char *PhaseEntry::Input(int index = 0)
 * virtual long int PhaseEntry::Shift()
+* virtual const char *PhasEntry::Scalar(int index = 0)
+* virtual int PhaseEntry::ScalarIndex(int index = 0)
 
   These methods, re-implemented from the Entry class, return the corresponding
   field parameter.
@@ -639,18 +660,18 @@ Defined in getdata/lincomentry.h
 * virtual const char *PolynomEntry::Input(int index = 0)
 * virtual int PolynomEntry::ComplexScalars()
 * virtual int PolynomEntry::PolyOrd()
-* virtual double PolynomEntry::Coefficient(int index = 0)
-* virtual std::complex<double> PolynomEntry::CCoefficient(int index = 0)
-* virtual const char *PolynomEntry::Scalar(int index = 0)
-* virtual int PolynomEntry::ScalarIndex(int index = 0)
+* virtual double PolynomEntry::Coefficient(int index)
+* virtual std::complex<double> PolynomEntry::CCoefficient(int index)
+* virtual const char *PolynomEntry::Scalar(int index)
+* virtual int PolynomEntry::ScalarIndex(int index)
 
   These methods, re-implemented from the Entry class, return the corresponding
   field parameter.
 
 * int PolynomEntry::SetInput(const char *field)
-* int PolynomEntry::SetCoefficient(double scale, int index = 0)
-* int PolynomEntry::SetCoefficient(const char* scale, int index = 0)
-* int PolynomEntry::SetCoefficient(std::complex<double> scale, int index = 0)
+* int PolynomEntry::SetCoefficient(double scale, int index)
+* int PolynomEntry::SetCoefficient(const char* scale, int index)
+* int PolynomEntry::SetCoefficient(std::complex<double> scale, int index)
 
   These functions will change the specified field parameter associated with the
   input field with the given index, which should be between zero and two.  To
@@ -677,12 +698,12 @@ Defined in getdata/divideentry.h
 * DivideEntry::DivideEntry(const char *field_code, const char *in_field1,
     const char *in_field2, int fragment_index = 0)
 
-* virtual const char *DivideEntry::Input(int index = 0)
+* virtual const char *DivideEntry::Input(int index)
 
   This method, re-implemented from the Entry class, returns one of the input
   fields.
 
-* int DivideEntry::SetInput(const char *field, int index = 0)
+* int DivideEntry::SetInput(const char *field, int index)
 
   This function will change the specified input field with the given index,
   which should be zero or one.
@@ -700,12 +721,12 @@ Defined in getdata/recipentry.h
 * RecipEntry::RecipEntry(const char *field_code, const char *in_field1,
     const char *in_field2, int fragment_index = 0)
 
-* virtual const char *RecipEntry::Input()
+* virtual const char *RecipEntry::Input(int index = 0)
 * virtual int RecipEntry::ComplexScalars()
 * virtual double RecipEntry::Dividend()
 * virtual std::complex<double> RecipEntry::CDividend()
 * virtual const char *RecipEntry::Scalar()
-* virtual int RecipEntry::ScalarIndex()
+* virtual int RecipEntry::ScalarIndex(int index = 0)
 
   These methods, re-implemented from the Entry class, return the corresponding
   field parameter.
@@ -731,9 +752,9 @@ Defined in getdata/windowentry.h
 * WindowEntry::WindowEntry(const char *field_code, const char *in_field,
     const char *check_field, int fragment_index = 0)
 
-* virtual const char *WindowEntry::Input(int index = 0)
-* virtual const char *WindowEntry::Scalar()
-* virtual int WindowEntry::ScalarIndex()
+* virtual const char *WindowEntry::Input(int index)
+* virtual const char *WindowEntry::Scalar(int index = 0)
+* virtual int WindowEntry::ScalarIndex(int index = 0)
 * virtual WindOpType WindowEntry::WindOp()
 * virtual gd_triplet_t WindowEntry::Threshold()
 
@@ -763,9 +784,9 @@ Defined in getdata/mplex.h
 * MplexEntry::MplexEntry(const char *field_code, const char *in_field,
     const char *check_field, int fragment_index = 0)
 
-* virtual const char *MplexEntry::Input(int index = 0)
-* virtual const char *MplexEntry::Scalar()
-* virtual int MplexEntry::ScalarIndex()
+* virtual const char *MplexEntry::Input(int index)
+* virtual const char *MplexEntry::Scalar(int index)
+* virtual int MplexEntry::ScalarIndex(int index)
 * virtual int MplexEntry::CountVal()
 * virtual int MplexEntry::Period()
 

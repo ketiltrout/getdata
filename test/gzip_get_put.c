@@ -77,8 +77,11 @@ int main(void)
     0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff, 0x73,
     0x8c, 0x05, 0x29, 0x00, 0x01, 0x00, 0x00
   };
-  uint8_t b, c[8], d[8];
+  uint8_t c[8], d[8];
+#ifdef USE_GZIP
+  uint8_t b;
   char command[4096];
+#endif
   int fd, i, m, n, e1, e2, e3, unlink_data, unlink_datagz, r = 0;
   DIRFILE *D;
 

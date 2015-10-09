@@ -64,7 +64,7 @@ namespace GetData {
   class Entry;
   class RawEntry;
 
-  int EncodingSupport(unsigned long encoding);
+  int EncodingSupport(EncodingScheme encoding);
 
   class Dirfile {
     friend class Entry;
@@ -121,7 +121,7 @@ namespace GetData {
 
       const void *Constants(DataType type = Float64) const;
 
-      int Delete(const char* field_code, int flags = 0) const;
+      int Delete(const char* field_code, unsigned flags = 0) const;
 
       int DeSync(unsigned int flags = 0);
 

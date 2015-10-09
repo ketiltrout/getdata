@@ -22,9 +22,9 @@
 #include "internal.h"
 
 // This is not part of the Dirfile class, but it's convenient to put it here
-int GetData::EncodingSupport(unsigned long encoding)
+int GetData::EncodingSupport(GetData::EncodingScheme encoding)
 {
-  return gd_encoding_support(encoding);
+  return gd_encoding_support((unsigned long)encoding);
 }
 
 Dirfile::Dirfile()
@@ -413,7 +413,7 @@ int Dirfile::MAlterSpec(const char* line, const char *parent, int recode) const
   return gd_malter_spec(D, line, parent, recode);
 }
 
-int Dirfile::Delete(const char* field_code, int flags) const
+int Dirfile::Delete(const char* field_code, unsigned flags) const
 {
   return gd_delete(D, field_code, flags);
 }
