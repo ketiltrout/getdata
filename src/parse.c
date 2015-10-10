@@ -2246,10 +2246,11 @@ static int _GD_ParseDirective(DIRFILE *D, struct parser_state *restrict p,
       break;
     case 'I':
       if (strcmp(ptr, "INCLUDE") == 0 && GD_PVERS_GE(*p, 3)) {
-        matched = 1;
         char *new_ref = NULL;
         int frag;
         unsigned long oldflags = p->flags;
+
+        matched = 1;
 
         p->flags = D->fragment[me].encoding | D->fragment[me].byte_sex |
           (p->flags & (GD_PEDANTIC | GD_PERMISSIVE | GD_FORCE_ENDIAN |

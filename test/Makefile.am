@@ -237,9 +237,9 @@ INCLUDE_TESTS=include_accmode include_affix include_auto include_cb \
 INDEX_TESTS=index_domain index_index index_range index_s index_subset
 
 if INCLUDE_LEGACY_API
-LEGACY_TESTS=legacy_error legacy_format legacy_get legacy_get_put \
-						 legacy_get_rofs legacy_nframes legacy_nonexistent legacy_put \
-						 legacy_spf
+LEGACY_TESTS=legacy_error legacy_estring legacy_format legacy_get \
+						 legacy_get_put legacy_get_rofs legacy_nframes legacy_nonexistent \
+						 legacy_put legacy_spf
 endif
 
 LZMA_TESTS=lzma_get lzma_nframes lzma_put lzma_xz_add lzma_xz_get \

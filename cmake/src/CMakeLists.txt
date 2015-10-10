@@ -1,6 +1,7 @@
 
 set(files_ignored
 	${GD_DIR}/src/bzip.c
+	${GD_DIR}/src/flac.c
 	${GD_DIR}/src/gzip.c
 	${GD_DIR}/src/lzma.c
 	${GD_DIR}/src/legacy.c
