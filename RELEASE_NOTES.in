@@ -1,31 +1,26 @@
-GetData 0.8.4 is known to compile and pass the test suite on the following
-systems (including C++ and Fortran bindings):
+GetData-0.9.0 fixes bugs found in the 0.8-series.  It also adds PHP
+bindings, a FLAC encoding, write support for bzip2 and xz-compressed
+datafiles.  GetData-0.9.0 has been tested on various platforms including
+Linux, MaxOS X, OpenBSD, Cygwin, and native Microsoft Windows.
 
-Linux:
-* x86, x86_64, ARM under (variously) Debian, Slackware, Ubuntu, RHEL
-MacOS X:
-* x86 and x86_64, using Xcode 3.2/gcc 4.2, under MacOS X Snow Leopard
-Cygwin:
-* x86_64, using gcc 4.3
-Win32:
-* x86_64, using mingw/gcc 4.5, under MSys
-* X86_64, using MSVC 10
-OpenBSD:
-* x86, using gcc 4.2
+Full release notes are given below; the following changes to the build
+system should be noted especially:
 
-The Python bindings have been tested with Python 2.4 through Python 2.7.
-The IDL bindings have been tested with IDL 6.0 and IDL 7.1.
-The Perl bindings have been tested with Perl 5.8 through Perl 5.16.
-The MATLAB bindings have been tested with MATLAB R2009b and MATLAB R2012a.
+* the legacy (pre-0.3) API is no longer built by default.  Pass
+  --enable-legacy-api to the configure script to enable it.
+* building support for the FLAC encoding reqires Xiph.Org's libFLAC.
+* the Python bindings now require NumPy; previously, it was optional
+* building the PHP bindings requires the PHP command-line interpreter to
+  be installed at configure time
 
 ---------------------------------------------------------------------------
 
 Four packages are available:
-* getdata-0.8.4.tar.bz2/.gz: the full source code to the library, with
+* getdata-0.9.0.tar.bz2/.gz: the full source code to the library, with
     bindings.  This package uses the GNU autotools build system, and is
     designed for POSIX systems (UNIX, Linux, BSD, MacOS X, Cygwin, MSys,
     &c.)
-* getdata_win-0.8.4.zip: a reduced source code package, with the CMake
+* getdata_win-0.9.0.zip: a reduced source code package, with the CMake
     build system designed to be built on Microsoft Windows, either using
     the free MinGW compiler, or else Microsoft's Visual C++ compiler.
     (The full source package above can also be built using MinGW, if the
@@ -34,16 +29,17 @@ Four packages are available:
     package lacks support for compressed dirfiles, the Legacy API, and a
     few other features.  This build is used in native Microsoft Windows
     builds of kst2.
-* idl_getdata-0.8.4.tar.bz2/.gz: the Interactive Data Language (IDL)
+* idl_getdata-0.9.0.tar.bz2/.gz: the Interactive Data Language (IDL)
     bindings, packaged separately with an autotools build system, designed
     to be built against an already installed version of GetData.  Due to
     licensing restrictions, pre-built packages rarely come with these
     bindings, and this package allows end-users to add support for IDL
-* matlab_getdata-0.8.4.tar.bz2/.gz: the MATLAB bindings, packaged separately
-    with an autotools build system, designed to be built against an already
-    installed version of GetData.  Due to licensing restrictions, pre-built
-    packages rarely come with these bindings, and this package allows end-users
-    to add support for MATLAB without having to recompile the whole GetData
-    package.
+    without having to recompile the whole GetData package.
+* matlab_getdata-0.9.0.tar.bz2/.gz: the MATLAB bindings, packaged
+    separately with an autotools build system, designed to be built against
+    an already installed version of GetData.  Due to licensing
+    restrictions, pre-built packages rarely come with these bindings, and
+    this package allows end- users to add support for MATLAB without having
+    to recompile the whole GetData package.
 
 ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-New in verison 0.9.0rc3:
+New in verison 0.9.0:
 
   Library Changes:
 
@@ -197,8 +197,7 @@ New in verison 0.9.0rc3:
 
   * BUG FIX: If the dirfile path provided cannot be resolved (due to, for
     instance, a symbolic link pointing to a non-existent path), gd_open()
-    and friends now return GD_E_OPEN, as documented, instead of
-    GD_E_RAW_IO.
+    and friends now return the correct error code (GD_E_IO).
   
   * BUG FIX: gd_naliases() now returns an unsigned int, and zero on error,
     as documented.
@@ -268,9 +267,6 @@ New in verison 0.9.0rc3:
 
   * F95 BUG FIX: fgd_add and fgd_alter_entry no longer ignore named scalar
     parameters provided in supplied entry structures.
-
-  * PYTHON BUG FIX: Several memory leaks have been plugged.  Patch from
-    Matthew Petroff.
 
   * PYTHON BUG FIX: Several memory leaks have been plugged.  Patch from
     Matthew Petroff.

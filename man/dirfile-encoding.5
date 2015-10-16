@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile-encoding 5 "24 September 2015" "Standards Version 9" "DATA FORMATS"
+.TH dirfile-encoding 5 "15 October 2015" "Standards Version 9" "DATA FORMATS"
 .SH NAME
 dirfile-encoding \(em dirfile database encoding schemes
 .SH DESCRIPTION
@@ -85,11 +85,13 @@ field has multiple data files with different, supported file extensions which
 could legitimately be associated with it, the encoding scheme discovered by
 GetData is not well defined.
 
-In addition to raw (unencoded) data, GetData supports eight other encoding
+In addition to raw (unencoded) data, GetData supports nine other encoding
 schemes:
 .I text
 encoding,
 .I bzip2
+encoding,
+.I flac
 encoding,
 .I gzip
 encoding,
@@ -121,7 +123,7 @@ Within GetData, reading from a field so encoded after writing to it will cause
 writing to the temporary file to be finished and then the file moved into place
 before the read occurs, which may take some time to do.  Encodings which perform
 out-of-place writes are:
-.IR bzip2 ", " gzip ", and " lzma .
+.IR bzip2 ", " flac ", " gzip ", and " lzma .
 
 .SS BZip2 Encoding
 
@@ -147,7 +149,7 @@ The file extension of the BZip2 Encoding is
 The FLAC Encoding compresses raw binary files using the Free Lossless Audio
 Codec.  GetData's FLAC Encoding scheme is implemented through the libFLAC
 reference implementation developed by Josh Coalson and the Xiph.Org Foundation.
-All operations are supported by the FLAC Encdoing, but writing occurs
+All operations are supported by the FLAC Encoding, but writing occurs
 out-of-place.  See the
 .B Out-of-place writes
 section above for details.

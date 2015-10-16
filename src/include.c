@@ -85,8 +85,7 @@ static int _GD_SetFieldAffixes(DIRFILE *D, const struct parser_state *p, int me,
     return 1;
   }
 
-  dreturn("%i (\"%s\"/%" PRNsize_t ", \"%s\", \"%s\")", 0, *ns, *nsl, *prefix,
-      *suffix);
+  dreturn("%i (\"%s\", \"%s\")", 0, *prefix, *suffix);
   return 0;
 }
 
