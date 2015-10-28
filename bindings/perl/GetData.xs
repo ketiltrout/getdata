@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2015 D. V. Wiebe
+/* Copyright (C) 2011-2014 D. V. Wiebe
  *
  **************************************************************************
  *
@@ -479,6 +479,9 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const gd_entry_t *old_E,
       }
 
       break;
+    case GD_SARRAY_ENTRY:
+      GDP_EHASH_FETCH_IV(partial, "array_len", E->EN(scalar,array_len), size_t);
+      break;
     case GD_CARRAY_ENTRY:
       GDP_EHASH_FETCH_IV(partial, "array_len", E->EN(scalar,array_len), size_t);
       /* fallthrough */
@@ -529,6 +532,8 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const gd_entry_t *old_E,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       gdp_fetch_in_fields(E->in_fields, sv, partial, 2, 2, pkg, func);
       break;
     case GD_PHASE_ENTRY:
@@ -1416,6 +1421,10 @@ entry(dirfile, field_code)
           GDP_PUSHuv(E.EN(bit,numbits));
           sp = gdp_store_scalars(sp, &E, 0x3);
           break;
+        case GD_SARRAY_ENTRY:
+          GDP_PUSHpvn("array_len");
+          GDP_PUSHuv(E.EN(scalar,array_len));
+          break;
         case GD_CARRAY_ENTRY:
           GDP_PUSHpvn("array_len");
           GDP_PUSHuv(E.EN(scalar,array_len));
@@ -1444,6 +1453,8 @@ entry(dirfile, field_code)
           break;
         case GD_MULTIPLY_ENTRY:
         case GD_DIVIDE_ENTRY:
+        case GD_INDIR_ENTRY:
+        case GD_SINDIR_ENTRY:
           GDP_PUSHpvn("in_fields");
           GDP_PUSHrvavpv(E.in_fields, 2);
           break;
@@ -1706,7 +1717,6 @@ getdata(dirfile, field_code, first_frame, first_samp, num_frames, num_samp, retu
     gd_entype_t t;
     GDP_DIRFILE_ALIAS;
     size_t i, len;
-    void * data_out;
   ALIAS:
     GetData::Dirfile::getdata = 1
   PPCODE:
@@ -1726,24 +1736,45 @@ getdata(dirfile, field_code, first_frame, first_samp, num_frames, num_samp, retu
       GDP_UNDEF_ON_ERROR();
     }
 
-    if (return_type == GD_UNKNOWN)
-      croak("%s::getdata() - No return type specified", gdp_package);
+    if (t == GD_SINDIR_ENTRY) {
+      const char **data_out = safemalloc(sizeof(*data_out) * num_samp);
+
+      len = gd_getdata64(dirfile, field_code, first_frame, first_samp, 0,
+          num_samp, GD_STRING, data_out);
+
+      GDP_UNDEF_ON_ERROR(safefree(data_out));
+
+      /* In array context return the array; in scalar context return a reference
+       * to an array */
+      if (GIMME_V == G_ARRAY)
+        for (i = 0; i < len; ++i)
+          GDP_PUSHpvz(data_out[i]);
+      else
+        XPUSHs(sv_2mortal(gdp_newRVavpv(data_out, len)));
+
+      safefree(data_out);
+    } else {
+      void *data_out;
+
+      if (return_type == GD_UNKNOWN)
+        croak("%s::getdata() - No return type specified", gdp_package);
       
-    data_out = safemalloc(GD_SIZE(return_type) * num_samp);
+      data_out = safemalloc(GD_SIZE(return_type) * num_samp);
 
-    len = gd_getdata64(dirfile, field_code, first_frame, first_samp, 0,
-        num_samp, return_type, data_out);
+      len = gd_getdata64(dirfile, field_code, first_frame, first_samp, 0,
+          num_samp, return_type, data_out);
 
-    GDP_UNDEF_ON_ERROR(safefree(data_out));
+      GDP_UNDEF_ON_ERROR(safefree(data_out));
 
-    /* In array context, unpack the array and push it onto the stack,
-     * otherwise just return the packed data */
-    if (GIMME_V == G_ARRAY)
-      sp = (SV **)gdp_unpack(sp, data_out, len, return_type);
-    else
-      XPUSHs(sv_2mortal(newSVpvn(data_out, len * GD_SIZE(return_type))));
+      /* In array context, unpack the array and push it onto the stack,
+       * otherwise just return the packed data */
+      if (GIMME_V == G_ARRAY)
+        sp = (SV **)gdp_unpack(sp, data_out, len, return_type);
+      else
+        XPUSHs(sv_2mortal(newSVpvn(data_out, len * GD_SIZE(return_type))));
 
-    safefree(data_out);
+      safefree(data_out);
+    }
     dreturnvoid();
 
 void
@@ -2385,5 +2416,230 @@ carray_len(dirfile, field_code)
 		RETVAL
 	CLEANUP:
 		dreturn("%zi", RETVAL);
+
+void
+get_sarray(dirfile, field_code)
+  DIRFILE * dirfile
+  const char * field_code
+  PREINIT:
+    size_t i;
+    const char **data_out = NULL;
+    GDP_DIRFILE_ALIAS;
+  ALIAS:
+    GetData::Dirfile::get_sarray = 1
+  PPCODE:
+    dtrace("%p, \"%s\"; %i", dirfile, field_code, (int)GIMME_V);
+    size_t len = gd_array_len(dirfile, field_code);
+    data_out = safemalloc(sizeof(*data_out) * len);
+    gd_get_sarray(dirfile, field_code, data_out);
+
+    GDP_UNDEF_ON_ERROR(safefree(data_out));
+
+    /* In array context return the array; in scalar context return a reference
+     * to an array */
+    if (GIMME_V == G_ARRAY)
+      for (i = 0; i < len; ++i)
+        GDP_PUSHpvz(data_out[i]);
+    else
+      XPUSHs(sv_2mortal(gdp_newRVavpv(data_out, len)));
+
+    safefree(data_out);
+    dreturnvoid();
+
+void
+get_sarray_slice(dirfile, field_code, start, len);
+  DIRFILE * dirfile
+  const char * field_code
+  unsigned int start
+  size_t len
+  PREINIT:
+    size_t i;
+    const char **data_out = NULL;
+    GDP_DIRFILE_ALIAS;
+  ALIAS:
+    GetData::Dirfile::get_sarray_slice = 1
+  PPCODE:
+    dtrace("%p, \"%s\", %u, %zi; %i", dirfile, field_code, start, len,
+        (int)GIMME_V);
+    data_out = safemalloc(sizeof(*data_out) * len);
+    gd_get_sarray_slice(dirfile, field_code, start, len, data_out);
+
+    GDP_UNDEF_ON_ERROR(safefree(data_out));
+
+    if (GIMME_V == G_ARRAY)
+      for (i = 0; i < len; ++i)
+        GDP_PUSHpvz(data_out[i]);
+    else
+      XPUSHs(sv_2mortal(gdp_newRVavpv(data_out, len)));
+
+    safefree(data_out);
+    dreturnvoid();
+
+void
+sarrays(dirfile)
+  DIRFILE * dirfile
+  PREINIT:
+    int i;
+    const char ***data_out = NULL;
+    GDP_DIRFILE_ALIAS;
+  ALIAS:
+    GetData::Dirfile::sarrays = 1
+  PPCODE:
+    dtrace("%p; %i", dirfile, (int)GIMME_V);
+    data_out = gd_sarrays(dirfile);
+
+    GDP_UNDEF_ON_ERROR();
+
+    /* in array context, return an array of arrays of strings.
+     * Otherwise, return a reference to the same. */
+    if (GIMME_V == G_ARRAY)
+      for (i = 0; data_out[i]; ++i)
+        XPUSHs(sv_2mortal(gdp_newRVavpv0(data_out[i])));
+    else {
+      AV *av = newAV();
+      for (i = 0; data_out[i]; ++i)
+        av_store(av, i, gdp_newRVavpv0(data_out[i]));
+      XPUSHs(sv_2mortal(newRV_noinc((SV*)av)));
+    }
+
+    dreturnvoid();
+
+int
+put_sarray(dirfile, field_code, sv_in, ...)
+    DIRFILE * dirfile
+    const char * field_code
+    SV *sv_in
+  PREINIT:
+    const char **data_in;
+    GDP_DIRFILE_ALIAS;
+  ALIAS:
+    GetData::Dirfile::put_sarray = 1
+  CODE:
+    dtrace("%p, \"%s\", %p ...[%li]", dirfile, field_code, sv_in,
+        (long)items - 3);
+
+    data_in = gdp_convert_strarr(NULL, items, ax, 2, gdp_package, "put_sarray");
+
+    RETVAL = gd_put_sarray(dirfile, field_code, data_in);
+
+    GDP_UNDEF_ON_ERROR(safefree(data_in));
+  OUTPUT:
+    RETVAL
+  CLEANUP:
+    safefree(data_in);
+    dreturn("%i", RETVAL);
+
+int
+put_sarray_slice(dirfile, field_code, start, sv_in, ...)
+    DIRFILE * dirfile
+    const char * field_code
+    gd_off64_t start
+    SV *sv_in
+  PREINIT:
+    GDP_DIRFILE_ALIAS;
+    size_t len;
+    const char **data_in;
+  ALIAS:
+    GetData::Dirfile::put_sarray_slice = 1
+  CODE:
+    dtrace("%p, \"%s\", %lli, %p ...[%li]", dirfile, field_code,
+        (long long)start, sv_in, (long)items - 4);
+
+    data_in = gdp_convert_strarr(&len, items, ax, 3, gdp_package,
+        "put_sarray_slice");
+
+    RETVAL = gd_put_sarray_slice(dirfile, field_code, start, len, data_in);
+
+    GDP_UNDEF_ON_ERROR(safefree(data_in));
+  OUTPUT:
+    RETVAL
+  CLEANUP:
+    safefree(data_in);
+    dreturn("%i", RETVAL);
+
+int
+add_sarray(dirfile, field_code, fragment_index, sv_in, ...)
+    DIRFILE * dirfile
+    const char * field_code
+    int fragment_index
+    SV *sv_in
+  PREINIT:
+    GDP_DIRFILE_ALIAS;
+    size_t len;
+    const char **data_in;
+  ALIAS:
+    GetData::Dirfile::add_sarray = 1
+  CODE:
+    dtrace("%p, \"%s\", %i, %p, ...[%li]", dirfile, field_code, fragment_index,
+        sv_in, (long)items - 4);
+
+    data_in = gdp_convert_strarr(&len, items, ax, 3, gdp_package, "add_sarray");
+
+    RETVAL = gd_add_sarray(dirfile, field_code, len, data_in, fragment_index);
+
+    GDP_UNDEF_ON_ERROR(safefree(data_in));
+  OUTPUT:
+    RETVAL
+  CLEANUP:
+    safefree(data_in);
+    dreturn("%i", RETVAL);
+
+int
+madd_sarray(dirfile, parent, field_code, sv_in, ...)
+    DIRFILE * dirfile
+    const char * parent
+    const char * field_code
+    SV *sv_in
+  PREINIT:
+    GDP_DIRFILE_ALIAS;
+    size_t len;
+    const char **data_in;
+  ALIAS:
+    GetData::Dirfile::madd_sarray = 1
+  CODE:
+    dtrace("%p, \"%s\", \"%s\", %p, ...[%li]", dirfile, parent, field_code,
+        sv_in, (long)items - 4);
+
+    data_in = gdp_convert_strarr(&len, items, ax, 3, gdp_package,
+        "madd_sarray");
+
+    RETVAL = gd_madd_sarray(dirfile, parent, field_code, len, data_in);
+
+    GDP_UNDEF_ON_ERROR(safefree(data_in));
+  OUTPUT:
+    RETVAL
+  CLEANUP:
+    safefree(data_in);
+    dreturn("%i", RETVAL);
+
+void
+msarrays(dirfile, parent)
+  DIRFILE * dirfile
+  const char * parent
+  PREINIT:
+    int i;
+    const char ***data_out = NULL;
+    GDP_DIRFILE_ALIAS;
+  ALIAS:
+    GetData::Dirfile::msarrays = 1
+  PPCODE:
+    dtrace("%p, \"%s\"; %i", dirfile, parent, (int)GIMME_V);
+    data_out = gd_msarrays(dirfile, parent);
+
+    GDP_UNDEF_ON_ERROR();
+
+    /* in array context, return an array of arrays of strings.
+     * Otherwise, return a reference to the same. */
+    if (GIMME_V == G_ARRAY)
+      for (i = 0; data_out[i]; ++i)
+        XPUSHs(sv_2mortal(gdp_newRVavpv0(data_out[i])));
+    else {
+      AV *av = newAV();
+      for (i = 0; data_out[i]; ++i)
+        av_store(av, i, gdp_newRVavpv0(data_out[i]));
+      XPUSHs(sv_2mortal(newRV_noinc((SV*)av)));
+    }
+
+    dreturnvoid();
 
 INCLUDE: simple_funcs.xs

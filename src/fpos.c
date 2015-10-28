@@ -70,6 +70,8 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
           break;
       pos = _GD_GetFilePos(D, E->e->entry[0], -1);
@@ -109,6 +111,7 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_ALIAS_ENTRY:
       _GD_InternalError(D);
   }
@@ -214,7 +217,7 @@ off64_t _GD_DoSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
 
         ptr = buffer;
         while (n_read > 0) {
-          n_wrote = (*enc->write)(E->e->u.raw.file + 1, ptr,
+          n_wrote = (*enc->write)(E->e->u.raw.file + 1, buffer,
               E->EN(raw,data_type), n_read);
           if (n_wrote < 0) {
             _GD_SetEncIOError(D, GD_E_IO_WRITE, E->e->u.raw.file + 1);
@@ -304,6 +307,8 @@ int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode)
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       if (!_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
         _GD_Seek(D, E->e->entry[0], offset, mode);
       break;
@@ -318,6 +323,7 @@ int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode)
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_ALIAS_ENTRY:
       _GD_InternalError(D);
   }

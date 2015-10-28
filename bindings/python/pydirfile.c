@@ -431,6 +431,53 @@ static PyObject *gdpy_dirfile_getcarray(struct gdpy_dirfile_t *self,
   return pyobj;
 }
 
+static PyObject *gdpy_dirfile_getsarray(struct gdpy_dirfile_t *self,
+    void *args, void *keys)
+{
+  char *keywords[] = {"field_code", "start", "len", NULL};
+  const char *field_code;
+  unsigned int start = 0, len = 0, i;
+  PyObject *pyobj = NULL;
+
+  dtrace("%p, %p, %p", self, args, keys);
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s|II:pygetdata.dirfile.get_sarray", keywords, &field_code, &start,
+        &len))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  if (len == 0) {
+    len = gd_array_len(self->D, field_code);
+    if (len > start)
+      len -= start;
+    else
+      len = 0;
+  }
+
+  if (len == 0)
+    pyobj = Py_BuildValue("[]");
+  else {
+    const char **data = malloc(len * sizeof(*data));
+
+    gd_get_sarray_slice(self->D, field_code, start, (size_t)len, data);
+
+    PYGD_CHECK_ERROR2(self->D, NULL, free(data));
+
+    pyobj = PyList_New(len);
+
+    for (i = 0; i < len; ++i)
+      PyList_SetItem(pyobj, i, PyString_FromString(data[i]));
+
+    free(data);
+  }
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
 static PyObject *gdpy_dirfile_getconstant(struct gdpy_dirfile_t *self,
     void *args, void *keys)
 {
@@ -546,6 +593,35 @@ static PyObject *gdpy_dirfile_carrays(struct gdpy_dirfile_t *self,
   return pyobj;
 }
 
+static PyObject *gdpy_dirfile_sarrays(struct gdpy_dirfile_t *self)
+{
+  const char **fields;
+  size_t i, j;
+  const char ***sarrays;
+  PyObject *pyobj;
+
+  dtrace("%p", self);
+
+  fields = gd_field_list_by_type(self->D, GD_SARRAY_ENTRY);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  sarrays = gd_sarrays(self->D);
+
+  pyobj = PyList_New(0);
+
+  for (i = 0; sarrays[i] != NULL; ++i) {
+    PyObject *pydata = PyList_New(0);
+    for (j = 0; sarrays[i][j] != NULL; ++j)
+      PyList_Append(pydata, PyString_FromString(sarrays[i][j]));
+
+    PyList_Append(pyobj, Py_BuildValue("sN", fields[i], pydata));
+  }
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
 static PyObject *gdpy_dirfile_getconstants(struct gdpy_dirfile_t *self,
     void *args, void *keys)
 {
@@ -594,8 +670,8 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
   PyObject *num_frames_obj = NULL, *num_samples_obj = NULL;
   PyObject *return_type_obj = NULL;
   long int num_frames = 0, num_samples = 0;
-  size_t ns;
-  int as_list = 0, read_to_end = 0;
+  size_t ns, i;
+  int as_list = 0, read_to_end = 0, is_sindir = 0;
   gd_type_t return_type = GD_NULL;
   unsigned int spf = 1;
   PyObject *pyobj = NULL;
@@ -610,6 +686,12 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
   {
     dreturn("%p", NULL);
     return NULL;
+  }
+
+  /* check for SINDIR_ENTRY */
+  if (gd_entry_type(self->D, field_code) == GD_SINDIR_ENTRY) {
+    is_sindir = 1;
+    as_list = 1;
   }
 
   PYGD_CHECK_ERROR(self->D, NULL);
@@ -679,6 +761,17 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
       pyobj = PyArray_ZEROS(1, dims, gdpy_npytype_from_type(return_type), 0);
     else
       pyobj = Py_BuildValue("[]");
+  } else if (is_sindir) {
+    const char** data = malloc(num_samples * sizeof(*data));
+
+    ns = gd_getdata(self->D, field_code, first_frame, first_sample, 0,
+        (size_t)num_samples, return_type, data);
+
+    pyobj = PyList_New(ns);
+    for (i = 0; i < ns; ++i)
+      PyList_SetItem(pyobj, i, PyString_FromString(data[i]));
+
+    free(data);
   } else {
     void *data;
     if (!as_list) {
@@ -1149,6 +1242,45 @@ static PyObject *gdpy_dirfile_mcarrays(struct gdpy_dirfile_t *self,
       pydata = gdpy_convert_to_pylist(carrays[i].d, return_type, carrays[i].n);
 
     gdpylist_append(pyobj, Py_BuildValue("sN", fields[i], pydata));
+  }
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static PyObject *gdpy_dirfile_msarrays(struct gdpy_dirfile_t *self,
+    void *args, void *keys)
+{
+  char *keywords[] = {"parent", NULL};
+  const char **fields;
+  const char *parent;
+  int i, j;
+  const char ***sarrays;
+  PyObject *pyobj;
+
+  dtrace("%p, %p, %p", self, args, keys);
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirfile.msarrays",
+        keywords, &parent))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  fields = gd_mfield_list_by_type(self->D, parent, GD_SARRAY_ENTRY);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  sarrays = gd_msarrays(self->D, parent);
+
+  pyobj = PyList_New(0);
+
+  for (i = 0; sarrays[i] != NULL; ++i) {
+    PyObject *pydata = PyList_New(0);
+    for (j = 0; sarrays[i][j] != NULL; ++j)
+      PyList_Append(pydata, PyString_FromString(sarrays[i][j]));
+
+    PyList_Append(pyobj, Py_BuildValue("sN", fields[i], pydata));
   }
 
   dreturn("%p", pyobj);
@@ -1856,6 +1988,46 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
   return Py_None;
 }
 
+static PyObject *gdpy_dirfile_putsarray(struct gdpy_dirfile_t *self,
+    PyObject *args, PyObject *keys)
+{
+  char *keywords[] = { "field_code", "data", "start", NULL };
+  const char *field_code;
+  unsigned int start = 0, len = 1, i;
+  PyObject *pyobj;
+
+  dtrace("%p, %p, %p", self, args, keys);
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "sO|I:pygetdata.dirfile.put_sarray", keywords, &field_code, &pyobj,
+        &start)) {
+    dreturn ("%p", NULL);
+    return NULL;
+  }
+
+  if (PyList_Check(pyobj))
+    len = PyList_Size(pyobj);
+
+  if (len > 0) {
+    const char **data = malloc(len * sizeof(*data));
+
+    if (PyList_Check(pyobj))
+      for (i = 0; i < len; ++i)
+        data[i] = PyString_AsString(PyList_GetItem(pyobj, i));
+    else
+      data[0] = PyString_AsString(pyobj);
+
+    gd_put_sarray_slice(self->D, field_code, start, len, data);
+    free(data);
+
+    PYGD_CHECK_ERROR(self->D, NULL);
+  }
+
+  Py_INCREF(Py_None);
+  dreturn("%p", Py_None);
+  return Py_None;
+}
+
 static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
@@ -2235,7 +2407,8 @@ static PyObject *gdpy_dirfile_seek(struct gdpy_dirfile_t *self, PyObject *args,
     return NULL;
   }
 
-  pos = gd_seek64(self->D, field_code, frame_num, sample_num, flags);
+  pos = gd_seek64(self->D, field_code, (off_t)frame_num, (off_t)sample_num,
+      flags);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -2872,6 +3045,16 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "given by 'len'.  If omitted or zero, all elements from 'start' to\n"
       "the end of the array are returned.  See gd_get_carray_slice(3)."
   },
+  {"get_sarray", (PyCFunction)gdpy_dirfile_getsarray,
+    METH_VARARGS | METH_KEYWORDS,
+    "get_sarray(field_code [, start, len])\n\n"
+      "Retrieve the value of the SARRAY field specified by 'field_code'.\n"
+      "A list of values will be returned.\n\n"
+      "The first element returned is given by 'start', counting from zero.\n"
+      "If omitted, zero is assumed.  The number of elements returned is\n"
+      "given by 'len'.  If omitted or zero, all elements from 'start' to\n"
+      "the end of the array are returned.  See gd_get_sarray_slice(3)."
+  },
   {"get_constant", (PyCFunction)gdpy_dirfile_getconstant,
     METH_VARARGS | METH_KEYWORDS,
     "get_constant(field_code, return_type)\n\n"
@@ -2917,6 +3100,13 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT, or\n"
       "pygetdata.COMPLEX, although any GetData data type code is permitted.\n"
       "See gd_carrays(3), but note that this method returns both names\n"
+      "and values, unlike the C API counterpart."
+  },
+  {"sarrays", (PyCFunction)gdpy_dirfile_sarrays, METH_NOARGS,
+    "sarrays()\n\n"
+      "Retrieve all SARRAY fields, and their values.  A list of tuples\n"
+      "will be returned, each tuple containing the name and list of values.\n\n"
+      "See gd_sarrays(3), but note that this method returns both names\n"
       "and values, unlike the C API counterpart."
   },
   {"getdata", (PyCFunction)gdpy_dirfile_getdata, METH_VARARGS | METH_KEYWORDS,
@@ -3016,6 +3206,14 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT, or\n"
       "pygetdata.COMPLEX, although any GetData data type code is permitted.\n"
       "See gd_mcarrays(3), but note that this method returns both names\n"
+      "and values, unlike the C API counterpart."
+  },
+  {"msarrays", (PyCFunction)gdpy_dirfile_msarrays, METH_VARARGS | METH_KEYWORDS,
+    "msarrays(parent)\n\n"
+      "Retrieve all SARRAY metafields, and their values, for the parent\n"
+      "field 'parent'.  A list of tuples will be returned, each tuple\n"
+      "containing the name and a list of values of the field.  See\n"
+      "gd_mcarrays(3), but note that this method returns both names\n"
       "and values, unlike the C API counterpart."
   },
   {"mconstants", (PyCFunction)gdpy_dirfile_getmconstants,
@@ -3205,6 +3403,14 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "same type.  The parameter 'start' indicates where the first sample\n"
       "in which the data will be stored.  Zero is assumed if not given.\n"
       "See gd_put_carray_slice(3)."
+  },
+  {"put_sarray", (PyCFunction)gdpy_dirfile_putsarray,
+    METH_VARARGS | METH_KEYWORDS,
+    "put_sarray(field_code, data [, start])\n\n"
+      "Store the list 'data' in the SARRAY given by 'field_code'.  The\n"
+      "parameter 'start' indicates where the first sample in which the data\n"
+      "will be stored.  Zero is assumed if not given.  See\n"
+      "gd_put_sarray_slice(3)."
       /* ------- handy ruler ---------------------------------------------| */
   },
   {"put_constant", (PyCFunction)gdpy_dirfile_putconstant,

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2015 D. V. Wiebe
+/* Copyright (C) 2008-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -147,9 +147,12 @@ static struct {
   CONSTANT(RECIP_ENTRY,      "GD_RCE", GDMP_ENTYPE),
   CONSTANT(WINDOW_ENTRY,     "GD_WDE", GDMP_ENTYPE),
   CONSTANT(MPLEX_ENTRY,      "GD_MXE", GDMP_ENTYPE),
+  CONSTANT(INDIR_ENTRY,      "GD_IDE", GDMP_ENTYPE),
+  CONSTANT(SINDIR_ENTRY,     "GD_SDE", GDMP_ENTYPE),
   CONSTANT(CONST_ENTRY,      "GD_COE", GDMP_ENTYPE),
   CONSTANT(CARRAY_ENTRY,     "GD_CAE", GDMP_ENTYPE),
   CONSTANT(STRING_ENTRY,     "GD_STE", GDMP_ENTYPE),
+  CONSTANT(SARRAY_ENTRY,     "GD_SAE", GDMP_ENTYPE),
 
   CONSTANT(NULL,             "GD_NUL", GDMP_DTYPE),
   CONSTANT(UINT8,            "GD_U8",  GDMP_DTYPE),
@@ -164,6 +167,7 @@ static struct {
   CONSTANT(FLOAT64,          "GD_F64", GDMP_DTYPE),
   CONSTANT(COMPLEX64,        "GD_C64", GDMP_DTYPE),
   CONSTANT(COMPLEX128,       "GDC128", GDMP_DTYPE),
+  CONSTANT(STRING,           "GD_STR", GDMP_DTYPE),
 
   CONSTANT(DEL_META,         "GDD_MT", GDMP_RFLAG),
   CONSTANT(DEL_DATA,         "GDD_DT", GDMP_RFLAG),
@@ -392,6 +396,7 @@ void Fortran(void)
     printf("/\n");
   }
   printf("s/@GD_MAX_LINE_LENGTH@/%i/\n", GD_MAX_LINE_LENGTH);
+  printf("s/@SIZEOF_VOID_P@/%i/\n", SIZEOF_VOID_P);
 }
 
 void Python(void)

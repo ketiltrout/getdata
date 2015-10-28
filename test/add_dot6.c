@@ -44,7 +44,7 @@ int main(void)
   E.EN(phase,shift) = 0;
   E.scalar[0] = NULL;
 
-  D = gd_open(filedir, GD_RDWR | GD_CREAT);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_dirfile_standards(D, 6);
   gd_add(D, &E);
   error = gd_error(D);

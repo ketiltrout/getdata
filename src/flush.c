@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2015 D. V. Wiebe
+/* Copyright (C) 2008-2012, 2014, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -46,7 +46,8 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
             _GD_ef[E->e->u.raw.file[0].subenc].sync != NULL &&
             (*_GD_ef[E->e->u.raw.file[0].subenc].sync)(E->e->u.raw.file))
         {
-          _GD_SetEncIOError(D, GD_E_IO_WRITE, E->e->u.raw.file + 0);
+          _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[0].name, 0,
+              NULL);
         } else if (clo && _GD_FiniRawIO(D, E, E->fragment_index,
               GD_FINIRAW_KEEP))
         {
@@ -73,10 +74,13 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       if (!_GD_BadInput(D, E, 0, GD_NO_ENTRY, 0))
         _GD_Flush(D, E->e->entry[0], syn, clo);
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
@@ -719,6 +723,55 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
           goto WRITE_ERR;
         }
         break;
+      case GD_SARRAY_ENTRY:
+        pos = fprintf(stream, " SARRAY%s", pretty ? "  " : "");
+        if (pos < 0)
+          goto WRITE_ERR;
+
+        for (z = 0; z < E->EN(scalar,array_len); ++z) {
+          if (fputc(' ', stream) == EOF)
+            goto WRITE_ERR;
+          pos++;
+
+          /* compute length */
+          len = _GD_StringEscapeise(NULL, ((char**)E->e->u.scalar.d)[z], 0,
+              permissive, D->standards);
+
+          /* don't write lines that are too long
+           * also, add one to length for the trailing '\n' */
+          if (GD_SSIZE_T_MAX - (len + 1) <= pos) {
+            _GD_SetError(D, GD_E_LINE_TOO_LONG, GD_E_LONG_FLUSH, E->field, 0, NULL);
+            dreturn("%i", -1);
+            return -1;
+          }
+
+          if (_GD_StringEscapeise(stream, ((char**)E->e->u.scalar.d)[z], 0,
+                permissive, D->standards) < 0)
+          {
+            goto WRITE_ERR;
+          }
+        }
+        break;
+      case GD_INDIR_ENTRY:
+        if (fprintf(stream, " INDIR%s ", pretty ? "   " : "") < 0 ||
+            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
+              D->standards, GD_WFC_SPACE) < 0 ||
+            _GD_WriteFieldCode(D, stream, me, E->in_fields[1], 0, permissive,
+              D->standards, 0) < 0)
+        {
+          goto WRITE_ERR;
+        }
+        break;
+      case GD_SINDIR_ENTRY:
+        if (fprintf(stream, " SINDIR%s ", pretty ? "  " : "") < 0 ||
+            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
+              D->standards, GD_WFC_SPACE) < 0 ||
+            _GD_WriteFieldCode(D, stream, me, E->in_fields[1], 0, permissive,
+              D->standards, 0) < 0)
+        {
+          goto WRITE_ERR;
+        }
+        break;
       case GD_INDEX_ENTRY:
       case GD_ALIAS_ENTRY:
       case GD_NO_ENTRY:
@@ -1204,6 +1257,7 @@ int gd_flush(DIRFILE *D, const char *field_code)
 #define GD_VERS_GE_7  0xFFFFFF80UL
 #define GD_VERS_GE_8  0xFFFFFF00UL
 #define GD_VERS_GE_9  0xFFFFFE00UL
+#define GD_VERS_GE_10 0xFFFFFC00UL
 
 #define GD_VERS_LE_0  0x00000001UL
 #define GD_VERS_LE_1  0x00000003UL
@@ -1215,6 +1269,7 @@ int gd_flush(DIRFILE *D, const char *field_code)
 #define GD_VERS_LE_7  0x000000ffUL
 #define GD_VERS_LE_8  0x000001ffUL
 #define GD_VERS_LE_9  0x000003ffUL
+#define GD_VERS_LE_10 0x000007ffUL
 
 uint64_t _GD_FindVersion(DIRFILE *D)
 {
@@ -1300,6 +1355,11 @@ uint64_t _GD_FindVersion(DIRFILE *D)
         case GD_STRING_ENTRY:
           D->av &= GD_VERS_GE_6;
           break;
+        case GD_SARRAY_ENTRY:
+        case GD_INDIR_ENTRY:
+        case GD_SINDIR_ENTRY:
+          D->av &= GD_VERS_GE_10;
+          break;
         case GD_BIT_ENTRY:
           if (D->entry[i]->EN(bit,numbits) > 1)
             D->av &= GD_VERS_GE_1;
@@ -1348,6 +1408,8 @@ uint64_t _GD_FindVersion(DIRFILE *D)
         case '.':
           if (D->entry[i]->flags & GD_EN_DOTTED)
             D->av &= GD_VERS_LE_5;
+          else
+            D->av &= GD_VERS_GE_10;
           break;
         case '&':
         case ';':

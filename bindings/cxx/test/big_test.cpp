@@ -1,4 +1,4 @@
-// Copyright (C) 2009-2015 D. V. Wiebe
+// Copyright (C) 2009-2013 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -163,13 +163,17 @@ void run_tests(void)
     "phase PHASE data 11\n"
     "window WINDOW linterp mult LT 4.1\n"
     "/ALIAS alias data\n"
-    "string STRING \"Zaphod Beeblebrox\"\n";
+    "string STRING \"Zaphod Beeblebrox\"\n"
+    "sarray SARRAY one two three four five six seven\n"
+    "data/msarray SARRAY eight nine ten eleven twelve\n"
+    "indir INDIR data carray\n"
+    "sindir SINDIR data sarray\n";
   const char* form2_data = "const2 CONST INT8 -19\n";
-  const int nfields = 17;
+  const int nfields = 20;
   unsigned char c[8];
   unsigned char data_data[80];
   signed char sc;
-  int m, n, i;
+  int m, n, i, j;
   float fl;
   double dp, p[6], q[6];
   const double *qp;
@@ -195,16 +199,20 @@ void run_tests(void)
   StringEntry gent;
   WindowEntry went, *wep;
   MplexEntry xent, *xep;
+  SarrayEntry saent, *saep;
+  IndirEntry ient, *iep;
+  SindirEntry sient, *siep;
   Fragment *frag;
   gd_triplet_t thresh;
   const gd_carray_t *carrays;
+  const char*** sarrays;
 
-  char* fields[nfields + 10] = {(char*)"INDEX", (char*)"alias", (char*)"bit",
+  char* fields[nfields + 9] = {(char*)"INDEX", (char*)"alias", (char*)"bit",
     (char*)"carray", (char*)"const", (char*)"data", (char*)"div",
-    (char*)"lincom", (char*)"linterp", (char*)"mplex", (char*)"mult",
-    (char*)"phase", (char*)"polynom", (char*)"recip", (char*)"sbit",
-    (char*)"string", (char*)"window", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL};
+    (char*)"indir", (char*)"lincom", (char*)"linterp", (char*)"mplex",
+    (char*)"mult", (char*)"phase", (char*)"polynom", (char*)"recip",
+    (char*)"sarray", (char*)"sbit", (char*)"sindir", (char*)"string",
+    (char*)"window", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
   char *strings[3];
 
   unlink(data);
@@ -266,13 +274,14 @@ void run_tests(void)
   // 26: Dirfile::NFields check
   n = d->NMFields("data");
   CHECK_OK(26);
-  CHECK_INT(26,n,4);
+  CHECK_INT(26,n,5);
 
   // 27: Dirfile::MFieldList check
   fields[0] = (char*)"mstr";
   fields[1] = (char*)"mconst";
   fields[2] = (char*)"mcarray";
   fields[3] = (char*)"mlut";
+  fields[4] = (char*)"msarray";
   list = d->MFieldList("data");
   CHECK_OK(27);
   CHECK_STRING_ARRAY(27,n,list[i],fields[i]);
@@ -675,7 +684,7 @@ void run_tests(void)
   // 69: Dirfile::NVectors check
   n = d->NVectors();
   CHECK_OK(69);
-  CHECK_INT(69,n,24);
+  CHECK_INT(69,n,26);
 
   // 70: Dirfile::VectorList check
   fields[0] = (char*)"INDEX";
@@ -683,25 +692,27 @@ void run_tests(void)
   fields[2] = (char*)"bit";
   fields[3] = (char*)"data";
   fields[4] = (char*)"div";
-  fields[5] = (char*)"lincom";
-  fields[6] = (char*)"linterp";
-  fields[7] = (char*)"mplex";
-  fields[8] = (char*)"mult";
-  fields[9] = (char*)"new1";
-  fields[10] = (char*)"new10";
-  fields[11] = (char*)"new2";
-  fields[12] = (char*)"new3";
-  fields[13] = (char*)"new4";
-  fields[14] = (char*)"new5";
-  fields[15] = (char*)"new6";
-  fields[16] = (char*)"new7";
-  fields[17] = (char*)"new8";
-  fields[18] = (char*)"new9";
-  fields[19] = (char*)"phase";
-  fields[20] = (char*)"polynom";
-  fields[21] = (char*)"recip";
-  fields[22] = (char*)"sbit";
-  fields[23] = (char*)"window";
+  fields[5] = (char*)"indir";
+  fields[6] = (char*)"lincom";
+  fields[7] = (char*)"linterp";
+  fields[8] = (char*)"mplex";
+  fields[9] = (char*)"mult";
+  fields[10] = (char*)"new1";
+  fields[11] = (char*)"new10";
+  fields[12] = (char*)"new2";
+  fields[13] = (char*)"new3";
+  fields[14] = (char*)"new4";
+  fields[15] = (char*)"new5";
+  fields[16] = (char*)"new6";
+  fields[17] = (char*)"new7";
+  fields[18] = (char*)"new8";
+  fields[19] = (char*)"new9";
+  fields[20] = (char*)"phase";
+  fields[21] = (char*)"polynom";
+  fields[22] = (char*)"recip";
+  fields[23] = (char*)"sbit";
+  fields[24] = (char*)"sindir";
+  fields[25] = (char*)"window";
   list = d->VectorList();
   CHECK_OK(70);
   CHECK_STRING_ARRAY(70,n,list[i],fields[i]);
@@ -1697,39 +1708,41 @@ void run_tests(void)
   n = d->NEntries("data", GD_SCALAR_ENTRIES,
       GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   CHECK_OK2(237, 1);
-  CHECK_INT2(237, 1, n, 4);
+  CHECK_INT2(237, 1, n, 5);
   n = d->NEntries(NULL, GD_VECTOR_ENTRIES,
       GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   CHECK_OK2(237, 2);
-  CHECK_INT2(237, 2, n, 26);
+  CHECK_INT2(237, 2, n, 28);
 
   // 239: gd_entry_list
   fields[0] = (char*)"INDEX";
   fields[1] = (char*)"bit";
   fields[2] = (char*)"data";
   fields[3] = (char*)"div";
-  fields[4] = (char*)"lincom";
-  fields[5] = (char*)"linterp";
-  fields[6] = (char*)"mplex";
-  fields[7] = (char*)"mult";
-  fields[8] = (char*)"new1";
-  fields[9] = (char*)"new14";
-  fields[10] = (char*)"new15";
-  fields[11] = (char*)"new16";
-  fields[12] = (char*)"new18";
-  fields[13] = (char*)"new2";
-  fields[14] = (char*)"new21";
-  fields[15] = (char*)"new3";
-  fields[16] = (char*)"new4";
-  fields[17] = (char*)"new5";
-  fields[18] = (char*)"new6";
-  fields[19] = (char*)"new7";
-  fields[20] = (char*)"new8";
-  fields[21] = (char*)"phase";
-  fields[22] = (char*)"polynom";
-  fields[23] = (char*)"recip";
-  fields[24] = (char*)"sbit";
-  fields[25] = (char*)"window";
+  fields[4] = (char*)"indir";
+  fields[5] = (char*)"lincom";
+  fields[6] = (char*)"linterp";
+  fields[7] = (char*)"mplex";
+  fields[8] = (char*)"mult";
+  fields[9] = (char*)"new1";
+  fields[10] = (char*)"new14";
+  fields[11] = (char*)"new15";
+  fields[12] = (char*)"new16";
+  fields[13] = (char*)"new18";
+  fields[14] = (char*)"new2";
+  fields[15] = (char*)"new21";
+  fields[16] = (char*)"new3";
+  fields[17] = (char*)"new4";
+  fields[18] = (char*)"new5";
+  fields[19] = (char*)"new6";
+  fields[20] = (char*)"new7";
+  fields[21] = (char*)"new8";
+  fields[22] = (char*)"phase";
+  fields[23] = (char*)"polynom";
+  fields[24] = (char*)"recip";
+  fields[25] = (char*)"sbit";
+  fields[26] = (char*)"sindir";
+  fields[27] = (char*)"window";
   list = d->EntryList(NULL, GD_VECTOR_ENTRIES,
       GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   CHECK_OK(239);
@@ -1757,16 +1770,233 @@ void run_tests(void)
   CHECK_INT2(242,5,carrays[2].n,0);
 
   // 271: gd_encoding_support
-  n = EncodingSupport(GetData::SieEncoding);
+  n = EncodingSupport(SieEncoding);
   CHECK_INT(271, n, GD_RDWR);
 
-  // 272: NULL return from gd_reference
+  // 274: gd_entry (SARRAY)
+  ent = d->Entry("sarray");
+  CHECK_OK(274);
+  CHECK_INT2(274,1,ent->Type(),SarrayEntryType);
+  CHECK_INT2(274,2,ent->FragmentIndex(),0);
+  CHECK_INT2(274,3,ent->ArrayLen(),7);
+  delete ent;
+
+  // 275: gd_get_sarray
+  fields[0] = (char*)"one";
+  fields[1] = (char*)"two";
+  fields[2] = (char*)"three";
+  fields[3] = (char*)"four";
+  fields[4] = (char*)"five";
+  fields[5] = (char*)"six";
+  fields[6] = (char*)"seven";
+  n = d->GetSarray("sarray", list);
+  CHECK_OK(275);
+  CHECK_INT(275,n,0);
+  CHECK_STRING_ARRAY(275,7,list[i],fields[i]);
+
+  // 276: gd_get_sarray_slice
+  n = d->GetSarray("sarray", list, 4, 3);
+  CHECK_OK(276);
+  CHECK_INT(276,n,0);
+  CHECK_STRING_ARRAY(276,3,list[i],fields[i+4]);
+
+  // 277: gd_sarrays
+  sarrays = d->Sarrays();
+  CHECK_OK(277);
+  CHECK_NONNULL(277,sarrays);
+  for (i = 0; sarrays[i] != NULL; ++i) {
+    for (j = 0; sarrays[i][j] != NULL; ++j)
+      CHECK_STRINGi(277, i * 1000 + j, sarrays[i][j], fields[j]);
+    CHECK_INT2(277, i + 1, j, 7);
+  }
+  CHECK_INT2(277, 0, i, 1);
+
+  // 278: gd_put_sarray
+  fields[0] = (char*)"eka";
+  fields[1] = (char*)"dvi";
+  fields[2] = (char*)"tri";
+  fields[3] = (char*)"catur";
+  fields[4] = (char*)"panca";
+  fields[5] = (char*)"sas";
+  fields[6] = (char*)"sapta";
+  n = d->PutSarray("sarray", (const char**)fields);
+  CHECK_OK2(278, 1);
+
+  n = d->GetSarray("sarray", list);
+  CHECK_OK2(278,2);
+  CHECK_INT(278,n,0);
+  CHECK_STRING_ARRAY(278,7,list[i],fields[i]);
+
+  // 279: gd_put_sarray_slice
+  fields[4] = (char*)"asta";
+  fields[5] = (char*)"nava";
+  n = d->PutSarray("sarray", (const char**)fields + 4, 4, 2);
+  CHECK_OK2(279, 1);
+
+  n = d->GetSarray("sarray", list);
+  CHECK_OK2(279,2);
+  CHECK_INT(279,n,0);
+  CHECK_STRING_ARRAY(279,7,list[i],fields[i]);
+
+  // 280: gd_add_sarray
+  saent.SetName("new280");
+  saent.SetFragmentIndex(0);
+  saent.SetArrayLen(4);
+  d->Add(saent);
+  CHECK_OK2(280,1);
+
+  ent = d->Entry("new280");
+  CHECK_OK2(280,2);
+  CHECK_INT2(280,1,ent->Type(),SarrayEntryType);
+  CHECK_INT2(280,2,ent->FragmentIndex(),0);
+  CHECK_INT2(280,4,ent->ArrayLen(),4);
+  delete ent;
+
+  // 282: gd_madd_sarray
+  saent.Dissociate();
+  saent.SetName("mnew282");
+  saent.SetFragmentIndex(0);
+  saent.SetArrayLen(2);
+  d->MAdd(saent, "data");
+  CHECK_OK2(282,1);
+
+  ent = d->Entry("data/mnew282");
+  CHECK_OK2(282,2);
+  CHECK_INT2(282,1,ent->Type(),SarrayEntryType);
+  CHECK_INT2(282,2,ent->FragmentIndex(),0);
+  CHECK_INT2(282,4,ent->ArrayLen(),2);
+  delete ent;
+
+  // 283: gd_alter_sarray
+  saep = reinterpret_cast<SarrayEntry*>(d->Entry("new280"));
+  CHECK_OK2(283,1);
+  saep->SetArrayLen(12);
+  CHECK_OK2(283,2);
+  delete saep;
+
+  ent = d->Entry("new280");
+  CHECK_OK2(283,3);
+  CHECK_INT2(283,1,ent->Type(),SarrayEntryType);
+  CHECK_INT2(283,2,ent->FragmentIndex(),0);
+  CHECK_INT2(283,4,ent->ArrayLen(),12);
+  delete ent;
+
+  // 284: gd_msarrays
+  fields[0] = (char*)"eight";
+  fields[1] = (char*)"nine";
+  fields[2] = (char*)"ten";
+  fields[3] = (char*)"eleven";
+  fields[4] = (char*)"twelve";
+  sarrays = d->MSarrays("data");
+  CHECK_OK(284);
+  CHECK_NONNULL2(284,0,sarrays);
+  CHECK_NONNULL2(284,1,sarrays[0]);
+  for (j = 0; sarrays[0][j] != NULL; ++j)
+    CHECK_STRINGi(284, j, sarrays[0][j], fields[j]);
+  CHECK_INT2(284, 1, j, 5);
+
+  fields[0] = (char*)"";
+  fields[1] = (char*)"";
+  CHECK_NONNULL2(284,2,sarrays[1]);
+  for (j = 0; sarrays[1][j] != NULL; ++j)
+    CHECK_STRINGi(284, 1000 + j, sarrays[1][j], fields[j]);
+  CHECK_INT2(284, 3, j, 2);
+  CHECK_NULL2(284,4,sarrays[2]);
+
+  // 285: Dirfile::Entry / IndirEntry check
+  ent = d->Entry("indir");
+  CHECK_OK(285);
+  CHECK_INT2(285,1,ent->Type(),IndirEntryType);
+  CHECK_INT2(285,2,ent->FragmentIndex(),0);
+  CHECK_STRING2(285,3,ent->Input(0),"data");
+  CHECK_STRING2(285,4,ent->Input(1),"carray");
+  delete ent;
+
+  // 286: Dirfile::Add / IndirEntry check
+  ient.SetName("new286");
+  ient.SetFragmentIndex(0);
+  ient.SetInput("in1", 0);
+  ient.SetInput("in2", 1);
+  d->Add(ient);
+  CHECK_OK2(286,1);
+
+  ent = d->Entry("new286");
+  CHECK_OK2(286,2);
+  CHECK_INT2(286,1,ent->Type(),IndirEntryType);
+  CHECK_INT2(286,2,ent->FragmentIndex(),0);
+  CHECK_STRING2(286,3,ent->Input(0),"in1");
+  CHECK_STRING2(286,4,ent->Input(1),"in2");
+
+  // 289: IndirEntry check
+  iep = reinterpret_cast<IndirEntry*>(d->Entry("new286"));
+  CHECK_OK2(289,1);
+  iep->SetInput("in4",0);
+  CHECK_OK2(289,2);
+  iep->SetInput("in5",1);
+  CHECK_OK2(289,3);
+  delete iep;
+
+  ent = d->Entry("new286");
+  CHECK_OK2(289,2);
+  CHECK_INT2(289,1,ent->Type(),IndirEntryType);
+  CHECK_INT2(289,2,ent->FragmentIndex(),0);
+  CHECK_STRING2(289,3,ent->Input(0),"in4");
+  CHECK_STRING2(289,4,ent->Input(1),"in5");
+
+  // 290: Dirfile::Entry / SindirEntry check
+  ent = d->Entry("sindir");
+  CHECK_OK(290);
+  CHECK_INT2(290,1,ent->Type(),SindirEntryType);
+  CHECK_INT2(290,2,ent->FragmentIndex(),0);
+  CHECK_STRING2(290,3,ent->Input(0),"data");
+  CHECK_STRING2(290,4,ent->Input(1),"sarray");
+  delete ent;
+
+  // 291: Dirfile::Add / SindirEntry check
+  sient.SetName("new291");
+  sient.SetFragmentIndex(0);
+  sient.SetInput("in1", 0);
+  sient.SetInput("in2", 1);
+  d->Add(sient);
+  CHECK_OK2(291,1);
+
+  ent = d->Entry("new291");
+  CHECK_OK2(291,2);
+  CHECK_INT2(291,1,ent->Type(),SindirEntryType);
+  CHECK_INT2(291,2,ent->FragmentIndex(),0);
+  CHECK_STRING2(291,3,ent->Input(0),"in1");
+  CHECK_STRING2(291,4,ent->Input(1),"in2");
+
+  // 294: SindirEntry check
+  siep = reinterpret_cast<SindirEntry*>(d->Entry("new291"));
+  CHECK_OK2(294,1);
+  siep->SetInput("in4",0);
+  CHECK_OK2(294,2);
+  siep->SetInput("in5",1);
+  CHECK_OK2(294,3);
+  delete siep;
+
+  ent = d->Entry("new291");
+  CHECK_OK2(294,2);
+  CHECK_INT2(294,1,ent->Type(),SindirEntryType);
+  CHECK_INT2(294,2,ent->FragmentIndex(),0);
+  CHECK_STRING2(294,3,ent->Input(0),"in4");
+  CHECK_STRING2(294,4,ent->Input(1),"in5");
+  delete ent;
+
+  // 295: gd_getstrdata
+  n = d->GetData("sindir", 0, 0, 1, 0, list);
+  CHECK_OK(295);
+  CHECK_INT(295,n,8);
+  CHECK_STRING_ARRAY(295,8,list[i],"eka");
+
+  // 299: NULL return from gd_reference
   id = new Dirfile("dirfile/empty", GD_RDWR | GD_CREAT | GD_EXCL);
-  CHECK_OK2(272, 1);
+  CHECK_OK2(299, 1);
 
   rep = id->Reference();
-  CHECK_OK2(272, 2);
-  CHECK_NULL(272, rep);
+  CHECK_OK2(299, 2);
+  CHECK_NULL(299, rep);
 
   id->Discard();
 

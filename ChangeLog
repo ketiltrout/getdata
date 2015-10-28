@@ -1,62 +1,122 @@
-2015-10-16   D. V. Wiebe <getdata@ketiltrout.net> svn:1011
-	GetData-0.9.0 released.
+2015-10-28  D. V. Wiebe <getdata@ketiltrout.net> svn:1017
+	Merge in fixes from GetData-0.9.0 in trunk:
 
-2015-10-05   D. V. Wiebe <getdata@ketiltrout.net> svn:1009
-	GetData-0.9.0rc3:
+	* bindings/idl/getdata.c bindings/python/pydirfile.c bindings/perl/typemap
+	bindings/perl/simple_funcs.pl bindings/perl/GetData.xs: Use gd_off64_t in
+	place of off64_t or off_t. (r998)
 
-	* bindings/cxx/dirfile.cpp (GetData::EncodingSupport): Use
-	GetData::EncodingScheme for the encoding parameter.
+	* bindings/perl/GetData.xs bindings/perl/simple_funcs.pl (gdp64): Deleted;
+	use the 64-bit API always. (r998)
 
-	* bindings/cxx/dirfile.cpp (Dirfile::Delete): Use unsigned for the flags
-	parameter.
+	* bindings/python/pydirfile.c (gdpy_dirfile_getdata gdpy_dirfile_getnframes
+	gdpy_dirfile_getbof gdpy_dirfile_getbof gdpy_dirfile_geteof
+	gdpy_dirfile_putdata gdpy_dirfile_getframenum gdpy_dirfile_seek
+	gdpy_dirfile_tell) bindings/python/pyfragment.c (gdpy_fragment_getoffset
+	gdpy_fragment_setoffset): Call the 64-bit API. (r998)
 
-	* bindings/cxx/getdata/fragment.h: Add FlacEncoding.
+	* configure.ac: Remove AC_SYS_LARGEFILE (r998)
+	* src/internal.h: Define _LARGEFILE64_SOURCE. (r998)
 
-	* bindings/idl/getdata.c (gdidl_delete): Add missing /META flag.
+	* test/header_off64t: Added. (r998)
 
-	* bindings/php/getdata.c (gdphp_callback): Don't accept floating point
-	response from callback.
+	* m4/php.m4: Handle NONE for php-binary. (r998)
 
-	* bindings/matlab/Contents.m.head bindings/matlab/gd_move.c
-	bindings/perl/GetData.pm.in doc/README.cxx doc/README.f77 doc/README.f95
-	doc/README.idl doc/README.php doc/README.python: Update bindings docs.
+	* src/getdata.h.in: Do 64-bit API redirection if _FILE_OFFSET_BITS == 64.
+	(r998)
 
-	* test/put_nofile.c: Fix !defined HAVE_SETRLIMIT case.
+	* src/zzslim.c (_GD_ZzslimSeek) src/zzip.c (_GD_ZzipSeek) src/slim.c
+	(_GD_SlimSeek): Cast count to the correct type. (r998)
 
-	* test/test.h (gd_pathwrite): Also escape hash and space and use in all
-	cases.
-	* test/get_linterp_abs.c: Use gd_pathwrite.  Don't double buffer
-	format_data.
+	* src/gzip.c (_GD_GzipSeek): Use the 64-bit zlib API. (r998)
 
-2015-10-05   D. V. Wiebe <getdata@ketiltrout.net> svn:1008
-	* configure.ac: Fix handling of --with-ltdl.
-	* src/encoding.c src/internal.h: Move inclusion of <ltdl.h> out of header.
+	* bindings/f77/test/gdcopn.f: remove GD_VB (r999)
 
-	* src/compat.c (gd_StatAt64): Don't define if GD_NO_64BIT_STAT is defined.
+	* bindings/python/pydirfile.c bindings/python/pygetdata.c configure.ac: Make
+	NumPy support mandatory. (r1000)
 
-	* test/gzip_put_nframes.c test/gzip_put_off.c test/gzip_seek.c
-	test/gzip_seek_far.c test/gzip_seek_put.c: Fix for !defined(USE_GZIP).
+	* src/flac.c: Added. (r1001)
+	* configure.ac src/Makefile.am src/encoding.c (_GD_EncodingUnderstood)
+	src/flush.c (_GD_FlushFragment): Deal with FLAC. (r1001)
+	* bindings/make_parameters.c src/getdata.h.in: Add GD_FLAC_ENCODED. (r1001)
+	* man/dirfile-encoding.5: Updated. (r1001)
 
-	* bindings/f77/getdata.f.in: Delete GDDELA and GDDSTP.
+	* src/internal.h: data_type added to gd_ef_open_t. (r1001)
 
-	* configure.ac: remove check for -fno-backslash
-	* m4/compiler.m4 (GD_PROG_F77_FNO_BACKSLASH): Deleted.
-	* bidnings/f77/test/big_test.f: Define backslash parameter.
+	* src/bzip2.c (_GD_Bzip2DoOpen): Clean up after errors. (r1001)
 
-2015-09-30   D. V. Wiebe <getdata@ketiltrout.net> svn:1007
-	GetData-0.9.0rc2.
+	* src/internal.h: Abstractify strerror stuff. (r1001)
+	* src/compat.c (gd_sterror): Added. (r1001)
+	* src/errors.c (gd_error_string): Call gd_sterrror. (r1001)
 
-2015-09-27   D. V. Wiebe <getdata@ketiltrout.net> svn:1006
-	* test/gzip_seek_far.c: Allow both 256 and 4000 which can be returned by
-	different builds of zlib.
+	* src/fpos.c (_GD_DoSeek): Renamed from _GD_WriteSeek.  Handle short writes.
+	(r1001)
 
-	* src/getdata.c (_GD_ExtractRepr): Remove unused 4th parameter from
-	EXTRACT_REPR.
+	* src/slim.c: Handle ZZSLIM. (r1001)
 
-2015-09-26   D. V. Wiebe <getdata@ketiltrout.net> svn:1005
+	* src/slim.c (Seek) src/zzip.c (_GD_ZzipSeek): Deal with seeks past the EOF.
+	Properly update and report file->pos. (r1001)
+
+	* src/slim.c (DoOpen): Record full path name along with SLIMFILE in
+	file->edata.  Renamed from _GD_SlimOpen. (r1001)
+	* src/slim.c (Open): Added. (r1001)
+
+	* src/zzip.c (_GD_ZzipName): Put both .zip name and field name in
+	file->name. (r1001)
+	* src/zzip.c (_GD_ZzipDoOpen): Renamed from _GD_ZzipOpen.  Open containing
+	archive (ZZIP_DIR) separately from the data file (ZZIP_FILE). (r1001)
+	* src/zzip.c (_GD_ZzipOpen): Added. (r1001)
+	* src/zzip.c (_GD_ZzipDoOpen): Call _GD_DoOpen. (r1001)
+
+	* src/zzslim.c (_GD_ZzslimOpen _GD_ZzslimSeek _GD_ZzslimRead _GD_ZzslimClose
+	_GD_ZzslimSize): Removed.  Instead, define ZZSLIM and include slim.c. (r1001)
+
+	* src/internal.h: Added error to gd_raw_file_.  Added strerr to encoding_t.
+	Added GD_EF_STRERR. (r1001)
+	* src/bzip2.c src/gzip.c src/lzma.c src/zzip.c: Record errors in file->error.
+	* src/errors.c (_GD_SetEncIOError) src/bzip2.c (_GD_Bzip2Strerr) src/gzip.c
+	(_GD_GzipStrerr) src/lzma.c (_GD_LzmaStrerr) src/slim.c (Strerr) src/zzip.c
+	(_GD_ZzipStrerr): Added. (r1001)
+	* src/del.c (_GD_Delete) src/encoding.c (_GD_FiniRawIO _GD_InitRawIO)
+	src/flimits.c (_GD_GetEOF) src/fpos.c (_GD_DoSeek gd_tell) src/getdata.c
+	(_GD_DoRaw) src/mod.c (_GD_Change) src/move.c (_GD_MogrifyFile) src/name.c
+	(_GD_Rename) src/nframes.c (gd_nframes64) src/putdata.c (_GD_DoRawOut): Set
+	error via _GD_SetEncIOError. (r1001)
+	* src/encoding.c (_GD_MissingFramework): Deal with GD_EF_STRERR (r1001)
+	* src/fpos.c (_GD_Seek): _GD_DoSeek has already set the error. (r1001)
+	* src/errors.c: Added GD_E_IO_ENC_*. (r1001)
+	* src/errors.c (_GD_SetEncIOError): Added. (r1001)
+
+	* test/ascii_get_here.c test/ascii_put_here.c test/ascii_seek.c
+	test/ascii_seek_far.c test/bzip_seek.c test/bzip_seek_far.c test/flac_add.c
+	test/flac_get_big.c test/flac_get_far.c test/flac_get_get.c
+	test/flac_get_get2.c test/flac_get_little.c test/flac_nframes.c
+	test/flac_put_big.c test/flac_put_float64.c test/flac_put_int32.c
+	test/flac_put_little.c test/flac_seek.c test/flac_seek_far.c
+	test/flac_sync.c test/gzip_seek.c test/gzip_seek_far.c test/lzma_xz_seek.c
+	test/lzma_xz_seek_far.c test/seek_far.c test/sie_seek.c test/sie_seek_far.c
+	test/slim_seek.c test/slim_seek_far.c test/zzip_seek.c test/zzip_seek_far.c
+	test/zzslim_seek.c test/zzslim_seek_far.c: Added. (r1001)
+
+	* src/internal.h (gd_ef_strerr_t): Mark first argument const. (r1004)
+
+	* test/ascii_get_here.c: Fix e1 check. (r1004)
+	* test/flac_put_int32.c: Fix signedness. (r1004)
+
+	* src/nan.h: Deleted. (r1004)
+	* src/internal.h: Merged in nan.h content. (r1004)
+
+	* test/gzip_put_off.c test/gzip_seek_put.c: Halve the amount of data used.
+	(r1004)
+
+	* Makefile.am: Don't run matlabdistcheck and idldistcheck against an
+	installed GetData. (r1004, per 0.8 branch, r969)
+
+	* bindings/idl/Makefile.am bindings/python/Makefile.am: Fix VPATH builds
+	again. (r1004, per 0.8 branch, r969)
+
 	* bindings/cxx/bitentry.cpp (BitEntry::Scalar BitEntry::ScalarIndex)
 	bindings/cxx/sbitentry.cpp (SBitEntry::Scalar SBitEntry::ScalarIndex): Moved
-	to header.
+	to header. (r1005)
 
 	* bindings/cxx/getdata/bitentry.h (Input Scalar ScalarIndex)
 	bindings/cxx/getdata/divideentry.h (Input) bindings/cxx/getdata/entry.h
@@ -72,258 +132,69 @@
 	bindings/cxx/getdata/recipentry.h (Index Scalar ScalarIndex)
 	bindings/cxx/getdata/sbitentry.h (Index Scalar ScalarIndex)
 	bindings/cxx/getdata/windowentry.h (Index Scalar ScalarIndex): Remove default
-	from index.
+	from index. (r1005)
 
 	* bindings/python/pydirfile.c (gdpy_dirfile_getfieldlist
-	gdpy_dirfile_getmfieldlist gdpy_dirfile_getnmfields): Fix type cast.
+	gdpy_dirfile_getmfieldlist gdpy_dirfile_getnmfields): Fix type cast. (r1005)
 
-	* configure.ac: Remove GD_C_CAST_COMPLEX
+	* configure.ac: Remove GD_C_CAST_COMPLEX (r1005)
 	* src/getdata.c (_GD_ExtractRepr): Avoid calling complex functions
-	unnecessarily.
-	* src/internal.h: Remove GD_RTOC.
+	unnecessarily. (r1005)
+	* src/internal.h: Remove GD_RTOC. (r1005)
 
-	* configure.ac: Check for gzseek64 and gztell64
-	* src/gzip.c (_GD_GzipSeek): Abstractify gzseek and gztell.
+	* configure.ac: Check for gzseek64 and gztell64 (r1005)
+	* src/gzip.c (_GD_GzipSeek): Abstractify gzseek and gztell. (r1005)
 
-	* src/internal.h: Redirect gd_StatAt64 if GD_NO_64BIT_STAT.
+	* src/internal.h: Redirect gd_StatAt64 if GD_NO_64BIT_STAT. (r1005)
 
-2015-09-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1004
-	GetData-0.9.0rc1:
+	* test/gzip_seek_far.c: Allow both 256 and 4000 which can be returned by
+	different builds of zlib. (r1006)
 
-	* src/internal.h (gd_ef_strerr_t): Mark first argument const.
+	* src/getdata.c (_GD_ExtractRepr): Remove unused 4th parameter from
+	EXTRACT_REPR. (r1006)
 
-	* src/include.c (_GD_SetFieldAffixes): Remove unused ns and nsl arguments.
+	* configure.ac: Fix handling of --with-ltdl. (r1008)
+	* src/encoding.c src/internal.h: Move inclusion of <ltdl.h> out of header.
+	(r1008)
 
-	* src/legacy.c (GetFormat): Remove DSV 10 stuff.
+	* src/compat.c (gd_StatAt64): Don't define if GD_NO_64BIT_STAT is defined.
+	(r1008)
 
-	* test/ascii_get_here.c: Fix e1 check.
-	* test/flac_put_int32.c: Fix signedness.
+	* test/gzip_put_nframes.c test/gzip_put_off.c test/gzip_seek.c
+	test/gzip_seek_far.c test/gzip_seek_put.c: Fix for !defined(USE_GZIP). (r1008)
 
-	* bindings/matlab/gd_add_indir.m bindings/matlab/gd_add_sindir.m
-	bindings/matlab/gd_alter_indir.m bindings/matlab/gd_alter_sindir.m
-	bindings/matlab/gd_madd_indir.m bindings/matlab/gd_madd_sindir.m
-	bindings/matlab/gd_msarrays.c: Deleted.
-	
-	* src/nan.h: Deleted.
-	* src/internal.h: Merged in nan.h content.
+	* bindings/f77/getdata.f.in: Delete GDDELA. (r1008)
 
-	* test/gzip_put_off.c test/gzip_seek_put.c: Halve the amount of data used.
+	* configure.ac: remove check for -fno-backslash (r1008)
+	* m4/compiler.m4 (GD_PROG_F77_FNO_BACKSLASH): Deleted. (r1008)
+	* bidnings/f77/test/big_test.f: Define backslash parameter. (r1008)
 
-	Merge in build system fixes from GetData-0.8 branch, revision 969:
+	* bindings/cxx/dirfile.cpp (GetData::EncodingSupport): Use
+	GetData::EncodingScheme for the encoding parameter. (r1009)
 
-	* Makefile.am: Don't run matlabdistcheck and idldistcheck against an
-	installed GetData.
+	* bindings/cxx/dirfile.cpp (Dirfile::Delete): Use unsigned for the flags
+	parameter. (r1009)
 
-	* bindings/idl/Makefile.am bindings/python/Makefile.am: Fix VPATH builds
-	again.
+	* bindings/cxx/getdata/fragment.h: Add FlacEncoding. (r1009)
 
-2015-09-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1003
-	* src/flac.c (_GD_FlacWrite): Fix data marshalling for little-ended data.
-	* test/flac_put_complex128.c: Added.
+	* bindings/idl/getdata.c (gdidl_delete): Add missing /META flag. (r1009)
 
-2015-09-24   D. V. Wiebe <getdata@ketiltrout.net> svn:1001
-	* src/flac.c: Added.
-	* configure.ac src/Makefile.am src/encoding.c (_GD_EncodingUnderstood)
-	src/flush.c (_GD_FlushFragment): Deal with FLAC.
-	* bindings/make_parameters.c src/getdata.h.in: Add GD_FLAC_ENCODED.
-	* man/dirfile-encoding.5: Updated.
+	* bindings/php/getdata.c (gdphp_callback): Don't accept floating point
+	response from callback. (r1009)
 
-	* src/internal.h: data_type added to gd_ef_open_t.
+	* bindings/matlab/Contents.m.head bindings/matlab/gd_move.c
+	bindings/perl/GetData.pm.in doc/README.cxx doc/README.f77 doc/README.f95
+	doc/README.idl doc/README.php doc/README.python: Update bindings docs. (r1009)
 
-	* src/bzip2.c (_GD_Bzip2DoOpen): Clean up after errors.
+	* test/put_nofile.c: Fix !defined HAVE_SETRLIMIT case. (r1009)
 
-	* src/internal.h: Abstractify strerror stuff.
-	* src/compat.c (gd_sterror): Added.
-	* src/errors.c (gd_error_string): Call gd_sterrror.
+	* test/test.h (gd_pathwrite): Also escape hash and space and use in all
+	cases. (r1009)
+	* test/get_linterp_abs.c: Use gd_pathwrite.  Don't double buffer
+	format_data. (r1009)
 
-	* src/fpos.c (_GD_DoSeek): Renamed from _GD_WriteSeek.  Handle short writes.
-
-	* src/slim.c: Handle ZZSLIM.
-
-	* src/slim.c (Seek) src/zzip.c (_GD_ZzipSeek): Deal with seeks past the EOF.
-	Properly update and report file->pos.
-
-	* src/slim.c (DoOpen): Record full path name along with SLIMFILE in
-	file->edata.  Renamed from _GD_SlimOpen.
-	* src/slim.c (Open): Added.
-
-	* src/zzip.c (_GD_ZzipName): Put both .zip name and field name in
-	file->name.
-	* src/zzip.c (_GD_ZzipDoOpen): Renamed from _GD_ZzipOpen.  Open containing
-	archive (ZZIP_DIR) separately from the data file (ZZIP_FILE).
-	* src/zzip.c (_GD_ZzipOpen): Added.
-	* src/zzip.c (_GD_ZzipDoOpen): Call _GD_DoOpen.
-
-	* src/zzslim.c (_GD_ZzslimOpen _GD_ZzslimSeek _GD_ZzslimRead _GD_ZzslimClose
-	_GD_ZzslimSize): Removed.  Instead, define ZZSLIM and include slim.c.
-
-	* src/internal.h: Added error to gd_raw_file_.  Added strerr to encoding_t.
-	Added GD_EF_STRERR.
-	* src/bzip2.c src/gzip.c src/lzma.c src/zzip.c: Record errors in file->error.
-	* src/errors.c (_GD_SetEncIOError) src/bzip2.c (_GD_Bzip2Strerr) src/gzip.c
-	(_GD_GzipStrerr) src/lzma.c (_GD_LzmaStrerr) src/slim.c (Strerr) src/zzip.c
-	(_GD_ZzipStrerr): Added.
-	* src/del.c (_GD_Delete) src/encoding.c (_GD_FiniRawIO _GD_InitRawIO)
-	src/flimits.c (_GD_GetEOF) src/fpos.c (_GD_DoSeek gd_tell) src/getdata.c
-	(_GD_DoRaw) src/mod.c (_GD_Change) src/move.c (_GD_MogrifyFile) src/name.c
-	(_GD_Rename) src/nframes.c (gd_nframes64) src/putdata.c (_GD_DoRawOut): Set error via _GD_SetEncIOError.
-	* src/encoding.c (_GD_MissingFramework): Deal with GD_EF_STRERR
-	* src/fpos.c (_GD_Seek): _GD_DoSeek has already set the error.
-	* src/errors.c: Added GD_E_IO_ENC_*.
-	* src/errors.c (_GD_SetEncIOError): Added.
-
-	* src/getdata.h.in: Fix GD_DIRFILE_STANDARDS_VERSION.
-
-	* test/name_dot10.c: Deleted.
-
-	* test/ascii_get_here.c test/ascii_put_here.c test/ascii_seek.c
-	test/ascii_seek_far.c test/bzip_seek.c test/bzip_seek_far.c test/flac_add.c
-	test/flac_get_big.c test/flac_get_far.c test/flac_get_get.c
-	test/flac_get_get2.c test/flac_get_little.c test/flac_nframes.c
-	test/flac_put_big.c test/flac_put_float64.c test/flac_put_int32.c
-	test/flac_put_little.c test/flac_seek.c test/flac_seek_far.c
-	test/flac_sync.c test/gzip_seek.c test/gzip_seek_far.c test/lzma_xz_seek.c
-	test/lzma_xz_seek_far.c test/seek_far.c test/sie_seek.c test/sie_seek_far.c
-	test/slim_seek.c test/slim_seek_far.c test/zzip_seek.c test/zzip_seek_far.c
-	test/zzslim_seek.c test/zzslim_seek_far.c: Added.
-
-
-2015-09-22   D. V. Wiebe <getdata@ketiltrout.net> svn:1000
-	* bindings/python/pydirfile.c bindings/python/pygetdata.c configure.ac: Make
-	NumPy support mandatory.
-
-	* src/common.c (_GD_GetRepr): Remove DSV 10 features.
-
-2015-09-22   D. V. Wiebe <getdata@ketiltrout.net> svn:999
-	* src/fragment.c (_GD_SubFragmentList): Removed (part of DSV 10).
-
-	* bindings/f77/test/gdcopn.f: remove GD_VB
-
-2015-09-22   D. V. Wiebe <getdata@ketiltrout.net> svn:998
-	* bindings/idl/getdata.c bindings/python/pydirfile.c bindings/perl/typemap
-	bindings/perl/simple_funcs.pl bindings/perl/GetData.xs: Use gd_off64_t in
-	place of off64_t or off_t.
-
-	* bindings/perl/GetData.xs bindings/perl/simple_funcs.pl (gdp64): Deleted;
-	use the 64-bit API always.
-
-	* bindings/python/pydirfile.c (gdpy_dirfile_getdata gdpy_dirfile_getnframes
-	gdpy_dirfile_getbof gdpy_dirfile_getbof gdpy_dirfile_geteof
-	gdpy_dirfile_putdata gdpy_dirfile_getframenum gdpy_dirfile_seek
-	gdpy_dirfile_tell) bindings/python/pyfragment.c (gdpy_fragment_getoffset
-	gdpy_fragment_setoffset): Call the 64-bit API.
-
-	* configure.ac: Remove AC_SYS_LARGEFILE
-	* src/internal.h: Define _LARGEFILE64_SOURCE.
-
-	* test/header_off64t: Added.
-
-	* m4/php.m4: Handle NONE for php-binary.
-
-	* src/getdata.h.in: Do 64-bit API redirection if _FILE_OFFSET_BITS == 64.
-
-	* src/zzslim.c (_GD_ZzslimSeek) src/zzip.c (_GD_ZzipSeek) src/slim.c
-	(_GD_SlimSeek): Cast count to the correct type.
-
-	* src/gzip.c (_GD_GzipSeek): Use the 64-bit zlib API.
-
-2015-09-21   D. V. Wiebe <getdata@ketiltrout.net> svn:997
-	* src/add.c (_GD_InvalidEntype _GD_Add) src/close.c (_GD_FreeD)
-	src/constant.c (gd_array_len) src/del.c (_GD_ClearDerived _GD_DeReference)
-	src/entry.c (_GD_FreeE _GD_CalculateEntry gd_entry gd_validate)
-	src/field_list.c (_GD_EntryIndex) src/flimits.c (_GD_GetEOF _GD_GetBOF)
-	src/flush.c (_GD_Flush _GD_FieldSpec _GD_FindVersion) src/fpos.c
-	(_GD_GetFilePos _GD_Seek) src/getdata.c (_GD_DoField gd_getdata64)
-	src/getdata.h.in src/internal.h src/mod.c (_GD_Change) src/name.c
-	(_GD_UpdateInputs) src/native.c (_GD_NativeType) src/parse.c
-	(_GD_ParseArray _GD_ParseFieldSpec _GD_ParseDirective) src/putdata.c
-	(_GD_DoFieldOut) src/spf.c (_GD_GetSPF) src/include.c (_GD_SetFieldAffixes):
-	Remove DSV 10 features.
-
-	* src/add.c (gd_add_indir gd_add_sindir gd_add_sarray gd_madd_indir
-	gd_madd_sindir gd_madd_sarray) src/field_list.c (gd_sarrays gd_msarrays)
-	src/getdata.c (_GD_IndirData _GD_DoIndir _GD_DoSindir) src/mod.c
-	(gd_alter_indir gd_alter_sindir gd_alter_sarray) src/parse.c
-	(_GD_ParseNamespace) src/string.c (gd_get_sarray gd_put_sarray_slice
-	gd_put_sarray) src/fragment.c (_GD_CheckChangeNamespace
-	gd_fragment_namespace): Removed.
-	* src/string.c (gd_get_sarray_slice): Made static.
-
-	* test/add_dot10.c test/add_indir.c test/add_sarray.c test/add_sarray_nil.c
-	test/add_sindir.c test/alter_entry_sarray.c test/alter_indir.c
-	test/alter_sarray.c test/alter_sindir.c test/get_indir.c test/get_sarray.c
-	test/get_sarray_len.c test/get_sarray_slice.c test/get_sindir.c
-	test/get_sindir_none.c test/get_sindir_null.c test/get_sindir_type.c
-	test/get_type_string.c test/madd_indir.c test/madd_sarray.c
-	test/madd_sindir.c test/name_updb_sarray.c test/parse_include_ns2.c
-	test/parse_include_nsabs.c test/parse_include_nsinh.c
-	test/parse_include_nspop.c test/parse_include_nsrabs.c
-	test/parse_include_nsrainh.c test/parse_include_nsrinh.c
-	test/parse_include_nsroot.c test/parse_indir.c test/parse_ns.c
-	test/parse_ns_abs.c test/parse_ns_dot.c test/parse_ns_dotdot.c
-	test/parse_ns_dotdotns.c test/parse_ns_dotns.c test/parse_ns_ndotdots.c
-	test/parse_ns_ndots.c test/parse_ns_nsdot.c test/parse_ns_nsdotdot.c
-	test/parse_ns_par.c test/parse_ns_sub.c test/parse_nsf.c
-	test/parse_nsf_abs.c test/parse_nsf_alias.c test/parse_nsf_dot.c
-	test/parse_nsf_hide.c test/parse_nsf_index.c test/parse_nsf_meta.c
-	test/parse_nsf_meta2.c test/parse_nsf_par.c test/parse_nsf_ref.c
-	test/parse_nsf_refabs.c test/parse_nsf_refrel.c test/parse_nsf_root.c
-	test/parse_nsf_rpar.c test/parse_nsf_sub.c test/parse_sarray.c
-	test/parse_sarray_long.c test/parse_sindir.c put_indir.c test/put_sarray.c
-	test/put_sarray_slice.c test/put_sindir.c test/svlist_array.c
-	test/svlist_array_meta.c test/add_ns.c test/add_ns_frag.c
-	test/add_ns_frag2.c test/include_ns.c test/name_ns.c test/name_ns2.c
-	test/name_nsdot.c test/parse_include_ns.c: Deleted.
-	* test/name_updb.c test/name_updb_carray.c test/native_string.c: Remove DSV 10
-	tests.
-
-	* bindings/make_parameters.c bindings/cxx/dirfile.cpp (Dirfile::Entry
-	Dirfile::GetData) bindings/cxx/entry.cpp (Entry::CheckIndex scalar_ok)
-	bindings/cxx/getdata/entry.h bindings/f77/fgetdata.c (GDGSCA GDASCA)
-	bindings/f77/getdata.f90.in (fgd_entry fgd_add fgd_madd fgd_alter_entry)
-	bindings/idl/getdata.c (gdidl_make_idl_entry gdidl_convert_entry_num
-	gdidl_read_idl_entry gdidl_getdata) bindings/matlab/gd_getdata.c
-	bindings/matlab/matlab.c (gdmx_from_entry gdmx_to_entry)
-	bindings/perl/GetData.xs (gdp_to_entry entry getdata)
-	bindings/perl/simple_funcs.xsin bindings/php/getdata.c (gdphp_from_entry
-	gdphp_to_entry gd_getdata) bindings/python/pydirfile.c
-	(gdpy_dirfile_getdata) bindings/python/pyentry.c (gdpy_set_entry_from_tuple
-	gdpy_entry_getinfields gdpy_entry_setinfields gdpy_entry_getarraylen
-	gdpy_entry_setarraylen gdpy_entry_getparms) bindings/python/pygetdata.c
-	(gdpy_convert_to_pylist gdpy_convert_to_pyobj): Remove DSV 10 features.
-
-	* bindings/cxx/dirfile.cpp (Dirfile::GetSarray Dirfile::Sarrays
-	Dirfile::MSarrays Dirfile::PutSarray) bindings/f77/fgetdata.c (GDGEID GDGESD
-	GDGESA GDADID GDADSD GDMDID GDMDSD GDADSA GDMDSA GDALID GDALSD GDSARX GDMSAX
-	GDGTSA GDPTSA GDALSA GDGSTD GDGSTP GDXSTP) bindings/f77/getdata.f90.in
-	(fgd_sarray_value_max fgd_msarray_value_max fgd_get_sarray
-	fgd_get_sarray_slice fgd_put_sarray fgd_put_sarray_slice fgd_add_sarray
-	fgd_madd_sarray fgd_alter_sarray fgd_add_indir fgd_add_sindir fgd_madd_indir
-	fgd_madd_sindir fgd_alter_indir fgd_alter_sindir fgd_getstrdata)
-	bindings/idl/getdata.c (gdidl_add_sarray gdidl_get_sarray gdidl_get_sarray
-	gdidl_alter_sarray gdidl_add_indir gdidl_alter_indir gdidl_add_sindir
-	gdidl_alter_sindir) bindings/matlab/matlab.c (gdmx_from_sarrays)
-	bindings/perl/GetData.xs (get_sarray get_sarray_slice sarrays put_sarray
-	put_sarray_slice add_sarray madd_sarray msarrays) bindings/php/getdata.c
-	(gdphp_convert_sarray gd_add_sarray gd_add_indir gd_add_sindir
-	gd_alter_sarray gd_alter_indir gd_alter_sindir gd_sarrays gd_get_sarray
-	gd_madd_sarray gd_madd_indir gd_madd_sindir gd_msarrays gd_put_sarray)
-	bindings/python/pydirfile.c (gdpy_dirfile_getsarray gdpy_dirfile_sarrays
-	gdpy_dirfile_msarrays gdpy_dirfile_putsarray): Removed.
-
-	* bindings/cxx/getdata/indirentry.h bindings/cxx/getdata/sarrayentry.h
-	bindings/cxx/getdata/sindirentry.h bindings/cxx/indirentry.cpp
-	bindings/cxx/sarrayentry.cpp bindings/cxx/sindirentry.cpp
-	bindings/matlab/gd_add_sarray.c bindings/matlab/gd_alter_sarray.m
-	bindings/matlab/gd_get_sarray.c bindings/matlab/gd_get_sarray_slice.c
-	bindings/matlab/gd_madd_sarray.c bindings/matlab/gd_put_sarray.m
-	bindings/matlab/gd_put_sarray_slice.c bindings/matlab/gd_sarrays.c: Deleted.
-
-	* bindings/cxx/test/big_test.cpp bindings/f77/test/big_test.f
-	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro
-	bindings/matlab/test/big_test.m bindings/perl/t/big_test.t
-	bindings/php/test/big_test.php bindings/python/test/big_test.py
-	doc/list.tests: Deleted tests 272-298.  Renumbered test 299 to 272.
+2015-09-21  D. V. Wiebe <getdata@ketiltrout.net> svn:996
+	Fork getdata-dsv10 from trunk.
 
 2015-09-20   D. V. Wiebe <getdata@ketiltrout.net> svn:995
 	* src/encoding.c (_GD_FiniRawIO) src/fpos.c (_GD_WriteSeek): Place large

@@ -69,27 +69,35 @@ gd_static_inline_ int _GD_EntryIndex(unsigned int t)
     case GD_MPLEX_ENTRY:
       i = 12;
       break;
-    case GD_CONST_ENTRY:
+    case GD_INDIR_ENTRY:
       i = 13;
       break;
-    case GD_CARRAY_ENTRY:
+    case GD_SINDIR_ENTRY:
       i = 14;
       break;
-    case GD_STRING_ENTRY:
+    case GD_CONST_ENTRY:
       i = 15;
       break;
-
-    case GD_VECTOR_ENTRIES:
+    case GD_CARRAY_ENTRY:
       i = 16;
       break;
-    case GD_SCALAR_ENTRIES:
+    case GD_STRING_ENTRY:
       i = 17;
       break;
-    case GD_ALIAS_ENTRY:
+    case GD_SARRAY_ENTRY:
       i = 18;
       break;
-    case GD_ALL_ENTRIES:
+    case GD_VECTOR_ENTRIES:
       i = 19;
+      break;
+    case GD_SCALAR_ENTRIES:
+      i = 20;
+      break;
+    case GD_ALIAS_ENTRY:
+      i = 21;
+      break;
+    case GD_ALL_ENTRIES:
+      i = 22;
       break;
     default:
       i = -1;
@@ -652,4 +660,126 @@ const char **gd_mfield_list(DIRFILE* D, const char* parent) gd_nothrow
   el = gd_entry_list(D, parent, GD_ALL_ENTRIES, 0);
   dreturn("%p", el);
   return el;
+}
+
+const char ***gd_sarrays(DIRFILE* D) gd_nothrow
+{
+  unsigned int i, n;
+  const char ***fl;
+
+  dtrace("%p", D);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  _GD_ClearError(D);
+
+  if ((n = _GD_NEntries(D, NULL, GD_SARRAY_ENTRY, 0)) == 0) {
+    dreturn("%p", zero_list);
+    return (const char ***)zero_list;
+  }
+
+  if (D->value_list_validity & GD_LIST_VALID_SARRAY_VALUE) {
+    /* list already made */
+    dreturn("%p", D->sarray_value_list);
+    return D->sarray_value_list;
+  }
+
+  fl = _GD_Malloc(D, sizeof(*fl) * (n + 1));
+
+  if (fl == NULL) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  for (i = n = 0; i < D->n_entries; ++i) {
+    if (_GD_ListEntry(D->entry[i], 0, 0, 0, 0, GD_SARRAY_ENTRY)) {
+      /* We do it this way so we can append a NULL */
+      fl[n] = _GD_Malloc(D,
+          sizeof(**fl) * (D->entry[i]->EN(scalar,array_len) + 1));
+      if (fl[n] == NULL) {
+        dreturn("%p", NULL);
+        return NULL;
+      }
+
+      memcpy(fl[n], D->entry[i]->e->u.scalar.d,
+          sizeof(char*) * D->entry[i]->EN(scalar,array_len));
+      fl[n++][D->entry[i]->EN(scalar,array_len)] = NULL;
+    }
+  }
+  fl[n] = NULL;
+
+  free(D->sarray_value_list);
+  D->sarray_value_list = fl;
+  D->value_list_validity |= GD_LIST_VALID_SARRAY_VALUE;
+
+  dreturn("%p", D->sarray_value_list);
+  return D->sarray_value_list;
+}
+
+const char ***gd_msarrays(DIRFILE* D, const char* parent) gd_nothrow
+{
+  int i, n;
+  const char ***fl;
+  gd_entry_t *P;
+  struct gd_private_entry_ *e;
+
+  dtrace("%p, \"%s\"", D, parent);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  _GD_ClearError(D);
+
+  P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+
+  if (P == NULL || P->e->n_meta == -1) {
+    _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
+        NULL, 0, parent);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  e = P->e;
+
+  if ((n = gd_nmfields_by_type(D, parent, GD_SARRAY_ENTRY)) == 0) {
+    dreturn("%p", zero_list);
+    return (const char***)zero_list;
+  }
+
+  fl = _GD_Malloc(D, sizeof(*fl) * (n + 1));
+
+  if (fl == NULL) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  for (i = n = 0; i < e->n_meta; ++i) {
+    if (_GD_ListEntry(e->p.meta_entry[i], 1, 0, 0, 0, GD_SARRAY_ENTRY)) {
+      /* We do it this way so we can append a NULL */
+      fl[n] = _GD_Malloc(D,
+          sizeof(**fl) * (e->p.meta_entry[i]->EN(scalar,array_len) + 1));
+      if (fl[n] == NULL) {
+        dreturn("%p", NULL);
+        return NULL;
+      }
+
+      memcpy(fl[n], e->p.meta_entry[i]->e->u.scalar.d,
+          sizeof(char*) * e->p.meta_entry[i]->EN(scalar,array_len));
+      fl[n++][e->p.meta_entry[i]->EN(scalar,array_len)] = NULL;
+    }
+  }
+  fl[n] = NULL;
+
+  free(e->sarray_value_list);
+  e->sarray_value_list = fl;
+
+  dreturn("%p", e->sarray_value_list);
+  return e->sarray_value_list;
 }

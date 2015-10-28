@@ -858,6 +858,8 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
   const int recip_nfields = GDMX_NSCALAR + 2;
   const char *recip_fields[] = {GDMX_COMMON_FIELDS, "in_fields", "dividend",
     GDMX_SCALAR_FIELDS};
+  const int sarray_nfields = 1;
+  const char *sarray_fields[] = {GDMX_COMMON_FIELDS, "array_len"};
   const int window_nfields = GDMX_NSCALAR + 3;
   const char *window_fields[] = {GDMX_COMMON_FIELDS, "in_fields", "windop",
     "threshold", GDMX_SCALAR_FIELDS};
@@ -870,6 +872,10 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
     case GD_SBIT_ENTRY:
       nfields = GDMX_NCOMMON + bit_nfields;
       field_names = bit_fields;
+      break;
+    case GD_SARRAY_ENTRY:
+      nfields = GDMX_NCOMMON + sarray_nfields;
+      field_names = sarray_fields;
       break;
     case GD_CARRAY_ENTRY:
       nfields = GDMX_NCOMMON + carray_nfields;
@@ -898,6 +904,8 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       nfields = GDMX_NCOMMON + multiply_nfields;
       field_names = multiply_fields;
       break;
@@ -980,6 +988,8 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       mxSetField(lhs, 0, "in_fields",
           gdmx_from_nstring_list((const char**)E->in_fields, 2));
       break;
@@ -1012,6 +1022,10 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
       else
         mxSetField(lhs, 0, "dividend", gdmx_from_double(E->EN(recip,dividend)));
       nscalar = 1;
+      break;
+    case GD_SARRAY_ENTRY:
+      mxSetField(lhs, 0, "array_len",
+          gdmx_from_size_t(E->EN(scalar,array_len)));
       break;
     case GD_WINDOW_ENTRY:
       mxSetField(lhs, 0, "in_fields",
@@ -1076,6 +1090,26 @@ mxArray *gdmx_from_carrays(const gd_carray_t *c, gd_type_t type)
 
     mxSetCell(lhs, n, a);
   }
+
+  dreturn("%p", lhs);
+  return lhs;
+}
+
+mxArray *gdmx_from_sarrays(const char ***l)
+{
+  mxArray *lhs;
+  size_t i, n;
+
+  dtrace("%p", l);
+
+  /* count */
+  for (n = 0; l[n]; ++n)
+    ;
+
+  /* create and populate cell array of cell arrays */
+  lhs = mxCreateCellMatrix(1, n);
+  for (i = 0; i < n; ++i)
+    mxSetCell(lhs, i, gdmx_from_string_list(l[i]));
 
   dreturn("%p", lhs);
   return lhs;
@@ -1271,6 +1305,10 @@ gd_entry_t *gdmx_to_entry(const mxArray **rhs, int n, unsigned flags)
       gdmx_convert_struct_scalar(rhs[n], &ctx, "numbits", GD_INT_TYPE,
           &E->EN(bit,numbits));
       break;
+    case GD_SARRAY_ENTRY:
+      gdmx_convert_struct_scalar(rhs[n], &ctx, "array_len", GD_UINT64, &s);
+      E->EN(scalar,array_len) = (size_t)s;
+      break;
     case GD_CARRAY_ENTRY:
       gdmx_convert_struct_scalar(rhs[n], &ctx, "array_len", GD_UINT64, &s);
       E->EN(scalar,array_len) = (size_t)s;
@@ -1281,6 +1319,8 @@ gd_entry_t *gdmx_to_entry(const mxArray **rhs, int n, unsigned flags)
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       gdmx_convert_in_fields(rhs[n], &ctx, E);
       break;
     case GD_LINCOM_ENTRY:

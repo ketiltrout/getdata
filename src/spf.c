@@ -54,6 +54,8 @@ unsigned int _GD_GetSPF(DIRFILE *D, gd_entry_t *E)
     case GD_SBIT_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
         break;
 
@@ -65,6 +67,7 @@ unsigned int _GD_GetSPF(DIRFILE *D, gd_entry_t *E)
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_ALIAS_ENTRY:
     case GD_NO_ENTRY:
       _GD_InternalError(D);

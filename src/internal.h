@@ -851,6 +851,7 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_N_ENTRY_LISTS (GD_N_ENTYPES + 4)
 
 #define GD_LIST_VALID_STRING_VALUE 0x01
+#define GD_LIST_VALID_SARRAY_VALUE 0x02
 
 /* name types for ValidateField */
 #define GD_VF_NAME  0
@@ -913,6 +914,7 @@ struct gd_private_entry_ {
   const char **entry_list[GD_N_ENTRY_LISTS];
   unsigned int entry_list_flags[GD_N_ENTRY_LISTS];
   const char **string_value_list;
+  const char ***sarray_value_list;
   void *const_value_list;
   gd_carray_t *carray_value_list;
   uint32_t value_list_validity;
@@ -1055,7 +1057,7 @@ struct gd_fragment_t {
   char* sname; /* Subdirectory name (path relative to dirfile or absolute) */
   char *bname; /* basename (filename) */
   char* ename; /* External name (the one that appears in the format file) */
-  char *ns; /* unused */
+  char *ns; /* root namespace */
   size_t nsl; /* strlen(ns) */
   void *enc_data;
   int modified;
@@ -1152,6 +1154,7 @@ struct gd_dirfile_ {
   const char **entry_list[GD_N_ENTRY_LISTS];
   unsigned int entry_list_flags[GD_N_ENTRY_LISTS];
   const char **string_value_list;
+  const char ***sarray_value_list;
   void *const_value_list;
   gd_carray_t *carray_value_list;
   uint32_t value_list_validity;

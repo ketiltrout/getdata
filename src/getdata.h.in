@@ -59,7 +59,7 @@ extern "C" {
 #endif
 
 /* The most recent standards version supported by this library */
-#define GD_DIRFILE_STANDARDS_VERSION 9
+#define GD_DIRFILE_STANDARDS_VERSION 10
 
 #include <math.h>
 #include <sys/types.h>
@@ -238,16 +238,19 @@ typedef enum {
   GD_RECIP_ENTRY    = 0x0B,
   GD_WINDOW_ENTRY   = 0x0C,
   GD_MPLEX_ENTRY    = 0x0D,
+  GD_INDIR_ENTRY    = 0x0E,
+  GD_SINDIR_ENTRY   = 0x0F,
   GD_CONST_ENTRY    = GD_SCALAR_ENTRY_BIT | 0x00,
   GD_STRING_ENTRY   = GD_SCALAR_ENTRY_BIT | 0x01,
   GD_CARRAY_ENTRY   = GD_SCALAR_ENTRY_BIT | 0x02,
+  GD_SARRAY_ENTRY   = GD_SCALAR_ENTRY_BIT | 0x03,
 
   /* not a real entry type, but it's convenient to put this here */
   GD_ALIAS_ENTRY    =   -1
 } gd_entype_t;
 
 /* GD_NO_ENTRY and GD_ALIAS_ENTRY are not part of this count */
-#define GD_N_ENTYPES 16
+#define GD_N_ENTYPES 19
 
 /* Special types for gd_nentries(3) and gd_entry_list(3) */
 #define GD_ALL_ENTRIES    0
@@ -314,6 +317,7 @@ typedef enum {
   GD_FLOAT64    = GD_SIZE64  | GD_IEEE754,
   GD_COMPLEX64  = GD_SIZE64  | GD_COMPLEX,
   GD_COMPLEX128 = GD_SIZE128 | GD_COMPLEX,
+  GD_STRING     = (sizeof(char*)) | GD_CHAR
 } gd_type_t;
 
 
@@ -346,8 +350,9 @@ typedef union {
 #define GD_EN_COMPSCAL 0x1 /* entry has complex scalar parameters */
 #define GD_EN_CALC     0x2 /* scalar field codes have been resolved */
 #define GD_EN_HIDDEN   0x4 /* entry is hidden */
-#define GD_EN_DOTTED   0x8 /* the field's name contains a dot (.) (i.e.
-                              Standards Version 5 or earlier) */
+#define GD_EN_DOTTED   0x8 /* the field's name contains a dot (.) which isn't
+                              part of a namespace specificiation (i.e. Standards
+                              Version 5 or earlier) */
 
 /* ANSI C does not permit anonymous structs/unions */
 #ifdef GD_C89_API
@@ -548,6 +553,10 @@ extern int gd_add_divide(DIRFILE *dirfile, const char *field_code,
     const char *in_field1, const char *in_field2, int fragment_index)
 gd_nothrow gd_nonnull ((1,2,3,4));
 
+extern int gd_add_indir(DIRFILE *dirfile, const char *field_code,
+    const char *in_field1, const char *in_field2, int fragment_index)
+gd_nothrow gd_nonnull ((1,2,3,4));
+
 extern int gd_add_lincom(DIRFILE *dirfile, const char *field_code, int n_fields,
     const char **in_fields, const double *m, const double *b,
     int fragment_index) gd_nothrow gd_nonnull ((1,2,4,5,6));
@@ -576,9 +585,17 @@ extern int gd_add_recip(DIRFILE *dirfile, const char *field_code,
     const char *in_field, double dividend, int fragment_index) gd_nothrow
 gd_nonnull ((1,2,3));
 
+extern int gd_add_sarray(DIRFILE *dirfile, const char *field_code,
+    size_t array_len, const char **values, int fragment_index) gd_nothrow
+gd_nonnull ((1,2,4));
+
 extern int gd_add_sbit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, int bitnum, int numbits,
     int fragment_index) gd_nothrow gd_nonnull ((1,2,3));
+
+extern int gd_add_sindir(DIRFILE *dirfile, const char *field_code,
+    const char *in_field1, const char *in_field2, int fragment_index)
+gd_nothrow gd_nonnull ((1,2,3,4));
 
 extern int gd_add_string(DIRFILE *dirfile, const char *field_code,
     const char *value, int fragment_index) gd_nothrow gd_nonnull((1,2,3));
@@ -630,6 +647,9 @@ gd_nonnull((1,2));
 extern int gd_alter_divide(DIRFILE *dirfile, const char *field_code,
     const char *in_field1, const char *in_field2) gd_nothrow gd_nonnull((1,2));
 
+extern int gd_alter_indir(DIRFILE *dirfile, const char *field_code,
+    const char *in_field1, const char *in_field2) gd_nothrow gd_nonnull((1,2));
+
 extern int gd_alter_lincom(DIRFILE *dirfile, const char *field_code,
     int n_fields, const char **in_fields, const double *m, const double *b)
 gd_nothrow gd_nonnull((1,2));
@@ -651,9 +671,15 @@ gd_nonnull((1,2));
 extern int gd_alter_recip(DIRFILE *dirfile, const char *field_code,
     const char *in_field, double cdividend) gd_nothrow gd_nonnull((1,2));
 
+extern int gd_alter_sarray(DIRFILE *dirfile, const char *field_code,
+    size_t array_len) gd_nothrow gd_nonnull((1,2));
+
 extern int gd_alter_sbit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, int bitnum, int numbits) gd_nothrow
 gd_nonnull((1,2));
+
+extern int gd_alter_sindir(DIRFILE *dirfile, const char *field_code,
+    const char *in_field1, const char *in_field2) gd_nothrow gd_nonnull((1,2));
 
 extern int gd_alter_window(DIRFILE *dirfile, const char *field_code,
     const char *in_field, const char *check_field, gd_windop_t windop,
@@ -732,6 +758,9 @@ extern int gd_fragment_index(DIRFILE *dirfile,
 extern const char *gd_fragmentname(DIRFILE *dirfile,
     int index) gd_nothrow gd_nonnull ((1));
 
+extern const char *gd_fragment_namespace(DIRFILE *D, int index,
+    const char *ns) gd_nothrow;
+
 extern gd_entry_t *gd_free_entry_strings(gd_entry_t *entry) gd_nothrow;
 
 extern int gd_hidden(DIRFILE *dirfile, const char *field_code) gd_nothrow
@@ -789,6 +818,10 @@ extern int gd_madd_divide(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field1, const char *in_field2)
 gd_nothrow gd_nonnull ((1,2,3,4,5));
 
+extern int gd_madd_indir(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field1, const char *in_field2)
+gd_nothrow gd_nonnull ((1,2,3,4,5));
+
 extern int gd_madd_lincom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int n_fields, const char **in_fields,
     const double *m, const double *b) gd_nothrow gd_nonnull((1,2,3,5,6,7));
@@ -818,9 +851,17 @@ extern int gd_madd_recip(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field, double dividend) gd_nothrow
 gd_nonnull ((1,2,3,4));
 
+extern int gd_madd_sarray(DIRFILE *dirfile, const char *parent,
+    const char *field_code, size_t array_len, const char **values) gd_nothrow
+gd_nonnull ((1,2,3,5));
+
 extern int gd_madd_sbit(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field, int bitnum,
     int numbits) gd_nothrow gd_nonnull ((1,2,3,4));
+
+extern int gd_madd_sindir(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field1, const char *in_field2)
+gd_nothrow gd_nonnull ((1,2,3,4,5));
 
 extern int gd_madd_spec(DIRFILE *dirfile, const char *line,
     const char *parent) gd_nothrow gd_nonnull ((1,2,3));
@@ -851,6 +892,9 @@ extern const char **gd_mfield_list_by_type(DIRFILE *dirfile,
 
 extern void gd_mplex_lookback(DIRFILE *dirfile, int lookback) gd_nothrow
 gd_nonnull((1));
+
+extern const char ***gd_msarrays(DIRFILE *dirfile,
+    const char *parent) gd_nothrow gd_nonnull ((1,2));
 
 extern const char **gd_mstrings(DIRFILE *dirfile, const char *parent) gd_nothrow
 gd_nonnull((1,2));
@@ -905,6 +949,20 @@ extern char *gd_raw_filename(DIRFILE *dirfile,
 extern const char *gd_reference(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1));
 
+extern int gd_get_sarray(DIRFILE *dirfile, const char *field_code,
+    const char **data_out) gd_nothrow gd_nonnull((1,2));
+
+extern int gd_get_sarray_slice(DIRFILE *dirfile, const char *field_code,
+    unsigned long start, size_t n, const char **data_out) gd_nothrow
+gd_nonnull((1,2));
+
+extern int gd_put_sarray(DIRFILE *dirfile, const char *field_code,
+  const char **data_in) gd_nothrow gd_nonnull((1,2,3));
+
+extern int gd_put_sarray_slice(DIRFILE *dirfile, const char *field_code,
+    unsigned long first, size_t n, const char **data_in) gd_nothrow
+gd_nonnull((1,2,5));
+
 extern unsigned int gd_spf(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull ((1, 2));
 
@@ -913,6 +971,8 @@ extern size_t gd_get_string(DIRFILE *dirfile, const char *field_code,
 
 extern size_t gd_put_string(DIRFILE *dirfile, const char *field_code,
     const char *data) gd_nothrow gd_nonnull ((1, 2, 3));
+
+const char ***gd_sarrays(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
 extern const char **gd_strings(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
@@ -1062,7 +1122,7 @@ extern off_t gd_seek(DIRFILE *dirfile, const char *field_code, off_t frame_num,
 extern off_t gd_tell(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull ((1,2));
 
-#endif 
+#endif
 
 #ifdef _LARGEFILE64_SOURCE
 #ifndef GD_64BIT_API
@@ -1070,7 +1130,6 @@ gd_nonnull ((1,2));
 #endif
 #endif
 
-/* This is the explicitly 64-bit API */
 #ifdef GD_64BIT_API
 #ifdef __off64_t_defined
 typedef __off64_t gd_off64_t;
