@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012, 2014, 2015 D. V. Wiebe
+/* Copyright (C) 2008-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -46,8 +46,7 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
             _GD_ef[E->e->u.raw.file[0].subenc].sync != NULL &&
             (*_GD_ef[E->e->u.raw.file[0].subenc].sync)(E->e->u.raw.file))
         {
-          _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, E->e->u.raw.file[0].name, 0,
-              NULL);
+          _GD_SetEncIOError(D, GD_E_IO_WRITE, E->e->u.raw.file + 0);
         } else if (clo && _GD_FiniRawIO(D, E, E->fragment_index,
               GD_FINIRAW_KEEP))
         {

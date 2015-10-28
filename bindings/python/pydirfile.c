@@ -2407,8 +2407,7 @@ static PyObject *gdpy_dirfile_seek(struct gdpy_dirfile_t *self, PyObject *args,
     return NULL;
   }
 
-  pos = gd_seek64(self->D, field_code, (off_t)frame_num, (off_t)sample_num,
-      flags);
+  pos = gd_seek64(self->D, field_code, frame_num, sample_num, flags);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 

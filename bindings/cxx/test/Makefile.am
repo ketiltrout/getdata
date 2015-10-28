@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2011 D. V. Wiebe
+# Copyright (C) 2008-2012, 2014 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -18,25 +18,23 @@
 # along with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-AUTOMAKE_OPTIONS = foreign dist-xz check-news 1.13
+AUTOMAKE_OPTIONS = foreign serial-tests
 
-ACLOCAL_AMFLAGS = -I m4
+AM_CPPFLAGS = ${GD_CXX_WALL} $(GD_CXX_WEXTRA) -I$(srcdir)/.. -I$(top_srcdir)/src
+LDADD=../libgetdata++.la
+TESTS=big_test
 
-BUILDCC=@BUILDCC@
+big_test_SOURCES=big_test.cpp
 
-DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl"
+check_PROGRAMS=${TESTS}
 
-noinst_PROGRAMS=make_parameters
+# clean up after the tests
+check-local: check-TESTS
+	$(MAKE) getdata-clean-dirs
 
-make_parameters_SOURCES = make_parameters.c
-
-SUBDIRS = . src
-
-EXTRA_DIST = ChangeLog README.idl
-
-make_parameters$(EXEEXT): $(make_parameters_SOURCES)
-	${BUILDCC} $(DEFS) $(GETDATA_CFLAGS) -Isrc \
-		-o make_parameters$(EXEEXT) $(srcdir)/$(make_parameters_SOURCES)
+getdata-clean-dirs:
+	rm -rf *odirfile
 
 clean-local:
-	rm -rf *~ 
+	$(MAKE) getdata-clean-dirs
+	rm -rf *~

@@ -148,7 +148,7 @@ NO_PREFIX:
     return 1;
   }
 
-  dreturn("%i [\"%s\"/%" PRNsize_t ", \"%s\", \"%s\"]", 0, *ns, *nsl, *prefix,
+  dreturn("%i (\"%s\"/%" PRNsize_t ", \"%s\", \"%s\")", 0, *ns, *nsl, *prefix,
       *suffix);
   return 0;
 }

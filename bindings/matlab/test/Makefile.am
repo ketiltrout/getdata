@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2011 D. V. Wiebe
+# Copyright (C) 2013, 2014, 2015 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -18,25 +18,24 @@
 # along with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-AUTOMAKE_OPTIONS = foreign dist-xz check-news 1.13
+AUTOMAKE_OPTIONS = foreign serial-tests
 
-ACLOCAL_AMFLAGS = -I m4
+if TEST_MATLAB
+TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=../../../src/.libs:../.libs:${${DL_LIBRARY_PATH}} MATLABPATH=${srcdir}:..:${srcdir}/.. ${srcdir}/test.sh ${MATLAB}
 
-BUILDCC=@BUILDCC@
+matlabTESTS=big_test.m
 
-DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl"
+TESTS=$(addprefix ${srcdir}/,$(matlabTESTS))
+endif
 
-noinst_PROGRAMS=make_parameters
+EXTRA_DIST=${matlabTESTS} test.sh
 
-make_parameters_SOURCES = make_parameters.c
+check-local: check-TESTS
+	echo $(MAKE) getdata-clean-dirs
 
-SUBDIRS = . src
-
-EXTRA_DIST = ChangeLog README.idl
-
-make_parameters$(EXEEXT): $(make_parameters_SOURCES)
-	${BUILDCC} $(DEFS) $(GETDATA_CFLAGS) -Isrc \
-		-o make_parameters$(EXEEXT) $(srcdir)/$(make_parameters_SOURCES)
+getdata-clean-dirs:
+	rm -rf dirfile
 
 clean-local:
-	rm -rf *~ 
+	$(MAKE) getdata-clean-dirs
+	rm -rf *~

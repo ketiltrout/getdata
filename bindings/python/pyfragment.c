@@ -233,8 +233,7 @@ static PyObject *gdpy_fragment_setoffset(struct gdpy_fragment_t *self,
     return NULL;
   }
 
-  gd_alter_frameoffset64(self->dirfile->D, (off_t)offset, self->n,
-      recode);
+  gd_alter_frameoffset64(self->dirfile->D, offset, self->n, recode);
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 

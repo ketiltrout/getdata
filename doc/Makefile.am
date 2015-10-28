@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2011 D. V. Wiebe
+# Copyright (C) 2008, 2009, 2012, 2013 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -18,25 +18,39 @@
 # along with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-AUTOMAKE_OPTIONS = foreign dist-xz check-news 1.13
+AUTOMAKE_OPTIONS = foreign
 
-ACLOCAL_AMFLAGS = -I m4
+if MAKE_CXXBINDINGS
+READMECXX=README.cxx
+endif
 
-BUILDCC=@BUILDCC@
+if MAKE_F77BINDINGS
+READMEF77=README.f77
+endif
 
-DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl"
+if MAKE_F95BINDINGS
+READMEF95=README.f95
+endif
 
-noinst_PROGRAMS=make_parameters
+if MAKE_IDLBINDINGS
+READMEIDL=README.idl
+endif
 
-make_parameters_SOURCES = make_parameters.c
+if MAKE_MATLABBINDINGS
+READMEMATLAB=README.matlab
+endif
 
-SUBDIRS = . src
+if MAKE_PERLBINDINGS
+READMEPERL=README.perl
+endif
 
-EXTRA_DIST = ChangeLog README.idl
+if MAKE_PYBINDINGS
+READMEPYTHON=README.python
+endif
 
-make_parameters$(EXEEXT): $(make_parameters_SOURCES)
-	${BUILDCC} $(DEFS) $(GETDATA_CFLAGS) -Isrc \
-		-o make_parameters$(EXEEXT) $(srcdir)/$(make_parameters_SOURCES)
+dist_doc_DATA = ${READMECXX} ${READMEF77} ${READMEF95} ${READMEIDL} \
+								${READMEMATLAB} ${READMEPERL} ${READMEPYTHON} \
+								unclean_database_recovery.txt
 
 clean-local:
-	rm -rf *~ 
+	rm -rf *~

@@ -217,7 +217,7 @@ off64_t _GD_DoSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
 
         ptr = buffer;
         while (n_read > 0) {
-          n_wrote = (*enc->write)(E->e->u.raw.file + 1, buffer,
+          n_wrote = (*enc->write)(E->e->u.raw.file + 1, ptr,
               E->EN(raw,data_type), n_read);
           if (n_wrote < 0) {
             _GD_SetEncIOError(D, GD_E_IO_WRITE, E->e->u.raw.file + 1);

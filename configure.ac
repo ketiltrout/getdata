@@ -557,7 +557,7 @@ if test "x${use_modules}" != "xno"; then
 
   if test "x$ltdl_prefix" != "x"; then
     LIBLTDL="-L${ltdl_prefix}/lib -lltdl"
-    LTDLINC="-I${ltdl_prefix}/include"
+    LTDLINCL="-I${ltdl_prefix}/include"
     saved_cppflags=$CPPFLAGS
     CPPFLAGS="${CPPFLAGS} ${LTDLINCL}"
     AC_CHECK_HEADERS(ltdl.h)
