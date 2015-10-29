@@ -1,3 +1,9 @@
+2015-10-16   D. V. Wiebe <getdata@ketiltrout.net> svn:1021
+	* src/legacy.c: Correct GD_ERROR_CODES.
+
+	* bindings/python/pygetdata.c bindings/matlab/matlab.c: Deprecate
+	GD_E_BAD_REPR.
+
 2015-10-16   D. V. Wiebe <getdata@ketiltrout.net> svn:1011
 	GetData-0.9.0 released.
 

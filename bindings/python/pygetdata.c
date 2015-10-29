@@ -54,7 +54,7 @@ static const char *gdpy_exception_list[GD_N_ERROR_CODES] = {
   "Exists",
   "UncleanDatabase",
   "Domain",
-  "BadRepr",
+  NULL, /* 32 */
   NULL, /* 33 */
   NULL, /* 34 */
   "Bounds",
@@ -70,6 +70,7 @@ static struct {
 } gdpy_dead_exceptions[] = {
   { "BadEndianness", GD_E_ARGUMENT },
   { "BadProtection", GD_E_ARGUMENT },
+  { "BadRepr", GD_E_BAD_CODE },
   { "BadVersion", GD_E_ARGUMENT },
   { "OpenLinfile", GD_E_LUT },
   { "Flush", GD_E_IO },
@@ -589,7 +590,7 @@ static PyMethodDef GetDataMethods[] = {
       "symbols.  This method will return pygetdata.RDWR if the library can\n"
       "read and write the encoding, pygetdata.RDONLY if the library can\n"
       /* ------- handy ruler ---------------------------------------------| */
-      "only read the encodin, or None otherwise.  See\n"
+      "only read the encoding, or None otherwise.  See\n"
       "gd_encoding_support(3)."
   },
   { NULL, NULL, 0, NULL }

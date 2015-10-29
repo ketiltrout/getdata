@@ -86,7 +86,7 @@ static const char *gdmx_msgid[GD_N_ERROR_CODES] =
   GD_LIBCOMP "Exists",
   GD_LIBCOMP "UncleanDB",
   GD_LIBCOMP "Domain",
-  GD_LIBCOMP "BadRepr",
+  GD_LIBCOMP "Error32", /* unused */
   GD_LIBCOMP "Error33", /* unused */
   GD_LIBCOMP "Error34", /* unused */
   GD_LIBCOMP "Bounds",
@@ -160,8 +160,7 @@ void gdmx_err(DIRFILE *D, int discard)
   gd_colclear();
 #endif
 
-  mexErrMsgIdAndTxt(gdmx_msgid[gdmx_errno],
-      gdmx_estring);
+  mexErrMsgIdAndTxt(gdmx_msgid[gdmx_errno], gdmx_estring);
 }
 
 static gd_type_t gdmx_type(const mxArray *a, const struct gdmx_context_t *ctx,

@@ -1,3 +1,13 @@
+New in version 0.9.1a:
+
+  Bindings Changes:
+
+  * PYTHON BUG FIX: Reflecting the merge of GD_E_BAD_REPR into
+    GD_E_BAD_CODE in the C API in 0.9.0, the BadRepr exception is now an
+    alias of BadCode.
+
+|=========================================================================|
+
 New in verison 0.9.0:
 
   Library Changes:
@@ -48,6 +58,10 @@ New in verison 0.9.0:
     gd_flush, gd_linterp_tablename, gd_put_carray, gd_put_carray_slice,
     gd_putdata, gd_raw_close, gd_raw_filename, gd_seek, gd_spf, gd_sync,
     gd_tell.
+
+  * The error code GD_E_BAD_REPR has been merged into GD_E_BAD_CODE.  The
+    symbol GD_E_BAD_REPR remains as an alias for GD_E_BAD_CODE, but is
+    deprecated.
 
   * Attempts to seek past the end-of-field with gd_seek() now always
     succeed, although the resultant position is encoding specific.

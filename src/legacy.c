@@ -56,11 +56,11 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Internal error", /* GD_E_INTERNAL_ERROR */
   "Memory allocation failed", /* GD_E_ALLOC */
   "Request out-of-range", /* GD_E_RANGE */
-  "Bad LINTERP table", /* GD_E_LINTERP */
+  "Syntax error in LINTERP table", /* GD_E_LUT */
   "Too many levels of recursion", /* GD_E_RECURSE_LEVEL */
   "Bad dirfile", /* GD_E_BAD_DIRFILE */
   "Bad field type", /* GD_E_BAD_FIELD_TYPE */
-  "Read-only dirfile", /* GD_E_ACC_MODE */
+  "Read-only dirfile", /* GD_E_ACCMODE */
   "Operation not supported by current encoding scheme", /* GD_E_UNSUPPORTED */
   "Unknown encoding scheme", /* GD_E_UNKNOWN_ENCODING */
   NULL, /* GD_E_BAD_ENTRY */
@@ -76,7 +76,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   NULL, /* GD_E_EXISTS */
   NULL, /* GD_E_UNCLEAN_DB */
   "Improper domain", /* GD_E_DOMAIN */
-  "Bad representation", /* GD_E_BAD_REPR */
+  NULL, /* unused */
   NULL, /* unused */
   NULL, /* unused */
   NULL, /* GD_E_BOUNDS */
