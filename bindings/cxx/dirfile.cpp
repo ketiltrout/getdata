@@ -18,7 +18,6 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-#include "getdata/dirfile.h"
 #include "internal.h"
 
 // This is not part of the Dirfile class, but it's convenient to put it here

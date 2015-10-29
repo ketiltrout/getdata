@@ -166,7 +166,8 @@
 	* src/del.c (_GD_Delete) src/encoding.c (_GD_FiniRawIO _GD_InitRawIO)
 	src/flimits.c (_GD_GetEOF) src/fpos.c (_GD_DoSeek gd_tell) src/getdata.c
 	(_GD_DoRaw) src/mod.c (_GD_Change) src/move.c (_GD_MogrifyFile) src/name.c
-	(_GD_Rename) src/nframes.c (gd_nframes64) src/putdata.c (_GD_DoRawOut): Set error via _GD_SetEncIOError.
+	(_GD_Rename) src/nframes.c (gd_nframes64) src/putdata.c (_GD_DoRawOut): Set
+	error via _GD_SetEncIOError.
 	* src/encoding.c (_GD_MissingFramework): Deal with GD_EF_STRERR
 	* src/fpos.c (_GD_Seek): _GD_DoSeek has already set the error.
 	* src/errors.c: Added GD_E_IO_ENC_*.
