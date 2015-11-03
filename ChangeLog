@@ -1,3 +1,15 @@
+2015-10-16   D. V. Wiebe <getdata@ketiltrout.net> svn:1022
+	* bindings/perl/Makefile: Use ExtUtils::MakeMaker instead of Module::Build.
+	Because EU::MM creates a Makefile, run everything in a "build" subdir created
+	and populated at build-time.
+	* bindings/perl/Build.PL.in bindings/perl/MANIFEST.in: Deleted.
+	* bindings/perl/src: Added.
+	* bindings/perl/src/GetData.xs bindings/perl/src/typemap: Moved from ..
+	* bindings/perl/src/Makefile.PL.in: Added.
+	* m4/perl.m4: Look for and use ExtUtils::MakeMaker instead of Module::Build.
+
+	* bindings/python/Makefile.am: Fix race condition in "make -j distclean"
+
 2015-10-16   D. V. Wiebe <getdata@ketiltrout.net> svn:1021
 	* src/legacy.c: Correct GD_ERROR_CODES.
 

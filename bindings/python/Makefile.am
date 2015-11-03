@@ -43,7 +43,15 @@ pyconstants.c: ../make_parameters
 
 clean-local:
 if MAKE_PYBINDINGS
-	if [ -e setup.py ]; then ${PYTHON} setup.py clean; fi
+	test ! -f setup.py || ${PYTHON} setup.py clean
 endif
 	rm -rf build pygetdata.so ${BUILT_SOURCES} debug.c *~ 
 
+# Avoid a race condition from distclean deleting setup.py between the test and
+# the ${PYTHON} in the clean-local rule.  The variable shennanigans here are to
+# fool automake into letting us add a second distclean-generic rule.  Had we
+# defined this rule with a bare "disclean-generic:", automake would assume we've
+# redefined the distclean-generic recipe, with an empty one, which we don't want
+# to do.
+gd_distclean_generic = distclean-generic
+$(gd_distclean_generic): clean-local

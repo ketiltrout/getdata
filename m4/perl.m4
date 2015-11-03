@@ -48,11 +48,12 @@ fi
 
 dnl GD_PERL_MAN3EXT
 dnl ---------------------------------------------------------------
-dnl Define PERL_MAN3EXT to the section 3 manual extension used by Module::Build
+dnl Define PERL_MAN3EXT to the section 3 manual extension used by
+dnl ExtUtils::MakeMaker
 AC_DEFUN([GD_PERL_MAN3EXT],
 [
 AC_MSG_CHECKING([for the section 3 manual page extension])
-PERL_MAN3EXT=`$PERL -MModule::Build -e 'print "\n>>GD ", Module::Build->new(module_name=>"conftest",dist_version=>0)->config('man3ext'), " GD<<";' | $AWK '/>>GD .* GD<</ { print @S|@2 }'`
+PERL_MAN3EXT=`$PERL -MExtUtils::MakeMaker::Config -e 'print "\n>>GD ", @S|@Config{man3ext}, " GD<<";' | $AWK '/>>GD .* GD<</ { print @S|@2 }'`
 AC_MSG_RESULT([.$PERL_MAN3EXT])
 AC_SUBST([PERL_MAN3EXT])
 ])
@@ -151,12 +152,12 @@ site-specific module directory.  [default: site] ]),
     ], [ perl_inst_type="site" ])
 
 if test "x${have_perl}" != "xno"; then
+  GD_PERL_CHECK_MODULE([ExtUtils::MakeMaker])
   GD_PERL_CHECK_MODULE([Math::Complex])
-  GD_PERL_CHECK_MODULE([Module::Build])
   GD_PERL_CHECK_MODULE([Test::Harness])
 fi
 
-if test "$HAVE_Math__Complex$HAVE_Module__Build" != "yesyes"; then
+if test "$HAVE_Math__Complex$HAVE_ExtUtils__MakeMaker" != "yesyes"; then
   have_perl=no
 fi
 

@@ -24,37 +24,41 @@ if GETDATA_DEBUG
 TEST_VERBOSE=verbose=1
 endif
 
-plTESTS=t/big_test.t t/callback.t
-PERL_TESTS=$(addprefix ${srcdir}/, $(plTESTS))
+blibdir=build/blib
 
-EXTRA_DIST=funclist.pl GetData.xs simple_funcs.pl simple_funcs.xsin typemap \
-					 GetData.pm.in MANIFEST.in ${plTESTS}
+plTESTS=t/big_test.t t/callback.t
+
+EXTRA_DIST=funclist.pl simple_funcs.pl simple_funcs.xsin GetData.pm.in \
+					 src/typemap src/GetData.xs ${plTESTS}
 
 man3dir=${perlmandir}
-nodist_man3_MANS=blib/libdoc/GetData.$(PERL_MAN3EXT)
+nodist_man3_MANS=${blibdir}/man3/GetData.$(PERL_MAN3EXT)
 
-nodist_perl_SCRIPTS=blib/lib/GetData.pm
+nodist_perl_SCRIPTS=${blibdir}/lib/GetData.pm
 
 perlautogetdatadir=${perldir}/auto/GetData
-nodist_perlautogetdata_SCRIPTS=blib/arch/auto/GetData/GetData.bs blib/arch/auto/GetData/GetData.so
+nodist_perlautogetdata_SCRIPTS=${blibdir}/arch/auto/GetData/GetData.so
 
-lib:
-	mkdir -p $@
+build/build.stamp: src/Makefile.PL src/GetData.xs src/typemap
+	rm -rf build
+	mkdir build
+	cp -r $(srcdir)/src/* build
+	[ -e build/Makefile.PL ] || cp src/Makefile.PL build
+	mkdir build/t
+	cp -r $(srcdir)/t/* build/t
+	mkdir build/lib
+	touch $@
 
-lib/GetData.xs: GetData.xs
-	$(MAKE) lib
-	cat $(srcdir)/GetData.xs > $@
+src/Makefile.PL: src/Makefile.PL.in $(top_builddir)/config.status
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
 
-lib/typemap: typemap
-	$(MAKE) lib
-	cat $(srcdir)/typemap > $@
-
-lib/simple_funcs.xs: simple_funcs.xsin simple_funcs.pl
-	$(MAKE) lib
+build/simple_funcs.xs: simple_funcs.xsin simple_funcs.pl build/build.stamp
 	$(PERL) $(srcdir)/simple_funcs.pl $(srcdir)/simple_funcs.xsin > $@
 
-MANIFEST: MANIFEST.in
-	cat $(srcdir)/MANIFEST.in > $@
+build/Makefile: build/build.stamp build/lib/GetData.pm
+	cd build && ${PERL} Makefile.PL
+	$(SED) 's|^LD_RUN_PATH|#LD_RUN_PATH|g;s|LD_RUN_PATH="$$(LD_RUN_PATH)" ||g' \
+		-i $@
 
 make_parameters.sed: ../make_parameters ../../src/getdata.h
 	  ../make_parameters P > $@
@@ -62,42 +66,37 @@ make_parameters.sed: ../make_parameters ../../src/getdata.h
 ../make_parameters: ../make_parameters.c ../../src/gd_config.h
 	  cd .. && ${MAKE} make_parameters
 
-GetData.pm: GetData.pm.in make_parameters.sed funclist.pl lib/GetData.xs \
-	lib/simple_funcs.xs
+build/lib/GetData.pm: GetData.pm.in make_parameters.sed funclist.pl \
+	src/GetData.xs build/simple_funcs.xs build/build.stamp
 	rm -f $@
 	$(SED) -f make_parameters.sed $(srcdir)/GetData.pm.in | \
-		$(PERL) $(srcdir)/funclist.pl lib/GetData.xs lib/simple_funcs.xs > $@
+		$(PERL) $(srcdir)/funclist.pl $(srcdir)/src/GetData.xs \
+		build/simple_funcs.xs > $@
 	chmod a-w $@
 
-blib/arch/auto/GetData/GetData.bs blib/arch/auto/GetData/GetData.so \
-	blib/lib/GetData.pm blib/libdoc/GetData.$(PERL_MAN3EXT): build.stamp
+${blibdir}/arch/auto/GetData/GetData.so ${blibdir}/lib/GetData.pm \
+	${blibdir}/man3/GetData.$(PERL_MAN3EXT): build/make.stamp
 	
-build.stamp: Build lib/GetData.xs lib/simple_funcs.xs lib/typemap
-	$(PERL) Build build
+build/make.stamp: build/Makefile
+	cd build && ${MAKE}
 	touch $@
 
-.PRECIOUS: Build
-Build: Build.PL GetData.pm lib/GetData.xs lib/simple_funcs.xs lib/typemap \
-	MANIFEST
-	$(PERL) Build.PL
-
 clean-local: 
-	rm -rf lib blib
-	if test -e Build; then \
-		$(PERL) Build clean || true; \
-	fi
-	rm -f $(BUILT_SOURCES) make_parameters.sed MYMETA.yml MYMETA.json GetData.pm
-	rm -rf Build _build MANIFEST build.stamp t/*~
+	rm -rf build
+	rm -f $(BUILT_SOURCES) make_parameters.sed src/Makefile.PL
+	rm -rf src/*~ t/*~ *~
 
 uninstall-hook:
 	rmdir $(DESTDIR)${perlautogetdatadir}
 
 if TEST_PERL
-check: $(PERL_TESTS)
-	${DL_LIBRARY_PATH}=../../src/.libs:${${DL_LIBRARY_PATH}} $(PERL) ./Build test ${TEST_VERBOSE}
+check: build/Makefile
+	export ${DL_LIBRARY_PATH}=../../../src/.libs:${${DL_LIBRARY_PATH}} && \
+		( cd build && ${MAKE} test ${TEST_VERBOSE} )
 
-testdb testcover: $(PERL_TESTS)
-	${DL_LIBRARY_PATH}=../../src/.libs:${${DL_LIBRARY_PATH}} $(PERL) ./Build $@ ${TEST_VERBOSE}
+testdb testcover: build/Makefile
+	export ${DL_LIBRARY_PATH}=../../../src/.libs:${${DL_LIBRARY_PATH}} && \
+		( cd build && ${MAKE} $@ ${TEST_VERBOSE} )
 
 .PHONY: check testdb testcover
 endif

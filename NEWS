@@ -6,6 +6,14 @@ New in version 0.9.1a:
     GD_E_BAD_CODE in the C API in 0.9.0, the BadRepr exception is now an
     alias of BadCode.
 
+  Miscellaneous:
+
+  * The build system now uses ExtUtils::MakeMaker instead of Module::Build
+    to build the perl bindings.  Module::Build was removed from the Perl 5
+    core in Perl 5.22.  ExtUtils::MakeMaker is still a core module.  The
+    bindings are unchanged; the change in build prerequisites is the only
+    difference users should notice due to this switch.
+
 |=========================================================================|
 
 New in verison 0.9.0:
