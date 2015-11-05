@@ -1,6 +1,6 @@
-.\" gd_fragment_affix.3.  The gd_fragment_affix man page.
+.\" gd_fragment_affixes.3.  The gd_fragment_affixes man page.
 .\"
-.\" Copyright (C) 2012 D. V. Wiebe
+.\" Copyright (C) 2012, 2015 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,21 +13,21 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_fragment_affix 3 "2 August 2012" "Version 0.8.1" "GETDATA"
+.TH gd_fragment_affixes 3 "4 November 2015" "Version 0.9.1" "GETDATA"
 .SH NAME
-gd_fragment_affix \(em report the field affixes of a fragment of a dirfile database
+gd_fragment_affixes \(em report the field affixes of a fragment of a dirfile database
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "int gd_fragment_affix(DIRFILE *" dirfile ", int " fragment_index ,
+.BI "int gd_fragment_affixes(DIRFILE *" dirfile ", int " fragment_index ,
 .BI "char **" prefix ", char **" suffix );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR gd_fragment_affix ()
+.BR gd_fragment_affixes ()
 function queries a dirfile(5) database specified by
 .I dirfile
 and returns the field affixes for the fragment indexed by
@@ -49,7 +49,7 @@ argument must point to a valid DIRFILE object previously created by a call to
 
 .SH RETURN VALUE
 Upon successful completion,
-.BR gd_fragment_affix ()
+.BR gd_fragment_affixes ()
 returns zero.  If non-empty, the prefix and suffix are reported in
 .BR malloc (3)'d
 buffers whose addresses are returned in
