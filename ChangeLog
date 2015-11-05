@@ -1,3 +1,18 @@
+2015-11-05   D. V. Wiebe <getdata@ketiltrout.net> svn:1024
+	* src/add.c (gd_add_spec gd_madd_spec _GD_AddSpec): Merge gd_add_spec and
+	gd_madd_spec into _GD_AddSpec and make the public functions boilerpates for
+	the new common code.
+	* src/field_list.c (gd_carrays gd_mcarrays _GD_Carrays): Similarly, gd_carrays
+	and gd_mcarrays into _GD_Carrays.
+	* src/field_list.c (gd_constants gd_mconstants _GD_Constants): gd_constants
+	and gd_mconstants into _GD_Constants.
+	* src/field_list.c (gd_strings gd_mstrings _GD_Strings): gd_strings and
+	gd_mstrings into _GD_Strings.
+	* src/mod.c (gd_alter_spec gd_malter_spec _GD_AlterSpec): gd_alter_spec and
+	gd_malter_spec into _GD_AlterSpec.
+
+	* src/parse.c (_GD_RawType): Reduce the number of string compares.
+
 2015-10-16   D. V. Wiebe <getdata@ketiltrout.net> svn:1022
 	* bindings/perl/Makefile: Use ExtUtils::MakeMaker instead of Module::Build.
 	Because EU::MM creates a Makefile, run everything in a "build" subdir created

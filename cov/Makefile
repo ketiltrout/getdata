@@ -1,8 +1,8 @@
 default:
 	${MAKE} clean
 	cp ../test/*.[co] .
-	cp ../test/*.gc* .
-	cp ../src/.libs/*.gc* .
+	mv ../test/*.gc* .
+	mv ../src/.libs/*.gc* .
 	cp ../src/*.[co] .
 	gcov *.o | tee gcov.log
 
