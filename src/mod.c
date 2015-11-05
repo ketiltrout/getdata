@@ -1632,16 +1632,17 @@ gd_nothrow
   return ret;
 }
 
-int gd_alter_spec(DIRFILE* D, const char* line, int move)
+static int _GD_AlterSpec(DIRFILE* D, const char* line, const char* parent,
+    const char *name, int move)
 {
-  const char *tok_pos = NULL;
   char *outstring = NULL, *new_code;
+  const char *tok_pos;
   char *in_cols[MAX_IN_COLS];
   int n_cols, ret;
   gd_entry_t *N = NULL;
   struct parser_state p;
 
-  dtrace("%p, \"%s\", %i", D, line, move);
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, line, parent, name, move);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1659,9 +1660,13 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
   _GD_ClearError(D);
 
   /* start parsing */
-  _GD_SimpleParserInit(D, "gd_alter_spec()", &p);
+  _GD_SimpleParserInit(D, name, &p);
   n_cols = _GD_Tokenise(D, &p, line, &outstring, &tok_pos, MAX_IN_COLS,
       in_cols);
+
+  /* Sanity check */
+  if (!D->error && n_cols == 0)
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, name, 0, NULL);
 
   if (D->error) {
     free(outstring);
@@ -1669,45 +1674,49 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
     return -1;
   }
 
-  /* Sanity check */
-  if (n_cols == 0) {
-    free(outstring);
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, "dirfile_alter_spec()", 0,
-        NULL);
-    dreturn("%i", -1);
-    return -1;
+  if (parent) {
+    N = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+    if (N == NULL)
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
+  } else {
+    N = _GD_FindField(D, in_cols[0], D->entry, D->n_entries, 1, NULL);
+    if (N == NULL)
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, in_cols[0]);
   }
 
-  N = _GD_FindField(D, in_cols[0], D->entry, D->n_entries, 1, NULL);
-
-  if (N == NULL) {
+  if (D->error) {
     free(outstring);
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, in_cols[0]);
     dreturn("%i", -1);
     return -1;
   }
 
   /* the parser will modifiy in_cols[0] if it contains a metafield code */
-  if ((new_code = _GD_Strdup(D, in_cols[0])) == NULL) {
+  if (parent) {
+    if ((new_code = _GD_Malloc(D, strlen(parent) + strlen(in_cols[0]) + 2)))
+      sprintf(new_code, "%s/%s", parent, in_cols[0]);
+  } else
+    new_code = _GD_Strdup(D, in_cols[0]);
+
+  if (D->error) { /* malloc error */
+    free(outstring);
     dreturn("%i", -1);
     return -1;
   }
 
   /* Let the parser compose the entry */
-  N = _GD_ParseFieldSpec(D, &p, n_cols, in_cols, NULL, N->fragment_index, 0, 0,
-      &outstring, tok_pos);
-
-  free(outstring);
-
-  if (D->error) {
-    free(new_code);
-    dreturn("%i", -1); /* field spec parser threw an error */
-    return -1;
-  }
+  N = _GD_ParseFieldSpec(D, &p, n_cols, in_cols, parent ? N : NULL,
+      N->fragment_index, 0, 0, &outstring, tok_pos);
 
   /* The parse will have re-applied the prefix and suffix, undo that */
   free(N->field);
   N->field = new_code;
+
+  free(outstring);
+
+  if (D->error) {
+    dreturn("%i", -1); /* field spec parser threw an error */
+    return -1;
+  }
 
   if (N->field_type == GD_LINCOM_ENTRY || N->field_type == GD_POLYNOM_ENTRY)
     move = 7;
@@ -1721,69 +1730,25 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
   return ret;
 }
 
+int gd_alter_spec(DIRFILE* D, const char* line, int move)
+{
+  int ret;
+
+  dtrace("%p, \"%s\", %i", D, line, move);
+
+  ret = _GD_AlterSpec(D, line, NULL, "gd_alter_spec()", move);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
 int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
 {
-  char *outstring = NULL;
-  const char *tok_pos;
-  char *in_cols[MAX_IN_COLS];
-  int n_cols, ret;
-  gd_entry_t *N = NULL;
-  struct parser_state p;
+  int ret;
 
   dtrace("%p, \"%s\", \"%s\", %i", D, line, parent, move);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  /* check access mode */
-  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
-    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  _GD_ClearError(D);
-
-  N = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
-  if (N == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  /* start parsing */
-  _GD_SimpleParserInit(D, "gd_malter_spec()", &p);
-  n_cols = _GD_Tokenise(D, &p, line, &outstring, &tok_pos, MAX_IN_COLS,
-      in_cols);
-
-  if (!D->error) {
-    /* Let the parser compose the entry */
-    N = _GD_ParseFieldSpec(D, &p, n_cols, in_cols, N, N->fragment_index, 0, 0,
-        &outstring, tok_pos);
-
-    /* The parse will have re-applied the prefix and suffix, undo that */
-    free(N->field);
-    if ((N->field = _GD_Malloc(D, strlen(parent) + strlen(in_cols[0]) + 2)))
-      sprintf(N->field, "%s/%s", parent, in_cols[0]);
-  }
-
-  free(outstring);
-
-  if (D->error) {
-    dreturn("%i", -1); /* field spec parser threw an error */
-    return -1;
-  }
-
-  if (N->field_type == GD_LINCOM_ENTRY || N->field_type == GD_POLYNOM_ENTRY)
-    move = 7;
-
-  /* Change the entry */
-  ret = _GD_Change(D, N->field, N, move);
-
-  _GD_FreeE(D, N, 1);
+  ret = _GD_AlterSpec(D, line, parent, "gd_malter_spec()", move);
 
   dreturn("%i", ret);
   return ret;

@@ -182,4 +182,4 @@ libgetdatazzslim_la_LDFLAGS = $(SLIM_LDFLAGS) $(ZZIP_LDFLAGS) \
 libgetdatazzslim_la_CPPFLAGS = $(AM_CPPFLAGS) $(SLIM_CPPFLAGS) $(ZZIP_CPPFLAGS)
 
 clean-local:
-	rm -rf *~ getdata.pc
+	rm -rf *~ getdata.pc *.gcno

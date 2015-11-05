@@ -31,31 +31,32 @@ static gd_type_t _GD_RawType(const char* type, int standards, int pedantic)
   else if (pedantic && standards < 5)
     t = GD_UNKNOWN;
 
-  else if (strcmp(type, "NULL") == 0)
-    t = GD_NULL;
-  else if (strcmp(type, "INT8") == 0)
-    t = GD_INT8;
-  else if (strcmp(type, "UINT8") == 0)
-    t = GD_UINT8;
-  else if (strcmp(type, "INT16") == 0)
-    t = GD_INT16;
-  else if (strcmp(type, "INT32") == 0)
-    t = GD_INT32;
-  else if (strcmp(type, "UINT32") == 0)
-    t = GD_UINT32;
-  else if (strcmp(type, "UINT64") == 0)
-    t = GD_UINT64;
-  else if (strcmp(type, "INT64") == 0)
-    t = GD_INT64;
-  else if (strcmp(type, "UINT16") == 0)
-    t = GD_UINT16;
-  else if (strcmp(type, "FLOAT32") == 0)
-    t = GD_FLOAT32;
-  else if (strcmp(type, "FLOAT") == 0)
-    t = GD_FLOAT32;
-  else if (strcmp(type, "FLOAT64") == 0)
-    t = GD_FLOAT64;
-  else if (strcmp(type, "DOUBLE") == 0)
+  else if (type[0] == 'I') {
+    if (strcmp(type, "INT8") == 0)
+      t = GD_INT8;
+    else if (strcmp(type, "INT16") == 0)
+      t = GD_INT16;
+    else if (strcmp(type, "INT32") == 0)
+      t = GD_INT32;
+    else if (strcmp(type, "INT64") == 0)
+      t = GD_INT64;
+  } else if (type[0] == 'U') {
+    if (strcmp(type, "UINT8") == 0)
+      t = GD_UINT8;
+    else if (strcmp(type, "UINT16") == 0)
+      t = GD_UINT16;
+    else if (strcmp(type, "UINT32") == 0)
+      t = GD_UINT32;
+    else if (strcmp(type, "UINT64") == 0)
+      t = GD_UINT64;
+  } else if (type[0] == 'F') {
+    if (strcmp(type, "FLOAT32") == 0)
+      t = GD_FLOAT32;
+    else if (strcmp(type, "FLOAT") == 0)
+      t = GD_FLOAT32;
+    else if (strcmp(type, "FLOAT64") == 0)
+      t = GD_FLOAT64;
+  } else if (strcmp(type, "DOUBLE") == 0)
     t = GD_FLOAT64;
   else if (pedantic && standards < 7)
     t = GD_UNKNOWN;

@@ -22,7 +22,7 @@
 
 /* zero length lists */
 static const char* zero_list[1] = { NULL };
-static const gd_carray_t zero_carrays[1] = { {0, NULL} };
+static gd_carray_t zero_carrays[1] = { {0, NULL} };
 
 gd_static_inline_ int _GD_EntryIndex(unsigned int t)
 {
@@ -278,12 +278,17 @@ const char **gd_entry_list(DIRFILE* D, const char *parent, int type,
   return el;
 }
 
-const void *gd_constants(DIRFILE* D, gd_type_t return_type) gd_nothrow
+static void *_GD_Constants(DIRFILE* D, const char* parent,
+    gd_type_t return_type) gd_nothrow
 {
-  unsigned int i, n;
-  char* fl;
+  int i, n, nentries;
+  void* fl;
+  gd_entry_t *P;
+  gd_entry_t **entry;
+  void **list;
+  struct gd_private_entry_ *e = NULL;
 
-  dtrace("%p, 0x%x", D, return_type);
+  dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -293,7 +298,27 @@ const void *gd_constants(DIRFILE* D, gd_type_t return_type) gd_nothrow
 
   _GD_ClearError(D);
 
-  if ((n = _GD_NEntries(D, NULL, GD_CONST_ENTRY, 0)) == 0) {
+  if (parent) {
+    P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+
+    if (P == NULL || P->e->n_meta == -1) {
+      _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
+          NULL, 0, parent);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    e = P->e;
+    nentries = e->n_meta;
+    entry = e->p.meta_entry;
+    list = &e->const_value_list;
+  } else {
+    nentries = D->n_entries;
+    entry = D->entry;
+    list = &D->const_value_list;
+  }
+
+  if ((n = _GD_NEntries(D, e, GD_CONST_ENTRY, 0)) == 0) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -305,26 +330,38 @@ const void *gd_constants(DIRFILE* D, gd_type_t return_type) gd_nothrow
     return NULL;
   }
 
-  for (i = n = 0; i < D->n_entries; ++i) {
-    if (_GD_ListEntry(D->entry[i], 0, 0, 0, 0, GD_CONST_ENTRY))
-      if (_GD_DoField(D, D->entry[i], 0, 0, 1, return_type,
+  /* DoField will implicitly choose GD_REPR_AUTO for complex data being returned
+   * as purely real */
+  for (i = n = 0; i < nentries; ++i) {
+    if (_GD_ListEntry(entry[i], 1, 0, 0, 0, GD_CONST_ENTRY))
+      if (_GD_DoField(D, entry[i], 0, 0, 1, return_type,
             fl + n++ * GD_SIZE(return_type)) != 1)
         break;
   }
 
-  free(D->const_value_list);
-  D->const_value_list = fl;
+  if (D->error) {
+    free(fl);
+    fl = NULL;
+  }
 
-  dreturn("%p", D->error ? NULL : D->const_value_list);
-  return D->error ? NULL : D->const_value_list;
+  free(*list);
+  *list = fl;
+
+  dreturn("%p", fl);
+  return fl;
 }
 
-const gd_carray_t *gd_carrays(DIRFILE* D, gd_type_t return_type) gd_nothrow
+static gd_carray_t *_GD_Carrays(DIRFILE* D, const char* parent,
+    gd_type_t return_type) gd_nothrow
 {
-  unsigned int i, n;
-  gd_carray_t* fl;
+  int i, n, nentries;
+  gd_carray_t *fl;
+  gd_entry_t *P;
+  gd_entry_t **entry;
+  gd_carray_t **list;
+  struct gd_private_entry_ *e = NULL;
 
-  dtrace("%p, 0x%x", D, return_type);
+  dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -334,7 +371,27 @@ const gd_carray_t *gd_carrays(DIRFILE* D, gd_type_t return_type) gd_nothrow
 
   _GD_ClearError(D);
 
-  if ((n = _GD_NEntries(D, NULL, GD_CARRAY_ENTRY, 0)) == 0) {
+  if (parent) {
+    P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+
+    if (P == NULL || P->e->n_meta == -1) {
+      _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
+          NULL, 0, parent);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    e = P->e;
+    nentries = e->n_meta;
+    entry = e->p.meta_entry;
+    list = &e->carray_value_list;
+  } else {
+    nentries = D->n_entries;
+    entry = D->entry;
+    list = &D->carray_value_list;
+  }
+
+  if ((n = _GD_NEntries(D, e, GD_CARRAY_ENTRY, 0)) == 0) {
     dreturn("%p", zero_carrays);
     return zero_carrays;
   }
@@ -346,36 +403,42 @@ const gd_carray_t *gd_carrays(DIRFILE* D, gd_type_t return_type) gd_nothrow
     return NULL;
   }
 
-  memset(fl, 0, sizeof(gd_carray_t) * (n + 1));
-
-  for (i = n = 0; i < D->n_entries; ++i) {
-    if (_GD_ListEntry(D->entry[i], 0, 0, 0, 0, GD_CARRAY_ENTRY)) {
-      fl[n].n = D->entry[i]->EN(scalar,array_len);
+  /* DoField will implicitly choose GD_REPR_AUTO for complex data being returned
+   * as purely real */
+  for (i = n = 0; i < nentries; ++i) {
+    if (_GD_ListEntry(entry[i], 1, 0, 0, 0, GD_CARRAY_ENTRY)) {
+      fl[n].n = entry[i]->EN(scalar,array_len);
       fl[n].d = _GD_Alloc(D, return_type, fl[n].n);
-      if (D->error || _GD_DoField(D, D->entry[i], 0, 0, fl[n].n, return_type,
-            fl[n].d) < 1)
+      if (D->error || _GD_DoField(D, entry[i], 0, 0, fl[n].n,
+            return_type, fl[n].d) < 1)
         break;
       n++;
     }
   }
   fl[n].n = 0;
 
-  if (D->carray_value_list)
-    for (i = 0; D->carray_value_list[i].n != 0; ++i)
-      free(D->carray_value_list[i].d);
-  free(D->carray_value_list);
-  D->carray_value_list = fl;
+  if (*list) {
+    for (i = 0; (*list)[i].n != 0; ++i)
+      free((*list)[i].d);
+    free(*list);
+  }
+
+  *list = fl;
 
   dreturn("%p", D->error ? NULL : fl);
   return D->error ? NULL : fl;
 }
 
-const char **gd_strings(DIRFILE* D) gd_nothrow
+static const char **_GD_Strings(DIRFILE* D, const char* parent) gd_nothrow
 {
-  unsigned int i, n;
-  char** fl;
+  int i, n, nentries;
+  const char** fl;
+  gd_entry_t *P;
+  gd_entry_t **entry;
+  const char ***list;
+  struct gd_private_entry_ *e = NULL;
 
-  dtrace("%p", D);
+  dtrace("%p, \"%s\"", D, parent);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -385,15 +448,29 @@ const char **gd_strings(DIRFILE* D) gd_nothrow
 
   _GD_ClearError(D);
 
-  if ((n = _GD_NEntries(D, NULL, GD_STRING_ENTRY, 0)) == 0) {
-    dreturn("%p", zero_list);
-    return zero_list;
+  if (parent) {
+    P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+
+    if (P == NULL || P->e->n_meta == -1) {
+      _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
+          NULL, 0, parent);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    e = P->e;
+    nentries = e->n_meta;
+    entry = e->p.meta_entry;
+    list = &e->string_value_list;
+  } else {
+    nentries = D->n_entries;
+    entry = D->entry;
+    list = &D->string_value_list;
   }
 
-  if (D->value_list_validity & GD_LIST_VALID_STRING_VALUE) {
-    /* list already made */
-    dreturn("%p", D->string_value_list);
-    return D->string_value_list;
+  if ((n = _GD_NEntries(D, e, GD_STRING_ENTRY, 0)) == 0) {
+    dreturn("%p", zero_list);
+    return zero_list;
   }
 
   fl = _GD_Malloc(D, sizeof(*fl) * (n + 1));
@@ -403,18 +480,52 @@ const char **gd_strings(DIRFILE* D) gd_nothrow
     return NULL;
   }
 
-  for (i = n = 0; i < D->n_entries; ++i) {
-    if (_GD_ListEntry(D->entry[i], 0, 0, 0, 0, GD_STRING_ENTRY))
-      fl[n++] = D->entry[i]->e->u.string;
-  }
+  for (i = n = 0; i < nentries; ++i)
+    if (_GD_ListEntry(entry[i], 1, 0, 0, 0, GD_STRING_ENTRY))
+      fl[n++] = entry[i]->e->u.string;
   fl[n] = NULL;
 
-  free(D->string_value_list);
-  D->string_value_list = (const char **)fl;
-  D->value_list_validity |= GD_LIST_VALID_STRING_VALUE;
+  free(*list);
+  *list = fl;
 
-  dreturn("%p", D->string_value_list);
-  return D->string_value_list;
+  dreturn("%p", fl);
+  return fl;
+}
+
+const void *gd_constants(DIRFILE* D, gd_type_t return_type) gd_nothrow
+{
+  void *ret;
+
+  dtrace("%p, 0x%x", D, return_type);
+
+  ret = _GD_Constants(D, NULL, return_type);
+
+  dreturn("%p", ret);
+  return ret;
+}
+
+const gd_carray_t *gd_carrays(DIRFILE* D, gd_type_t return_type) gd_nothrow
+{
+  gd_carray_t *ret;
+
+  dtrace("%p, 0x%x", D, return_type);
+
+  ret = _GD_Carrays(D, NULL, return_type);
+  
+  dreturn("%p", ret);
+  return ret;
+}
+
+const char **gd_strings(DIRFILE* D) gd_nothrow
+{
+  const char **ret;
+
+  dtrace("%p", D);
+
+  ret = _GD_Strings(D, NULL);
+
+  dreturn("%p", ret);
+  return ret;
 }
 
 const char **gd_field_list_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
@@ -451,176 +562,39 @@ const char **gd_field_list(DIRFILE* D) gd_nothrow
 const void *gd_mconstants(DIRFILE* D, const char* parent,
     gd_type_t return_type) gd_nothrow
 {
-  int i, n;
-  char* fl;
-  gd_entry_t *P;
-  struct gd_private_entry_ *e;
+  void *ret;
 
   dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
+  ret = _GD_Constants(D, parent, return_type);
 
-  _GD_ClearError(D);
-
-  P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
-
-  if (P == NULL || P->e->n_meta == -1) {
-    _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
-        NULL, 0, parent);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  e = P->e;
-
-  if ((n = gd_nmfields_by_type(D, parent, GD_CONST_ENTRY)) == 0) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  fl = (char *)_GD_Alloc(D, return_type, n);
-
-  if (fl == NULL) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  /* DoField will implicitly choose GD_REPR_AUTO for complex data being returned
-   * as purely real */
-  for (i = n = 0; i < e->n_meta; ++i) {
-    if (_GD_ListEntry(e->p.meta_entry[i], 1, 0, 0, 0, GD_CONST_ENTRY))
-      if (_GD_DoField(D, e->p.meta_entry[i], 0, 0, 1, return_type,
-            fl + n++ * GD_SIZE(return_type)) != 1)
-        break;
-  }
-
-  free(e->const_value_list);
-  e->const_value_list = fl;
-
-  dreturn("%p", e->const_value_list);
-  return e->const_value_list;
+  dreturn("%p", ret);
+  return ret;
 }
 
 const gd_carray_t *gd_mcarrays(DIRFILE* D, const char* parent,
     gd_type_t return_type) gd_nothrow
 {
-  int i, n;
-  gd_carray_t *fl;
-  gd_entry_t *P;
-  struct gd_private_entry_ *e;
+  gd_carray_t *ret;
 
   dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
+  ret = _GD_Carrays(D, parent, return_type);
 
-  _GD_ClearError(D);
-
-  P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
-
-  if (P == NULL || P->e->n_meta == -1) {
-    _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
-        NULL, 0, parent);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  e = P->e;
-
-  if ((n = gd_nmfields_by_type(D, parent, GD_CARRAY_ENTRY)) == 0) {
-    dreturn("%p", zero_carrays);
-    return zero_carrays;
-  }
-
-  fl = _GD_Malloc(D, sizeof(*fl) * (n + 1));
-
-  if (fl == NULL) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  /* DoField will implicitly choose GD_REPR_AUTO for complex data being returned
-   * as purely real */
-  for (i = n = 0; i < e->n_meta; ++i) {
-    if (_GD_ListEntry(e->p.meta_entry[i], 1, 0, 0, 0, GD_CARRAY_ENTRY)) {
-      fl[n].n = e->p.meta_entry[i]->EN(scalar,array_len);
-      fl[n].d = _GD_Alloc(D, return_type, fl[n].n);
-      if (D->error || _GD_DoField(D, e->p.meta_entry[i], 0, 0, fl[n].n,
-            return_type, fl[n].d) < 1)
-        break;
-      n++;
-    }
-  }
-  fl[n].n = 0;
-
-  if (e->carray_value_list)
-    for (i = 0; e->carray_value_list[i].n != 0; ++i)
-      free(e->carray_value_list[i].d);
-  free(e->carray_value_list);
-
-  e->carray_value_list = fl;
-
-  dreturn("%p", D->error ? NULL : fl);
-  return D->error ? NULL : fl;
+  dreturn("%p", ret);
+  return ret;
 }
 
 const char **gd_mstrings(DIRFILE* D, const char* parent) gd_nothrow
 {
-  int i, n;
-  char** fl;
-  gd_entry_t *P;
-  struct gd_private_entry_ *e;
+  const char **ret;
 
   dtrace("%p, \"%s\"", D, parent);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
+  ret = _GD_Strings(D, parent);
 
-  _GD_ClearError(D);
-
-  P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
-
-  if (P == NULL || P->e->n_meta == -1) {
-    _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
-        NULL, 0, parent);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  e = P->e;
-
-  if ((n = gd_nmfields_by_type(D, parent, GD_STRING_ENTRY)) == 0) {
-    dreturn("%p", zero_list);
-    return zero_list;
-  }
-
-  fl = _GD_Malloc(D, sizeof(*fl) * (n + 1));
-
-  if (fl == NULL) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  for (i = n = 0; i < e->n_meta; ++i)
-    if (_GD_ListEntry(e->p.meta_entry[i], 1, 0, 0, 0, GD_STRING_ENTRY))
-      fl[n++] = e->p.meta_entry[i]->e->u.string;
-  fl[n] = NULL;
-
-  free(e->string_value_list);
-  e->string_value_list = (const char **)fl;
-
-  dreturn("%p", e->string_value_list);
-  return e->string_value_list;
+  dreturn("%p", ret);
+  return ret;
 }
 
 const char **gd_mfield_list_by_type(DIRFILE* D, const char* parent,

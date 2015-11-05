@@ -658,18 +658,17 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   return E;
 }
 
-/* add a META field by parsing a field spec */
-int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
+static int _GD_AddSpec(DIRFILE* D, const char* line, const char* parent,
+    int me, const char *name) gd_nothrow
 {
   char *outstring = NULL;
   char *in_cols[MAX_IN_COLS];
   const char *tok_pos = NULL;
   int n_cols;
-  int me;
   gd_entry_t* E = NULL;
   struct parser_state p;
 
-  dtrace("%p, \"%s\", \"%s\"", D, line, parent);
+  dtrace("%p, \"%s\", \"%s\", %i, \"%s\"", D, line, parent, me, name);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -686,16 +685,24 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
 
   _GD_ClearError(D);
 
-  /* Find parent -- we don't do code mungeing here because we don't know
-   * which fragment this is yet.  */
-  E = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
-    dreturn("%i", -1);
-    return -1;
+  if (parent) {
+    /* Find parent -- we don't do code mungeing here because we don't know
+     * which fragment this is yet.  */
+    E = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+    if (E == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
+      dreturn("%i", -1);
+      return -1;
+    }
+    me = E->fragment_index;
+  } else {
+    /* check for fragment index out of range */
+    if (me < 0 || me >= D->n_fragment) {
+      _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, me, NULL);
+      dreturn("%i", -1);
+      return -1;
+    }
   }
-
-  me = E->fragment_index;
 
   /* check protection */
   if (D->fragment[me].protection & GD_PROTECT_FORMAT) {
@@ -704,15 +711,15 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
     dreturn("%i", -1);
     return -1;
   }
-
+  
   /* start parsing */
-  _GD_SimpleParserInit(D, "gd_madd_spec()", &p);
+  _GD_SimpleParserInit(D, name, &p);
   n_cols = _GD_Tokenise(D, &p, line, &outstring, &tok_pos, MAX_IN_COLS,
       in_cols);
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
   if (!D->error)
-    _GD_ParseFieldSpec(D, &p, n_cols, in_cols, E,  me, 1, 1, &outstring,
+    _GD_ParseFieldSpec(D, &p, n_cols, in_cols, E, me, 1, 1, &outstring,
         tok_pos);
 
   free(outstring);
@@ -731,79 +738,29 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
   return 0;
 }
 
+int gd_madd_spec(DIRFILE* D, const char* line, const char *parent)
+{
+  int ret;
+
+  dtrace("%p, \"%s\", \"%s\"", D, line, parent);
+
+  ret = _GD_AddSpec(D, line, parent, 0, "gd_madd_spec()");
+
+  dreturn("%i", ret);
+  return ret;
+}
+
 /* add a field by parsing a field spec */
 int gd_add_spec(DIRFILE* D, const char* line, int fragment_index)
 {
-  char *outstring;
-  const char *tok_pos = NULL;
-  char *in_cols[MAX_IN_COLS];
-  int n_cols;
-  struct parser_state p;
+  int ret;
 
   dtrace("%p, \"%s\", %i", D, line, fragment_index);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  ret = _GD_AddSpec(D, line, NULL, fragment_index, "gd_add_spec()");
 
-  /* check access mode */
-  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
-    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  /* check for include index out of range */
-  if (fragment_index < 0 || fragment_index >= D->n_fragment) {
-    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  /* check protection */
-  if (D->fragment[fragment_index].protection & GD_PROTECT_FORMAT) {
-    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
-        D->fragment[fragment_index].cname);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  _GD_ClearError(D);
-
-  if (~D->flags & GD_HAVE_VERSION)
-    _GD_FindVersion(D);
-
-  if (D->av) {
-    p.standards = D->standards;
-    p.pedantic = 1;
-  }
-
-  /* start parsing */
-  _GD_SimpleParserInit(D, "gd_add_spec()", &p);
-  n_cols = _GD_Tokenise(D, &p, line, &outstring, &tok_pos, MAX_IN_COLS,
-      in_cols);
-
-  /* Directive parsing is skipped -- The Field Spec parser will add the field */
-  if (!D->error)
-    _GD_ParseFieldSpec(D, &p, n_cols, in_cols, NULL, fragment_index, 1, 1,
-        &outstring, tok_pos);
-
-  free(outstring);
-
-  if (D->error) {
-    dreturn("%i", -1); /* parser threw an error */
-    return -1;
-  }
-
-  /* Update aliases */
-  _GD_UpdateAliases(D, 0);
-
-  D->fragment[fragment_index].modified = 1;
-  D->flags &= ~GD_HAVE_VERSION;
-  dreturn("%i", 0);
-  return 0;
+  dreturn("%i", ret);
+  return ret;
 }
 
 int gd_add(DIRFILE* D, const gd_entry_t* entry)
