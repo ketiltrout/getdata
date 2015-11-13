@@ -80,10 +80,10 @@
   do { \
     char *buffer = gd_error_string((D), NULL, 0); \
     if (buffer) { \
-      PyErr_SetString(gdpy_exceptions[e], buffer); \
+      PyErr_SetString(gdpy_exceptions[-e], buffer); \
       free(buffer); \
     } else \
-      PyErr_SetString(gdpy_exceptions[e], "Unspecified error"); \
+      PyErr_SetString(gdpy_exceptions[-e], "Unspecified error"); \
   } while (0)
 
 

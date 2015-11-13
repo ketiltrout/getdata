@@ -897,7 +897,7 @@ nume += check_simple(129,n,!GD.INT8)
 ;  131: gd_validate
 n =  gd_validate(d, "new7")
 nume += check_error(131,d,!GD.E_BAD_CODE)
-nume += check_simple(131,n,-1)
+nume += check_simple(131,n,!GD.E_BAD_CODE)
 
 ;  133: gd_framenum
 n = gd_framenum(d, "data", 33.3, field_start=6)

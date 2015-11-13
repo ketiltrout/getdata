@@ -32,8 +32,8 @@ off64_t gd_nframes64(DIRFILE* D)
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", 0);
-    return 0;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   if (D->reference_field == NULL) {
@@ -42,8 +42,8 @@ off64_t gd_nframes64(DIRFILE* D)
   }
 
   if (!_GD_Supports(D, D->reference_field, GD_EF_NAME | GD_EF_SIZE)) {
-    dreturn("%i", 0);
-    return 0;
+    dreturn("%i", D->error);
+    return D->error;
   }
 
   if ((*_GD_ef[D->reference_field->e->u.raw.file[0].subenc].name)(D,
@@ -51,8 +51,8 @@ off64_t gd_nframes64(DIRFILE* D)
         D->reference_field->e->u.raw.file,
         D->reference_field->e->u.raw.filebase, 0, 0))
   {
-    dreturn("%i", 0);
-    return 0;
+    dreturn("%i", D->error);
+    return D->error;
   }
 
   /* If the reference field is open for writing, close it first to flush the
@@ -62,8 +62,8 @@ off64_t gd_nframes64(DIRFILE* D)
     _GD_FiniRawIO(D, D->reference_field, D->reference_field->fragment_index,
         GD_FINIRAW_KEEP);
     if (D->error) {
-      dreturn("%i", 0);
-      return 0;
+      dreturn("%i", D->error);
+      return D->error;
     }
   }
 
@@ -74,8 +74,8 @@ off64_t gd_nframes64(DIRFILE* D)
 
   if (nf < 0) {
     _GD_SetEncIOError(D, GD_E_IO_READ, D->reference_field->e->u.raw.file);
-    dreturn("%lli", 0LL);
-    return 0;
+    dreturn("%i", D->error);
+    return D->error;
   }
 
   nf /= D->reference_field->EN(raw,spf);

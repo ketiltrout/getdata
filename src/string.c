@@ -31,46 +31,32 @@ gd_nothrow
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   _GD_ClearError(D);
 
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
 
-  if (E == NULL) {
+  if (E == NULL)
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (E->field_type != GD_STRING_ENTRY && E->field_type != GD_SARRAY_ENTRY) {
+  else if (E->field_type != GD_STRING_ENTRY && E->field_type != GD_SARRAY_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
-  } else if (start + n > ((E->field_type == GD_STRING_ENTRY) ? 1 :
+  else if (start + n > ((E->field_type == GD_STRING_ENTRY) ? 1 :
         E->EN(scalar,array_len)))
   {
     _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  /* nothing to do */
-  if (n == 0) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  if (E->field_type == GD_STRING_ENTRY)
+  } else if (n == 0)
+    ; /* nothing to do */
+  else if (E->field_type == GD_STRING_ENTRY)
     data_out[0] = E->e->u.string;
   else
     memcpy(data_out, ((const char **)E->e->u.scalar.d) + start,
         n * sizeof(const char*));
 
-  dreturn("%i", 0);
-  return 0;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 int gd_get_sarray(DIRFILE *D, const char *field_code, const char **data_out)
@@ -82,8 +68,8 @@ gd_nothrow
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", 0);
-    return 0;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   _GD_ClearError(D);
@@ -92,8 +78,8 @@ gd_nothrow
 
   if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_CODE);
+    return GD_E_BAD_CODE;
   }
 
   if (E->field_type == GD_STRING_ENTRY)
@@ -103,8 +89,8 @@ gd_nothrow
         E->EN(scalar,array_len) * sizeof(const char*));
   else {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_FIELD_TYPE);
+    return GD_E_BAD_FIELD_TYPE;
   }
 
   dreturn("%i", 0);
@@ -218,70 +204,58 @@ int gd_put_sarray_slice(DIRFILE *D, const char *field_code, unsigned long first,
     size_t n, const char **data_in) gd_nothrow
 {
   gd_entry_t *E;
-  int r = -1;
 
   dtrace("%p, \"%s\", %lu, %" PRNsize_t ", %p", D, field_code, first, n,
       data_in);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   _GD_ClearError(D);
 
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
 
-  if (E == NULL) {
+  if (E == NULL)
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (E->field_type != GD_SARRAY_ENTRY && E->field_type != GD_STRING_ENTRY)
+  else if (E->field_type != GD_SARRAY_ENTRY && E->field_type != GD_STRING_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-  else if (_GD_PutSarraySlice(D, E, first, n, data_in) > 0)
-    r = 0;
+  else
+    _GD_PutSarraySlice(D, E, first, n, data_in);
 
-  dreturn("%i", r);
-  return r;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 int gd_put_sarray(DIRFILE *D, const char *field_code, const char **data_in)
   gd_nothrow
 {
   gd_entry_t *E;
-  int r = -1;
 
   dtrace("%p, \"%s\", %p", D, field_code, data_in);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   _GD_ClearError(D);
 
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
 
-  if (E == NULL) {
+  if (E == NULL) 
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (E->field_type != GD_SARRAY_ENTRY && E->field_type != GD_STRING_ENTRY)
+  else if (E->field_type != GD_SARRAY_ENTRY && E->field_type != GD_STRING_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-  else if (_GD_PutSarraySlice(D, E, 0, (E->field_type == GD_STRING_ENTRY) ? 1 :
-        E->EN(scalar,array_len), data_in) > 0)
-  {
-    r = 0;
-  }
+  else
+   _GD_PutSarraySlice(D, E, 0, (E->field_type == GD_STRING_ENTRY) ? 1 :
+       E->EN(scalar,array_len), data_in);
 
-  dreturn("%i", r);
-  return r;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 size_t gd_put_string(DIRFILE *D, const char *field_code, const char *data_in)
@@ -305,9 +279,8 @@ size_t gd_put_string(DIRFILE *D, const char *field_code, const char *data_in)
   if (E == NULL)
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
   else if (E->field_type != GD_STRING_ENTRY && E->field_type != GD_SARRAY_ENTRY)
-  {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-  } else 
+  else 
     n_wrote = _GD_PutSarraySlice(D, E, 0, 1, &data_in);
 
   dreturn("%" PRNsize_t, n_wrote);

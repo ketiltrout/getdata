@@ -100,8 +100,8 @@ int _GD_ShutdownDirfile(DIRFILE* D, int flush_meta, int keep_dirfile)
       _GD_Flush(D, D->entry[i], 0, 1);
 
   if (D->error) {
-    dreturn("%i", 1);
-    return -1;
+    dreturn("%i", D->error);
+    return D->error;
   }
 
 #ifndef GD_NO_DIR_OPEN
@@ -140,4 +140,4 @@ int gd_discard(DIRFILE* D)
   return ret;
 }
 /* vim: ts=2 sw=2 et tw=80
-*/
+*/ 

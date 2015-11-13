@@ -33,8 +33,8 @@ int gd_get_carray_slice(DIRFILE *D, const char *field_code_in,
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   _GD_ClearError(D);
@@ -43,8 +43,8 @@ int gd_get_carray_slice(DIRFILE *D, const char *field_code_in,
       1);
 
   if (D->error) {
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", D->error);
+    return D->error;
   }
 
   if (entry->field_type != GD_CARRAY_ENTRY &&
@@ -61,13 +61,8 @@ int gd_get_carray_slice(DIRFILE *D, const char *field_code_in,
   if (field_code != field_code_in)
     free(field_code);
 
-  if (D->error) {
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  dreturn("%i", 0);
-  return 0;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 int gd_get_carray(DIRFILE *D, const char *field_code_in, gd_type_t return_type,
@@ -81,8 +76,8 @@ int gd_get_carray(DIRFILE *D, const char *field_code_in, gd_type_t return_type,
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   _GD_ClearError(D);
@@ -91,8 +86,8 @@ int gd_get_carray(DIRFILE *D, const char *field_code_in, gd_type_t return_type,
       1);
 
   if (D->error) {
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", D->error);
+    return D->error;
   }
 
   if (entry->field_type != GD_CARRAY_ENTRY &&
@@ -106,13 +101,8 @@ int gd_get_carray(DIRFILE *D, const char *field_code_in, gd_type_t return_type,
   if (field_code != field_code_in)
     free(field_code);
 
-  if (D->error) {
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  dreturn("%i", 0);
-  return 0;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 int gd_get_constant(DIRFILE* D, const char *field_code_in,
@@ -170,7 +160,7 @@ size_t gd_carray_len(DIRFILE *D, const char *field_code) gd_nothrow
   return gd_array_len(D, field_code);
 }
 
-static int _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, unsigned long first,
+static void _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, unsigned long first,
     size_t n, gd_type_t data_type, const void *data_in) gd_nothrow
 {
   int i;
@@ -180,8 +170,8 @@ static int _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, unsigned long first,
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturnvoid();
+    return;
   }
 
   if (first + n > ((E->field_type == GD_CONST_ENTRY) ? 1 :
@@ -192,8 +182,8 @@ static int _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, unsigned long first,
     _GD_DoFieldOut(D, E, first, n, data_type, data_in);
 
   if (D->error) {
-    dreturn("%i", -1);
-    return -1;
+    dreturnvoid();
+    return;
   }
 
   /* Flag all clients as needing recalculation */
@@ -205,23 +195,21 @@ static int _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, unsigned long first,
   E->e->u.scalar.client = NULL;
   E->e->u.scalar.n_client = 0;
 
-  dreturn("%i", 0);
-  return 0;
+  dreturnvoid();
 }
 
 int gd_put_carray_slice(DIRFILE* D, const char *field_code, unsigned long first,
     size_t n, gd_type_t data_type, const void *data_in) gd_nothrow
 {
   gd_entry_t *entry;
-  int r = -1;
 
   dtrace("%p, \"%s\", %lu, %" PRNsize_t ", 0x%X, %p", D, field_code, first,
       n, data_type, data_in);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   _GD_ClearError(D);
@@ -230,8 +218,8 @@ int gd_put_carray_slice(DIRFILE* D, const char *field_code, unsigned long first,
 
   if (entry == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_CODE);
+    return GD_E_BAD_CODE;
   }
 
   if (entry->field_type != GD_CARRAY_ENTRY &&
@@ -239,24 +227,23 @@ int gd_put_carray_slice(DIRFILE* D, const char *field_code, unsigned long first,
   {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   } else
-    r = _GD_PutCarraySlice(D, entry, first, n, data_type, data_in);
+    _GD_PutCarraySlice(D, entry, first, n, data_type, data_in);
 
-  dreturn("%i", r);
-  return r;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 int gd_put_carray(DIRFILE* D, const char *field_code, gd_type_t data_type,
     const void *data_in) gd_nothrow
 {
   gd_entry_t *entry;
-  int r = -1;
 
   dtrace("%p, \"%s\", 0x%x, %p", D, field_code, data_type, data_in);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   _GD_ClearError(D);
@@ -265,8 +252,8 @@ int gd_put_carray(DIRFILE* D, const char *field_code, gd_type_t data_type,
 
   if (entry == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_CODE);
+    return GD_E_BAD_CODE;
   }
 
   if (entry->field_type != GD_CARRAY_ENTRY &&
@@ -274,12 +261,11 @@ int gd_put_carray(DIRFILE* D, const char *field_code, gd_type_t data_type,
   {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   } else
-    r = _GD_PutCarraySlice(D, entry, 0,
-        (entry->field_type == GD_CONST_ENTRY) ? 1 : entry->EN(scalar,array_len),
-        data_type, data_in);
+    _GD_PutCarraySlice(D, entry, 0, (entry->field_type == GD_CONST_ENTRY)
+        ? 1 : entry->EN(scalar,array_len), data_type, data_in);
 
-  dreturn("%i", r);
-  return r;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 int gd_put_constant(DIRFILE* D, const char *field_code, gd_type_t data_type,

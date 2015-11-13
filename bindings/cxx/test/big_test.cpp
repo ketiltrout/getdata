@@ -1120,7 +1120,7 @@ void run_tests(void)
   // 131: Dirfile::Validate check
   n = d->Validate("new7");
   CHECK_ERROR(131,GD_E_BAD_CODE);
-  CHECK_INT(131,n,-1);
+  CHECK_INT(131,n,GD_E_BAD_CODE);
 
   // 133: Dirfile::FrameNum check
   delete d->Reference("data");

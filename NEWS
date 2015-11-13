@@ -1,3 +1,49 @@
+New in verison 0.10.0:
+  
+  API Changes:
+
+  * All dirfile error values (GD_E_...) are now negatively valued.  Notably
+    this excludes GD_E_OK, which is still equal to zero.
+
+  * With the exception of gd_error_count(), all functions which return an
+    int or off_t (or, equivalently, gd_off64_t), now return a negatively-
+    valued dirfile error on error (e.g.  GD_E_BAD_DIRFILE, &c.).
+    Previously, most of these functions simply returned -1 on error.  The
+    full function list follows:
+
+      gd_add, gd_add_alias, gd_add_bit, gd_add_carray, gd_add_clincom,
+      gd_add_const, gd_add_cpolynom, gd_add_crecip, gd_add_divide,
+      gd_add_indir, gd_add_lincom, gd_add_linterp, gd_add_mplex,
+      gd_add_multiply, gd_add_phase, gd_add_polynom, gd_add_raw,
+      gd_add_recip, gd_add_sarray, gd_add_sbit, gd_add_sindir, gd_add_spec,
+      gd_add_string, gd_add_window, gd_alter_affixes, gd_alter_bit,
+      gd_alter_carray, gd_alter_clincom, gd_alter_const, gd_alter_cpolynom,
+      gd_alter_crecip, gd_alter_divide, gd_alter_encoding,
+      gd_alter_endianness, gd_alter_entry, gd_alter_frameoffset,
+      gd_alter_indir, gd_alter_lincom, gd_alter_linterp, gd_alter_mplex,
+      gd_alter_multiply, gd_alter_phase, gd_alter_polynom,
+      gd_alter_protection, gd_alter_raw, gd_alter_recip, gd_alter_sarray,
+      gd_alter_sbit, gd_alter_sindir, gd_alter_spec, gd_alter_window,
+      gd_bof, gd_close, gd_delete, gd_desync, gd_dirfile_standards,
+      gd_discard, gd_encoding_support, gd_entry, gd_eof, gd_flush,
+      gd_fragment_affixes, gd_fragment_index, gd_frameoffset,
+      gd_get_carray, gd_get_carray_slice, gd_get_constant, gd_get_sarray,
+      gd_get_sarray_slice, gd_hidden, gd_hide, gd_include,
+      gd_include_affix, gd_madd, gd_madd_alias, gd_madd_bit,
+      gd_madd_carray, gd_madd_clincom, gd_madd_const, gd_madd_cpolynom,
+      gd_madd_crecip, gd_madd_divide, gd_madd_indir, gd_madd_lincom,
+      gd_madd_linterp, gd_madd_mplex, gd_madd_multiply, gd_madd_phase,
+      gd_madd_polynom, gd_madd_recip, gd_madd_sarray, gd_madd_sbit,
+      gd_madd_sindir, gd_madd_spec, gd_madd_string, gd_madd_window,
+      gd_malter_spec, gd_metaflush, gd_move, gd_nfragments, gd_nframes,
+      gd_parent_fragment, gd_protection, gd_put_carray,
+      gd_put_carray_slice, gd_put_constant, gd_put_sarray,
+      gd_put_sarray_slice, gd_raw_close, gd_rename, gd_rewrite_fragment,
+      gd_seek, gd_sync, gd_tell, gd_unhide, gd_uninclude, gd_validate,
+      gd_verbose_prefix.
+
+|=========================================================================|
+
 New in verison 0.9.0:
 
   Library Changes:
@@ -48,6 +94,10 @@ New in verison 0.9.0:
     gd_flush, gd_linterp_tablename, gd_put_carray, gd_put_carray_slice,
     gd_putdata, gd_raw_close, gd_raw_filename, gd_seek, gd_spf, gd_sync,
     gd_tell.
+
+  * The error code GD_E_BAD_REPR has been merged into GD_E_BAD_CODE.  The
+    symbol GD_E_BAD_REPR remains as an alias for GD_E_BAD_CODE, but is
+    deprecated.
 
   * Attempts to seek past the end-of-field with gd_seek() now always
     succeed, although the resultant position is encoding specific.
@@ -124,18 +174,8 @@ New in verison 0.9.0:
     these obsolete, cached LUTs would sometimes linger, causing incorrect
     LINTERP computation.
 
-  * BUG FIX: The library now properly recovers from an I/O error while
-    trying to open an unencoded datafile.  Previously, such an error would
-    poison the library's bookkeeping data, preventing all subsequent
-    attempts to open that file unless the Dirfile was re-opened.  Reported
-    by Alexandra Rahlin.
-
-  * BUG FIX: Calling gd_putdata() to write gzip data with a non-zero
-    starting offset equal to the field's current I/O position, no longer
-    result in the call hanging.
-
-  * BUG FIX: The I/O position reported by gd_tell and gd_seek for slim, zzip,
-    and zzslim encoded data is now correct.
+  * BUG FIX: The I/O position reported by gd_tell and gd_seek for slim,
+    zzip, and zzslim encoded data is now correct.
 
   API Changes:
   
@@ -212,8 +252,8 @@ New in verison 0.9.0:
   * C++: There is no longer a default value for the "index" argument for
     Entry methods (including subclasses) which accept it (viz. Input,
     Scalar, ScalarIndex, Scale, CScale, Offset COffset, Coefficient,
-    CCoefficient).  The exception to this is with Entry subclasses for which
-    zero is the only allowed value for the parameter.
+    CCoefficient).  The exception to this is with Entry subclasses for
+    which zero is the only allowed value for the parameter.
 
   * F77 and F95: The bindings no longer raise SIGABRT when the dirfile
     space is exhausted.  Instead they simply return a invalid dirfile unit
@@ -257,13 +297,13 @@ New in verison 0.9.0:
     simply aliases for the current ones and are never returned by the
     bindings.
 
-  * C++ BUG FIX: The Entry methods Input, Scalar, and ScalarIndex (including
-    subclasses) now return zero or NULL when passed an out-of-range index value.
-    Previously they would return, variously, zero, NULL, another value for some
-    other, valid index value, or segfault.
+  * C++ BUG FIX: The Entry methods Input, Scalar, and ScalarIndex
+    (including subclasses) now return zero or NULL when passed an out-of-
+    range index value.  Previously they would return, variously, zero,
+    NULL, another value for some other, valid index value, or segfault.
 
-  * C++ BUG FIX: The flags parameter to Dirfile::Delete() is now unsigned, as it
-    is in the C API.
+  * C++ BUG FIX: The flags parameter to Dirfile::Delete() is now unsigned,
+    as it is in the C API.
 
   * F95 BUG FIX: fgd_add and fgd_alter_entry no longer ignore named scalar
     parameters provided in supplied entry structures.

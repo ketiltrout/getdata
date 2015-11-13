@@ -52,14 +52,14 @@ int gd_fragment_affixes(DIRFILE *D, int index, char **prefix, char **suffix)
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   if (index < 0 || index >= D->n_fragment) {
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_INDEX);
+    return GD_E_BAD_INDEX;
   }
 
   if (D->fragment[index].prefix)
@@ -70,8 +70,8 @@ int gd_fragment_affixes(DIRFILE *D, int index, char **prefix, char **suffix)
   if (D->error) {
     free(p);
     free(s);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", D->error);
+    return D->error;
   }
 
   *prefix = p;
@@ -204,29 +204,21 @@ int gd_alter_affixes(DIRFILE *D, int index, const char *prefix,
 
   _GD_ClearError(D);
 
-  if (D->flags & GD_INVALID) {
+  if (D->flags & GD_INVALID)
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (index <= 0 || index >= D->n_fragment) {
+  else if (index <= 0 || index >= D->n_fragment)
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+  else if ((D->flags & GD_ACCMODE) == GD_RDONLY)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (D->fragment[D->fragment[index].parent].protection & GD_PROTECT_FORMAT) {
+  else if (D->fragment[D->fragment[index].parent].protection & GD_PROTECT_FORMAT)
     _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[D->fragment[index].parent].cname);
-    dreturn("%i", -1);
-    return -1;
+  else
+    _GD_ClearError(D);
+
+  if (D->error) {
+    dreturn("%i", D->error);
+    return D->error;
   }
 
   /* affixes to keep */
@@ -250,8 +242,8 @@ int gd_alter_affixes(DIRFILE *D, int index, const char *prefix,
     for (u = 0; u < n; ++u)
       free(new_codes[u]);
     free(new_codes);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", D->error);
+    return D->error;
   }
 
   _GD_ChangeAffixes(D, index, new_codes, &resort);
@@ -259,7 +251,6 @@ int gd_alter_affixes(DIRFILE *D, int index, const char *prefix,
   free(new_codes);
 
   if (resort) {
-    /* resort */
     qsort(D->entry, D->n_entries, sizeof(gd_entry_t*), _GD_EntryCmp);
     qsort(D->dot_list, D->n_dot, sizeof(gd_entry_t*), _GD_EntryCmp);
   }
@@ -276,8 +267,8 @@ int gd_nfragments(DIRFILE* D) gd_nothrow
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", 0);
-    return 0;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   dreturn("%i", D->n_fragment);
@@ -288,19 +279,19 @@ int gd_parent_fragment(DIRFILE* D, int fragment_index) gd_nothrow
 {
   dtrace("%p, %i", D, fragment_index);
 
-  _GD_ClearError(D);
-
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   if (fragment_index <= 0 || fragment_index >= D->n_fragment) {
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_INDEX);
+    return GD_E_BAD_INDEX;
   }
+
+  _GD_ClearError(D);
 
   dreturn("%i", D->fragment[fragment_index].parent);
   return D->fragment[fragment_index].parent;
@@ -316,8 +307,8 @@ int gd_desync(DIRFILE *D, unsigned int flags)
 
   dtrace("%p, 0x%x", D, flags);
 
-  /* if we can't open directories, we're stuck with the full path method */
 #ifdef GD_NO_DIR_OPEN
+  /* if we can't open directories, we're stuck with the full path method */
   flags |= GD_DESYNC_PATHCHECK;
 #endif
 
@@ -325,8 +316,8 @@ int gd_desync(DIRFILE *D, unsigned int flags)
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", 0);
-    return 0;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   for (i = 0; i < D->n_fragment; ++i) {
@@ -337,8 +328,8 @@ int gd_desync(DIRFILE *D, unsigned int flags)
         buffer = _GD_Malloc(D, strlen(D->name) + strlen(D->fragment[i].bname) +
             strlen(D->fragment[i].sname) + 3);
         if (buffer == NULL) {
-          dreturn("%i", -1);
-          return -1;
+          dreturn("%i", D->error);
+          return D->error;
         }
         sprintf(buffer, "%s%c%s%c%s", D->name, GD_DIRSEP, D->fragment[i].sname,
             GD_DIRSEP, D->fragment[i].bname);
@@ -346,16 +337,16 @@ int gd_desync(DIRFILE *D, unsigned int flags)
         buffer = _GD_Malloc(D, strlen(D->name) + strlen(D->fragment[i].bname) +
             2);
         if (buffer == NULL) {
-          dreturn("%i", -1);
-          return -1;
+          dreturn("%i", D->error);
+          return D->error;
         }
         sprintf(buffer, "%s%c%s", D->name, GD_DIRSEP, D->fragment[i].bname);
       }
       if (stat(buffer, &statbuf)) {
         _GD_SetError(D, GD_E_IO, 0, buffer, 0, NULL);
         free(buffer);
-        dreturn("%i", -1);
-        return -1;
+        dreturn("%i", GD_E_IO);
+        return GD_E_IO;
       }
       free(buffer);
     } else
@@ -363,8 +354,8 @@ int gd_desync(DIRFILE *D, unsigned int flags)
       if (gd_StatAt(D, D->fragment[i].dirfd, D->fragment[i].bname, &statbuf, 0))
       {
         _GD_SetError(D, GD_E_IO, 0, D->fragment[i].cname, 0, NULL);
-        dreturn("%i", -1);
-        return -1;
+        dreturn("%i", GD_E_IO);
+        return GD_E_IO;
       }
 
     if (statbuf.st_mtime != D->fragment[i].mtime) {
@@ -389,22 +380,22 @@ int gd_desync(DIRFILE *D, unsigned int flags)
       dirfd = dup(D->fragment[0].dirfd);
       if (dirfd == -1) {
         _GD_SetError(D, GD_E_IO, GD_E_OPEN, D->name, 0, NULL);
-        dreturn("%i", -1);
-        return -1;
+        dreturn("%i", GD_E_IO);
+        return GD_E_IO;
       }
     }
 
     D->name = NULL; /* so FreeD doesn't delete it */
     if (_GD_ShutdownDirfile(D, 0, 1)) {
       D->name = name;
-      dreturn("%i", -1);
-      return -1;
+      dreturn("%i", D->error);
+      return D->error;
     }
     _GD_Open(D, dirfd, name, flags, sehandler, extra);
     free(name);
 
     if (D->error)
-      changed = -1;
+      changed = D->error;
   }
 
   dreturn("%i", changed);

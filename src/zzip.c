@@ -38,7 +38,7 @@ int _GD_ZzipName(DIRFILE *restrict D gd_unused_, const char *restrict enc_data,
     struct gd_raw_file_ *restrict file, const char *restrict base,
     int temp gd_unused_, int resolv gd_unused_)
 {
-  size_t enc_len;
+  size_t enc_len = 0;
 
   dtrace("%p, \"%s\", %p, \"%s\", <unused>, <unused>", D, enc_data, file, base);
 

@@ -112,44 +112,30 @@ int gd_alter_endianness(DIRFILE* D, unsigned long byte_sex, int fragment,
 
   dtrace("%p, %lx, %i, %i", D, (unsigned long)byte_sex, fragment, move);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
+  if (D->flags & GD_INVALID)
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if ((D->flags & GD_ACCMODE) != GD_RDWR) {
+  else if ((D->flags & GD_ACCMODE) != GD_RDWR)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment) {
+  else if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment)
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (byte_sex != GD_BIG_ENDIAN && byte_sex != GD_LITTLE_ENDIAN) {
+  else if (byte_sex != GD_BIG_ENDIAN && byte_sex != GD_LITTLE_ENDIAN)
     _GD_SetError(D, GD_E_ARGUMENT, GD_E_ARG_ENDIANNESS, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+  else {
+    _GD_ClearError(D);
+
+    if (fragment == GD_ALL_FRAGMENTS) {
+      for (i = 0; i < D->n_fragment; ++i) {
+        _GD_ByteSwapFragment(D, byte_sex, i, move);
+
+        if (D->error)
+          break;
+      }
+    } else
+      _GD_ByteSwapFragment(D, byte_sex, fragment, move);
   }
 
-  _GD_ClearError(D);
-
-  if (fragment == GD_ALL_FRAGMENTS) {
-    for (i = 0; i < D->n_fragment; ++i) {
-      _GD_ByteSwapFragment(D, byte_sex, i, move);
-
-      if (D->error)
-        break;
-    }
-  } else
-    _GD_ByteSwapFragment(D, byte_sex, fragment, move);
-
-  dreturn("%i", (D->error) ? -1 : 0);
-  return (D->error) ? -1 : 0;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 unsigned long gd_endianness(DIRFILE* D, int fragment) gd_nothrow

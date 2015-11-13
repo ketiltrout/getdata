@@ -1554,7 +1554,7 @@ program big_test
 ! 131: fgd_validate check
   n = fgd_validate(d, 'new7')
   call check_err(ne, 131, d, GD_E_BAD_CODE)
-  call check_int(ne, 131, n, -1)
+  call check_int(ne, 131, n, GD_E_BAD_CODE)
 
 ! 132: fgd_framenum check
   str = fgd_reference(d, "data")

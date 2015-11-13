@@ -115,43 +115,39 @@ extern "C" {
 #define GD_MAX_LINE_LENGTH  4096
 
 /* error codes */
-#define GD_E_OK                0 /* this MUST be zero */
-/* unused                      1 */
-#define GD_E_FORMAT            2
-/* unused                      3 */
-#define GD_E_CREAT             4
-#define GD_E_BAD_CODE          5
-#define GD_E_BAD_TYPE          6
-#define GD_E_IO                7
-/* unused                      8 */
-#define GD_E_INTERNAL_ERROR    9
-#define GD_E_ALLOC            10
-#define GD_E_RANGE            11
-#define GD_E_LUT              12
-#define GD_E_RECURSE_LEVEL    13
-#define GD_E_BAD_DIRFILE      14
-#define GD_E_BAD_FIELD_TYPE   15
-#define GD_E_ACCMODE          16
-#define GD_E_UNSUPPORTED      17
-#define GD_E_UNKNOWN_ENCODING 18
-#define GD_E_BAD_ENTRY        19
-#define GD_E_DUPLICATE        20
-#define GD_E_DIMENSION        21
-#define GD_E_BAD_INDEX        22
-#define GD_E_BAD_SCALAR       23
-#define GD_E_BAD_REFERENCE    24
-#define GD_E_PROTECTED        25
-#define GD_E_DELETE           26
-#define GD_E_ARGUMENT         27
-#define GD_E_CALLBACK         28
-#define GD_E_EXISTS           29
-#define GD_E_UNCLEAN_DB       30
-#define GD_E_DOMAIN           31
-/* unused                     32, 33, 34 */
-#define GD_E_BOUNDS           35
-#define GD_E_LINE_TOO_LONG    36
+#define GD_E_OK               (  0) /* this MUST be zero */
+#define GD_E_FORMAT           ( -1)
+#define GD_E_CREAT            ( -2)
+#define GD_E_BAD_CODE         ( -3)
+#define GD_E_BAD_TYPE         ( -4)
+#define GD_E_IO               ( -5)
+#define GD_E_INTERNAL_ERROR   ( -6)
+#define GD_E_ALLOC            ( -7)
+#define GD_E_RANGE            ( -8)
+#define GD_E_LUT              ( -9)
+#define GD_E_RECURSE_LEVEL    (-10)
+#define GD_E_BAD_DIRFILE      (-11)
+#define GD_E_BAD_FIELD_TYPE   (-12)
+#define GD_E_ACCMODE          (-13)
+#define GD_E_UNSUPPORTED      (-14)
+#define GD_E_UNKNOWN_ENCODING (-15)
+#define GD_E_BAD_ENTRY        (-16)
+#define GD_E_DUPLICATE        (-17)
+#define GD_E_DIMENSION        (-18)
+#define GD_E_BAD_INDEX        (-19)
+#define GD_E_BAD_SCALAR       (-20)
+#define GD_E_BAD_REFERENCE    (-21)
+#define GD_E_PROTECTED        (-22)
+#define GD_E_DELETE           (-23)
+#define GD_E_ARGUMENT         (-24)
+#define GD_E_CALLBACK         (-25)
+#define GD_E_EXISTS           (-26)
+#define GD_E_UNCLEAN_DB       (-27)
+#define GD_E_DOMAIN           (-28)
+#define GD_E_BOUNDS           (-29)
+#define GD_E_LINE_TOO_LONG    (-30)
 
-#define GD_N_ERROR_CODES      37 /* including unused codes */
+#define GD_N_ERROR_CODES      31 /* including GD_E_OK and unused codes */
 
 /* Deprecated error codes */
 #define GD_E_BAD_ENDIANNESS   GD_E_ARGUMENT

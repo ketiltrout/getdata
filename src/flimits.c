@@ -96,66 +96,49 @@ int gd_alter_frameoffset64(DIRFILE* D, off64_t offset, int fragment, int move)
 
   dtrace("%p, %lli, %i, %i", D, (long long)offset, fragment, move);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
+  if (D->flags & GD_INVALID)
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if ((D->flags & GD_ACCMODE) != GD_RDWR) {
+  else if ((D->flags & GD_ACCMODE) != GD_RDWR)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment) {
+  else if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment)
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (offset < 0) {
+  else if (offset < 0)
     _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+  else {
+    _GD_ClearError(D);
+
+    if (fragment == GD_ALL_FRAGMENTS) {
+      for (i = 0; i < D->n_fragment; ++i) {
+        _GD_ShiftFragment(D, offset, i, move);
+
+        if (D->error)
+          break;
+      }
+    } else
+      _GD_ShiftFragment(D, offset, fragment, move);
   }
 
-  _GD_ClearError(D);
-
-  if (fragment == GD_ALL_FRAGMENTS) {
-    for (i = 0; i < D->n_fragment; ++i) {
-      _GD_ShiftFragment(D, offset, i, move);
-
-      if (D->error)
-        break;
-    }
-  } else
-    _GD_ShiftFragment(D, offset, fragment, move);
-
-  dreturn("%i", (D->error) ? -1 : 0);
-  return (D->error) ? -1 : 0;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 off64_t gd_frameoffset64(DIRFILE* D, int fragment)
 {
   dtrace("%p, %i", D, fragment);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
+  if (D->flags & GD_INVALID)
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (fragment < 0 || fragment >= D->n_fragment) {
+  else if (fragment < 0 || fragment >= D->n_fragment)
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+  else {
+    _GD_ClearError(D);
+
+    dreturn("%lli", (long long)D->fragment[fragment].frame_offset);
+    return D->fragment[fragment].frame_offset;
   }
 
-  _GD_ClearError(D);
-
-  dreturn("%lli", (long long)D->fragment[fragment].frame_offset);
-  return D->fragment[fragment].frame_offset;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 /* 32(ish)-bit wrappers for the 64-bit versions, when needed */
@@ -358,33 +341,31 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
 off64_t gd_eof64(DIRFILE* D, const char *field_code)
 {
   off64_t ns;
-  gd_entry_t *entry;
+  gd_entry_t *entry = NULL;
   int is_index;
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  _GD_ClearError(D);
-
-  if (D->flags & GD_INVALID) {
+  if (D->flags & GD_INVALID)
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+  else {
+    _GD_ClearError(D);
+
+    entry = _GD_FindEntry(D, field_code, NULL, 1, 1);
   }
 
-  entry = _GD_FindEntry(D, field_code, NULL, 1, 1);
-
   if (D->error) {
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", D->error);
+    return D->error;
   }
 
   ns = _GD_GetEOF(D, entry, NULL, &is_index);
 
-  if (is_index)
+  if (!D->error && is_index)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
 
-  dreturn("%lli", (unsigned long long)ns);
-  return ns;
+  dreturn("%lli", (unsigned long long)(D->error ? D->error : ns));
+  return D->error ? D->error : ns;
 }
 
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */
@@ -548,31 +529,33 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
 off64_t gd_bof64(DIRFILE* D, const char *field_code) gd_nothrow
 {
   off64_t bof;
-  gd_entry_t *entry;
+  gd_entry_t *entry = NULL;
   unsigned int spf;
   int64_t ds;
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  _GD_ClearError(D);
-
-  if (D->flags & GD_INVALID) {
+  if (D->flags & GD_INVALID)
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+  else {
+    _GD_ClearError(D);
+
+    entry = _GD_FindEntry(D, field_code, NULL, 1, 1);
   }
 
-  entry = _GD_FindEntry(D, field_code, NULL, 1, 1);
-
   if (D->error) {
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", D->error);
+    return D->error;
   }
 
   bof = _GD_GetBOF(D, entry, NULL, &spf, &ds);
 
-  if (bof != -1)
-    bof = bof * spf + ds;
+  if (bof == -1) { /* error */
+    dreturn("%i", D->error);
+    return D->error;
+  }
+
+  bof = bof * spf + ds;
 
   dreturn("%lli", (unsigned long long)bof);
   return bof;

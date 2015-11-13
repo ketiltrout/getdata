@@ -1133,57 +1133,42 @@ int gd_metaflush(DIRFILE* D)
 {
   dtrace("%p", D);
 
-  _GD_ClearError(D);
-
-  if (D->flags & GD_INVALID) {
+  if (D->flags & GD_INVALID)
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+  else if ((D->flags & GD_ACCMODE) == GD_RDONLY)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+  else {
+    _GD_ClearError(D);
+
+    _GD_FlushMeta(D, GD_ALL_FRAGMENTS, 0);
   }
 
-  _GD_FlushMeta(D, GD_ALL_FRAGMENTS, 0);
-
-  dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
-  return (D->error == GD_E_OK) ? 0 : -1;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 int gd_rewrite_fragment(DIRFILE* D, int fragment)
 {
   dtrace("%p, %i", D, fragment);
 
-  _GD_ClearError(D);
-
-  if (D->flags & GD_INVALID) {
+  if (D->flags & GD_INVALID)
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", 1);
-    return -1;
-  }
-
-  if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment) {
+  else if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment)
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+  else if ((D->flags & GD_ACCMODE) == GD_RDONLY)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+  else {
+    _GD_ClearError(D);
+
+    _GD_FlushMeta(D, fragment, 1);
   }
 
-  _GD_FlushMeta(D, fragment, 1);
-
-  dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
-  return (D->error == GD_E_OK) ? 0 : -1;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
-static int _GD_SyncOrClose(DIRFILE* D, const char* field_code, int syn, int clo)
+static void _GD_SyncOrClose(DIRFILE* D, const char* field_code, int syn,
+    int clo)
 {
   unsigned int i;
   gd_entry_t *E;
@@ -1207,44 +1192,37 @@ static int _GD_SyncOrClose(DIRFILE* D, const char* field_code, int syn, int clo)
       _GD_Flush(D, E, syn, clo);
   }
 
-  dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
-  return (D->error == GD_E_OK) ? 0 : -1;
+  dreturnvoid();
 }
 
 int gd_sync(DIRFILE *D, const char *field_code)
 {
-  int ret;
-
   dtrace("%p, \"%s\"", D, field_code);
 
-  ret = _GD_SyncOrClose(D, field_code, 1, 0);
+  _GD_SyncOrClose(D, field_code, 1, 0);
 
-  dreturn("%i", ret);
-  return ret;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 int gd_raw_close(DIRFILE *D, const char *field_code)
 {
-  int ret;
-
   dtrace("%p, \"%s\"", D, field_code);
 
-  ret = _GD_SyncOrClose(D, field_code, 0, 1);
+  _GD_SyncOrClose(D, field_code, 0, 1);
 
-  dreturn("%i", ret);
-  return ret;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 int gd_flush(DIRFILE *D, const char *field_code)
 {
-  int ret;
-
   dtrace("%p, \"%s\"", D, field_code);
 
-  ret = _GD_SyncOrClose(D, field_code, 1, 1);
+  _GD_SyncOrClose(D, field_code, 1, 1);
 
-  dreturn("%i", ret);
-  return ret;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 #define GD_VERS_GE_1  0xFFFFFFFEUL
@@ -1463,8 +1441,8 @@ int gd_dirfile_standards(DIRFILE *D, int vers) gd_nothrow
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   if (~D->flags & GD_HAVE_VERSION)
@@ -1486,8 +1464,8 @@ int gd_dirfile_standards(DIRFILE *D, int vers) gd_nothrow
   {
     _GD_SetError(D, GD_E_ARGUMENT, (D->av == 0) ? GD_E_ARG_NO_VERS :
         GD_E_ARG_BAD_VERS, NULL, vers, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_ARGUMENT);
+    return GD_E_ARGUMENT;
   }
 
   D->standards = vers;

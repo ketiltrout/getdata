@@ -140,8 +140,8 @@ int gd_verbose_prefix(DIRFILE *D, const char *prefix) gd_nothrow
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   _GD_ClearError(D);
@@ -149,8 +149,8 @@ int gd_verbose_prefix(DIRFILE *D, const char *prefix) gd_nothrow
   if (prefix) {
     ptr = _GD_Strdup(D, prefix);
     if (D->error) {
-      dreturn("%i", -1);
-      return -1;
+      dreturn("%i", GD_E_ALLOC);
+      return GD_E_ALLOC;
     }
   }
 

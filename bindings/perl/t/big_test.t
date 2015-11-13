@@ -1318,7 +1318,7 @@ $_ = &GetData::invalid_dirfile;
 CheckOK2(156, 0);
 $s = $_->fragments;
 CheckError2(156, 1, $GetData::E_BAD_DIRFILE);
-CheckNum2(156, 2, $s, 0);
+CheckNum2(156, 2, $s, $GetData::E_BAD_DIRFILE);
 $_->close;
 $_ = $d;
 
@@ -2226,7 +2226,7 @@ CheckSArray(295, $s, qw(eka eka eka eka eka eka eka eka));
 
   $s = $_->reference();
   CheckOK2(243, 2);
-  CheckString(243, $s, undef);
+  CheckNum(243, $s, undef);
 }
 
 

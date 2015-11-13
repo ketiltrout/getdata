@@ -399,33 +399,21 @@ int gd_include_affix(DIRFILE* D, const char* file, int fragment_index,
   dtrace("%p, \"%s\", %i, \"%s\", \"%s\", 0x%lX", D, file, fragment_index,
       prefix, suffix, flags);
 
-  _GD_ClearError(D);
-
-  if (D->flags & GD_INVALID) {/* don't crash */
+  if (D->flags & GD_INVALID)
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-  /* check access mode */
-  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+  else if ((D->flags & GD_ACCMODE) == GD_RDONLY)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  /* check for include index out of range */
-  if (fragment_index < 0 || fragment_index >= D->n_fragment) {
+  else if (fragment_index < 0 || fragment_index >= D->n_fragment)
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  /* check protection */
-  if (D->fragment[fragment_index].protection & GD_PROTECT_FORMAT) {
+  else if (D->fragment[fragment_index].protection & GD_PROTECT_FORMAT)
     _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[fragment_index].cname);
-    dreturn("%i", -1);
-    return -1;
+  else
+    _GD_ClearError(D);
+
+  if (D->error) {
+    dreturn("%i", D->error);
+    return D->error;
   }
 
   if (~D->flags & GD_HAVE_VERSION)
@@ -482,8 +470,8 @@ int gd_include_affix(DIRFILE* D, const char* file, int fragment_index,
   }
   free(ref_name);
 
-  dreturn("%i", new_fragment);
-  return new_fragment;
+  dreturn("%i", D->error ? D->error : new_fragment);
+  return D->error ? D->error : new_fragment;
 }
 
 int gd_include(DIRFILE* D, const char* file, int fragment_index,
@@ -550,33 +538,25 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
 
   dtrace("%p, %i, %i", D, fragment_index, del);
 
-  _GD_ClearError(D);
-
-  if (D->flags & GD_INVALID) {/* don't crash */
+  if (D->flags & GD_INVALID)
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+  else if ((D->flags & GD_ACCMODE) == GD_RDONLY)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (fragment_index <= 0 || fragment_index >= D->n_fragment) {
+  else if (fragment_index <= 0 || fragment_index >= D->n_fragment)
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
-    dreturn("%i", -1);
-    return -1;
+  else {
+    _GD_ClearError(D);
+
+    parent = D->fragment[fragment_index].parent;
+
+    if (D->fragment[parent].protection & GD_PROTECT_FORMAT)
+      _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+          D->fragment[parent].cname);
   }
 
-  parent = D->fragment[fragment_index].parent;
-
-  if (D->fragment[parent].protection & GD_PROTECT_FORMAT) {
-    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
-        D->fragment[parent].cname);
-    dreturn("%i", -1);
-    return -1;
+  if (D->error) {
+    dreturn("%i", D->error);
+    return D->error;
   }
 
   /* find all affected fragments */
@@ -584,8 +564,8 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
 
   if (D->error) {
     free(f);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", D->error);
+    return D->error;
   }
 
   /* close affected raw fields */
@@ -603,8 +583,8 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
 
   if (D->error) {
     free(f);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", D->error);
+    return D->error;
   }
 
   /* Nothing from now on may fail */

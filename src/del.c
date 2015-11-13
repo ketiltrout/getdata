@@ -226,7 +226,7 @@ static void _GD_DeReference(DIRFILE *restrict D, gd_entry_t *restrict E,
   dreturnvoid();
 }
 
-static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
+static void _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
     unsigned int index, unsigned int flags)
 {
   unsigned int first, last = 0;
@@ -238,37 +238,32 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   dtrace("%p, %p, %u, 0x%X", D, E, index, flags);
 
-  if ((D->flags & GD_ACCMODE) != GD_RDWR) {
+  if ((D->flags & GD_ACCMODE) != GD_RDWR)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  len = strlen(E->field);
-
-  /* check protection */
-  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
+  else if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT)
     _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[E->fragment_index].cname);
-    dreturn("%i", -1);
-    return -1;
+  else if (E->e->n_meta > 0 && ~flags & GD_DEL_META)
+    /* This field has metafields and we weren't asked to delete those too:
+     * complain */
+    _GD_SetError(D, GD_E_DELETE, GD_E_DEL_META, NULL, 0, E->field);
+
+  if (D->error) {
+    dreturnvoid();
+    return;
   }
 
-  /* If this field has metafields, and we weren't asked to delete those too,
-   * complain */
-  if (E->e->n_meta > 0 && ~flags & GD_DEL_META) {
-    _GD_SetError(D, GD_E_DELETE, GD_E_DEL_META, NULL, 0, E->field);
-    dreturn("%i", -1);
-    return -1;
-  } else if (E->e->n_meta > 0) {
+  if (E->e->n_meta > 0) {
+    len = strlen(E->field);
+
     /* find one of the meta fields -- it's not true that metafields are
      * necessarily sorted directly after their parent */
     if (_GD_FindField(D, E->e->p.meta_entry[0]->field, D->entry, D->n_entries,
           0, &first) == NULL)
     {
       _GD_InternalError(D);
-      dreturn("%i", -1);
-      return -1;
+      dreturnvoid();
+      return;
     }
     last = first;
 
@@ -295,8 +290,8 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
           E->e->n_meta) + 1));
 
   if (del_list == NULL) {
-    dreturn("%i", -1);
-    return -1;
+    dreturnvoid();
+    return;
   }
 
   del_list[0] = E;
@@ -320,8 +315,8 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
 
         if (D->error) {
           free(del_list);
-          dreturn("%i", -1);
-          return -1;
+          dreturnvoid();
+          return;
         }
       }
 
@@ -330,8 +325,8 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
     /* close data file, if open */
     if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_DISCARD)) {
       free(del_list);
-      dreturn("%i", -1);
-      return -1;
+      dreturnvoid();
+      return;
     }
 
     if (flags & GD_DEL_DATA) {
@@ -340,14 +335,14 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
         _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
             D->fragment[E->fragment_index].cname);
         free(del_list);
-        dreturn("%i", -1);
-        return -1;
+        dreturnvoid();
+        return;
       }
 
       if (!_GD_Supports(D, E, GD_EF_NAME | GD_EF_UNLINK)) {
         free(del_list);
-        dreturn("%i", -1);
-        return -1;
+        dreturnvoid();
+        return;
       }
 
       if ((*_GD_ef[E->e->u.raw.file[0].subenc].name)(D,
@@ -355,8 +350,8 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
             E->e->u.raw.file, E->e->u.raw.filebase, 0, 0))
       {
         free(del_list);
-        dreturn("%i", -1);
-        return -1;
+        dreturnvoid();
+        return;
       }
 
       if ((*_GD_ef[E->e->u.raw.file[0].subenc].unlink)(
@@ -365,8 +360,8 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
         if (errno != ENOENT) {
           _GD_SetEncIOError(D, GD_E_IO_UNLINK, E->e->u.raw.file + 0);
           free(del_list);
-          dreturn("%i", -1);
-          return -1;
+          dreturnvoid();
+          return;
         }
       }
     }
@@ -377,8 +372,8 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
     new_ref = _GD_Malloc(D, sizeof(*new_ref) * D->n_fragment);
     if (new_ref == NULL) {
       free(del_list);
-      dreturn("%i", -1);
-      return -1;
+      dreturnvoid();
+      return;
     }
     memset(new_ref, 0, sizeof(char*) * D->n_fragment);
 
@@ -408,8 +403,8 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
                   free(new_ref[f]);
                 free(new_ref);
                 free(del_list);
-                dreturn("%i", -1);
-                return -1;
+                dreturnvoid();
+                return;
               }
 
               if (i == 0)
@@ -491,35 +486,34 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
       sizeof(gd_entry_t *) * (D->n_entries - index - 1));
   D->n_entries--;
 
-  dreturn("%i", 0);
-  return 0;
+  dreturnvoid();
 }
 
 int gd_delete(DIRFILE *D, const char *field_code, unsigned int flags)
 {
   unsigned index;
-  int ret;
   gd_entry_t *E;
 
   dtrace("%p, \"%s\", 0x%X", D, field_code, flags);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_BAD_DIRFILE);
+    return GD_E_BAD_DIRFILE;
   }
 
   _GD_ClearError(D);
 
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, &index);
 
-  if (D->error) {
-    dreturn("%i", -1);
-    return -1;
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    dreturn("%i", GD_E_BAD_CODE);
+    return GD_E_BAD_CODE;
   }
 
-  ret = _GD_Delete(D, E, index, flags);
+  _GD_Delete(D, E, index, flags);
 
-  dreturn("%i", ret);
-  return ret;
+  dreturn("%i", D->error);
+  return D->error;
 }

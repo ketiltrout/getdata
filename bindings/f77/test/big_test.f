@@ -1428,7 +1428,7 @@ C     130: GDENFL check
 C     131: GDVLDT check
       CALL GDVLDT(n, d, 'new7', 4)
       CALL CHKERR(ne, 131, d, GD_EBC)
-      CALL CHKINT(ne, 131, n, -1)
+      CALL CHKINT(ne, 131, n, GD_EBC)
 
 C     132: GDFNUM check
       l = slen

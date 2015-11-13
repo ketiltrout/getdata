@@ -1,0 +1,295 @@
+.\" gd_alter_entry.3.  The gd_alter_entry man page.
+.\"
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013, 2014 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_alter_entry 3 "16 October 2014" "Version 0.9.0" "GETDATA"
+.SH NAME
+gd_alter_entry \(em modify the metadata of a dirfile field
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_alter_entry(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const gd_entry_t *" entry ", int " recode );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_alter_entry ()
+function modifies the field specified by 
+.I field_code
+in the dirfile specified by
+.I dirfile
+to correspond to the new parameters specified by
+.IR entry .
+In addition to specifying a regular field,
+.I field_code
+may also refer to a metafield by specifying it using its full (slashed) field
+code.  However,
+.I field_code
+should never contain a representation suffix.
+
+The form of
+.I entry
+is described in detail in the
+.BR get_entry (3)
+man page.  The
+.IR entry -> field
+and
+.IR entry -> fragment_index
+members are ignored by this function and need not be initialised.  All other
+members appropriate to the field type of 
+.I field_code
+should be initialised, except as noted below.  To change the fragment index of a
+field, use
+.BR gd_move (3).
+To change the name of a field, use
+.BR gd_rename (3).
+
+The only flags in the
+.IR entry -> flags
+member which are honoured are
+.BR GD_EN_HIDDEN ,
+which should be set or cleared to set the hiddenness of the entry (see
+.BR gd_hidden (3)),
+and
+.BR GD_EN_COMPSCAL ,
+which indicates whether scalar parameters are initialised from the complex
+valued or purely real member, which both are present
+.RB ( LINCOM ,
+.BR POLYNOM ,
+.BR RECIP ).
+
+If
+.I field_code
+specifies a
+.B RAW
+field and the
+.I recode
+argument is non-zero, the binary file associated with the field will be
+converted for changes in data type and samples-per-frame.  In this case,
+the field's I/O pointer will be reset to the beginning-of-frame.  If
+.I recode
+is zero, no binary file conversion will take place.
+
+If
+.I field_code
+specifies a
+.B LINTERP
+field and the
+.I recode
+argument is non-zero, the look-up table file will be moved if
+.IR entry -> table
+specifies a different path.  If a file with the new pathname already exists, it
+will be overwritten.  If the field specified by
+.I field_code
+is of type other than
+.B RAW
+or
+.BR LINTERP ,
+the
+.I recode
+argument is ignored.
+
+If
+.I field_code
+specified a
+.B LINCOM
+or
+.B POLYNOM
+field, the value of
+.IR entry -> comp_scal
+indicates whether the purely real scalar lists
+.RI ( entry -> a ", or " entry -> b " and " entry -> m )
+or the complex valued lists
+.RI ( entry -> ca ", or " entry -> cb " and " entry -> cm )
+will be used.  The unused counterparts need not be initialised.
+
+The
+.IR entry -> field_type
+member must correspond to the field type of
+.IR field_code .
+This interface cannot be used to change the type of a given field.  To do so,
+delete the old field first with
+.BR gd_delete (3),
+and then create a new field of the desired type with
+.BR gd_add (3).
+
+Some entry members have special values which indicate no change should be
+made to the member.  These special values are:
+.TP
+.B NULL\fR:
+any of the string members, also 
+.IR m ", " b ", " a ", " cm ", " cb ", or " ca ;
+.TP
+.B 0\fR:
+.IR spf ", " n_fields ", " numbits ", " cdividend ", " dividend ", or " array_len ;
+.TP
+.B -1\fR:
+.IR bitnum " or " period ;
+.TP
+.B GD_NULL\fR:
+.IR data_type " or " const_type ;
+.TP
+.B GD_WINDOP_UNK\fR:
+.IR windop .
+.PP
+All
+.IR entry -> scalar
+elements relevant for the given field type must be initialised to one of the
+following values:
+.IP \(bu 4
+a pointer to a field code indicating a new scalar field to be used for the
+corresponding field parameter.  If the parameter was previously a literal
+number, it will be replaced by the specified field code.  If the parameter was
+previously a field code, the new field code will replace the old one.  If the
+field code specifies a
+.B CARRAY
+field, the corresponding
+.IR entry -> scalar_ind
+element should also be set.
+.IP \(bu 4
+a pointer to the empty string ("").  In this case, no change is made to the
+field code for the corresponding field parameter: if one already existed, it is
+kept, otherwise the corresponding literal numerical parameter is used.  If the
+value of the corresponding numerical
+.I entry
+member is the special value listed above indicating no change, no change is
+made to the field parameter at all.
+.IP \(bu 4
+the NULL pointer.  If the corresponding field parameter was previously a field
+code, the field code will be deleted and a literal number used instead.  In the
+special case when a scalar element is NULL and the corresponding numerical
+.I entry
+member contains a special value indicating no change listed above, GetData will
+de-reference the previous field code value and convert it into a literal number
+before removing the field code from the entry.
+.PP
+If this function is used to increase the length of a
+.B CARRAY
+field, the added elements will be uninitialised.  Use
+.BR gd_put_carray_slice (3)
+or equivalent to initialise them.
+
+.SH RETURN VALUE
+On success,
+.BR gd_alter_entry ()
+returns zero.   On error, it returns a non-zero dirfile error.  Possible error
+values are:
+.TP 8
+.B GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The field specified by
+.I field_code
+was not found or a supplied field code did not contain the appropriate prefix
+or suffix.  This error may also result from attempting to dereference a scalar
+field code which indicates a non-existent field.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_ENTRY
+One or more of the parameters specified in
+.I entry
+was invalid.
+.TP
+.B GD_E_BAD_FIELD_TYPE
+The
+.IR entry -> field_type
+parameter did not correspond to the type of the field specified by
+.IR field_code ,
+or an attempt was made to modify the immutable
+.I INDEX
+field.  This error may also result from attempting to dereference a scalar
+field code which does not indicate a
+.B CONST
+or
+.B CARRAY
+field.
+.TP
+.B GD_E_BAD_TYPE
+The
+.IR entry -> data_type
+parameter provided with a
+.BR RAW
+entry, or the
+.IR entry -> const_type
+parameter provided with a
+.BR CONST
+or
+.BR CARRAY
+entry, was invalid.
+.TP
+.B GD_E_IO
+An I/O error occurred while translating the binary file associated with a
+modified
+.B RAW
+field, or an I/O error occurred while attempting to rename a
+.B LINTERP
+table file.
+.TP
+.B GD_E_PROTECTED
+The metadata of the fragment was protected from change.  Or, a request to
+translate the binary file associated with a
+.B RAW
+field was attempted, but the data of the fragment was protected.
+.TP
+.B GD_E_UNKNOWN_ENCODING
+The encoding scheme of the indicated format specification fragment is not known
+to the library.  As a result, the library was unable to translate the binary
+file be associated with a modified
+.B RAW
+field.
+.TP
+.B GD_E_UNSUPPORTED
+The encoding scheme of the indicated format specification fragment does not
+support translating the binary file associated with a modified
+.B RAW
+field.
+.PP
+The dirfile error may also be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH SEE ALSO
+.BR gd_alter_bit (3),
+.BR gd_alter_carray (3),
+.BR gd_alter_const (3),
+.BR gd_alter_divide (3),
+.BR gd_alter_lincom (3),
+.BR gd_alter_linterp (3),
+.BR gd_alter_multiply (3),
+.BR gd_alter_phase (3),
+.BR gd_alter_polynom (3),
+.BR gd_alter_raw (3),
+.BR gd_alter_recip (3),
+.BR gd_alter_spec (3),
+.BR gd_delete (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_hidden (3),
+.BR gd_malter_spec (3),
+.BR gd_metaflush (3),
+.BR gd_move (3),
+.BR gd_open (3),
+.BR gd_put_carray_slice (3),
+.BR gd_rename (3),
+.BR dirfile-format (5)

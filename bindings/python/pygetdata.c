@@ -23,14 +23,11 @@
 static PyObject *GdPy_DirfileError;
 static const char *gdpy_exception_list[GD_N_ERROR_CODES] = {
   NULL,
-  NULL, /* 1 */
   "Format",
-  NULL, /* 3 */
   "Creation",
   "BadCode",
   "BadType",
   "IO",
-  NULL, /* 8 */
   "Internal",
   "Alloc",
   "Range",
@@ -54,9 +51,6 @@ static const char *gdpy_exception_list[GD_N_ERROR_CODES] = {
   "Exists",
   "UncleanDatabase",
   "Domain",
-  "BadRepr",
-  NULL, /* 33 */
-  NULL, /* 34 */
   "Bounds",
   "LineTooLong"
 };
@@ -70,6 +64,7 @@ static struct {
 } gdpy_dead_exceptions[] = {
   { "BadEndianness", GD_E_ARGUMENT },
   { "BadProtection", GD_E_ARGUMENT },
+  { "BadRepr", GD_E_BAD_CODE },
   { "BadVersion", GD_E_ARGUMENT },
   { "OpenLinfile", GD_E_LUT },
   { "Flush", GD_E_IO },
@@ -591,7 +586,7 @@ static PyMethodDef GetDataMethods[] = {
       "symbols.  This method will return pygetdata.RDWR if the library can\n"
       "read and write the encoding, pygetdata.RDONLY if the library can\n"
       /* ------- handy ruler ---------------------------------------------| */
-      "only read the encodin, or None otherwise.  See\n"
+      "only read the encoding, or None otherwise.  See\n"
       "gd_encoding_support(3)."
   },
   { NULL, NULL, 0, NULL }
@@ -716,9 +711,9 @@ PyMODINIT_FUNC initpygetdata(void)
     for (i = 0; gdpy_dead_exceptions[i].name; ++i) {
       char name[40];
       sprintf(name, "%sError", gdpy_dead_exceptions[i].name);
-      Py_INCREF(gdpy_exceptions[gdpy_dead_exceptions[i].e]);
+      Py_INCREF(gdpy_exceptions[-gdpy_dead_exceptions[i].e]);
       PyDict_SetItemString(mdict, name,
-          gdpy_exceptions[gdpy_dead_exceptions[i].e]);
+          gdpy_exceptions[-gdpy_dead_exceptions[i].e]);
     }
 
   dreturnvoid();

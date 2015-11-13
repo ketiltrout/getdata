@@ -1,0 +1,156 @@
+.\" gd_move.3.  The gd_move man page.
+.\"
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013, 2014, 2015 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_move 3 "5 November 2015 "Version 0.10.0" "GETDATA"
+.SH NAME
+gd_move \(em move a dirfile entry between format specification fragments
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_move(DIRFILE *" dirfile ", const char"
+.BI * field_code ", int " new_fragment ", unsigned int " flags );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_move ()
+function transfers the field or alias specified by
+.IR field_code ,
+which should not have a representation suffix, defined in the dirfile
+specified by
+.IR dirfile
+from it's current format specification fragment to the fragment indexed by
+.IR new_fragment .
+If the field is already defined in the fragment index by
+.IR new_fragment ,
+this function does nothing and returns no error.
+
+If the new fragment has different affixes, the field will be renamed as part of
+the move.  See
+.BR gd_rename (3)
+for details on field renaming.  The field is closed before moving, resulting
+in it's I/O pointer being reset to the beginning-of-field.
+
+The
+.I flags
+parameter should be zero or more of the following flags, bitwise or'd together:
+.TP
+.B GD_REN_DANGLE
+By default, if the move results in a change of name for the field due to
+differing fragment affixes,
+.B ALIAS
+entries pointing to this field will be updated with the field's new name.
+Specifying this flag prohibits this behaviour, turning these aliases into
+dangling aliases.  If moving the field doesn't rename it, this flag is ignored.
+.TP
+.B GD_REN_DATA
+If
+.I field_code
+specifies a
+.B RAW
+field, the binary file associated with the field will be translated to account
+for the possibly different encoding, endianness, and frame offset of the
+new format specification fragment.  It will also be moved to a new directory, if
+necessary.
+
+If this flag is not specified, no changes will be made to the binary file.  If
+.I field_code
+specifies a field of type other than
+.BR RAW ,
+this flag is ignored.
+
+If the binary file is translated, and the frame offset of the destination
+fragment is larger than that of the source fragment, this will result in
+permanent deletion of data from the database.  If the new frame offset is
+smaller than the old frame offset, the binary file will be padded at the front
+with zeroes.
+.TP
+.B GD_REN_FORCE
+Skip updating entries which would be invalid (see
+.BR gd_rename (3)
+for details).  By default, an invalid field causes the move to fail.  If moving
+the field doesn't rename it, this flag is ignored.
+.TP
+.B GD_REN_UPDB
+If moving the field renames it, update entries which use this field as an input
+to account for the new name (see
+.BR gd_rename (3)).
+If moving the field doesn't rename it, this flag is ignored.
+
+.SH RETURN VALUE
+On success,
+.BR gd_move ()
+returns zero.  On error, it returns a non-zero dirfile error.
+Possible error values are:
+.TP 8
+.B GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The field specified by
+.I field_code
+was not found, or else the move resulted in the field being renamed and
+the resultant metadata update tried to change a field code into something
+prohibited by a fragment's affixes.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_FIELD_TYPE
+An attempt was made to move the immutable
+.I INDEX
+field.
+.TP
+.B GD_E_BAD_INDEX
+The
+.I new_fragment
+argument did not index a valid format specification fragment.
+.TP
+.B GD_E_IO
+An I/O error occurred while attempting to translate a binary file.
+.TP
+.B GD_E_PROTECTED
+The metadata of the source or destination format specification fragments was
+protected from change, or the binary data of the source or destination fragments
+was protected from change and binary file translation was requested.
+.TP
+.B GD_E_UNKNOWN_ENCODING
+The encoding scheme of the source or destination fragment is unknown.
+.TP
+.B GD_E_UNSUPPORTED
+The encoding scheme of the source or destination fragment does not support
+binary file translation.
+.PP
+The dirfile error may also be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH NOTES
+A binary file translation occurs out-of-place.  As a result, sufficient space
+must be present on the filesystem for both the binary file before translation
+and the binary file after translation.
+.SH SEE ALSO
+.BR gd_metaflush (3),
+.BR gd_open (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR dirfile (5),
+.BR dirfile-format (5)

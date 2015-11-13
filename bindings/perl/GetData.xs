@@ -2282,7 +2282,7 @@ fragments(dirfile)
   DIRFILE * dirfile
   PREINIT:
     GDP_DIRFILE_ALIAS;
-    unsigned int nf;
+    int nf;
   ALIAS:
     GetData::Dirfile::fragments = 1
   PPCODE:
@@ -2292,10 +2292,12 @@ fragments(dirfile)
 
     if (GIMME_V == G_ARRAY) {
       unsigned int i;
+      GDP_UNDEF_ON_ERROR();
+
       for (i = 0; i < nf; ++i)
         GDP_PUSHpvz(gd_fragmentname(dirfile, i));
     } else
-      GDP_PUSHuv(nf);
+      GDP_PUSHiv(nf);
 
     dreturnvoid();
 

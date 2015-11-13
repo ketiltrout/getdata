@@ -82,7 +82,7 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   }
 
   if (_GD_DoSeek(D, E, _GD_ef + E->e->u.raw.file[0].subenc, s0, GD_FILE_WRITE)
-      == -1)
+      < 0)
   {
     free(databuffer);
     dreturn("%i", 0);

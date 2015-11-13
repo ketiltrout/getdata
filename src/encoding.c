@@ -900,44 +900,30 @@ int gd_alter_encoding(DIRFILE* D, unsigned long encoding, int fragment,
 
   dtrace("%p, %lu, %i, %i", D, (unsigned long)encoding, fragment, move);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
+  if (D->flags & GD_INVALID)
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if ((D->flags & GD_ACCMODE) != GD_RDWR) {
+  else if ((D->flags & GD_ACCMODE) != GD_RDWR)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment) {
+  else if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment)
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (!_GD_EncodingUnderstood(encoding)) {
+  else if (!_GD_EncodingUnderstood(encoding))
     _GD_SetError(D, GD_E_UNKNOWN_ENCODING, GD_E_UNENC_TARGET, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+  else {
+    _GD_ClearError(D);
+
+    if (fragment == GD_ALL_FRAGMENTS) {
+      for (i = 0; i < D->n_fragment; ++i) {
+        _GD_RecodeFragment(D, encoding, i, move);
+
+        if (D->error)
+          break;
+      }
+    } else
+      _GD_RecodeFragment(D, encoding, fragment, move);
   }
 
-  _GD_ClearError(D);
-
-  if (fragment == GD_ALL_FRAGMENTS) {
-    for (i = 0; i < D->n_fragment; ++i) {
-      _GD_RecodeFragment(D, encoding, i, move);
-
-      if (D->error)
-        break;
-    }
-  } else
-    _GD_RecodeFragment(D, encoding, fragment, move);
-
-  dreturn("%i", (D->error) ? -1 : 0);
-  return (D->error) ? -1 : 0;
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 unsigned long gd_encoding(DIRFILE* D, int fragment) gd_nothrow
@@ -999,8 +985,8 @@ int gd_encoding_support(unsigned long encoding) gd_nothrow
 
   /* make sure we have a valid encoding */
   if (!_GD_EncodingUnderstood(encoding)) {
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_UNKNOWN_ENCODING);
+    return GD_E_UNKNOWN_ENCODING;
   }
 
   /* spin up ltdl if needed */
@@ -1025,8 +1011,8 @@ int gd_encoding_support(unsigned long encoding) gd_nothrow
     }
 
   /* nope */
-  dreturn("%i", -1);
-  return -1;
+  dreturn("%i", GD_E_UNSUPPORTED);
+  return GD_E_UNSUPPORTED;
 }
 
 /* This is basically the non-existant POSIX funcion mkstempat.  There are two

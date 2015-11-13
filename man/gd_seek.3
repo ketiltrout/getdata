@@ -13,9 +13,9 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_seek 3 "25 September 2015" "Version 0.9.0" "GETDATA"
+.TH gd_seek 3 "4 November 2015" "Version 0.10.0" "GETDATA"
 .SH NAME
-gd_seek \(em reposition a dirfile field pointer
+gd_seek \(em reposition a dirfile field I/O pointer
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -132,9 +132,9 @@ on such a field will result in an error.
 .SH RETURN VALUE
 Upon successful completion,
 .BR gd_seek ()
-returns the field position of the specified field in samples.  On error, it
-returns -1 and set the dirfile error to a non-zero value.  Possible error values
-are:
+returns the I/O position of the specified field, in samples, after the seek,
+which will be non-negative.  On error, it returns a negatively-valued dirfile
+error.  Possible error values are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.
@@ -200,7 +200,7 @@ supported by the library.  See
 .BR dirfile-encoding (5)
 for details on dirfile encoding schemes.
 .PP
-The dirfile error may be retrieved by calling
+The dirfile error may also be retrieved by calling
 .BR gd_error (3).
 A descriptive error string for the last error encountered can be obtained from
 a call to
