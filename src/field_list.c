@@ -101,20 +101,20 @@ gd_static_inline_ int _GD_EntryIndex(unsigned int t)
 }
 
 /* returns true if E a member of the given list */
-int _GD_ListEntry(const gd_entry_t *E, int meta, int hidden, int noalias,
+int _GD_ListEntry(const gd_entry_t *E, int meta_ok, int hidden_ok, int noalias,
     int special, gd_entype_t type)
 {
-  dtrace("%p{%s}, %i, %i, %i, %i, 0x%X", E, E->field, meta, hidden, noalias,
-      special, type);
+  dtrace("%p{%s}, %i, %i, %i, %i, 0x%X", E, E->field, meta_ok, hidden_ok,
+      noalias, special, type);
 
   /* check hidden */
-  if (!hidden && (E->flags & GD_EN_HIDDEN)) {
+  if (!hidden_ok && (E->flags & GD_EN_HIDDEN)) {
     dreturn("%i (hidden)", 0);
     return 0;
   }
 
   /* check meta */
-  if (!meta && E->e->n_meta == -1) {
+  if (!meta_ok && E->e->n_meta == -1) {
     dreturn("%i (meta)", 0);
     return 0;
   }
@@ -135,7 +135,7 @@ int _GD_ListEntry(const gd_entry_t *E, int meta, int hidden, int noalias,
     }
       
     if (E->e->entry[0])
-      ret = _GD_ListEntry(E->e->entry[0], meta, hidden, 0, special, type);
+      ret = _GD_ListEntry(E->e->entry[0], 1, 1, 0, special, type);
     dreturn("%i", ret);
     return ret;
   }
@@ -333,10 +333,18 @@ static void *_GD_Constants(DIRFILE* D, const char* parent,
   /* DoField will implicitly choose GD_REPR_AUTO for complex data being returned
    * as purely real */
   for (i = n = 0; i < nentries; ++i) {
-    if (_GD_ListEntry(entry[i], 1, 0, 0, 0, GD_CONST_ENTRY))
-      if (_GD_DoField(D, entry[i], 0, 0, 1, return_type,
+    if (_GD_ListEntry(entry[i], e ? 1 : 0, 0, 0, 0, GD_CONST_ENTRY)) {
+      gd_entry_t *E = entry[i];
+
+      if (E->field_type == GD_ALIAS_ENTRY)
+        E = E->e->entry[0];
+
+      if (_GD_DoField(D, E, 0, 0, 1, return_type,
             fl + n++ * GD_SIZE(return_type)) != 1)
+      {
         break;
+      }
+    }
   }
 
   if (D->error) {
@@ -406,12 +414,19 @@ static gd_carray_t *_GD_Carrays(DIRFILE* D, const char* parent,
   /* DoField will implicitly choose GD_REPR_AUTO for complex data being returned
    * as purely real */
   for (i = n = 0; i < nentries; ++i) {
-    if (_GD_ListEntry(entry[i], 1, 0, 0, 0, GD_CARRAY_ENTRY)) {
-      fl[n].n = entry[i]->EN(scalar,array_len);
+    if (_GD_ListEntry(entry[i], e ? 1 : 0, 0, 0, 0, GD_CARRAY_ENTRY)) {
+      gd_entry_t *E = entry[i];
+
+      if (E->field_type == GD_ALIAS_ENTRY)
+        E = E->e->entry[0];
+
+      fl[n].n = E->EN(scalar,array_len);
       fl[n].d = _GD_Alloc(D, return_type, fl[n].n);
-      if (D->error || _GD_DoField(D, entry[i], 0, 0, fl[n].n,
-            return_type, fl[n].d) < 1)
+      if (D->error || _GD_DoField(D, E, 0, 0, fl[n].n, return_type,
+            fl[n].d) < 1)
+      {
         break;
+      }
       n++;
     }
   }
@@ -481,8 +496,13 @@ static const char **_GD_Strings(DIRFILE* D, const char* parent) gd_nothrow
   }
 
   for (i = n = 0; i < nentries; ++i)
-    if (_GD_ListEntry(entry[i], 1, 0, 0, 0, GD_STRING_ENTRY))
-      fl[n++] = entry[i]->e->u.string;
+    if (_GD_ListEntry(entry[i], e ? 1 : 0, 0, 0, 0, GD_STRING_ENTRY))
+    {
+      if (entry[i]->field_type == GD_ALIAS_ENTRY)
+        fl[n++] = entry[i]->e->entry[0]->e->u.string;
+      else
+        fl[n++] = entry[i]->e->u.string;
+    }
   fl[n] = NULL;
 
   free(*list);

@@ -1149,7 +1149,7 @@ static int _GD_SyncOrClose(DIRFILE* D, const char* field_code, int syn, int clo)
         if (D->entry[i]->field_type == GD_RAW_ENTRY)
           _GD_Flush(D, D->entry[i], syn, clo);
   } else {
-    E = _GD_FindEntry(D, field_code, NULL, 1, 1);
+    E = _GD_FindEntry(D, field_code);
 
     if (!D->error)
       _GD_Flush(D, E, syn, clo);

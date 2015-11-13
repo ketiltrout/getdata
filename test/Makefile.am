@@ -132,10 +132,10 @@ CVLIST_TESTS=cvlist cvlist_array cvlist_array0 cvlist_array_free \
 						 cvlist_invalid cvlist_meta cvlist_meta0 cvlist_meta_hidden \
 						 cvlist_meta_invalid
 
-DEL_TESTS=del_alias del_carray del_carray_deref del_const del_const_deref \
-					del_const_force del_data del_data_enoent del_data_open del_derived \
-					del_derived_after del_derived_force del_del del_meta del_meta_force \
-					del_ref
+DEL_TESTS=del_alias del_bad_code del_carray del_carray_deref del_const \
+					del_const_deref del_const_force del_data del_data_enoent \
+					del_data_open del_derived del_derived_after del_derived_force \
+					del_del del_meta del_meta_force del_ref
 
 DESYNC_TESTS=desync desync_flush desync_path desync_reopen desync_reopen_inv
 
@@ -227,7 +227,8 @@ GZIP_TESTS=gzip_add gzip_del gzip_get gzip_get_far gzip_get_get gzip_get_get2 \
 
 HEADER_TESTS=header_complex header_off64t
 
-HIDE_TESTS=hide hide_hidden hide_unhide
+HIDE_TESTS=hide hide_bad hide_hidden hide_hidden_bad hide_unhide \
+					 hide_unhide_bad
 
 INCLUDE_TESTS=include_accmode include_affix include_auto include_cb \
 							include_creat include_ignore include_include include_index \

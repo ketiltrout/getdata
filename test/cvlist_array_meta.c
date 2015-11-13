@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -34,12 +34,14 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format_data =
+    "data0 CARRAY UINT8 4 8 12 16 20 24 28 32\n"
     "parent CARRAY UINT8 1\n"
     "parent/data1 CARRAY UINT8 1 2 3 4 5\n"
     "parent/data2 CARRAY UINT8 2 4 6 8 10 12\n"
     "parent/data3 CARRAY UINT8 3 6 9 12 15 18 21\n"
-    "META parent data4 LINTERP UINT8 1\n";
-  int fd, r = 0;
+    "META parent data4 LINTERP UINT8 1\n"
+    "/ALIAS parent/data5 data0\n";
+  int j, r = 0;
   size_t i, error;
   struct uint8_carrays {
     size_t n;
@@ -50,9 +52,9 @@ int main(void)
   rmdirfile();
   mkdir(filedir, 0777);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  j = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(j, format_data, strlen(format_data));
+  close(j);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   field_list = (struct uint8_carrays *)gd_mcarrays(D, "parent", GD_UINT8);
@@ -61,10 +63,10 @@ int main(void)
   CHECKI(error, 0);
 
   if (!r)
-    for (fd = 0; fd < 3; ++fd) {
-      CHECKUi(fd,field_list[fd].n, (size_t)(5 + fd));
-      for (i = 0; i < field_list[fd].n; ++i)
-        CHECKUi(fd * 1000 + i,field_list[fd].d[i], (fd + 1) * (i + 1));
+    for (j = 0; j < 4; ++j) {
+      CHECKUi(j,field_list[j].n, (size_t)(5 + j));
+      for (i = 0; i < field_list[j].n; ++i)
+        CHECKUi(j * 1000 + i,field_list[j].d[i], (j + 1) * (i + 1));
     }
 
 

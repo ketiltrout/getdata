@@ -589,6 +589,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
     0;
   D->fragment[0].suffix = D->fragment[0].prefix = NULL;
   D->fragment[0].ns = NULL;
+  D->fragment[0].nsl = 0;
 
   /* parser proto-state */
   p.line = 0;

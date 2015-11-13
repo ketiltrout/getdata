@@ -339,7 +339,7 @@ char* gd_raw_filename(DIRFILE* D, const char* field_code) gd_nothrow
   }
 
   /* Check field */
-  E = _GD_FindEntry(D, field_code, NULL, 1, 1);
+  E = _GD_FindEntry(D, field_code);
 
   if (D->error) {
     dreturn("%p", NULL);
@@ -394,10 +394,9 @@ int gd_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry) gd_nothrow
 
   _GD_ClearError(D);
 
-  E = _GD_FindEntry(D, field_code, NULL, 1, 1);
+  E = _GD_FindEntry(D, field_code);
 
   if (D->error) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%i", -1);
     return -1;
   }
@@ -613,7 +612,7 @@ gd_entype_t gd_entry_type(DIRFILE* D, const char* field_code) gd_nothrow
 
   _GD_ClearError(D);
 
-  E = _GD_FindEntry(D, field_code, NULL, 1, 1);
+  E = _GD_FindEntry(D, field_code);
 
   if (D->error) {
     dreturn("%i", GD_NO_ENTRY);
@@ -670,7 +669,7 @@ int gd_hide(DIRFILE *D, const char *field_code) gd_nothrow
 
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
 
-  if (D->error) {
+  if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%i", -1);
     return -1;
@@ -708,7 +707,7 @@ int gd_hidden(DIRFILE *D, const char *field_code) gd_nothrow
 
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
 
-  if (D->error) {
+  if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%i", -1);
     return -1;
@@ -738,7 +737,7 @@ int gd_unhide(DIRFILE *D, const char *field_code) gd_nothrow
 
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
 
-  if (D->error) {
+  if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%i", -1);
     return -1;
@@ -844,7 +843,7 @@ char *gd_linterp_tablename(DIRFILE *D, const char *field_code) gd_nothrow
 
   _GD_ClearError(D);
 
-  E = _GD_FindEntry(D, field_code, NULL, 1, 1);
+  E = _GD_FindEntry(D, field_code);
 
   if (D->error) {
     dreturn("%p", NULL);

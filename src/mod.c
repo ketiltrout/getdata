@@ -1707,7 +1707,7 @@ static int _GD_AlterSpec(DIRFILE* D, const char* line, const char* parent,
   N = _GD_ParseFieldSpec(D, &p, n_cols, in_cols, parent ? N : NULL,
       N->fragment_index, 0, 0, &outstring, tok_pos);
 
-  /* The parse will have re-applied the prefix and suffix, undo that */
+  /* The parser will have re-applied the prefix and suffix, undo that */
   free(N->field);
   N->field = new_code;
 

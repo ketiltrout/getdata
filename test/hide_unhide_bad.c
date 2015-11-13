@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013, 2015 D. V. Wiebe
+/* Copyright (C) 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,47 +24,17 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
-    "data1 STRING valu2\n"
-    "data2 STRING valu4\n"
-    "/HIDDEN data2\n"
-    "data3 STRING valu3\n"
-    "/ALIAS data4 data2\n"
-    "data5 STRING valu5\n"
-    "/ALIAS data6 data5\n"
-    "/HIDDEN data6\n";
-  int fd, i, error, r = 0;
-  const char **data;
+  int h1, e1, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL);
+  h1 = gd_unhide(D, "something");
+  e1 = gd_error(D);
 
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  data = gd_strings(D);
-
-  error = gd_error(D);
-  CHECKI(error, 0);
-  CHECKPN(data);
-
-  for (i = 0; data[i]; ++i) {
-    int len = strlen(data[i]);
-    CHECKIi(i,len,5);
-
-    if (len == 5) {
-      CHECKIi(i,data[i][0], 'v');
-      CHECKIi(i,data[i][1], 'a');
-      CHECKIi(i,data[i][2], 'l');
-      CHECKIi(i,data[i][3], 'u');
-      CHECKIi(i,data[i][4], '2' + i);
-    }
-  }
-
-  CHECKI(i,4);
+  CHECKI(e1, GD_E_BAD_CODE);
+  CHECKI(h1, -1);
 
   gd_discard(D);
   unlink(format);

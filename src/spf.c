@@ -92,10 +92,7 @@ unsigned int gd_spf(DIRFILE* D, const char *field_code) gd_nothrow
 
   _GD_ClearError(D);
 
-  /* the representation is unimportant: it doesn't change the SPF of the field,
-   * yet we have to run the field code through here to potentially remove it
-   */
-  entry = _GD_FindEntry(D, field_code, NULL, 1, 1);
+  entry = _GD_FindEntry(D, field_code);
 
   if (D->error) {
     dreturn("%u", 0);

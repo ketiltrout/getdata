@@ -20,7 +20,7 @@
  */
 #include "internal.h"
 
-off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
+off64_t _GD_GetIOPos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
 {
   int i;
   off64_t pos = -1, pos2;
@@ -29,9 +29,9 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
-    dreturn("%u", 0);
     D->recurse_level--;
-    return 0;
+    dreturn("%u", -1);
+    return -1;
   }
 
   switch (E->field_type) {
@@ -50,14 +50,14 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
       if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
         break;
 
-      pos = _GD_GetFilePos(D, E->e->entry[0], -1);
+      pos = _GD_GetIOPos(D, E->e->entry[0], -1);
       if (!D->error)
         for (i = 1; i < E->EN(lincom,n_fields); ++i) {
           if (_GD_BadInput(D, E, i, GD_NO_ENTRY, 1)) {
             pos = -1;
             break;
           }
-          pos2 = _GD_GetFilePos(D, E->e->entry[i], pos);
+          pos2 = _GD_GetIOPos(D, E->e->entry[i], pos);
           if (pos2 != pos) {
             _GD_SetError(D, GD_E_DOMAIN, GD_E_DOMAIN_MULTIPOS, NULL, 0, NULL);
             pos = -1;
@@ -72,7 +72,7 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
     case GD_RECIP_ENTRY:
       if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
           break;
-      pos = _GD_GetFilePos(D, E->e->entry[0], -1);
+      pos = _GD_GetIOPos(D, E->e->entry[0], -1);
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
@@ -83,10 +83,10 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
       {
           break;
       }
-      pos = _GD_GetFilePos(D, E->e->entry[0], -1);
+      pos = _GD_GetIOPos(D, E->e->entry[0], -1);
       if (D->error)
         break;
-      pos2 = _GD_GetFilePos(D, E->e->entry[1], pos);
+      pos2 = _GD_GetIOPos(D, E->e->entry[1], pos);
       if (!D->error && pos != pos2) {
         _GD_SetError(D, GD_E_DOMAIN, GD_E_DOMAIN_MULTIPOS, NULL, 0, NULL);
         pos = -1;
@@ -95,7 +95,7 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
     case GD_PHASE_ENTRY:
       if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
         break;
-      pos = _GD_GetFilePos(D, E->e->entry[0], -1);
+      pos = _GD_GetIOPos(D, E->e->entry[0], -1);
       if (pos >= 0)
         pos += E->EN(phase,shift);
       break;
@@ -129,23 +129,23 @@ off64_t gd_tell64(DIRFILE *D, const char *field_code) gd_nothrow
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%u", 0);
-    return 0;
+    dreturn("%u", -1);
+    return -1;
   }
 
   _GD_ClearError(D);
 
-  entry = _GD_FindEntry(D, field_code, NULL, 1, 1);
+  entry = _GD_FindEntry(D, field_code);
 
   if (D->error) {
-    dreturn("%u", 0);
-    return 0;
+    dreturn("%u", -1);
+    return -1;
   }
 
   if (entry->field_type & GD_SCALAR_ENTRY_BIT)
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
   else
-    pos = _GD_GetFilePos(D, entry, -1);
+    pos = _GD_GetIOPos(D, entry, -1);
 
   dreturn("%lli", (long long)pos);
   return pos;
@@ -343,13 +343,13 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code, off64_t frame_num,
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%u", 0);
-    return 0;
+    dreturn("%u", -1);
+    return -1;
   }
 
   _GD_ClearError(D);
 
-  entry = _GD_FindEntry(D, field_code, NULL, 1, 1);
+  entry = _GD_FindEntry(D, field_code);
 
   if (D->error) {
     dreturn("%i", -1);
@@ -377,7 +377,7 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code, off64_t frame_num,
   if (whence == GD_SEEK_SET)
     pos = 0;
   else if (whence == GD_SEEK_CUR)
-    pos = _GD_GetFilePos(D, entry, -1);
+    pos = _GD_GetIOPos(D, entry, -1);
   else if (whence == GD_SEEK_END) {
     pos = _GD_GetEOF(D, entry, NULL, &is_index);
     if (is_index)
@@ -391,7 +391,7 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code, off64_t frame_num,
   if (D->error)
     pos = -1;
   else
-    pos = _GD_GetFilePos(D, entry, -1);
+    pos = _GD_GetIOPos(D, entry, -1);
 
   dreturn("%lli", (long long)pos);
   return pos;

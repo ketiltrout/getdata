@@ -1,3 +1,29 @@
+2015-11-05   D. V. Wiebe <getdata@ketiltrout.net> svn:1028
+	* src/field_list.c (_GD_ListEntry): Force meta_ok and hidden_ok on after
+	dereferencing an alias.
+	* src/field_list.c (_GD_Constants _GD_Carrays _GD_Strings): Handle aliases.
+	* test/cvlist_array.c test/cvlist_array_meta.c test/cvlist_hidden.c
+	test/svlist_hidden.c: Update test.
+
+	* src/open.c (_GD_Open): Zero the unused nsl in fragment[0].
+
+	* src/iopos.c: Renamed from src/fpos.c.
+	* src/iopos.c (_GD_GetIOPos): Renamed from _GD_GetFilePos.
+
+	* src/del.c (gd_delete) src/entry.c (gd_hide gd_hidden gd_unhide): Properly
+	check for failure of _GD_FindField.
+	* test/del_bad_code.c test/hide_bad.c test/hide_hidden_bad.c
+	test/hide_unhide_bad.c: Added.
+
+	* src/entry.c (gd_entry): Don't doubly set GD_E_BAD_CODE.
+
+	* src/common.c (_GD_FindEntry): Removed parameters index, set, err: anyone
+	who calls this function wants it to succeed or return error.
+
+	* src/move.c (_GD_Move): Statickify.
+
+	* src/fpos.c (_GD_GetFilePos gd_seek64 gd_tell64): Return -1 on error.
+
 2015-11-05   D. V. Wiebe <getdata@ketiltrout.net> svn:1024
 	* src/add.c (gd_add_spec gd_madd_spec _GD_AddSpec): Merge gd_add_spec and
 	gd_madd_spec into _GD_AddSpec and make the public functions boilerpates for

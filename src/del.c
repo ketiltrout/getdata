@@ -507,7 +507,8 @@ int gd_delete(DIRFILE *D, const char *field_code, unsigned int flags)
 
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, &index);
 
-  if (D->error) {
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%i", -1);
     return -1;
   }

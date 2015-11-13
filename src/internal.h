@@ -1201,8 +1201,7 @@ size_t _GD_DoFieldOut(DIRFILE *restrict, gd_entry_t *restrict, off64_t, size_t,
 off64_t _GD_DoSeek(DIRFILE *restrict, gd_entry_t *restrict,
     const struct encoding_t *restrict, off64_t, unsigned int mode);
 int _GD_EntryCmp(const void*, const void*);
-gd_entry_t *_GD_FindEntry(DIRFILE *restrict, const char *restrict,
-    unsigned int *restrict, int, int);
+gd_entry_t *_GD_FindEntry(DIRFILE *restrict, const char *restrict);
 gd_entry_t *_GD_FindField(const DIRFILE *restrict, const char *restrict,
     gd_entry_t *const *, unsigned int, int, unsigned int *restrict);
 gd_entry_t *_GD_FindFieldAndRepr(DIRFILE *restrict, const char *restrict,
@@ -1216,7 +1215,7 @@ void _GD_FlushMeta(DIRFILE* D, int fragment, int force);
 void _GD_FreeE(DIRFILE *restrict, gd_entry_t *restrict, int);
 off64_t _GD_GetEOF(DIRFILE *restrict, const gd_entry_t *restrict,
     const char *restrict, int *restrict);
-off64_t _GD_GetFilePos(DIRFILE *restrict, gd_entry_t *restrict, off64_t);
+off64_t _GD_GetIOPos(DIRFILE *restrict, gd_entry_t *restrict, off64_t);
 char *_GD_GetLine(FILE *restrict, size_t *restrict, int *restrict);
 int _GD_GetRepr(DIRFILE *restrict, const char *restrict,
     char **restrict, int);

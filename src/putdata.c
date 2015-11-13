@@ -710,7 +710,7 @@ size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E,
    * reject anyways; so we ignore this error for a more relevant one later
    */
   if (first_samp == GD_HERE)
-    first_samp = _GD_GetFilePos(D, E, -1);
+    first_samp = _GD_GetIOPos(D, E, -1);
 
   switch (E->field_type) {
     case GD_RAW_ENTRY:

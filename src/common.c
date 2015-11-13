@@ -893,23 +893,21 @@ int _GD_BadInput(DIRFILE *D, const gd_entry_t *E, int i, gd_entype_t t, int err)
   return 0;
 }
 
-/* Find an entry without a representation */
-gd_entry_t *_GD_FindEntry(DIRFILE *restrict D, const char *restrict field_code,
-    unsigned int *restrict index, int set, int err)
+/* Find an entry without a representation; this function will de-alias */
+gd_entry_t *_GD_FindEntry(DIRFILE *restrict D, const char *restrict field_code)
 {
   gd_entry_t *E = NULL;
 
-  dtrace("%p, \"%s\", %p, %i, %i", D, field_code, index, set, err);
+  dtrace("%p, \"%s\"", D, field_code);
 
   if (D->n_dot > 0)
     E = _GD_FindField(D, field_code, D->dot_list, D->n_dot, 1, NULL);
 
-  if (E == NULL || index != NULL)
-    E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, index);
+  if (E == NULL)
+    E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
 
-  if (E == NULL && set)
-    if (err)
-      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+  if (E == NULL)
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
 
   dreturn("%p", E);
   return E;

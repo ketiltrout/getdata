@@ -368,7 +368,7 @@ off64_t gd_eof64(DIRFILE* D, const char *field_code)
     return -1;
   }
 
-  entry = _GD_FindEntry(D, field_code, NULL, 1, 1);
+  entry = _GD_FindEntry(D, field_code);
 
   if (D->error) {
     dreturn("%i", -1);
@@ -556,7 +556,7 @@ off64_t gd_bof64(DIRFILE* D, const char *field_code) gd_nothrow
     return -1;
   }
 
-  entry = _GD_FindEntry(D, field_code, NULL, 1, 1);
+  entry = _GD_FindEntry(D, field_code);
 
   if (D->error) {
     dreturn("%i", -1);

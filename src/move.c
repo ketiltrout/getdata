@@ -315,7 +315,7 @@ int _GD_StrCmpNull(const char *s1, const char *s2)
   return r;
 }
 
-int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
+static int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
 {
   char *new_filebase, *new_code;
   struct gd_rename_data_ *rdat = NULL;

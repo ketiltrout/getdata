@@ -129,8 +129,8 @@ module_LTLIBRARIES = ${LIBGETDATABZIP2_LA} ${LIBGETDATAFLAC_LA} \
 libgetdata_la_SOURCES = add.c ascii.c ${BZIP2_C} close.c common.c compat.c \
 												constant.c ${DEBUG_C} del.c encoding.c endian.c \
 												entry.c errors.c field_list.c ${FLAC_C} flimits.c \
-												flush.c fpos.c fragment.c getdata.c globals.c \
-												${GZIP_C} index.c include.c ${LEGACY_C} ${LZMA_C} \
+												flush.c fragment.c getdata.c globals.c ${GZIP_C} \
+												index.c include.c iopos.c ${LEGACY_C} ${LZMA_C} \
 												mod.c move.c name.c native.c nfields.c nframes.c \
 												open.c parse.c protect.c putdata.c raw.c sie.c \
 												${SLIM_C} spf.c string.c types.c ${ZZIP_C} ${ZZSLIM_C} \

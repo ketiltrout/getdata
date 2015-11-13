@@ -1,4 +1,24 @@
 New in version 0.9.1a:
+  
+  Library Changes:
+
+  * BUG FIX: Top-level aliases pointing to metafields, and non-hidden
+    aliases pointing to hidden entries are now included in the data
+    returned by gd_nentries() and gd_entry_list() when they should be.
+
+  * BUG FIX: Surprising combinations of hidden fields, meta fields, and
+    aliases no long confuse the functions which return bulk scalar data
+    (gd_constants, gd_strings, gd_carrays, &c.).  Previously, given the
+    right metadata, these functions would segfault, return incorrect
+    data, or raise GD_E_INTERNAL_ERROR.
+
+  * BUG FIX: The functions gd_delete(), gd_hide(), gd_hidden(), and
+    gd_unhide() no longer segfault when asked to operate on a field that
+    doesn't exist; instead, they properly report error (GD_E_BAD_CODE).
+
+  * BUG FIX: gd_seek() and gd_tell() now always return -1 on error.
+    Previously, they would return zero for some errors; they always
+    still set correctly set the dirfile error.
 
   Bindings Changes:
 
@@ -145,16 +165,6 @@ New in verison 0.9.0:
     changing table paths with gd_alter_linterp() or similar.  Previously
     these obsolete, cached LUTs would sometimes linger, causing incorrect
     LINTERP computation.
-
-  * BUG FIX: The library now properly recovers from an I/O error while
-    trying to open an unencoded datafile.  Previously, such an error would
-    poison the library's bookkeeping data, preventing all subsequent
-    attempts to open that file unless the Dirfile was re-opened.  Reported
-    by Alexandra Rahlin.
-
-  * BUG FIX: Calling gd_putdata() to write gzip data with a non-zero
-    starting offset equal to the field's current I/O position, no longer
-    result in the call hanging.
 
   * BUG FIX: The I/O position reported by gd_tell and gd_seek for slim,
     zzip, and zzslim encoded data is now correct.
