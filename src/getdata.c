@@ -1928,7 +1928,7 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
   }
 
   if (first_samp == GD_HERE) {
-    first_samp = _GD_GetFilePos(D, E, -1);
+    first_samp = _GD_GetIOPos(D, E, -1);
     if (D->error) {
       D->recurse_level--;
       dreturn("%i", 0);

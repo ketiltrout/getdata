@@ -1219,7 +1219,7 @@ void _GD_FlushMeta(DIRFILE* D, int fragment, int force);
 void _GD_FreeE(DIRFILE *restrict, gd_entry_t *restrict, int);
 off64_t _GD_GetEOF(DIRFILE *restrict, const gd_entry_t *restrict,
     const char *restrict, int *restrict);
-off64_t _GD_GetFilePos(DIRFILE *restrict, gd_entry_t *restrict, off64_t);
+off64_t _GD_GetIOPos(DIRFILE *restrict, gd_entry_t *restrict, off64_t);
 char *_GD_GetLine(FILE *restrict, size_t *restrict, int *restrict);
 int _GD_GetRepr(DIRFILE *restrict, const char *restrict,
     char **restrict, int);

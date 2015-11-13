@@ -1,3 +1,7 @@
+2015-11-13  D. V. Wiebe <getdata@ketiltrout.net> svn:1029
+	* src/iopos.c: Renamed from src/fpos.c.
+	* src/iopos.c (_GD_GetIOPos): Renamed from _GD_GetFilePos.
+
 2015-11-13  D. V. Wiebe <getdata@ketiltrout.net> svn:1027
 	* bindings/matlab/matlab.c (gdmx_err) bindings/python/pygetdata.h
 	(PYGD_REPORT_ERROR): Handle negative error codes.
@@ -44,8 +48,6 @@
 	(gd_rename) src/nframes.c (gd_nframes64) src/protect.c (gd_protection
 	gd_alter_protection) src/string.c (gd_get_sarray_slice gd_get_sarray
 	gd_put_sarray_slice gd_put_sarray gd_put_string): Return D->error.
-
-	Merge in changes from trunk, revision 1027:
 
 	* src/move.c (_GD_Move): Statickify.
 
