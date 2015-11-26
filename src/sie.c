@@ -678,6 +678,13 @@ off64_t _GD_SampIndSize(int dirfd, struct gd_raw_file_* file,
 
   fclose(f.fp);
 
+  /* check for overflow */
+  if (n > GD_INT64_MAX - 1) {
+    errno = ERANGE;
+    dreturn("%i", -1);
+    return -1;
+  }
+
   dreturn("%llx", (long long unsigned)n + 1);
-  return (off64_t)n + 1;
+  return n + 1;
 }

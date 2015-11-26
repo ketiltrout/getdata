@@ -20,11 +20,17 @@ New in version 0.9.1a:
     Previously, they would return zero for some errors; they always
     still set correctly set the dirfile error.
 
+  * BUG FIX: Several memory or other resource leaks triggered by error
+    returns have been fixed.
+
   Bindings Changes:
 
   * PYTHON BUG FIX: Reflecting the merge of GD_E_BAD_REPR into
     GD_E_BAD_CODE in the C API in 0.9.0, the BadRepr exception is now an
     alias of BadCode.
+
+  * PHP BUG FIX: Passing data with a GD_NULL data type now behaves as
+    expected (i.e. the passed data is ignored).
 
   Miscellaneous:
 

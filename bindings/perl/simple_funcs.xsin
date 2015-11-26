@@ -25,10 +25,10 @@ int alter_bit(DIRFILE *dirfile, const char *field_code,
 int alter_carray(DIRFILE* dirfile, const char* field_code, gd_type_t const_type,
     size_t array_len)
 int alter_clincom:alter_lincom(DIRFILE *dirfile, const char *field_code,
-    gdp_int n_fields=0, const char **in_fields=NULL, gdp_complex_in m=NULL,
-    gdp_complex_in b=NULL)
+    gdp_int n_fields=0, const char **in_fields=NULL, gdp_complex_undef m=NULL,
+    gdp_complex_undef b=NULL)
 int alter_cpolynom:alter_polynom(DIRFILE *dirfile, const char *field_code,
-    gdp_int poly_ord=0, gdp_char *in_field=NULL, gdp_complex_in a=NULL)
+    gdp_int poly_ord=0, gdp_char *in_field=NULL, gdp_complex_undef a=NULL)
 int alter_crecip:alter_recip(DIRFILE *dirfile, const char *field_code,
     gdp_char *in_field=NULL, gdp_complex cdividend)
 int alter_divide(DIRFILE *dirfile, const char *field_code,

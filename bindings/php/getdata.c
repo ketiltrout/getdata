@@ -965,19 +965,25 @@ static struct gdphp_din gdphp_convert_data(zval *zdata1, zval *zdata2, int p1,
 
     din.type = gdphp_type_from_long(zdata1, &ctx); /* doesn't return on error */
 
-    ctx.p = p2;
+    if (din.type == GD_NULL) { /* Weird, but we'll allow it */
+      din.data = NULL;
+      din.ns = 0;
+      din.free_din = 0;
+    } else {
+      ctx.p = p2;
 
-    switch (Z_TYPE_P(zdata2)) {
-      case IS_STRING: /* packed data -- just use it in place */
-        din.data = Z_STRVAL_P(zdata2);
-        din.ns = Z_STRLEN_P(zdata2) / GD_SIZE(din.type);
-        din.free_din = 0;
-        break;
-      case IS_ARRAY:
-        gdphp_convert_array(&din, zdata2, &ctx);
-        break;
-      default:
-        GDPHP_DIE(&ctx, "bad input data: expected array or string");
+      switch (Z_TYPE_P(zdata2)) {
+        case IS_STRING: /* packed data -- just use it in place */
+          din.data = Z_STRVAL_P(zdata2);
+          din.ns = Z_STRLEN_P(zdata2) / GD_SIZE(din.type);
+          din.free_din = 0;
+          break;
+        case IS_ARRAY:
+          gdphp_convert_array(&din, zdata2, &ctx);
+          break;
+        default:
+          GDPHP_DIE(&ctx, "bad input data: expected array or string");
+      }
     }
   }
 

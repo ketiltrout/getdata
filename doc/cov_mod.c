@@ -99,3 +99,9 @@ void croak(const char *pat, ...)
 {
   __coverity_panic__();
 }
+
+/* doesn't return */
+void mexErrMsgIdAndTxt(const char *id, const char *txt)
+{
+  __coverity_panic__();
+}

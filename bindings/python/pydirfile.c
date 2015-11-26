@@ -1679,7 +1679,7 @@ static PyObject *gdpy_dirfile_getstring(struct gdpy_dirfile_t *self,
 
   gd_get_string(self->D, field_code, len, data);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  PYGD_CHECK_ERROR2(self->D, NULL, free(data));
 
   pyobj = PyString_FromString(data);
 

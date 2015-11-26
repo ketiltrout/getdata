@@ -42,22 +42,25 @@ int _GD_ZzipName(DIRFILE *restrict D gd_unused_, const char *restrict enc_data,
 
   dtrace("%p, \"%s\", %p, \"%s\", <unused>, <unused>", D, enc_data, file, base);
 
-  if (file->name == NULL) {
-    if (enc_data == NULL)
-      enc_data = "raw";
-
-    enc_len = strlen(enc_data);
-
-    file->name = (char*)malloc(enc_len + 5 + strlen(base) + 1);
-    if (file->name == NULL) {
-      dreturn("%i", -1);
-      return -1;
-    }
-
-    sprintf(file->name, "%s.zip_%s", enc_data, base);
-    /* Now replace the '_' with a NUL */
-    file->name[enc_len + 4] = '\0';
+  if (file->name) {
+    dreturn("%i (%s)", 0, file->name);
+    return 0;
   }
+
+  if (enc_data == NULL)
+    enc_data = "raw";
+
+  enc_len = strlen(enc_data);
+
+  file->name = (char*)malloc(enc_len + 5 + strlen(base) + 1);
+  if (file->name == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  sprintf(file->name, "%s.zip_%s", enc_data, base);
+  /* Now replace the '_' with a NUL */
+  file->name[enc_len + 4] = '\0';
 
   dreturn("%i (%s\\0%s)", 0, file->name, file->name + enc_len + 5);
   return 0;

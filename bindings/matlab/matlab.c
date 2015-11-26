@@ -1134,6 +1134,8 @@ void gdmx_free_entry(gd_entry_t *E)
         break;
       case GD_LINTERP_ENTRY:
         mxFree(E->EN(linterp,table));
+        ni = 1;
+        break;
       case GD_DIVIDE_ENTRY:
       case GD_MULTIPLY_ENTRY:
         ni = 2;

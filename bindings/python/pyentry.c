@@ -43,6 +43,7 @@ static const char *gdpy_entry_type_names[] =
   "STRING_ENTRY",   /* 0x11 */
   "CARRAY_ENTRY",   /* 0x12 */
 };
+#define GDPY_N_ENTYPES 0x12
 
 static char *gdpy_dup_pystring(PyObject *obj)
 {
@@ -659,7 +660,7 @@ static int gdpy_entry_init(struct gdpy_entry_t *self, PyObject *args,
   }
 
   /* check for valid field type */
-  if (E.field_type > 0x13 || E.field_type <= 0 ||
+  if (E.field_type > GDPY_N_ENTYPES || E.field_type <= 0 ||
       gdpy_entry_type_names[E.field_type] == NULL) {
     PyErr_SetString(PyExc_ValueError,
         "'pygetdata.entry.__init__' invalid entry type");

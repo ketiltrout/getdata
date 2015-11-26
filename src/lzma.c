@@ -93,6 +93,7 @@ static struct gd_lzmadata *_GD_LzmaDoOpen(int dirfd, struct gd_raw_file_* file,
 
   if ((lzd = (struct gd_lzmadata *)malloc(sizeof(struct gd_lzmadata))) == NULL)
   {
+    fclose(stream);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -314,9 +315,9 @@ off64_t _GD_LzmaSeek(struct gd_raw_file_* file, off64_t count,
       if (e != LZMA_OK) {
         file->error = e;
         file->idata = -1;
+        fclose(lzd->stream);
         free(lzd);
         file->edata = NULL;
-        fclose(lzd->stream);
         dreturn("%i", 1);
         return 1;
       }

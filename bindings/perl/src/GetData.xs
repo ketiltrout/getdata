@@ -43,6 +43,7 @@
 
 /* fake data types to simplify our typemap */
 typedef GD_DCOMPLEXP_t gdp_complex_in;
+typedef GD_DCOMPLEXP_t gdp_complex_undef;
 typedef GD_DCOMPLEXA(gdp_complex);
 typedef int gdp_bitnum_t;
 typedef int gdp_numbits_t;
@@ -400,11 +401,11 @@ static unsigned gdp_fetch_scalars(gd_entry_t *E, HV *hv, unsigned int mask,
   v = gdp_hv_fetchs(hv, "scalar_ind", 0);
   if (v) {
     scalar_ind = *v;
-    while (SvROK(scalar_ind))
+    while ((SvTYPE(scalar_ind) != SVt_NULL) && SvROK(scalar_ind))
       scalar_ind = SvRV(scalar_ind);
 
     if (SvTYPE(scalar_ind) == SVt_NULL)
-      scalar_ind == NULL;
+      scalar_ind = NULL;
   }
 
   if (SvTYPE(scalar) != SVt_PVAV)

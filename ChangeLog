@@ -1,3 +1,39 @@
+2015-11-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1030
+	* bindings/idl/getdata.c (gdidl_alter_lincom gdidl_alter_polynom): Set
+	comp_scal = 0 by default.
+
+	* bindings/matlab/matlab.c (gdmx_free_entry): Fix GD_LINTERP_ENTRY case.
+
+	* bindings/perl/src/GetData.xs bindings/perl/simple_funcs.pl: Handle
+	gdp_complex_undef.
+	* bindings/perl/src/typemap: rename T_COMPLEXIN to T_COMPLEX_UNDEF and add
+	new T_COMPLEXIN which doesn't allow NULL.
+
+	* bindings/perl/src/GetData.xs (gdp_fetch_scalars): Don't dereference a NULL
+	scalar_ind.
+
+	* bindings/php/getdata.c (gdphp_convert_data): Properly handle GD_NULL.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getstring): Free data on error.
+
+	* bindings/python/pyentry.c (gdpy_entry_init): Fix field_type check.
+
+	* doc/cov_mod.c: Added mexErrMsgIdAndTxt.
+
+	* src/bzip.c (_GD_Bzip2DoOpen) src/lzma.c (_GD_LzmaSeek): Record error before
+	free.
+
+	* src/sie.c (_GD_SampIndSize): Handle overflow.
+
+	* src/flush.c (_GD_StringEscapeise): Check fputc return value.
+
+	* src/flush.c (_GD_FlushFragment): Don't try another fclose after fclose
+	fails.
+
+	* src/lzma.c (_GD_LzmaDoOpen): close stream on error.
+
+	* src/zzip.c (_GD_ZzipName): Immediately return if file->name is defined.
+
 2015-11-05   D. V. Wiebe <getdata@ketiltrout.net> svn:1028
 	* src/field_list.c (_GD_ListEntry): Force meta_ok and hidden_ok on after
 	dereferencing an alias.

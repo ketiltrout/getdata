@@ -248,8 +248,12 @@ static ssize_t _GD_StringEscapeise(FILE *stream, const char *in, int meta,
 
   for (; *in != '\0'; ++in) {
     if (*in == '\\' || *in == '#' || *in == '"' || *in == ' ') {
-      fputc('\\', stream);
-      fputc(*in, stream);
+      if (stream) {
+        if (fputc('\\', stream) == EOF)
+          goto WRITE_ERR;
+        if (fputc(*in, stream) == EOF)
+          goto WRITE_ERR;
+      }
       len += 2;
     } else if (*in < 0x20
 #if CHAR_MIN != 0
@@ -1035,11 +1039,16 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
 #endif
 
   /* if there's no error, try closing */
-  if (ferror(stream) || fclose(stream) == EOF) {
+  if (ferror(stream)) {
 WRITE_ERR:
     if (!D->error)
       _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, NULL, 0, NULL);
     fclose(stream);
+  }
+
+  if (fclose(stream) == EOF) {
+    if (!D->error)
+      _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, NULL, 0, NULL);
   }
 
   /* If no error was encountered, move the temporary file over the

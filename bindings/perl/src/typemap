@@ -35,6 +35,7 @@ gd_windop_t T_IV
 
 # GetData Perl pseudotypes
 gdp_complex_in T_COMPLEXIN
+gdp_complex_undef T_COMPLEX_UNDEF
 gdp_bitnum_t T_IV_FFFF
 gdp_char * T_PV_NULL
 gdp_int T_IV_ZERO
@@ -57,6 +58,27 @@ T_DIRFILE
   } else
     croak(\"%s::${func_name}() - Invalid dirfile object\", gdp_package);
 T_COMPLEXIN
+  if (SvROK($arg) && SvTYPE(SvRV($arg)) == SVt_PVAV) {
+    AV *av = (AV*)SvRV($arg);
+    I32 i, len = av_len(av);
+
+    $var = ($type)safemalloc(2 * sizeof(double) * (1 + len));
+    for (i = 0; i <= len; ++i) {
+      SV **sv = av_fetch(av, i, 0);
+      if (sv == NULL) {
+        safefree($var);
+        croak(\"%s::${func_name}() - Expected array of complex numbers\",
+            gdp_package);
+      }
+      gdp_convert_cmp(gd_cap_(${var}, i), *sv, NULL, gdp_package,
+          \"${func_name}\");
+    }
+  } else {
+    $var = NULL;
+    croak(\"%s::${func_name}() - Expected array of complex numbers\",
+      gdp_package);
+  }
+T_COMPLEX_UNDEF
   if ($arg == undef)
     $var = NULL;
   else if (SvROK($arg) && SvTYPE(SvRV($arg)) == SVt_PVAV) {

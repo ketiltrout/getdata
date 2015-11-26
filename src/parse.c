@@ -521,7 +521,7 @@ static char *_GD_SetScalar(DIRFILE *restrict D,
   return NULL;
 
 carray_check:
-  /* look a < > delimeters */
+  /* look for < > delimeters */
   *index = -1;
   for (lt = ptr; *lt; ++lt) {
     if (*lt == '<') {
@@ -680,9 +680,10 @@ static gd_entry_t *_GD_ParseLincom(DIRFILE *restrict D,
 
   if ((E->EN(lincom,n_fields) < 1) || (E->EN(lincom,n_fields) >
         GD_MAX_LINCOM))
+  {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_FIELDS, p->file, p->line,
         in_cols[2]);
-  else if (n_cols < E->EN(lincom,n_fields) * 3 + 3)
+  } else if (n_cols < E->EN(lincom,n_fields) * 3 + 3)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, p->file, p->line, NULL);
   else
     for (i = 0; i < E->EN(lincom,n_fields); i++) {

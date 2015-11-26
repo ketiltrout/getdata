@@ -96,8 +96,8 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct gd_raw_file_* file,
     else
       BZ2_bzWriteClose(&ptr->bzerror, ptr->bzfile, 0, NULL, NULL);
     fclose(stream);
-    free(ptr);
     file->error = ptr->bzerror;
+    free(ptr);
     dreturn("%p", NULL);
     return NULL;
   }

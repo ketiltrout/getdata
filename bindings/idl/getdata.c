@@ -2413,7 +2413,7 @@ void gdidl_alter_lincom(int argc, IDL_VPTR argv[], char *argk)
   const char** in_field = NULL;
   IDL_VPTR tmp_m = NULL;
   IDL_VPTR tmp_b = NULL;
-  int comp_scal = 1;
+  int comp_scal = 0;
 
   GDIDL_KW_INIT_ERROR;
   kw.in_field = kw.m = kw.b = NULL;
@@ -2769,7 +2769,7 @@ void gdidl_alter_polynom(int argc, IDL_VPTR argv[], char *argk)
   } KW_RESULT;
   KW_RESULT kw;
 
-  int comp_scal = 1;
+  int comp_scal = 0;
   double* a = NULL;
   double complex* ca = NULL;
   const char* in_field = NULL;

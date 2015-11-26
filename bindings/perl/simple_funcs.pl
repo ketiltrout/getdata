@@ -30,7 +30,8 @@ sub printcleanup {
   my ($t, $n) = @$_;
 
   return "\t\tsafefree($n);\n" if (
-    $t eq "gdp_complex_in" or $t eq "const char **" or $t eq "gdp_data_in *"
+    $t eq "gdp_complex_undef" or $t eq "gdp_complex_in"
+      or $t eq "const char **" or $t eq "gdp_data_in *"
       or $t eq "gdp_double_in *"
   );
   return "";
@@ -57,7 +58,7 @@ sub printfmt {
 
   if (/char \*$/) {
     return "\\\"%s\\\"";
-  } elsif (/[\*&]$/ or $_ eq "gdp_complex_in") {
+  } elsif (/[\*&]$/ or $_ eq "gdp_complex_in" or $_ eq "gdp_complex_undef") {
     return "%p";
   } elsif ($_ eq "_Complex double" or $_ eq "gdp_complex") {
     return "%g;%g";
