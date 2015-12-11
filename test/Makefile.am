@@ -128,9 +128,9 @@ CREAT_TESTS=creat creat_excl creat_rdonly creat_rdonly_exists
 
 CVLIST_TESTS=cvlist cvlist_array cvlist_array0 cvlist_array_free \
 						 cvlist_array_hidden cvlist_array_meta cvlist_array_meta0 \
-						 cvlist_array_meta_free cvlist_array_meta_hidden cvlist_hidden \
-						 cvlist_invalid cvlist_meta cvlist_meta0 cvlist_meta_hidden \
-						 cvlist_meta_invalid
+						 cvlist_array_meta_free cvlist_array_meta_hidden cvlist_array_null \
+						 cvlist_hidden cvlist_invalid cvlist_meta cvlist_meta0 \
+						 cvlist_meta_hidden cvlist_meta_invalid cvlist_null
 
 DEL_TESTS=del_alias del_bad_code del_carray del_carray_deref del_const \
 					del_const_deref del_const_force del_data del_data_enoent \

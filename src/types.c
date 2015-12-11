@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2010, 2012, 2014 D. V. Wiebe
+ * Copyright (C) 2005-2012, 2014, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -119,7 +119,7 @@ gd_nothrow
           TO_COMPLEX(double,int8_t);
           return;
         default:
-          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
+          _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, out_type, NULL);
           break;
       }
       break;
@@ -171,7 +171,7 @@ gd_nothrow
           TO_COMPLEX(double,uint8_t);
           return;
         default:
-          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
+          _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, out_type, NULL);
           break;
       }
       break;
@@ -223,7 +223,7 @@ gd_nothrow
           TO_COMPLEX(double,int16_t);
           return;
         default:
-          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
+          _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, out_type, NULL);
           break;
       }
       break;
@@ -275,7 +275,7 @@ gd_nothrow
           TO_COMPLEX(double,uint16_t);
           return;
         default:
-          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
+          _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, out_type, NULL);
           break;
       }
       break;
@@ -327,7 +327,7 @@ gd_nothrow
           TO_COMPLEX(double,int32_t);
           return;
         default:
-          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
+          _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, out_type, NULL);
           break;
       }
       break;
@@ -430,7 +430,7 @@ gd_nothrow
           TO_COMPLEX(double,int64_t);
           return;
         default:
-          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
+          _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, out_type, NULL);
           break;
       }
       break;
@@ -482,7 +482,7 @@ gd_nothrow
           TO_COMPLEX(double,uint64_t);
           return;
         default:
-          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
+          _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, out_type, NULL);
           break;
       }
       break;
@@ -534,7 +534,7 @@ gd_nothrow
           TO_COMPLEX(double,float);
           return;
         default:
-          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
+          _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, out_type, NULL);
           break;
       }
       break;
@@ -586,7 +586,7 @@ gd_nothrow
           TO_COMPLEX(double,double);
           return;
         default:
-          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
+          _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, out_type, NULL);
           break;
       }
       break;
@@ -630,7 +630,7 @@ gd_nothrow
             ((double *)data_out)[i] = (double)((float *)data_in)[i];
           return;
         default:
-          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
+          _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, out_type, NULL);
           break;
       }
       break;
@@ -674,12 +674,12 @@ gd_nothrow
           memcpy(data_out, data_in, 2 * n * sizeof(double));
           return;
         default:
-          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
+          _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, out_type, NULL);
           break;
       }
       break;
     default:
-      _GD_SetError(D, GD_E_BAD_TYPE, in_type, NULL, 0, NULL);
+      _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, in_type, NULL);
       break;
   }
 }

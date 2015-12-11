@@ -520,7 +520,7 @@ int _GD_LzmaStrerr(const struct gd_raw_file_ *file, char *buf, size_t buflen)
 
   switch(file->error) {
     case LZMA_OK:
-      r = gd_strerror(errno, buf, buflen);
+      r = gd_StrError(errno, buf, buflen);
       break;
     case LZMA_MEM_ERROR:
     case LZMA_MEMLIMIT_ERROR:

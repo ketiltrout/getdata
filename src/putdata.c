@@ -562,7 +562,7 @@ static void _GD_MplexOutData(DIRFILE *restrict D, void *restrict A,
     case GD_FLOAT64:    MPLEX(  double); break;
     case GD_COMPLEX64:  MPLEXC(  float); break;
     case GD_COMPLEX128: MPLEXC( double); break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
                         break;
   }
 

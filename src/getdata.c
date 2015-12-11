@@ -52,7 +52,7 @@
     case GD_NULL: \
       break; \
     default: \
-      _GD_SetError(D, GD_E_BAD_TYPE, in_type, NULL, 0, NULL); \
+      _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, in_type, NULL); \
   }
 
 #define EXTRACT_REPRC2(it,ot) \
@@ -116,7 +116,7 @@ static void _GD_ExtractRepr(DIRFILE *restrict D, const void *restrict cdata,
 #endif
     case GD_NULL:                                      break;
     default:
-      _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+      _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
       break;
   }
 
@@ -472,7 +472,7 @@ static void _GD_PolynomData(DIRFILE *restrict D, void *restrict data,
       case GD_FLOAT64:    POLYNOM(  double); break;
       case GD_COMPLEX64:  POLYNOMC(  float); break;
       case GD_COMPLEX128: POLYNOMC( double); break;
-      default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+      default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
                           break;
     }
   }
@@ -619,7 +619,7 @@ static void _GD_CPolynomData(DIRFILE *restrict D, void *restrict data,
       case GD_FLOAT64: _GD_InternalError(D); break;
       case GD_COMPLEX64:  POLYNOMC(  float); break;
       case GD_COMPLEX128: POLYNOMC( double); break;
-      default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+      default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
                           break;
     }
   }
@@ -666,7 +666,7 @@ static void _GD_MultiplyData(DIRFILE *restrict D, void *restrict A,
     case GD_FLOAT64:    MULTIPLY(  double); break;
     case GD_COMPLEX64:  MULTIPLYC(  float); break;
     case GD_COMPLEX128: MULTIPLYC( double); break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
                         break;
   }
 
@@ -714,7 +714,7 @@ static void _GD_CMultiplyData(DIRFILE *restrict D, void *restrict A,
     case GD_FLOAT64: _GD_InternalError(D);  break;
     case GD_COMPLEX64:  MULTIPLYC(  float); break;
     case GD_COMPLEX128: MULTIPLYC( double); break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
                         break;
   }
 
@@ -761,7 +761,7 @@ static void _GD_DivideData(DIRFILE *restrict D, void *restrict A,
     case GD_FLOAT64:    DIVIDE(  double); break;
     case GD_COMPLEX64:  DIVIDEC(  float); break;
     case GD_COMPLEX128: DIVIDEC( double); break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
                         break;
   }
 
@@ -810,7 +810,7 @@ static void _GD_CDivideData(DIRFILE *restrict D, void *restrict A,
     case GD_FLOAT64: _GD_InternalError(D); break;
     case GD_COMPLEX64:  DIVIDEC(  float); break;
     case GD_COMPLEX128: DIVIDEC( double); break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
                         break;
   }
 
@@ -882,7 +882,7 @@ static void _GD_WindowData(DIRFILE *restrict D, void *restrict A,
     case GD_FLOAT64:    WINDOW(  double,NaN) break;
     case GD_COMPLEX64:  WINDOWC(  float,NaN) break;
     case GD_COMPLEX128: WINDOWC( double,NaN) break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
                         break;
   }
 
@@ -939,7 +939,7 @@ static void _GD_MplexData(DIRFILE *restrict D, void *restrict A,
     case GD_FLOAT64:    MPLEX(  double); break;
     case GD_COMPLEX64:  MPLEXC(  float); break;
     case GD_COMPLEX128: MPLEXC( double); break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
                         break;
   }
 

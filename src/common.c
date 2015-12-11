@@ -197,8 +197,8 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n)
     return NULL;
   }
 
-  else if (GD_SIZE(type) == 0) {
-    _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+  if (GD_SIZE(type) == 0) {
+    _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -499,7 +499,7 @@ void _GD_LinterpData(DIRFILE *restrict D, void *restrict data, gd_type_t type,
     case GD_FLOAT64:    LINTERP(double  ); break;
     case GD_COMPLEX64:  LINTERPC(float  ); break;
     case GD_COMPLEX128: LINTERPC(double ); break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
   }
 
   dreturnvoid();

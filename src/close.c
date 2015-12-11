@@ -1,4 +1,4 @@
-/* Copyright (C) 2008, 2010, 2012, 2014 D. V. Wiebe
+/* Copyright (C) 2008-2012, 2014, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -49,16 +49,7 @@ static void _GD_FreeD(DIRFILE *D, int keep_dirfile)
   free(D->error_prefix);
   free(D->error_string);
   free(D->error_file);
-  for (j = 0; j < GD_N_ENTRY_LISTS; ++j)
-    free(D->entry_list[j]);
-  free(D->string_value_list);
-  free(D->const_value_list);
-
-  if (D->carray_value_list) {
-    for (i = 0; D->carray_value_list[i].n != 0; ++i)
-      free(D->carray_value_list[i].d);
-    free(D->carray_value_list);
-  }
+  _GD_FreeFL(&D->fl);
   
   free(D->fragment);
   free(D->name);

@@ -222,7 +222,7 @@ int GD_SLIM(Strerr)(const struct gd_raw_file_ *file, char *buf, size_t buflen)
   dtrace("%p, %p, %" PRNsize_t, file, buf, buflen);
 
   if (file->error)
-    r = gd_strerror(file->error, buf, buflen);
+    r = gd_StrError(file->error, buf, buflen);
   else /* the slimlib C API has no error reporting */
     strncpy(buf, "SLIMLIB: Unspecified error", buflen);
 

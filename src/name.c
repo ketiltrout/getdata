@@ -726,11 +726,11 @@ void _GD_PerformRename(DIRFILE *restrict D,
 
   /* Invalidate the field lists */
   if (rdat->E->e->n_meta == -1) {
-    rdat->E->e->p.parent->e->value_list_validity = 0;
-    rdat->E->e->p.parent->e->entry_list_validity = 0;
+    rdat->E->e->p.parent->e->fl.value_list_validity = 0;
+    rdat->E->e->p.parent->e->fl.entry_list_validity = 0;
   } else {
-    D->value_list_validity = 0;
-    D->entry_list_validity = 0;
+    D->fl.value_list_validity = 0;
+    D->fl.entry_list_validity = 0;
   }
 
   /* rehash the aliases */

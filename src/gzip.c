@@ -158,16 +158,6 @@ ssize_t _GD_GzipWrite(struct gd_raw_file_ *file, const void *ptr,
   return n;
 }
 
-/* Because calling gzflush can result in degredation of compression, we avoid
- * doing anything here */
-int _GD_GzipSync(struct gd_raw_file_ *file gd_unused_)
-{
-  dtrace("<unused>");
-
-  dreturn("%i", 0);
-  return 0;
-}
-
 int _GD_GzipClose(struct gd_raw_file_ *file)
 {
   int ret;
@@ -237,7 +227,7 @@ int _GD_GzipStrerr(const struct gd_raw_file_ *file, char *buf, size_t buflen)
   gzerr = gzerror((gzFile)file->edata, &gzerrnum);
 
   if (gzerrnum == Z_ERRNO)
-    r = gd_strerror(errno, buf, buflen);
+    r = gd_StrError(errno, buf, buflen);
   else {
     strncpy(buf, gzerr, buflen);
     buf[buflen - 1] = 0;

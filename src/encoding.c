@@ -40,16 +40,21 @@ static int framework_initialised = 0;
   NULL, NULL
 #define GD_EF_GENERIC_SET &_GD_GenericName, NULL, NULL, NULL, NULL, NULL, \
   NULL, NULL, &_GD_GenericMove, &_GD_GenericUnlink, NULL
+#define GD_EF_GENERICNOP_SET &_GD_GenericName, NULL, NULL, NULL, NULL, NULL, \
+  NULL, &_GD_NopSync, &_GD_GenericMove, &_GD_GenericUnlink, NULL
 
 #ifdef USE_MODULES
 #define GD_EXT_ENCODING_NULL(sc,ex,ec,af,ff) \
 { sc,ex,ec,af,ff,GD_EF_PROVIDES,GD_EF_NULL_SET }
 #define GD_EXT_ENCODING_GEN(sc,ex,ec,af,ff) \
 { sc,ex,ec,af,ff,GD_EF_PROVIDES,GD_EF_GENERIC_SET }
+#define GD_EXT_ENCODING_GENOP(sc,ex,ec,af,ff) \
+{ sc,ex,ec,af,ff,GD_EF_PROVIDES,GD_EF_GENERICNOP_SET }
 #else
 #define GD_EXT_ENCODING(sc,ex,ec,af,ff) { sc,ex,ec,af,ff,0,GD_INT_FUNCS }
 #define GD_EXT_ENCODING_NULL GD_EXT_ENCODING
 #define GD_EXT_ENCODING_GEN GD_EXT_ENCODING
+#define GD_EXT_ENCODING_GENOP GD_EXT_ENCODING
 #endif
 struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
   { GD_UNENCODED, "", GD_EF_ECOR, NULL, "none", 0,
@@ -61,16 +66,16 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
 #ifdef USE_GZIP
 #define GD_EF_PROVIDES \
   GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE | \
-  GD_EF_WRITE | GD_EF_SYNC | GD_EF_STRERR
+  GD_EF_WRITE | GD_EF_STRERR
 #define GD_INT_FUNCS \
   &_GD_GenericName, &_GD_GzipOpen, &_GD_GzipClose, &_GD_GzipSeek, \
-  &_GD_GzipRead, &_GD_GzipSize, &_GD_GzipWrite, &_GD_GzipSync, \
+  &_GD_GzipRead, &_GD_GzipSize, &_GD_GzipWrite, &_GD_NopSync, \
   &_GD_GenericMove, &_GD_GenericUnlink, &_GD_GzipStrerr
 #else
 #define GD_EF_PROVIDES 0
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #endif
-  GD_EXT_ENCODING_GEN(GD_GZIP_ENCODED, ".gz", GD_EF_ECOR | GD_EF_OOP, "Gzip",
+  GD_EXT_ENCODING_GENOP(GD_GZIP_ENCODED, ".gz", GD_EF_ECOR | GD_EF_OOP, "Gzip",
       "gzip"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES
@@ -79,17 +84,17 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
 #ifdef USE_BZIP2
 #define GD_EF_PROVIDES \
   GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE | \
-  GD_EF_WRITE | GD_EF_SYNC | GD_EF_STRERR
+  GD_EF_WRITE | GD_EF_STRERR
 #define GD_INT_FUNCS \
   &_GD_GenericName, &_GD_Bzip2Open, &_GD_Bzip2Close, &_GD_Bzip2Seek, \
-  &_GD_Bzip2Read, &_GD_Bzip2Size, &_GD_Bzip2Write, &_GD_Bzip2Sync, \
+  &_GD_Bzip2Read, &_GD_Bzip2Size, &_GD_Bzip2Write, &_GD_NopSync, \
   &_GD_GenericMove, &_GD_GenericUnlink, &_GD_Bzip2Strerr
 #else
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
 #endif
-  GD_EXT_ENCODING_GEN(GD_BZIP2_ENCODED, ".bz2", GD_EF_ECOR | GD_EF_OOP, "Bzip2",
-      "bzip2"),
+  GD_EXT_ENCODING_GENOP(GD_BZIP2_ENCODED, ".bz2", GD_EF_ECOR | GD_EF_OOP,
+      "Bzip2", "bzip2"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES
 
@@ -99,13 +104,13 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
   GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE | GD_EF_STRERR
 #define GD_INT_FUNCS \
   &_GD_GenericName, &_GD_SlimOpen, &_GD_SlimClose, &_GD_SlimSeek, \
-  &_GD_SlimRead, &_GD_SlimSize, NULL /* WRITE */, NULL /* SYNC */, \
+  &_GD_SlimRead, &_GD_SlimSize, NULL /* WRITE */, &_GD_NopSync, \
   &_GD_GenericMove, &_GD_GenericUnlink, &_GD_SlimStrerr
 #else
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
 #endif
-  GD_EXT_ENCODING_GEN(GD_SLIM_ENCODED, ".slm", GD_EF_ECOR, "Slim", "slim"),
+  GD_EXT_ENCODING_GENOP(GD_SLIM_ENCODED, ".slm", GD_EF_ECOR, "Slim", "slim"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES
 
@@ -196,17 +201,17 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
 #ifdef USE_FLAC
 #define GD_EF_PROVIDES \
   GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE | \
-  GD_EF_WRITE | GD_EF_SYNC | GD_EF_STRERR
+  GD_EF_WRITE | GD_EF_STRERR
 #define GD_INT_FUNCS \
   &_GD_GenericName, &_GD_FlacOpen, &_GD_FlacClose, &_GD_FlacSeek, \
-  &_GD_FlacRead, &_GD_FlacSize, &_GD_FlacWrite, &_GD_FlacSync, \
+  &_GD_FlacRead, &_GD_FlacSize, &_GD_FlacWrite, &_GD_NopSync, \
   &_GD_GenericMove, &_GD_GenericUnlink, &_GD_FlacStrerr
 #else
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
 #endif
-  GD_EXT_ENCODING_GEN(GD_FLAC_ENCODED, ".flac", GD_EF_ECOR | GD_EF_OOP, "Flac",
-      "flac"),
+  GD_EXT_ENCODING_GENOP(GD_FLAC_ENCODED, ".flac", GD_EF_ECOR | GD_EF_OOP,
+      "Flac", "flac"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES
 
@@ -1099,6 +1104,15 @@ int _GD_GenericMove(int olddirfd, struct gd_raw_file_ *restrict file,
 
   dreturn("%i", r);
   return r;
+}
+
+/* This function does nothing */
+int _GD_NopSync(struct gd_raw_file_ *file gd_unused_)
+{
+  dtrace("<unused>");
+
+  dreturn("%i", 0);
+  return 0;
 }
 /* vim: ts=2 sw=2 et tw=80
 */

@@ -20,6 +20,26 @@
  */
 #include "internal.h"
 
+void _GD_FreeFL(struct gd_flist_ *fl)
+{
+  int i;
+
+  dtrace("%p", fl);
+
+  for (i = 0; i < GD_N_ENTRY_LISTS; ++i)
+    free(fl->entry_list[i]);
+  free(fl->string_value_list);
+  free(fl->const_value_list);
+
+  if (fl->carray_value_list) {
+    for (i = 0; fl->carray_value_list[i].n != 0; ++i)
+      free(fl->carray_value_list[i].d);
+    free(fl->carray_value_list);
+  }
+
+  dreturnvoid();
+}
+
 void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
 {
   int i;
@@ -113,16 +133,7 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
 
   if (priv) {
     free(entry->e->alias_list);
-    for (i = 0; i < GD_N_ENTRY_LISTS; ++i)
-      free(entry->e->entry_list[i]);
-    free(entry->e->string_value_list);
-    free(entry->e->const_value_list);
-
-    if (entry->e->carray_value_list) {
-      for (i = 0; entry->e->carray_value_list[i].n != 0; ++i)
-        free(entry->e->carray_value_list[i].d);
-      free(entry->e->carray_value_list);
-    }
+    _GD_FreeFL(&entry->e->fl);
 
     if (entry->e->n_meta > -1)
       free(entry->e->p.meta_entry);

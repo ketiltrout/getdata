@@ -82,8 +82,9 @@ static const struct {
   { GD_E_BAD_CODE, GD_E_CODE_AMBIGUOUS, "Ambiguous field code: {4}", 0 },
   { GD_E_BAD_CODE, GD_E_CODE_INVALID_NS, "Bad namespace: {4}", 0 },
   { GD_E_BAD_CODE, GD_E_CODE_REPR, "Invalid representation suffix in: {4}", 0 },
-  /* GD_E_BAD_TYPE: 1 = data type */
-  { GD_E_BAD_TYPE, 0, "Bad data type: {1}", 0 },
+  /* GD_E_BAD_TYPE: 1 = suberror, 4 = data type */
+  { GD_E_BAD_TYPE, GD_E_TYPE_NULL, "Bad data type: GD_NULL not allowed", 0 },
+  { GD_E_BAD_TYPE, 0, "Bad data type: {4}", 0 },
   /* GD_E_IO: 2 = filename; 3 = line; 4 = included file/encoding error */
   { GD_E_IO, GD_E_IO_OPEN, "Error opening {2}: ", 1 },
   { GD_E_IO, GD_E_IO_READ, "Error reading {2}: ", 1 },
@@ -363,7 +364,7 @@ char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen) gd_nothrow
 
     *op = '\0';
     if (op < bufend - 1 && error_string[s].adderr)
-      gd_strerror(D->stdlib_errno, op, bufend - op);
+      _GD_StrError(D->stdlib_errno, op, bufend - op);
   }
 
   dreturn("\"%s\"", buffer);

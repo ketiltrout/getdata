@@ -474,7 +474,7 @@ double gd_strtod(const char *nptr, char **endptr)
 /* There are two versions of this function: one deals with no strerror_r,
  * the other with GNU's non XSI-conforming strerror_r */
 #if !defined HAVE_STRERROR_R || defined STRERROR_R_CHAR_P
-int gd_strerror(int errnum, char *buf, size_t buflen)
+int _GD_StrError(int errnum, char *buf, size_t buflen)
 {
   char *ptr;
 

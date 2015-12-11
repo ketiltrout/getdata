@@ -2,6 +2,16 @@ New in version 0.9.1a:
   
   Library Changes:
 
+  * gd_constants() and gd_mconstants() now return NULL and set the dirfile
+    error to GD_E_BAD_TYPE if passed GD_NULL as the return_type.
+    Previously these functions would return NULL without setting an error
+    when passed GD_NULL.
+
+  * Functions returning field lists (gd_entry_list(), &c.) or bulk scalar
+    field data (gd_constants(), gd_carrays(), &c.) no longer run through
+    the entry list twice, resulting in noticable speed improvements when
+    operating on large dirfiles.
+
   * BUG FIX: Top-level aliases pointing to metafields, and non-hidden
     aliases pointing to hidden entries are now included in the data
     returned by gd_nentries() and gd_entry_list() when they should be.

@@ -253,7 +253,7 @@ int _GD_ZzipStrerr(const struct gd_raw_file_ *file, char *buf, size_t buflen)
     case ZZIP_DIR_SEEK:
     case ZZIP_DIR_READ:
     case -1:
-      r = gd_strerror(errno, buf, buflen);
+      r = gd_StrError(errno, buf, buflen);
       break;
     default:
       snprintf(buf, buflen, "ZZIP: Unkown error 0x%X", file->error);

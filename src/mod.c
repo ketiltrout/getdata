@@ -198,7 +198,7 @@ static void _GD_SPFConvert(DIRFILE* D, void *A, unsigned int spfA, void *B,
             2 * sizeof(double));
       break;
     default:
-      _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+      _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
       break;
   }
 
@@ -303,7 +303,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (Q.EN(raw,data_type) & 0x40 ||
           (Qe.u.raw.size = GD_SIZE(Q.EN(raw,data_type))) == 0)
       {
-        _GD_SetError(D, GD_E_BAD_TYPE, Q.EN(raw,data_type), NULL, 0, NULL);
+        _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, Q.EN(raw,data_type), NULL);
         dreturn("%i", -1);
         return -1;
       }
@@ -869,7 +869,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (Q.EN(scalar,const_type) & 0x40 || GD_SIZE(Q.EN(scalar,const_type))
           == 0)
       {
-        _GD_SetError(D, GD_E_BAD_TYPE, Q.EN(scalar,const_type), NULL, 0, NULL);
+        _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, Q.EN(scalar,const_type), NULL);
         dreturn("%i", -1);
         return -1;
       }
@@ -925,7 +925,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         if (Q.EN(scalar,const_type) & 0x40 ||
             GD_SIZE(Q.EN(scalar,const_type)) == 0)
         {
-          _GD_SetError(D, GD_E_BAD_TYPE, Q.EN(scalar,const_type), NULL, 0,
+          _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, Q.EN(scalar,const_type),
               NULL);
           break;
         }

@@ -166,12 +166,16 @@ static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
 {
   char** el;
   int i, index;
-  unsigned int u, n = 0;
+  unsigned int n;
   const int special = (type & GD_SPECIAL_ENTRY_BIT) ? type : 0;
   const gd_entype_t ctype = (type & GD_SPECIAL_ENTRY_BIT) ? GD_NO_ENTRY :
     (gd_entype_t)type;
   const int hidden = (flags & GD_ENTRIES_HIDDEN);
   const int noalias = (flags & GD_ENTRIES_NOALIAS);
+  size_t len = 10;
+  gd_entry_t **entry;
+  struct gd_flist_ *l;
+  int nentries;
 
   dtrace("%p, %p, %" PRNsize_t ", 0x%X, 0x%X", D, p, offs, type, flags);
 
@@ -183,61 +187,57 @@ static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
   }
 
   if (p) {
-    if (p->entry_list_validity & (1 << index) &&
-      p->entry_list_flags[index] == flags)
-    {
-      /* list already made */
-      dreturn("%p", p->entry_list[index]);
-      return p->entry_list[index];
-    }
-  } else if (D->entry_list_validity & (1 << index) &&
-      D->entry_list_flags[index] == flags)
+    nentries = p->n_meta;
+    entry = p->p.meta_entry;
+    l = &p->fl;
+  } else {
+    nentries = D->n_entries;
+    entry = D->entry;
+    l = &D->fl;
+  }
+
+  if (l->entry_list_validity & (1 << index) &&
+      l->entry_list_flags[index] == flags)
   {
     /* list already made */
-    dreturn("%p", D->entry_list[index]);
-    return D->entry_list[index];
+    dreturn("%p", l->entry_list[index]);
+    return l->entry_list[index];
   }
 
-  n = _GD_NEntries(D, p, type, flags);
-
-  if (D->error) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  if (n == 0) {
-    dreturn("%p", zero_list);
-    return zero_list;
-  }
-
-  el = _GD_Malloc(D, sizeof(*el) * (n + 1));
+  el = _GD_Malloc(D, sizeof(*el) * len);
 
   if (el == NULL) {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  n = 0;
-  if (p) {
-    for (i = 0; i < p->n_meta; ++i)
-      if (_GD_ListEntry(p->p.meta_entry[i], 1, hidden, noalias, special, ctype))
-        el[n++] = p->p.meta_entry[i]->field + offs;
+  for (i = n = 0; i < nentries; ++i) {
+    if (n == len) {
+      void *ptr = _GD_Realloc(D, el, sizeof(*el) * (len *= 2));
+      if (ptr == NULL) {
+        free(el);
+        dreturn("%p", NULL);
+        return NULL;
+      }
+      el = ptr;
+    }
 
-    free(p->entry_list[index]);
-    p->entry_list[index] = (const char **)el;
-    p->entry_list_flags[index] = flags;
-    p->entry_list_validity |= 1 << index;
-  } else {
-    for (u = 0; u < D->n_entries; ++u)
-      if (_GD_ListEntry(D->entry[u], 0, hidden, noalias, special, ctype))
-        el[n++] = D->entry[u]->field;
-
-    free(D->entry_list[index]);
-    D->entry_list[index] = (const char **)el;
-    D->entry_list_flags[index] = flags;
-    D->entry_list_validity |= 1 << index;
+    if (_GD_ListEntry(entry[i], 1, hidden, noalias, special, ctype))
+      el[n++] = entry[i]->field + offs;
   }
+
+  if (n == 0) {
+    free(el);
+    dreturn("%p", zero_list);
+    return zero_list;
+  }
+
   el[n] = NULL;
+
+  free(l->entry_list[index]);
+  l->entry_list[index] = (const char **)el;
+  l->entry_list_flags[index] = flags;
+  l->entry_list_validity |= 1 << index;
 
   dreturn("%p", (const char **)el);
   return (const char **)el;
@@ -281,17 +281,23 @@ const char **gd_entry_list(DIRFILE* D, const char *parent, int type,
 static void *_GD_Constants(DIRFILE* D, const char* parent,
     gd_type_t return_type) gd_nothrow
 {
-  int i, n, nentries;
+  int i, nentries;
   void* fl;
   gd_entry_t *P;
   gd_entry_t **entry;
   void **list;
   struct gd_private_entry_ *e = NULL;
+  unsigned n;
+  size_t len = 10;
 
   dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  } else if (return_type == GD_NULL) {
+    _GD_SetError(D, GD_E_BAD_TYPE, GD_E_TYPE_NULL, NULL, return_type, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -311,19 +317,14 @@ static void *_GD_Constants(DIRFILE* D, const char* parent,
     e = P->e;
     nentries = e->n_meta;
     entry = e->p.meta_entry;
-    list = &e->const_value_list;
+    list = &e->fl.const_value_list;
   } else {
     nentries = D->n_entries;
     entry = D->entry;
-    list = &D->const_value_list;
+    list = &D->fl.const_value_list;
   }
 
-  if ((n = _GD_NEntries(D, e, GD_CONST_ENTRY, 0)) == 0) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  fl = (char *)_GD_Alloc(D, return_type, n);
+  fl = (char *)_GD_Alloc(D, return_type, len);
 
   if (fl == NULL) {
     dreturn("%p", NULL);
@@ -333,6 +334,16 @@ static void *_GD_Constants(DIRFILE* D, const char* parent,
   /* DoField will implicitly choose GD_REPR_AUTO for complex data being returned
    * as purely real */
   for (i = n = 0; i < nentries; ++i) {
+    if (n == len) {
+      void *ptr = _GD_Realloc(D, fl, GD_SIZE(return_type) * (len *= 2));
+      if (ptr == NULL) {
+        free(fl);
+        dreturn("%p", NULL);
+        return NULL;
+      }
+      fl = ptr;
+    }
+
     if (_GD_ListEntry(entry[i], e ? 1 : 0, 0, 0, 0, GD_CONST_ENTRY)) {
       gd_entry_t *E = entry[i];
 
@@ -342,12 +353,12 @@ static void *_GD_Constants(DIRFILE* D, const char* parent,
       if (_GD_DoField(D, E, 0, 0, 1, return_type,
             fl + n++ * GD_SIZE(return_type)) != 1)
       {
-        break;
+        break; /* error */
       }
     }
   }
 
-  if (D->error) {
+  if (n == 0 || D->error) {
     free(fl);
     fl = NULL;
   }
@@ -362,12 +373,14 @@ static void *_GD_Constants(DIRFILE* D, const char* parent,
 static gd_carray_t *_GD_Carrays(DIRFILE* D, const char* parent,
     gd_type_t return_type) gd_nothrow
 {
-  int i, n, nentries;
+  int i, nentries;
   gd_carray_t *fl;
   gd_entry_t *P;
   gd_entry_t **entry;
   gd_carray_t **list;
   struct gd_private_entry_ *e = NULL;
+  unsigned n;
+  size_t len = 10;
 
   dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
 
@@ -392,19 +405,14 @@ static gd_carray_t *_GD_Carrays(DIRFILE* D, const char* parent,
     e = P->e;
     nentries = e->n_meta;
     entry = e->p.meta_entry;
-    list = &e->carray_value_list;
+    list = &e->fl.carray_value_list;
   } else {
     nentries = D->n_entries;
     entry = D->entry;
-    list = &D->carray_value_list;
+    list = &D->fl.carray_value_list;
   }
 
-  if ((n = _GD_NEntries(D, e, GD_CARRAY_ENTRY, 0)) == 0) {
-    dreturn("%p", zero_carrays);
-    return zero_carrays;
-  }
-
-  fl = _GD_Malloc(D, sizeof(*fl) * (n + 1));
+  fl = _GD_Malloc(D, sizeof(*fl) * len);
 
   if (fl == NULL) {
     dreturn("%p", NULL);
@@ -414,6 +422,16 @@ static gd_carray_t *_GD_Carrays(DIRFILE* D, const char* parent,
   /* DoField will implicitly choose GD_REPR_AUTO for complex data being returned
    * as purely real */
   for (i = n = 0; i < nentries; ++i) {
+    if (n == len) {
+      void *ptr = _GD_Realloc(D, fl, sizeof(*fl) * (len *= 2));
+      if (ptr == NULL) {
+        free(fl);
+        dreturn("%p", NULL);
+        return NULL;
+      }
+      fl = ptr;
+    }
+
     if (_GD_ListEntry(entry[i], e ? 1 : 0, 0, 0, 0, GD_CARRAY_ENTRY)) {
       gd_entry_t *E = entry[i];
 
@@ -430,6 +448,13 @@ static gd_carray_t *_GD_Carrays(DIRFILE* D, const char* parent,
       n++;
     }
   }
+
+  if (n == 0) {
+    free(fl);
+    dreturn("%p", zero_carrays);
+    return zero_carrays;
+  }
+
   fl[n].n = 0;
 
   if (*list) {
@@ -446,12 +471,14 @@ static gd_carray_t *_GD_Carrays(DIRFILE* D, const char* parent,
 
 static const char **_GD_Strings(DIRFILE* D, const char* parent) gd_nothrow
 {
-  int i, n, nentries;
+  int i, nentries;
   const char** fl;
   gd_entry_t *P;
   gd_entry_t **entry;
   const char ***list;
   struct gd_private_entry_ *e = NULL;
+  unsigned n;
+  size_t len = 10;
 
   dtrace("%p, \"%s\"", D, parent);
 
@@ -476,26 +503,31 @@ static const char **_GD_Strings(DIRFILE* D, const char* parent) gd_nothrow
     e = P->e;
     nentries = e->n_meta;
     entry = e->p.meta_entry;
-    list = &e->string_value_list;
+    list = &e->fl.string_value_list;
   } else {
     nentries = D->n_entries;
     entry = D->entry;
-    list = &D->string_value_list;
+    list = &D->fl.string_value_list;
   }
 
-  if ((n = _GD_NEntries(D, e, GD_STRING_ENTRY, 0)) == 0) {
-    dreturn("%p", zero_list);
-    return zero_list;
-  }
-
-  fl = _GD_Malloc(D, sizeof(*fl) * (n + 1));
+  fl = _GD_Malloc(D, sizeof(*fl) * len);
 
   if (fl == NULL) {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  for (i = n = 0; i < nentries; ++i)
+  for (i = n = 0; i < nentries; ++i) {
+    if (n == len) {
+      void *ptr = _GD_Realloc(D, fl, sizeof(*fl) * (len *= 2));
+      if (ptr == NULL) {
+        free(fl);
+        dreturn("%p", NULL);
+        return NULL;
+      }
+      fl = ptr;
+    }
+
     if (_GD_ListEntry(entry[i], e ? 1 : 0, 0, 0, 0, GD_STRING_ENTRY))
     {
       if (entry[i]->field_type == GD_ALIAS_ENTRY)
@@ -503,6 +535,14 @@ static const char **_GD_Strings(DIRFILE* D, const char* parent) gd_nothrow
       else
         fl[n++] = entry[i]->e->u.string;
     }
+  }
+
+  if (n == 0) {
+    free(fl);
+    dreturn("%p", zero_list);
+    return zero_list;
+  }
+
   fl[n] = NULL;
 
   free(*list);

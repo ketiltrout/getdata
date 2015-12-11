@@ -1,4 +1,4 @@
-/* Copyright (C) 2008, 2010-2015 D. V. Wiebe
+/* Copyright (C) 2008-2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -589,13 +589,13 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
     D->entry[i]->flags &= ~GD_EN_CALC;
     for (j = 0; j < GD_MAX_LINCOM; ++j)
       D->entry[i]->e->entry[j] = NULL;
-    D->entry[i]->e->value_list_validity = 0;
-    D->entry[i]->e->entry_list_validity = 0;
+    D->entry[i]->e->fl.value_list_validity = 0;
+    D->entry[i]->e->fl.entry_list_validity = 0;
   }
 
   /* Invalidate the field lists */
-  D->value_list_validity = 0;
-  D->entry_list_validity = 0;
+  D->fl.value_list_validity = 0;
+  D->fl.entry_list_validity = 0;
 
   free(f);
 

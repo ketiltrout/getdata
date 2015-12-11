@@ -1,6 +1,6 @@
 .\" gd_constants.3.  The gd_constants man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2011, 2015 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,9 +13,9 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_constants 3 "18 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_constants 3 "4 December 2015" "Version 0.9.1" "GETDATA"
 .SH NAME
-gd_constants \(em retrieve a list of constant values from a dirfile
+gd_constants, gd_mconstants \(em retrieve a list of constant values from a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -23,6 +23,9 @@ gd_constants \(em retrieve a list of constant values from a dirfile
 .ad l
 .BI "const void *gd_constants(DIRFILE *" dirfile ", gd_type_t
 .IB return_type );
+.HP
+.BI "const void *gd_mconstants(DIRFILE *" dirfile ", const char"
+.BI * parent ", gd_type_t " return_type );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -32,55 +35,94 @@ function queries a dirfile(5) database specified by
 .I dirfile
 and returns a read-only list of values of the all
 .B CONST
-type fields defined in the database after type conversion to the data type
-specified by
+fields defined in the database, excluding meta subfields.  The values returned
+are converted to the data type specified by
 .IR return_type .
-Notably, this list does not include /META subfields.  For a list of valid
-symbols to use for
-.IR return_type ,
-see the
-.BR gd_get_constant (3)
-man page.
-
 The 
+.I return_type 
+should be one of the following symbols:
+.IP
+.nh
+.ad l
+.BR GD_UINT8 ,\~ GD_INT8 ,\~ GD_UINT16 ,\~ GD_INT16 ,\~ GD_UINT32 ,\~ GD_INT32 ,
+.BR GD_UINT64, \~ GD_INT64 ,\~ GD_FLOAT32 ,\~ GD_FLOAT64 ,\~ GD_COMPLEX64 ,
+.BR GD_COMPLEX128 .
+.ad n
+.hy
+.PP
+See
+.BR gd_get_constant (3)
+for the meaning of these symbols.  The 
 .I dirfile
 argument must point to a valid DIRFILE object previously created by a call to
 .BR gd_open (3).
 
-The array returned will be de-allocated by a call to
-.BR gd_close (3)
-and should not be de-allocated by the caller.  The list returned should not be
-assumed to be in any particular order, although it is guaranteed to be in the
-same order as the list of
+
+The
+.BR gd_mconstants ()
+function returns the same list for
+.B CONST
+meta subfields of the parent field specified by
+.IR parent .
+
+The list returned should not be assumed to be in any particular order, although
+it is guaranteed to be in the same order as the list of
 .B CONST
 fields returned by
-.BR gd_field_list_by_type (3).
+.BR gd_field_list_by_type (3)
+or
+.BR gd_mfield_list_by_type (3).
 The array is unterminated.  The number of values in the array can be obtained
 from a call to
-.BR gd_nfields_by_type (3).
+.BR gd_nfields_by_type (3)
+or
+.BR gd_nmfields_by_type (3),
+as appropriate.
 
-The caller may not modify any values in the array, or the array itself.  Doing
-so may cause database corruption.  The pointer returned is guaranteed to be
-valid only until
-.BR gd_constants ()
-is called again with the same arguments, or until the dirfile's metadata is
-modified (by adding, modifying or deleting an entry), or until the array is
-de-allocated by a call to
-.BR gd_close (3).
+Memory for the returned array is managed by GetData and should not be
+de-allocated by the caller.  The caller may not modify any values in the array.
+Doing so may cause database corruption.  The pointer returned is guaranteed to
+be valid only until the function is called again, with the exception that, since
+each top-level field maintains its own arrays, calling
+.BR gd_mconstants ()
+for a one parent field does not invalidate the pointer returned for a any other
+parent.
+
+Modifying the dirfile's metadata invalidates any pointer returned by these
+functions.  And no pointers remain valid after the dirfile is de-allocated by a
+call to
+.BR gd_close (3)
+or
+.BR gd_discard (3).
+Once a pointer is invalidated, the caller should not dereference it.
 
 A corresponding list of names for these fields may be obtained by calling
-.BR gd_field_list_by_type (3).
+.BR gd_field_list_by_type (3)
+or
+.BR gd_mfield_list_by_type (3).
 
 .SH RETURN VALUE
 Upon successful completion,
 .BR gd_constants ()
-returns a pointer to an array of values containing the values of all the
-constants defined in the dirfile database.  If no constants are defined in the
-database, NULL is returned.  On error it returns NULL and sets the dirfile error
-to a non-zero error value.  Possible error values are:
+returns a pointer to an array containing the values of all the constants defined
+in the dirfile database.  Similarly,
+.BR gd_mconstants ()
+returns a pointer to an array containing the values of the all the meta subfield
+constants of the specified parent field.
+
+If no constants of the appropriate class are defined in the database, NULL is
+returned.  On error, it returns NULL and sets the dirfile error to a non-zero
+error value.  Possible error values are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The specified
+.I parent
+field code was not found, or referred to a metafield
+.RB ( gd_mconstants ()
+only).
 .TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
@@ -88,7 +130,7 @@ The supplied dirfile was invalid.
 .B GD_E_BAD_TYPE
 The
 .I return_type
-specified was invalid.
+specified was not one of the symbols listed above.
 .TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.
@@ -107,4 +149,6 @@ a call to
 .BR gd_error_string (3),
 .BR gd_field_list_by_type (3),
 .BR gd_get_constant (3),
-.BR gd_nfields_by_type (3)
+.BR gd_mfield_list_by_type (3),
+.BR gd_nfields_by_type (3),
+.BR gd_nmfields_by_type (3)

@@ -305,15 +305,6 @@ off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t count,
   return file->pos;;
 }
 
-/* This function does nothing */
-int _GD_Bzip2Sync(struct gd_raw_file_ *file gd_unused_)
-{
-  dtrace("<unused>");
-
-  dreturn("%i", 0);
-  return 0;
-}
-
 int _GD_Bzip2Close(struct gd_raw_file_ *file)
 {
   struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
@@ -394,7 +385,7 @@ int _GD_Bzip2Strerr(const struct gd_raw_file_ *file, char *buf, size_t buflen)
   switch (file->error) {
     case BZ_OK:
     case BZ_IO_ERROR:
-      r = gd_strerror(errno, buf, buflen);
+      r = gd_StrError(errno, buf, buflen);
       break;
     case BZ_SEQUENCE_ERROR:
     case BZ_PARAM_ERROR:

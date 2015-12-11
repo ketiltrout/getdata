@@ -456,15 +456,6 @@ off64_t _GD_FlacSeek(struct gd_raw_file_* file, off64_t count,
   return file->pos;
 }
 
-/* This function does nothing */
-int _GD_FlacSync(struct gd_raw_file_ *file gd_unused_)
-{
-  dtrace("<unused>");
-
-  dreturn("%i", 0);
-  return 0;
-}
-
 int _GD_FlacClose(struct gd_raw_file_ *file)
 {
   struct gd_flacdata *gdfl = (struct gd_flacdata *)file->edata;
@@ -526,7 +517,7 @@ int _GD_FlacStrerr(const struct gd_raw_file_ *file, char *buf, size_t buflen)
       break;
     case GD_FLAC_E_IO:
     case GD_FLAC_E_SES | FLAC__STREAM_ENCODER_IO_ERROR:
-      r = gd_strerror(errno, buf, buflen);
+      r = gd_StrError(errno, buf, buflen);
       break;
     case GD_FLAC_E_MEM:
     case GD_FLAC_E_SDS | FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR:

@@ -1,3 +1,30 @@
+2015-12-10   D. V. Wiebe <getdata@ketiltrout.net> svn:1031
+	* man/gd_mconstants.3: Merged into gd_constants.3 and deleted.
+	* man/gd_constants.3: Merge in gd_mconstants.3.
+
+	* src/bzip.c (_GD_Bzip2Sync) src/flac.c (_GD_FlacSync) src/gzip.c
+	(_GD_GzipSync): Deleted.  (Replaced by _GD_NopSync.)
+	* src/encoding.c (_GD_NopSync): Added.
+	* src/encoding.c: Deal with _GD_NopSync in the gd_ef_ initialisation.
+	_GD_NopSync added to Slim functions.
+
+	* src/internal.h: Merge the entry_list stuff found in both gd_private_entry_
+	and gd_dirfile_ into a common struct gd_flist_ used by both.
+	* src/entry.c (_GD_FreeFL): Added.
+	* src/close.c (_GD_FreeD) src/entry.c (_GD_FreeE): Call _GD_FreeFL().
+
+	* src/errors.c src/internal.h: Distinguish GD_E_BAD_TYPE errors where
+	the caller has invalidly passed GD_NULL.
+	* src/field_list.c (_GD_Constants): Set GD_E_BAD_TYPE if passed GD_NULL.
+	* test/cvlist_array_null.c test/cvlist_null.c: Added.
+
+	* src/internal.h: Only export _GD_StrError when using modules.
+	* src/compat.c (_GD_StrError): Renamed from gd_strerror.
+
+	* src/field_list.c (_GD_EntryList _GD_Constants _GD_Carrays _GD_Strings):
+	Remove the _GD_NEntries call to avoid running throught the field list twice.
+	Instead, dynamically resize the output buffer.
+
 2015-11-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1030
 	* bindings/idl/getdata.c (gdidl_alter_lincom gdidl_alter_polynom): Set
 	comp_scal = 0 by default.

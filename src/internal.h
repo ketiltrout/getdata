@@ -636,12 +636,6 @@ int strerror_r(int, char*, size_t);
 # endif
 #endif
 
-#if !defined HAVE_STRERROR_R || defined STRERROR_R_CHAR_P
-int gd_strerror(int errnum, char *buf, size_t buflen);
-#else
-# define gd_strerror strerror_r
-#endif
-
 #if defined HAVE_FTRUNCATE64
 #define gd_truncate ftruncate64
 #elif defined HAVE_FTRUNCATE
@@ -758,6 +752,8 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_CODE_AMBIGUOUS    3
 #define GD_E_CODE_INVALID_NS   4
 #define GD_E_CODE_REPR         5
+
+#define GD_E_TYPE_NULL         1
 
 #define GD_E_IO_OPEN           1
 #define GD_E_IO_READ           2
@@ -897,6 +893,18 @@ struct gd_lut_ {
   } y;
 };
 
+/* field lists */
+struct gd_flist_ {
+  const char **alias_list;
+  const char **entry_list[GD_N_ENTRY_LISTS];
+  unsigned int entry_list_flags[GD_N_ENTRY_LISTS];
+  const char **string_value_list;
+  void *const_value_list;
+  gd_carray_t *carray_value_list;
+  uint32_t value_list_validity;
+  uint32_t entry_list_validity;
+};
+
 /* Unified entry struct */
 struct gd_private_entry_ {
   gd_entry_t* entry[GD_MAX_LINCOM];
@@ -910,13 +918,7 @@ struct gd_private_entry_ {
 
   /* field lists */
   const char **alias_list;
-  const char **entry_list[GD_N_ENTRY_LISTS];
-  unsigned int entry_list_flags[GD_N_ENTRY_LISTS];
-  const char **string_value_list;
-  void *const_value_list;
-  gd_carray_t *carray_value_list;
-  uint32_t value_list_validity;
-  uint32_t entry_list_validity;
+  struct gd_flist_ fl;
 
   union {
     struct { /* RAW */
@@ -1149,18 +1151,51 @@ struct gd_dirfile_ {
   int n_fragment;
 
   /* field lists */
-  const char **entry_list[GD_N_ENTRY_LISTS];
-  unsigned int entry_list_flags[GD_N_ENTRY_LISTS];
-  const char **string_value_list;
-  void *const_value_list;
-  gd_carray_t *carray_value_list;
-  uint32_t value_list_validity;
-  uint32_t entry_list_validity;
+  struct gd_flist_ fl;
 
   /* syntax error callback */
   gd_parser_callback_t sehandler;
   void* sehandler_extra;
 };
+
+/* These are internal functions we need to expose so that modules can use them
+ */
+#ifdef USE_MODULES
+/* Alias the internal symbols to the external ones */
+#define _GD_MakeFullPathOnly gd_MakeFullPathOnly
+#define _GD_MakeTempFile gd_MakeTempFile
+#define _GD_StrError gd_StrError
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#else
+/* Alias the external symbols to the internal ones */
+#define gd_StrError _GD_StrError
+#define gd_MakeFullPathOnly _GD_MakeFullPathOnly
+#define gd_MakeTempFile _GD_MakeTempFile
+#endif
+
+#if !defined HAVE_STRERROR_R || defined STRERROR_R_CHAR_P
+int _GD_StrError(int errnum, char *buf, size_t buflen);
+#else
+# ifdef USE_MODULES
+#  define gd_StrError strerror_r
+# else
+#  define _GD_StrError strerror_r
+# endif
+#endif
+
+char *_GD_MakeFullPathOnly(const DIRFILE *D, int dirfd, const char *name);
+int _GD_MakeTempFile(const DIRFILE*, int, char*);
+
+#ifdef USE_MODULES
+#ifdef __cplusplus
+}
+#endif
+#endif
+
 
 /* forward declarations */
 void *_GD_Alloc(DIRFILE*, gd_type_t, size_t) __attribute_malloc__;
@@ -1213,6 +1248,7 @@ int _GD_FiniRawIO(DIRFILE*, const gd_entry_t*, int, int);
 void _GD_Flush(DIRFILE *restrict, gd_entry_t *restrict, int, int);
 void _GD_FlushMeta(DIRFILE* D, int fragment, int force);
 void _GD_FreeE(DIRFILE *restrict, gd_entry_t *restrict, int);
+void _GD_FreeFL(struct gd_flist_ *);
 off64_t _GD_GetEOF(DIRFILE *restrict, const gd_entry_t *restrict,
     const char *restrict, int *restrict);
 off64_t _GD_GetIOPos(DIRFILE *restrict, gd_entry_t *restrict, off64_t);
@@ -1244,29 +1280,6 @@ void _GD_LinterpData(DIRFILE *restrict, void *restrict, gd_type_t, int,
 int _GD_ListEntry(const gd_entry_t *E, int meta, int hidden, int noalias,
     int special, gd_entype_t type);
 char *_GD_MakeFullPath(DIRFILE *restrict, int, const char *restrict, int);
-
-#ifdef USE_MODULES
-#define _GD_MakeFullPathOnly gd_MakeFullPathOnly
-#define _GD_MakeTempFile gd_MakeTempFile
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#else
-#define gd_MakeFullPathOnly _GD_MakeFullPathOnly
-#define gd_MakeTempFile _GD_MakeTempFile
-#endif
-
-char *_GD_MakeFullPathOnly(const DIRFILE *D, int dirfd, const char *name);
-int _GD_MakeTempFile(const DIRFILE*, int, char*);
-
-#ifdef USE_MODULES
-#ifdef __cplusplus
-}
-#endif
-#endif
-
 void *_GD_Malloc(DIRFILE *D, size_t size);
 int _GD_MissingFramework(int encoding, unsigned int funcs);
 int _GD_MogrifyFile(DIRFILE *restrict, gd_entry_t *restrict, unsigned long int,
@@ -1318,6 +1331,7 @@ int _GD_GenericMove(int, struct gd_raw_file_ *restrict, int, char *restrict);
 int _GD_GenericName(DIRFILE *restrict, const char *restrict,
     struct gd_raw_file_ *restrict, const char *restrict, int, int);
 int _GD_GenericUnlink(int, struct gd_raw_file_* file);
+int _GD_NopSync(struct gd_raw_file_*);
 
 /* unencoded I/O methods */
 int _GD_RawOpen(int, struct gd_raw_file_*, gd_type_t, int, unsigned int);
@@ -1363,7 +1377,6 @@ off64_t _GD_SampIndSize(int, struct gd_raw_file_* file, gd_type_t data_type,
 #define _GD_Bzip2Seek lt_libgetdatabzip2_LTX_GD_Bzip2Seek
 #define _GD_Bzip2Read lt_libgetdatabzip2_LTX_GD_Bzip2Read
 #define _GD_Bzip2Write lt_libgetdatabzip2_LTX_GD_Bzip2Write
-#define _GD_Bzip2Sync lt_libgetdatabzip2_LTX_GD_Bzip2Sync
 #define _GD_Bzip2Close lt_libgetdatabzip2_LTX_GD_Bzip2Close
 #define _GD_Bzip2Size lt_libgetdatabzip2_LTX_GD_Bzip2Size
 #define _GD_Bzip2Strerr lt_libgetdatabzip2_LTX_GD_Bzip2Strerr
@@ -1372,7 +1385,6 @@ off64_t _GD_SampIndSize(int, struct gd_raw_file_* file, gd_type_t data_type,
 #define _GD_FlacSeek lt_libgetdataflac_LTX_GD_FlacSeek
 #define _GD_FlacRead lt_libgetdataflac_LTX_GD_FlacRead
 #define _GD_FlacWrite lt_libgetdataflac_LTX_GD_FlacWrite
-#define _GD_FlacSync lt_libgetdataflac_LTX_GD_FlacSync
 #define _GD_FlacClose lt_libgetdataflac_LTX_GD_FlacClose
 #define _GD_FlacSize lt_libgetdataflac_LTX_GD_FlacSize
 #define _GD_FlacStrerr lt_libgetdataflac_LTX_GD_FlacStrerr
@@ -1381,7 +1393,6 @@ off64_t _GD_SampIndSize(int, struct gd_raw_file_* file, gd_type_t data_type,
 #define _GD_GzipSeek lt_libgetdatagzip_LTX_GD_GzipSeek
 #define _GD_GzipRead lt_libgetdatagzip_LTX_GD_GzipRead
 #define _GD_GzipWrite lt_libgetdatagzip_LTX_GD_GzipWrite
-#define _GD_GzipSync lt_libgetdatagzip_LTX_GD_GzipSync
 #define _GD_GzipClose lt_libgetdatagzip_LTX_GD_GzipClose
 #define _GD_GzipSize lt_libgetdatagzip_LTX_GD_GzipSize
 #define _GD_GzipStrerr lt_libgetdatagzip_LTX_GD_GzipStrerr
@@ -1431,7 +1442,6 @@ ssize_t _GD_Bzip2Read(struct gd_raw_file_ *restrict, void *restrict, gd_type_t,
     size_t);
 ssize_t _GD_Bzip2Write(struct gd_raw_file_ *restrict, const void *restrict,
     gd_type_t, size_t);
-int _GD_Bzip2Sync(struct gd_raw_file_*);
 int _GD_Bzip2Close(struct gd_raw_file_*);
 off64_t _GD_Bzip2Size(int, struct gd_raw_file_*, gd_type_t, int);
 int _GD_Bzip2Strerr(const struct gd_raw_file_*, char*, size_t);
@@ -1444,7 +1454,6 @@ ssize_t _GD_FlacRead(struct gd_raw_file_ *restrict, void *restrict, gd_type_t,
     size_t);
 ssize_t _GD_FlacWrite(struct gd_raw_file_ *restrict, const void *restrict,
     gd_type_t, size_t);
-int _GD_FlacSync(struct gd_raw_file_*);
 int _GD_FlacClose(struct gd_raw_file_* file);
 off64_t _GD_FlacSize(int, struct gd_raw_file_* file, gd_type_t data_type,
     int swap);
@@ -1458,7 +1467,6 @@ ssize_t _GD_GzipRead(struct gd_raw_file_ *restrict, void *restrict, gd_type_t,
     size_t);
 ssize_t _GD_GzipWrite(struct gd_raw_file_ *restrict, const void *restrict,
     gd_type_t, size_t);
-int _GD_GzipSync(struct gd_raw_file_*);
 int _GD_GzipClose(struct gd_raw_file_* file);
 off64_t _GD_GzipSize(int, struct gd_raw_file_* file, gd_type_t data_type,
     int swap);

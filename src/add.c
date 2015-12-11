@@ -313,7 +313,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_SPF, NULL, 0, NULL);
       else if (E->EN(raw,data_type) & 0x40 || (E->e->u.raw.size =
             GD_SIZE(E->EN(raw,data_type))) == 0)
-        _GD_SetError(D, GD_E_BAD_TYPE, entry->EN(raw,data_type), NULL, 0, NULL);
+        _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, entry->EN(raw,data_type),
+            NULL);
       else if (_GD_InitRawIO(D, E, NULL, -1, NULL, 0,
             GD_FILE_WRITE | GD_FILE_TOUCH, _GD_FileSwapBytes(D, E)))
       {
@@ -495,7 +496,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       if (E->EN(scalar,const_type) & 0x40 || GD_SIZE(E->EN(scalar,const_type))
           == 0)
       {
-        _GD_SetError(D, GD_E_BAD_TYPE, E->EN(scalar,const_type), NULL, 0, NULL);
+        _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, E->EN(scalar,const_type), NULL);
       } else {
         size_t size = GD_SIZE(_GD_ConstType(D, E->EN(scalar,const_type)));
         if (!D->error)
@@ -511,7 +512,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       if (E->EN(scalar,const_type) & 0x40 || GD_SIZE(E->EN(scalar,const_type))
           == 0)
       {
-        _GD_SetError(D, GD_E_BAD_TYPE, E->EN(scalar,const_type), NULL, 0, NULL);
+        _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, E->EN(scalar,const_type), NULL);
       } else {
         size_t size = GD_SIZE(_GD_ConstType(D, E->EN(scalar,const_type))) *
           E->EN(scalar,array_len);
@@ -613,12 +614,12 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     P->e->p.meta_entry[P->e->n_meta] = E;
     P->e->n_meta++;
 
-    P->e->value_list_validity = 0;
-    P->e->entry_list_validity = 0;
+    P->e->fl.value_list_validity = 0;
+    P->e->fl.entry_list_validity = 0;
   } else {
     /* Invalidate the field lists */
-    D->value_list_validity = 0;
-    D->entry_list_validity = 0;
+    D->fl.value_list_validity = 0;
+    D->fl.entry_list_validity = 0;
   }
 
 
@@ -2141,11 +2142,11 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
 
   /* Invalidate the field lists */
   if (P) {
-    P->e->value_list_validity = 0;
-    P->e->entry_list_validity = 0;
+    P->e->fl.value_list_validity = 0;
+    P->e->fl.entry_list_validity = 0;
   } else {
-    D->value_list_validity = 0;
-    D->entry_list_validity = 0;
+    D->fl.value_list_validity = 0;
+    D->fl.entry_list_validity = 0;
   }
 
   /* Update aliases */

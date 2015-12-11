@@ -454,8 +454,8 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
     }
 
     /* Invalidate the field lists */
-    D->entry_list_validity = 0;
-    D->value_list_validity = 0;
+    D->fl.entry_list_validity = 0;
+    D->fl.value_list_validity = 0;
   } else {
     /* If this is a metafield, update its parent's lists */
     struct gd_private_entry_ *Pe = E->e->p.parent->e;
@@ -471,8 +471,8 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
     Pe->n_meta--;
 
     /* Invalidate the field lists */
-    Pe->entry_list_validity = 0;
-    Pe->value_list_validity = 0;
+    Pe->fl.entry_list_validity = 0;
+    Pe->fl.value_list_validity = 0;
   }
 
   /* Remove the entry from the list -- we need not worry about the way we've
