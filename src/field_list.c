@@ -222,7 +222,7 @@ static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
       el = ptr;
     }
 
-    if (_GD_ListEntry(entry[i], 1, hidden, noalias, special, ctype))
+    if (_GD_ListEntry(entry[i], p ? 1 : 0, hidden, noalias, special, ctype))
       el[n++] = entry[i]->field + offs;
   }
 

@@ -1,3 +1,7 @@
+2015-12-10   D. V. Wiebe <getdata@ketiltrout.net> svn:1032
+	* src/field_list.c (_GD_EntryList): Fix _GD_ListEntry call.
+	* test/vlist.c test/vlist_meta.c: Updated.
+
 2015-12-10   D. V. Wiebe <getdata@ketiltrout.net> svn:1031
 	* man/gd_mconstants.3: Merged into gd_constants.3 and deleted.
 	* man/gd_constants.3: Merge in gd_mconstants.3.

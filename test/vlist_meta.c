@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,16 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Retreiving the number of fields of a field should succeed cleanly */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
 
 int main(void)
 {
@@ -35,10 +26,12 @@ int main(void)
   const char *format = "dirfile/format";
   const char *format_data =
     "parent RAW UINT8 1\n"
-    "META parent data1 LINTERP UINT8 1\n"
-    "META parent data2 LINTERP UINT8 1\n"
-    "META parent data3 LINTERP UINT8 1\n"
-    "META parent data4 CONST UINT8 1\n";
+    "META parent data1 LINCOM parent 1 0\n"
+    "META parent data2 LINCOM parent 1 0\n"
+    "META parent data3 LINCOM parent 1 0\n"
+    "META parent data4 CONST UINT8 1\n"
+    "other RAW UINT8 1\n"
+    "META other data5 LINCOM parent 1 0\n";
   int fd, i, error, r = 0;
   const char **field_list;
   DIRFILE *D;
