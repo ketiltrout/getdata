@@ -1,4 +1,4 @@
-2015-12-10   D. V. Wiebe <getdata@ketiltrout.net> svn:1033
+2015-12-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1033,1034
 	* src/ascii.c (_GD_ScanFormat): Don't strcpy, just return the string.
 	* src/ascii.c (_GD_AsciiWrite): Merge duplicate code into WRITE_ASCII and
 	WRITE_CASCII macros.
@@ -8,6 +8,8 @@
 	* src/getdata.c (_GD_DoField gd_getdata64 _GD_DoSeek gd_seek64
 	_GD_DoFieldOut gd_putdata64): Return GD_E_RANGE if we would overflow the
 	I/O position.
+	* test/get_range.c test/put_range.c test/seek_range.c test/seek_range2.c:
+	Added.
 
 	* src/internal.h: Define PRIuSIZE and PRIdSIZE if necessary.
 	* src/flush.c (_GD_FlushFragment): Use inttype printf macros to write
