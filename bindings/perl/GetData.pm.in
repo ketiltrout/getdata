@@ -581,26 +581,30 @@ order that they're indexed.  See gd_nfragments(3) and gd_fragmentname(3).
 
 Returns the value of the CARRAY named C<$FIELD_CODE> after converting its
 elements to the return type C<$RETURN_TYPE>, which should be one of the symbols
-listed under L</"Data Types"> above.  If called in scalar context, returns a
-packed string containing the data.  If called in list context, the data will be
-unpacked and returned as an array.  See gd_get_carray(3).
+listed under L</"Data Types"> above.  If C<$RETURN_TYPE> is C<$GetData::NULL>,
+in scalar context this function returns undef.  Otherwise, if called in scalar
+context, returns a packed string containing the data.  If called in list
+context, the data will be unpacked and returned as an array.  See
+gd_get_carray(3).
 
 =item $dirfile->get_carray_slice ($FIELD_CODE, $START, $LEN, $RETURN_TYPE)
 
 Returns the value of a portion of the CARRAY named C<$FIELD_CODE> after
 converting its elements to the return type C<$RETURN_TYPE>, which should be one
 of the symbols listed under L</"Data Types"> above.  The first element returned
-is given by C<$START>, and the number of elements by C<$LEN>.  If called in
-scalar context, returns a packed string containing the data.  If called in list
-context, the data will be unpacked and returned as an array.  Less data than
-requested may be returned, if insufficient data exists.  See
-gd_get_carray_slice(3).
+is given by C<$START>, and the number of elements by C<$LEN>.  If
+C<$RETURN_TYPE> is C<$GetData::NULL>, in scalar context this function returns
+undef.  Otherwise, if called in scalar context, returns a packed string
+containing the data.  If called in list context, the data will be unpacked and
+returned as an array.  Less data than requested may be returned, if insufficient
+data exist.  See gd_get_carray_slice(3).
 
 =item $dirfile->get_constant ($FIELD_CODE, $RETURN_TYPE)
 
 Returns the value of the CONST named C<$FIELD_CODE> after converting it to the
 return type C<$RETURN_TYPE>, which should be one of the symbols listed under
-L</"Data Types"> above.  See gd_get_constant(3).
+L</"Data Types"> above.  If C<$RETURN_TYPE> is C<$GetData::NULL>, returns undef
+on success.  See gd_get_constant(3).
 
 =item $dirfile->getdata ($FIELD_CODE, $FIRST_FRAME, $FIRST_SAMP, $NUM_FRAMES,
 $NUM_SAMP, $RETURN_TYPE)
@@ -609,10 +613,12 @@ Returns data from the field specified by C<$FIELD_CODE> after converting them
 to the return type C<$RETURN_TYPE>, which should be one of the symbols listed
 under L</"Data Types"> above.  The first sample returned is C<$FIRST_SAMP>
 samples after the start of C<$FIRST_FRAME> and the amount of data returned is
-C<$NUM_FRAMES> frames plus C<$NUM_SAMP> samples.  If called in scalar context
-returns a string of packed data.  If called in array context, the data will be
-unpacked and returned as an array.  Complex data are returned as
-C<Math::Complex> objects.  See gd_getdata(3).
+C<$NUM_FRAMES> frames plus C<$NUM_SAMP> samples.  If C<$RETURN_TYPE> is
+C<$GetData::NULL>, in scalar context this function returns the number of
+samples read.  Otherwise, if called in scalar context, it returns a string of
+packed data.  If called in array context, the data will be unpacked and returned
+as an array.  Complex data are returned as C<Math::Complex> objects.  See
+gd_getdata(3).
 
 =item $dirfile->get_string ($FIELD_CODE)
 

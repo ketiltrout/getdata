@@ -262,7 +262,7 @@ int _GD_FlacOpen(int dirfd, struct gd_raw_file_* file, gd_type_t data_type,
 static size_t _GD_FlacOutput(struct gd_flacdata *gdfl, gd_type_t data_type,
     char *output, size_t ns)
 {
-  dtrace("%p, 0x%X, %p, %" PRNsize_t, gdfl, data_type, output, ns);
+  dtrace("%p, 0x%X, %p, %" PRIuSIZE, gdfl, data_type, output, ns);
 
   if (ns > gdfl->dlen - gdfl->pos)
     ns = gdfl->dlen - gdfl->pos;
@@ -270,7 +270,7 @@ static size_t _GD_FlacOutput(struct gd_flacdata *gdfl, gd_type_t data_type,
   memcpy(output, gdfl->data + gdfl->pos, ns * GD_SIZE(data_type));
   gdfl->pos += ns;
 
-  dreturn("%" PRNsize_t, ns);
+  dreturn("%" PRIuSIZE, ns);
   return ns;
 }
 
@@ -281,7 +281,7 @@ ssize_t _GD_FlacRead(struct gd_raw_file_ *restrict file, void *restrict data,
   void *output = data;
   size_t ns = nmemb;
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, data, data_type, nmemb);
 
   for (;;) {
     /* copy the currently loaded frame to the output */
@@ -327,7 +327,7 @@ ssize_t _GD_FlacWrite(struct gd_raw_file_ *file, const void *data,
   const int8_t *i8 = data;
   const int16_t *i16 = data;
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, data, data_type, nmemb);
 
   if (nmemb > 0 && size) {
     /* Allocate buffers */
@@ -370,7 +370,7 @@ WRITE_ERROR:
 
   for (i = 0; i < gdfl->cps; ++i)
     free(buffer[i]);
-  dreturn("%" PRNssize_t, n);
+  dreturn("%" PRIdSIZE, n);
   return n;
 }
 
@@ -379,13 +379,13 @@ off64_t _GD_FlacSeek(struct gd_raw_file_* file, off64_t count,
 {
   struct gd_flacdata *gdfl;
 
-  dtrace("%p, %lli, 0x%X, 0x%X", file, (long long)count, data_type, mode);
+  dtrace("%p, %" PRId64 ", 0x%X, 0x%X", file, (int64_t)count, data_type, mode);
 
   gdfl = (struct gd_flacdata *)(file[(mode == GD_FILE_WRITE) ? 1 : 0].edata);
 
   /* nothing to do */
   if (gdfl->base + gdfl->pos == count) {
-    dreturn("%lli", (long long)count);
+    dreturn("%" PRId64, (int64_t)count);
     return count;
   }
 
@@ -452,7 +452,7 @@ off64_t _GD_FlacSeek(struct gd_raw_file_* file, off64_t count,
   
   file->pos = count;
 
-  dreturn("%lli", (long long)file->pos);
+  dreturn("%" PRId64, (int64_t)file->pos);
   return file->pos;
 }
 
@@ -495,7 +495,7 @@ off64_t _GD_FlacSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 
   free(gdfl);
 
-  dreturn("%lli", (long long)n);
+  dreturn("%" PRId64, (int64_t)n);
   return n;
 }
 
@@ -503,7 +503,7 @@ int _GD_FlacStrerr(const struct gd_raw_file_ *file, char *buf, size_t buflen)
 {
   int r = 0;
 
-  dtrace("%p, %p, %" PRNsize_t, file, buf, buflen);
+  dtrace("%p, %p, %" PRIuSIZE, file, buf, buflen);
 
   switch(file->error) {
     case GD_FLAC_E_EOS:

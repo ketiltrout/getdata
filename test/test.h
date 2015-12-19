@@ -125,10 +125,10 @@ int gd_system(const char* command)
     (double)(v))
 #define CHECKFi(i,n,v) CHECKi(i,fabs((n)-(v)) > 1e-10,n,"%.15g","%.15g",\
     (double)(n),(double)(v))
-#define CHECKI(n,v)    CHECK((n) != (v),n,"%lli","%lli",(long long)(n),\
-    (long long)(v))
-#define CHECKIi(i,n,v) CHECKi(i,(long long)(n) != (long long)(v),n,"%lli",\
-    "%lli", (long long)(n),(long long)(v))
+#define CHECKI(n,v)    CHECK((n) != (v),n,"%" PRId64,"%" PRId64,(int64_t)(n),\
+    (int64_t)(v))
+#define CHECKIi(i,n,v) CHECKi(i,(int64_t)(n) != (int64_t)(v),n,"%" PRId64,\
+    "%" PRId64, (int64_t)(n),(int64_t)(v))
 #define CHECKNAN(n)    CHECK(!isnan(n),n,"%.15g","%s",(double)(n),"nan")
 #define CHECKNANi(i,n) CHECKi(i,!isnan(n),n,"%.15g","%s",(double)(n),"nan")
 #define CHECKP(n)      CHECK((n) != NULL,n,"%p","%s",n,"NULL")
@@ -145,11 +145,11 @@ int gd_system(const char* command)
     (n),(v));
 #define CHECKEOS(n,v)  CHECK(strcmp((n) + strlen(n) - sizeof(v) + 1,(v)),n,\
     "...\"%s\"","\"%s\"",(n) + strlen(n) - sizeof(v) + 1,(v));
-#define CHECKU(n,v)    CHECK((n) != (v),n,"%llu","%llu",\
-    (unsigned long long)(n),(unsigned long long)(v))
-#define CHECKUi(i,n,v) CHECKi(i,(n) != (v),n,"%llu","%llu",\
-    (unsigned long long)(n),(unsigned long long)(v))
-#define CHECKX(n,v)    CHECK((n) != (v),n,"0x%llX","0x%llX",\
-    (unsigned long long)(n),(unsigned long long)(v))
-#define CHECKXi(i,n,v) CHECKi(i,(n) != (v),n,"0x%llX","0x%llX",\
-    (unsigned long long)(n),(unsigned long long)(v))
+#define CHECKU(n,v)    CHECK((n) != (v),n,"%" PRIu64,"%" PRIu64,\
+    (uint64_t)(n),(uint64_t)(v))
+#define CHECKUi(i,n,v) CHECKi(i,(n) != (v),n,"%" PRIu64,"%" PRIu64,\
+    (uint64_t)(n),(uint64_t)(v))
+#define CHECKX(n,v)    CHECK((n) != (v),n,"0x%" PRIX64,"0x%" PRIX64,\
+    (uint64_t)(n),(uint64_t)(v))
+#define CHECKXi(i,n,v) CHECKi(i,(n) != (v),n,"0x%" PRIX64,"0x%" PRIX64,\
+    (uint64_t)(n),(uint64_t)(v))

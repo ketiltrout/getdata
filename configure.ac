@@ -658,11 +658,11 @@ dnl headers
 echo
 echo "*** Looking for additional header files"
 echo
-AC_CHECK_HEADERS([asm/unaligned.h Availability.h byteswap.h direct.h fcntl.h \
-                  float.h inttypes.h io.h libgen.h libkern/OSByteOrder.h \
-                  math.h stddef.h stdint.h sys/endian.h sys/file.h sys/param.h \
-                  sys/resource.h sys/stat.h sys/time.h sys/types.h sys/wait.h \
-                  unistd.h])
+AC_CHECK_HEADERS([asm/unaligned.h Availability.h byteswap.h crtdefs.h direct.h \
+                  fcntl.h float.h inttypes.h io.h libgen.h \
+                  libkern/OSByteOrder.h math.h stddef.h stdint.h sys/endian.h \
+                  sys/file.h sys/param.h sys/resource.h sys/stat.h sys/time.h \
+                  sys/types.h sys/wait.h unistd.h])
 if test "x$disable_c99" = "xno"; then
 AC_CHECK_HEADERS([complex.h])
 fi
@@ -675,24 +675,27 @@ echo
 AC_C_CONST
 AC_C_BIGENDIAN
 GD_C_FLOATORDERING
+
+if test "x$disable_c99" = "xno"; then
+AC_CHECK_TYPES([_Complex float, _Complex double])
+fi
+
+AC_TYPE_LONG_LONG_INT
+
 AC_TYPE_INT8_T
 AC_TYPE_INT16_T
 AC_TYPE_INT32_T
 AC_TYPE_INT64_T
 AC_TYPE_MODE_T
 AC_TYPE_OFF_T
+AC_CHECK_TYPES([off64_t])
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
+AC_CHECK_TYPES([struct stat64, struct _stat64, struct __stat64])
 AC_TYPE_UINT8_T
 AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
 AC_TYPE_UINT64_T
-
-if test "x$disable_c99" = "xno"; then
-AC_CHECK_TYPES([_Complex float, _Complex double])
-fi
-
-AC_CHECK_TYPES([struct stat64, struct _stat64, struct __stat64, off64_t])
 
 dnl integer sizes
 AC_CHECK_SIZEOF([off_t])
@@ -700,11 +703,19 @@ AC_CHECK_SIZEOF([size_t])
 AC_CHECK_SIZEOF([short int])
 AC_CHECK_SIZEOF([int])
 AC_CHECK_SIZEOF([long int])
+if test "x$ac_cv_type_long_long_int" = "xyes"; then
 AC_CHECK_SIZEOF([long long int])
+else
+  ac_cv_sizeof_long_long_int=0
+fi
 AC_CHECK_SIZEOF([unsigned short int])
 AC_CHECK_SIZEOF([unsigned int])
 AC_CHECK_SIZEOF([unsigned long int])
+if test "x$ac_cv_type_unsigned_long_long_int" = "xyes"; then
 AC_CHECK_SIZEOF([unsigned long long int])
+else
+  ac_cv_sizeof_unsigned_long_long_int=0
+fi
 AC_CHECK_SIZEOF([void *])
 
 dnl C89 API types

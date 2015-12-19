@@ -136,7 +136,7 @@ ssize_t _GD_Bzip2Read(struct gd_raw_file_ *restrict file, void *restrict data,
   struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
   uint64_t nbytes = nmemb * GD_SIZE(data_type);
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, data, data_type, nmemb);
 
   while (nbytes > (uint64_t)(ptr->end - ptr->pos)) {
     int n;
@@ -194,7 +194,7 @@ ssize_t _GD_Bzip2Write(struct gd_raw_file_ *file, const void *data,
   struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
   ssize_t n;
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, data, data_type, nmemb);
 
   n = GD_SIZE(data_type) * nmemb;
   if (n > INT_MAX)
@@ -211,7 +211,7 @@ ssize_t _GD_Bzip2Write(struct gd_raw_file_ *file, const void *data,
     file->pos += n;
   }
 
-  dreturn("%" PRNssize_t, n);
+  dreturn("%" PRIdSIZE, n);
   return n;
 }
 
@@ -220,13 +220,13 @@ off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t count,
 {
   struct gd_bzdata *ptr;
 
-  dtrace("%p, %lli, 0x%X, 0x%X", file, (long long)count, data_type, mode);
+  dtrace("%p, %" PRId64 ", 0x%X, 0x%X", file, (int64_t)count, data_type, mode);
 
   ptr = (struct gd_bzdata *)(file[(mode == GD_FILE_WRITE) ? 1 : 0].edata);
 
   /* nothing to do */
   if (ptr->base + ptr->pos == count * GD_SIZE(data_type)) {
-    dreturn("%lli", (long long)count);
+    dreturn("%" PRId64, (int64_t)count);
     return count;
   }
 
@@ -301,8 +301,8 @@ off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t count,
   
   file->pos = (ptr->base + ptr->pos) / GD_SIZE(data_type);
 
-  dreturn("%lli", (long long)file->pos);
-  return file->pos;;
+  dreturn("%" PRId64, (int64_t)file->pos);
+  return file->pos;
 }
 
 int _GD_Bzip2Close(struct gd_raw_file_ *file)
@@ -372,7 +372,7 @@ off64_t _GD_Bzip2Size(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
   n = (ptr->base + ptr->end) / GD_SIZE(data_type);
   free(ptr);
 
-  dreturn("%lli", (long long)n);
+  dreturn("%" PRId64, (int64_t)n);
   return n;
 }
 
@@ -380,7 +380,7 @@ int _GD_Bzip2Strerr(const struct gd_raw_file_ *file, char *buf, size_t buflen)
 {
   int r = 0;
 
-  dtrace("%p, %p, %" PRNsize_t, file, buf, buflen);
+  dtrace("%p, %p, %" PRIuSIZE, file, buf, buflen);
 
   switch (file->error) {
     case BZ_OK:

@@ -65,7 +65,7 @@ off64_t _GD_AsciiSeek(struct gd_raw_file_* file, off64_t count,
 {
   char line[64];
 
-  dtrace("%p, %lli, <unused>, 0x%X", file, (long long)count, mode);
+  dtrace("%p, %" PRId64 ", <unused>, 0x%X", file, (int64_t)count, mode);
 
   if (count < file->pos) {
     rewind((FILE *)file->edata);
@@ -82,81 +82,83 @@ off64_t _GD_AsciiSeek(struct gd_raw_file_* file, off64_t count,
       fputs(line, (FILE *)file->edata);
   }
 
-  dreturn("%lli", (long long)file->pos);
+  dreturn("%" PRId64, (int64_t)file->pos);
   return file->pos;
 }
 
-static void _GD_ScanFormat(char* fmt, gd_type_t data_type)
-{
-  dtrace("%p, 0x%X", fmt, data_type);
+static const char * _GD_ScanFormat(gd_type_t data_type)
+{ 
+  const char *fmt;
+  dtrace("0x%X", data_type);
 
   switch(data_type) {
     case GD_UINT8:
 #ifndef NO_8BIT_INT_PREFIX
-      strcpy(fmt, "%" SCNu8);
+      fmt = "%" SCNu8 "\n";
       break;
+#else
+      /* FALLTHROUGH */
 #endif
     case GD_UINT16:
-      strcpy(fmt, "%" SCNu16);
+      fmt = "%" SCNu16 "\n";
       break;
     case GD_INT8:
 #ifndef NO_8BIT_INT_PREFIX
-      strcpy(fmt, "%" SCNi8);
+      fmt = "%" SCNi8 "\n";
       break;
+#else
+      /* FALLTHROUGH */
 #endif
     case GD_INT16:
-      strcpy(fmt, "%" SCNi16);
+      fmt = "%" SCNi16 "\n";
       break;
     case GD_UINT32:
-      strcpy(fmt, "%" SCNu32);
+      fmt = "%" SCNu32 "\n";
       break;
     case GD_INT32:
-      strcpy(fmt, "%" SCNi32);
+      fmt = "%" SCNi32 "\n";
       break;
     case GD_UINT64:
-      strcpy(fmt, "%" SCNu64);
+      fmt = "%" SCNu64 "\n";
       break;
     case GD_INT64:
-      strcpy(fmt, "%" SCNi64);
+      fmt = "%" SCNi64 "\n";
       break;
     case GD_FLOAT32:
-      strcpy(fmt, "%f");
+      fmt = "%f\n";
       break;
     case GD_FLOAT64:
-      strcpy(fmt, "%lf");
+      fmt = "%lf\n";
       break;
     case GD_COMPLEX64:
-      strcpy(fmt, "%f;%f");
+      fmt = "%f;%f\n";
       break;
     case GD_COMPLEX128:
-      strcpy(fmt, "%lf;%lf");
+      fmt = "%lf;%lf\n";
       break;
     default:
-      fmt[0] = 0;
+      fmt = NULL;
       break;
   }
 
-  if (fmt[0])
-    strcat(fmt, "\n");
-
-  dreturn("[\"%s\"]", fmt);
+  dreturn("\"%s\"", fmt);
+  return fmt;
 }
 
 ssize_t _GD_AsciiRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
     gd_type_t data_type, size_t nmemb)
 {
-  char fmt[50];
-  size_t n = 0;
-  ssize_t ret = 0;
+  const char *fmt;
+  ssize_t n = 0;
 #ifdef NO_8BIT_INT_PREFIX
   short int i16;
 #endif
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, ptr, data_type, nmemb);
 
-  _GD_ScanFormat(fmt, data_type);
+  fmt = _GD_ScanFormat(data_type);
   if (data_type & GD_COMPLEX) {
-    for (n = 0; n < nmemb; ++n) {
+    for (n = 0; n < (ssize_t)nmemb; ++n) {
       if (feof((FILE *)file->edata))
         break;
 
@@ -164,13 +166,13 @@ ssize_t _GD_AsciiRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
             (char *)ptr + GD_SIZE(data_type) * n + GD_SIZE(data_type) / 2) < 2)
       {
         if (ferror((FILE *)file->edata))
-          ret = -1;
+          n = -1;
         break;
       }
       file->pos++;
     }
   } else {
-    for (n = 0; n < nmemb; ++n) {
+    for (n = 0; n < (ssize_t)nmemb; ++n) {
       if (ferror((FILE *)file->edata))
         break;
 
@@ -179,7 +181,7 @@ ssize_t _GD_AsciiRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
       if (GD_SIZE(data_type) == 1) {
         if (fscanf((FILE *)file->edata, fmt, &i16) < 1) {
           if (ferror((FILE *)file->edata))
-            ret = -1;
+            n = -1;
           break;
         }
         if (data_type & GD_SIGNED)
@@ -193,7 +195,7 @@ ssize_t _GD_AsciiRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
               n) < 1)
         {
           if (ferror((FILE *)file->edata))
-            ret = -1;
+            n = -1;
           break;
         }
       }
@@ -201,130 +203,45 @@ ssize_t _GD_AsciiRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
     }
   }
 
-  dreturn("%li", (ret) ? (long)ret : (long)n);
-  return (ret) ? ret : (ssize_t)n;
+  dreturn("%" PRIdSIZE, n);
+  return n;
 }
+
+#define WRITE_ASCII(fmt,t) do { \
+  for (n = 0; n < (ssize_t)nmemb; ++n) \
+    if (fprintf((FILE *)file->edata, "%" fmt "\n", ((t*)ptr)[n]) < 0) { n = -1; break; } \
+} while (0)
+#define WRITE_CASCII(fmt,t) do { \
+  for (n = 0; n < (ssize_t)nmemb; ++n) \
+    if (fprintf((FILE *)file->edata, "%" fmt ";%" fmt "\n", ((t*)ptr)[n*2], ((t*)ptr)[n*2+1]) < 0) \
+      { n = -1; break; } \
+} while (0)
 
 ssize_t _GD_AsciiWrite(struct gd_raw_file_ *restrict file,
     const void *restrict ptr, gd_type_t data_type, size_t nmemb)
 {
-  ssize_t ret = 0;
-  size_t n = 0;
+  ssize_t n = -1;
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, ptr, data_type, nmemb);
 
-  switch(data_type) {
-    case GD_UINT8:
-      for (n = 0; n < nmemb; ++n)
-        if (fprintf((FILE *)file->edata, "%" PRIu8 "\n",
-              ((uint8_t *)ptr)[n]) < 0)
-        {
-          ret = -1;
-          break;
-        }
-      break;
-    case GD_INT8:
-      for (n = 0; n < nmemb; ++n)
-        if (fprintf((FILE *)file->edata, "%" PRIi8 "\n",
-              ((int8_t *)ptr)[n]) < 0)
-        {
-          ret = -1;
-          break;
-        }
-      break;
-    case GD_UINT16:
-      for (n = 0; n < nmemb; ++n)
-        if (fprintf((FILE *)file->edata, "%" PRIu16 "\n", ((uint16_t *)ptr)[n])
-            < 0)
-        {
-          ret = -1;
-          break;
-        }
-      break;
-    case GD_INT16:
-      for (n = 0; n < nmemb; ++n)
-        if (fprintf((FILE *)file->edata, "%" PRIi16 "\n", ((int16_t *)ptr)[n])
-            < 0)
-        {
-          ret = -1;
-          break;
-        }
-      break;
-    case GD_UINT32:
-      for (n = 0; n < nmemb; ++n)
-        if (fprintf((FILE *)file->edata, "%" PRIu32 "\n", ((uint32_t *)ptr)[n])
-            < 0)
-        {
-          ret = -1;
-          break;
-        }
-      break;
-    case GD_INT32:
-      for (n = 0; n < nmemb; ++n)
-        if (fprintf((FILE *)file->edata, "%" PRIi32 "\n", ((int32_t *)ptr)[n])
-            < 0)
-        {
-          ret = -1;
-          break;
-        }
-      break;
-    case GD_UINT64:
-      for (n = 0; n < nmemb; ++n)
-        if (fprintf((FILE *)file->edata, "%" PRIu64 "\n", ((uint64_t *)ptr)[n])
-            < 0)
-        {
-          ret = -1;
-          break;
-        }
-      break;
-    case GD_INT64:
-      for (n = 0; n < nmemb; ++n)
-        if (fprintf((FILE *)file->edata, "%" PRIi64 "\n", ((int64_t *)ptr)[n])
-            < 0)
-        {
-          ret = -1;
-          break;
-        }
-      break;
-    case GD_FLOAT32:
-      for (n = 0; n < nmemb; ++n)
-        if (fprintf((FILE *)file->edata, "%.7g\n", ((float *)ptr)[n]) < 0) {
-          ret = -1;
-          break;
-        }
-      break;
-    case GD_FLOAT64:
-      for (n = 0; n < nmemb; ++n)
-        if (fprintf((FILE *)file->edata, "%.16lg\n", ((double *)ptr)[n]) < 0) {
-          ret = -1;
-          break;
-        }
-      break;
-    case GD_COMPLEX64:
-      for (n = 0; n < nmemb; ++n)
-        if (fprintf((FILE *)file->edata, "%.16g;%.16g\n", ((float *)ptr)[n * 2],
-              (((float *)ptr)[n * 2 + 1])) < 0)
-        {
-          ret = -1;
-          break;
-        }
-      break;
-    case GD_COMPLEX128:
-      for (n = 0; n < nmemb; ++n)
-        if (fprintf((FILE *)file->edata, "%.16lg;%.16lg\n",
-              ((double *)ptr)[n * 2], (((double *)ptr)[n * 2 + 1])) < 0)
-        {
-          ret = -1;
-          break;
-        }
-      break;
-    default:
-      ret = -1;
-      break;
+  switch (data_type) {
+    case GD_UINT8:       WRITE_ASCII(PRIu8 ,  uint8_t); break;
+    case GD_INT8:        WRITE_ASCII(PRId8 ,   int8_t); break;
+    case GD_UINT16:      WRITE_ASCII(PRIu16, uint16_t); break;
+    case GD_INT16:       WRITE_ASCII(PRId16,  int16_t); break;
+    case GD_UINT32:      WRITE_ASCII(PRIu32, uint32_t); break;
+    case GD_INT32:       WRITE_ASCII(PRId32,  int32_t); break;
+    case GD_UINT64:      WRITE_ASCII(PRIu64, uint64_t); break;
+    case GD_INT64:       WRITE_ASCII(PRId64,  int64_t); break;
+    case GD_FLOAT32:     WRITE_ASCII(".7g",     float); break;
+    case GD_FLOAT64:     WRITE_ASCII(".16g",   double); break;
+    case GD_COMPLEX64:  WRITE_CASCII(".7g",     float); break;
+    case GD_COMPLEX128: WRITE_CASCII(".16g",   double); break;
+    default:                            errno = EINVAL; break; /* internal error */
   }
 
-  dreturn("%li", (ret) ? (long)ret : (long)n);
-  return (ret) ? ret : (ssize_t)n;
+  dreturn("%" PRIdSIZE, n);
+  return n;
 }
 
 int _GD_AsciiSync(struct gd_raw_file_ *file)
@@ -392,6 +309,6 @@ off64_t _GD_AsciiSize(int dirfd, struct gd_raw_file_* file,
 
   fclose(stream);
 
-  dreturn("%lli", (long long)n);
+  dreturn("%" PRId64, (int64_t)n);
   return n;
 }

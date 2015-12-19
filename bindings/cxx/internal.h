@@ -1,4 +1,4 @@
-// Copyright (C) 2011 D. V. Wiebe
+// Copyright (C) 2011, 2015 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -25,9 +25,15 @@
 #include "getdata/dirfile.h"
 
 #include <cstring>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <stdint.h>
+#ifdef HAVE_INTTYPES_H
+#ifndef __STDC_FORMAT_MACROS
+#define __STDC_FORMAT_MACROS
+#endif
+#include <inttypes.h>
+#endif
 
 /* debugging macros */
 #ifdef GETDATA_DEBUG

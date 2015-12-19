@@ -25,7 +25,7 @@ off64_t _GD_GetIOPos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
   int i;
   off64_t pos = -1, pos2;
 
-  dtrace("%p, %p, %lli", D, E, (long long)index_pos);
+  dtrace("%p, %p, %" PRId64, D, E, (int64_t)index_pos);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
@@ -114,7 +114,7 @@ off64_t _GD_GetIOPos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
   }
 
   D->recurse_level--;
-  dreturn("%lli", (long long)pos);
+  dreturn("%" PRId64, (int64_t)pos);
   return pos;
 }
 
@@ -147,7 +147,7 @@ off64_t gd_tell64(DIRFILE *D, const char *field_code) gd_nothrow
   else
     pos = _GD_GetIOPos(D, entry, -1);
 
-  dreturn("%lli", (long long)pos);
+  dreturn("%" PRId64, (int64_t)pos);
   return pos;
 }
 
@@ -164,7 +164,16 @@ off64_t _GD_DoSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
   const int oop_write = ((enc->flags & GD_EF_OOP) && (mode & GD_FILE_WRITE))
     ? 1 : 0;
 
-  dtrace("%p, %p, %p, %lli, 0x%X", D, E, enc, (long long)offset, mode);
+  dtrace("%p, %p, %p, %" PRId64 ", 0x%X", D, E, enc, (int64_t)offset, mode);
+
+  /* Yet another overflow check */
+  if (GD_SIZE(E->EN(raw,data_type)) > 0 &&
+      offset > GD_INT64_MAX / GD_SIZE(E->EN(raw,data_type)))
+  {
+    _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   if (oop_write) {
     /* in this case we need to close and then re-open the file */
@@ -238,7 +247,7 @@ off64_t _GD_DoSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
     _GD_SetEncIOError(D, (mode & GD_FILE_WRITE) ? GD_E_IO_WRITE : GD_E_IO_READ,
         E->e->u.raw.file + 0);
 
-  dreturn("%lli", (long long)pos);
+  dreturn("%" PRId64, (int64_t)pos);
   return pos;
 }
 
@@ -246,7 +255,7 @@ int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode)
 {
   int i;
 
-  dtrace("%p, %p, %lli, 0x%X", D, E, (long long)offset, mode);
+  dtrace("%p, %p, %" PRId64 ", 0x%X", D, E, (int64_t)offset, mode);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
@@ -338,8 +347,8 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code, off64_t frame_num,
   int is_index = 0;
   unsigned int mode = (whence & GD_SEEK_WRITE) ? GD_FILE_WRITE : GD_FILE_READ;
 
-  dtrace("%p, \"%s\", %lli, %lli, 0x%X", D, field_code, (long long)frame_num,
-      (long long)sample_num, whence);
+  dtrace("%p, \"%s\", %" PRId64 ", %" PRId64 ", 0x%X", D, field_code,
+      (int64_t)frame_num, (int64_t)sample_num, whence);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -369,9 +378,17 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code, off64_t frame_num,
       dreturn("%i", -1);
       return -1;
     }
-  }
 
-  sample_num += frame_num * spf;
+    /* don't overflow */
+    if ((frame_num > 0 && sample_num > GD_INT64_MAX - spf * frame_num) ||
+        (frame_num < 0 && sample_num < -GD_INT64_MAX - spf * frame_num))
+    {
+      _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
+      dreturn("%i", -1);
+      return -1;
+    }
+    sample_num += frame_num * spf;
+  }
 
   whence &= (GD_SEEK_SET | GD_SEEK_CUR | GD_SEEK_END);
   if (whence == GD_SEEK_SET)
@@ -385,6 +402,15 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code, off64_t frame_num,
   } else
     _GD_SetError(D, GD_E_ARGUMENT, GD_E_ARG_WHENCE, NULL, 0, NULL);
 
+  /* Check for overflow again */
+  if ((sample_num > 0 && pos > GD_INT64_MAX - sample_num) ||
+      (sample_num < 0 && pos < -GD_INT64_MAX - sample_num))
+  {
+    _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
+    dreturn("%i", 0);
+    return 0;
+  }
+
   if (!D->error)
     _GD_Seek(D, entry, sample_num + pos, mode);
 
@@ -393,7 +419,7 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code, off64_t frame_num,
   else
     pos = _GD_GetIOPos(D, entry, -1);
 
-  dreturn("%lli", (long long)pos);
+  dreturn("%" PRId64, (int64_t)pos);
   return pos;
 }
 

@@ -21,7 +21,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 if GETDATA_DEBUG
-TEST_VERBOSE=verbose=1
+VERBOSE_TESTS=TEST_VERBOSE=1
 endif
 
 blibdir=build/blib
@@ -44,9 +44,13 @@ build/build.stamp: src/Makefile.PL src/GetData.xs src/typemap
 	mkdir build
 	cp -r $(srcdir)/src/* build
 	[ -e build/Makefile.PL ] || cp src/Makefile.PL build
-	mkdir build/t
-	cp -r $(srcdir)/t/* build/t
 	mkdir build/lib
+	touch $@
+	${MAKE} build/test.stamp
+
+build/test.stamp: build/build.stamp ${plTESTS}
+	[ -e build/t ] || mkdir build/t
+	cp -r $(srcdir)/t/* build/t
 	touch $@
 
 src/Makefile.PL: src/Makefile.PL.in $(top_builddir)/config.status
@@ -90,13 +94,13 @@ uninstall-hook:
 	rmdir $(DESTDIR)${perlautogetdatadir}
 
 if TEST_PERL
-check: build/Makefile
+check: build/Makefile build/test.stamp
 	export ${DL_LIBRARY_PATH}=../../../src/.libs:${${DL_LIBRARY_PATH}} && \
-		( cd build && ${MAKE} test ${TEST_VERBOSE} )
+		( cd build && ${MAKE} test ${VERBOSE_TESTS} )
 
-testdb testcover: build/Makefile
+testdb testcover: build/Makefile build/test.stamp
 	export ${DL_LIBRARY_PATH}=../../../src/.libs:${${DL_LIBRARY_PATH}} && \
-		( cd build && ${MAKE} $@ ${TEST_VERBOSE} )
+		( cd build && ${MAKE} $@ ${VERBOSE_TESTS} )
 
 .PHONY: check testdb testcover
 endif

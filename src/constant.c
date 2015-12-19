@@ -28,7 +28,7 @@ int gd_get_carray_slice(DIRFILE *D, const char *field_code_in,
   char* field_code;
   int repr;
 
-  dtrace("%p, \"%s\", %lu, %" PRNsize_t ", 0x%x, %p", D, field_code_in, start,
+  dtrace("%p, \"%s\", %lu, %" PRIuSIZE ", 0x%x, %p", D, field_code_in, start,
       n, return_type, data_out);
 
   if (D->flags & GD_INVALID) {
@@ -159,7 +159,7 @@ size_t gd_array_len(DIRFILE *D, const char *field_code_in) gd_nothrow
   if (field_code != field_code_in)
     free(field_code);
 
-  dreturn("%" PRNsize_t, len);
+  dreturn("%" PRIuSIZE, len);
   return len;
 }
 
@@ -174,7 +174,7 @@ static int _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, unsigned long first,
 {
   int i;
 
-  dtrace("%p, %p, %lu, %" PRNsize_t ", 0x%X, %p", D, E, first, n, data_type,
+  dtrace("%p, %p, %lu, %" PRIuSIZE ", 0x%X, %p", D, E, first, n, data_type,
       data_in);
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR) {
@@ -214,7 +214,7 @@ int gd_put_carray_slice(DIRFILE* D, const char *field_code, unsigned long first,
   gd_entry_t *entry;
   int r = -1;
 
-  dtrace("%p, \"%s\", %lu, %" PRNsize_t ", 0x%X, %p", D, field_code, first,
+  dtrace("%p, \"%s\", %lu, %" PRIuSIZE ", 0x%X, %p", D, field_code, first,
       n, data_type, data_in);
 
   if (D->flags & GD_INVALID) {

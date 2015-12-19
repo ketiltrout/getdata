@@ -457,13 +457,13 @@ PyObject *gdpy_convert_to_pylist(const void *data, gd_type_t type, size_t ns)
     case GD_UINT64:
       for (i = 0; i < ns; ++i)
         if (gdpylist_append(pyobj, PyLong_FromUnsignedLongLong(
-                (unsigned long long)((uint64_t*)data)[i])))
+                (unsigned PY_LONG_LONG)((uint64_t*)data)[i])))
           return NULL;
       break;
     case GD_INT64:
       for (i = 0; i < ns; ++i)
         if (gdpylist_append(pyobj,
-              PyLong_FromLongLong((long long)((int64_t*)data)[i])))
+              PyLong_FromLongLong((PY_LONG_LONG)((int64_t*)data)[i])))
           return NULL;
       break;
     case GD_FLOAT32:
@@ -500,7 +500,7 @@ PyObject *gdpy_convert_to_pyobj(const void *data, gd_type_t type)
 {
   PyObject *pyobj = NULL;
 
-  dtrace("%p, %02x", data, type);
+  dtrace("%p, 0x%X", data, type);
 
   switch(type) {
     case GD_NULL:
@@ -526,10 +526,11 @@ PyObject *gdpy_convert_to_pyobj(const void *data, gd_type_t type)
       pyobj = PyInt_FromLong((long)*(int32_t*)data);
       break;
     case GD_UINT64:
-      pyobj = PyLong_FromUnsignedLongLong((unsigned long long)*(uint64_t*)data);
+      pyobj = PyLong_FromUnsignedLongLong(
+          (unsigned PY_LONG_LONG)*(uint64_t*)data);
       break;
     case GD_INT64:
-      pyobj = PyLong_FromLongLong((long long)*(int64_t*)data);
+      pyobj = PyLong_FromLongLong((PY_LONG_LONG)*(int64_t*)data);
       break;
     case GD_FLOAT32:
       pyobj = PyFloat_FromDouble((double)*(float*)data);

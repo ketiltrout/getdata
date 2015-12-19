@@ -42,13 +42,10 @@ sub printmunge {
   my ($t, $n) = @$_;
 
   return "&$n" if ($t =~ /&$/);
-  return "(long long)$n" if ($t eq "gd_off64_t" or $t eq "gd_shift_t" or
-    $t eq "gdp_shift_t" or $t eq "int64_t");
-  return "(unsigned long long)$n" if ($t eq "uint64_t");
+  return "(int64_t)$n" if ($t eq "gd_off64_t");
   return "creal($n), cimag($n)" if ($t eq "_Complex double" or
     $t eq "gdp_complex");
-  return "$n.r, (unsigned long long)$n.u, (long long)$n.i"
-  if ($t eq "gd_triplet_t");
+  return "$n.r, $n.u, $n.i" if ($t eq "gd_triplet_t");
   return $n;
 }
 
@@ -69,25 +66,25 @@ sub printfmt {
   {
     return "%i";
   } elsif ($_ eq "gd_entype_t") {
-    return "%02x";
+    return "0x%02X";
   } elsif ($_ eq "gd_shift_t" or $_ eq "gdp_shift_t") {
-    return "%lli";
+    return "% \" PRId64 \"";
   } elsif ($_ eq "gdp_uint_t") {
     return "%u";
   } elsif ($_ eq "gd_type_t" or $_ eq "gdp_type_t") {
-    return "%03x";
+    return "0x%03X";
   } elsif ($_ eq "int" or $_ eq "gdp_int") {
     return "%i";
   } elsif ($_ eq "gd_off64_t") {
-    return "%lli";
+    return "% \" PRId64 \"";
   } elsif ($_ eq "size_t") {
-    return "%zi";
+    return "% \" PRIuSIZE \"";
   } elsif ($_ eq "unsigned int") {
     return "%u";
   } elsif ($_ eq "unsigned long int") {
     return "%lu";
   } elsif ($_ eq "gd_triplet_t") {
-    return "{%g,%llX,%lli}";
+    return "{%g,%\" PRIX64 \",%\" PRId64 \"}";
   } else {
     die "Can't format \"$_\"";
   }

@@ -56,11 +56,11 @@ off64_t _GD_RawSeek(struct gd_raw_file_* file, off64_t count,
 {
   off64_t pos;
 
-  dtrace("%p, %lli, 0x%X, <unused>", file, (long long)count, data_type);
+  dtrace("%p, %" PRId64 ", 0x%X, <unused>", file, (int64_t)count, data_type);
 
   /* short circuit */
   if (file->pos == count) {
-    dreturn("%lli", (long long)count);
+    dreturn("%" PRId64, (int64_t)count);
     return count;
   }
 
@@ -78,7 +78,7 @@ off64_t _GD_RawSeek(struct gd_raw_file_* file, off64_t count,
   pos /= GD_SIZE(data_type);
   file->pos = pos;
 
-  dreturn("%lli", (long long)pos);
+  dreturn("%" PRId64, (int64_t)pos);
   return pos;
 }
 
@@ -87,7 +87,7 @@ ssize_t _GD_RawRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
 {
   ssize_t nread;
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, ptr, data_type, nmemb);
 
   nread = read(file->idata, ptr, nmemb * GD_SIZE(data_type));
 
@@ -96,7 +96,7 @@ ssize_t _GD_RawRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
     file->pos += nread;
   }
 
-  dreturn("%" PRNssize_t, nread);
+  dreturn("%" PRIdSIZE, nread);
   return nread;
 }
 
@@ -105,7 +105,7 @@ ssize_t _GD_RawWrite(struct gd_raw_file_ *restrict file,
 {
   ssize_t nwrote;
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, ptr, data_type, nmemb);
 
   nwrote = write(file->idata, ptr, nmemb * GD_SIZE(data_type));
 
@@ -114,7 +114,7 @@ ssize_t _GD_RawWrite(struct gd_raw_file_ *restrict file,
     file->pos += nwrote;
   }
 
-  dreturn("%" PRNsize_t, nwrote);
+  dreturn("%" PRIuSIZE, nwrote);
   return nwrote;
 }
 
@@ -154,10 +154,10 @@ off64_t _GD_RawSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
   dtrace("%i, %p, 0x%X, <unused>", dirfd, file, data_type);
 
   if (gd_StatAt64(file->D, dirfd, file->name, &statbuf, 0) < 0)  {
-    dreturn("%lli", -1LL);
+    dreturn("%i", -1);
     return -1;
   }
 
-  dreturn("%lli", (long long)statbuf.st_size);
+  dreturn("%" PRId64, (int64_t)statbuf.st_size);
   return statbuf.st_size / GD_SIZE(data_type);
 }

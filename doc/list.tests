@@ -9,7 +9,7 @@
   8 .9..p... gd_getdata (FLOAT64)
   9 .9...... gd_getdata (COMPLEX64)
  10 .9..pPmh gd_getdata (COMPLEX128)
- 11 .9...... gd_getdata (NULL)
+ 11 .9.IpPm. gd_getdata (NULL)
  12 F9CIpPmh gd_get_constant (INT8)
  13 .9...... gd_get_constant (INT16)
  14 .9...... gd_get_constant (INT32)
@@ -18,7 +18,7 @@
  17 .9..p... gd_get_constant (FLOAT64)
  18 .9...... gd_get_constant (COMPLEX64)
  19 .9..pP.h gd_get_constant (COMPLEX128)
- 20 .9...... gd_get_constant (NULL)
+ 20 .9.IpP.h gd_get_constant (NULL)
  21 F9...... fgd_field_name_max
  22 F9...... fgd_mfield_name_max
  23 F9CIpPmh gd_nfields
@@ -88,7 +88,7 @@
  87 .9...... gd_put_constant (INT16)
  88 .9..p... gd_put_constant (INT32)
  89 .9..p... gd_put_constant (INT64)
- 90 .9...... gd_put_constant (FLOAT32)
+ 90 .9..p... gd_put_constant (FLOAT32)
  91 .9..p..h gd_put_constant (FLOAT64)
  92 .9...... gd_put_constant (COMPLEX64)
  93 .9..p.mh gd_put_constant (COMPLEX128)
@@ -161,7 +161,7 @@
 160 .9...... gd_get_carray_slice (INT16)
 161 .9...... gd_get_carray_slice (INT32)
 162 .9..p... gd_get_carray_slice (INT64)
-163 .9...... gd_get_carray_slice (FLOAT32)
+163 .9..p... gd_get_carray_slice (FLOAT32)
 164 .9..pP.. gd_get_carray_slice (FLOAT64)
 165 .9...... gd_get_carray_slice (COMPLEX64)
 166 .9..p... gd_get_carray_slice (COMPLEX128)
@@ -271,3 +271,5 @@
 270 .......h gd_dirfilekey
 271 F9CIpPmh gd_encoding_support
 272 F9C.pPm- NULL return from gd_reference
+273 ...I.Pmh gd_get_carray (NULL)
+274 ...IpPmh gd_get_carray_slice (NULL)

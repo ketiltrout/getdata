@@ -210,7 +210,7 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_multiply_ccin get_multiply_crin get_multiply_crinr \
 					get_multiply_noin get_multiply_rcin get_multiply_s get_neg get_none \
 					get_nonexistent get_null get_off64 get_phase get_phase_affix \
-					get_polynom get_polynom_cmpin get_polynom_noin get_recip \
+					get_polynom get_polynom_cmpin get_polynom_noin get_range get_recip \
 					get_recip_const get_recurse get_rofs get_sbit get_sf get_ss \
 					get_string get_type get_uint16 get_uint32 get_uint64 get_window \
 					get_window_clr get_window_complex get_window_ge get_window_gt \
@@ -357,10 +357,10 @@ PUT_TESTS=put64 put_bad_code put_bit put_bof put_carray put_carray_client \
 					put_lincom_noin put_linterp put_linterp_noin put_linterp_nomono \
 					put_linterp_notab put_linterp_reverse put_mplex put_mplex_complex \
 					put_multiply put_nofile put_null put_off64 put_phase put_phase_noin \
-					put_polynom1 put_polynom2 put_polynom_noin put_protect put_rdonly \
-					put_recip put_recurse put_repr put_rofs put_sbit put_sf put_ss \
-					put_string put_string_protect put_sub put_type put_uint16 put_uint32 \
-					put_uint64 put_window put_zero
+					put_polynom1 put_polynom2 put_polynom_noin put_protect put_range \
+					put_rdonly put_recip put_recurse put_repr put_rofs put_sbit put_sf \
+					put_ss put_string put_string_protect put_sub put_type put_uint16 \
+					put_uint32 put_uint64 put_window put_zero
 
 REF_TESTS=ref ref_none ref_two
 
@@ -370,7 +370,8 @@ REPR_TESTS=repr_a repr_bad repr_float32 repr_float64 repr_i repr_int16 \
 					 repr_uint64 repr_uint8
 
 SEEK_TESTS=seek64 seek_cur seek_end seek_far seek_foffs seek_foffs2 seek_index \
-					 seek_lincom seek_mult seek_neg seek_phase seek_set seek_sub
+					 seek_lincom seek_mult seek_neg seek_phase seek_range seek_range2 \
+					 seek_set seek_sub
 
 SIE_TESTS=sie_get_big sie_get_little sie_move_from sie_move_to sie_nframes_big \
 					sie_nframes_little sie_put_append sie_put_append2 sie_put_back \

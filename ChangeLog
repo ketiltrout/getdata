@@ -1,3 +1,60 @@
+2015-12-10   D. V. Wiebe <getdata@ketiltrout.net> svn:1033
+	* src/ascii.c (_GD_ScanFormat): Don't strcpy, just return the string.
+	* src/ascii.c (_GD_AsciiWrite): Merge duplicate code into WRITE_ASCII and
+	WRITE_CASCII macros.
+
+	* src/getdata.c (_GD_DoField gd_getdata64) src/putdata.c (_GD_DoFieldOut
+	gd_putdata64): Truncate requests to avoid overflow of ssize_t.
+	* src/getdata.c (_GD_DoField gd_getdata64 _GD_DoSeek gd_seek64
+	_GD_DoFieldOut gd_putdata64): Return GD_E_RANGE if we would overflow the
+	I/O position.
+
+	* src/internal.h: Define PRIuSIZE and PRIdSIZE if necessary.
+	* src/flush.c (_GD_FlushFragment): Use inttype printf macros to write
+	frameoffset, &c.
+
+	* configure.ac: Call AC_TYPE_LONG_LONG_INT
+	* bindings/idl/getdata.c (gdidl_get_frameoffset): Use IDL_LONG64 for long
+	long.
+	* bindings/python/pydirfile.c (gdpy_dirfile_seek gdpy_dirfile_tell)
+	bindings/python/pyentry.c (gdpy_entry_getparms gdpy_entry_getthreshold)
+	bindings/python/pyfragment.c (gdpy_fragment_getoffset
+	gdpy_fragment_setoffset) bindings/python/pygetdata.c (gdpy_convert_to_pylist
+	gdpy_convert_to_pyobj): Use PY_LONG_LONG for long long.
+	* bindings/perl/simple_funcs.pl: Use inttypes printf macros and avoid long
+	long.
+
+	* bindings/matlab/gd_matlab.h: Define int64_t and uint64_t.
+	* bindings/matlab/matlab.c (gdmx_to_int64_): Renamed from gdmx_to_llong_.
+	* bindings/matlab/matlab.c (gdmx_to_int64): Renamed from gdmx_to_llong.
+	* bindings/matlab/matlab.c (gdmx_to_uint64_): Renamed from gdmx_to_ullong_.
+	* bindings/matlab/matlab.c (gdmx_to_uint64): Renamed from gdmx_to_ullong.
+	* bindings/matlab/matlab.c (gdmx_from_int64): Renamed from gdmx_from_llong.
+	* bindings/matlab/matlab.c (gdmx_from_uint64): Renamed from gdmx_from_ullong.
+
+	* src/internal.h: Properly distinguish between _MSC_VER (compiler stuff) and
+	__MSCVRT__ (library stuff).
+
+	* bindings/idl/getdata.c (gdidl_getdata gdidl_get_constant
+	gdidl_get_carray) bindings/matlab/gd_get_carray.c
+	bindings/matlab/gd_get_carray_slice.c bindings/matlab/gd_getdata.c
+	bindings/perl/src/GetData.xs (get_carray get_carray_slice get_constant
+	getdata) bindings/php/getdata.c (gd_get_carray gd_get_constant gd_getdata)
+	bindings/python/pydirfile.c (gdpy_dirfile_getcarray gdpy_dirfile_getconstant
+	gdpy_dirfile_getdata): Handle GD_NULL.
+	* bindings/test/matlab/big_test.m: Add tests 11, 273, 274.
+	* bindings/test/idl/big_test.pro bindings/perl/t/big_test.t
+	bindings/php/test/big_test.php: Add tests 11, 20, 273, 274.
+	* bindings/python/test/big_test.py: Add tests 11, 16, 20, 274.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getcarray
+	gdpy_dirfile_getconstant): Make return_type optional.
+
+	* bindings/python/test/big_test.py: Delete all the __numpy_supported__
+	conditionals.
+
+	* bindings/perl/Makefile.am: Fix verbose tests and test dependency tracking.
+
 2015-12-10   D. V. Wiebe <getdata@ketiltrout.net> svn:1032
 	* src/field_list.c (_GD_EntryList): Fix _GD_ListEntry call.
 	* test/vlist.c test/vlist_meta.c: Updated.

@@ -1,5 +1,5 @@
 /* Copyright (C) 2010, 2011 Matthew Truch
- * Copyright (C) 2010, 2012, 2014 D. V. Wiebe
+ * Copyright (C) 2010, 2012, 2014, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -203,7 +203,7 @@ int main (int argc, char **argv)
   type_data[(int)'G'].t = READ_AS_DOUBLE;
   type_data[(int)'G'].f = "G";
   type_data[(int)'i'].t = READ_AS_INT;
-  type_data[(int)'i'].f = PRIi64;
+  type_data[(int)'i'].f = PRId64;
   type_data[(int)'o'].t = READ_AS_UINT;
   type_data[(int)'o'].f = PRIo64;
   type_data[(int)'u'].t = READ_AS_UINT;
@@ -386,8 +386,8 @@ int main (int argc, char **argv)
   if (verbose) {
     fprintf(stderr, "Reading %d field%s from %s\n", numfields,
         (numfields > 1) ? "s" : "", dirfile_name);
-    fprintf(stderr, "First frame: %llu Number of frames: %zd\n",
-        (long long)ff, nf);
+    fprintf(stderr, "First frame: %" PRIu64 " Number of frames: %" PRIdSIZE
+        "\n", ff, nf);
   }
 
   for (i = 0; i < numfields; i++) { /* Read in all the fields */
@@ -430,7 +430,8 @@ int main (int argc, char **argv)
       exit(5);
     } else if (!zero && n_want > fields[i].n_read) {
       if (verbose)
-        fprintf(stderr, "Short read on field %i, padding %zu frames\n",
+        fprintf(stderr,
+            "Short read on field %i, padding %" PRIuSIZE " frames\n",
             i, n_want - fields[i].n_read);
       if (type_data[fields[i].type].t == READ_AS_DOUBLE) {
         for (k = fields[i].n_read; k < n_want; ++k)

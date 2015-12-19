@@ -2,11 +2,6 @@ New in version 0.9.1a:
   
   Library Changes:
 
-  * gd_constants() and gd_mconstants() now return NULL and set the dirfile
-    error to GD_E_BAD_TYPE if passed GD_NULL as the return_type.
-    Previously these functions would return NULL without setting an error
-    when passed GD_NULL.
-
   * Functions returning field lists (gd_entry_list(), &c.) or bulk scalar
     field data (gd_constants(), gd_carrays(), &c.) no longer run through
     the entry list twice, resulting in noticable speed improvements when
@@ -33,14 +28,75 @@ New in version 0.9.1a:
   * BUG FIX: Several memory or other resource leaks triggered by error
     returns have been fixed.
 
+  API Changes:
+
+  * BUG FIX: gd_constants() and gd_mconstants() now return NULL and set the
+    dirfile error to GD_E_BAD_TYPE if passed GD_NULL as the return_type.
+    Previously these functions would return NULL without setting an error
+    when passed GD_NULL.
+
+  * BUG FIX: gd_getdata() and gd_putdata() now truncate their operation to
+    avoid overflow.  If size_t is N-bytes wide, and GetData is operating on
+    an M-byte wide data type, then truncation occurs at 2**(8N-M)-1
+    samples.  Note, however, that truncation can also be triggered by
+    intermediate data products, which may have wider data types (larger M)
+    than the type specified by the caller.  If truncation occurs, a short
+    read/write will occur, without raising an error.  Truncation occurs
+    even when the data type is GD_NULL (i.e. when these functions have
+    nothing to do).  For GD_NULL, M is taken to be 1.  Callers should
+    check the return value of these functions, and make another call to
+    handle the truncation, if necessary.
+
+  * BUG FIX: Instead of seeking to a random place, gd_seek() now returns
+    GD_E_RANGE when the specified offset, or the resultant position would
+    overflow a 64-bit signed integer.  Note, however, that, in most cases,
+    the file size limit imposed by your filesystem or OS will be
+    encountered first (in which case GD_E_IO will be returned).  For
+    comparison, the Windows NTFS driver limits files to 2**44 bytes,
+    as does the ext4 filesystem.
+
+  * BUG FIX: Similarly, gd_getdata() and gd_putdata() return GD_E_RANGE if
+    asked to operate on data outside the addressable range (more than 2**63
+    samples past the start of the dirfile).
+
   Bindings Changes:
+
+  * PYTHON: The return_type parameter to dirfile.get_constant() and
+    dirfile.get_carray() is now optional, and will default to the native
+    type of the data returned, as happens with dirfile.getdata().
+
+  * IDL BUG FIX: Using !GD.NULL with GD_GETDATA(), GD_GET_CONSTANT() and
+    GD_GET_CARRAY() now works.  In this case GD_GETDATA() returns the
+    number of samples read (as in the C API), and the other functions
+    return zero on success.
+
+  * MATLAB BUG FIX: Using GD.NULL with gd_getdata(), gd_get_constant(),
+    gd_get_carray(), and gd_get_carray_slice(), now works.  In this case,
+    gd_getdata() returns the number of samples read (as in the C API), and
+    the other functions return zero on success.
+
+  * PERL BUG FIX: Using $GetData::NULL with getdata(), get_constant(),
+    get_carray(), and get_carray_slice() now works.  In scalar context,
+    getdata() returns the number of samples read, while the others return
+    undef.  In list context, they all return an empty array in this case.
+
+  * PHP BUG FIX: Passing data with a GD_NULL data type now behaves as
+    expected (i.e. the passed data is ignored).
+
+  * PHP BUG FIX: Using GD_NULL with gd_getdata(), gd_get_constant(),
+    gd_get_carray() now works.  In this case, gd_getdata() returns the
+    number of samples read (as in the C API), and the other functions
+    return TRUE on success.
+
+  * PYTHON BUG FIX: Using return_type=pygetdata.NULL with
+    dirfile.getdata(), dirfile.get_constant() or dirfile.get_carray() now
+    works.  dirfile.getdata() will return the number of samples read (as in
+    the C API), ignoring as_list.  The other functions return None on
+    success.
 
   * PYTHON BUG FIX: Reflecting the merge of GD_E_BAD_REPR into
     GD_E_BAD_CODE in the C API in 0.9.0, the BadRepr exception is now an
     alias of BadCode.
-
-  * PHP BUG FIX: Passing data with a GD_NULL data type now behaves as
-    expected (i.e. the passed data is ignored).
 
   Miscellaneous:
 

@@ -3676,18 +3676,25 @@ IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
     if (kw.return_type == GD_INT8)
       GDIDL_KW_ABORT("Cannot return data as a signed 8-bit integer.");
 
-    void* data = malloc(kw.n_samples * GD_SIZE(kw.return_type));
+    if (kw.return_type == GD_NULL) {
+      n = gd_getdata64(D, field_code, kw.first_frame, kw.first_sample, 0,
+          kw.n_samples, GD_NULL, NULL);
 
-    n = gd_getdata64(D, field_code, kw.first_frame, kw.first_sample, 0,
-        kw.n_samples, kw.return_type, data);
-
-    if (n == 0) {
-      free(data);
-      r = IDL_GettmpInt(0);
+      r = IDL_GettmpInt(n);
     } else {
-      IDL_MEMINT dim[] = { n };
-      r = IDL_ImportArray(1, dim, gdidl_idl_type(kw.return_type), data,
-          (IDL_ARRAY_FREE_CB)free, NULL);
+      void* data = malloc(kw.n_samples * GD_SIZE(kw.return_type));
+
+      n = gd_getdata64(D, field_code, kw.first_frame, kw.first_sample, 0,
+          kw.n_samples, kw.return_type, data);
+
+      if (n == 0) {
+        free(data);
+        r = IDL_GettmpInt(0);
+      } else {
+        IDL_MEMINT dim[] = { n };
+        r = IDL_ImportArray(1, dim, gdidl_idl_type(kw.return_type), data,
+            (IDL_ARRAY_FREE_CB)free, NULL);
+      }
     }
   }
 
@@ -3733,6 +3740,7 @@ IDL_VPTR gdidl_get_constant(int argc, IDL_VPTR argv[], char *argk)
     int const_type;
   } KW_RESULT;
   KW_RESULT kw;
+  IDL_VPTR r;
 
   GDIDL_KW_INIT_ERROR;
   kw.const_type = GD_FLOAT64;
@@ -3749,20 +3757,25 @@ IDL_VPTR gdidl_get_constant(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  void* data = malloc(16);
+  if (kw.const_type == GD_NULL) {
+    int ret = gd_get_constant(D, field_code, GD_NULL, NULL);
 
-  int ret = gd_get_constant(D, field_code, kw.const_type, data);
-
-  IDL_VPTR r;
-  if (!ret) {
-    r = IDL_Gettmp();
-    r->value = gdidl_to_alltypes(kw.const_type, data);
-    r->type = gdidl_idl_type(kw.const_type);
+    r = IDL_GettmpInt(ret);
   } else {
-    GDIDL_SET_ERROR(D);
-    r = IDL_GettmpInt(0);
+    void* data = malloc(16);
+
+    int ret = gd_get_constant(D, field_code, kw.const_type, data);
+
+    if (!ret) {
+      r = IDL_Gettmp();
+      r->value = gdidl_to_alltypes(kw.const_type, data);
+      r->type = gdidl_idl_type(kw.const_type);
+    } else {
+      GDIDL_SET_ERROR(D);
+      r = IDL_GettmpInt(0);
+    }
+    free(data);
   }
-  free(data);
 
   IDL_KW_FREE;
 
@@ -3785,6 +3798,7 @@ IDL_VPTR gdidl_get_carray(int argc, IDL_VPTR argv[], char *argk)
     int const_type;
   } KW_RESULT;
   KW_RESULT kw;
+  IDL_VPTR r;
 
   GDIDL_KW_INIT_ERROR;
   kw.const_type = GD_FLOAT64;
@@ -3803,27 +3817,37 @@ IDL_VPTR gdidl_get_carray(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
-  if (kw.n == 0) {
-    kw.n = gd_array_len(D, field_code);
-    if (kw.n > kw.start)
-      kw.n -= kw.start;
-    else
-      kw.n = 0;
-  }
 
-  data = malloc(16 * kw.n);
-  ret = gd_get_carray_slice(D, field_code, kw.start, kw.n, kw.const_type,
-      data);
+  if (kw.const_type == GD_NULL) {
+    if (kw.n == 0)
+      ret = gd_get_carray(D, field_code, GD_NULL, NULL);
+    else 
+      ret = gd_get_carray_slice(D, field_code, kw.start, kw.n, GD_NULL, NULL);
 
-  IDL_VPTR r;
-  if (!ret) {
-    IDL_MEMINT dim[] = { kw.n };
-    r = IDL_ImportArray(1, dim, gdidl_idl_type(kw.const_type), data,
-        (IDL_ARRAY_FREE_CB)free, NULL);
-  } else {
-    free(data);
     GDIDL_SET_ERROR(D);
-    r = IDL_GettmpInt(0);
+    r = IDL_GettmpInt(ret);
+  } else {
+    if (kw.n == 0) {
+      kw.n = gd_array_len(D, field_code);
+      if (kw.n > kw.start)
+        kw.n -= kw.start;
+      else
+        kw.n = 0;
+    }
+
+    data = malloc(16 * kw.n);
+    ret = gd_get_carray_slice(D, field_code, kw.start, kw.n, kw.const_type,
+        data);
+
+    if (!ret) {
+      IDL_MEMINT dim[] = { kw.n };
+      r = IDL_ImportArray(1, dim, gdidl_idl_type(kw.const_type), data,
+          (IDL_ARRAY_FREE_CB)free, NULL);
+    } else {
+      free(data);
+      GDIDL_SET_ERROR(D);
+      r = IDL_GettmpInt(0);
+    }
   }
 
   IDL_KW_FREE;
@@ -4282,7 +4306,7 @@ IDL_VPTR gdidl_get_frameoffset(int argc, IDL_VPTR argv[], char *argk)
 
   IDL_VPTR r = IDL_Gettmp();
   r->type = IDL_TYP_LONG64;
-  r->value.l64 = (long long)foffs;
+  r->value.l64 = (IDL_LONG64)foffs;
   dreturn("%p", r);
   return r;
 }

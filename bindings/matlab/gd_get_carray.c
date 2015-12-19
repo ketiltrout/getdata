@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2013, 2014, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -25,9 +25,12 @@
  %
  %   A = GD_GET_CARRAY(DIRFILE,FIELD_CODE[,TYPE])
  %             retrieves an array, A, of value of the CARRAY field called
- %             FIELD_CODE.  If type is given, it should be one of the data type
+ %             FIELD_CODE.  If TYPE is given, it should be one of the data type
  %             symbols provided by GETDATA_CONSTANTS, otherwise the data are
  %             returned in their native type.
+ %
+ %             If TYPE is the NULL data type, this function simply returns zero
+ %             on success.
  %
  %   The DIRFILE object should have previously been created with GD_OPEN.
  %
@@ -55,16 +58,21 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     type = gd_native_type(D, field_code);
     gdmx_err(D, 0);
   }
+  
+  if (type == GD_NULL) {
+    gd_get_carray(D, field_code, GD_NULL, NULL);
+    plhs[0] = gdmx_from_int(0);
+  } else {
+    len = gd_array_len(D, field_code);
+    gdmx_err(D, 0);
 
-  len = gd_array_len(D, field_code);
-  gdmx_err(D, 0);
+    plhs[0] = gdmx_vector(type, len, &data);
 
-  plhs[0] = gdmx_vector(type, len, &data);
+    gd_get_carray(D, field_code, type, data);
 
-  gd_get_carray(D, field_code, type, data);
+    mxFree(field_code);
+    gdmx_err(D, 0);
 
-  mxFree(field_code);
-  gdmx_err(D, 0);
-
-  gdmx_fix_vector(plhs[0], type, len, data);
+    gdmx_fix_vector(plhs[0], type, len, data);
+  }
 }

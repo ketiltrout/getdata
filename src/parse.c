@@ -1518,7 +1518,7 @@ static gd_entry_t *_GD_ParseString(DIRFILE *restrict D,
 static int _GD_UTF8Encode(DIRFILE *restrict D, const char *restrict format_file,
     int linenum, char **restrict op, uint32_t value)
 {
-  dtrace("%p, %p, %llx", D, op, (unsigned long long)value);
+  dtrace("%p, %p, 0x%" PRIX32, D, op, value);
 
   if (value > 0x10FFFF || value == 0) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_CHARACTER, format_file, linenum,

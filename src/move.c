@@ -33,8 +33,8 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   int arm_fix = 0, endian_fix = 0;
   void *buffer;
 
-  dtrace("%p, %p, %lu, %lu, %lli, %i, %i, %p", D, E, encoding, byte_sex,
-      (long long)offset, finalise, new_fragment, new_filebase);
+  dtrace("%p, %p, %lu, %lu, %" PRId64 ", %i, %i, %p", D, E, encoding, byte_sex,
+      (int64_t)offset, finalise, new_fragment, new_filebase);
 
   if (new_fragment == -1)
     new_fragment = E->fragment_index;

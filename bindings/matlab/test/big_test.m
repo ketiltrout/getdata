@@ -109,6 +109,14 @@ try
     ne = ne + check_ok(exc, 10);
   end
 
+  % 11: getdata check (NULL)
+  try
+    d = gd_getdata(D, 'data', 5, 0, 1, 0, GD.NULL);
+    ne = ne + check_num(11, d, 8);
+  catch exc
+    ne = ne + check_ok(exc, 11);
+  end
+
   % 12: gd_get_constant check
   try
     d = gd_get_constant(D, 'const');
@@ -2002,6 +2010,23 @@ try
   catch exc
     ne = ne + check_ok2(exc, 272, 1);
   end
+
+  % 273: get_carray (NULL)
+  try
+    d = gd_get_carray(D, 'carray', GD.NULL);
+    ne = ne + check_num(273, d, 0);
+  catch exc
+    ne = ne + check_ok(exc, 273);
+  end
+
+  % 274: gd_carray_slice (NULL)
+  try
+    d = gd_get_carray_slice(D, 'carray', 2, 2, GD.NULL);
+    ne = ne + check_array(274, d, 0);
+  catch exc
+    ne = ne + check_ok(exc, 274);
+  end
+
 
 
 

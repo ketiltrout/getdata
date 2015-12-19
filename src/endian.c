@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2014, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -302,7 +302,7 @@ void _GD_FixEndianness(void* databuffer, size_t ns, gd_type_t type, unsigned
   size_t i;
   int endian_fix, arm_fix;
 
-  dtrace("%p, %" PRNsize_t ", 0x%X, 0x%X, 0x%X", databuffer, ns, type, old_sex,
+  dtrace("%p, %" PRIuSIZE ", 0x%X, 0x%X, 0x%X", databuffer, ns, type, old_sex,
       new_sex);
 
   /* compare byte sexes */

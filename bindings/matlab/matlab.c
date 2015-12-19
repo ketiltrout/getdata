@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2013, 2014, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -565,7 +565,7 @@ int gdmx_to_int(const mxArray **rhs, int n)
 }
 
 
-static long long gdmx_to_llong_(const mxArray *a,
+static int64_t gdmx_to_int64_(const mxArray *a,
     const struct gdmx_context_t *ctx)
 {
   int64_t v;
@@ -574,18 +574,18 @@ static long long gdmx_to_llong_(const mxArray *a,
 
   gdmx_convert_scalar(a, ctx, GD_INT64, -1, &v);
 
-  dreturn("%lli", (long long)v);
+  dreturn("%" PRId64, v);
 
-  return (long long)v;
+  return v;
 }
 
-long long gdmx_to_llong(const mxArray **rhs, int n)
+int64_t gdmx_to_int64(const mxArray **rhs, int n)
 {
   struct gdmx_context_t ctx = { NULL, NULL, n };
-  return gdmx_to_llong_(rhs[n], &ctx);
+  return gdmx_to_int64_(rhs[n], &ctx);
 }
 
-static unsigned long long gdmx_to_ullong_(const mxArray *a,
+static uint64_t gdmx_to_uint64_(const mxArray *a,
     const struct gdmx_context_t *ctx)
 {
   uint64_t v;
@@ -594,15 +594,15 @@ static unsigned long long gdmx_to_ullong_(const mxArray *a,
 
   gdmx_convert_scalar(a, ctx, GD_UINT64, -1, &v);
 
-  dreturn("%llu", (unsigned long long)v);
+  dreturn("%" PRIu64, v);
 
-  return (unsigned long long)v;
+  return v;
 }
 
-unsigned long long gdmx_to_ullong(const mxArray **rhs, int n)
+uint64_t gdmx_to_uint64(const mxArray **rhs, int n)
 {
   struct gdmx_context_t ctx = { NULL, NULL, n };
-  return gdmx_to_ullong_(rhs[n], &ctx);
+  return gdmx_to_uint64_(rhs[n], &ctx);
 }
 
 static unsigned long gdmx_to_ulong_(const mxArray *a,
@@ -664,11 +664,11 @@ mxArray *gdmx_from_long(long x)
   return lhs;
 }
 
-mxArray *gdmx_from_llong(long long x)
+mxArray *gdmx_from_int64(int64_t x)
 {
   mxArray *lhs;
 
-  dtrace("%lli", x);
+  dtrace("%" PRId64, x);
 
   lhs = mxCreateNumericMatrix(1, 1, mxINT64_CLASS, mxREAL);
   *((int64_t*)mxGetData(lhs)) = x;
@@ -690,11 +690,11 @@ mxArray *gdmx_from_ulong(unsigned long x)
   return lhs;
 }
 
-mxArray *gdmx_from_ullong(unsigned long long x)
+mxArray *gdmx_from_uint64(uint64_t x)
 {
   mxArray *lhs;
 
-  dtrace("%llu", x);
+  dtrace("%" PRIu64, x);
 
   lhs = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
   *((uint64_t*)mxGetData(lhs)) = x;
@@ -707,16 +707,16 @@ mxArray *gdmx_from_triplet(gd_triplet_t datum, gd_windop_t windop)
 {
   mxArray *a;
 
-  dtrace("{%g, %llu, %lli}, %i", datum.r, datum.u, datum.i, windop);
+  dtrace("{%g, %" PRIu64 ", %lli}, %i", datum.r, datum.u, datum.i, windop);
 
   switch (windop) {
     case GD_WINDOP_EQ:
     case GD_WINDOP_NE:
-      a = gdmx_from_llong(datum.i);
+      a = gdmx_from_int64(datum.i);
       break;
     case GD_WINDOP_SET:
     case GD_WINDOP_CLR:
-      a = gdmx_from_ullong(datum.u);
+      a = gdmx_from_uint64(datum.u);
       break;
     default:
       a = gdmx_from_double(datum.r);
@@ -984,7 +984,7 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
       break;
     case GD_PHASE_ENTRY:
       mxSetField(lhs, 0, "in_fields", mxCreateString(E->in_fields[0]));
-      mxSetField(lhs, 0, "shift", gdmx_from_llong(E->EN(phase,shift)));
+      mxSetField(lhs, 0, "shift", gdmx_from_int64(E->EN(phase,shift)));
       nscalar = 1;
       break;
     case GD_POLYNOM_ENTRY:

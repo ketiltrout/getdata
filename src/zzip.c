@@ -142,7 +142,7 @@ off64_t _GD_ZzipSeek(struct gd_raw_file_* file, off64_t count,
 
   struct gd_zzipdata *gdzz = file->edata;
 
-  dtrace("%p, %lli, 0x%X, <unused>", file, (long long)count, data_type);
+  dtrace("%p, %" PRId64 ", 0x%X, <unused>", file, (int64_t)count, data_type);
 
   n = (off64_t)zzip_seek(gdzz->file, (zzip_off_t)(count * GD_SIZE(data_type)),
       SEEK_SET);
@@ -165,7 +165,7 @@ off64_t _GD_ZzipSeek(struct gd_raw_file_* file, off64_t count,
 
   file->pos = n;
 
-  dreturn("%lli", (long long)n);
+  dreturn("%" PRId64, (int64_t)n);
   return n;
 }
 
@@ -176,7 +176,7 @@ ssize_t _GD_ZzipRead(struct gd_raw_file_ *restrict file, void *restrict data,
 
   struct gd_zzipdata *gdzz = file->edata;
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, data, data_type, nmemb);
 
   n = zzip_read(gdzz->file, data, GD_SIZE(data_type) * nmemb);
 
@@ -187,7 +187,7 @@ ssize_t _GD_ZzipRead(struct gd_raw_file_ *restrict file, void *restrict data,
 
   file->pos += n;
 
-  dreturn("%lli", (long long)n);
+  dreturn("%" PRId64, (int64_t)n);
   return n;
 }
 
@@ -234,7 +234,7 @@ off64_t _GD_ZzipSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
   zzip_file_close(gdzz->file);
   zzip_dir_close(gdzz->dir);
 
-  dreturn("%lli", (long long)size);
+  dreturn("%" PRId64, (int64_t)size);
   return size;
 }
 
@@ -242,7 +242,7 @@ int _GD_ZzipStrerr(const struct gd_raw_file_ *file, char *buf, size_t buflen)
 {
   int r = 0;
 
-  dtrace("%p, %p, %" PRNsize_t, file, buf, buflen);
+  dtrace("%p, %p, %" PRIuSIZE, file, buf, buflen);
 
   switch (file->error) {
     case ZZIP_OUTOFMEM:

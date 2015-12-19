@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -25,10 +25,13 @@
  %
  %   A = GD_GET_CARRAY_SLICE(DIRFILE,FIELD_CODE,START,LEN[,TYPE])
  %             retrieves a subset, A, of the CARRAY field called FIELD_CODE.
- %             LEN elements are retrieved, starting with element START.  If type
+ %             LEN elements are retrieved, starting with element START.  If TYPE
  %             is given, it should be one of the data type symbols provided by
  %             GETDATA_CONSTANTS, otherwise the data are returned in their
  %             native type.
+ %
+ %             If TYPE is the NULL data type, this function simply returns zero
+ %             on success.
  %
  %   The DIRFILE object should have previously been created with GD_OPEN.
  %
@@ -60,12 +63,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     gdmx_err(D, 0);
   }
 
-  plhs[0] = gdmx_vector(type, len, &data);
+  if (type == GD_NULL) {
+    gd_get_carray_slice(D, field_code, start, len, GD_NULL, NULL);
+    plhs[0] = gdmx_from_int(0);
+  } else {
+    plhs[0] = gdmx_vector(type, len, &data);
 
-  gd_get_carray_slice(D, field_code, start, len, type, data);
+    gd_get_carray_slice(D, field_code, start, len, type, data);
 
-  mxFree(field_code);
-  gdmx_err(D, 0);
+    mxFree(field_code);
+    gdmx_err(D, 0);
 
-  gdmx_fix_vector(plhs[0], type, len, data);
+    gdmx_fix_vector(plhs[0], type, len, data);
+  }
 }

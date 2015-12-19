@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -41,13 +41,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
   int i, r;
-  unsigned long long o;
+  uint64_t o;
 
   GDMX_NO_LHS;
   GDMX_CHECK_RHS(4);
 
   D = gdmx_to_dirfile(prhs[0]);
-  o = gdmx_to_ullong(prhs, 1);
+  o = gdmx_to_uint64(prhs, 1);
   i = gdmx_to_int(prhs, 2);
   r = gdmx_to_int(prhs, 3);
 

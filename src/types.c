@@ -63,7 +63,7 @@ gd_nothrow
 {
   size_t i;
 
-  dtrace("%p, %p, 0x%x, %p, 0x%x, %" PRNsize_t, D, data_in, in_type, data_out,
+  dtrace("%p, %p, 0x%x, %p, 0x%x, %" PRIuSIZE, D, data_in, in_type, data_out,
       out_type, n);
   dreturnvoid();
 

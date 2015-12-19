@@ -99,10 +99,20 @@ n = gd_getdata(d, "data", type=!GD.INT16, first_frame=5, num_frames=1)
 nume += check_ok(3, d)
 nume += check_simple(3, n, INDGEN(8) + 41)
 
+; 11: gd_getdata check (NULL)
+n = gd_getdata(d, "data", type=!GD.NULL, first_frame=5, num_frames=1)
+nume += check_ok(11, d)
+nume += check_simple(11, n, 8)
+
 ;  12: gd_get_constant check
 n = gd_get_constant(d, "const", type=!GD.FLOAT64)
 nume += check_ok(12, d)
 nume += check_simple(12, n, 5.5)
+
+;  20: gd_get_constant check (NULL)
+n = gd_get_constant(d, "const", type=!GD.NULL)
+nume += check_ok(20, d)
+nume += check_simple(20, n, 0)
 
 ;  23: gd_nfields check
 n = gd_nfields(d)
@@ -1596,6 +1606,17 @@ nume += check_simple2(259, 13, n.scalar, [ "", "const", "const", "carray", $
 ;  271: gd_encoding_support
 n = gd_encoding_support(!GD.SIE_ENCODED)
 nume += check_simple(271, n, !GD.RDWR)
+
+;  273: gd_get_carray
+n = gd_get_carray(d, "carray", type=!GD.NULL)
+nume += check_ok(273, d)
+nume += check_simple(273, n, 0)
+
+;  274: gd_get_carray_slice
+n = gd_get_carray(d, "carray", type=!GD.NULL, len=2, start=2)
+nume += check_ok(274, d)
+nume += check_simple(274, n, 0)
+
 
 
 

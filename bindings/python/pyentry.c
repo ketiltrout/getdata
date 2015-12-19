@@ -2015,13 +2015,13 @@ static PyObject *gdpy_entry_getparms(struct gdpy_entry_t *self, void *closure)
         case GD_WINDOP_NE:
           tuple = Py_BuildValue("(ssiL)", self->E->in_fields[0],
               self->E->in_fields[1], self->E->EN(window,windop),
-              (long long)self->E->EN(window,threshold).i);
+              (PY_LONG_LONG)self->E->EN(window,threshold).i);
           break;
         case GD_WINDOP_SET:
         case GD_WINDOP_CLR:
           tuple = Py_BuildValue("(ssiK)", self->E->in_fields[0],
               self->E->in_fields[1], self->E->EN(window,windop),
-              (unsigned long long)self->E->EN(window,threshold).u);
+              (unsigned PY_LONG_LONG)self->E->EN(window,threshold).u);
           break;
         default:
           tuple = Py_BuildValue("(ssid)", self->E->in_fields[0],
@@ -2142,12 +2142,13 @@ static PyObject *gdpy_entry_getthreshold(struct gdpy_entry_t *self,
     switch (self->E->EN(window,windop)) {
       case GD_WINDOP_EQ:
       case GD_WINDOP_NE:
-        obj = PyLong_FromLongLong((long long)self->E->EN(window,threshold).i);
+        obj = PyLong_FromLongLong(
+            (PY_LONG_LONG)self->E->EN(window,threshold).i);
         break;
       case GD_WINDOP_SET:
       case GD_WINDOP_CLR:
         obj = PyLong_FromUnsignedLongLong(
-            (unsigned long long)self->E->EN(window,threshold).u);
+            (unsigned PY_LONG_LONG)self->E->EN(window,threshold).u);
         break;
       default:
         obj = PyFloat_FromDouble(self->E->EN(window,threshold).r);

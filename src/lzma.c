@@ -153,7 +153,7 @@ static int _GD_LzmaReady(struct gd_lzmadata *lzd, size_t nreq, int *errnum)
   lzma_ret e;
   int ready = READY(*lzd);
 
-  dtrace("%p, %" PRNsize_t " %p", lzd, nreq, errnum);
+  dtrace("%p, %" PRIuSIZE " %p", lzd, nreq, errnum);
 
   /* already have enough data, or no more data to read */
   if (LZEOF(*lzd) || (size_t)ready >= nreq) {
@@ -250,7 +250,7 @@ ssize_t _GD_LzmaWrite(struct gd_raw_file_ *file, const void *data,
   size_t n;
   struct gd_lzmadata *lzd = (struct gd_lzmadata *)file->edata;
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, data, data_type, nmemb);
 
   n = nmemb * GD_SIZE(data_type);
 
@@ -274,7 +274,7 @@ ssize_t _GD_LzmaWrite(struct gd_raw_file_ *file, const void *data,
   }
 
   /* we always write all the input, if successful */
-  dreturn("%" PRNssize_t, (ssize_t)nmemb);
+  dreturn("%" PRIdSIZE, (ssize_t)nmemb);
   return nmemb;
 }
 
@@ -285,7 +285,7 @@ off64_t _GD_LzmaSeek(struct gd_raw_file_* file, off64_t count,
   lzma_ret e;
   uint64_t bcount;
 
-  dtrace("%p, %lli, 0x%X, 0x%X", file, (long long)count, data_type, mode);
+  dtrace("%p, %" PRId64 ", 0x%X, 0x%X", file, (int64_t)count, data_type, mode);
 
   bcount = count * GD_SIZE(data_type);
 
@@ -299,7 +299,7 @@ off64_t _GD_LzmaSeek(struct gd_raw_file_* file, off64_t count,
     lzd->offset = bcount - BASE(*lzd);
     file->pos = count;
 
-    dreturn("%lli", (long long)(file->pos));
+    dreturn("%" PRId64, (int64_t)(file->pos));
     return file->pos;
   }
 
@@ -361,7 +361,7 @@ off64_t _GD_LzmaSeek(struct gd_raw_file_* file, off64_t count,
     file->pos = lzd->xz.total_in / GD_SIZE(data_type);
   }
 
-  dreturn("%lli", (long long)(file->pos));
+  dreturn("%" PRId64, (int64_t)file->pos);
   return file->pos;
 }
 
@@ -372,7 +372,7 @@ ssize_t _GD_LzmaRead(struct gd_raw_file_ *file, void *data, gd_type_t data_type,
   struct gd_lzmadata *lzd = (struct gd_lzmadata *)file->edata;
   ssize_t nread = 0;
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, data, data_type, nmemb);
 
   if (nmemb > GD_SSIZE_T_MAX / GD_SIZE(data_type))
     nmemb = GD_SSIZE_T_MAX / GD_SIZE(data_type);
@@ -409,7 +409,7 @@ ssize_t _GD_LzmaRead(struct gd_raw_file_ *file, void *data, gd_type_t data_type,
       break;
   }
 
-  dreturn("%" PRNssize_t, nread);
+  dreturn("%" PRIdSIZE, nread);
   return nread;
 }
 
@@ -508,7 +508,7 @@ off64_t _GD_LzmaSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 
   free(lzd);
 
-  dreturn("%lli", (long long)n);
+  dreturn("%" PRId64, (int64_t)n);
   return n;
 }
 
@@ -516,7 +516,7 @@ int _GD_LzmaStrerr(const struct gd_raw_file_ *file, char *buf, size_t buflen)
 {
   int r = 0;
 
-  dtrace("%p, %p, %" PRNsize_t, file, buf, buflen);
+  dtrace("%p, %p, %" PRIuSIZE, file, buf, buflen);
 
   switch(file->error) {
     case LZMA_OK:

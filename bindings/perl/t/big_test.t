@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1519;
+use Test::More tests => 1533;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -210,6 +210,14 @@ CheckArray(4, \@a, 41 .. 48);
 CheckOK(10);
 CheckArray(10, \@a, 41 .. 48);
 
+# 11: getdata (GD_NULL) check - in both scalar and array context
+$s = $_->getdata("data", 5, 0, 1, 0, $GetData::NULL);
+CheckOK2(11,1);
+CheckNum(11, $s, 8);
+@a = $_->getdata("data", 5, 0, 1, 0, $GetData::NULL);
+CheckOK2(11,2);
+CheckArray(11, @a);
+
 # 12: constant (INT8) check
 $s = $_->get_constant("const", $GetData::INT8);
 CheckOK(12);
@@ -219,6 +227,11 @@ CheckNum(12, $s, 5);
 $s = $_->get_constant("const", $GetData::COMPLEX128);
 CheckOK(19);
 CheckNum(19, $s, 5.5);
+
+# 20: constant (GD_NULL) check
+$s = $_->get_constant("const", $GetData::NULL);
+CheckOK(20);
+CheckNum(20, $s, undef);
 
 # 23: nfields check
 $s = $_->field_list;
@@ -2002,6 +2015,23 @@ CheckArray2(259, 13, $h{'scalar_ind'}, undef, -1, -1, 4, undef, -1);
   CheckOK2(272, 2);
   CheckString(272, $s, undef);
 }
+
+# 273: get_carray (GD_NULL)
+$s = $_->get_carray("carray", $GetData::NULL);
+CheckOK(273);
+CheckNum(273, $s, undef);
+@a = $_->get_carray("carray", $GetData::NULL);
+CheckOK(273);
+CheckArray(273, \@a);
+
+# 274: get_carray_slice (GD_NULL)
+@a = $_->get_carray_slice("carray", 2, 2, $GetData::NULL);
+CheckOK(274);
+CheckNum(273, $s, undef);
+@a = $_->get_carray_slice("carray", 2, 2, $GetData::NULL);
+CheckOK(274);
+CheckArray(274, \@a);
+
 
 
 

@@ -379,17 +379,43 @@ static PyObject *gdpy_dirfile_getcarray(struct gdpy_dirfile_t *self,
   unsigned int start = 0, len = 0;
   int as_list = 0;
   gd_type_t return_type;
+  PyObject *return_type_obj = NULL;
   PyObject *pyobj = NULL;
   npy_intp dims[] = { 0 };
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "si|IIi:pygetdata.dirfile.get_carray", keywords, &field_code,
-        &return_type, &start, &len, &as_list))
+        "s|OIIi:pygetdata.dirfile.get_carray", keywords, &field_code,
+        &return_type_obj, &start, &len, &as_list))
   {
     dreturn("%p", NULL);
     return NULL;
+  }
+
+  /* get return type */
+  if (return_type_obj) {
+    return_type = (gd_type_t)PyInt_AsLong(return_type_obj);
+    if (PyErr_Occurred()) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+  } else {
+    return_type = gd_native_type(self->D, field_code);
+    PYGD_CHECK_ERROR(self->D, NULL);
+  }
+
+  if (return_type == GD_NULL) {
+    if (len == 0)
+      gd_get_carray(self->D, field_code, GD_NULL, NULL);
+    else
+      gd_get_carray_slice(self->D, field_code, start, len, GD_NULL, NULL);
+
+    PYGD_CHECK_ERROR(self->D, NULL);
+
+    Py_INCREF(Py_None);
+    dreturn("%p", Py_None);
+    return Py_None;
   }
 
   if (len == 0) {
@@ -436,6 +462,7 @@ static PyObject *gdpy_dirfile_getconstant(struct gdpy_dirfile_t *self,
 {
   char *keywords[] = {"field_code", "return_type", NULL};
   const char *field_code;
+  PyObject *return_type_obj = NULL;
   gd_type_t return_type;
   char data[16];
   PyObject *pyobj;
@@ -443,11 +470,23 @@ static PyObject *gdpy_dirfile_getconstant(struct gdpy_dirfile_t *self,
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "si:pygetdata.dirfile.get_constant", keywords, &field_code,
-        &return_type))
+        "s|O:pygetdata.dirfile.get_constant", keywords, &field_code,
+        &return_type_obj))
   {
     dreturn("%p", NULL);
     return NULL;
+  }
+
+  /* get return type */
+  if (return_type_obj) {
+    return_type = (gd_type_t)PyInt_AsLong(return_type_obj);
+    if (PyErr_Occurred()) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+  } else {
+    return_type = gd_native_type(self->D, field_code);
+    PYGD_CHECK_ERROR(self->D, NULL);
   }
 
   gd_get_constant(self->D, field_code, return_type, data);
@@ -674,7 +713,16 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
       num_samples += num_frames * spf;
   }
 
-  if (num_samples == 0) {
+  /* Handle GD_NULL -- this still needs to be run though the C library to
+   * check for errors and get the return value */
+  if (return_type == GD_NULL) {
+    ns = gd_getdata64(self->D, field_code, first_frame, first_sample, 0,
+        (size_t)num_samples, GD_NULL, NULL);
+    
+    PYGD_CHECK_ERROR(self->D, NULL);
+
+    pyobj = PyLong_FromLongLong(ns);
+  } else if (num_samples == 0) {
     if (!as_list)
       pyobj = PyArray_ZEROS(1, dims, gdpy_npytype_from_type(return_type), 0);
     else
@@ -2239,7 +2287,7 @@ static PyObject *gdpy_dirfile_seek(struct gdpy_dirfile_t *self, PyObject *args,
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  pyobj = PyLong_FromLongLong((long long)pos);
+  pyobj = PyLong_FromLongLong((PY_LONG_LONG)pos);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -2266,7 +2314,7 @@ static PyObject *gdpy_dirfile_tell(struct gdpy_dirfile_t *self, PyObject *args,
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  pyobj = PyLong_FromLongLong((long long)pos);
+  pyobj = PyLong_FromLongLong((PY_LONG_LONG)pos);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -2858,15 +2906,17 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   },
   {"get_carray", (PyCFunction)gdpy_dirfile_getcarray,
     METH_VARARGS | METH_KEYWORDS,
-    "get_carray(field_code, return_type [, start, len, as_list])\n\n"
+    "get_carray(field_code [, return_type, start, len, as_list])\n\n"
       "Retrieve the value of the CARRAY field specified by 'field_code'.\n"
-      "The 'return_type' parameter indicates the desired type of the\n"
-      "elements of the array returned, and should be (typically) one of:\n"
-      "pygetdata.INT, pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT,\n"
+      "The 'return_type' parameter, if given, indicates the desired type of\n"
+      "the elements of the array returned, and should be (typically) one\n"
+      "of: pygetdata.INT, pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT,\n"
       "or pygetdata.COMPLEX, although any GetData data type code is\n"
-      "permitted.  If NumPy support is present in pygetdata, and 'as_list'\n"
-      "is not given or is zero, a NumPy array will be returned.  Otherwise\n"
-      "a list of values will be returned.\n\n"
+      "permitted.  If 'as_list' is not given or is zero, a NumPy array will\n"
+      "be returned.  Otherwise a list of values will be returned.  If\n"
+      "omitted, the return type defaults to the native type of the field\n"
+      "(see dirfile.native_type()).  If 'return_type' is pygetdata.NULL,\n"
+      "None is returned on success.\n\n"
       "The first element returned is given by 'start', counting from zero.\n"
       "If omitted, zero is assumed.  The number of elements returned is\n"
       "given by 'len'.  If omitted or zero, all elements from 'start' to\n"
@@ -2874,13 +2924,16 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   },
   {"get_constant", (PyCFunction)gdpy_dirfile_getconstant,
     METH_VARARGS | METH_KEYWORDS,
-    "get_constant(field_code, return_type)\n\n"
+    "get_constant(field_code [, return_type])\n\n"
       "Retrieve the value of the CONST field specified by 'field_code'.\n"
-      "The 'return_type' parameter indicates the desired type of the object\n"
-      "returned, and should be (typically) one of: pygetdata.INT,\n"
-      "pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT, or\n"
+      "The 'return_type' parameter, if given, indicates the desired type of\n"
+      "the object returned, and should be (typically) one of:\n"
+      "pygetdata.INT, pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT, or\n"
       "pygetdata.COMPLEX, although any GetData data type code is permitted.\n"
-      "See gd_get_constant(3)."
+      "If omitted, the return type defaults to the native type of the field\n"
+      "(see dirfile.native_type()).  If 'return_type' is pygetdata.NULL,\n"
+      "None is returned on success.  See gd_get_constant(3)."
+      /* ------- handy ruler ---------------------------------------------| */
   },
   {"constants", (PyCFunction)gdpy_dirfile_getconstants,
     METH_VARARGS | METH_KEYWORDS,
@@ -2909,9 +2962,9 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     "carrays(return_type [, as_list])\n\n"
       "Retrieve all CARRAY fields, and their values.  A list of tuples\n"
       "will be returned, each tuple containing the name and values of the\n"
-      "field.  If NumPy support is present in pygetdata, and 'as_list' is\n"
-      "not given or zero, the values will be returned in NumPy arrays;\n"
-      "otherwise, the values will be returned as lists.\n\n"
+      "field.  If 'as_list' is not given or is zero, the values will be\n"
+      "returned in NumPy arrays; otherwise, the values will be returned as\n"
+      "lists.\n\n"
       "The 'return_type' parameter indicates the desired type of the values\n"
       "returned, and should be (typically) one of: pygetdata.INT,\n"
       "pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT, or\n"
@@ -2922,19 +2975,20 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   {"getdata", (PyCFunction)gdpy_dirfile_getdata, METH_VARARGS | METH_KEYWORDS,
     "getdata(field_code [, return_type, first_frame, first_sample,\n"
       "num_frames, num_samples, as_list])\n\n"
-      "Retrieve a data vector from the dirfile.  If NumPy support is\n"
-      "present in pygetdata, and 'as_list' is not given or zero, a NumPy\n"
-      "array will be returned.  Otherwise a list of data values will\n"
-      "be returned.  NumPy arrays should be preferred for large datasets:\n"
-      "they are more efficient both in terms of memory usage and retrieval\n"
-      "time.\n\n"
+      "Retrieve a data vector from the dirfile.  If 'as_list' is not given\n"
+      "or is zero, a NumPy array will be returned.  Otherwise a list of\n"
+      "data values will be returned.  NumPy arrays should be preferred for\n"
+      "large datasets: they are more efficient both in terms of memory\n"
+      "usage and retrieval time.\n\n"
       "The 'return_type' parameter indicates the desired type of the values\n"
       "returned.  For NumPy data, the NumPy array will have the dtype\n"
       "indicated.  For list data it should be (typically) one of:\n"
       "pygetdata.INT, pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT, or\n"
       "pygetdata.COMPLEX, although any GetData data type code is permitted.\n"
       "If omitted, the return type defaults to the native type of the field\n"
-      "(see dirfile.native_type()).\n\n"
+      "(see dirfile.native_type()).  If 'return_type' is pygetdata.NULL,\n"
+      "this function will simply return the number of samples read (as in\n"
+      "the C API), ignoring 'as_list'.\n\n"
       "The 'first_frame' and 'first_sample' parameters indicate first\n"
       "datum to read.  If they are both omitted, data is read from the\n"
       "first sample.  Similarly, 'num_frames' and 'num_samples' indicate\n"
@@ -3007,10 +3061,9 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     "mcarrays(parent, return_type [, as_list])\n\n"
       "Retrieve all CARRAY metafields, and their values, for the parent\n"
       "field 'parent'.  A list of tuples will be returned, each tuple\n"
-      "containing the name and values of the field.  If NumPy support is\n"
-      "present in pygetdata, and 'as_list' is not given or zero, the values\n"
-      "will be returned in NumPy arrays; otherwise, the values will be\n"
-      "returned as lists.\n\n"
+      "containing the name and values of the field.  If 'as_list' is not\n"
+      "given or is zero, the values will be returned in NumPy arrays;\n"
+      "otherwise, the values will be returned as lists.\n\n"
       "The 'return_type' parameter indicates the desired type of the values\n"
       "returned, and should be (typically) one of: pygetdata.INT,\n"
       "pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT, or\n"
@@ -3205,7 +3258,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "same type.  The parameter 'start' indicates where the first sample\n"
       "in which the data will be stored.  Zero is assumed if not given.\n"
       "See gd_put_carray_slice(3)."
-      /* ------- handy ruler ---------------------------------------------| */
   },
   {"put_constant", (PyCFunction)gdpy_dirfile_putconstant,
     METH_VARARGS | METH_KEYWORDS,

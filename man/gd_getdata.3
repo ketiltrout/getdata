@@ -1,6 +1,6 @@
 .\" gd_getdata.3.  The gd_getdata man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_getdata 3 "16 October 2014" "Version 0.9.0" "GETDATA"
+.TH gd_getdata 3 "16 December 2015" "Version 0.9.1" "GETDATA"
 .SH NAME
 gd_getdata \(em retrieve data from a dirfile database
 .SH SYNOPSIS
@@ -354,7 +354,26 @@ reclaimed by calling
 .BR gd_raw_close (3)
 on fields when finished reading them.
 
-.SH GETDATA I/O POINTERs
+When operating on a platform whose
+.B size_t
+is
+.IR N -bytes
+wide, a single call of
+.BR gd_getdata ()
+will never return more than (2**(\fIN\fR-1) - 1) samples.  The request will
+be truncated at (2**(\fIN\fR-\fIM\fR) - 1) samples, where \fIM\fR is the size,
+in bytes, of the largest data type used to calculate the returned field.  If a
+larger request is specified, less data than requested will be returned, without
+raising an error.  This limit is imposed even when 
+.I return_type
+is
+.B GD_NULL
+or when reading from the
+.I INDEX
+field (i.e., even when no actual I/O or calculation occurs).  In all cases, the
+actual amount of data is returned.
+
+.SH GETDATA I/O POINTERS
 This is a general discussion of field I/O pointers in the GetData library, and
 contains information not directly applicable to
 .BR gd_getdata ().

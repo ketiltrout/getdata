@@ -192,6 +192,11 @@ $v = gd_getdata($D, 'data', 5, 0, 1, 0, GD_COMPLEX128, TRUE);
 check_ok(10, $D);
 check_var(10, $v, array(41., 42., 43., 44., 45., 46., 47., 48.));
 
+# 11: getdata (NULL)
+$v = gd_getdata($D, 'data', 5, 0, 1, 0, GD_NULL);
+check_ok(11, $D);
+check_var(11, $v, 8);
+
 # 12: gd_get_constant (INT8)
 $v = gd_get_constant($D, 'const', GD_UINT8);
 check_ok(12, $D);
@@ -201,6 +206,11 @@ check_var(12, $v, 5);
 $v = gd_get_constant($D, 'const', GD_COMPLEX128);
 check_ok(19, $D);
 check_var(19, $v, 5.5);
+
+# 20: gd_get_constant (NULL)
+$v = gd_get_constant($D, 'const', GD_NULL);
+check_ok(20, $D);
+check_var(20, $v, true);
 
 # 23: nfields
 $v = gd_nfields($D);
@@ -1667,6 +1677,17 @@ check_ok2(272, 2, $D2);
 check_var(272, $v, null);
 
 gd_discard($D2);
+
+# 273: get carray (NULL)
+$v = gd_get_carray($D, 'carray', GD_NULL);
+check_ok(273, $D);
+check_var(273, $v, true);
+
+# 274: get carray slice (NULL)
+$v = gd_get_carray($D, 'carray', GD_NULL, 2, 2);
+check_ok(274, $D);
+check_var(274, $v, true);
+
 
 
 

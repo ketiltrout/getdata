@@ -74,14 +74,14 @@ off64_t gd_nframes64(DIRFILE* D)
 
   if (nf < 0) {
     _GD_SetEncIOError(D, GD_E_IO_READ, D->reference_field->e->u.raw.file);
-    dreturn("%lli", 0LL);
+    dreturn("%i", 0);
     return 0;
   }
 
   nf /= D->reference_field->EN(raw,spf);
   nf += D->fragment[D->reference_field->fragment_index].frame_offset;
 
-  dreturn("%lli", (unsigned long long)nf);
+  dreturn("%" PRId64, (int64_t)nf);
   return nf;
 }
 

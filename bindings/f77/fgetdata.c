@@ -151,16 +151,16 @@ static gd_triplet_t _GDF_SetTriplet(gd_windop_t op, const void *data)
     case GD_WINDOP_EQ:
     case GD_WINDOP_NE:
       t.i = *(int32_t*)data;
-      dreturn("%lli", (long long)t.i);
+      dreturn("%" PRId64, t.i);
       break;
     case GD_WINDOP_SET:
     case GD_WINDOP_CLR:
       t.u = *(int32_t*)data;
-      dreturn("%llu", (unsigned long long)t.u);
+      dreturn("%" PRIu64, t.u);
       break;
     default:
       t.r = *(double*)data;
-      dreturn("%g", t.r);
+      dreturn("%.15g", t.r);
       break;
   }
 

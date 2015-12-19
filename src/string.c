@@ -26,7 +26,7 @@ gd_nothrow
 {
   gd_entry_t *E;
 
-  dtrace("%p, \"%s\", %lu, %" PRNsize_t ", %p", D, field_code, start, n,
+  dtrace("%p, \"%s\", %lu, %" PRIuSIZE ", %p", D, field_code, start, n,
       data_out);
 
   if (D->flags & GD_INVALID) {
@@ -79,7 +79,7 @@ size_t gd_get_string(DIRFILE *D, const char *field_code, size_t len,
   size_t n_read;
   const char *ptr;
 
-  dtrace("%p, \"%s\", %" PRNsize_t ", %p", D, field_code, len, data_out);
+  dtrace("%p, \"%s\", %" PRIuSIZE ", %p", D, field_code, len, data_out);
 
   /* get string */
   if (gd_get_sarray_slice(D, field_code, 0, 1, &ptr)) {
@@ -93,7 +93,7 @@ size_t gd_get_string(DIRFILE *D, const char *field_code, size_t len,
 
   n_read = strlen(ptr) + 1;
 
-  dreturn("%" PRNsize_t, n_read);
+  dreturn("%" PRIuSIZE, n_read);
   return n_read;
 }
 
@@ -102,7 +102,7 @@ static size_t _GD_PutSarraySlice(DIRFILE *restrict D, gd_entry_t *restrict E,
 {
   size_t len;
 
-  dtrace("%p, %p, %lu, %" PRNsize_t ", %p", D, E, first, n, data_in);
+  dtrace("%p, %p, %lu, %" PRIuSIZE ", %p", D, E, first, n, data_in);
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
@@ -172,7 +172,7 @@ static size_t _GD_PutSarraySlice(DIRFILE *restrict D, gd_entry_t *restrict E,
   D->fragment[E->fragment_index].modified = 1;
 
   len = strlen(data_in[0]) + 1;
-  dreturn("%" PRNsize_t, len);
+  dreturn("%" PRIuSIZE, len);
   return len;
 }
 
@@ -201,7 +201,7 @@ size_t gd_put_string(DIRFILE *D, const char *field_code, const char *data_in)
   } else 
     n_wrote = _GD_PutSarraySlice(D, E, 0, 1, &data_in);
 
-  dreturn("%" PRNsize_t, n_wrote);
+  dreturn("%" PRIuSIZE, n_wrote);
   return n_wrote;
 }
 /* vim: ts=2 sw=2 et tw=80

@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2013, 2014, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -41,7 +41,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   DIRFILE *D;
   void *data;
   char *field_code;
-  long long first_frame, first_samp;
+  int64_t first_frame, first_samp;
   size_t nsamp, n;
   gd_type_t type;
 
@@ -49,8 +49,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
   D = gdmx_to_dirfile(prhs[0]);
   field_code = gdmx_to_string(prhs, 1, 0);
-  first_frame = gdmx_to_llong(prhs, 2);
-  first_samp = gdmx_to_llong(prhs, 3);
+  first_frame = gdmx_to_int64(prhs, 2);
+  first_samp = gdmx_to_int64(prhs, 3);
   gdmx_to_data(&data, &type, &nsamp, prhs[4], 4);
 
   n = gd_putdata64(D, field_code, (gd_off64_t)first_frame,

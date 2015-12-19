@@ -32,7 +32,7 @@ char *_GD_MungeCode(DIRFILE *D, const char *ns, size_t len_newns,
   const char *ptr, *slash, *old_ns;
   char *new_code, *nptr;
 
-  dtrace("%p, \"%s\", %" PRNsize_t ", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", "
+  dtrace("%p, \"%s\", %" PRIuSIZE ", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", "
       "%p, 0x%X", D, ns, len_newns, old_prefix, old_suffix, new_prefix,
       new_suffix, code, nso, flags);
 
@@ -339,7 +339,7 @@ static int _GD_MatchCode(const char *candidate, const char *code, size_t len,
 {
   int c;
 
-  dtrace("\"%s\", \"%s\", %" PRNsize_t ", %i", candidate, code, len,
+  dtrace("\"%s\", \"%s\", %" PRIuSIZE ", %i", candidate, code, len,
       meta_ok);
 
   if (strncmp(candidate, code, len)) {

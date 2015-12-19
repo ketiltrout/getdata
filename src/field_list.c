@@ -177,7 +177,7 @@ static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
   struct gd_flist_ *l;
   int nentries;
 
-  dtrace("%p, %p, %" PRNsize_t ", 0x%X, 0x%X", D, p, offs, type, flags);
+  dtrace("%p, %p, %" PRIuSIZE ", 0x%X, 0x%X", D, p, offs, type, flags);
 
   index = _GD_EntryIndex(type);
   if (index < 0) {

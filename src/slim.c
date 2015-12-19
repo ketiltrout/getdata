@@ -116,7 +116,7 @@ off64_t GD_SLIM(Seek)(struct gd_raw_file_* file, off64_t count,
 {
   struct gd_slimdata *gdsl = file->edata;
 
-  dtrace("%p, %lli, 0x%X, <unused>", file, (long long)count, data_type);
+  dtrace("%p, %" PRId64 ", 0x%X, <unused>", file, (int64_t)count, data_type);
 
   /* slimlib appears to do a rewind before every SEEK_SET ! */
   if (slimseek(gdsl->f, (long)count * GD_SIZE(data_type), SEEK_SET))
@@ -131,7 +131,7 @@ off64_t GD_SLIM(Seek)(struct gd_raw_file_* file, off64_t count,
   }
 
   file->pos = count;
-  dreturn("%lli", (long long)count);
+  dreturn("%" PRId64, (int64_t)count);
   return count;
 }
 
@@ -141,11 +141,11 @@ ssize_t GD_SLIM(Read)(struct gd_raw_file_ *restrict file, void *restrict ptr,
   ssize_t n;
   struct gd_slimdata *gdsl = file->edata;
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, ptr, data_type, nmemb);
 
   n = slimread(ptr, GD_SIZE(data_type), nmemb, gdsl->f);
 
-  dreturn("%" PRNsize_t, n);
+  dreturn("%" PRIuSIZE, n);
   return n;
 }
 
@@ -211,7 +211,7 @@ off64_t GD_SLIM(Size)(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 
   size /= GD_SIZE(data_type);
 
-  dreturn("%lli", (long long)size);
+  dreturn("%" PRId64, (int64_t)size);
   return size;
 }
 
@@ -219,7 +219,7 @@ int GD_SLIM(Strerr)(const struct gd_raw_file_ *file, char *buf, size_t buflen)
 {
   int r = 0;
 
-  dtrace("%p, %p, %" PRNsize_t, file, buf, buflen);
+  dtrace("%p, %p, %" PRIuSIZE, file, buf, buflen);
 
   if (file->error)
     r = gd_StrError(file->error, buf, buflen);

@@ -211,7 +211,7 @@ static PyObject *gdpy_fragment_getoffset(struct gdpy_fragment_t *self,
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
-  pyobj = PyLong_FromLongLong((long long)offset);
+  pyobj = PyLong_FromLongLong((PY_LONG_LONG)offset);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -221,7 +221,7 @@ static PyObject *gdpy_fragment_setoffset(struct gdpy_fragment_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "frameoffset", "recode", NULL };
-  long long offset;
+  PY_LONG_LONG offset;
   int recode = 0;
 
   dtrace("%p, %p, %p", self, args, keys);

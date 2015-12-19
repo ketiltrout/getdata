@@ -75,7 +75,7 @@ static void _GD_ExtractRepr(DIRFILE *restrict D, const void *restrict cdata,
 {
   size_t i;
 
-  dtrace("%p, %p, 0x%X, %p, 0x%X, %" PRNsize_t ", %i", D, cdata, in_type, rdata,
+  dtrace("%p, %p, 0x%X, %p, 0x%X, %" PRIuSIZE ", %i", D, cdata, in_type, rdata,
       type, n, repr);
 
   switch (type) {
@@ -130,7 +130,7 @@ static void _GD_FillFileFrame(void *dataout, gd_type_t rtype, off64_t s0,
 {
   size_t i;
 
-  dtrace("%p, 0x%X, %lli, %" PRNsize_t, dataout, rtype, (long long)s0, n);
+  dtrace("%p, 0x%X, %" PRId64 ", %" PRIuSIZE, dataout, rtype, (int64_t)s0, n);
 
   switch (rtype) {
     case GD_INT8:
@@ -195,7 +195,7 @@ static int _GD_FillZero(void *databuffer, gd_type_t type, size_t nz)
   size_t i;
   const double NaN = NAN;
 
-  dtrace("%p, 0x%X, %" PRNsize_t, databuffer, type, nz);
+  dtrace("%p, 0x%X, %" PRIuSIZE, databuffer, type, nz);
 
   if (type & GD_IEEE754) {
     if (type == GD_FLOAT32)
@@ -214,7 +214,7 @@ static int _GD_FillZero(void *databuffer, gd_type_t type, size_t nz)
   } else
     memset(databuffer, 0, nz * GD_SIZE(type));
 
-  dreturn("%" PRNsize_t, nz);
+  dreturn("%" PRIuSIZE, nz);
 
   return (nz);
 }
@@ -229,7 +229,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
   char *databuffer;
   size_t zero_pad = 0;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p)", D, E, (long long)s0, ns,
+  dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p)", D, E, (int64_t)s0, ns,
       return_type, data_out);
 
   if (s0 < E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset)
@@ -308,7 +308,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
 
   free(databuffer);
 
-  dreturn("%" PRNsize_t, (D->error == GD_E_OK) ? n_read : (size_t)0);
+  dreturn("%" PRIuSIZE, (D->error == GD_E_OK) ? n_read : (size_t)0);
   return (D->error == GD_E_OK) ? n_read : (size_t)0;
 }
 
@@ -452,7 +452,7 @@ static void _GD_PolynomData(DIRFILE *restrict D, void *restrict data,
 {
   size_t i;
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t ", %i, %p", D, data, type, npts, n, a);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE ", %i, %p", D, data, type, npts, n, a);
 
   if (n == 1) {
     /* no need to duplicate this case */
@@ -599,7 +599,7 @@ static void _GD_CPolynomData(DIRFILE *restrict D, void *restrict data,
 {
   size_t i;
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t ", %i, %p", D, data, type, npts, n, a);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE ", %i, %p", D, data, type, npts, n, a);
 
   if (n == 1) {
     /* no need to duplicate this case */
@@ -650,7 +650,7 @@ static void _GD_MultiplyData(DIRFILE *restrict D, void *restrict A,
 {
   size_t i;
 
-  dtrace("%p, %p, %u, %p, %u, 0x%X, %" PRNsize_t, D, A, spfA, B, spfB, type, n);
+  dtrace("%p, %p, %u, %p, %u, 0x%X, %" PRIuSIZE, D, A, spfA, B, spfB, type, n);
 
   switch (type) {
     case GD_NULL:                           break;
@@ -698,7 +698,7 @@ static void _GD_CMultiplyData(DIRFILE *restrict D, void *restrict A,
 {
   size_t i;
 
-  dtrace("%p, %p, %u, %p, %u, 0x%X, %" PRNsize_t, D, A, spfA, B, spfB, type, n);
+  dtrace("%p, %p, %u, %p, %u, 0x%X, %" PRIuSIZE, D, A, spfA, B, spfB, type, n);
 
   switch (type) {
     case GD_NULL:                           break;
@@ -745,7 +745,7 @@ static void _GD_DivideData(DIRFILE *restrict D, void *restrict A,
 {
   size_t i;
 
-  dtrace("%p, %p, %u, %p, %u, 0x%X, %" PRNsize_t, D, A, spfA, B, spfB, type, n);
+  dtrace("%p, %p, %u, %p, %u, 0x%X, %" PRIuSIZE, D, A, spfA, B, spfB, type, n);
 
   switch (type) {
     case GD_NULL:                         break;
@@ -794,7 +794,7 @@ static void _GD_CDivideData(DIRFILE *restrict D, void *restrict A,
 {
   size_t i;
 
-  dtrace("%p, %p, %u, %p, %u, 0x%X, %" PRNsize_t, D, A, spfA, B, spfB, type, n);
+  dtrace("%p, %p, %u, %p, %u, 0x%X, %" PRIuSIZE, D, A, spfA, B, spfB, type, n);
 
   switch (type) {
     case GD_NULL:                         break;
@@ -864,9 +864,9 @@ static void _GD_WindowData(DIRFILE *restrict D, void *restrict A,
   size_t i;
   const double NaN = NAN;
 
-  dtrace("%p, %p, %u, %p, %u, 0x%X, %i, {%g,%llx,%lli}, %" PRNsize_t, D, A,
-      spfA, B, spfB, type, op, threshold.r, (unsigned long long)threshold.u,
-      (long long)threshold.i, n);
+  dtrace("%p, %p, %u, %p, %u, 0x%X, %i, {%g,%" PRIX64 ",%" PRId64 "}, %"
+      PRIuSIZE, D, A, spfA, B, spfB, type, op, threshold.r, threshold.u,
+      threshold.i, n);
 
   switch (type) {
     case GD_NULL:                            break;
@@ -922,7 +922,7 @@ static void _GD_MplexData(DIRFILE *restrict D, void *restrict A,
 {
   size_t i;
 
-  dtrace("%p, %p, %u, %p, %u, 0x%X, %i, %p, %" PRNsize_t, D, A, spfA, B, spfB,
+  dtrace("%p, %p, %u, %p, %u, 0x%X, %i, %p, %" PRIuSIZE, D, A, spfA, B, spfB,
       type, val, start, n);
 
   switch (type) {
@@ -960,8 +960,8 @@ static size_t _GD_DoLincom(DIRFILE *restrict D, gd_entry_t *restrict E,
   const gd_type_t ntype = (return_type & GD_COMPLEX) ? GD_COMPLEX128
     : GD_FLOAT64;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
-      num_samp, return_type, data_out);
+  dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
+      (int64_t)first_samp, num_samp, return_type, data_out);
 
   /* input field checks */
   for (i = 0; i < E->EN(lincom,n_fields); ++i) {
@@ -1000,7 +1000,7 @@ static size_t _GD_DoLincom(DIRFILE *restrict D, gd_entry_t *restrict E,
   if (E->EN(lincom,n_fields) == 1 && gd_ccmpl_(E->EN(lincom,cm)[0],1,0) &&
       gd_ccmpl_(E->EN(lincom,cb)[0],0,0))
   {
-    dreturn("%" PRNsize_t, n_read);
+    dreturn("%" PRIuSIZE, n_read);
     return n_read;
   }
 
@@ -1078,7 +1078,7 @@ static size_t _GD_DoLincom(DIRFILE *restrict D, gd_entry_t *restrict E,
   if (D->error)
     n_read = 0;
 
-  dreturn("%" PRNsize_t, n_read);
+  dreturn("%" PRIuSIZE, n_read);
   return n_read;
 }
 
@@ -1094,8 +1094,8 @@ static size_t _GD_DoMultiply(DIRFILE *restrict D, gd_entry_t *restrict E,
   off64_t first_samp2;
   gd_type_t type2;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
-      num_samp, return_type, data_out);
+  dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
+      (int64_t)first_samp, num_samp, return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
@@ -1175,7 +1175,7 @@ static size_t _GD_DoMultiply(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   free(tmpbuf);
 
-  dreturn("%" PRNsize_t, n_read);
+  dreturn("%" PRIuSIZE, n_read);
   return n_read;
 }
 
@@ -1187,8 +1187,8 @@ static size_t _GD_DoRecip(DIRFILE *restrict D, gd_entry_t *restrict E,
 {
   size_t n_read;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
-      num_samp, return_type, data_out);
+  dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
+      (int64_t)first_samp, num_samp, return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
@@ -1217,7 +1217,7 @@ static size_t _GD_DoRecip(DIRFILE *restrict D, gd_entry_t *restrict E,
   else
     _GD_InvertData(D, data_out, return_type, E->EN(recip,dividend), num_samp);
 
-  dreturn("%" PRNsize_t, n_read);
+  dreturn("%" PRIuSIZE, n_read);
   return n_read;
 }
 
@@ -1233,8 +1233,8 @@ static size_t _GD_DoDivide(DIRFILE *restrict D, gd_entry_t *restrict E,
   off64_t first_samp2;
   gd_type_t type2;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
-      num_samp, return_type, data_out);
+  dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
+      (int64_t)first_samp, num_samp, return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1) ||
@@ -1314,7 +1314,7 @@ static size_t _GD_DoDivide(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   free(tmpbuf);
 
-  dreturn("%" PRNsize_t, n_read);
+  dreturn("%" PRIuSIZE, n_read);
   return n_read;
 }
 
@@ -1331,8 +1331,8 @@ static size_t _GD_DoBit(DIRFILE *restrict D, gd_entry_t *restrict E,
   const uint64_t mask = (E->EN(bit,numbits) == 64) ? 0xffffffffffffffffULL :
     ((uint64_t)1 << E->EN(bit,numbits)) - 1;
 
-  dtrace("%p, %p, %i, %lli, %" PRNsize_t ", 0x%X, %p", D, E, is_signed,
-      (long long)first_samp, num_samp, return_type, data_out);
+  dtrace("%p, %p, %i, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E, is_signed,
+      (int64_t)first_samp, num_samp, return_type, data_out);
 
   if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
@@ -1372,7 +1372,7 @@ static size_t _GD_DoBit(DIRFILE *restrict D, gd_entry_t *restrict E,
       return_type, n_read);
   free(tmpbuf);
 
-  dreturn("%" PRNsize_t, n_read);
+  dreturn("%" PRIuSIZE, n_read);
   return n_read;
 }
 
@@ -1384,8 +1384,8 @@ static size_t _GD_DoPhase(DIRFILE *restrict D, gd_entry_t *restrict E,
 {
   size_t n_read;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
-      num_samp, return_type, data_out);
+  dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
+      (int64_t)first_samp, num_samp, return_type, data_out);
 
   if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
@@ -1395,7 +1395,7 @@ static size_t _GD_DoPhase(DIRFILE *restrict D, gd_entry_t *restrict E,
   n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp +
       E->EN(phase,shift), num_samp, return_type, data_out);
 
-  dreturn("%" PRNsize_t, n_read);
+  dreturn("%" PRIuSIZE, n_read);
   return n_read;
 }
 
@@ -1408,8 +1408,8 @@ static size_t _GD_DoLinterp(DIRFILE *restrict D, gd_entry_t *restrict E,
   size_t n_read = 0;
   double* data_in;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
-      num_samp, return_type, data_out);
+  dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
+      (int64_t)first_samp, num_samp, return_type, data_out);
 
   if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
@@ -1438,7 +1438,7 @@ static size_t _GD_DoLinterp(DIRFILE *restrict D, gd_entry_t *restrict E,
       data_in, n_read, E->e->u.linterp.lut, E->e->u.linterp.table_len);
 
   free(data_in);
-  dreturn("%" PRNsize_t, n_read);
+  dreturn("%" PRIuSIZE, n_read);
   return n_read;
 }
 
@@ -1450,8 +1450,8 @@ static size_t _GD_DoPolynom(DIRFILE *restrict D, gd_entry_t *restrict E,
 {
   size_t n_read;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
-      num_samp, return_type, data_out);
+  dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
+      (int64_t)first_samp, num_samp, return_type, data_out);
 
   if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
@@ -1480,7 +1480,7 @@ static size_t _GD_DoPolynom(DIRFILE *restrict D, gd_entry_t *restrict E,
     _GD_PolynomData(D, data_out, return_type, n_read, E->EN(polynom,poly_ord),
         E->EN(polynom,a));
 
-  dreturn("%" PRNsize_t, n_read);
+  dreturn("%" PRIuSIZE, n_read);
   return n_read;
 }
 
@@ -1496,8 +1496,8 @@ static size_t _GD_DoWindow(DIRFILE *restrict D, gd_entry_t *restrict E,
   off64_t first_samp2;
   gd_type_t type2;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
-      num_samp, return_type, data_out);
+  dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
+      (int64_t)first_samp, num_samp, return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
@@ -1585,7 +1585,7 @@ static size_t _GD_DoWindow(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   free(tmpbuf);
 
-  dreturn("%" PRNsize_t, n_read);
+  dreturn("%" PRIuSIZE, n_read);
   return n_read;
 }
 
@@ -1602,8 +1602,8 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
   const size_t size = GD_SIZE(return_type);
   off64_t first_samp2;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
-      num_samp, return_type, data_out);
+  dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
+      (int64_t)first_samp, num_samp, return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
@@ -1769,7 +1769,7 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   free(tmpbuf);
 
-  dreturn("%" PRNsize_t, n_read);
+  dreturn("%" PRIuSIZE, n_read);
   return n_read;
 }
 
@@ -1779,8 +1779,8 @@ static size_t _GD_DoConst(DIRFILE *restrict D, const gd_entry_t *restrict E,
 {
   gd_type_t type;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first, len,
-      return_type, data_out);
+  dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E, (int64_t)first,
+      len, return_type, data_out);
 
   type = _GD_ConstType(D, E->EN(scalar,const_type));
   _GD_ConvertType(D, (char *)E->e->u.scalar.d + first * GD_SIZE(type), type,
@@ -1807,8 +1807,8 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
   const gd_type_t true_return_type = return_type;
   int out_of_place = 0;
 
-  dtrace("%p, %p(%s), %i, %lli, %" PRNsize_t ", 0x%X, %p", D, E, E->field, repr,
-      (long long)first_samp, num_samp, return_type, data_out);
+  dtrace("%p, %p(%s), %i, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E, E->field,
+      repr, (int64_t)first_samp, num_samp, return_type, data_out);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
@@ -1845,11 +1845,22 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
     }
   }
 
+  /* avoid craziness */
+  if (num_samp > GD_TRANSACTION_MAX(return_type))
+    num_samp = GD_TRANSACTION_MAX(return_type);
+  if (num_samp > GD_TRANSACTION_MAX(ntype))
+    num_samp = GD_TRANSACTION_MAX(ntype);
+  if (first_samp > (int64_t)(GD_INT64_MAX - num_samp)) {
+    _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
+    dreturn("%i", 0);
+    return 0;
+  }
+
   /* short circuit for purely real native types */
   if (~ntype & GD_COMPLEX) {
     if (repr == GD_REPR_IMAG) {
       memset(data_out, 0, GD_SIZE(return_type) * num_samp);
-      dreturn("%" PRNsize_t, num_samp);
+      dreturn("%" PRIuSIZE, num_samp);
       return num_samp;
     } else if (repr == GD_REPR_REAL)
       repr = GD_REPR_NONE;
@@ -1862,6 +1873,10 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
   if (ntype & GD_COMPLEX && ~return_type & GD_COMPLEX) {
     out_of_place = 1;
     return_type = GD_COMPLEX128;
+
+    if (num_samp > GD_TRANSACTION_MAX(GD_COMPLEX128))
+      num_samp = GD_TRANSACTION_MAX(GD_COMPLEX128);
+
     data_out = _GD_Alloc(D, GD_COMPLEX128, num_samp);
     if (repr == GD_REPR_NONE)
       repr = GD_REPR_AUTO;
@@ -1930,7 +1945,7 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
     free(data_out);
 
   D->recurse_level--;
-  dreturn("%" PRNsize_t, n_read);
+  dreturn("%" PRIuSIZE, n_read);
   return n_read;
 }
 
@@ -1945,9 +1960,9 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   int repr;
   unsigned int spf;
 
-  dtrace("%p, \"%s\", %lli, %lli, %" PRNsize_t ", %" PRNsize_t ", 0x%X, %p", D,
-      field_code_in, (long long)first_frame, (long long)first_samp, num_frames,
-      num_samp, return_type, data_out);
+  dtrace("%p, \"%s\", %" PRId64 ", %" PRId64 ", %" PRIuSIZE ", %" PRIuSIZE
+      ", 0x%X, %p", D, field_code_in, (int64_t)first_frame, (int64_t)first_samp,
+      num_frames, num_samp, return_type, data_out);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1990,8 +2005,18 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
       return 0;
     }
 
+    /* don't overflow */
+    if (first_samp > GD_INT64_MAX - spf * first_frame) {
+      _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
+      dreturn("%i", 0);
+      return 0;
+    }
     first_samp += spf * first_frame;
-    num_samp += spf * num_frames;
+
+    if (num_samp > GD_SIZE_T_MAX - spf * num_frames)
+      num_samp = GD_SIZE_T_MAX;
+    else
+      num_samp += spf * num_frames;
   }
 
   if (first_samp < 0 && (first_samp != GD_HERE || first_frame != 0)) {
@@ -2003,7 +2028,7 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   n_read = _GD_DoField(D, entry, repr, first_samp, num_samp, return_type,
       data_out);
 
-  dreturn("%" PRNsize_t, n_read);
+  dreturn("%" PRIuSIZE, n_read);
   return n_read;
 }
 

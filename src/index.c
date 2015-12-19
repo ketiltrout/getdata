@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2013 D. V. Wiebe
+/* Copyright (C) 2009-2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -27,7 +27,8 @@ static double _GD_Extrapolate(DIRFILE *D, gd_entry_t *E, int repr, double value,
   double sample = NAN;
   double data[2];
 
-  dtrace("%p, %p, %i, %g, %lli, %i", D, E, repr, value, (long long)limit, eof);
+  dtrace("%p, %p, %i, %g, %" PRId64 ", %i", D, E, repr, value, (int64_t)limit,
+      eof);
 
   /* load data */
   n = _GD_DoField(D, E, repr, limit - eof, 2, GD_FLOAT64, data);
@@ -58,8 +59,8 @@ static double _GD_GetIndex(DIRFILE* D, gd_entry_t *E, int repr, double value,
   double low_v, high_v, field_start_v, c_v;
   size_t n;
 
-  dtrace("%p, %p, %i, %g, %lli, %lli", D, E, repr, value,
-      (long long)field_start, (long long)field_end);
+  dtrace("%p, %p, %i, %g, %" PRId64 ", %" PRId64, D, E, repr, value,
+      (int64_t)field_start, (int64_t)field_end);
 
   /* find the end-points */
   n = _GD_DoField(D, E, repr, field_start, 1, GD_FLOAT64, &low_v);
@@ -212,8 +213,8 @@ double gd_framenum_subset64(DIRFILE* D, const char* field_code_in,
   int repr = GD_REPR_NONE;
   unsigned int spf;
 
-  dtrace("%p, \"%s\", %g, %lli, %lli", D, field_code_in, value,
-      (long long)field_start, (long long)field_end);
+  dtrace("%p, \"%s\", %g, %" PRId64 ", %" PRId64, D, field_code_in, value,
+      (int64_t)field_start, (int64_t)field_end);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -270,8 +271,8 @@ double gd_framenum_subset(DIRFILE* D, const char* field_code, double value,
 {
   double frame;
 
-  dtrace("%p, \"%s\", %g, %lli, %lli", D, field_code, value,
-      (long long int)field_start, (long long int)field_end);
+  dtrace("%p, \"%s\", %g, %" PRId64 ", %" PRId64, D, field_code, value,
+      (int64_t)field_start, (int64_t)field_end);
 
   frame = gd_framenum_subset64(D, field_code,  value, (off64_t)field_start,
       (off64_t)field_end);

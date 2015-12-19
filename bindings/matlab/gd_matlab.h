@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2013, 2014, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -23,7 +23,20 @@
 /* mex runs GCC in -ansi mode */
 #ifndef GDMXLIB
 #define GD_C89_API
+
+# define uint64_t gd_uint64_t
+# define int64_t gd_int64_t
+#else
+
+#ifdef HAVE_INTTYPES_H
+#ifndef __STDC_FORMAT_MACROS
+#define __STDC_FORMAT_MACROS
 #endif
+#include <inttypes.h>
+#endif
+
+#endif
+
 #define GD_64BIT_API
 #include "getdata.h"
 
@@ -56,11 +69,14 @@
 
 /* integer type aliases */
 #if SIZEOF_SIZE_T == 8
-#define gdmx_to_size_t(a,b) ((size_t)gdmx_to_ullong(a,b))
-#define gdmx_from_size_t gdmx_from_ullong
-#else
+#define gdmx_to_size_t(a,b) ((size_t)gdmx_to_uint64(a,b))
+#define gdmx_from_size_t gdmx_from_uint64
+#elif SIZEOF_SIZE_T == SIZEOF_LONG
 #define gdmx_to_size_t(a,b) ((size_t)gdmx_to_ulong(a,b))
 #define gdmx_from_size_t gdmx_from_ulong
+#else
+#define gdmx_to_size_t(a,b) ((size_t)gdmx_to_uint(a,b))
+#define gdmx_from_size_t gdmx_from_uint
 #endif
 #define gdmx_to_gd_type(a,b) ((gd_type_t)gdmx_to_int(a,b))
 #define gdmx_from_gd_type gdmx_from_int
@@ -88,9 +104,9 @@ mxArray *gdmx_from_string_list(const char **);
 #define gdmx_from_double mxCreateDoubleScalar
 mxArray *gdmx_from_bool(int);
 mxArray *gdmx_from_long(long);
-mxArray *gdmx_from_llong(long long);
+mxArray *gdmx_from_int64(int64_t);
 mxArray *gdmx_from_ulong(unsigned long);
-mxArray *gdmx_from_ullong(unsigned long long);
+mxArray *gdmx_from_uint64(uint64_t);
 
 mxArray *gdmx_from_carrays(const gd_carray_t *, gd_type_t);
 mxArray *gdmx_from_sarrays(const char ***);
@@ -108,10 +124,10 @@ gd_entry_t *gdmx_to_entry(const mxArray **, int, unsigned);
 
 double gdmx_to_double(const mxArray **, int);
 long gdmx_to_long(const mxArray **, int);
-long long gdmx_to_llong(const mxArray **, int);
+int64_t gdmx_to_int64_t(const mxArray **, int);
 #define gdmx_to_uint(a,b) ((unsigned int)gdmx_to_ulong(a,b))
 unsigned long gdmx_to_ulong(const mxArray **, int);
-unsigned long long gdmx_to_ullong(const mxArray **, int);
+uint64_t gdmx_to_uint64(const mxArray **, int);
 
 size_t gdmx_to_nsamp(DIRFILE*, const char*, const mxArray**, int, int);
 void gdmx_to_data(void**, gd_type_t*, size_t*, const mxArray*, int);

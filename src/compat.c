@@ -158,7 +158,7 @@ int strerror_r(int errnum, char *buf, size_t buflen)
 {
   char *ptr;
 
-  dtrace("%i, %p, %" PRNsize_t, errnum, buf, buflen);
+  dtrace("%i, %p, %" PRIuSIZE, errnum, buf, buflen);
 
   ptr = strerror(errnum);
   strncpy(buf, ptr, buflen);
@@ -478,7 +478,7 @@ int _GD_StrError(int errnum, char *buf, size_t buflen)
 {
   char *ptr;
 
-  dtrace("%i, %p, %" PRNsize_t, errnum, buf, buflen);
+  dtrace("%i, %p, %" PRIuSIZE, errnum, buf, buflen);
   
 #ifdef STRERROR_R_CHAR_P
   ptr = strerror_r(errnum, buf, buflen);

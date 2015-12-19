@@ -81,10 +81,10 @@ off64_t _GD_GzipSeek(struct gd_raw_file_* file, off64_t count,
 {
   off64_t n = 0;
 
-  dtrace("%p, %lli, 0x%X, 0x%X", file, (long long)count, data_type, mode);
+  dtrace("%p, %" PRId64 ", 0x%X, 0x%X", file, (int64_t)count, data_type, mode);
 
   if (file->pos == count) {
-    dreturn("%lli", (long long)count);
+    dreturn("%" PRId64, (int64_t)count);
     return count;
   }
 
@@ -108,7 +108,7 @@ off64_t _GD_GzipSeek(struct gd_raw_file_* file, off64_t count,
     file->pos = n;
   }
 
-  dreturn("%lli", (long long)n);
+  dreturn("%" PRId64, (int64_t)n);
   return n;
 }
 
@@ -118,7 +118,7 @@ ssize_t _GD_GzipRead(struct gd_raw_file_ *file, void *ptr, gd_type_t data_type,
   ssize_t n;
   int errnum;
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, ptr, data_type, nmemb);
 
   n = gzread((gzFile)file->edata, ptr, GD_SIZE(data_type) * nmemb);
 
@@ -131,7 +131,7 @@ ssize_t _GD_GzipRead(struct gd_raw_file_ *file, void *ptr, gd_type_t data_type,
       n = -1;
   }
 
-  dreturn("%" PRNsize_t, n);
+  dreturn("%" PRIuSIZE, n);
   return n;
 }
 
@@ -141,7 +141,7 @@ ssize_t _GD_GzipWrite(struct gd_raw_file_ *file, const void *ptr,
   ssize_t n;
   int errnum;
 
-  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, ptr, data_type, nmemb);
 
   n = gzwrite((gzFile)file->edata, ptr, GD_SIZE(data_type) * nmemb);
 
@@ -154,7 +154,7 @@ ssize_t _GD_GzipWrite(struct gd_raw_file_ *file, const void *ptr,
       n = -1;
   }
 
-  dreturn("%" PRNssize_t, n);
+  dreturn("%" PRIdSIZE, n);
   return n;
 }
 
@@ -212,7 +212,7 @@ off64_t _GD_GzipSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 
   size /= GD_SIZE(data_type);
 
-  dreturn("%lli", (long long)size);
+  dreturn("%" PRIu32, size);
   return size;
 }
 
@@ -222,7 +222,7 @@ int _GD_GzipStrerr(const struct gd_raw_file_ *file, char *buf, size_t buflen)
   int gzerrnum = 0;
   const char *gzerr;
 
-  dtrace("%p, %p, %" PRNsize_t, file, buf, buflen);
+  dtrace("%p, %p, %" PRIuSIZE, file, buf, buflen);
 
   gzerr = gzerror((gzFile)file->edata, &gzerrnum);
 

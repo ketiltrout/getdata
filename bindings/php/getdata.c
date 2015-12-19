@@ -3237,6 +3237,14 @@ PHP_FUNCTION(gd_get_carray)
   len = gdphp_long_from_zval_null(zlen, -1);
   unpack = gdphp_unpack(zunpack);
 
+  if (data_type == GD_NULL) {
+    if (len == -1)
+      GDPHP_RETURN_BOOL(gd_get_carray(D, field_code, GD_NULL, NULL));
+    else
+      GDPHP_RETURN_BOOL(gd_get_carray_slice(D, field_code, start, len, GD_NULL,
+            NULL));
+  }
+
   if (len == -1) {
     len = gd_array_len(D, field_code) - start;
     if (len == 0) /* error */
@@ -3279,6 +3287,9 @@ PHP_FUNCTION(gd_get_constant)
 
   if (gd_get_constant(D, field_code, data_type, datum))
     GDPHP_RETURN_F;
+
+  if (data_type == GD_NULL)
+    GDPHP_RETURN_T;
 
   gdphp_from_datum(return_value, datum, data_type);
   dreturnvoid();
@@ -3339,31 +3350,43 @@ PHP_FUNCTION(gd_getdata)
 
   unpack = gdphp_unpack(zunpack);
 
-  /* figure out how much data we have */
-  if (num_frames > 0) {
-    unsigned spf = gd_spf(D, field_code);
-    if (spf == 0)
-      GDPHP_RETURN_F;
-    ns = num_frames * spf + num_samples;
-  } else
-    ns = num_samples;
+  if (data_type == GD_NULL) {
+    n = gd_getdata(D, field_code, first_frame, first_sample, num_frames,
+        num_samples, GD_NULL, NULL);
 
-  /* get the type, if needed */
-  if (data_type == GD_UNKNOWN)
-    data_type = gd_native_type(D, field_code);
+    GDPHP_CHECK_ERROR(D);
 
-  /* allocate a buffer */
-  gdphp_validate_type(data_type, &ctx);
-  data = emalloc(ns * GD_SIZE(data_type));
+    gdphp_from_data(return_value, n, data_type, data, 0, unpack);
 
-  n = gd_getdata(D, field_code, first_frame, first_sample, 0, ns, data_type,
-      data);
+    dreturn("%" PRIuSIZE, n);
+    RETURN_LONG(n);
+  } else {
+    /* figure out how much data we have */
+    if (num_frames > 0) {
+      unsigned spf = gd_spf(D, field_code);
+      if (spf == 0)
+        GDPHP_RETURN_F;
+      ns = num_frames * spf + num_samples;
+    } else
+      ns = num_samples;
 
-  GDPHP_CHECK_ERROR(D);
+    /* get the type, if needed */
+    if (data_type == GD_UNKNOWN)
+      data_type = gd_native_type(D, field_code);
 
-  gdphp_from_data(return_value, n, data_type, data, 0, unpack);
+    /* allocate a buffer */
+    gdphp_validate_type(data_type, &ctx);
+    data = emalloc(ns * GD_SIZE(data_type));
 
-  dreturn("%" PRNsize_t, n);
+    n = gd_getdata(D, field_code, first_frame, first_sample, 0, ns, data_type,
+        data);
+
+    GDPHP_CHECK_ERROR(D);
+
+    gdphp_from_data(return_value, n, data_type, data, 0, unpack);
+
+    dreturn("%" PRIuSIZE, n);
+  }
 }
 
 PHP_FUNCTION(gd_hidden)

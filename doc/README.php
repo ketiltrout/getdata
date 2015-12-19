@@ -345,16 +345,20 @@ Some functions have several ways that they can be called.
         [ int $start = 0, int $len = null, bool $unpack ])
 
       If $len is null (or not given), all values to the end of the CARRAY are
-      returned.
+      returned.  If $return_type is GD_NULL, returns true on success.
 
 * number gd_get_constant(resource $dirfile, string $field_code,
         int $return_type)
+
+      If $return_type is GD_NULL, returns true on success.
 
 * string gd_get_string(resource $dirfile, string $field_code)
 
 * data gd_getdata(resource $dirfile, string $field_code, int $first_frame,
         int $first_sample, int $num_frames, int $num_samples, int $return_type,
         [ bool $unpack ])
+
+      If $return_type is GD_NULL, simply returns the number of samples read.
 
 * bool gd_hidden(resource $dirfile, string $field_code)
 

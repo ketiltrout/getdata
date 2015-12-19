@@ -1,4 +1,4 @@
-// Copyright (C) 2011, 2012 D. V. Wiebe
+// Copyright (C) 2011, 2012, 2015 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -24,9 +24,9 @@ WindowEntry::WindowEntry(const char* field_code, const char* in_field,
     const char* check, WindOpType windop, gd_triplet_t threshold,
     int fragment_index) : Entry()
 {
-  dtrace("\"%s\", \"%s\", \"%s\", %i, {%g,%llx,%lli}, %i", field_code,
-      in_field, check, (unsigned)windop, threshold.r,
-      (unsigned long long)threshold.u, (long long)threshold.i, fragment_index);
+  dtrace("\"%s\", \"%s\", \"%s\", %i, {%g,%" PRIX64 ",%" PRId64 "}, %i",
+      field_code, in_field, check, (unsigned)windop, threshold.r, threshold.u,
+      threshold.i, fragment_index);
 
   E.field = strdup(field_code);
   E.field_type = GD_WINDOW_ENTRY;
@@ -78,8 +78,7 @@ int WindowEntry::SetThreshold(gd_triplet_t threshold)
 {
   int ret = 0;
 
-  dtrace("{%g,%llX,%lli}", threshold.r, (unsigned long long)threshold.u,
-      (long long)threshold.i);
+  dtrace("{%g,%" PRIX64 ",%" PRId64 "}", threshold.r, threshold.u, threshold.i);
 
   E.u.window.threshold = threshold;
 

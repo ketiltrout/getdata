@@ -142,7 +142,7 @@ static void _GD_SPFConvert(DIRFILE* D, void *A, unsigned int spfA, void *B,
 {
   size_t i;
 
-  dtrace("%p, %p, %u, %p, %u, 0x%X, %" PRNsize_t, D, A, spfA, B, spfB, type, n);
+  dtrace("%p, %p, %u, %p, %u, 0x%X, %" PRIuSIZE, D, A, spfA, B, spfB, type, n);
 
   switch (type) {
     case GD_NULL: /* null read */
@@ -1391,7 +1391,7 @@ int gd_alter_phase(DIRFILE* D, const char* field_code, const char* in_field,
   int ret;
   gd_entry_t N;
 
-  dtrace("%p, \"%s\", \"%s\", %lli", D, field_code, in_field, (long long)shift);
+  dtrace("%p, \"%s\", \"%s\", %" PRId64, D, field_code, in_field, shift);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1441,7 +1441,7 @@ int gd_alter_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
   int ret;
   gd_entry_t N;
 
-  dtrace("%p, \"%s\", 0x%X, %" PRNsize_t, D, field_code, const_type, array_len);
+  dtrace("%p, \"%s\", 0x%X, %" PRIuSIZE, D, field_code, const_type, array_len);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1578,9 +1578,9 @@ gd_nothrow
   int ret;
   gd_entry_t N;
 
-  dtrace("%p, \"%s\", \"%s\", \"%s\", %i, {%g,%llx,%lli}", D, field_code,
-      in_field, check_field, windop, threshold.r,
-      (unsigned long long)threshold.u, (long long)threshold.i);
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %i, {%g,%" PRIX64 ",%" PRId64 "}", D,
+      field_code, in_field, check_field, windop, threshold.r, threshold.u,
+      threshold.i);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

@@ -29,9 +29,10 @@
 #define dprintf_sie(...)
 #endif
 
-#define DPRINTF dprintf_sie("F  r:%zi p:0x%llX s:%i,0x%llX " \
-    "d:0x%llX,0x%llX l:%i/0x%llX,0x%llX @%li", f->r, f->p, f->bof, f->s, \
-    f->d[0], f->d[1], f->have_l, f->l[0], f->l[1], ftell(f->fp));
+#define DPRINTF dprintf_sie("F  r:%zi p:0x%" PRIX64 " s:%i,0x%" PRIX64 " " \
+    "d:0x%" PRIX64 ",0x%" PRIX64 " l:%i/0x%" PRIX64 ",0x%" PRIX64 " @%li", \
+    f->r, f->p, f->bof, f->s, f->d[0], f->d[1], f->have_l, f->l[0], f->l[1], \
+    ftell(f->fp));
 
 struct gd_siedata {
   int swap; /* byte swapping required */
@@ -126,7 +127,7 @@ static int _GD_Advance(struct gd_siedata *f, size_t size)
   size_t n;
   int64_t p = f->s + 1;
   int64_t l[3];
-  dtrace("%p, %" PRNsize_t, f, size);
+  dtrace("%p, %" PRIuSIZE, f, size);
 
   /* save the current record */
   if (p > 0)
@@ -172,10 +173,11 @@ off64_t _GD_SampIndSeek(struct gd_raw_file_ *file, off64_t sample,
   const size_t size = sizeof(int64_t) + GD_SIZE(data_type);
   struct gd_siedata *f = (struct gd_siedata*)(file->edata);
 
-  dtrace("%p, 0x%llx, 0x%X, 0x%X", file, (long long)sample, data_type, mode);
+  dtrace("%p, 0x%" PRIX64 ", 0x%X, 0x%X", file, (uint64_t)sample, data_type,
+      mode);
 
   if (file->pos == sample && f->p >= 0) {
-    dreturn("0x%llX", (long long)sample);
+    dreturn("0x%" PRIX64, (uint64_t)sample);
     return sample;
   }
 
@@ -246,7 +248,7 @@ off64_t _GD_SampIndSeek(struct gd_raw_file_ *file, off64_t sample,
 
   DPRINTF;
 
-  dreturn("0x%llX", (unsigned long long)sample);
+  dreturn("0x%" PRIX64, (uint64_t)sample);
   return (off64_t)(sample);
 }
 
@@ -255,7 +257,7 @@ static void *_GD_Duplicate(void *restrict d, const void *restrict s, size_t l,
     int64_t n)
 {
   int64_t i;
-  dtrace("%p, %p, %" PRNsize_t ", 0x%llx", d, s, l, (long long)n);
+  dtrace("%p, %p, %" PRIuSIZE ", 0x%" PRIX64, d, s, l, (uint64_t)n);
 
   if (n > 0) {
     if (l == 1) {
@@ -311,7 +313,7 @@ ssize_t _GD_SampIndRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
   struct gd_siedata *f = (struct gd_siedata*)(file->edata);
   void *cur = ptr;
 
-  dtrace("%p, %p, 0x%03x, %" PRNsize_t, file, ptr, data_type, nelem);
+  dtrace("%p, %p, 0x%03x, %" PRIuSIZE, file, ptr, data_type, nelem);
 
   /* not enough data in the current run */
   while (f->s - f->p < (int64_t)(nelem - count)) {
@@ -346,7 +348,7 @@ ssize_t _GD_SampIndRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
 
   file->pos = f->p;
 
-  dreturn("%lli", (long long)count);
+  dreturn("%" PRIdSIZE, count);
   return count;
 }
 
@@ -354,14 +356,14 @@ ssize_t _GD_SampIndRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
 static ssize_t _GD_GetNRec(struct gd_siedata *f, size_t size)
 {
   gd_stat64_t statbuf;
-  dtrace("%p, %" PRNsize_t, f, size);
+  dtrace("%p, %" PRIuSIZE, f, size);
 
   if (gd_fstat64(fileno(f->fp), &statbuf)) {
     dreturn("%i", -1);
     return -1;
   }
 
-  dreturn("%" PRNssize_t, (ssize_t)(statbuf.st_size / size));
+  dreturn("%" PRIdSIZE, (ssize_t)(statbuf.st_size / size));
   return (ssize_t)(statbuf.st_size / size);
 }
 
@@ -380,7 +382,7 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
   struct gd_siedata *f = (struct gd_siedata*)(file->edata);
   const size_t dlen = GD_SIZE(data_type);
   const size_t size = sizeof(int64_t) + dlen;
-  dtrace("%p, %p, 0x%03x, %" PRNsize_t, file, ptr, data_type, nelem);
+  dtrace("%p, %p, 0x%03x, %" PRIuSIZE, file, ptr, data_type, nelem);
 
   if ((nrec = _GD_GetNRec(f, size)) < 0) {
     dreturn("%i", -1);
@@ -430,7 +432,7 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
        * it is, combine them
        */
       if (memcmp(f->l + 1, ptr, dlen) == 0) {
-        dprintf_sie("combine: 0x%llX", f->l[1]);
+        dprintf_sie("combine: 0x%" PRIX64, f->l[1]);
         /* the new value is the same as the value of the previous record, so
          * back up a record and combine */
 
@@ -481,7 +483,8 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
         cur_end = (int64_t*)((char*)p + size * (rin - 1));
       }
       end = f->p + i - 1;
-      dprintf_sie("*cur_end:   %llX -> %llX", FIXSEX(f->swap, *cur_end), end);
+      dprintf_sie("*cur_end:   0x%" PRIX64 " -> 0x%" PRIX64, FIXSEX(f->swap,
+            *cur_end), end);
       gd_put_unaligned64(FIXSEX(f->swap, end), cur_end);
       dprintf_sie(" cur_end:   %p -> %p", cur_end, (char*)p + size * rin);
       cur_end = (int64_t*)((char*)p + size * rin);
@@ -493,7 +496,8 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
     }
   }
   end = f->p + nelem - 1;
-  dprintf_sie("*cur_end:   %llX -> %llX", FIXSEX(f->swap, *cur_end), end);
+  dprintf_sie("*cur_end:   0x%" PRIX64 " -> 0x%" PRIX64, FIXSEX(f->swap,
+        *cur_end), end);
   gd_put_unaligned64(FIXSEX(f->swap, end), cur_end);
   rin++;
 
@@ -528,7 +532,8 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
   }
   DPRINTF;
 
-  dprintf_sie("nrec:%zi rin:%zi rout:%zi fr:%lli", nrec, rin, rout, fr);
+  dprintf_sie("nrec:%" PRIdSIZE " rin:%" PRIdSIZE " rout:%" PRIdSIZE
+      " fr:%" PRId64, nrec, rin, rout, fr);
 
   /* now, do some moving: first, move the trailing records, forward by
    * (rin - rout) records */
@@ -599,7 +604,7 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
   free(p);
 
   file->pos = f->p;
-  dreturn("%llu", (unsigned long long)nelem);
+  dreturn("%" PRIuSIZE, nelem);
   return nelem;
 }
 
@@ -685,6 +690,6 @@ off64_t _GD_SampIndSize(int dirfd, struct gd_raw_file_* file,
     return -1;
   }
 
-  dreturn("%llx", (long long unsigned)n + 1);
+  dreturn("0x%" PRIX64, (uint64_t)(n + 1));
   return n + 1;
 }

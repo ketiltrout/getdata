@@ -530,7 +530,7 @@ ssize_t _GD_WriteOut(const gd_entry_t *E, const struct encoding_t *enc,
 {
   ssize_t n_wrote;
 
-  dtrace("%p, %p, %p, 0x%X, %" PRNsize_t ", %i", E, enc, ptr, type, n, temp);
+  dtrace("%p, %p, %p, 0x%X, %" PRIuSIZE ", %i", E, enc, ptr, type, n, temp);
 
   if (temp)
     n_wrote = (*enc->write)(E->e->u.raw.file + 1, ptr, type, n);
@@ -550,7 +550,7 @@ ssize_t _GD_WriteOut(const gd_entry_t *E, const struct encoding_t *enc,
       n_wrote = (*enc->write)(E->e->u.raw.file, ptr, type, n);
   }
 
-  dreturn("%" PRNssize_t, n_wrote);
+  dreturn("%" PRIdSIZE, n_wrote);
   return n_wrote;
 }
 

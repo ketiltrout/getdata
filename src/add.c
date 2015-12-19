@@ -1208,8 +1208,8 @@ int gd_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
 {
   gd_entry_t P;
 
-  dtrace("%p, \"%s\", \"%s\", %lli, %i", D, field_code, in_field,
-      (long long)shift, fragment_index);
+  dtrace("%p, \"%s\", \"%s\", %" PRId64 ", %i", D, field_code, in_field,
+      (int64_t)shift, fragment_index);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1240,9 +1240,9 @@ int gd_add_window(DIRFILE *D, const char *field_code, const char *in_field,
 {
   gd_entry_t E;
 
-  dtrace("%p, \"%s\", \"%s\", \"%s\", %i, {%g,%llx,%lli}, %i", D, field_code,
-      in_field, check_field, windop, threshold.r,
-      (unsigned long long)threshold.u, (long long)threshold.i, fragment_index);
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %i, {%g,%" PRIX64 ",%" PRId64 "}, %i", D,
+      field_code, in_field, check_field, windop, threshold.r, threshold.u,
+      threshold.i, fragment_index);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1382,7 +1382,7 @@ int gd_add_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
   gd_entry_t *entry;
   gd_entry_t C;
 
-  dtrace("%p, \"%s\", 0x%X, %" PRNsize_t ", 0x%X, %p, %i", D, field_code,
+  dtrace("%p, \"%s\", 0x%X, %" PRIuSIZE ", 0x%X, %p, %i", D, field_code,
       const_type, array_len, data_type, values, fragment_index);
 
   if (D->flags & GD_INVALID) {
@@ -1659,8 +1659,8 @@ int gd_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
 {
   gd_entry_t P;
 
-  dtrace("%p, \"%s\", \"%s\", \"%s\", %lli", D, field_code, parent, in_field,
-      (long long)shift);
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %" PRId64, D, field_code, parent,
+      in_field, shift);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1863,9 +1863,9 @@ int gd_madd_window(DIRFILE *D, const char *parent, const char *field_code,
 {
   gd_entry_t E;
 
-  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\", %i, {%g,%llx,%lli}", D, parent,
-      field_code, in_field, check_field, windop, threshold.r,
-      (unsigned long long)threshold.u, (long long)threshold.i);
+  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\", %i, {%g,%" PRIX64 ",%" PRId64 "}",
+      D, parent, field_code, in_field, check_field, windop, threshold.r,
+      threshold.u, threshold.i);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -2003,7 +2003,7 @@ int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
   gd_entry_t *entry;
   gd_entry_t C;
 
-  dtrace("%p, \"%s\", \"%s\", 0x%X, %" PRNsize_t ", 0x%X, %p", D, parent,
+  dtrace("%p, \"%s\", \"%s\", 0x%X, %" PRIuSIZE ", 0x%X, %p", D, parent,
       field_code, const_type, array_len, data_type, values);
 
   if (D->flags & GD_INVALID) {/* don't crash */

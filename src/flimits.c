@@ -25,7 +25,7 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
 {
   unsigned int i, n_raw = 0;
 
-  dtrace("%p, %lli, %i, %i", D, (long long)offset, fragment, move);
+  dtrace("%p, %" PRId64 ", %i, %i", D, (int64_t)offset, fragment, move);
 
   /* check protection */
   if (D->fragment[fragment].protection & GD_PROTECT_FORMAT) {
@@ -94,7 +94,7 @@ int gd_alter_frameoffset64(DIRFILE* D, off64_t offset, int fragment, int move)
 {
   int i;
 
-  dtrace("%p, %lli, %i, %i", D, (long long)offset, fragment, move);
+  dtrace("%p, %" PRId64 ", %i, %i", D, (int64_t)offset, fragment, move);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -154,7 +154,7 @@ off64_t gd_frameoffset64(DIRFILE* D, int fragment)
 
   _GD_ClearError(D);
 
-  dreturn("%lli", (long long)D->fragment[fragment].frame_offset);
+  dreturn("%" PRId64, (int64_t)D->fragment[fragment].frame_offset);
   return D->fragment[fragment].frame_offset;
 }
 
@@ -348,7 +348,7 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
 
   D->recurse_level--;
 
-  dreturn("%lli %i", (unsigned long long)ns, *is_index);
+  dreturn("%" PRId64 " %i", (int64_t)ns, *is_index);
   return ns;
 }
 
@@ -380,7 +380,7 @@ off64_t gd_eof64(DIRFILE* D, const char *field_code)
   if (is_index)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
 
-  dreturn("%lli", (unsigned long long)ns);
+  dreturn("%" PRId64, (int64_t)ns);
   return ns;
 }
 
@@ -534,8 +534,7 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
 
   D->recurse_level--;
 
-  dreturn("%llu %lu %lli", (unsigned long long)bof, (unsigned long)*spf,
-      (long long)*ds);
+  dreturn("%" PRIu64 " %u %" PRId64, bof, *spf, *ds);
   return bof;
 }
 
@@ -568,7 +567,7 @@ off64_t gd_bof64(DIRFILE* D, const char *field_code) gd_nothrow
   if (bof != -1)
     bof = bof * spf + ds;
 
-  dreturn("%lli", (unsigned long long)bof);
+  dreturn("%" PRId64, (int64_t)bof);
   return bof;
 }
 

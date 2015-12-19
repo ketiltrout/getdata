@@ -23,9 +23,7 @@ import os
 import re
 import array
 import pygetdata
-
-if (pygetdata.__numpy_supported__):
-  import numpy
+import numpy
 
 def CheckOK(t):
   global ne
@@ -142,10 +140,7 @@ try:
 except:
   CheckOK(3)
 CheckSimple(3,len(n),8)
-if (pygetdata.__numpy_supported__):
-  CheckNumpy(3,n,numpy.arange(41,49))
-else:
-  CheckSimple(3,n,range(41,49))
+CheckNumpy(3,n,numpy.arange(41,49))
 
 # 6: getdata (long) check
 try:
@@ -153,10 +148,7 @@ try:
 except:
   CheckOK(6)
 CheckSimple(6,len(n),8)
-if (pygetdata.__numpy_supported__):
-  CheckNumpy(6,n,numpy.arange(41L,49L))
-else:
-  CheckSimple(6,n,range(41L,49L))
+CheckNumpy(6,n,numpy.arange(41L,49L))
 
 # 8: getdata (float) check
 try:
@@ -164,10 +156,7 @@ try:
 except:
   CheckOK(8)
 CheckSimple(8,len(n),8)
-if (pygetdata.__numpy_supported__):
-  CheckNumpy(8,n,numpy.arange(41.,49.))
-else:
-  CheckSimple(8,n,[41.,42.,43.,44.,45.,46.,47.,48.])
+CheckNumpy(8,n,numpy.arange(41.,49.))
 
 # 10: getdata (complex) check
 try:
@@ -175,10 +164,14 @@ try:
 except:
   CheckOK(10)
 CheckSimple(10,len(n),8)
-if (pygetdata.__numpy_supported__):
-  CheckNumpy(10,n,numpy.arange(41,49,dtype=numpy.complex128))
-else:
-  CheckSimple(10,n,[41.+0j,42.+0j,43.+0j,44.+0j,45.+0j,46.+0j,47.+0j,48.+0j])
+CheckNumpy(10,n,numpy.arange(41,49,dtype=numpy.complex128))
+
+# 11: getdata (GD_NULL) check
+try:
+  n = d.getdata("data", pygetdata.NULL, first_frame=5, num_frames=1)
+except:
+  CheckOK(11)
+CheckSimple(11, n, 8);
 
 # 12: constant (int) check
 try:
@@ -194,6 +187,13 @@ except:
   CheckOK(15)
 CheckSimple(15,n,5L)
 
+# 16: constant (float) check
+try:
+  n = d.get_constant("const")
+except:
+  CheckOK(16)
+CheckSimple(16,n,5.5)
+
 # 17: constant (float) check
 try:
   n = d.get_constant("const", pygetdata.FLOAT)
@@ -207,6 +207,13 @@ try:
 except:
   CheckOK(19)
 CheckSimple(19,n,5.5+0j)
+
+# 20: constant (GD_NULL) check
+try:
+  n = d.get_constant("const", pygetdata.NULL)
+except:
+  CheckOK(20)
+CheckSimple(20,n,None)
 
 # 23: nfields check
 try:
@@ -265,19 +272,18 @@ except:
 CheckSimple2(30,2,n,[41, 13, 14, 15, 16, 46, 47, 48])
 
 # 32: putdata (numpy) check
-if (pygetdata.__numpy_supported__):
-  p = numpy.array([ 73, 74, 75, 76 ])
-  try:
-    n = d.putdata("data", p, first_frame=5, first_sample=1)
-  except:
-    CheckOK2(32,1)
-  CheckSimple2(32,1,n,4)
+p = numpy.array([ 73, 74, 75, 76 ])
+try:
+  n = d.putdata("data", p, first_frame=5, first_sample=1)
+except:
+  CheckOK2(32,1)
+CheckSimple2(32,1,n,4)
 
-  try:
-    n = d.getdata("data", pygetdata.INT, first_frame=5, num_frames=1)
-  except:
-    CheckOK(32,2)
-  CheckNumpy2(32,2,n,numpy.array([41, 73, 74, 75, 76, 46, 47, 48]))
+try:
+  n = d.getdata("data", pygetdata.INT, first_frame=5, num_frames=1)
+except:
+  CheckOK(32,2)
+CheckNumpy2(32,2,n,numpy.array([41, 73, 74, 75, 76, 46, 47, 48]))
 
 # 33: putdata (long) check
 p = [ 23L, 24L, 25L, 26L ]
@@ -1334,10 +1340,7 @@ try:
 except:
   CheckOK(158)
 
-if (pygetdata.__numpy_supported__):
-  CheckNumpy(158,n,numpy.arange(1,7))
-else:
-  CheckSimple(158,n,[1, 2, 3, 4, 5, 6])
+CheckNumpy(158,n,numpy.arange(1,7))
 
 # 159: gd_get_carray_slice (INT8)
 try:
@@ -1345,10 +1348,7 @@ try:
 except:
   CheckOK(159)
 
-if (pygetdata.__numpy_supported__):
-  CheckNumpy(159,n,numpy.arange(3,5))
-else:
-  CheckSimple(159,n,[3, 4])
+CheckNumpy(159,n,numpy.arange(3,5))
 
 # 162: gd_get_carray_slice (INT64)
 try:
@@ -1356,10 +1356,15 @@ try:
 except:
   CheckOK(162)
 
-if (pygetdata.__numpy_supported__):
-  CheckNumpy(162,n,numpy.arange(3L,5L))
-else:
-  CheckSimple(162,n,[3L, 4L])
+CheckNumpy(162,n,numpy.arange(3L,5L))
+
+# 163: gd_get_carray_slice (auto-type)
+try:
+  n = d.get_carray("carray", start=2, len=2)
+except:
+  CheckOK(163)
+
+CheckNumpy(163,n,numpy.array([3.3, 4.4]))
 
 # 164: gd_get_carray_slice (FLOAT64)
 try:
@@ -1367,10 +1372,7 @@ try:
 except:
   CheckOK(164)
 
-if (pygetdata.__numpy_supported__):
-  CheckNumpy(164,n,numpy.array([3.3, 4.4]))
-else:
-  CheckSimple(164,n,[3.3, 4.4])
+CheckNumpy(163,n,numpy.array([3.3, 4.4]))
 
 # 166: gd_get_carray_slice (COMPLEX128)
 try:
@@ -1378,10 +1380,7 @@ try:
 except:
   CheckOK(166)
 
-if (pygetdata.__numpy_supported__):
-  CheckNumpy(166,n,numpy.array([3.3+0j, 4.4+0j]))
-else:
-  CheckSimple(166,n,[3.3+0j, 4.4+0j])
+CheckNumpy(166,n,numpy.array([3.3+0j, 4.4+0j]))
 
 # 167: gd_carrays
 try:
@@ -1390,11 +1389,8 @@ except:
   CheckOK(167)
 
 CheckSimple2(167,1,len(n),1)
-if (pygetdata.__numpy_supported__):
-  CheckSimple2(167,2,n[0][0],"carray")
-  CheckNumpy2(167,3,n[0][1],numpy.arange(1,7))
-else:
-  CheckSimple(167,n,[("carray", [1,2,3,4,5,6])])
+CheckSimple2(167,2,n[0][0],"carray")
+CheckNumpy2(167,3,n[0][1],numpy.arange(1,7))
 
 # 168: gd_put_carray
 try:
@@ -1407,10 +1403,7 @@ try:
 except:
   CheckOK2(168,2)
 
-if (pygetdata.__numpy_supported__):
-  CheckNumpy(168,n,numpy.arange(9,3,-1))
-else:
-  CheckSimple(168,n,[9,8,7,6,5,4])
+CheckNumpy(168,n,numpy.arange(9,3,-1))
 
 # 169: gd_put_carray_slice (INT8)
 try:
@@ -1423,10 +1416,7 @@ try:
 except:
   CheckOK2(169,2)
 
-if (pygetdata.__numpy_supported__):
-  CheckNumpy(169,n,numpy.array([9,8,169,169,5,4]))
-else:
-  CheckSimple(169,n,[9,8,169,169,5,4])
+CheckNumpy(169,n,numpy.array([9,8,169,169,5,4]))
 
 # 172: gd_put_carray_slice (INT64)
 try:
@@ -1439,10 +1429,7 @@ try:
 except:
   CheckOK2(172,2)
 
-if (pygetdata.__numpy_supported__):
-  CheckNumpy(172,n,numpy.array([9,8,172,172,5,4]))
-else:
-  CheckSimple(172,n,[9,8,172,172,5,4])
+CheckNumpy(172,n,numpy.array([9,8,172,172,5,4]))
 
 # 174: gd_put_carray_slice (FLOAT64)
 try:
@@ -1455,10 +1442,7 @@ try:
 except:
   CheckOK2(174,2)
 
-if (pygetdata.__numpy_supported__):
-  CheckNumpy(174,n,numpy.array([9,8,174,174,5,4]))
-else:
-  CheckSimple(174,n,[9,8,174,174,5,4])
+CheckNumpy(174,n,numpy.array([9,8,174,174,5,4]))
 
 # 176: gd_put_carray_slice (COMPLEX128)
 try:
@@ -1471,10 +1455,7 @@ try:
 except:
   CheckOK2(176,2)
 
-if (pygetdata.__numpy_supported__):
-  CheckNumpy(176,n,numpy.array([9,8,176,176,5,4]))
-else:
-  CheckSimple(176,n,[9,8,176,176,5,4])
+CheckNumpy(176,n,numpy.array([9,8,176,176,5,4]))
 
 # 177: gd_carray_len
 try:
@@ -1616,10 +1597,7 @@ except:
   CheckOK2(203,1)
 CheckSimple2(203,0,n,280)
 CheckSimple2(203,1,len(m),8)
-if (pygetdata.__numpy_supported__):
-  CheckNumpy2(203,2,m,numpy.arange(17,25))
-else:
-  CheckSimple2(203,2,m,range(17,25))
+CheckNumpy2(203,2,m,numpy.arange(17,25))
 
 # 204: gd_tell
 try:
@@ -1980,13 +1958,10 @@ except:
   CheckOK(242)
 
 CheckSimple2(242,1,len(n),2)
-if (pygetdata.__numpy_supported__):
-  CheckSimple2(242,2,n[0][0],"mcarray")
-  CheckNumpy2(242,3,n[0][1],1.9 + 0.9 * numpy.arange(0,5))
-  CheckSimple2(242,4,n[1][0],"mnew17")
-  CheckNumpy2(242,5,n[1][1],[0,0])
-else:
-  CheckSimple(242,n,[("mcarray", [1.9, 2.8, 3.7, 4.6, 5.5]), ("mnew17", [0,0])])
+CheckSimple2(242,2,n[0][0],"mcarray")
+CheckNumpy2(242,3,n[0][1],1.9 + 0.9 * numpy.arange(0,5))
+CheckSimple2(242,4,n[1][0],"mnew17")
+CheckNumpy2(242,5,n[1][1],[0,0])
 
 # 271: encoding_support
 n = pygetdata.encoding_support(pygetdata.SIE_ENCODED)
@@ -2004,6 +1979,14 @@ try:
   CheckSimple(272, n, None);
 except:
   CheckOK2(272, 2)
+
+# 274: gd_get_carray_slice (NULL)
+try:
+  n = d.get_carray("carray", pygetdata.NULL, start=2, len=2)
+except:
+  CheckOK(274)
+CheckSimple(274, n, None);
+
 
 
 
@@ -2025,5 +2008,4 @@ os.system("rm -rf dirfile")
 
 if (ne > 0):
   print "ne =", ne
-  print "__numpy_supported__ =", pygetdata.__numpy_supported__
   sys.exit(1)

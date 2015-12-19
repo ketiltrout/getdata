@@ -242,7 +242,7 @@ static ssize_t _GD_StringEscapeise(FILE *stream, const char *in, int meta,
     if (stream)
       if (fputs(in, stream) == EOF)
         goto WRITE_ERR;
-    dreturn("%" PRNsize_t, strlen(in));
+    dreturn("%" PRIuSIZE, strlen(in));
     return strlen(in);
   }
 
@@ -280,7 +280,7 @@ static ssize_t _GD_StringEscapeise(FILE *stream, const char *in, int meta,
     }
   }
 
-  dreturn("%" PRNsize_t, len);
+  dreturn("%" PRIuSIZE, len);
   return len;
 
 WRITE_ERR:
@@ -335,7 +335,7 @@ static ssize_t _GD_WriteFieldCode(DIRFILE *D, FILE *stream, int me,
 
   free(ptr);
 
-  dreturn("%" PRNssize_t, len);
+  dreturn("%" PRIdSIZE, len);
   return len;
 }
 
@@ -345,7 +345,7 @@ static ssize_t _GD_PadField(DIRFILE *D, FILE *stream, int me, const char *in,
 {
   ssize_t i;
 
-  dtrace("%p, %p, %i, \"%s\", %" PRNsize_t ", %i, %i", D, stream, me, in, len,
+  dtrace("%p, %p, %i, \"%s\", %" PRIuSIZE ", %i, %i", D, stream, me, in, len,
       permissive, standards);
 
   i = _GD_WriteFieldCode(D, stream, me, in, 0, permissive, standards, 0);
@@ -357,7 +357,7 @@ static ssize_t _GD_PadField(DIRFILE *D, FILE *stream, int me, const char *in,
         break;
       }
 
-  dreturn("%" PRNssize_t, i);
+  dreturn("%" PRIdSIZE, i);
   return i;
 }
 
@@ -385,7 +385,7 @@ static int _GD_WriteConst(DIRFILE *D, FILE *stream, int me, int permissive,
   } else if (type == GD_UINT64)
     fprintf(stream, "%" PRIu64 "%s", *(uint64_t *)value, postamble);
   else if (type == GD_INT64)
-    fprintf(stream, "%" PRIi64 "%s", *(int64_t *)value, postamble);
+    fprintf(stream, "%" PRId64 "%s", *(int64_t *)value, postamble);
   else if (type == GD_UINT32)
     fprintf(stream, "%" PRIu32 "%s", *(uint32_t *)value, postamble);
   else if (type == GD_INT32)
@@ -420,7 +420,7 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
   char buffer[1000];
   size_t z;
 
-  dtrace("%p, %p, %p, %i, %i, %" PRNsize_t ", %i, %i", D, stream, E, me, meta,
+  dtrace("%p, %p, %p, %i, %i, %" PRIuSIZE ", %i, %i", D, stream, E, me, meta,
       max_len, pretty, permissive);
 
   /* INDEX is implicit, and it is an error to define it in the format file */
@@ -669,7 +669,7 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
           goto WRITE_ERR;
         }
         if (E->EN(scalar,const_type) & GD_SIGNED) {
-          if (fprintf(stream, "%" PRIi64, *(int64_t*)E->e->u.scalar.d) < 0)
+          if (fprintf(stream, "%" PRId64, *(int64_t*)E->e->u.scalar.d) < 0)
             goto WRITE_ERR;
         } else if (E->EN(scalar,const_type) & GD_IEEE754) {
           if (fprintf(stream, "%.15g", *(double*)E->e->u.scalar.d) < 0)
@@ -692,7 +692,7 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
 
         for (z = 0; z < E->EN(scalar,array_len); ++z) {
           if (E->EN(scalar,const_type) & GD_SIGNED)
-            len = sprintf(buffer, " %" PRIi64, ((int64_t*)E->e->u.scalar.d)[z]);
+            len = sprintf(buffer, " %" PRId64, ((int64_t*)E->e->u.scalar.d)[z]);
           else if (E->EN(scalar,const_type) & GD_IEEE754)
             len = sprintf(buffer, " %.15g", ((double*)E->e->u.scalar.d)[z]);
           else if (E->EN(scalar,const_type) & GD_COMPLEX)
@@ -706,7 +706,8 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
           /* don't write lines that are too long
            * also, add one to length for the trailing '\n' */
           if (GD_SSIZE_T_MAX - (len + 1) <= pos) {
-            _GD_SetError(D, GD_E_LINE_TOO_LONG, GD_E_LONG_FLUSH, E->field, 0, NULL);
+            _GD_SetError(D, GD_E_LINE_TOO_LONG, GD_E_LONG_FLUSH, E->field, 0,
+                NULL);
             dreturn("%i", -1);
             return -1;
           }
@@ -896,9 +897,8 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   /* Frame offset */
   if (permissive || D->standards >= 1)
     if (D->fragment[i].frame_offset != 0)
-      if (fprintf(stream, "%sFRAMEOFFSET %llu\n",
-            (D->standards >= 5) ? "/" : "",
-            (unsigned long long)D->fragment[i].frame_offset) < 0)
+      if (fprintf(stream, "%sFRAMEOFFSET %" PRIu64 "\n",
+            (D->standards >= 5) ? "/" : "", D->fragment[i].frame_offset) < 0)
       {
         goto WRITE_ERR;
       }

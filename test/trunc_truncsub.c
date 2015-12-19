@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2013 D. V. Wiebe
+/* Copyright (C) 2008-2013, 2015 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -59,7 +59,8 @@ int main(void)
 
   stat_format = stat(format, &buf);
   CHECKI(stat_format, 0);
-  CHECK((buf.st_size > 0),buf.st_size,"%lli","%s",(long long)buf.st_size,"> 0");
+  CHECK((buf.st_size > 0),buf.st_size,"%" PRId64,"%s",(int64_t)buf.st_size,
+      "> 0");
 
   rmdir_sub = rmdir(subdir);
   CHECKI(rmdir_sub, -1);

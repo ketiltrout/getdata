@@ -73,6 +73,9 @@
 #include <time.h>
 #endif
 
+#ifdef HAVE_CRTDEFS_H
+#include <crtdefs.h>
+#endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -104,27 +107,50 @@
 #include <io.h>
 #endif
 
-/* MSVC types */
-#ifdef _MSC_VER
-#ifdef _WIN64
+#ifndef SIZEOF_SIZE_T
+#define SIZEOF_SIZE_T (sizeof size_t)
+#endif
+
+/* MSCVRT defines ssize_t but not ssize_t */
+#ifdef __MSVCRT__
+#if SIZEOF_SIZE_T == 8
 typedef __int64 ssize_t;
-#define PRNssize_t "li"
-#define PRNsize_t  "lu"
 #else
 typedef int ssize_t;
-#define PRNssize_t "i"
-#define PRNsize_t  "u"
 #endif
-#else
-#define PRNssize_t "zi"
-#define PRNsize_t  "zu"
+#endif
+
+#ifndef SIZEOF_UNSIGNED_LONG_LONG
+#define SIZEOF_UNSIGNED_LONG_LONG 0
+#endif
+
+#if !defined(PRIuSIZE) || !defined(PRIdSIZE)
+# ifdef __MSVCRT__
+#  define GD_PRISIZE_PREFIX "I"
+# elif defined (__GNUC__)
+#  define GD_PRISIZE_PREFIX "z"
+# elif SIZEOF_SIZE_T == SIZEOF_UNSIGNED_LONG
+#  define GD_PRISIZE_PREFIX "l"
+# elif SIZEOF_SIZE_T == SIZEOF_UNSIGNED_LONG_LONG
+#  define GD_PRISIZE_PREFIX "ll"
+# else
+#  define GD_PRISIZE_PREFIX ""
+# endif
+#endif
+
+#ifndef PRIuSIZE
+# define PRIuSIZE GD_PRISIZE_PREFIX "u"
+#endif
+
+#ifndef PRIdSIZE
+# define PRIdSIZE GD_PRISIZE_PREFIX "d"
 #endif
 
 #ifndef HAVE_OFF64_T
 typedef gd_off64_t off64_t;
 #endif
 
-#ifdef _MSC_VER
+#ifdef __MSVCRT__
 /* missing in sys/stat.h */
 #define S_ISREG(m)  (((m) & _S_IFMT) == _S_IFREG)
 #define S_ISDIR(m) (((m) & _S_IFMT) == _S_IFDIR)
@@ -287,13 +313,13 @@ double cimag(double complex z);
 #define GD_UINT_TYPE ((gd_type_t)(SIZEOF_UNSIGNED_INT))
 
 /* a few integer limits */
-#ifndef SIZEOF_SIZE_T
-#define SIZEOF_SIZE_T (sizeof(size_t))
-#endif
-
 #define GD_INT64_MAX ((int64_t)((uint64_t)-1>>1))
 #define GD_SSIZE_T_MAX ((ssize_t)((size_t)-1>>1))
 #define GD_SIZE_T_MAX ((size_t)-1)
+
+/* Maximum samples in getdata and putdata */
+#define GD_TRANSACTION_MAX(t) \
+  (GD_SIZE(t) ? (GD_SSIZE_T_MAX / GD_SIZE(t)) : GD_SSIZE_T_MAX)
 
 /* default buffer size */
 #if SIZEOF_INT < 4
