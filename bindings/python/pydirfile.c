@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2015 D. V. Wiebe
+/* Copyright (C) 2009-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -376,7 +376,8 @@ static PyObject *gdpy_dirfile_getcarray(struct gdpy_dirfile_t *self,
   char *keywords[] = {"field_code", "return_type", "start", "len", "as_list",
     NULL};
   const char *field_code;
-  unsigned int start = 0, len = 0;
+  unsigned int start = 0;
+  size_t len = 0;
   int as_list = 0;
   gd_type_t return_type;
   PyObject *return_type_obj = NULL;
@@ -632,7 +633,7 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
   PY_LONG_LONG first_frame = 0, first_sample = 0;
   PyObject *num_frames_obj = NULL, *num_samples_obj = NULL;
   PyObject *return_type_obj = NULL;
-  long int num_frames = 0, num_samples = 0;
+  PY_LONG_LONG num_frames = 0, num_samples = 0;
   size_t ns;
   int as_list = 0, read_to_end = 0;
   gd_type_t return_type = GD_NULL;
@@ -734,7 +735,7 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
       pyobj = PyArray_SimpleNew(1, dims, gdpy_npytype_from_type(return_type));
       data = PyArray_DATA(pyobj);
     } else
-      data = malloc(num_samples * GD_SIZE(return_type));
+      data = malloc((size_t)num_samples * GD_SIZE(return_type));
 
     ns = gd_getdata64(self->D, field_code, first_frame, first_sample, 0,
         (size_t)num_samples, return_type, data);
@@ -1811,7 +1812,8 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
 {
   char *keywords[] = { "field_code", "data", "type", "start", NULL };
   const char *field_code;
-  unsigned int start = 0, len;
+  unsigned int start = 0;
+  size_t len;
   gd_type_t type = GD_UNKNOWN;
   PyObject *pyobj;
   int have_ndarray = 0;
@@ -1834,7 +1836,7 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
       return NULL;
     }
     have_ndarray = 1;
-    len = PyArray_DIM(pyobj, 0);
+    len = (size_t)PyArray_DIM(pyobj, 0);
   } else {
     if (!PyList_Check(pyobj)) {
       PyErr_SetString(PyExc_TypeError,

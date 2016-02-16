@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2015 D. V. Wiebe
+/* Copyright (C) 2011-2016 D. V. Wiebe
  *
  **************************************************************************
  *
@@ -1544,6 +1544,7 @@ entry(dirfile, field_code)
           break;
         case GD_INDEX_ENTRY:
         case GD_STRING_ENTRY:
+        case GD_ALIAS_ENTRY: /* avoid compiler warnings */
         case GD_NO_ENTRY:
           break;
       }

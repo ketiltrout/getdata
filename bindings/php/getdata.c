@@ -3356,8 +3356,6 @@ PHP_FUNCTION(gd_getdata)
 
     GDPHP_CHECK_ERROR(D);
 
-    gdphp_from_data(return_value, n, data_type, data, 0, unpack);
-
     dreturn("%" PRIuSIZE, n);
     RETURN_LONG(n);
   } else {

@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2015 D. V. Wiebe
+/* Copyright (C) 2009-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -158,7 +158,8 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
   PyObject *parm2;
   PyObject *parm3;
   PyObject *obj;
-  int i, count, size, min;
+  int i, count, min;
+  long size;
 
   dtrace("%p, %p, \"%s\"", E, tuple, name);
 
@@ -204,7 +205,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
   size = PyTuple_Size(tuple);
   if (size < min) {
     PyErr_Format(PyExc_TypeError, "'pygetdata.entry' "
-        "%s: needed %d entry parameters, but got only %d",
+        "%s: needed %d entry parameters, but got only %" PRIdSIZE,
         name, min, size);
     dreturnvoid();
     return;
@@ -234,7 +235,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
         return;
       }
 
-      count = E->EN(lincom,n_fields) = PyTuple_Size(parm1);
+      count = E->EN(lincom,n_fields) = (int)PyTuple_Size(parm1);
       if (count > GD_MAX_LINCOM)
         count = GD_MAX_LINCOM;
 
@@ -386,7 +387,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
         return;
       }
 
-      E->EN(polynom,poly_ord) = count = PyTuple_Size(parm2) - 1;
+      E->EN(polynom,poly_ord) = count = (int)PyTuple_Size(parm2) - 1;
       if (count > GD_MAX_POLYORD)
         count = GD_MAX_POLYORD;
 
@@ -1006,7 +1007,7 @@ static PyObject *gdpy_entry_getdatatype(struct gdpy_entry_t *self,
 static int gdpy_entry_setdatatype(struct gdpy_entry_t *self, PyObject *value,
     void *closure)
 {
-  int t;
+  long t;
 
   dtrace("%p, %p, %p", self, value, closure);
 
@@ -2101,7 +2102,7 @@ static PyObject *gdpy_entry_getwindop(struct gdpy_entry_t *self, void *closure)
 static int gdpy_entry_setwindop(struct gdpy_entry_t *self, PyObject *value,
     void *closure)
 {
-  int t;
+  long t;
 
   dtrace("%p, %p, %p", self, value, closure);
 

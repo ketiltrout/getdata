@@ -1,4 +1,4 @@
-# Copyright (C) 2011, 2012, 2013, 2015 D. V. Wiebe
+# Copyright (C) 2011, 2012, 2013, 2015, 2016 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -39,6 +39,12 @@ nodist_perl_SCRIPTS=${blibdir}/lib/GetData.pm
 perlautogetdatadir=${perldir}/auto/GetData
 nodist_perlautogetdata_SCRIPTS=${blibdir}/arch/auto/GetData/GetData.so
 
+src/Makefile.PL: src/Makefile.PL.in $(top_builddir)/config.status
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
+
+# build.stamp creates the build/ arena for the build.  Makefile.PL (above)
+# is a built file in the src directory.  As a result, in a VPATH build it won't
+# be in $(srcdir)/src but in ./src, hence the special Makefile.PL line.
 build/build.stamp: src/Makefile.PL src/GetData.xs src/typemap
 	rm -rf build
 	mkdir build
@@ -46,23 +52,21 @@ build/build.stamp: src/Makefile.PL src/GetData.xs src/typemap
 	[ -e build/Makefile.PL ] || cp src/Makefile.PL build
 	mkdir build/lib
 	touch $@
-	${MAKE} build/test.stamp
 
+# this enssures that the test files are present and up-to-date
 build/test.stamp: build/build.stamp ${plTESTS}
 	[ -e build/t ] || mkdir build/t
 	cp -r $(srcdir)/t/* build/t
 	touch $@
 
-src/Makefile.PL: src/Makefile.PL.in $(top_builddir)/config.status
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
-
 build/simple_funcs.xs: simple_funcs.xsin simple_funcs.pl build/build.stamp
 	$(PERL) $(srcdir)/simple_funcs.pl $(srcdir)/simple_funcs.xsin > $@
 
-build/Makefile: build/build.stamp build/lib/GetData.pm
+build/Makefile: build/build.stamp build/test.stamp build/lib/GetData.pm
 	cd build && ${PERL} Makefile.PL
+	mv $@ $@.tmp
 	$(SED) 's|^LD_RUN_PATH|#LD_RUN_PATH|g;s|LD_RUN_PATH="$$(LD_RUN_PATH)" ||g' \
-		-i $@
+		$@.tmp > $@
 
 make_parameters.sed: ../make_parameters ../../src/getdata.h
 	  ../make_parameters P > $@
@@ -78,6 +82,8 @@ build/lib/GetData.pm: GetData.pm.in make_parameters.sed funclist.pl \
 		build/simple_funcs.xs > $@
 	chmod a-w $@
 
+# The make.stamp rule here is to avoid running this recipe separately
+# for each target
 ${blibdir}/arch/auto/GetData/GetData.so ${blibdir}/lib/GetData.pm \
 	${blibdir}/man3/GetData.$(PERL_MAN3EXT): build/make.stamp
 	

@@ -2,7 +2,7 @@ New in version 0.9.1a:
   
   Library Changes:
 
-  * Functions returning field lists (gd_entry_list(), &c.) or bulk scalar
+  * Functions returning entry lists (gd_entry_list(), &c.) or bulk scalar
     field data (gd_constants(), gd_carrays(), &c.) no longer run through
     the entry list twice, resulting in noticable speed improvements when
     operating on large dirfiles.
@@ -23,7 +23,7 @@ New in version 0.9.1a:
 
   * BUG FIX: gd_seek() and gd_tell() now always return -1 on error.
     Previously, they would return zero for some errors; they always
-    still set correctly set the dirfile error.
+    still correctly set the dirfile error.
 
   * BUG FIX: Several memory or other resource leaks triggered by error
     returns have been fixed.
@@ -197,7 +197,7 @@ New in verison 0.9.0:
     is now interpreted as a simple field code (which may be rejected later
     due to the presence of the invalid '<' character).
 
-  * BUG FIX: The parser no-longer interprets various numbers as field codes
+  * BUG FIX: The parser no longer interprets various numbers as field codes
     when it shouldn't (e.g. when specifying a PHASE shift as "1." instead
     of "1").
 
@@ -320,8 +320,8 @@ New in verison 0.9.0:
     which zero is the only allowed value for the parameter.
 
   * F77 and F95: The bindings no longer raise SIGABRT when the dirfile
-    space is exhausted.  Instead they simply return a invalid dirfile unit
-    number.
+    space is exhausted.  Instead they simply return a dirfile unit number
+    referenceing a static, invalid dirfile.
 
   * F77: Functions to add fields with named scalar parameters have been
     added (GDASBT GDASCL GDASCP GDASCR GDASLC GDASMX GDASPH GDASPN GDASRC

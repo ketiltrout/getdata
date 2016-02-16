@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2015 D. V. Wiebe
+/* Copyright (C) 2009-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -286,7 +286,7 @@ static int gdpy_fragment_setprotection(struct gdpy_fragment_t *self,
 
   dtrace("%p, %p, %p", self, value, closure);
 
-  p = PyInt_AsLong(value);
+  p = (int)PyInt_AsLong(value);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);

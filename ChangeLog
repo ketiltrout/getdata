@@ -1,3 +1,15 @@
+2016-01-17   D. V. Wiebe <getdata@ketiltrout.net> svn:1035
+	* bindings/perl/Makefile.am: Remove gnuism.
+
+	* bindings/php/getdata.c (gd_getdata): Don't call gdphp_from_data with
+	GD_NULL.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getcarray gdpy_dirfile_getdata
+	gdpy_dirfile_putcarray) bindings/python/pyentry.c (gdpy_set_entry_from_tuple
+	gdpy_entry_getdatatype gdpy_entry_getwindop) bindings/python/pyfragment.c
+	(gdpy_fragment_setprotection) bindings/python/pygetdata.c
+	(gdpy_convert_from_pylist): Fix data types and conversions.
+
 2015-12-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1033,1034
 	* src/ascii.c (_GD_ScanFormat): Don't strcpy, just return the string.
 	* src/ascii.c (_GD_AsciiWrite): Merge duplicate code into WRITE_ASCII and

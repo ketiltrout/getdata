@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2015 D. V. Wiebe
+/* Copyright (C) 2009-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -242,9 +242,9 @@ gd_type_t gdpy_convert_from_pylist(PyObject *value, void *data, gd_type_t type,
   switch(data_type) {
     case GDPY_INT_AS_LONG:
       type = GD_INT32;
-      *(int32_t*)data = tmp.s;
+      *(int32_t*)data = (int32_t)tmp.s;
       for (i = 1; i < ns; ++i)
-        ((int32_t*)data)[i] = PyInt_AsLong(PyList_GetItem(value, i));
+        ((int32_t*)data)[i] = (int32_t)PyInt_AsLong(PyList_GetItem(value, i));
       break;
     case GDPY_LONG_AS_ULL: 
       type = GD_UINT64;
