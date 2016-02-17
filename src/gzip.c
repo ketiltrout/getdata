@@ -145,7 +145,7 @@ ssize_t _GD_GzipWrite(struct gd_raw_file_ *file, const void *ptr,
 
   n = gzwrite((gzFile)file->edata, ptr, GD_SIZE(data_type) * nmemb);
 
-  if (n >= 0) {
+  if (n > 0) {
     n /= GD_SIZE(data_type);
     file->pos += n;
   } else {

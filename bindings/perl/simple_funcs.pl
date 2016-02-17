@@ -68,7 +68,7 @@ sub printfmt {
   } elsif ($_ eq "gd_entype_t") {
     return "0x%02X";
   } elsif ($_ eq "gd_shift_t" or $_ eq "gdp_shift_t") {
-    return "% \" PRId64 \"";
+    return "%\" PRId64 \"";
   } elsif ($_ eq "gdp_uint_t") {
     return "%u";
   } elsif ($_ eq "gd_type_t" or $_ eq "gdp_type_t") {
@@ -76,9 +76,9 @@ sub printfmt {
   } elsif ($_ eq "int" or $_ eq "gdp_int") {
     return "%i";
   } elsif ($_ eq "gd_off64_t") {
-    return "% \" PRId64 \"";
+    return "%\" PRId64 \"";
   } elsif ($_ eq "size_t") {
-    return "% \" PRIuSIZE \"";
+    return "%\" PRIuSIZE \"";
   } elsif ($_ eq "unsigned int") {
     return "%u";
   } elsif ($_ eq "unsigned long int") {

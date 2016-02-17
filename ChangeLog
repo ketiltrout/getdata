@@ -1,3 +1,17 @@
+2016-02-17   D. V. Wiebe <getdata@ketiltrout.net> svn:1037
+	* src/gzip.c (_GD_GzipWrite): A return value of zero from gzwrite indicates
+	error.
+
+	* configure.ac: Added --disable-large-tests.  Define NO_LARGE_TESTS if
+	given.
+	* test/gzip_put_off.c test/gzip_seek_put.c: Skip if NO_LARGE_TESTS defined.
+
+	* configure.ac: Call both AC_TYPE_UNSIGNED_LONG_LONG_INT and
+	AC_TYPE_LONG_LONG_INT.
+
+	* bindings/perl/simple_funcs.pl (printfmt): Fix format codes for gd_shift_t,
+	gdp_shift_t, gd_off64_t, size_t.
+
 2016-02-17   D. V. Wiebe <getdata@ketiltrout.net> svn:1036
 	* bindings/idl/package/configure.ac bindings/matlab/package/configure.ac:
 	Update to match changes in ./configure.ac.  Remove cruft.

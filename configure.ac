@@ -147,6 +147,24 @@ AC_ARG_ENABLE(ansi-c, AS_HELP_STRING([--enable-ansi-c],
 AC_MSG_CHECKING([whether to build in ANSI C compliance mode])
 AC_MSG_RESULT([$disable_c99])
 
+dnl large tests
+AC_ARG_ENABLE([large-tests], AS_HELP_STRING([--disable-large-tests],
+              [don't run tests that write large amounts of temporary ]dnl'
+              [data (>1MB)]),
+              [
+               if test "x${enableval}" = "xno"; then
+                 run_large_tests="no";
+               else
+                 run_large_tests="yes";
+               fi
+              ], [run_large_tests="yes"])
+AC_MSG_CHECKING([whether to run large tests])
+AC_MSG_RESULT([$run_large_tests])
+if test "x$run_large_tests" = "xno"; then
+  AC_DEFINE([NO_LARGE_TESTS], [1], [ Define to 1 to disable tests that ]
+  [write large quantities (>1MB) of temporary data.])
+fi
+
 dnl bindings, globally
 make_cxxbindings="yes"
 make_f77bindings="yes"
@@ -680,8 +698,6 @@ if test "x$disable_c99" = "xno"; then
 AC_CHECK_TYPES([_Complex float, _Complex double])
 fi
 
-AC_TYPE_LONG_LONG_INT
-
 AC_TYPE_INT8_T
 AC_TYPE_INT16_T
 AC_TYPE_INT32_T
@@ -696,6 +712,9 @@ AC_TYPE_UINT8_T
 AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
 AC_TYPE_UINT64_T
+
+AC_TYPE_UNSIGNED_LONG_LONG_INT
+AC_TYPE_LONG_LONG_INT
 
 dnl integer sizes
 AC_CHECK_SIZEOF([off_t])
