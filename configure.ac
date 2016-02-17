@@ -1128,7 +1128,6 @@ AM_CONDITIONAL(HAVE_DIFF, [test "x$DIFF" != "x"])
 AM_CONDITIONAL(USE_ZZSLIM, [test "x$use_zzslim" = "xyes"])
 AM_CONDITIONAL(GD_EXTERNAL, [false])
 
-
 dnl we do this here to avoid screwing up other tests
 LDFLAGS="${LDFLAGS}${NO_UNDEFINED}"
 

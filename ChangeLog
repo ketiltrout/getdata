@@ -1,3 +1,7 @@
+2016-02-17   D. V. Wiebe <getdata@ketiltrout.net> svn:1036
+	* bindings/idl/package/configure.ac bindings/matlab/package/configure.ac:
+	Update to match changes in ./configure.ac.  Remove cruft.
+
 2016-01-17   D. V. Wiebe <getdata@ketiltrout.net> svn:1035
 	* bindings/perl/Makefile.am: Remove gnuism.
 

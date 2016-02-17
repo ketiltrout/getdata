@@ -1,6 +1,6 @@
 dnl Copyright (C) 2008-2015 D. V. Wiebe
 dnl
-dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
+dnllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
 dnl This file is part of the GetData project.
 dnl
@@ -22,7 +22,17 @@ dnl
 m4_include([m4/version.m4])
 
 AC_INIT([MATLAB_GetData],[getdata_version],
-        [getdata-devel@lists.sourceforge.net])
+        [getdata-devel@lists.sourceforge.net],,
+        [http://getdata.sourceforge.net/])
+
+AC_COPYRIGHT(
+[Parts of this program are copyright (C) 2008-2015 D. V. Wiebe.
+
+These parts may be redistributed and/or modified under the terms of the GNU
+Lesser General Public License as published by the Free Software Foundation;
+either version 2.1 of the License, or (at your option) any later version.
+See the file COPYING for details.]
+)
 
 AC_DEFINE([GETDATA_MAJOR], [getdata_major], [ The major version number ])
 AC_DEFINE([GETDATA_MINOR], [getdata_minor], [ The minor version number ])
@@ -37,7 +47,8 @@ AC_CONFIG_MACRO_DIR([m4])
 LT_PREREQ([2.2.7b])
 
 AC_ARG_VAR([BUILDCC],
-           [C compiler command on the build system (only needed if cross-compiling)])
+           [C compiler command targetting the build system ]
+           [(only needed if cross-compiling)])
 
 AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_SRCDIR([src/matlab.c])
@@ -48,14 +59,8 @@ echo "*** Checking GetData configuration"
 echo
 
 dnl Build/Host triplets
+AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
-
-dnl DL library path munging for test suite
-case "${host}" in
-  *-apple-darwin*) DL_LIBRARY_PATH="DYLD_LIBRARY_PATH" ;;
-  *) DL_LIBRARY_PATH="LD_LIBRARY_PATH" ;;
-esac
-AC_SUBST([DL_LIBRARY_PATH])
 
 dnl Programs
 echo
@@ -71,11 +76,43 @@ AC_ARG_VAR([DATE], \
            [a date program which supports '+%...' conversion specifiers])
 AC_CHECK_PROGS([DATE], [date], [not found])
 
-AC_ARG_VAR([DIFF], [a POSIX-compatible diff])
-AC_CHECK_PROGS([DIFF], [diff], [])
-
 AC_ARG_VAR([PRINTF], [a POSIX-compatible printf])
 AC_CHECK_PROGS([PRINTF], [printf], [not found])
+
+echo
+echo "*** Checking host environment"
+echo
+
+AC_MSG_CHECKING([for extra LDFLAGS needed on ${host}])
+case "${host}" in
+  *-pc-mingw*)
+  NO_UNDEFINED=" -no-undefined"
+  NO_DLOPEN_TESTS=1 ;;
+  *-*-cygwin*)
+  NO_UNDEFINED=" -no-undefined -enable-auto-import"
+  NO_DLOPEN_TESTS=1 ;;
+  *) NO_DLOPEN_TESTS=0 ;;
+esac
+
+if test "x${NO_UNDEFINED}" = "x"; then
+  AC_MSG_RESULT([none needed])
+else
+  AC_MSG_RESULT([${NO_UNDEFINED}])
+fi
+
+AC_MSG_CHECKING([whether the test suite can dynamically load objects])
+if test "x${NO_DLOPEN_TESTS}" = "x1"; then
+  AC_MSG_RESULT([no])
+else
+  AC_MSG_RESULT([yes])
+fi
+
+dnl DL library path munging for test suite
+case "${host}" in
+  *-apple-darwin*) DL_LIBRARY_PATH="DYLD_LIBRARY_PATH" ;;
+  *) DL_LIBRARY_PATH="LD_LIBRARY_PATH" ;;
+esac
+AC_SUBST([DL_LIBRARY_PATH])
 
 echo
 echo "*** Checking C compiler characteristics"
@@ -99,7 +136,9 @@ if test "x${cross_compiling}" != "xno"; then
     AC_CHECK_PROGS([BUILDCC], [gcc cc cl])
   fi
 else
-  BUILDCC=$CC
+  if test -z "$BUILDCC"; then
+    BUILDCC=$CC
+  fi
   AC_SUBST([BUILDCC])
 fi
 
@@ -108,22 +147,14 @@ echo "*** Building libtool"
 echo
 LT_INIT([dlopen])
 AC_SUBST([LIBTOOL_DEPS])
-
-case "${host}" in
-  *-pc-mingw*|*-pc-cygwin*)
-  NO_UNDEFINED=" -no-undefined --enable-auto-import";
-  NO_DLOPEN_TESTS=1 ;;
-  *) NO_DLOPEN_TESTS=0 ;;
-esac
-
 LT_OUTPUT
 
 dnl compiler checks
 echo
 echo "*** Checking additional compiler characteristics"
 echo
-AC_DEFINE([GD_EXTERNAL], [1], [ Define to 1 if building the GetData bindings outside the GetData source tree ])
-AC_SYS_LARGEFILE
+AC_DEFINE([GD_EXTERNAL], [1], [ Define to 1 if building the MATLAB GetData ]
+          [bindings outside the GetData source tree ])
 AC_C_INLINE
 GD_PROG_CC_WALL
 
@@ -138,15 +169,15 @@ echo
 echo "*** Checking data types"
 echo
 AC_C_CONST
-AC_TYPE_UINT8_T
 AC_TYPE_INT8_T
-AC_TYPE_UINT16_T
 AC_TYPE_INT16_T
-AC_TYPE_UINT32_T
 AC_TYPE_INT32_T
-AC_TYPE_UINT64_T
 AC_TYPE_INT64_T
 AC_CHECK_TYPES([off64_t])
+AC_TYPE_UINT8_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
+AC_TYPE_UINT64_T
 AC_CHECK_SIZEOF([void *])
 
 dnl matlab
@@ -155,7 +186,7 @@ echo "*** Configuring MATLAB bindings"
 echo
 GD_MATLAB
 if test "x$have_matlab" = "xno"; then
-  AC_ERROR([Couldn't find a useable MATLAB!])
+  AC_ERROR([Couldn't find a useable MATLAB!]);dnl'
 fi
 
 dnl output
@@ -169,12 +200,7 @@ AC_CONFIG_FILES([src/test/Makefile])
 
 dnl Automake conditionals
 AM_CONDITIONAL(GETDATA_DEBUG, [false])
-AM_CONDITIONAL(INTEL_F77_COMPILER,
-               [test "x$gd_cv_f77_compiler_intel" == "xyes"])
-AM_CONDITIONAL(INTEL_FC_COMPILER, [test "x$gd_cv_fc_compiler_intel" == "xyes"])
-AM_CONDITIONAL(LFS_TRANSITIONAL_API, [test "x$gd_cv_type_off64_t" = "xyes"])
 AM_CONDITIONAL(TEST_MATLAB, [test "x$NO_DLOPEN_TESTS" = "x0"])
-AM_CONDITIONAL(HAVE_DIFF, [test "x$DIFF" != "x"])
 AM_CONDITIONAL(GD_EXTERNAL, [true])
 
 dnl we do this here to avoid screwing up other tests
