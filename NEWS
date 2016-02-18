@@ -1,4 +1,4 @@
-New in version 0.9.1a:
+New in version 0.9.1:
   
   Library Changes:
 
@@ -27,6 +27,10 @@ New in version 0.9.1a:
 
   * BUG FIX: Several memory or other resource leaks triggered by error
     returns have been fixed.
+
+  * BUG FIX: GetData no longer ignores errors reported by zlib when
+    writing to gzipped data files.  In the past, this could, in some
+    cases, cause GetData to wegde.
 
   API Changes:
 
@@ -105,6 +109,9 @@ New in version 0.9.1a:
     core in Perl 5.22.  ExtUtils::MakeMaker is still a core module.  The
     bindings are unchanged; the change in build prerequisites is the only
     difference users should notice due to this switch.
+
+  * A new configure option, --disable-large-tests, will cause the test
+    suite to skip running tests that write large amounts (>~10MB) of data.
 
 |=========================================================================|
 

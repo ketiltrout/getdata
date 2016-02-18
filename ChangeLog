@@ -1,3 +1,6 @@
+2016-02-18   D. V. Wiebe <getdata@ketiltrout.net> svn:1038
+	GetData-0.9.1 released.
+
 2016-02-17   D. V. Wiebe <getdata@ketiltrout.net> svn:1037
 	* src/gzip.c (_GD_GzipWrite): A return value of zero from gzwrite indicates
 	error.
