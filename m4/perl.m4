@@ -1,4 +1,4 @@
-dnl Copyright (C) 2011-2013 D. V. Wiebe
+dnl Copyright (C) 2011-2013, 2015, 2016 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -178,11 +178,11 @@ if test "x${have_perl}" != "xno"; then
     GD_PERL_CONFIG([perlmandir], [siteman3direxp])
   elif test $perl_inst_type != "vendor"; then
     perldir="${local_perl_path}"
-    perlmandir="${man3dir}"
+    perlmandir="UNKNOWN"
   fi
 
   if test $perlmandir = "UNKNOWN"; then
-    perlmandir="${mandir}"
+    perlmandir="${mandir}/man3"
   fi
 
   AC_SUBST([perldir])

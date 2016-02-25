@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2015, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -71,6 +71,8 @@ int main(void)
     else
       CHECKFi(i, d[i], 1.234 * (i - 10));
   }
+
+  gd_discard(D);
 
   unlink(data);
   unlink(format);

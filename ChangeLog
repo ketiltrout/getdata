@@ -1,3 +1,17 @@
+2016-02-24   D. V. Wiebe <getdata@ketiltrout.net> svn:1041
+	* m4/perl.m4: Fix perlmandir when user specifies --with-perl-dir=
+
+	* src/flac.c (_GD_FlacSize): Close the file after reading it.
+
+	* test/flac_put_big.c test/flac_put_float64.c test/flac_put_little.c
+	test/flac_put_complex128.c test/flac_put_int32.c: Call gd_discard at the end.
+
+	* test/lzma_put.c: Fix Dirfile creation.
+
+	* src/field_list.c (_GD_EntryList): Fix fencepost error in realloc check.
+
+	* man/gd_getdata.3 man/gd_putdata.3: Mention the 2**63 sample limit.
+
 2016-02-18   D. V. Wiebe <getdata@ketiltrout.net> svn:1038
 	GetData-0.9.1 released.
 

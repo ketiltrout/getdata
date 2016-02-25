@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2015, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -75,6 +75,8 @@ int main(void)
   CHECKI(n, 0);
   CHECKI(stat_data, -1);
 #endif
+
+  gd_discard(D);
 
 #ifdef USE_FLAC
   snprintf(command, 4096, "%s --silent --decode --delete-input-file "

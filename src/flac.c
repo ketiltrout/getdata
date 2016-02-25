@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2015, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -493,6 +493,8 @@ off64_t _GD_FlacSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 
   n = FLAC__stream_decoder_get_total_samples(gdfl->codec.d);
 
+  FLAC__stream_decoder_finish(gdfl->codec.d);
+  FLAC__stream_decoder_delete(gdfl->codec.d);
   free(gdfl);
 
   dreturn("%" PRId64, (int64_t)n);

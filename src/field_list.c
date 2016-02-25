@@ -212,7 +212,7 @@ static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
   }
 
   for (i = n = 0; i < nentries; ++i) {
-    if (n == len) {
+    if (n == len - 1) { /* leave space for the terminating NULL */
       void *ptr = _GD_Realloc(D, el, sizeof(*el) * (len *= 2));
       if (ptr == NULL) {
         free(el);
