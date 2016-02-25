@@ -5,3 +5,17 @@
    fun:fillin_rpath
    fun:_dl_init_paths
 }
+{
+  zlib_deflate
+  Memcheck:Cond
+  fun:deflate
+  ...
+  fun:gzclose*
+}
+{
+  liblzma_lzma_stream_encoder
+  Memcheck:Cond
+  ...
+  fun:lzma_stream_encoder
+  fun:lzma_easy_encoder
+}
