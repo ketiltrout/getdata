@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2015 D. V. Wiebe
+/* Copyright (C) 2008-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -688,7 +688,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (j & GD_AS_ERROR)
         break;
       if (j & GD_AS_FREE_SCALAR)
-        scalar_free |= 2;
+        scalar_free |= 1;
       if (j & GD_AS_NEED_RECALC)
         Q.flags &= ~GD_EN_CALC;
       if (j & GD_AS_MODIFIED)

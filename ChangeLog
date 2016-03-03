@@ -1,3 +1,8 @@
+2016-03-02   D. V. Wiebe <getdata@ketiltrout.net> svn:1043
+	* src/mod.c (_GD_Change): Free the correct scalar for PHASE entries.
+
+	* bindings/cxx/test/big_test.cpp: Delete test 272's Dirfile object.
+
 2016-03-01   D. V. Wiebe <getdata@ketiltrout.net> svn:1042
 	* src/flush.c (_GD_FlushFragment): Don't double fclose on ferror.
 

@@ -1768,7 +1768,7 @@ void run_tests(void)
   CHECK_OK2(272, 2);
   CHECK_NULL(272, rep);
 
-  id->Discard();
+  delete id;
 
 
 
