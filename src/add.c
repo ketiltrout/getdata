@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2015 D. V. Wiebe
+/* Copyright (C) 2008-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1338,6 +1338,7 @@ int gd_add_string(DIRFILE* D, const char* field_code, const char* value,
     return -1;
   }
 
+  free(entry->e->u.string);
   entry->e->u.string = ptr;
   dreturn("%i", 0);
   return 0;
@@ -1959,6 +1960,7 @@ int gd_madd_string(DIRFILE* D, const char* parent,
     return -1;
   }
 
+  free(entry->e->u.string);
   entry->e->u.string = ptr;
   dreturn("%i", 0);
   return 0;

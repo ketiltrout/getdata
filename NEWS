@@ -8,6 +8,14 @@ New in version 0.9.2a:
   * BUG FIX: A segfault in gd_entry_list() introduced in 0.9.1 has been fixed.
     Reported by Christian Trippe.
 
+  * BUG FIX: A descriptor leak on error has been plugged in gd_desync().
+
+  * BUG FIX: A segfault triggered by encountering an I/O error while writing
+    metadata has been fixed.
+
+  * BUG FIX: Memory leaks in the FLAC and ZZIP encodings, plus single-byte
+    leaks in gd_add_string() and gd_madd_string() have been plugged.
+
 New in version 0.9.1:
   
   Library Changes:

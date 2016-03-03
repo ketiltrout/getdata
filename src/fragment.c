@@ -1,4 +1,4 @@
-/* Copyright (C) 2008, 2010, 2011, 2012, 2014, 2015 D. V. Wiebe
+/* Copyright (C) 2008, 2010, 2011, 2012, 2014, 2015, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -397,6 +397,8 @@ int gd_desync(DIRFILE *D, unsigned int flags)
     D->name = NULL; /* so FreeD doesn't delete it */
     if (_GD_ShutdownDirfile(D, 0, 1)) {
       D->name = name;
+      if (dirfd >= 0)
+        close(dirfd);
       dreturn("%i", -1);
       return -1;
     }

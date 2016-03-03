@@ -469,6 +469,7 @@ int _GD_FlacClose(struct gd_raw_file_ *file)
     FLAC__stream_encoder_delete(gdfl->codec.e);
   }
 
+  free(gdfl->data);
   file->idata = -1;
   file->mode = 0;
   free(file->edata);

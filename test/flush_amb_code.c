@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -68,6 +68,7 @@ int main(void)
 
   for (i = 0; i < 6; ++i)
     CHECKSi(i, E.scalar[i], code[i]);
+  gd_free_entry_strings(&E);
 
   gd_discard(D);
 

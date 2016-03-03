@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -49,6 +49,7 @@ int main(void)
 
   gd_entry(D, "data", &E);
   CHECKS(E.scalar[0], "scalar<3");
+  gd_free_entry_strings(&E);
 
   gd_discard(D);
 

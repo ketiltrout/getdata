@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2012, 2013, 2015 D. V. Wiebe
+/* Copyright (C) 2011, 2012, 2013, 2015, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -233,6 +233,7 @@ off64_t _GD_ZzipSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 
   zzip_file_close(gdzz->file);
   zzip_dir_close(gdzz->dir);
+  free(gdzz);
 
   dreturn("%" PRId64, (int64_t)size);
   return size;

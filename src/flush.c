@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2015 D. V. Wiebe
+/* Copyright (C) 2008-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1043,7 +1043,6 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
 WRITE_ERR:
     if (!D->error)
       _GD_SetError(D, GD_E_IO, GD_E_IO_WRITE, NULL, 0, NULL);
-    fclose(stream);
   }
 
   if (fclose(stream) == EOF) {

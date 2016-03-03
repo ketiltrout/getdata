@@ -1,3 +1,14 @@
+2016-03-01   D. V. Wiebe <getdata@ketiltrout.net> svn:1042
+	* src/flush.c (_GD_FlushFragment): Don't double fclose on ferror.
+
+	* src/fragment.c (gd_desync): close dup'd dirfd on error.
+
+	* src/add.c (gd_add_string gd_madd_string): free the empty string created
+	by _GD_Add.
+	* src/flac.c (_GD_FlacClose): Free gdfl->data.
+	* src/zzip.c (_GD_ZzipSize): Free gdzz.
+	* test/flush_amb_code.c test/parse_scalar2.c: Call gd_free_entry_strings.
+
 2016-02-24   D. V. Wiebe <getdata@ketiltrout.net> svn:1041
 	* m4/perl.m4: Fix perlmandir when user specifies --with-perl-dir=
 
