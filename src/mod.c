@@ -25,103 +25,161 @@ static unsigned int gd_max_(unsigned int A, unsigned int B)
   return (A > B) ? A : B;
 }
 
-#define GD_AS_FREE_SCALAR 1
-#define GD_AS_NEED_RECALC 2
-#define GD_AS_ERROR       4
-#define GD_AS_MODIFIED    8
-/* inputs:
- *  sin - old scalar name ( == NULL means remove; == "" means keep as-is )
- *  iin - old scalar index
- *  lin - old literal value
+#define GD_AS_FREE_SCALAR 1 /* Free the old scalar */
+#define GD_AS_NEED_RECALC 2 /* Updated entry needs re-calculation */
+#define GD_AS_ERROR       4 /* Error occurred */
+#define GD_AS_MODIFIED    8 /* Updated entry has been modified */
+/* _GD_AlterScalar: modify an entry scalar that can take a field code.
  *
- * outputs:
- *  sout - new scalar name
- *  iout - new scalar index
- *  lout - new literal value
+ * There's two types of things to consider here:
+ * - the literal (numeric) parameter (e.g. E->shfit for PHASE)
+ * - the scalar field code (if any) (i.e. E->scalar and E->scalar_ind)
  *
- *  sin sout alit
- * 0a N    N0   0     -> do nothing         ()
- * 1  N    N0   1     -> set lout           ()
- * 2  Na   a    01    -> set sout           (free scalar; need recalc)
- * 3  a    N    0     -> recalc, set sout   (free scalar)
- * 4  a    N    1     -> set sout, set lout (free scalar)
- * 0b a    0    01    -> do nothing         ()
+ * There are bits and pieces of two entry objects here:
+ * - Q: the entry object we're updating.  It started off as a copy of the
+ *      old entry (E) and it's a mess
+ * - N: the entry object containing the update request (from the caller)
+ *      which may contain some special "keep-as-is" values
+ *
+ * Parameters:
+ *  sN - scalar name in N (NULL means remove; "" means keep as-is)
+ *  iN - scalar index in N
+ *  lN - literal value in N
+ *
+ *  sQ - scalar name in Q
+ *  iQ - scalar index in Q
+ *  lQ - literal value in Q
+ *
+ *  calculated: whether E was calculated (GD_EN_CALCULATED) before _GD_Change
+ *              was called.
+ *
+ *  alter_literal: boolean; true if lN and lQ differ and lN is not a special
+ *                          "keep-as-is" value
+ *
+ * This function performs one of five actions, inicated by 0 through 4
+ * according to the values of sN, sQ, and alter_literal as given in 
+ * the following table where:
+ *
+ * - sQ can be 'N' (NULL) or 'a' (a non-NULL field code from the
+ *                                                     original entry)
+ * - sN can be 'N' (NULL), '-' (the empty string ""), or 'b' (a new
+ *                                  field code provided by the caller)
+ * - AL can be '0' or '1' indicating the boolean state of alter_literal
+ *
+ * sQ or AL can also be '*' meaning any permitted value
+ *
+ * sQ  sN  AL  ->  action
+ *  N   N   0  ->  0: no change            (labelled 0a below)
+ *  N   N   1  ->  1: set lQ from lN       (labelled 1a below)
+ *  N   -   0  ->  0: no change            (labelled 0b below)
+ *  N   -   1  ->  1: set lQ from lN       (labelled 1b below)
+ *  a   N   0  ->  3: set lQ to the value of the entry specified
+ *                    by sQ field and then delete sQ
+ *  a   N   1  ->  4: set lQ to lN and delete sQ
+ *  a   -   *  ->  0: no change            (labelled 0c below)
+ *  *   b   *  ->  2: set sQ,iQ from sN,iN
+ *
+ * Flags returned by this function are based on action performed:
+ *
+ * GD_AS_FREE_SCALAR is set when sQ is changed (2) or deleted (3,4)
+ * GD_AS_NEED_RECALC is set when sQ is changed (2)
+ * GD_AS_MODIFIED is set when any of Q is changed (all but 0)
+ *
+ * Also note: iN is ignored if sN == "" (keep as-is), even if it is
+ * different than iQ!
  */
 static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
-    void *lout, const void *lin, char **sout, int *iout, const char *sin,
-    int iin, int calculated, int fragment_index)
+    void *lQ, const void *lN, char **sQ, int *iQ, const char *sN,
+    int iN, int calculated, int fragment_index)
 {
   int r = 0;
-  int set_lout = 0;
+  int set_lQ = 0;
 
   dtrace("%p, %i, 0x%X, %p, %p, %p, %p, %p, %i, %i, %i", D, alter_literal, type,
-      lout, lin, sout, iout, sin, iin, calculated, fragment_index);
+      lQ, lN, sQ, iQ, sN, iN, calculated, fragment_index);
 
-  if (sin == NULL) {
-    if (*sout != NULL) {
+  if (sN == NULL) {
+    if (*sQ != NULL) {
       if (alter_literal) {
         /* 4: replace a CONST field with a literal scalar */
         r = GD_AS_FREE_SCALAR | GD_AS_MODIFIED;
-        *sout = NULL;
-        set_lout = 1;
+        *sQ = NULL;
+        set_lQ = 1;
       } else {
-        /* 3: derefencing a CONST field to turn it into a literal scalar
-         *    lout is not set from lin, but kept as-is, after calculation;
-         *    this may throw GD_E_BAD_CODE or GD_E_BAD_FIELD_TYPE, via
-         *    get_constant. */
+        /* 3: derefence a CONST field to turn it into a literal scalar
+         *
+         *    if E has been successfully calculated, lQ already has
+         *    the right value, and all we need to do is delete sQ.
+         *
+         *    Otherwise we're in for some tricks:
+         */
+        if (!calculated) {
+          /* We've not tried to fetch this scalar before.  Ideally we'd like
+           * to run _GD_Calculate here, but we can't because Q is a mess right
+           * now, being in the middle of an update.  It's also in two discon-
+           * nected parts on the stack (Q, Qe), which makes even passing it to
+           * other parts of the library sketchy at best.  Instead we call
+           * _GD_GetScalar (which _GD_Calculate uses) directly.  It returns a
+           * GD_E_BAD_SCALAR suberror which we convert into GD_E_BAD_CODE or
+           * GD_E_BAD_FIELD_TYPE
+           */
+          int e = _GD_GetScalar(D, *sQ, iQ, type, lQ, NULL);
+          if (e == GD_E_SCALAR_CODE) 
+            _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, *sQ);
+          else if (e == GD_E_SCALAR_TYPE)
+            _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, *sQ);
+        }
         r = GD_AS_FREE_SCALAR | GD_AS_MODIFIED;
-        if (!calculated)
-          gd_get_constant(D, *sout, GD_INT64, lout);
-        *sout = NULL;
+        *sQ = NULL;
       }
     } else if (alter_literal) {
-      /* 1: set lout from lin */
-      set_lout = 1;
+      /* 1a: set lQ from lN */
+      set_lQ = 1;
     }
     /* otherwise 0a: do nothing */
-  } else if (sin[0] == '\0') {
-    if (*sout == NULL && alter_literal) {
-      /* 1: set lout from lin */
-      set_lout = 1;
+  } else if (sN[0] == '\0') {
+    if (*sQ == NULL && alter_literal) {
+      /* 1b: set lQ from lN */
+      set_lQ = 1;
     }
-    /* otherwise 0b: do nothing */
+    /* otherwise 0b or 0c: do nothing */
   } else {
-    /* 2: set a new CONST field from sout; if this is a RAW field, and we've
+    /* 2: set a new CONST field from sN; if this is a RAW field, and we've
      *    been asked to move the raw file, _GD_Change is going to need to
-     *    recalculate the entry; no need to change lout: it's ignored. */
+     *    recalculate the entry; no need to change lQ: it's ignored. */
 
-    if (_GD_CheckCodeAffixes(D, sin, fragment_index, 1))
+    if (_GD_CheckCodeAffixes(D, sN, fragment_index, 1))
       ; /* reject codes with bad affixes */
-    else if (iin == -1 && !(D->flags & GD_NOSTANDARD) && D->standards <= 7 &&
-        _GD_TokToNum(sin, D->standards, 1, NULL, NULL, NULL, NULL) != -1)
+    else if (iN == -1 && !(D->flags & GD_NOSTANDARD) && D->standards <= 7 &&
+        _GD_TokToNum(sN, D->standards, 1, NULL, NULL, NULL, NULL) != -1)
     {
       /* when using early Standards, reject ambiguous field codes */
-      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_AMBIGUOUS, NULL, 0, sin);
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_AMBIGUOUS, NULL, 0, sN);
     } else {
       r = GD_AS_FREE_SCALAR | GD_AS_NEED_RECALC | GD_AS_MODIFIED;
-      *sout = _GD_Strdup(D, sin);
-      *iout = iin;
+      *sQ = _GD_Strdup(D, sN);
+      *iQ = iN;
     }
   }
 
-  if (!D->error && set_lout) {
+  if (!D->error && set_lQ) {
     r |= GD_AS_MODIFIED;
     if (type == GD_INT64)
-      *(int64_t *)lout = *(int64_t *)lin;
+      *(int64_t *)lQ = *(int64_t *)lN;
     else if (type == GD_COMPLEX128)
-      memcpy(lout, lin, 2 * sizeof(double));
+      memcpy(lQ, lN, 2 * sizeof(double));
     else if (type == GD_FLOAT64)
-      *(double *)lout = *(double *)lin;
+      *(double *)lQ = *(double *)lN;
     else if (type == GD_INT16)
-      *(int16_t *)lout = *(int16_t *)lin;
+      *(int16_t *)lQ = *(int16_t *)lN;
     else if (type == GD_UINT16)
-      *(uint16_t *)lout = *(uint16_t *)lin;
+      *(uint16_t *)lQ = *(uint16_t *)lN;
     else if (type == GD_INT32)
-      *(int32_t *)lout = *(int32_t *)lin;
+      *(int32_t *)lQ = *(int32_t *)lN;
     else if (type == GD_UINT32)
-      *(uint32_t *)lout = *(uint32_t *)lin;
+      *(uint32_t *)lQ = *(uint32_t *)lN;
     else if (type == GD_UINT64)
-      *(uint64_t *)lout = *(uint64_t *)lin;
+      *(uint64_t *)lQ = *(uint64_t *)lN;
     else
       _GD_InternalError(D);
   }

@@ -1,3 +1,20 @@
+2016-03-05   D. V. Wiebe <getdata@ketiltrout.net> svn:1046
+	* src/entry.c (_GD_GetScalar): Take scalar and scalar_ind directly;
+	allow E == NULL, return GD_E_BAD_SCALAR error instead of setting an
+	error; destatickify.
+	* src/entry.c (_GD_GetScalar2): Added with the old signature of
+	_GD_GetScalar.
+	* src/entry.c (_GD_Calculate): Call _GD_GetScalar2 instead of _GD_GetScalar
+	directly.
+	* src/mod.c (_GD_AlterScalar): Call _GD_GetScalar instead of gd_get_constant
+	to dereference when needed.  Also renamed most of the parameters to make
+	things (hopefully) less confusing in the future.
+	* test/alter_entry_scalar3i.c: Renamed from test/alter_entry_scalar3c.c.
+	* test/alter_entry_scalar3r.c test/alter_entry_scalar3c.c: Added.
+
+	* test/flac_put_big.c test/flac_put_little.c: Don't double-close the
+	dirfile.
+
 2016-03-02   D. V. Wiebe <getdata@ketiltrout.net> svn:1044
 	* src/mod.c (_GD_Change): Free the correct scalar for PHASE entries.
 

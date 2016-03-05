@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2016 D. V. Wiebe
+/* Copyright (C) 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,17 +20,20 @@
  */
 #include "test.h"
 
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
+#include <stdio.h>
+
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "data RECIP in c1\nc1 CONST COMPLEX128 3.1;4.5\n";
+  const char *format_data = "data BIT in c1 3\nc1 CONST INT64 3\n";
   int fd, ret, error, n, r = 0;
-#ifdef GD_NO_C99_API
-  const double d[2] = {3.1, 4.5};
-#else
-  const double _Complex d = 3.1 + _Complex_I * 4.5;
-#endif
   DIRFILE *D;
   gd_entry_t E;
 
@@ -44,27 +47,27 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
 
   memset(&E, 0, sizeof(E));
-  E.field_type = GD_RECIP_ENTRY;
+  E.field_type = GD_BIT_ENTRY;
+  E.EN(bit,bitnum) = -1;
+  E.EN(bit,numbits) = 3;
   E.in_fields[0] = "in";
-  E.flags = GD_EN_COMPSCAL;
+
   ret = gd_alter_entry(D, "data", &E, 0);
   error = gd_error(D);
 
-  CHECKI(ret,0);
-  CHECKI(error,0);
-
   n = gd_entry(D, "data", &E);
-
-  CHECKI(n,0);
-  CHECKU(E.flags & GD_EN_COMPSCAL, GD_EN_COMPSCAL);
-  CHECKC(E.EN(recip,cdividend), d);
-  CHECKP(E.scalar[0]);
-  gd_free_entry_strings(&E);
 
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
+
+  CHECKI(error,0);
+  CHECKI(n,0);
+  CHECKI(ret,0);
+  CHECKI(E.EN(bit,bitnum), 3);
+  CHECKP(E.scalar[0]);
+  gd_free_entry_strings(&E);
 
   return r;
 }

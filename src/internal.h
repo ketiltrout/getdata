@@ -1281,6 +1281,8 @@ off64_t _GD_GetIOPos(DIRFILE *restrict, gd_entry_t *restrict, off64_t);
 char *_GD_GetLine(FILE *restrict, size_t *restrict, int *restrict);
 int _GD_GetRepr(DIRFILE *restrict, const char *restrict,
     char **restrict, int);
+int _GD_GetScalar(DIRFILE *restrict, const char *restrict, int*, gd_type_t,
+   void *restrict, gd_entry_t*);
 unsigned int _GD_GetSPF(DIRFILE*, gd_entry_t*);
 int _GD_GrabDir(DIRFILE*, int, const char *restrict, int);
 int _GD_Include(DIRFILE*, struct parser_state *restrict, const char *restrict,

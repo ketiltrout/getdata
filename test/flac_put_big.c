@@ -58,27 +58,23 @@ int main(void)
   n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
   e1 = gd_error(D);
 
+#ifdef USE_FLAC
+  CHECKI(e1, GD_E_OK);
+  CHECKI(n, 8);
+#else
+  CHECKI(e1, GD_E_UNSUPPORTED);
+  CHECKI(n, 0);
+#endif
+
   e2 = gd_close(D);
   CHECKI(e2, 0);
 
   stat_data = stat(data_flac, &buf);
 
 #ifdef USE_FLAC
-  CHECKI(e1, GD_E_OK);
-  CHECKI(n, 8);
-  if (stat_data) {
-    perror("stat");
-  }
   CHECKI(stat_data, 0);
-#else
-  CHECKI(e1, GD_E_UNSUPPORTED);
-  CHECKI(n, 0);
-  CHECKI(stat_data, -1);
-#endif
-
-  gd_discard(D);
-
-#ifdef USE_FLAC
+  if (stat_data)
+    perror("stat");
   snprintf(command, 4096, "%s --silent --decode --delete-input-file "
       "--force-raw-format --sign=signed --endian=big %s --output-name=%s",
       FLAC, data_flac, data);
@@ -99,6 +95,8 @@ int main(void)
       close(fd);
     }
   }
+#else
+  CHECKI(stat_data, -1);
 #endif
 
   unlink_flac = unlink(data_flac);

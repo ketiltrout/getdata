@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,7 +24,7 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int error, r = 0;
+  int e1, e2, r = 0;
   DIRFILE *D;
 
   gd_entry_t E, e;
@@ -43,30 +43,27 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_spec(D, "c CARRAY INT64 1 2 3 4", 0);
   gd_add(D, &E);
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(e1, GD_E_OK);
 
   /* check */
   gd_entry(D, "data", &e);
-  if (gd_error(D))
-    r = 1;
-  else {
-    CHECKI(e.field_type, GD_LINCOM_ENTRY);
-    CHECKI(e.fragment_index, 0);
-    CHECKI(e.EN(lincom,n_fields), 1);
-    CHECKF(e.EN(lincom,m)[0], 1);
-    CHECKF(e.EN(lincom,b)[0], 1);
-    CHECKP(e.scalar[0]);
-    CHECKS(e.scalar[0 + GD_MAX_LINCOM], "c");
-    CHECKI(e.scalar_ind[0 + GD_MAX_LINCOM], 0);
-    gd_free_entry_strings(&e);
-  }
+  e2 = gd_error(D);
+  CHECKI(e2, GD_E_OK);
+  CHECKI(e.field_type, GD_LINCOM_ENTRY);
+  CHECKI(e.fragment_index, 0);
+  CHECKI(e.EN(lincom,n_fields), 1);
+  CHECKF(e.EN(lincom,m)[0], 1);
+  CHECKF(e.EN(lincom,b)[0], 1);
+  CHECKP(e.scalar[0]);
+  CHECKS(e.scalar[0 + GD_MAX_LINCOM], "c");
+  CHECKI(e.scalar_ind[0 + GD_MAX_LINCOM], 0);
+  gd_free_entry_strings(&e);
 
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, GD_E_OK);
 
   return r;
 }

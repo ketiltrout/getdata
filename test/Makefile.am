@@ -52,15 +52,15 @@ ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
 						alter_divide alter_entry alter_entry_affix alter_entry_hidden \
 						alter_entry_lincom alter_entry_recode alter_entry_recode_recalc \
 						alter_entry_scalar1 alter_entry_scalar2a alter_entry_scalar2n \
-						alter_entry_scalar3 alter_entry_scalar3c alter_entry_scalar4 \
-						alter_entry_scalar_amb alter_index alter_lincom_23 alter_lincom_32 \
-						alter_lincom_affix alter_lincom_input alter_lincom_offset \
-						alter_lincom_slope alter_linterp alter_linterp_move alter_mplex \
-						alter_mspec alter_mspec_affix alter_multiply alter_phase \
-						alter_polynom_coeff alter_polynom_input alter_polynom_ord \
-						alter_raw_spf alter_raw_type alter_recip alter_recip_zero \
-						alter_scalar_affix alter_spec alter_spec_affix alter_spec_meta \
-						alter_spec_polynom alter_window
+						alter_entry_scalar3 alter_entry_scalar3c alter_entry_scalar3i \
+						alter_entry_scalar3r alter_entry_scalar4 alter_entry_scalar_amb \
+						alter_index alter_lincom_23 alter_lincom_32 alter_lincom_affix \
+						alter_lincom_input alter_lincom_offset alter_lincom_slope \
+						alter_linterp alter_linterp_move alter_mplex alter_mspec \
+						alter_mspec_affix alter_multiply alter_phase alter_polynom_coeff \
+						alter_polynom_input alter_polynom_ord alter_raw_spf alter_raw_type \
+						alter_recip alter_recip_zero alter_scalar_affix alter_spec \
+						alter_spec_affix alter_spec_meta alter_spec_polynom alter_window
 
 ASCII_TESTS=ascii_add ascii_get ascii_get_complex ascii_get_get ascii_get_here \
 						ascii_get_sub ascii_nframes ascii_put ascii_put_here ascii_seek \

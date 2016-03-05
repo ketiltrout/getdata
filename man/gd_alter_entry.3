@@ -1,6 +1,6 @@
 .\" gd_alter_entry.3.  The gd_alter_entry man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2012, 2013, 2014 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013, 2014, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_entry 3 "16 October 2014" "Version 0.9.0" "GETDATA"
+.TH gd_alter_entry 3 "4 March 2016" "Version 0.9.2" "GETDATA"
 .SH NAME
 gd_alter_entry \(em modify the metadata of a dirfile field
 .SH SYNOPSIS
@@ -131,8 +131,7 @@ Some entry members have special values which indicate no change should be
 made to the member.  These special values are:
 .TP
 .B NULL\fR:
-any of the string members, also 
-.IR m ", " b ", " a ", " cm ", " cb ", or " ca ;
+any of the string members;
 .TP
 .B 0\fR:
 .IR spf ", " n_fields ", " numbits ", " cdividend ", " dividend ", or " array_len ;
@@ -168,6 +167,17 @@ value of the corresponding numerical
 .I entry
 member is the special value listed above indicating no change, no change is
 made to the field parameter at all.
+.I NB:
+In this case, GetData also ignores the corresponding
+.IR entry -> scalar_ind
+element, even if it differs from the current value.  To change a
+.I scalar_ind
+element without changing the corresponding
+.IR scalar ,
+set that
+.I scalar
+element to its current value (at which point GetData operates as per the
+previous bullet).
 .IP \(bu 4
 the NULL pointer.  If the corresponding field parameter was previously a field
 code, the field code will be deleted and a literal number used instead.  In the

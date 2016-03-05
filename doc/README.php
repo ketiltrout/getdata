@@ -452,7 +452,7 @@ Some functions have several ways that they can be called.
 * array gd_mfield_list_by_type(resource $dirfile, string $field_code, int $type)
 
 * bool gd_move(resource $dirfile, string $field_code, $new_fragment,
-        [ bool move_data = false ])
+        [ int $flags = 0 ])
 
 * bool gd_mplex_lookback(resource $dirfile, int $lookback)
 

@@ -24,13 +24,8 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "data RECIP in c1\nc1 CONST COMPLEX128 3.1;4.5\n";
+  const char *format_data = "data RECIP in c1\nc1 CONST FLOAT64 3.1\n";
   int fd, ret, error, n, r = 0;
-#ifdef GD_NO_C99_API
-  const double d[2] = {3.1, 4.5};
-#else
-  const double _Complex d = 3.1 + _Complex_I * 4.5;
-#endif
   DIRFILE *D;
   gd_entry_t E;
 
@@ -46,7 +41,6 @@ int main(void)
   memset(&E, 0, sizeof(E));
   E.field_type = GD_RECIP_ENTRY;
   E.in_fields[0] = "in";
-  E.flags = GD_EN_COMPSCAL;
   ret = gd_alter_entry(D, "data", &E, 0);
   error = gd_error(D);
 
@@ -56,8 +50,7 @@ int main(void)
   n = gd_entry(D, "data", &E);
 
   CHECKI(n,0);
-  CHECKU(E.flags & GD_EN_COMPSCAL, GD_EN_COMPSCAL);
-  CHECKC(E.EN(recip,cdividend), d);
+  CHECKF(E.EN(lincom,m)[0], 3.1);
   CHECKP(E.scalar[0]);
   gd_free_entry_strings(&E);
 

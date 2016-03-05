@@ -16,6 +16,10 @@ New in version 0.9.2a:
   * BUG FIX: Memory leaks in the FLAC and ZZIP encodings, plus single-byte
     leaks in gd_add_string() and gd_madd_string() have been plugged.
 
+  * BUG FIX: gd_alter_entry() and gd_[m]alter_spec() no longer mangle the values
+    of entry parameters when asked to remove scalar field codes.  Reported
+    by Dan Horák.
+
 New in version 0.9.1:
   
   Library Changes:
