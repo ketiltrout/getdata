@@ -1,3 +1,6 @@
+2016-03-08   D. V. Wiebe <getdata@ketiltrout.net> svn:1047
+	GetData-0.9.2rc1.
+
 2016-03-05   D. V. Wiebe <getdata@ketiltrout.net> svn:1046
 	* src/entry.c (_GD_GetScalar): Take scalar and scalar_ind directly;
 	allow E == NULL, return GD_E_BAD_SCALAR error instead of setting an

@@ -1,24 +1,26 @@
-New in version 0.9.2a:
+New in version 0.9.2rc1:
   
   Library Changes:
 
-  * BUG FIX: When using a FLAC-encoded reference field, gd_nframes() no longer
-    leaks file descriptors.
+  * BUG FIX: When using a FLAC-encoded reference field, gd_nframes() no
+    longer leaks file descriptors.
 
-  * BUG FIX: A segfault in gd_entry_list() introduced in 0.9.1 has been fixed.
-    Reported by Christian Trippe.
+  * BUG FIX: A segfault in gd_entry_list() introduced in 0.9.1 has been
+    fixed.  Reported by Christian Trippe.
 
   * BUG FIX: A descriptor leak on error has been plugged in gd_desync().
 
-  * BUG FIX: A segfault triggered by encountering an I/O error while writing
-    metadata has been fixed.
+  * BUG FIX: A segfault triggered by encountering an I/O error while
+    writing metadata has been fixed.
 
   * BUG FIX: Memory leaks in the FLAC and ZZIP encodings, plus single-byte
     leaks in gd_add_string() and gd_madd_string() have been plugged.
 
-  * BUG FIX: gd_alter_entry() and gd_[m]alter_spec() no longer mangle the values
-    of entry parameters when asked to remove scalar field codes.  Reported
-    by Dan Horák.
+  * BUG FIX: gd_alter_entry() and gd_[m]alter_spec() no longer mangle the
+    values of entry parameters when asked to remove scalar field codes.
+    Reported by Dan Horák.
+
+|=========================================================================|
 
 New in version 0.9.1:
   
