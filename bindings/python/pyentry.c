@@ -640,6 +640,7 @@ static int gdpy_entry_init(struct gdpy_entry_t *self, PyObject *args,
   gd_entry_t E;
   char *keywords[] = {"type", "name", "fragment_index", "parameters", NULL};
   PyObject *parms = NULL;
+  int field_type;
   const char *field_name;
 
   dtrace("%p, %p, %p", self, args, keys);
@@ -647,12 +648,13 @@ static int gdpy_entry_init(struct gdpy_entry_t *self, PyObject *args,
   memset(&E, 0, sizeof(gd_entry_t));
 
   if (!PyArg_ParseTupleAndKeywords(args, keys, "isi|O:pygetdata.entry.__init__",
-        keywords, &E.field_type, &field_name, &E.fragment_index, &parms))
+        keywords, &field_type, &field_name, &E.fragment_index, &parms))
   {
     dreturn("%i", -1);
     return -1;
   }
 
+  E.field_type = field_type;
   E.field = strdup(field_name);
   if (E.field == NULL) {
     PyErr_NoMemory();

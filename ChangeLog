@@ -1,3 +1,21 @@
+2016-03-12   D. V. Wiebe <getdata@ketiltrout.net> svn:1048
+	GetData-0.9.2rc2:
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_delentry): Change flags to
+	unsigned per C API.
+	* bindings/python/pydirfile.c (gdpy_dirfile_include): Change flags to
+	unsigned long per C API.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getcarray): Use unsigned
+	PY_LONG_LONG for len instead of size_t since size_t isn't supported by
+	PyArg_ParseTupleAndKeywords.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getconstants
+	gdpy_dirfile_mcarrays gdpy_dirfile_getmconstants gdpy_dirfile_getmfieldlist
+	gdpy_dirfile_putconstant gdpy_dirfile_putcarray gdpy_dirfile_putdata)
+	bindings/python/pyentry.c (gdpy_entry_init): Don't assume enums are the same
+	size as int.
+
 2016-03-08   D. V. Wiebe <getdata@ketiltrout.net> svn:1047
 	GetData-0.9.2rc1.
 

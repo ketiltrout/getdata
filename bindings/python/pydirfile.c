@@ -334,12 +334,12 @@ static PyObject *gdpy_dirfile_delentry(struct gdpy_dirfile_t *self,
 {
   char *keywords[] = {"field_code", "flags", NULL};
   const char *field_code;
-  int flags = 0;
+  unsigned int flags = 0;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s|i:pygetdata.dirfile.delete", keywords, &field_code, &flags))
+        "s|I:pygetdata.dirfile.delete", keywords, &field_code, &flags))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -377,7 +377,7 @@ static PyObject *gdpy_dirfile_getcarray(struct gdpy_dirfile_t *self,
     NULL};
   const char *field_code;
   unsigned int start = 0;
-  size_t len = 0;
+  unsigned PY_LONG_LONG len = 0;
   int as_list = 0;
   gd_type_t return_type;
   PyObject *return_type_obj = NULL;
@@ -387,7 +387,7 @@ static PyObject *gdpy_dirfile_getcarray(struct gdpy_dirfile_t *self,
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s|OIIi:pygetdata.dirfile.get_carray", keywords, &field_code,
+        "s|OIKi:pygetdata.dirfile.get_carray", keywords, &field_code,
         &return_type_obj, &start, &len, &as_list))
   {
     dreturn("%p", NULL);
@@ -410,7 +410,8 @@ static PyObject *gdpy_dirfile_getcarray(struct gdpy_dirfile_t *self,
     if (len == 0)
       gd_get_carray(self->D, field_code, GD_NULL, NULL);
     else
-      gd_get_carray_slice(self->D, field_code, start, len, GD_NULL, NULL);
+      gd_get_carray_slice(self->D, field_code, start, (size_t)len, GD_NULL,
+          NULL);
 
     PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -546,8 +547,7 @@ static PyObject *gdpy_dirfile_carrays(struct gdpy_dirfile_t *self,
 {
   char *keywords[] = {"return_type", "as_list", NULL};
   const char **fields;
-  int as_list = 0, i;
-  gd_type_t return_type;
+  int as_list = 0, i, return_type;
   const gd_carray_t *carrays;
   PyObject *pyobj;
   npy_intp dims[] = { 0 };
@@ -565,7 +565,7 @@ static PyObject *gdpy_dirfile_carrays(struct gdpy_dirfile_t *self,
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  carrays = gd_carrays(self->D, return_type);
+  carrays = gd_carrays(self->D, (gd_type_t)return_type);
 
   pyobj = PyList_New(0);
 
@@ -593,7 +593,7 @@ static PyObject *gdpy_dirfile_getconstants(struct gdpy_dirfile_t *self,
   char *keywords[] = {"return_type", NULL};
   const char **fields;
   const char *values;
-  gd_type_t return_type;
+  int return_type;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
@@ -609,7 +609,7 @@ static PyObject *gdpy_dirfile_getconstants(struct gdpy_dirfile_t *self,
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  values = gd_constants(self->D, return_type);
+  values = gd_constants(self->D, (gd_type_t)return_type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -944,7 +944,7 @@ static PyObject *gdpy_dirfile_getfieldlist(struct gdpy_dirfile_t *self,
 {
   const char **fields;
   char *keywords[] = { "type", NULL };
-  int type = (int)GD_NO_ENTRY;
+  int type = GD_NO_ENTRY;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
@@ -1048,7 +1048,7 @@ static PyObject *gdpy_dirfile_include(struct gdpy_dirfile_t *self,
     NULL };
   const char *file = NULL;
   int fragment_index = 0;
-  unsigned int flags = 0;
+  unsigned long flags = 0;
   char *prefix = NULL, *suffix = NULL;
   long index;
   PyObject *pyobj;
@@ -1056,7 +1056,7 @@ static PyObject *gdpy_dirfile_include(struct gdpy_dirfile_t *self,
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s|iiss:pygetdata.dirfile.include", keywords, &file, &fragment_index,
+        "s|ikss:pygetdata.dirfile.include", keywords, &file, &fragment_index,
         &flags, &prefix, &suffix))
   {
     dreturn("%p", NULL);
@@ -1163,8 +1163,7 @@ static PyObject *gdpy_dirfile_mcarrays(struct gdpy_dirfile_t *self,
   char *keywords[] = {"parent", "return_type", "as_list", NULL};
   const char **fields;
   const char *parent;
-  int as_list = 0, i;
-  gd_type_t return_type;
+  int as_list = 0, i, return_type;
   const gd_carray_t *carrays;
   PyObject *pyobj;
   npy_intp dims[] = { 0 };
@@ -1183,7 +1182,7 @@ static PyObject *gdpy_dirfile_mcarrays(struct gdpy_dirfile_t *self,
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  carrays = gd_mcarrays(self->D, parent, return_type);
+  carrays = gd_mcarrays(self->D, parent, (gd_type_t)return_type);
 
   pyobj = PyList_New(0);
 
@@ -1212,7 +1211,7 @@ static PyObject *gdpy_dirfile_getmconstants(struct gdpy_dirfile_t *self,
   const char **fields;
   const char *values;
   const char *parent = NULL;
-  gd_type_t return_type;
+  int return_type;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
@@ -1228,7 +1227,7 @@ static PyObject *gdpy_dirfile_getmconstants(struct gdpy_dirfile_t *self,
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  values = gd_mconstants(self->D, parent, return_type);
+  values = gd_mconstants(self->D, parent, (gd_type_t)return_type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1262,7 +1261,7 @@ static PyObject *gdpy_dirfile_getmfieldlist(struct gdpy_dirfile_t *self,
   const char **fields;
   char *keywords[] = { "parent", "type", NULL };
   const char *parent = NULL;
-  gd_entype_t type = GD_NO_ENTRY;
+  int type = GD_NO_ENTRY;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
@@ -1770,7 +1769,7 @@ static PyObject *gdpy_dirfile_putconstant(struct gdpy_dirfile_t *self,
   char *keywords[] = {"field_code", "value", "type", NULL};
   const char *field_code;
   PyObject *value;
-  gd_type_t type = GD_UNKNOWN;
+  int type = GD_UNKNOWN;
   union gdpy_quadruple_value data;
   int data_type;
 
@@ -1814,7 +1813,7 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
   const char *field_code;
   unsigned int start = 0;
   size_t len;
-  gd_type_t type = GD_UNKNOWN;
+  int type = GD_UNKNOWN;
   PyObject *pyobj;
   int have_ndarray = 0;
 
@@ -1913,7 +1912,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
     "first_sample", NULL };
   const char *field_code;
   PY_LONG_LONG first_frame = 0, first_sample = 0;
-  gd_type_t type = GD_UNKNOWN;
+  int type = GD_UNKNOWN;
   PyObject *pyobj;
   size_t ns;
   int have_ndarray = 0;
@@ -1993,13 +1992,10 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
     ns = gd_putdata64(self->D, field_code, first_frame, first_sample, 0, ns,
         type, data);
 
-    if (have_ndarray)
-      PYGD_CHECK_ERROR(self->D, NULL);
-    else {
-      PYGD_CHECK_ERROR2(self->D, NULL, free(data));
-
+    if (!have_ndarray)
       free(data);
-    }
+
+    PYGD_CHECK_ERROR(self->D, NULL);
   }
 
   pyobj = PyLong_FromLongLong(ns);
