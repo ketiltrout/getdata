@@ -22,8 +22,12 @@ New in version 0.9.2rc2:
 
   Bindings Changes:
 
-  * PYTHON BUG FIX: fixed a potential segfault in dirfile.get_carray() on
+  * PYTHON BUG FIX: Fixed a potential segfault in dirfile.get_carray() on
     platforms where sizeof size_t != sizeof int.  Reported by Dan Horák.
+
+  * PHP BUG FIX: Calling gd_discard or gd_close on a persistent dirfile now
+    does nothing, instead of closing the Dirfile and corrupting the
+    persistent resource.
 
 |=========================================================================|
 

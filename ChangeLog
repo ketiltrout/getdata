@@ -1,3 +1,8 @@
+2016-03-21   D. V. Wiebe <getdata@ketiltrout.net> svn:1049
+	* php/getdata.c (gdphp_open): Record persistent-ness.
+	* php/getdata.c (gd_close gd_discard): Don't close persistent dirfiles.
+	* php/test/persistence.php: Added.
+
 2016-03-12   D. V. Wiebe <getdata@ketiltrout.net> svn:1048
 	GetData-0.9.2rc2:
 

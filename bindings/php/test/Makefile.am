@@ -1,4 +1,4 @@
-# Copyright (C) 2013, 2014, 2015 D. V. Wiebe
+# Copyright (C) 2013, 2014, 2015, 2016 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -32,7 +32,7 @@ TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=../../../src/.libs:${${DL_LIBRARY_PATH}} \
 	-d "ignore_repeated_errors=0" -d "precision=14" -d "memory_limit=128M" \
 	-d "extension_dir=@top_builddir@/bindings/php/.libs" \
 	-d "extension=getdata.so" -d "session.auto_start=0" -f
-phpTESTS=big_test.php
+phpTESTS=big_test.php callback.php persistence.php
 TESTS=$(addprefix ${srcdir}/,$(phpTESTS))
 endif
 

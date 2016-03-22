@@ -18,9 +18,9 @@ calling gd_popen() instead.  (See Persistent Database Connections in the PHP
 manual for details on persistent resources.)
 
 A persistent Dirfile resource is not collected by GC when it goes out of scope.
-Call gd_discard or gd_close to explicitly delete it.  See the discussion of
-gd_popen() below for more details on retrieving previously-created persistent
-Dirfile resources.
+Calling gd_discard or gd_close on it will do nothing (and succeed).  See the
+discussion of gd_popen() below for more details on retrieving previously-created
+persistent Dirfile resources.
 
 In general when strings are passed to the extension, only that part of the
 string up to the first NUL character will be considered.  The exception to this
@@ -273,7 +273,10 @@ Some functions have several ways that they can be called.
 
 * bool gd_close(resource $dirfile)
 
-      On success, the resource $dirfile is deleted.
+      If $dirfile is not a persistent resource (see gd_popen), the resource
+      $dirfile is deleted if the underlying C API call returns success.
+      If $dirfile is a persistent resource, this function does nothing and
+      succeeds.
 
 * data gd_constants(resource $dirfile, int $return_type, [ bool $unpack ])
 
@@ -299,7 +302,10 @@ Some functions have several ways that they can be called.
 
 * bool gd_discard(resource $dirfile)
 
-      On success, the resource $dirfile is deleted.
+      If $dirfile is not a persistent resource (see gd_popen), the resource
+      $dirfile is deleted if the underlying C API call returns success.
+      If $dirfile is a persistent resource, this function does nothing and
+      succeeds.
 
 * int gd_encoding(resource $dirfile, [ int $fragment_index = 0 ])
 

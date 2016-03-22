@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014, 2015 D. V. Wiebe
+/* Copyright (C) 2013, 2014, 2015, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -150,13 +150,16 @@ static char *gdphp_context(char *buffer, const struct gdphp_context_t *ctx)
 }
 
 /* the dirfile resource */
-typedef struct _gdphp_dirfile {
+typedef struct gdphp_dirfile_ {
   DIRFILE *D;
   char *callback;
   int callback_len;
   zval **callback_data;
   char *key;
   int key_len;
+
+  /* Persistent resource stuff */
+  int persist;
 } gdphp_dirfile;
 
 int le_gdphp_dirfile;
@@ -315,6 +318,7 @@ static gdphp_dirfile *gdphp_open(const char *dirfilename, int len, long flags,
 
   /* record the dirfile */
   r->D = D;
+  r->persist = persist;
 
   dreturn("%p", r);
   return r;
@@ -2742,12 +2746,14 @@ PHP_FUNCTION(gd_close)
   GDPHP_PARSE("r", &z);
   GDPHP_FETCH_DIRFILE(r, z);
 
-  if (gd_close(r->D))
-    GDPHP_RETURN_F;
+  if (!r->persist) {
+    if (gd_close(r->D))
+      GDPHP_RETURN_F;
 
-  /* delete the resource on success */
-  r->D = NULL; /* avoid double close */
-  zend_list_delete(Z_LVAL_P(z));
+    /* delete the resource on success */
+    r->D = NULL; /* avoid double close */
+    zend_list_delete(Z_LVAL_P(z));
+  }
 
   GDPHP_RETURN_T;
 }
@@ -2876,12 +2882,14 @@ PHP_FUNCTION(gd_discard)
   GDPHP_PARSE("r", &z);
   GDPHP_FETCH_DIRFILE(r, z);
 
-  if (gd_discard(r->D))
-    GDPHP_RETURN_F;
+  if (!r->persist) {
+    if (gd_discard(r->D))
+      GDPHP_RETURN_F;
 
-  /* delete the resource on success */
-  r->D = NULL; /* avoid double close */
-  zend_list_delete(Z_LVAL_P(z));
+    /* delete the resource on success */
+    r->D = NULL; /* avoid double close */
+    zend_list_delete(Z_LVAL_P(z));
+  }
 
   GDPHP_RETURN_T;
 }
@@ -3460,6 +3468,7 @@ PHP_FUNCTION(gd_invalid_dirfile)
   memset(r, 0, sizeof(gdphp_dirfile));
 
   r->D = gd_invalid_dirfile();
+  r->persist = 0;
 
   ZEND_REGISTER_RESOURCE(return_value, r, le_gdphp_dirfile);
   dreturn("%p", r);
