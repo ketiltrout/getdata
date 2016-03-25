@@ -1,3 +1,6 @@
+2016-03-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1052
+	* test/alter_entry_scalar3r.c: Fix check.
+
 2016-03-24   D. V. Wiebe <getdata@ketiltrout.net> svn:1050
 	GetData-0.9.2.
 

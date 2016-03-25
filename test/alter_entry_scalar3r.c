@@ -50,7 +50,7 @@ int main(void)
   n = gd_entry(D, "data", &E);
 
   CHECKI(n,0);
-  CHECKF(E.EN(lincom,m)[0], 3.1);
+  CHECKF(E.EN(recip,dividend), 3.1);
   CHECKP(E.scalar[0]);
   gd_free_entry_strings(&E);
 
