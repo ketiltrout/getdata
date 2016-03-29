@@ -22,8 +22,11 @@ m4_define(getdata_major,    0)
 m4_define(getdata_minor,    9)
 m4_define(getdata_revision, 2)
 m4_define(getdata_extra,    [])
+m4_define(getdata_pkg_extra,[.1])
 m4_define(getdata_version,
           getdata_major.getdata_minor.getdata_revision[]getdata_extra)
+m4_define(getdata_pkg_version,
+          getdata_version[]getdata_pkg_extra)
 
 dnl libgetdata current interface version
 m4_define(getdata_iface_version,    7)

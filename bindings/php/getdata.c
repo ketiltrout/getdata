@@ -1710,7 +1710,7 @@ PHP_MINFO_FUNCTION(getdata)
 
   php_info_print_table_start();
   php_info_print_table_header(2, "GetData support", "enabled");
-  php_info_print_table_row(2, "Version", PACKAGE_VERSION);
+  php_info_print_table_row(2, "Version", GD_GETDATA_VERSION);
   php_info_print_table_end();
 
   dreturnvoid();
@@ -4923,7 +4923,7 @@ zend_module_entry getdata_module_entry = {
   NULL,
   PHP_MINFO(getdata),
 #if ZEND_MODULE_API_NO >= 20010901
-  PACKAGE_VERSION,
+  GD_GETDATA_VERSION,
 #endif
   STANDARD_MODULE_PROPERTIES
 };

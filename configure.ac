@@ -21,7 +21,7 @@ dnl
 
 m4_include([m4/version.m4])
 
-AC_INIT([GetData],[getdata_version],[getdata-devel@lists.sourceforge.net],,
+AC_INIT([GetData],[getdata_pkg_version],[getdata-devel@lists.sourceforge.net],,
         [http://getdata.sourceforge.net/])
 
 AC_COPYRIGHT(
@@ -43,6 +43,7 @@ AC_SUBST([GETDATA_MAJOR], [getdata_major])
 AC_SUBST([GETDATA_MINOR], [getdata_minor])
 AC_SUBST([GETDATA_REVISION], [getdata_revision])
 AC_SUBST([GETDATA_VERSION_SUFFIX], [getdata_extra])
+AC_SUBST([GETDATA_LIB_VERSION], [getdata_version])
 
 AC_PREREQ([2.65])
 AC_CONFIG_MACRO_DIR([m4])

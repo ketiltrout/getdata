@@ -21,7 +21,8 @@ dnl
 
 m4_include([m4/version.m4])
 
-AC_INIT([IDL_GetData],[getdata_version],[getdata-devel@lists.sourceforge.net],,
+AC_INIT([IDL_GetData],[getdata_pkg_version],
+        [getdata-devel@lists.sourceforge.net],,
         [http://getdata.sourceforge.net/])
 
 AC_COPYRIGHT(

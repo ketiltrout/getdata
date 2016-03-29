@@ -146,38 +146,38 @@ libgetdata_la_LIBADD = $(LIBLTDL) $(DLOPEN_LIBGETDATASLIM_LA) \
 											 $(DLOPEN_LIBGETDATAZZSLIM_LA) $(DLOPEN_LIBGETDATAFLAC_LA)
 
 libgetdataslim_la_SOURCES = slim.c
-libgetdataslim_la_LDFLAGS = $(SLIM_LDFLAGS) -release $(PACKAGE_VERSION) \
+libgetdataslim_la_LDFLAGS = $(SLIM_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
 														-module $(SLIM_LIBS)
 libgetdataslim_la_CPPFLAGS = $(AM_CPPFLAGS) $(SLIM_CPPFLAGS)
 
 libgetdataflac_la_SOURCES = flac.c
-libgetdataflac_la_LDFLAGS = $(FLAC_LDFLAGS) -release $(PACKAGE_VERSION) \
+libgetdataflac_la_LDFLAGS = $(FLAC_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
 														-module $(FLAC_LIBS)
 libgetdataflac_la_CPPFLAGS = $(AM_CPPFLAGS) $(FLAC_CPPFLAGS)
 
 libgetdatagzip_la_SOURCES = gzip.c
-libgetdatagzip_la_LDFLAGS = $(GZIP_LDFLAGS) -release $(PACKAGE_VERSION) \
+libgetdatagzip_la_LDFLAGS = $(GZIP_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
 														-module $(GZIP_LIBS)
 libgetdatagzip_la_CPPFLAGS = $(AM_CPPFLAGS) $(GZIP_CPPFLAGS)
 
 libgetdatabzip2_la_SOURCES = bzip.c
-libgetdatabzip2_la_LDFLAGS = $(BZIP2_LDFLAGS) -release $(PACKAGE_VERSION) \
+libgetdatabzip2_la_LDFLAGS = $(BZIP2_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
 														 -module $(BZIP2_LIBS)
 libgetdatabzip2_la_CPPFLAGS = $(AM_CPPFLAGS) $(BZIP2_CPPFLAGS)
 
 libgetdatalzma_la_SOURCES = lzma.c
-libgetdatalzma_la_LDFLAGS = $(LZMA_LDFLAGS) -release $(PACKAGE_VERSION) \
+libgetdatalzma_la_LDFLAGS = $(LZMA_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
 														 -module $(LZMA_LIBS)
 libgetdatalzma_la_CPPFLAGS = $(AM_CPPFLAGS) $(LZMA_CPPFLAGS)
 
 libgetdatazzip_la_SOURCES = zzip.c
-libgetdatazzip_la_LDFLAGS = $(ZZIP_LDFLAGS) -release $(PACKAGE_VERSION) \
+libgetdatazzip_la_LDFLAGS = $(ZZIP_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
 														 -module $(ZZIP_LIBS)
 libgetdatazzip_la_CPPFLAGS = $(AM_CPPFLAGS) $(ZZIP_CPPFLAGS)
 
 libgetdatazzslim_la_SOURCES = zzslim.c
 libgetdatazzslim_la_LDFLAGS = $(SLIM_LDFLAGS) $(ZZIP_LDFLAGS) \
-														-release $(PACKAGE_VERSION) -module \
+														-release $(GETDATA_LIB_VERSION) -module \
 														$(SLIM_LIBS) $(ZZIP_LIBS)
 libgetdatazzslim_la_CPPFLAGS = $(AM_CPPFLAGS) $(SLIM_CPPFLAGS) $(ZZIP_CPPFLAGS)
 

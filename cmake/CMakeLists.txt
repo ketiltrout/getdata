@@ -27,6 +27,7 @@ endmacro()
 add_definitions(
   -DPACKAGE_NAME=\"GetData\"
   -DPACKAGE_VERSION=\"0.9.x\"
+  -DGETDATA_LIB_VERSION=\"0.9.x\"
   -DPACKAGE_BUGREPORT=\"getdata-devel@lists.sourceforge.net\"
   -DUNALIGNED_ACCESS_OK
   )

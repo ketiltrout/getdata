@@ -21,7 +21,7 @@ dnl
 
 m4_include([m4/version.m4])
 
-AC_INIT([MATLAB_GetData],[getdata_version],
+AC_INIT([MATLAB_GetData],[getdata_pkg_version],
         [getdata-devel@lists.sourceforge.net],,
         [http://getdata.sourceforge.net/])
 

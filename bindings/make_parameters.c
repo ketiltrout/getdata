@@ -531,7 +531,7 @@ void MatLab(void)
       "%   See also GETDATA\n\n", stdout);
 
   fputs("  GD = struct(...\n"
-      "    'VERSION', '" VERSION "'", stdout);
+      "    'VERSION', '" GD_GETDATA_VERSION "'", stdout);
 
   for (i = 0; constant_list[i].lname != NULL; ++i)
     printf(", ...\n    '%s', int32(%li)", constant_list[i].sname,

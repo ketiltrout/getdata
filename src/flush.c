@@ -829,7 +829,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
 
   if (fprintf(stream, "# This is a dirfile format file.\n"
         "# It was written using version %s of the GetData Library.\n"
-        "# Written on %s UTC", PACKAGE_VERSION, buffer) < 0)
+        "# Written on %s UTC", GD_GETDATA_VERSION, buffer) < 0)
   {
     goto WRITE_ERR;
   }

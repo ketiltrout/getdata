@@ -287,7 +287,7 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
 
     /* make the library name */
     library = (char *)malloc(sizeof(GETDATA_MODULEDIR) +
-        strlen(_GD_ef[encoding].affix) + sizeof(PACKAGE_VERSION) + 13);
+        strlen(_GD_ef[encoding].affix) + sizeof(GD_GETDATA_VERSION) + 13);
     if (!library) {
       _GD_ef[encoding].provides = 0;
 #ifdef USE_PTHREAD
@@ -297,7 +297,7 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
       return 1;
     }
 
-    sprintf(library, GETDATA_MODULEPREFIX "%s-" PACKAGE_VERSION,
+    sprintf(library, GETDATA_MODULEPREFIX "%s-" GD_GETDATA_VERSION,
         _GD_ef[encoding].affix);
 
     /* affix starts with a capital letter, we need to lowercasify it --
