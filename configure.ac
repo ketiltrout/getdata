@@ -937,10 +937,10 @@ fi
 dnl python
 if test "x$make_pybindings" = "xyes"; then
   echo
-  echo "*** Configuring python bindings"
+  echo "*** Configuring Python bindings"
   echo
-  GD_PYTHON([2.3])
-  have_numpy="no (required for python bindings)"
+  GD_PYTHON([2.4],[3.2])
+  have_numpy="no (required for Python bindings)"
   if test "x$have_python" = "xno"; then
     make_pybindings="no"
   else
@@ -959,7 +959,7 @@ EOF
   fi
   if test "x$have_numpy" = "xyes"; then
     AC_MSG_CHECKING([NumPy includes])
-    NUMPY_CPPFLAGS=-I`$PYTHON -c "import numpy; print numpy.get_include()"`
+    NUMPY_CPPFLAGS=-I`$PYTHON -c "import numpy; print (numpy.get_include())"`
     AC_MSG_RESULT([$NUMPY_CPPFLAGS])
 
     saved_cppflags=$CPPFLAGS
@@ -1150,6 +1150,8 @@ AM_CONDITIONAL(GD_EXTERNAL, [false])
 
 dnl we do this here to avoid screwing up other tests
 LDFLAGS="${LDFLAGS}${NO_UNDEFINED}"
+
+AH_BOTTOM([#include "gd_extra_config.h"])
 
 AC_OUTPUT
 

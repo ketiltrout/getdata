@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,27 +18,25 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "test.h"
+#ifndef GETDATA_EXTRA_CONFIG_H
+#define GETDATA_EXTRA_CONFIG_H
 
-int main(void)
-{
-  const char *filedir = "dirfile";
-  const char *format = "dirfile/format";
-  int h1, e1, r = 0;
-  DIRFILE *D;
+/* Deal with Apple Universal builds */
+#ifdef __APPLE__
 
-  rmdirfile();
+# undef SIZEOF_LONG
+# undef SIZEOF_SIZE_T
+# undef SIZEOF_VOID_P
 
-  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL);
-  h1 = gd_delete(D, "something", 0);
-  e1 = gd_error(D);
+# ifdef __LP64__
+#   define SIZEOF_LONG   8
+#   define SIZEOF_SIZE_T 8
+#   define SIZEOF_VOID_P 8
+# else
+#   define SIZEOF_LONG   4
+#   define SIZEOF_SIZE_T 4
+#   define SIZEOF_VOID_P 4
+# endif
+#endif
 
-  CHECKI(e1, GD_E_BAD_CODE);
-  CHECKI(h1, -1);
-
-  gd_discard(D);
-  unlink(format);
-  rmdir(filedir);
-
-  return r;
-}
+#endif

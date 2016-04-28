@@ -21,6 +21,36 @@
 #define NO_IMPORT_ARRAY
 #include "pygetdata.h"
 
+/* Create an array of strings from a NULL-terminated string list */
+static PyObject *gdpyobj_from_strarr(const char **list,
+    const char *char_enc)
+{
+  PyObject *pyobj;
+  size_t i;
+
+  dtrace("%p, %p", list, char_enc);
+
+  pyobj = PyList_New(0);
+  if (pyobj)
+    for (i = 0; list[i] != NULL; ++i) {
+      PyObject *str = gdpyobj_from_string(list[i], char_enc);
+      if (str == NULL) {
+        Py_DECREF(pyobj);
+        pyobj = NULL;
+        break;
+      }
+
+      if (gdpylist_append(pyobj, str)) {
+        Py_DECREF(pyobj);
+        pyobj = NULL;
+        break;
+      }
+    }
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
 /* Dirfile */
 static int gdpy_callback_func(gd_parser_data_t *pdata, void *extra)
 {
@@ -68,7 +98,7 @@ static int gdpy_callback_func(gd_parser_data_t *pdata, void *extra)
           self->callback_exception = 1;
           break;
         case 1:
-          r = (int)PyInt_AsLong(PyTuple_GetItem(result, 0));
+          r = (int)gdpy_long_from_pyobj(PyTuple_GetItem(result, 0));
 
           if (PyErr_Occurred()) {
             self->callback_exception = 1;
@@ -76,14 +106,16 @@ static int gdpy_callback_func(gd_parser_data_t *pdata, void *extra)
           }
           break;
         default:
-          r = (int)PyInt_AsLong(PyTuple_GetItem(result, 0));
+          r = (int)gdpy_long_from_pyobj(PyTuple_GetItem(result, 0));
 
           if (PyErr_Occurred()) {
             self->callback_exception = 1;
             r = GD_SYNTAX_ABORT;
           }
 
-          new_string = PyString_AsString(PyTuple_GetItem(result, 1));
+          new_string = gdpy_string_from_pyobj(PyTuple_GetItem(result, 1),
+              self->char_enc,
+              "Element two of tuple returned from callback must be string", 0);
 
           if (new_string == NULL) {
             self->callback_exception = 1;
@@ -92,11 +124,8 @@ static int gdpy_callback_func(gd_parser_data_t *pdata, void *extra)
 
           pdata->line = new_string;
       }
-
-      if (PyTuple_Size(result) == 1) {
-      }
-    } else if (PyString_Check(result)) {
-      new_string = PyString_AsString(result);
+    } else if (gdpy_encobj_check(result) || PyUnicode_Check(result)) {
+      new_string = gdpy_string_from_pyobj(result, self->char_enc, NULL, 0);
 
       if (new_string == NULL) {
         self->callback_exception = 1;
@@ -105,8 +134,8 @@ static int gdpy_callback_func(gd_parser_data_t *pdata, void *extra)
 
       r = GD_SYNTAX_RESCAN;
       pdata->line = new_string;
-    } else if (PyInt_Check(result))
-      r = (int)PyInt_AsLong(result);
+    } else if (gdpyint_check(result))
+      r = (int)gdpy_long_from_pyobj(result);
     else {
       PyErr_SetString(PyExc_TypeError,
           "bad return type from callback function");
@@ -126,6 +155,7 @@ static void gdpy_dirfile_delete(struct gdpy_dirfile_t *self)
   free(self->verbose_prefix);
   Py_XDECREF(self->callback);
   Py_XDECREF(self->callback_data);
+  free(self->char_enc);
   PyObject_Del(self);
 
   dreturnvoid();
@@ -146,6 +176,7 @@ static PyObject *gdpy_dirfile_create(PyTypeObject *type, PyObject *args,
     self->verbose_prefix = NULL;
     self->callback = NULL;
     self->callback_data = NULL;
+    gdpy_copy_global_charenc(self->char_enc);
   }
 
   dreturn("%p", self);
@@ -157,31 +188,41 @@ static int gdpy_dirfile_init(struct gdpy_dirfile_t *self, PyObject *args,
 {
   PyObject *pycallback = NULL;
   PyObject *pycallback_data = Py_None;
-  char *keywords[] = {"name", "flags", "callback", "extra", NULL};
+  PyObject *char_enc = NULL;
+  char *keywords[] = {"name", "flags", "callback", "extra",
+    "character_encoding", NULL};
   PyObject *name = NULL;
   unsigned long flags = GD_RDONLY;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "|OkOO:pygetdata.dirfile.__init__", keywords, &name, &flags,
-        &pycallback, &pycallback_data))
+        "|OkOOO:pygetdata.dirfile.__init__", keywords, &name, &flags,
+        &pycallback, &pycallback_data, &char_enc))
   {
     dreturn("%i", -1);
     return -1;
+  }
+
+  /* First, try to update character_encoding, if requested */
+  if (char_enc) {
+    if (gdpy_parse_charenc(&self->char_enc, char_enc)) {
+      dreturn("%i", -1);
+      return -1;
+    }
   }
 
   /* An invalid dirfile was requested */
   if (name == NULL || name == Py_None) {
     self->D = gd_invalid_dirfile();
 
-    PYGD_CHECK_ERROR(self->D, -1);
+    GDPY_CHECK_ERROR(self->D, -1, self->char_enc);
 
     dreturn("%i", 0);
     return 0;
   }
 
-  if (!PyString_Check(name)) {
+  if (!gdpy_encobj_check(name) && !PyUnicode_Check(name)) {
     PyErr_SetString(PyExc_TypeError, "name must be a string or None");
     dreturn("%i", -1);
     return -1;
@@ -201,15 +242,16 @@ static int gdpy_dirfile_init(struct gdpy_dirfile_t *self, PyObject *args,
   self->callback_data = pycallback_data;
   self->callback_exception = 0;
 
-  self->D = gd_cbopen(PyString_AsString(name), (unsigned int)flags,
-      (pycallback == NULL) ? NULL : gdpy_callback_func, self);
+  self->D = gd_cbopen(gdpy_path_from_pyobj(name, self->char_enc, 0),
+      (unsigned int)flags, (pycallback == NULL) ? NULL : gdpy_callback_func,
+      self);
 
   if (self->callback_exception) {
     dreturn("%i", -1);
     return -1;
   }
 
-  PYGD_CHECK_ERROR(self->D, -1);
+  GDPY_CHECK_ERROR(self->D, -1, self->char_enc);
 
   dreturn("%i", 0);
   return 0;
@@ -232,7 +274,7 @@ static PyObject *gdpy_dirfile_add(struct gdpy_dirfile_t *self,
 
   gd_add(self->D, entry->E);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -243,21 +285,23 @@ static PyObject *gdpy_dirfile_addspec(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "spec", "fragment_index", NULL };
-  const char *spec;
+  char *spec;
   int fragment = 0;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "s|i:pygetdata.dirfile.add_spec",
-        keywords, &spec, &fragment))
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "et|i:pygetdata.dirfile.add_spec", keywords, self->char_enc, &spec,
+        &fragment))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_add_spec(self->D, spec, fragment);
+  PyMem_Free(spec);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -274,16 +318,17 @@ static PyObject *gdpy_dirfile_alter(struct gdpy_dirfile_t *self,
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "sO!|i:pygetdata.dirfile.alter",
-        keywords, &field_code, &gdpy_entry, &entry, &recode))
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "etO!|i:pygetdata.dirfile.alter",
+        keywords, self->char_enc, &field_code, &gdpy_entry, &entry, &recode))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_alter_entry(self->D, field_code, entry->E, recode);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -294,21 +339,23 @@ static PyObject *gdpy_dirfile_alterspec(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "spec", "recode", NULL };
-  const char *spec;
+  char *spec;
   int recode = 0;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s|i:pygetdata.dirfile.alter_spec", keywords, &spec, &recode))
+        "et|i:pygetdata.dirfile.alter_spec", keywords, self->char_enc, &spec,
+        &recode))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_alter_spec(self->D, spec, recode);
+  PyMem_Free(spec);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -320,7 +367,7 @@ static PyObject *gdpy_dirfile_close(struct gdpy_dirfile_t *self)
   dtrace("%p", self);
 
   if (gd_close(self->D))
-    PYGD_CHECK_ERROR(self->D, NULL);
+    GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   self->D = gd_invalid_dirfile();
 
@@ -333,21 +380,22 @@ static PyObject *gdpy_dirfile_delentry(struct gdpy_dirfile_t *self,
     void *args, void *keys)
 {
   char *keywords[] = {"field_code", "flags", NULL};
-  const char *field_code;
+  char *field_code;
   unsigned int flags = 0;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s|I:pygetdata.dirfile.delete", keywords, &field_code, &flags))
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "et|I:pygetdata.dirfile.delete",
+        keywords, self->char_enc, &field_code, &flags))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_delete(self->D, field_code, flags);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -359,7 +407,7 @@ static PyObject *gdpy_dirfile_discard(struct gdpy_dirfile_t *self)
   dtrace("%p", self);
 
   if (gd_discard(self->D)) {
-    PYGD_CHECK_ERROR(self->D, NULL);
+    GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
   }
 
   /* Here we replace D with an empty, invalid dirfile object.  */
@@ -375,7 +423,7 @@ static PyObject *gdpy_dirfile_getcarray(struct gdpy_dirfile_t *self,
 {
   char *keywords[] = {"field_code", "return_type", "start", "len", "as_list",
     NULL};
-  const char *field_code;
+  char *field_code;
   unsigned int start = 0;
   unsigned PY_LONG_LONG len = 0;
   int as_list = 0;
@@ -387,8 +435,8 @@ static PyObject *gdpy_dirfile_getcarray(struct gdpy_dirfile_t *self,
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s|OIKi:pygetdata.dirfile.get_carray", keywords, &field_code,
-        &return_type_obj, &start, &len, &as_list))
+        "et|OIKi:pygetdata.dirfile.get_carray", keywords, self->char_enc,
+        &field_code, &return_type_obj, &start, &len, &as_list))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -396,16 +444,18 @@ static PyObject *gdpy_dirfile_getcarray(struct gdpy_dirfile_t *self,
 
   /* get return type */
   if (return_type_obj) {
-    return_type = (gd_type_t)PyInt_AsLong(return_type_obj);
+    return_type = (gd_type_t)gdpy_long_from_pyobj(return_type_obj);
     if (PyErr_Occurred()) {
+      PyMem_Free(field_code);
       dreturn("%p", NULL);
       return NULL;
     }
   } else {
     return_type = gd_native_type(self->D, field_code);
-    PYGD_CHECK_ERROR(self->D, NULL);
+    GDPY_CHECK_ERROR2(self->D, NULL, PyMem_Free(field_code), self->char_enc);
   }
 
+  /* Handle GD_NULL */
   if (return_type == GD_NULL) {
     if (len == 0)
       gd_get_carray(self->D, field_code, GD_NULL, NULL);
@@ -413,13 +463,16 @@ static PyObject *gdpy_dirfile_getcarray(struct gdpy_dirfile_t *self,
       gd_get_carray_slice(self->D, field_code, start, (size_t)len, GD_NULL,
           NULL);
 
-    PYGD_CHECK_ERROR(self->D, NULL);
+    PyMem_Free(field_code);
+
+    GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
     Py_INCREF(Py_None);
     dreturn("%p", Py_None);
     return Py_None;
   }
 
+  /* Non-GD_NULL return_type */
   if (len == 0) {
     len = gd_array_len(self->D, field_code);
     if (len > start)
@@ -440,16 +493,17 @@ static PyObject *gdpy_dirfile_getcarray(struct gdpy_dirfile_t *self,
       pyobj = PyArray_SimpleNew(1, dims, gdpy_npytype_from_type(return_type));
       data = PyArray_DATA(pyobj);
     } else
-      data = malloc(len * GD_SIZE(return_type));
+      data = malloc((size_t)len * GD_SIZE(return_type));
 
     gd_get_carray_slice(self->D, field_code, start, (size_t)len, return_type,
         data);
+    PyMem_Free(field_code);
 
     if (!as_list)
-      PYGD_CHECK_ERROR(self->D, NULL);
+      GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
     else {
-      PYGD_CHECK_ERROR2(self->D, NULL, free(data));
-      pyobj = gdpy_convert_to_pylist(data, return_type, len);
+      GDPY_CHECK_ERROR2(self->D, NULL, free(data), self->char_enc);
+      pyobj = gdpy_convert_to_pylist(data, return_type, (size_t)len);
 
       free(data);
     }
@@ -463,7 +517,7 @@ static PyObject *gdpy_dirfile_getconstant(struct gdpy_dirfile_t *self,
     void *args, void *keys)
 {
   char *keywords[] = {"field_code", "return_type", NULL};
-  const char *field_code;
+  char *field_code;
   PyObject *return_type_obj = NULL;
   gd_type_t return_type;
   char data[16];
@@ -472,8 +526,8 @@ static PyObject *gdpy_dirfile_getconstant(struct gdpy_dirfile_t *self,
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s|O:pygetdata.dirfile.get_constant", keywords, &field_code,
-        &return_type_obj))
+        "et|O:pygetdata.dirfile.get_constant", keywords, self->char_enc,
+        &field_code, &return_type_obj))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -481,21 +535,24 @@ static PyObject *gdpy_dirfile_getconstant(struct gdpy_dirfile_t *self,
 
   /* get return type */
   if (return_type_obj) {
-    return_type = (gd_type_t)PyInt_AsLong(return_type_obj);
+    return_type = (gd_type_t)gdpy_long_from_pyobj(return_type_obj);
     if (PyErr_Occurred()) {
+      PyMem_Free(field_code);
       dreturn("%p", NULL);
       return NULL;
     }
   } else {
     return_type = gd_native_type(self->D, field_code);
-    PYGD_CHECK_ERROR(self->D, NULL);
+    GDPY_CHECK_ERROR2(self->D, NULL, PyMem_Free(field_code), self->char_enc);
   }
 
   gd_get_constant(self->D, field_code, return_type, data);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  PyMem_Free(field_code);
 
-  pyobj = gdpy_convert_to_pyobj(data, return_type);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
+
+  pyobj = gdpy_convert_to_pyobj(data, return_type, 1);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -505,23 +562,25 @@ static PyObject *gdpy_dirfile_arraylen(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
   size_t len;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirfile.array_len",
-        keywords, &field_code)) {
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "et:pygetdata.dirfile.array_len",
+        keywords, self->char_enc, &field_code))
+  {
     dreturn ("%p", NULL);
     return NULL;
   }
 
   len = gd_array_len(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyInt_FromLong((long)len);
+  pyobj = gdpyint_fromlong((long)len);
   dreturn("%p", pyobj);
   return pyobj;
 }
@@ -533,8 +592,8 @@ static PyObject *gdpy_dirfile_carraylen(struct gdpy_dirfile_t *self,
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  PyErr_WarnEx(PyExc_DeprecationWarning, "pygetdata.dirfile.carray_len is "
-      "deprecated; use pygetdata.dirfile.array_len instead.", 1);
+  PyErr_Warn(PyExc_DeprecationWarning, "pygetdata.dirfile.carray_len is "
+      "deprecated; use pygetdata.dirfile.array_len instead.");
 
   pyobj = gdpy_dirfile_arraylen(self, args, keys);
 
@@ -563,15 +622,18 @@ static PyObject *gdpy_dirfile_carrays(struct gdpy_dirfile_t *self,
 
   fields = gd_field_list_by_type(self->D, GD_CARRAY_ENTRY);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   carrays = gd_carrays(self->D, (gd_type_t)return_type);
 
   pyobj = PyList_New(0);
 
   for (i = 0; carrays[i].n != 0; ++i) {
-    PyObject *pydata;
-    if (!as_list) {
+    PyObject *pydata, *name;
+    if (return_type == GD_NULL) {
+      Py_INCREF(Py_None);
+      pydata = Py_None;
+    } else if (!as_list) {
       dims[0] = (npy_intp)carrays[i].n;
       pydata = PyArray_SimpleNew(1, dims, gdpy_npytype_from_type(return_type));
       memcpy(PyArray_DATA(pydata), carrays[i].d, GD_SIZE(return_type) *
@@ -579,7 +641,16 @@ static PyObject *gdpy_dirfile_carrays(struct gdpy_dirfile_t *self,
     } else
       pydata = gdpy_convert_to_pylist(carrays[i].d, return_type, carrays[i].n);
 
-    gdpylist_append(pyobj, Py_BuildValue("sN", fields[i], pydata));
+    name = gdpyobj_from_string(fields[i], self->char_enc);
+
+    if (name == NULL) {
+      Py_DECREF(pydata);
+      Py_DECREF(pyobj);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    gdpylist_append(pyobj, Py_BuildValue("NN", name, pydata));
   }
 
   dreturn("%p", pyobj);
@@ -607,18 +678,27 @@ static PyObject *gdpy_dirfile_getconstants(struct gdpy_dirfile_t *self,
 
   fields = gd_field_list_by_type(self->D, GD_CONST_ENTRY);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   values = gd_constants(self->D, (gd_type_t)return_type);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   pyobj = PyList_New(0);
 
-  for (i = 0; fields[i] != NULL; ++i)
-    gdpylist_append(pyobj, Py_BuildValue("sN", fields[i],
+  for (i = 0; fields[i] != NULL; ++i) {
+    PyObject *name = gdpyobj_from_string(fields[i], self->char_enc);
+
+    if (name == NULL) {
+      Py_DECREF(pyobj);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    gdpylist_append(pyobj, Py_BuildValue("NN", name, 
           gdpy_convert_to_pyobj(values + i * GD_SIZE(return_type),
-            return_type)));
+            return_type, 1)));
+  }
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -629,7 +709,7 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
 {
   char *keywords[] = { "field_code", "return_type", "first_frame",
     "first_sample", "num_frames", "num_samples", "as_list", NULL };
-  const char *field_code;
+  char *field_code;
   PY_LONG_LONG first_frame = 0, first_sample = 0;
   PyObject *num_frames_obj = NULL, *num_samples_obj = NULL;
   PyObject *return_type_obj = NULL;
@@ -644,49 +724,52 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s|OLLOOi:pygetdata.dirfile.getdata", keywords, &field_code,
-        &return_type_obj, &first_frame, &first_sample, &num_frames_obj,
-        &num_samples_obj, &as_list))
+        "et|OLLOOi:pygetdata.dirfile.getdata", keywords, self->char_enc,
+        &field_code, &return_type_obj, &first_frame, &first_sample,
+        &num_frames_obj, &num_samples_obj, &as_list))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  PYGD_CHECK_ERROR(self->D, NULL);
-
   /* get return type */
   if (return_type_obj) {
-    return_type = (gd_type_t)PyInt_AsLong(return_type_obj);
+    return_type = (gd_type_t)gdpy_long_from_pyobj(return_type_obj);
     if (PyErr_Occurred()) {
+      PyMem_Free(field_code);
       dreturn("%p", NULL);
       return NULL;
     }
   } else {
     return_type = gd_native_type(self->D, field_code);
-    PYGD_CHECK_ERROR(self->D, NULL);
+    GDPY_CHECK_ERROR2(self->D, NULL, PyMem_Free(field_code), self->char_enc);
   }
 
   if (num_frames_obj) {
-    num_frames = PyInt_AsLong(num_frames_obj);
+    num_frames = gdpy_long_from_pyobj(num_frames_obj);
     if (num_frames == -1 && PyErr_Occurred()) {
+      PyMem_Free(field_code);
       dreturn("%p", NULL);
       return NULL;
     } else if (num_frames < 0) {
       PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.gd_getdata(): "
           "num_frames must be non-negative");
+      PyMem_Free(field_code);
       dreturn("%p", NULL);
       return NULL;
     }
   }
 
   if (num_samples_obj) {
-    num_samples = PyInt_AsLong(num_samples_obj);
+    num_samples = gdpy_long_from_pyobj(num_samples_obj);
     if (num_samples == -1 && PyErr_Occurred()) {
+      PyMem_Free(field_code);
       dreturn("%p", NULL);
       return NULL;
     } else if (num_samples < 0) {
       PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.gd_getdata(): "
           "num_samples must be non-negative");
+      PyMem_Free(field_code);
       dreturn("%p", NULL);
       return NULL;
     }
@@ -700,11 +783,11 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
   if (read_to_end || num_frames) {
     spf = gd_spf(self->D, field_code);
 
-    PYGD_CHECK_ERROR(self->D, NULL);
+    GDPY_CHECK_ERROR2(self->D, NULL, PyMem_Free(field_code), self->char_enc);
 
     if (read_to_end) {
       num_samples = gd_nframes64(self->D) * spf;
-      PYGD_CHECK_ERROR(self->D, NULL);
+      GDPY_CHECK_ERROR2(self->D, NULL, PyMem_Free(field_code), self->char_enc);
 
       /* don't read past the frame indicated by nframes */
       num_samples -= first_frame * spf - first_sample;
@@ -719,11 +802,13 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
   if (return_type == GD_NULL) {
     ns = gd_getdata64(self->D, field_code, first_frame, first_sample, 0,
         (size_t)num_samples, GD_NULL, NULL);
+    PyMem_Free(field_code);
     
-    PYGD_CHECK_ERROR(self->D, NULL);
+    GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
     pyobj = PyLong_FromLongLong(ns);
   } else if (num_samples == 0) {
+    PyMem_Free(field_code);
     if (!as_list)
       pyobj = PyArray_ZEROS(1, dims, gdpy_npytype_from_type(return_type), 0);
     else
@@ -739,9 +824,10 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
 
     ns = gd_getdata64(self->D, field_code, first_frame, first_sample, 0,
         (size_t)num_samples, return_type, data);
+    PyMem_Free(field_code);
 
     if (!as_list) {
-      PYGD_CHECK_ERROR(self->D, NULL);
+      GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
       /* resize, if necessary */
       if (ns < num_samples) {
         PyObject *check;
@@ -759,7 +845,7 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
                              INCREF'd Py_None on success */
       }
     } else {
-      PYGD_CHECK_ERROR2(self->D, NULL, free(data));
+      GDPY_CHECK_ERROR2(self->D, NULL, free(data), self->char_enc);
       pyobj = gdpy_convert_to_pylist(data, return_type, ns);
 
       free(data);
@@ -774,15 +860,14 @@ static PyObject *gdpy_dirfile_getentry(struct gdpy_dirfile_t *self,
     void *args, void *keys)
 {
   char *keywords[] = {"field_code", NULL};
-  const char *field_code;
+  char *field_code;
   struct gdpy_entry_t *obj;
   gd_entry_t *E;
-  int e;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirfile.entry",
-        keywords, &field_code))
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "et:pygetdata.dirfile.entry",
+        keywords, self->char_enc, &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -791,19 +876,16 @@ static PyObject *gdpy_dirfile_getentry(struct gdpy_dirfile_t *self,
   E = malloc(sizeof(gd_entry_t));
 
   if (E == NULL) {
+    PyMem_Free(field_code);
     PyErr_NoMemory();
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_entry(self->D, field_code, E);
+  PyMem_Free(field_code);
 
-  if ((e = gd_error(self->D))) {
-    PYGD_REPORT_ERROR(self->D,e);
-    free(E);
-    dreturn("%p", NULL);
-    return NULL;
-  }
+  GDPY_CHECK_ERROR2(self->D, NULL, free(E), self->char_enc);
 
   obj = (struct gdpy_entry_t*)gdpy_entry.tp_alloc(&gdpy_entry, 0);
 
@@ -816,6 +898,11 @@ static PyObject *gdpy_dirfile_getentry(struct gdpy_dirfile_t *self,
   }
 
   obj->E = E;
+
+  /* These entry objects copy the dirfile's character_encoding, not the global
+   * pygetdata.character_encoding
+   */
+  obj->char_enc = self->char_enc;
   Py_INCREF(obj);
   dreturn("%p", obj);
   return (PyObject*)obj;
@@ -828,7 +915,7 @@ static PyObject *gdpy_dirfile_geterror(struct gdpy_dirfile_t *self,
 
   dtrace("%p, %p", self, closure);
 
-  error = PyInt_FromLong(gd_error(self->D));
+  error = gdpyint_fromlong(gd_error(self->D));
 
   dreturn("%p", error);
   return error;
@@ -841,7 +928,7 @@ static PyObject *gdpy_dirfile_geterrorcount(struct gdpy_dirfile_t *self,
 
   dtrace("%p, %p", self, closure);
 
-  count = PyInt_FromLong(gd_error_count(self->D));
+  count = gdpyint_fromlong(gd_error_count(self->D));
 
   dreturn("%p", count);
   return count;
@@ -883,24 +970,26 @@ static PyObject *gdpy_dirfile_getfragmentindex(struct gdpy_dirfile_t *self,
     void *args, void *keys)
 {
   char *keywords[] = {"field_code", NULL};
-  const char *field_code;
+  char *field_code;
   PyObject *pyobj;
   int index;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.fragment_index", keywords, &field_code))
+        "et:pygetdata.dirfile.fragment_index", keywords, self->char_enc,
+        &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   index = gd_fragment_index(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyInt_FromLong(index);
+  pyobj = gdpyint_fromlong(index);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -915,7 +1004,7 @@ static PyObject *gdpy_dirfile_geterrorstring(struct gdpy_dirfile_t *self,
   dtrace("%p, %p", self, closure);
 
   estring = gd_error_string(self->D, NULL, 0);
-  pyobj = PyString_FromString(estring);
+  pyobj = gdpyobj_from_estring(estring, self->char_enc);
   free(estring);
 
   dreturn("%p", pyobj);
@@ -931,9 +1020,9 @@ static PyObject *gdpy_dirfile_getvectorlist(struct gdpy_dirfile_t *self)
 
   vectors = gd_vector_list(self->D);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = gdpy_to_pystringlist(vectors);
+  pyobj = gdpyobj_from_strarr(vectors, self->char_enc);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -961,9 +1050,9 @@ static PyObject *gdpy_dirfile_getfieldlist(struct gdpy_dirfile_t *self,
   else
     fields = gd_field_list_by_type(self->D, (gd_entype_t)type);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = gdpy_to_pystringlist(fields);
+  pyobj = gdpyobj_from_strarr(fields, self->char_enc);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -973,20 +1062,21 @@ static PyObject *gdpy_dirfile_flush(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code = NULL;
+  char *field_code = NULL;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "|s:pygetdata.dirfile.flush",
-        keywords, &field_code))
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "|et:pygetdata.dirfile.flush",
+        keywords, self->char_enc, &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_flush(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -997,20 +1087,21 @@ static PyObject *gdpy_dirfile_sync(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code = NULL;
+  char *field_code = NULL;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "|s:pygetdata.dirfile.sync",
-        keywords, &field_code))
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "|et:pygetdata.dirfile.sync",
+        keywords, self->char_enc, &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_sync(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -1021,20 +1112,22 @@ static PyObject *gdpy_dirfile_raw_close(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code = NULL;
+  char *field_code = NULL;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "|s:pygetdata.dirfile.raw_close",
-        keywords, &field_code))
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "|et:pygetdata.dirfile.raw_close", keywords, self->char_enc,
+        &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_raw_close(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -1046,7 +1139,7 @@ static PyObject *gdpy_dirfile_include(struct gdpy_dirfile_t *self,
 {
   char *keywords[] = { "file", "fragment_index", "flags", "prefix", "suffix",
     NULL };
-  const char *file = NULL;
+  char *file = NULL;
   int fragment_index = 0;
   unsigned long flags = 0;
   char *prefix = NULL, *suffix = NULL;
@@ -1056,8 +1149,9 @@ static PyObject *gdpy_dirfile_include(struct gdpy_dirfile_t *self,
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s|ikss:pygetdata.dirfile.include", keywords, &file, &fragment_index,
-        &flags, &prefix, &suffix))
+        "et|iketet:pygetdata.dirfile.include", keywords, self->char_enc, &file,
+        &fragment_index, &flags, self->char_enc, &prefix, self->char_enc,
+        &suffix))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -1067,15 +1161,18 @@ static PyObject *gdpy_dirfile_include(struct gdpy_dirfile_t *self,
 
   index = gd_include_affix(self->D, file, fragment_index, prefix, suffix,
       flags);
+  PyMem_Free(file);
+  PyMem_Free(prefix);
+  PyMem_Free(suffix);
 
   if (self->callback_exception) {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyInt_FromLong(index);
+  pyobj = gdpyint_fromlong(index);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1086,20 +1183,21 @@ static PyObject *gdpy_dirfile_madd(struct gdpy_dirfile_t *self,
 {
   char *keywords[] = { "entry", "parent", NULL };
   struct gdpy_entry_t *entry = NULL;
-  const char *parent;
+  char *parent;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "O!s:pygetdata.dirfile.madd",
-        keywords, &gdpy_entry, &entry, &parent))
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "O!et:pygetdata.dirfile.madd",
+        keywords, &gdpy_entry, &entry, self->char_enc, &parent))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_madd(self->D, entry->E, parent);
+  PyMem_Free(parent);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -1110,21 +1208,24 @@ static PyObject *gdpy_dirfile_maddspec(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "spec", "parent", NULL };
-  const char *spec;
-  const char *parent;
+  char *spec;
+  char *parent;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "ss:pygetdata.dirfile.madd_spec",
-        keywords, &spec, &parent))
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "etet:pygetdata.dirfile.madd_spec", keywords, self->char_enc, &spec,
+        self->char_enc, &parent))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_madd_spec(self->D, spec, parent);
+  PyMem_Free(parent);
+  PyMem_Free(spec);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -1135,22 +1236,24 @@ static PyObject *gdpy_dirfile_malterspec(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "spec", "parent", "recode", NULL };
-  const char *spec, *parent;
+  char *spec, *parent;
   int recode = 0;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "ss|i:pygetdata.dirfile.malter_spec", keywords, &spec, &parent,
-        &recode))
+        "etet|i:pygetdata.dirfile.malter_spec", keywords, self->char_enc, &spec,
+        self->char_enc, &parent, &recode))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_malter_spec(self->D, spec, parent, recode);
+  PyMem_Free(parent);
+  PyMem_Free(spec);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -1162,7 +1265,7 @@ static PyObject *gdpy_dirfile_mcarrays(struct gdpy_dirfile_t *self,
 {
   char *keywords[] = {"parent", "return_type", "as_list", NULL};
   const char **fields;
-  const char *parent;
+  char *parent;
   int as_list = 0, i, return_type;
   const gd_carray_t *carrays;
   PyObject *pyobj;
@@ -1171,8 +1274,8 @@ static PyObject *gdpy_dirfile_mcarrays(struct gdpy_dirfile_t *self,
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "si|i:pygetdata.dirfile.mcarrays", keywords, &parent, &return_type,
-        &as_list))
+        "eti|i:pygetdata.dirfile.mcarrays", keywords, self->char_enc, &parent,
+        &return_type, &as_list))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -1180,15 +1283,20 @@ static PyObject *gdpy_dirfile_mcarrays(struct gdpy_dirfile_t *self,
 
   fields = gd_mfield_list_by_type(self->D, parent, GD_CARRAY_ENTRY);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR2(self->D, NULL, PyMem_Free(parent), self->char_enc);
 
   carrays = gd_mcarrays(self->D, parent, (gd_type_t)return_type);
+  PyMem_Free(parent);
 
   pyobj = PyList_New(0);
 
   for (i = 0; carrays[i].n != 0; ++i) {
-    PyObject *pydata;
-    if (!as_list) {
+    PyObject *pydata, *name;
+
+    if (return_type == GD_NULL) {
+      Py_INCREF(Py_None);
+      pydata = Py_None;
+    } else if (!as_list) {
       dims[0] = (npy_intp)carrays[i].n;
       pydata = PyArray_SimpleNew(1, dims, gdpy_npytype_from_type(return_type));
       memcpy(PyArray_DATA(pydata), carrays[i].d, GD_SIZE(return_type) *
@@ -1196,7 +1304,16 @@ static PyObject *gdpy_dirfile_mcarrays(struct gdpy_dirfile_t *self,
     } else
       pydata = gdpy_convert_to_pylist(carrays[i].d, return_type, carrays[i].n);
 
-    gdpylist_append(pyobj, Py_BuildValue("sN", fields[i], pydata));
+    name = gdpyobj_from_string(fields[i], self->char_enc);
+
+    if (name == NULL) {
+      Py_DECREF(pydata);
+      Py_DECREF(pyobj);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    gdpylist_append(pyobj, Py_BuildValue("NN", name, pydata));
   }
 
   dreturn("%p", pyobj);
@@ -1210,14 +1327,15 @@ static PyObject *gdpy_dirfile_getmconstants(struct gdpy_dirfile_t *self,
   char *keywords[] = {"parent", "return_type", NULL};
   const char **fields;
   const char *values;
-  const char *parent = NULL;
+  char *parent = NULL;
   int return_type;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "si:pygetdata.dirfile.mconstants", keywords, &parent, &return_type))
+        "eti:pygetdata.dirfile.mconstants", keywords, self->char_enc, &parent,
+        &return_type))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -1225,18 +1343,28 @@ static PyObject *gdpy_dirfile_getmconstants(struct gdpy_dirfile_t *self,
 
   fields = gd_mfield_list_by_type(self->D, parent, GD_CONST_ENTRY);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR2(self->D, NULL, PyMem_Free(parent), self->char_enc);
 
   values = gd_mconstants(self->D, parent, (gd_type_t)return_type);
+  PyMem_Free(parent);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   pyobj = PyList_New(0);
 
-  for (i = 0; fields[i] != NULL; ++i)
-    gdpylist_append(pyobj, Py_BuildValue("sN", fields[i],
+  for (i = 0; fields[i] != NULL; ++i) {
+    PyObject *name = gdpyobj_from_string(fields[i], self->char_enc);
+
+    if (name == NULL) {
+      Py_DECREF(pyobj);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    gdpylist_append(pyobj, Py_BuildValue("NN", name,
           gdpy_convert_to_pyobj(values + i * GD_SIZE(return_type),
-            return_type)));
+            return_type, 1)));
+  }
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1248,7 +1376,7 @@ static PyObject *gdpy_dirfile_metaflush(struct gdpy_dirfile_t *self)
 
   gd_metaflush(self->D);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -1260,14 +1388,15 @@ static PyObject *gdpy_dirfile_getmfieldlist(struct gdpy_dirfile_t *self,
 {
   const char **fields;
   char *keywords[] = { "parent", "type", NULL };
-  const char *parent = NULL;
+  char *parent = NULL;
   int type = GD_NO_ENTRY;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s|i:pygetdata.dirfile.field_list_by_type", keywords, &parent, &type))
+        "et|i:pygetdata.dirfile.field_list_by_type", keywords, self->char_enc,
+        &parent, &type))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -1277,10 +1406,11 @@ static PyObject *gdpy_dirfile_getmfieldlist(struct gdpy_dirfile_t *self,
     fields = gd_mfield_list(self->D, parent);
   else
     fields = gd_mfield_list_by_type(self->D, parent, (gd_entype_t)type);
+  PyMem_Free(parent);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = gdpy_to_pystringlist(fields);
+  pyobj = gdpyobj_from_strarr(fields, self->char_enc);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1296,9 +1426,9 @@ static PyObject *gdpy_dirfile_getname(struct gdpy_dirfile_t *self,
 
   name = gd_dirfilename(self->D);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyString_FromString(name);
+  pyobj = gdpyobj_from_path(name);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1311,13 +1441,13 @@ static PyObject *gdpy_dirfile_getmstrings(struct gdpy_dirfile_t *self,
   char *keywords[] = {"parent", NULL};
   const char **fields;
   const char **values;
-  const char *parent = NULL;
+  char *parent = NULL;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirfile.mstrings",
-        keywords, &parent))
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "et:pygetdata.dirfile.mstrings",
+        keywords, self->char_enc, &parent))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -1325,16 +1455,33 @@ static PyObject *gdpy_dirfile_getmstrings(struct gdpy_dirfile_t *self,
 
   fields = gd_mfield_list_by_type(self->D, parent, GD_STRING_ENTRY);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR2(self->D, NULL, PyMem_Free(parent), self->char_enc);
 
   values = gd_mstrings(self->D, parent);
+  PyMem_Free(parent);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   pyobj = PyList_New(0);
 
-  for (i = 0; fields[i] != NULL; ++i)
-    gdpylist_append(pyobj, Py_BuildValue("ss", fields[i], values[i]));
+  for (i = 0; fields[i] != NULL; ++i) {
+    PyObject *name = NULL, *value = NULL;
+
+    name = gdpyobj_from_string(fields[i], self->char_enc);
+    
+    if (name)
+      value = gdpyobj_from_string(values[i], self->char_enc);
+
+    if (value == NULL) {
+      if (name)
+        Py_DECREF(name);
+      Py_DECREF(pyobj);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    gdpylist_append(pyobj, Py_BuildValue("NN", name, value));
+  }
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1344,24 +1491,25 @@ static PyObject *gdpy_dirfile_getmvectorlist(struct gdpy_dirfile_t *self,
     void *args, void *keys)
 {
   char *keywords[] = {"parent", NULL};
-  const char *parent = NULL;
+  char *parent = NULL;
   const char **fields;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.mvector_list", keywords, &parent))
+        "et:pygetdata.dirfile.mvector_list", keywords, self->char_enc, &parent))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   fields = gd_mvector_list(self->D, parent);
+  PyMem_Free(parent);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = gdpy_to_pystringlist(fields);
+  pyobj = gdpyobj_from_strarr(fields, self->char_enc);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1371,24 +1519,26 @@ static PyObject *gdpy_dirfile_getrawfilename(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
   char *filename;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.raw_filename", keywords, &field_code))
+        "et:pygetdata.dirfile.raw_filename", keywords, self->char_enc,
+        &field_code))
   {
     dreturn ("%p", NULL);
     return NULL;
   }
 
   filename = gd_raw_filename(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyString_FromString(filename);
+  pyobj = gdpyobj_from_path(filename);
   free(filename);
   dreturn("%p", pyobj);
   return pyobj;
@@ -1398,24 +1548,26 @@ static PyObject *gdpy_dirfile_getnativetype(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
   PyObject *pyobj;
   gd_type_t ntype;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.native_type", keywords, &field_code))
+        "et:pygetdata.dirfile.native_type", keywords, self->char_enc,
+        &field_code))
   {
     dreturn ("%p", NULL);
     return NULL;
   }
 
   ntype = gd_native_type(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyInt_FromLong((long)ntype);
+  pyobj = gdpyint_fromlong((long)ntype);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1425,7 +1577,7 @@ static PyObject *gdpy_dirfile_getnativetypename(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
   char tbuffer[11];
   PyObject *pyobj;
   gd_type_t t;
@@ -1433,21 +1585,23 @@ static PyObject *gdpy_dirfile_getnativetypename(struct gdpy_dirfile_t *self,
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.native_type_name", keywords, &field_code))
+        "et:pygetdata.dirfile.native_type_name", keywords, self->char_enc,
+        &field_code))
   {
     dreturn ("%p", NULL);
     return NULL;
   }
 
   t = gd_native_type(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   sprintf(tbuffer, "%s%i", ((t & GD_COMPLEX) ? "COMPLEX" :
         (t & GD_IEEE754) ? "FLOAT" : (t & GD_SIGNED) ?  "INT" : "UINT"),
       (int)(8 * GD_SIZE(t)));
 
-  pyobj = PyString_FromString(tbuffer);
+  pyobj = gdpystrobj_from_string(tbuffer);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1475,9 +1629,9 @@ static PyObject *gdpy_dirfile_getnfields(struct gdpy_dirfile_t *self,
   else
     nfields = gd_nfields_by_type(self->D, (gd_entype_t)type);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyInt_FromLong((long)nfields);
+  pyobj = gdpyint_fromlong((long)nfields);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1493,9 +1647,9 @@ static PyObject *gdpy_dirfile_getnfragments(struct gdpy_dirfile_t *self,
 
   nfragments = gd_nfragments(self->D);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyInt_FromLong(nfragments);
+  pyobj = gdpyint_fromlong(nfragments);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1511,7 +1665,7 @@ static PyObject *gdpy_dirfile_getnframes(struct gdpy_dirfile_t *self,
 
   nframes = gd_nframes64(self->D);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   pyobj = PyLong_FromLongLong(nframes);
 
@@ -1523,15 +1677,16 @@ static PyObject *gdpy_dirfile_getnmfields(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "parent", "type", NULL };
-  const char *parent = NULL;
+  char *parent = NULL;
   int type = GD_NO_ENTRY;
   unsigned int nmfields;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "s|i:pygetdata.dirfile.nmfields",
-        keywords, &parent, &type))
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "et|i:pygetdata.dirfile.nmfields", keywords, self->char_enc, &parent,
+        &type))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -1541,10 +1696,11 @@ static PyObject *gdpy_dirfile_getnmfields(struct gdpy_dirfile_t *self,
     nmfields = gd_nmfields(self->D, parent);
   else
     nmfields = gd_nmfields_by_type(self->D, parent, (gd_entype_t)type);
+  PyMem_Free(parent);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyInt_FromLong((long)nmfields);
+  pyobj = gdpyint_fromlong((long)nmfields);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1554,24 +1710,25 @@ static PyObject *gdpy_dirfile_getnmvectors(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "parent", NULL };
-  const char *parent = NULL;
+  char *parent = NULL;
   PyObject *pyobj;
   unsigned int nmvectors;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.nmvectors", keywords, &parent))
+        "et:pygetdata.dirfile.nmvectors", keywords, self->char_enc, &parent))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   nmvectors = gd_nmvectors(self->D, parent);
+  PyMem_Free(parent);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyInt_FromLong((long)nmvectors);
+  pyobj = gdpyint_fromlong((long)nmvectors);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1581,22 +1738,23 @@ static PyObject *gdpy_dirfile_getbof(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
   gd_off64_t bof;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.bof", keywords, &field_code))
+        "et:pygetdata.dirfile.bof", keywords, self->char_enc, &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   bof = gd_bof64(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   pyobj = PyLong_FromLongLong(bof);
 
@@ -1608,22 +1766,23 @@ static PyObject *gdpy_dirfile_geteof(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
   PyObject *pyobj;
   gd_off64_t eof;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.eof", keywords, &field_code))
+        "et:pygetdata.dirfile.eof", keywords, self->char_enc, &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   eof = gd_eof64(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   pyobj = PyLong_FromLongLong(eof);
 
@@ -1640,9 +1799,9 @@ static PyObject *gdpy_dirfile_getnvectors(struct gdpy_dirfile_t *self)
 
   nvectors = gd_nvectors(self->D);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyInt_FromLong((long)nvectors);
+  pyobj = gdpyint_fromlong((long)nvectors);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1658,7 +1817,7 @@ static PyObject *gdpy_dirfile_getreference(struct gdpy_dirfile_t *self,
 
   ref = gd_reference(self->D, NULL);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   /* Empty dirfile */
   if (ref == NULL) {
@@ -1667,7 +1826,7 @@ static PyObject *gdpy_dirfile_getreference(struct gdpy_dirfile_t *self,
     return Py_None;
   }
 
-  pyobj = PyString_FromString(ref);
+  pyobj = gdpyobj_from_string(ref, self->char_enc);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1680,7 +1839,8 @@ static int gdpy_dirfile_setreference(struct gdpy_dirfile_t *self,
 
   dtrace("%p, %p, %p", self, value, closure);
 
-  ref = PyString_AsString(value);
+  ref = gdpy_string_from_pyobj(value, self->char_enc,
+      "reference field must be string", 0);
 
   /* TypeError already raised on error */
   if (ref == NULL) {
@@ -1690,7 +1850,7 @@ static int gdpy_dirfile_setreference(struct gdpy_dirfile_t *self,
 
   gd_reference(self->D, ref);
 
-  PYGD_CHECK_ERROR(self->D, -1);
+  GDPY_CHECK_ERROR(self->D, -1, self->char_enc);
 
   dreturn("%i", 0);
   return 0;
@@ -1700,15 +1860,16 @@ static PyObject *gdpy_dirfile_getstring(struct gdpy_dirfile_t *self,
     void *args, void *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
   PyObject *pyobj;
   size_t len;
   char *data;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirfile.get_string",
-        keywords, &field_code))
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "et:pygetdata.dirfile.get_string", keywords, self->char_enc,
+        &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -1716,20 +1877,22 @@ static PyObject *gdpy_dirfile_getstring(struct gdpy_dirfile_t *self,
 
   len = gd_get_string(self->D, field_code, 0, NULL);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR2(self->D, NULL, PyMem_Free(field_code), self->char_enc);
 
   data = malloc(len);
   if (data == NULL) {
+    PyMem_Free(field_code);
     PyErr_NoMemory();
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_get_string(self->D, field_code, len, data);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR2(self->D, NULL, free(data));
+  GDPY_CHECK_ERROR2(self->D, NULL, free(data), self->char_enc);
 
-  pyobj = PyString_FromString(data);
+  pyobj = gdpyobj_from_string(data, self->char_enc);
 
   free(data);
 
@@ -1748,16 +1911,32 @@ static PyObject *gdpy_dirfile_getstrings(struct gdpy_dirfile_t *self)
 
   fields = gd_field_list_by_type(self->D, GD_STRING_ENTRY);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   values = gd_strings(self->D);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   pyobj = PyList_New(0);
 
-  for (i = 0; fields[i] != NULL; ++i)
-    gdpylist_append(pyobj, Py_BuildValue("ss", fields[i], values[i]));
+  for (i = 0; fields[i] != NULL; ++i) {
+    PyObject *name = NULL, *value = NULL;
+
+    name = gdpyobj_from_string(fields[i], self->char_enc);
+    
+    if (name)
+      value = gdpyobj_from_string(values[i], self->char_enc);
+
+    if (value == NULL) {
+      if (name)
+        Py_DECREF(name);
+      Py_DECREF(pyobj);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    gdpylist_append(pyobj, Py_BuildValue("NN", name, value));
+  }
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -1767,7 +1946,7 @@ static PyObject *gdpy_dirfile_putconstant(struct gdpy_dirfile_t *self,
     void *args, void *keys)
 {
   char *keywords[] = {"field_code", "value", "type", NULL};
-  const char *field_code;
+  char *field_code;
   PyObject *value;
   int type = GD_UNKNOWN;
   union gdpy_quadruple_value data;
@@ -1776,8 +1955,8 @@ static PyObject *gdpy_dirfile_putconstant(struct gdpy_dirfile_t *self,
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "sO|i:pygetdata.dirfile.put_constant", keywords, &field_code, &value,
-        &type))
+        "etO|i:pygetdata.dirfile.put_constant", keywords, self->char_enc,
+        &field_code, &value, &type))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -1786,6 +1965,7 @@ static PyObject *gdpy_dirfile_putconstant(struct gdpy_dirfile_t *self,
   data_type = gdpy_convert_from_pyobj(value, &data, type);
 
   if (data_type == -1) {
+    PyMem_Free(field_code);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -1799,7 +1979,9 @@ static PyObject *gdpy_dirfile_putconstant(struct gdpy_dirfile_t *self,
   else
     gd_put_constant(self->D, field_code, GD_UINT64, &data.u);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  PyMem_Free(field_code);
+
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -1810,7 +1992,7 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", "data", "type", "start", NULL };
-  const char *field_code;
+  char *field_code;
   unsigned int start = 0;
   size_t len;
   int type = GD_UNKNOWN;
@@ -1820,8 +2002,9 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "sO|iI:pygetdata.dirfile.put_carray", keywords, &field_code, &pyobj,
-        &type, &start)) {
+        "etO|iI:pygetdata.dirfile.put_carray", keywords, self->char_enc,
+        &field_code, &pyobj, &type, &start))
+  {
     dreturn ("%p", NULL);
     return NULL;
   }
@@ -1831,6 +2014,7 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
     if (PyArray_NDIM(pyobj) != 1) {
       PyErr_SetString(PyExc_ValueError,
           "pygetdata.dirfile.put_carray() argument 2 must be one dimensional");
+      PyMem_Free(field_code);
       dreturn("%p", NULL);
       return NULL;
     }
@@ -1841,6 +2025,7 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
       PyErr_SetString(PyExc_TypeError,
           "pygetdata.dirfile.put_carray() argument 2 must be list or NumPy "
           "array.");
+      PyMem_Free(field_code);
       dreturn("%p", NULL);
       return NULL;
     }
@@ -1857,6 +2042,7 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
       if (type == GD_UNKNOWN) {
         PyErr_SetString(PyExc_ValueError,
             "pygetdata.dirfile.put_carray() unknown data type for argument 2.");
+        PyMem_Free(field_code);
         dreturn ("%p", NULL);
         return NULL;
       }
@@ -1864,6 +2050,7 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
       if (!(PyArray_FLAGS(pyobj) & NPY_ALIGNED)) {
         PyErr_SetString(PyExc_ValueError,
             "pygetdata.dirfile.put_carray() argument 2 must be aligned.");
+        PyMem_Free(field_code);
         dreturn ("%p", NULL);
         return NULL;
       }
@@ -1871,6 +2058,7 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
       if (!(PyArray_FLAGS(pyobj) & NPY_C_CONTIGUOUS)) {
         PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.put_carray()"
             " argument 2 must be C-style contiguous.");
+        PyMem_Free(field_code);
         dreturn ("%p", NULL);
         return NULL;
       }
@@ -1884,17 +2072,19 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
         PyErr_SetString(PyExc_ValueError,
             "pygetdata.dirfile.put_carray() unknown data type for argument 2.");
         free(data);
+        PyMem_Free(field_code);
         dreturn ("%p", NULL);
         return NULL;
       }
     }
 
     gd_put_carray_slice(self->D, field_code, start, len, type, data);
+    PyMem_Free(field_code);
 
     if (have_ndarray)
-      PYGD_CHECK_ERROR(self->D, NULL);
+      GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
     else {
-      PYGD_CHECK_ERROR2(self->D, NULL, free(data));
+      GDPY_CHECK_ERROR2(self->D, NULL, free(data), self->char_enc);
 
       free(data);
     }
@@ -1910,7 +2100,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
 {
   char *keywords[] = { "field_code", "data", "type", "first_frame",
     "first_sample", NULL };
-  const char *field_code;
+  char *field_code;
   PY_LONG_LONG first_frame = 0, first_sample = 0;
   int type = GD_UNKNOWN;
   PyObject *pyobj;
@@ -1920,8 +2110,9 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "sO|iLL:pygetdata.dirfile.putdata", keywords, &field_code, &pyobj,
-        &type, &first_frame, &first_sample)) {
+        "etO|iLL:pygetdata.dirfile.putdata", keywords, self->char_enc,
+        &field_code, &pyobj, &type, &first_frame, &first_sample))
+  {
     dreturn ("%p", NULL);
     return NULL;
   }
@@ -1931,6 +2122,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
     if (PyArray_NDIM(pyobj) != 1) {
       PyErr_SetString(PyExc_ValueError,
           "pygetdata.dirfile.putdata() argument 2 must be one dimensional");
+      PyMem_Free(field_code);
       dreturn("%p", NULL);
       return NULL;
     }
@@ -1941,6 +2133,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
       PyErr_SetString(PyExc_TypeError,
           "pygetdata.dirfile.putdata() argument 2 must be list or NumPy "
           "array.");
+      PyMem_Free(field_code);
       dreturn("%p", NULL);
       return NULL;
     }
@@ -1957,6 +2150,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
       if (type == GD_UNKNOWN) {
         PyErr_SetString(PyExc_ValueError,
             "pygetdata.dirfile.putdata() unknown data type for argument 2.");
+        PyMem_Free(field_code);
         dreturn ("%p", NULL);
         return NULL;
       }
@@ -1964,6 +2158,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
       if (!(PyArray_FLAGS(pyobj) & NPY_ALIGNED)) {
         PyErr_SetString(PyExc_ValueError,
             "pygetdata.dirfile.putdata() argument 2 must be aligned.");
+        PyMem_Free(field_code);
         dreturn ("%p", NULL);
         return NULL;
       }
@@ -1971,6 +2166,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
       if (!(PyArray_FLAGS(pyobj) & NPY_C_CONTIGUOUS)) {
         PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.putdata()"
             " argument 2 must be C-style contiguous.");
+        PyMem_Free(field_code);
         dreturn ("%p", NULL);
         return NULL;
       }
@@ -1984,6 +2180,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
         PyErr_SetString(PyExc_ValueError,
             "pygetdata.dirfile.putdata() unknown data type for argument 2.");
         free(data);
+        PyMem_Free(field_code);
         dreturn ("%p", NULL);
         return NULL;
       }
@@ -1991,11 +2188,12 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
 
     ns = gd_putdata64(self->D, field_code, first_frame, first_sample, 0, ns,
         type, data);
+    PyMem_Free(field_code);
 
     if (!have_ndarray)
       free(data);
 
-    PYGD_CHECK_ERROR(self->D, NULL);
+    GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
   }
 
   pyobj = PyLong_FromLongLong(ns);
@@ -2008,21 +2206,24 @@ static PyObject *gdpy_dirfile_putstring(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", "data", NULL };
-  const char *field_code;
-  const char *data;
+  char *field_code;
+  char *data;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "ss:pygetdata.dirfile.put_string", keywords, &field_code, &data))
+        "etet:pygetdata.dirfile.put_string", keywords, self->char_enc,
+        &field_code, self->char_enc, &data))
   {
     dreturn ("%p", NULL);
     return NULL;
   }
 
   gd_put_string(self->D, field_code, data);
+  PyMem_Free(field_code);
+  PyMem_Free(data);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -2033,23 +2234,25 @@ static PyObject *gdpy_dirfile_getspf(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
   PyObject *pyobj;
   unsigned int spf;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirfile.spf",
-        keywords, &field_code)) {
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "et:pygetdata.dirfile.spf",
+        keywords, self->char_enc, &field_code))
+  {
     dreturn ("%p", NULL);
     return NULL;
   }
 
   spf = gd_spf(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyInt_FromLong((long)spf);
+  pyobj = gdpyint_fromlong((long)spf);
   dreturn("%p", pyobj);
   return pyobj;
 }
@@ -2058,19 +2261,21 @@ static PyObject *gdpy_dirfile_validate(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirfile.validate",
-        keywords, &field_code)) {
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "et:pygetdata.dirfile.validate",
+        keywords, self->char_enc, &field_code))
+  {
     dreturn ("%p", NULL);
     return NULL;
   }
 
   gd_validate(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -2081,7 +2286,7 @@ static PyObject *gdpy_dirfile_getframenum(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", "value", "start", "end", NULL };
-  const char *field_code;
+  char *field_code;
   double value, frame;
   PY_LONG_LONG frame_start = 0;
   PY_LONG_LONG frame_end = 0;
@@ -2090,17 +2295,18 @@ static PyObject *gdpy_dirfile_getframenum(struct gdpy_dirfile_t *self,
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "sd|LL:pygetdata.dirfile.framenum", keywords, &field_code, &value,
-        &frame_start, &frame_end))
+        "etd|LL:pygetdata.dirfile.framenum", keywords, self->char_enc,
+        &field_code, &value, &frame_start, &frame_end))
   {
     dreturn ("%p", NULL);
     return NULL;
   }
 
- frame = gd_framenum_subset64(self->D, field_code, value, frame_start,
-     frame_end);
+  frame = gd_framenum_subset64(self->D, field_code, value, frame_start,
+      frame_end);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   pyobj = PyFloat_FromDouble(frame);
   dreturn("%p", pyobj);
@@ -2140,7 +2346,7 @@ static PyObject *gdpy_dirfile_callback(struct gdpy_dirfile_t *self,
   gd_parser_callback(self->D, (pycallback == NULL) ? NULL :
       gdpy_callback_func, self);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -2165,7 +2371,7 @@ static PyObject *gdpy_dirfile_uninclude(struct gdpy_dirfile_t *self,
 
   gd_uninclude(self->D, fragment_index, del);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -2176,21 +2382,22 @@ static PyObject *gdpy_dirfile_move(struct gdpy_dirfile_t *self, PyObject *args,
     PyObject *keys)
 {
   char *keywords[] = { "field_code", "new_fragment", "flags", NULL };
-  const char *field_code;
+  char *field_code;
   int new_fragment;
   unsigned flags = 0;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "si|I:pygetdata.dirfile.move",
-        keywords, &field_code, &new_fragment, &flags)) {
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "eti|I:pygetdata.dirfile.move",
+        keywords, self->char_enc, &field_code, &new_fragment, &flags)) {
     dreturn ("%p", NULL);
     return NULL;
   }
 
   gd_move(self->D, field_code, new_fragment, flags);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -2201,21 +2408,25 @@ static PyObject *gdpy_dirfile_rename(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "old_code", "new_name", "flags", NULL };
-  const char *old_code;
-  const char *new_name;
+  char *old_code;
+  char *new_name;
   unsigned flags = 0;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "ss|I:pygetdata.dirfile.rename",
-        keywords, &old_code, &new_name, &flags)) {
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "etet|I:pygetdata.dirfile.rename", keywords, self->char_enc, &old_code,
+        self->char_enc, &new_name, &flags))
+  {
     dreturn ("%p", NULL);
     return NULL;
   }
 
   gd_rename(self->D, old_code, new_name, flags);
+  PyMem_Free(old_code);
+  PyMem_Free(new_name);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -2232,9 +2443,9 @@ static PyObject *gdpy_dirfile_getstandards(struct gdpy_dirfile_t *self,
 
   vers = gd_dirfile_standards(self->D, GD_VERSION_CURRENT);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyInt_FromLong(vers);
+  pyobj = gdpyint_fromlong(vers);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -2247,7 +2458,7 @@ static int gdpy_dirfile_setstandards(struct gdpy_dirfile_t *self,
 
   dtrace("%p, %p, %p", self, value, closure);
 
-  vers = (int)PyInt_AsLong(value);
+  vers = (int)gdpy_long_from_pyobj(value);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -2256,7 +2467,7 @@ static int gdpy_dirfile_setstandards(struct gdpy_dirfile_t *self,
 
   gd_dirfile_standards(self->D, vers);
 
-  PYGD_CHECK_ERROR(self->D, -1);
+  GDPY_CHECK_ERROR(self->D, -1, self->char_enc);
 
   dreturn("%i", 0);
   return 0;
@@ -2266,7 +2477,7 @@ static PyObject *gdpy_dirfile_seek(struct gdpy_dirfile_t *self, PyObject *args,
     PyObject *keys)
 {
   char *keywords[] = { "field_code", "flags", "frame_num", "sample_num", NULL };
-  const char *field_code;
+  char *field_code;
   PY_LONG_LONG frame_num = 0, sample_num = 0;
   int flags;
   gd_off64_t pos;
@@ -2274,16 +2485,17 @@ static PyObject *gdpy_dirfile_seek(struct gdpy_dirfile_t *self, PyObject *args,
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "si|LL:pygetdata.dirfile.seek",
-        keywords, &field_code, &flags, &frame_num, &sample_num))
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "eti|LL:pygetdata.dirfile.seek",
+        keywords, self->char_enc, &field_code, &flags, &frame_num, &sample_num))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   pos = gd_seek64(self->D, field_code, frame_num, sample_num, flags);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   pyobj = PyLong_FromLongLong((PY_LONG_LONG)pos);
 
@@ -2295,22 +2507,23 @@ static PyObject *gdpy_dirfile_tell(struct gdpy_dirfile_t *self, PyObject *args,
     PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
   gd_off64_t pos;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirfile.tell",
-        keywords, &field_code))
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "et:pygetdata.dirfile.tell",
+        keywords, self->char_enc, &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   pos = gd_tell64(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   pyobj = PyLong_FromLongLong((PY_LONG_LONG)pos);
 
@@ -2322,20 +2535,21 @@ static PyObject *gdpy_dirfile_hide(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.hide", keywords, &field_code))
+        "et:pygetdata.dirfile.hide", keywords, self->char_enc, &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_hide(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -2346,20 +2560,21 @@ static PyObject *gdpy_dirfile_unhide(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.unhide", keywords, &field_code))
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "et:pygetdata.dirfile.unhide",
+        keywords, self->char_enc, &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_unhide(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -2370,24 +2585,25 @@ static PyObject *gdpy_dirfile_naliases(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
   PyObject *pyobj;
   long naliases;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.naliases", keywords, &field_code))
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "et:pygetdata.dirfile.naliases",
+        keywords, self->char_enc, &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   naliases = gd_naliases(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyInt_FromLong(naliases);
+  pyobj = gdpyint_fromlong(naliases);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -2397,23 +2613,26 @@ static PyObject *gdpy_dirfile_aliastarget(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code, *target;
+  char *field_code;
+  const char *target;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.alias_target", keywords, &field_code))
+        "et:pygetdata.dirfile.alias_target", keywords, self->char_enc,
+        &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   target = gd_alias_target(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyString_FromString(target);
+  pyobj = gdpyobj_from_string(target, self->char_enc);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -2423,24 +2642,25 @@ static PyObject *gdpy_dirfile_hidden(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
   PyObject *pyobj;
   long hidden;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.hidden", keywords, &field_code))
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "et:pygetdata.dirfile.hidden",
+        keywords, self->char_enc, &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   hidden = gd_hidden(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyInt_FromLong(hidden);
+  pyobj = gdpyint_fromlong(hidden);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -2451,23 +2671,25 @@ static PyObject *gdpy_dirfile_aliaslist(struct gdpy_dirfile_t *self,
 {
   const char **fields;
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.alias_list", keywords, &field_code))
+        "et:pygetdata.dirfile.alias_list", keywords, self->char_enc,
+        &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   fields = gd_aliases(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = gdpy_to_pystringlist(fields);
+  pyobj = gdpyobj_from_strarr(fields, self->char_enc);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -2477,22 +2699,24 @@ static PyObject *gdpy_dirfile_addalias(struct gdpy_dirfile_t *self,
     void *args, void *keys)
 {
   char *keywords[] = { "field_code", "target", "fragment_index", NULL };
-  const char *field_code, *target;
+  char *field_code, *target;
   int fragment_index = 0;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "ss|i:pygetdata.dirfile.add_alias", keywords, &field_code, &target,
-        &fragment_index))
+        "etet|i:pygetdata.dirfile.add_alias", keywords, self->char_enc,
+        &field_code, self->char_enc, &target, &fragment_index))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_add_alias(self->D, field_code, target, fragment_index);
+  PyMem_Free(field_code);
+  PyMem_Free(target);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -2503,21 +2727,24 @@ static PyObject *gdpy_dirfile_maddalias(struct gdpy_dirfile_t *self,
     void *args, void *keys)
 {
   char *keywords[] = { "parent", "field_code", "target", NULL };
-  const char *field_code, *target, *parent;
+  char *field_code, *target, *parent;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "sss:pygetdata.dirfile.madd_alias", keywords, &parent, &field_code,
-        &target))
+        "etetet:pygetdata.dirfile.madd_alias", keywords, self->char_enc,
+        &parent, self->char_enc, &field_code, self->char_enc, &target))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   gd_madd_alias(self->D, parent, field_code, target);
+  PyMem_Free(field_code);
+  PyMem_Free(target);
+  PyMem_Free(parent);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -2529,21 +2756,22 @@ static PyObject *gdpy_dirfile_strtok(struct gdpy_dirfile_t *self,
 {
   char *token;
   char *keywords[] = { "string", NULL };
-  const char *string = NULL;
+  char *string = NULL;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "|s:pygetdata.dirfile.strtok",
-        keywords, &string))
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "|et:pygetdata.dirfile.strtok",
+        keywords, self->char_enc, &string))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   token = gd_strtok(self->D, string);
+  PyMem_Free(string); /* gd_strtok make a copy of the string */
 
-  pyobj = PyString_FromString(token);
+  pyobj = gdpyobj_from_string(token, self->char_enc);
   free(token);
 
   dreturn("%p", pyobj);
@@ -2569,7 +2797,7 @@ static PyObject *gdpy_dirfile_desync(struct gdpy_dirfile_t *self,
 
   ret = gd_desync(self->D, flags);
 
-  pyobj = PyInt_FromLong((long)ret);
+  pyobj = gdpyint_fromlong((long)ret);
   dreturn("%p", pyobj);
   return pyobj;
 }
@@ -2584,7 +2812,7 @@ static PyObject *gdpy_dirfile_getflags(struct gdpy_dirfile_t *self,
 
   flags = gd_flags(self->D, 0, 0);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
   pyobj = PyLong_FromUnsignedLong(flags);
   dreturn("%p", pyobj);
@@ -2598,7 +2826,7 @@ static int gdpy_dirfile_setflags(struct gdpy_dirfile_t *self,
 
   dtrace("%p, %p, %p", self, value, closure);
 
-  new_flags = PyLong_AsUnsignedLong(value);
+  new_flags = gdpy_ulong_from_pyobj(value);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -2607,7 +2835,7 @@ static int gdpy_dirfile_setflags(struct gdpy_dirfile_t *self,
 
   gd_flags(self->D, new_flags, ~new_flags);
 
-  PYGD_CHECK_ERROR(self->D, -1);
+  GDPY_CHECK_ERROR(self->D, -1, self->char_enc);
 
   dreturn("%i", 0);
   return 0;
@@ -2626,7 +2854,7 @@ static PyObject *gdpy_dirfile_getverboseprefix(struct gdpy_dirfile_t *self,
     return Py_None;
   }
 
-  pyobj = PyString_FromString(self->verbose_prefix);
+  pyobj = gdpystrobj_from_string(self->verbose_prefix);
   dreturn("%p", pyobj);
   return pyobj;
 }
@@ -2639,18 +2867,13 @@ static int gdpy_dirfile_setverboseprefix(struct gdpy_dirfile_t *self,
   free(self->verbose_prefix);
   if (value == Py_None)
     self->verbose_prefix = NULL;
-  else {
-    char *string = PyString_AsString(value);
-    if (string == NULL) {
-      dreturn("%i", -1);
-      return -1;
-    }
-    self->verbose_prefix = strdup(string);
-  }
+  else
+    self->verbose_prefix = gdpy_string_from_pyobj(value, self->char_enc,
+        "prefix must be string", 1);
 
   gd_verbose_prefix(self->D, self->verbose_prefix);
 
-  PYGD_CHECK_ERROR(self->D, -1);
+  GDPY_CHECK_ERROR(self->D, -1, self->char_enc);
 
   dreturn("%i", 0);
   return 0;
@@ -2663,7 +2886,7 @@ static PyObject *gdpy_dirfile_getmplexlookback(struct gdpy_dirfile_t *self,
 
   dtrace("%p, %p", self, closure);
 
-  pyobj = PyInt_FromLong(self->mplex_lookback);
+  pyobj = gdpyint_fromlong(self->mplex_lookback);
   dreturn("%p", pyobj);
   return pyobj;
 }
@@ -2675,7 +2898,7 @@ static int gdpy_dirfile_setmplexlookback(struct gdpy_dirfile_t *self,
 
   dtrace("%p, %p, %p", self, value, closure);
 
-  lookback = (int)PyInt_AsLong(value);
+  lookback = (int)gdpy_long_from_pyobj(value);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -2686,7 +2909,7 @@ static int gdpy_dirfile_setmplexlookback(struct gdpy_dirfile_t *self,
 
   gd_mplex_lookback(self->D, lookback);
 
-  PYGD_CHECK_ERROR(self->D, -1);
+  GDPY_CHECK_ERROR(self->D, -1, self->char_enc);
 
   dreturn("%i", 0);
   return 0;
@@ -2698,23 +2921,25 @@ static PyObject *gdpy_dirfile_nentries(struct gdpy_dirfile_t *self,
   char *keywords[] = { "parent", "type", "flags", NULL };
   unsigned int nentries, flags = 0;
   int type = 0;
-  const char *parent = NULL;
+  char *parent = NULL;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "|siI:pygetdata.dirfile.nentries", keywords, &parent, &type, &flags))
+        "|etiI:pygetdata.dirfile.nentries", keywords, self->char_enc, &parent,
+        &type, &flags))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   nentries = gd_nentries(self->D, parent, type, flags);
+  PyMem_Free(parent);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyInt_FromLong((long)nentries);
+  pyobj = gdpyint_fromlong((long)nentries);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -2727,23 +2952,25 @@ static PyObject *gdpy_dirfile_entrylist(struct gdpy_dirfile_t *self,
   char *keywords[] = { "parent", "type", "flags", NULL };
   int type = 0;
   unsigned int flags = 0;
-  const char *parent = NULL;
+  char *parent = NULL;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "|siI:pygetdata.dirfile.entry_list", keywords, &parent, &type, &flags))
+        "|etiI:pygetdata.dirfile.entry_list", keywords, self->char_enc, &parent,
+        &type, &flags))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
   entries = gd_entry_list(self->D, parent, type, flags);
+  PyMem_Free(parent);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = gdpy_to_pystringlist(entries);
+  pyobj = gdpyobj_from_strarr(entries, self->char_enc);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -2753,30 +2980,68 @@ static PyObject *gdpy_dirfile_linterptablename(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
   char *keywords[] = { "field_code", NULL };
-  const char *field_code;
+  char *field_code;
   char *filename;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.linterp_tablename", keywords, &field_code))
+        "et:pygetdata.dirfile.linterp_tablename", keywords, self->char_enc,
+        &field_code))
   {
     dreturn ("%p", NULL);
     return NULL;
   }
 
   filename = gd_linterp_tablename(self->D, field_code);
+  PyMem_Free(field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
-  pyobj = PyString_FromString(filename);
+  pyobj = gdpyobj_from_path(filename);
   free(filename);
   dreturn("%p", pyobj);
   return pyobj;
 }
 
+static PyObject *gdpy_dirfile_getcharencoding(struct gdpy_dirfile_t *self,
+    void *closure)
+{
+  dtrace("%p, %p", self, closure);
+
+  PyObject *pyobj = gdpy_charenc_obj(self->char_enc);
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static int gdpy_dirfile_setcharencoding(struct gdpy_dirfile_t *self,
+    PyObject *value, void *closure)
+{
+  dtrace("%p, %p, %p", self, value, closure);
+
+  if (gdpy_parse_charenc(&self->char_enc, value)) {
+    dreturn("%i", -1);
+    return -1;
+  }
+  
+  dreturn("%i", 0);
+  return 0;
+}
+
 static PyGetSetDef gdpy_dirfile_getset[] = {
+  { "character_encoding", (getter)gdpy_dirfile_getcharencoding,
+    (setter)gdpy_dirfile_setcharencoding,
+    "The character encoding to use when representing Dirfile string data\n"
+      "and metadata in Python.  The initial value of this attribute is\n"
+      "copied from the value of the global pygetdata.character_encoding\n"
+      "at the time that the dirfile object is created, if the global value\n"
+      "is valid.  If the global pygetdata.character_encoding is invalid, the\n"
+      "initial value of this attribute is simply None.  Subsequent changes\n"
+      "affect only this object.  See the CHARACTER STRINGS section in the\n"
+      "pygetdata module documentation for further details.",
+    NULL },
   { "error", (getter)gdpy_dirfile_geterror, NULL,
     "The numerical error code encountered by the last call to the GetData\n"
       "library for this dirfile.  If the last call was successful, this\n"
@@ -2931,7 +3196,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "If omitted, the return type defaults to the native type of the field\n"
       "(see dirfile.native_type()).  If 'return_type' is pygetdata.NULL,\n"
       "None is returned on success.  See gd_get_constant(3)."
-      /* ------- handy ruler ---------------------------------------------| */
   },
   {"constants", (PyCFunction)gdpy_dirfile_getconstants,
     METH_VARARGS | METH_KEYWORDS,
@@ -3418,7 +3682,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
 };
 
 #define DIRFILE_DOC \
-  "dirfile([name [, flags [, sehandler [, extra ]]])\n\n" \
+  "dirfile([name, flags, sehandler, extra, character_encoding])\n\n" \
 "If 'name' is omitted or None, returns an invalid dirfile, as if\n" \
 "gd_invalid_dirfile(3) were called.  Othwerwise, if 'name' is a string,\n" \
 "returns a dirfile object representing the dirfile specified by 'name'.\n" \
@@ -3432,7 +3696,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
 "providing the same information as the gd_pdata_t structure in the C API.\n"\
 "The second object is the 'extra' object passed to this constructor, and\n"\
 "may be any object desired by the caller.  If no extra parameter was\n"\
-/* ---------------------------------------------------------------------| */\
 "specified, this will be None.  The sehandler should return either:\n\n"\
 " * an integer, one of the pygetdata.SYNTAX_... symbols; or\n"\
 " * a string containing the corrected line, and pygetdata.SYNTAX_RESCAN\n"\
@@ -3440,6 +3703,12 @@ static PyMethodDef gdpy_dirfile_methods[] = {
 " * a tuple consisting of an integer, one of the pygetdata.SYNTAX_...\n"\
 "   symbols, and then, optionally, a string containing the corrected\n"\
 "   line.\n"\
+"\n"\
+/* ---------------------------------------------------------------------| */\
+"The 'character_encoding' parameter sets the initial value of the\n"\
+"character_encoding attribute (q.v.).  If this parameter is omitted, the\n"\
+"initial value of the attribute is copied from the global\n"\
+"pygetdata.character_encoding instead.\n"\
 "\n"\
 "The dirfile will be automatically closed when garbage collection is run\n"\
 "on the object.  In general, however, an explicit call to close() or\n"\
@@ -3452,8 +3721,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
 
 PyTypeObject gdpy_dirfile =
 {
-  PyObject_HEAD_INIT(NULL)
-    0,                             /* ob_size */
+  PyVarObject_HEAD_INIT(NULL, 0)
   "pygetdata.dirfile",             /* tp_name */
   sizeof(struct gdpy_dirfile_t),   /* tp_basicsize */
   0,                               /* tp_itemsize */

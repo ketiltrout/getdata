@@ -45,24 +45,23 @@ static const char *gdpy_entry_type_names[] =
 };
 #define GDPY_N_ENTYPES 0x12
 
-static char *gdpy_dup_pystring(PyObject *obj)
-{
-  char *s;
-
-  dtrace("%p", obj);
-
-  s = PyString_AsString(obj);
-
-  if (s != NULL) {
-    s = strdup(s);
-
-    if (s == NULL)
-      PyErr_NoMemory();
-  }
-
-  dreturn("%p", s);
-  return s;
-}
+#define S1CHECK do { \
+  if (s1 == NULL) { dreturn("%p", NULL); return NULL; } \
+} while(0)
+#define S2CHECK do { \
+  if (s2 == NULL) { Py_DECREF(s1); dreturn("%p", NULL); return NULL; } \
+} while(0)
+#define S3CHECK do { \
+  if (s3 == NULL) { \
+    Py_DECREF(s1); Py_DECREF(s2); dreturn("%p", NULL); return NULL; \
+  } \
+} while(0)
+#define S4CHECK do { \
+  if (s4 == NULL) { \
+    Py_DECREF(s1); Py_DECREF(s2); Py_DECREF(s3); \
+    dreturn("%p", NULL); return NULL; \
+  } \
+} while(0)
 
 static void gdpy_entry_delete(struct gdpy_entry_t *self)
 {
@@ -70,6 +69,7 @@ static void gdpy_entry_delete(struct gdpy_entry_t *self)
 
   gd_free_entry_strings(self->E);
   free(self->E);
+  free(self->char_enc);
   PyObject_Del(self);
 
   dreturnvoid();
@@ -86,73 +86,57 @@ static PyObject *gdpy_entry_create(PyTypeObject *type, PyObject *args,
 
   if (self) {
     self->E = NULL;
+    gdpy_copy_global_charenc(self->char_enc);
   }
 
   dreturn("%p", self);
   return (PyObject*)self;
 }
 
-static void gdpy_set_scalar_from_pyobj(PyObject *pyobj, gd_type_t type,
-    char **scalar, void *data)
+static PyObject *gdpyobj_from_scalar(const gd_entry_t *E, int i, gd_type_t type,
+    const void *value, const char *char_enc)
 {
-  dtrace("%p, %x, %p, %p", pyobj, type, scalar, data);
-  /* FIXME */
+  PyObject *pyobj;
+  dtrace("%p, %i, 0x%X, %p, %p\n", E, i, type, value, char_enc);
 
-  if (PyString_Check(pyobj))
-    *scalar = gdpy_dup_pystring(pyobj);
+  if (E->scalar[i]) {
+    /* Return the scalar field code */
+    if (E->scalar_ind[i] >= 0) {
+      char *buffer = malloc(strlen(E->scalar[i]) + 23);
+      if (buffer == NULL) {
+        PyErr_NoMemory();
+        dreturn("%p", NULL);
+        return NULL;
+      }
+      sprintf(buffer, "%s<%i>", E->scalar[i], E->scalar_ind[i]);
+      pyobj = gdpyobj_from_string(buffer, char_enc);
+      free(buffer);
+    } else
+      pyobj = gdpyobj_from_string(E->scalar[i], char_enc);
+  } else /* If scalar is NULL, return the number */
+    pyobj = gdpy_convert_to_pyobj(value, type, 0);
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static void gdpy_set_scalar_from_pyobj(PyObject *pyobj, gd_type_t type,
+    char **scalar, const char *char_enc, void *data)
+{
+  dtrace("%p, 0x%X, %p, %p, %p", pyobj, type, scalar, char_enc, data);
+
+  if (gdpy_encobj_check(pyobj) || PyUnicode_Check(pyobj))
+    *scalar = gdpy_string_from_pyobj(pyobj, char_enc, NULL, 1);
   else {
     *scalar = NULL;
-    switch (type) {
-      case GD_UINT8:
-        *(uint8_t*)data = (uint8_t)PyInt_AsUnsignedLongMask(pyobj);
-        break;
-      case GD_INT8:
-        *(int8_t*)data = (int8_t)PyInt_AsLong(pyobj);
-        break;
-      case GD_UINT16:
-        *(uint16_t*)data = (uint16_t)PyInt_AsUnsignedLongMask(pyobj);
-        break;
-      case GD_INT16:
-        *(int16_t*)data = (int16_t)PyInt_AsLong(pyobj);
-        break;
-      case GD_UINT32:
-        *(uint32_t*)data = (uint32_t)PyLong_AsUnsignedLong(pyobj);
-        break;
-      case GD_INT32:
-        *(int32_t*)data = (int32_t)PyLong_AsLong(pyobj);
-        break;
-      case GD_UINT64:
-        if (PyLong_Check(pyobj))
-          *(uint64_t*)data = PyLong_AsUnsignedLongLong(pyobj);
-        else
-          *(uint64_t*)data = PyInt_AsUnsignedLongLongMask(pyobj);
-        break;
-      case GD_INT64:
-        *(int64_t*)data = (int64_t)PyLong_AsLongLong(pyobj);
-        break;
-      case GD_FLOAT32:
-        *(float*)data = (float)PyFloat_AsDouble(pyobj);
-        break;
-      case GD_FLOAT64:
-        *(double*)data = PyFloat_AsDouble(pyobj);
-        break;
-      case GD_COMPLEX64:
-        gdpy_as_complex((float*)data, pyobj);
-        break;
-      case GD_COMPLEX128:
-        gdpy_as_complex((double*)data, pyobj);
-        break;
-      default:
-        PyErr_Format(PyExc_RuntimeError,
-              "unexpected field type (%x) inside %s", type, __func__);
-    }
+    gdpy_coerce_from_pyobj(pyobj, type, data);
   }
 
   dreturnvoid();
 }
 
 static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
-    const char *name)
+    const char *char_enc, const char *name)
 {
   PyObject *parm1;
   PyObject *parm2;
@@ -161,7 +145,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
   int i, count, min;
   long size;
 
-  dtrace("%p, %p, \"%s\"", E, tuple, name);
+  dtrace("%p, %p, %p, \"%s\"", E, tuple, char_enc, name);
 
   switch (E->field_type)
   {
@@ -214,13 +198,14 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
   switch (E->field_type)
   {
     case GD_RAW_ENTRY:
-      E->EN(raw,data_type) = (gd_type_t)PyInt_AsLong(PyTuple_GetItem(tuple, 0));
+      E->EN(raw,data_type) =
+        (gd_type_t)gdpy_long_from_pyobj(PyTuple_GetItem(tuple, 0));
       if (GDPY_INVALID_TYPE(E->EN(raw,data_type)))
         PyErr_SetString(PyExc_ValueError,
             "'pygetdata.entry' invalid data type");
 
       gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 1), GD_UINT_TYPE,
-          &E->scalar[0], &E->EN(raw,spf));
+          &E->scalar[0], char_enc, &E->EN(raw,spf));
       break;
     case GD_LINCOM_ENTRY:
       parm1 = PyTuple_GetItem(tuple, 0);
@@ -247,7 +232,8 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       }
 
       for (i = 0; i < count; ++i) {
-        E->in_fields[i] = gdpy_dup_pystring(PyTuple_GetItem(parm1, i));
+        E->in_fields[i] = gdpy_string_from_pyobj(PyTuple_GetItem(parm1, i),
+            char_enc, "in_fields must be string", 1);
 
         if (PyErr_Occurred()) {
           dreturnvoid();
@@ -260,9 +246,9 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
           gdpy_as_complex(gd_csp_(E->EN(lincom,cm)[i]), obj);
         } else if (E->flags & GD_EN_COMPSCAL)
           gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, &E->scalar[i],
-              &E->EN(lincom,cm)[i]);
+              char_enc, &E->EN(lincom,cm)[i]);
         else {
-          gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, &E->scalar[i],
+          gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, &E->scalar[i], char_enc,
               &E->EN(lincom,m)[i]);
           gd_rs2cs_(E->EN(lincom,cm)[i], E->EN(lincom,m)[i]);
         }
@@ -278,10 +264,10 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
           gdpy_as_complex(gd_csp_(E->EN(lincom,cb)[i]), obj);
         } else if (E->flags & GD_EN_COMPSCAL)
           gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128,
-              &E->scalar[i + GD_MAX_LINCOM], &E->EN(lincom,cb)[i]);
+              &E->scalar[i + GD_MAX_LINCOM], char_enc, &E->EN(lincom,cb)[i]);
         else {
           gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64,
-              &E->scalar[i + GD_MAX_LINCOM], &E->EN(lincom,b)[i]);
+              &E->scalar[i + GD_MAX_LINCOM], char_enc, &E->EN(lincom,b)[i]);
           gd_rs2cs_(E->EN(lincom,cb)[i], E->EN(lincom,b)[i]);
         }
 
@@ -292,14 +278,16 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       }
       break;
     case GD_LINTERP_ENTRY:
-      E->in_fields[0] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 0));
+      E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
+          char_enc, "in_fields must be string", 1);
 
       if (PyErr_Occurred()) {
         dreturnvoid();
         return;
       }
 
-      E->EN(linterp,table) = gdpy_dup_pystring(PyTuple_GetItem(tuple, 1));
+      E->EN(linterp,table) = gdpy_path_from_pyobj(PyTuple_GetItem(tuple, 1),
+          char_enc, 1);
 
       if (PyErr_Occurred()) {
         dreturnvoid();
@@ -308,7 +296,8 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      E->in_fields[0] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 0));
+      E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
+          char_enc, "in_fields must be string", 1);
 
       if (PyErr_Occurred()) {
         dreturnvoid();
@@ -316,10 +305,10 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       }
 
       gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 1), GD_INT_TYPE,
-          &E->scalar[0], &E->EN(bit,bitnum));
+          &E->scalar[0], char_enc, &E->EN(bit,bitnum));
       if (size > 2)
         gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 2), GD_INT_TYPE,
-            &E->scalar[1], &E->EN(bit,numbits));
+            &E->scalar[1], char_enc, &E->EN(bit,numbits));
       else {
         E->EN(bit,numbits) = 1;
         E->scalar[1] = NULL;
@@ -327,14 +316,16 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
-      E->in_fields[0] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 0));
+      E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
+          char_enc, "in_fields must be string", 1);
 
       if (PyErr_Occurred()) {
         dreturnvoid();
         return;
       }
 
-      E->in_fields[1] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 1));
+      E->in_fields[1] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 1),
+          char_enc, "in_fields must be string", 1);
 
       if (PyErr_Occurred()) {
         dreturnvoid();
@@ -342,7 +333,8 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       }
       break;
     case GD_RECIP_ENTRY:
-      E->in_fields[0] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 0));
+      E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
+          char_enc, "in_fields must be string", 1);
 
       if (PyErr_Occurred()) {
         dreturnvoid();
@@ -354,10 +346,10 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
         E->flags |= GD_EN_COMPSCAL;
         gdpy_as_complex(gd_csp_(E->EN(recip,cdividend)), obj);
       } else if (E->flags & GD_EN_COMPSCAL)
-        gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, &E->scalar[0],
+        gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, &E->scalar[0], char_enc,
             &E->EN(recip,cdividend));
       else {
-        gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, &E->scalar[0],
+        gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, &E->scalar[0], char_enc,
             &E->EN(recip,dividend));
         gd_rs2cs_(E->EN(recip,cdividend), E->EN(recip,dividend));
       }
@@ -368,7 +360,8 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       }
       break;
     case GD_PHASE_ENTRY:
-      E->in_fields[0] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 0));
+      E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
+          char_enc, "in_fields must be string", 1);
 
       if (PyErr_Occurred()) {
         dreturnvoid();
@@ -376,7 +369,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       }
 
       gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 1), GD_INT64,
-          &E->scalar[0], &E->EN(phase,shift));
+          &E->scalar[0], char_enc, &E->EN(phase,shift));
       break;
     case GD_POLYNOM_ENTRY:
       parm2 = PyTuple_GetItem(tuple, 1);
@@ -391,7 +384,8 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       if (count > GD_MAX_POLYORD)
         count = GD_MAX_POLYORD;
 
-      E->in_fields[0] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 0));
+      E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
+          char_enc, "in_fields must be string", 1);
 
       if (PyErr_Occurred()) {
         dreturnvoid();
@@ -406,9 +400,9 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
           E->scalar[i] = NULL;
         } else if (E->flags & GD_EN_COMPSCAL)
           gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, &E->scalar[i],
-              &E->EN(polynom,ca)[i]);
+              char_enc, &E->EN(polynom,ca)[i]);
         else {
-          gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, &E->scalar[i],
+          gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, &E->scalar[i], char_enc,
               &E->EN(polynom,a)[i]);
           gd_rs2cs_(E->EN(polynom,ca)[i], E->EN(polynom,a)[i]);
         }
@@ -420,14 +414,16 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       }
       break;
     case GD_WINDOW_ENTRY:
-      E->in_fields[0] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 0));
+      E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
+          char_enc, "in_fields must be string", 1);
 
       if (PyErr_Occurred()) {
         dreturnvoid();
         return;
       }
 
-      E->in_fields[1] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 1));
+      E->in_fields[1] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 1),
+          char_enc, "in_fields must be string", 1);
 
       if (PyErr_Occurred()) {
         dreturnvoid();
@@ -435,7 +431,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       }
 
       E->EN(window,windop) =
-        (gd_windop_t)PyInt_AsLong(PyTuple_GetItem(tuple, 2));
+        (gd_windop_t)gdpy_long_from_pyobj(PyTuple_GetItem(tuple, 2));
       if (GDPY_INVALID_OP(E->EN(window,windop)))
         PyErr_SetString(PyExc_ValueError,
             "'pygetdata.entry' invalid window operation");
@@ -444,16 +440,16 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       switch (E->EN(window,windop)) {
         case GD_WINDOP_EQ:
         case GD_WINDOP_NE:
-          gdpy_set_scalar_from_pyobj(obj, GD_INT64, &E->scalar[0],
+          gdpy_set_scalar_from_pyobj(obj, GD_INT64, &E->scalar[0], char_enc,
               &E->EN(window,threshold).i);
           break;
         case GD_WINDOP_SET:
         case GD_WINDOP_CLR:
-          gdpy_set_scalar_from_pyobj(obj, GD_UINT64, &E->scalar[0],
+          gdpy_set_scalar_from_pyobj(obj, GD_UINT64, &E->scalar[0], char_enc,
               &E->EN(window,threshold).u);
           break;
         default:
-          gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, &E->scalar[0],
+          gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, &E->scalar[0], char_enc,
               &E->EN(window,threshold).r);
           break;
       }
@@ -464,14 +460,16 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       }
       break;
     case GD_MPLEX_ENTRY:
-      E->in_fields[0] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 0));
+      E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
+          char_enc, "in_fields must be string", 1);
 
       if (PyErr_Occurred()) {
         dreturnvoid();
         return;
       }
 
-      E->in_fields[1] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 1));
+      E->in_fields[1] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 1),
+          char_enc, "in_fields must be string", 1);
 
       if (PyErr_Occurred()) {
         dreturnvoid();
@@ -479,18 +477,18 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       }
 
       gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 2), GD_INT_TYPE,
-          &E->scalar[0], &E->EN(mplex,count_val));
+          &E->scalar[0], char_enc, &E->EN(mplex,count_val));
 
       gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 3), GD_INT_TYPE,
-          &E->scalar[1], &E->EN(mplex,period));
+          &E->scalar[1], char_enc, &E->EN(mplex,period));
       break;
     case GD_CARRAY_ENTRY:
       E->EN(scalar,array_len) =
-        (size_t)PyLong_AsUnsignedLong(PyTuple_GetItem(tuple, 1));
+        (size_t)gdpy_ulong_from_pyobj(PyTuple_GetItem(tuple, 1));
       /* fallthrough */
     case GD_CONST_ENTRY:
       E->EN(scalar,const_type) =
-        (gd_type_t)PyInt_AsLong(PyTuple_GetItem(tuple, 0));
+        (gd_type_t)gdpy_long_from_pyobj(PyTuple_GetItem(tuple, 0));
       if (GDPY_INVALID_TYPE(E->EN(scalar,const_type)))
         PyErr_SetString(PyExc_ValueError,
             "'pygetdata.entry' invalid data type");
@@ -505,13 +503,13 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
 }
 
 static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject *parms,
-    const char *name)
+    const char *char_enc, const char *name)
 {
   PyObject *tuple = Py_None;
   const char *key[4];
   int i, size = 0;
 
-  dtrace("%p, %p, \"%s\"", E, parms, name);
+  dtrace("%p, %p, %p, \"%s\"", E, parms, char_enc, name);
 
   /* convert the dictionary to a tuple */
 
@@ -629,7 +627,7 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject *parms,
     }
   }
 
-  gdpy_set_entry_from_tuple(E, tuple, name);
+  gdpy_set_entry_from_tuple(E, tuple, char_enc, name);
 
   dreturnvoid();
 }
@@ -638,33 +636,48 @@ static int gdpy_entry_init(struct gdpy_entry_t *self, PyObject *args,
     PyObject *keys)
 {
   gd_entry_t E;
-  char *keywords[] = {"type", "name", "fragment_index", "parameters", NULL};
+  char *keywords[] = {"type", "name", "fragment_index", "parameters",
+    "character_encoding", NULL};
   PyObject *parms = NULL;
+  PyObject *char_enc = NULL;
+  PyObject *field_name;
   int field_type;
-  const char *field_name;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   memset(&E, 0, sizeof(gd_entry_t));
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "isi|O:pygetdata.entry.__init__",
-        keywords, &field_type, &field_name, &E.fragment_index, &parms))
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "iOi|OO:pygetdata.entry.__init__", keywords, &field_type,
+        &field_name, &E.fragment_index, &parms, &char_enc))
   {
     dreturn("%i", -1);
     return -1;
   }
 
-  E.field_type = field_type;
-  E.field = strdup(field_name);
-  if (E.field == NULL) {
-    PyErr_NoMemory();
+  /* First, try to update character_encoding, if requested */
+  if (char_enc) {
+    if (gdpy_parse_charenc(&self->char_enc, char_enc)) {
+      dreturn("%i", -1);
+      return -1;
+    }
+  }
+
+  /* Now try to convert the field name object */
+  E.field = gdpy_string_from_pyobj(field_name, self->char_enc,
+      "field name should be string", 1);
+
+  if (PyErr_Occurred()) {
     dreturn("%i", -1);
     return -1;
   }
 
+  E.field_type = field_type;
+
   /* check for valid field type */
   if (E.field_type > GDPY_N_ENTYPES || E.field_type <= 0 ||
-      gdpy_entry_type_names[E.field_type] == NULL) {
+      gdpy_entry_type_names[E.field_type] == NULL)
+  {
     PyErr_SetString(PyExc_ValueError,
         "'pygetdata.entry.__init__' invalid entry type");
     dreturn("%i", -1);
@@ -678,9 +691,11 @@ static int gdpy_entry_init(struct gdpy_entry_t *self, PyObject *args,
         "of %s require parameter tuple or dictionary",
         gdpy_entry_type_names[E.field_type]);
   else if (PyDict_Check(parms))
-    gdpy_set_entry_from_dict(&E, parms, "pygetdata.entry.__init__");
+    gdpy_set_entry_from_dict(&E, parms, self->char_enc,
+        "pygetdata.entry.__init__");
   else if (PyTuple_Check(parms))
-    gdpy_set_entry_from_tuple(&E, parms, "pygetdata.entry.__init__");
+    gdpy_set_entry_from_tuple(&E, parms, self->char_enc,
+        "pygetdata.entry.__init__");
   else
     PyErr_SetString(PyExc_TypeError, "pygetdata.dirfile.__init__() argument 3 "
         "must be a tuple or dictionary");
@@ -712,7 +727,7 @@ static PyObject *gdpy_entry_getname(struct gdpy_entry_t *self, void *closure)
 
   dtrace("%p, %p", self, closure);
 
-  pyobj = PyString_FromString(self->E->field);
+  pyobj = gdpyobj_from_string(self->E->field, self->char_enc);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -725,7 +740,8 @@ static int gdpy_entry_setname(struct gdpy_entry_t *self, PyObject *value,
 
   dtrace("%p, %p, %p", self, value, closure);
 
-  s = gdpy_dup_pystring(value);
+  s = gdpy_string_from_pyobj(value, self->char_enc,
+      "field name should be string", 1);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -746,7 +762,7 @@ static PyObject *gdpy_entry_getfragment(struct gdpy_entry_t *self,
 
   dtrace("%p, %p", self, closure);
 
-  pyobj = PyInt_FromLong(self->E->fragment_index);
+  pyobj = gdpyint_fromlong(self->E->fragment_index);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -759,7 +775,7 @@ static int gdpy_entry_setfragment(struct gdpy_entry_t *self, PyObject *value,
 
   dtrace("%p, %p, %p", self, value, closure);
 
-  t = (int)PyInt_AsLong(value);
+  t = (int)gdpy_long_from_pyobj(value);
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
     return -1;
@@ -778,7 +794,7 @@ static PyObject *gdpy_entry_gettypename(struct gdpy_entry_t *self,
 
   dtrace("%p, %p", self, closure);
 
-  pyobj = PyString_FromString(gdpy_entry_type_names[self->E->field_type]);
+  pyobj = gdpystrobj_from_string(gdpy_entry_type_names[self->E->field_type]);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -790,7 +806,7 @@ static PyObject *gdpy_entry_gettype(struct gdpy_entry_t *self, void *closure)
 
   dtrace("%p, %p", self, closure);
 
-  pyobj = PyInt_FromLong(self->E->field_type);
+  pyobj = gdpyint_fromlong(self->E->field_type);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -800,7 +816,7 @@ static PyObject *gdpy_entry_getinfields(struct gdpy_entry_t *self,
     void *closure)
 {
   int i;
-  PyObject *tuple = NULL;
+  PyObject *tuple = NULL, *s1, *s2;
 
   dtrace("%p, %p", self, closure);
 
@@ -808,8 +824,15 @@ static PyObject *gdpy_entry_getinfields(struct gdpy_entry_t *self,
   {
     case GD_LINCOM_ENTRY:
       tuple = PyTuple_New(self->E->EN(lincom,n_fields));
-      for (i = 0; i < self->E->EN(lincom,n_fields); ++i)
-        PyTuple_SetItem(tuple, i, PyString_FromString(self->E->in_fields[i]));
+      for (i = 0; i < self->E->EN(lincom,n_fields); ++i) {
+        s1 = gdpyobj_from_string(self->E->in_fields[i], self->char_enc);
+        if (s1 == NULL) {
+          Py_DECREF(tuple);
+          dreturn("%p", NULL);
+          return NULL;
+        }
+        PyTuple_SetItem(tuple, i, s1);
+      }
       break;
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
@@ -817,14 +840,20 @@ static PyObject *gdpy_entry_getinfields(struct gdpy_entry_t *self,
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
-      tuple = Py_BuildValue("(s)", self->E->in_fields[0]);
+      s1 = gdpyobj_from_string(self->E->in_fields[0], self->char_enc);
+      S1CHECK;
+      tuple = Py_BuildValue("(N)", s1);
+      S1CHECK;
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
-      tuple = Py_BuildValue("(ss)", self->E->in_fields[0],
-          self->E->in_fields[1]);
+      s1 = gdpyobj_from_string(self->E->in_fields[0], self->char_enc);
+      S1CHECK;
+      s2 = gdpyobj_from_string(self->E->in_fields[1], self->char_enc);
+      S2CHECK;
+      tuple = Py_BuildValue("(NN)", s1, s2);
       break;
     case GD_NO_ENTRY:
     case GD_ALIAS_ENTRY:
@@ -869,7 +898,8 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t *self, PyObject *value,
       }
 
       for (i = 0; i < self->E->EN(lincom,n_fields); ++i)
-        s[i] = gdpy_dup_pystring(PyTuple_GetItem(value, i));
+        s[i] = gdpy_string_from_pyobj(PyTuple_GetItem(value, i), self->char_enc,
+            "in_fields should be strings", 1);
 
       if (PyErr_Occurred()) {
         dreturn("%i", -1);
@@ -888,7 +918,8 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t *self, PyObject *value,
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
       if (!PyTuple_Check(value))
-        s[0] = gdpy_dup_pystring(value);
+        s[0] = gdpy_string_from_pyobj(value, self->char_enc,
+            "in_fields should be strings", 1);
       else {
         if (PyTuple_Size(value) < 1) {
           PyErr_SetString(PyExc_TypeError, "'pygetdata.entry' "
@@ -896,7 +927,8 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t *self, PyObject *value,
           dreturn("%i", -1);
         }
 
-        s[0] = gdpy_dup_pystring(PyTuple_GetItem(value, 0));
+        s[0] = gdpy_string_from_pyobj(PyTuple_GetItem(value, 0), self->char_enc,
+            "in_fields should be strings", 1);
       }
 
       if (PyErr_Occurred()) {
@@ -926,7 +958,8 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t *self, PyObject *value,
       }
 
       for (i = 0; i < 2; ++i)
-        s[i] = gdpy_dup_pystring(PyTuple_GetItem(value, i));
+        s[i] = gdpy_string_from_pyobj(PyTuple_GetItem(value, i), self->char_enc,
+            "in_fields should be strings", 1);
 
       if (PyErr_Occurred()) {
         dreturn("%i", -1);
@@ -978,7 +1011,7 @@ static PyObject *gdpy_entry_getdatatypename(struct gdpy_entry_t *self,
     sprintf(buffer, "%s%i", (t & GD_COMPLEX) ? "COMPLEX" :
         (t & GD_IEEE754) ? "FLOAT" : (t & GD_SIGNED) ? "INT" : "UINT",
         8 * GD_SIZE(t));
-    obj = PyString_FromString(buffer);
+    obj = gdpystrobj_from_string(buffer);
   }
 
   dreturn("%p", obj);
@@ -993,10 +1026,10 @@ static PyObject *gdpy_entry_getdatatype(struct gdpy_entry_t *self,
   dtrace("%p, %p", self, closure);
 
   if (self->E->field_type == GD_RAW_ENTRY)
-    obj = PyInt_FromLong(self->E->EN(raw,data_type));
+    obj = gdpyint_fromlong(self->E->EN(raw,data_type));
   else if (self->E->field_type == GD_CONST_ENTRY ||
       self->E->field_type == GD_CARRAY_ENTRY)
-    obj = PyInt_FromLong(self->E->EN(scalar,const_type));
+    obj = gdpyint_fromlong(self->E->EN(scalar,const_type));
   else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'data_type' not available for entry type %s",
@@ -1024,7 +1057,7 @@ static int gdpy_entry_setdatatype(struct gdpy_entry_t *self, PyObject *value,
     return -1;
   }
 
-  t = PyInt_AsLong(value);
+  t = gdpy_long_from_pyobj(value);
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
     return -1;
@@ -1053,12 +1086,10 @@ static PyObject *gdpy_entry_getspf(struct gdpy_entry_t *self, void *closure)
 
   dtrace("%p, %p", self, closure);
 
-  if (self->E->field_type == GD_RAW_ENTRY) {
-    if (self->E->scalar[0] == NULL)
-      obj = PyInt_FromLong(self->E->EN(raw,spf));
-    else
-      obj = PyString_FromString(self->E->scalar[0]);
-  } else
+  if (self->E->field_type == GD_RAW_ENTRY)
+    obj = gdpyobj_from_scalar(self->E, 0, GD_UINT_TYPE, &self->E->EN(raw,spf),
+        self->char_enc);
+  else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'spf' not available for entry type %s",
         gdpy_entry_type_names[self->E->field_type]);
@@ -1083,7 +1114,8 @@ static int gdpy_entry_setspf(struct gdpy_entry_t *self, PyObject *value,
     return -1;
   }
 
-  gdpy_set_scalar_from_pyobj(value, GD_UINT_TYPE, &scalar, &spf);
+  gdpy_set_scalar_from_pyobj(value, GD_UINT_TYPE, &scalar, self->char_enc,
+      &spf);
 
   if (PyErr_Occurred()) {
     free(scalar);
@@ -1132,7 +1164,7 @@ static int gdpy_entry_setarraylen(struct gdpy_entry_t *self, PyObject *value,
     return -1;
   }
 
-  array_len = PyLong_AsUnsignedLong(value);
+  array_len = gdpy_ulong_from_pyobj(value);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -1152,7 +1184,7 @@ static PyObject *gdpy_entry_getnfields(struct gdpy_entry_t *self, void *closure)
   dtrace("%p, %p", self, closure);
 
   if (self->E->field_type == GD_LINCOM_ENTRY) {
-    obj = PyInt_FromLong(self->E->EN(lincom,n_fields));
+    obj = gdpyint_fromlong(self->E->EN(lincom,n_fields));
   } else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'n_fields' not available for entry type %s",
@@ -1177,7 +1209,7 @@ static int gdpy_entry_setnfields(struct gdpy_entry_t *self, PyObject *value,
     return -1;
   }
 
-  n = (int)PyInt_AsLong(value);
+  n = (int)gdpy_long_from_pyobj(value);
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
     return -1;
@@ -1213,12 +1245,16 @@ static PyObject *gdpy_entry_getm(struct gdpy_entry_t *self, void *closure)
 
   if (self->E->field_type == GD_LINCOM_ENTRY) {
     obj = PyTuple_New(self->E->EN(lincom,n_fields));
-    for (i = 0; i < self->E->EN(lincom,n_fields); ++i)
-      PyTuple_SetItem(obj, i, (self->E->scalar[i] == NULL) ?
-          (self->E->flags & GD_EN_COMPSCAL) ?
-          gdpy_from_complex(self->E->EN(lincom,cm)[i]) :
-          PyFloat_FromDouble(self->E->EN(lincom,m)[i]) :
-          PyString_FromString(self->E->scalar[i]));
+    for (i = 0; i < self->E->EN(lincom,n_fields); ++i) {
+      PyObject *scalar = gdpyobj_from_scalar(self->E, i, GD_COMPLEX128,
+          &self->E->EN(lincom,cm)[i], self->char_enc);
+      if (scalar == NULL) {
+        Py_DECREF(obj);
+        obj = NULL;
+        break;
+      }
+      PyTuple_SetItem(obj, i, scalar);
+    }
   } else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'm' not available for entry type %s",
@@ -1269,10 +1305,12 @@ static int gdpy_entry_setm(struct gdpy_entry_t *self, PyObject *value,
       m[i] = creal(cm[i]);
       scalar[i] = NULL;
     } else if (comp_scal) {
-      gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, scalar + i, cm + i);
+      gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, scalar + i, self->char_enc,
+          cm + i);
       m[i] = creal(cm[i]);
     } else {
-      gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, scalar + i, m + i);
+      gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, scalar + i, self->char_enc,
+          m + i);
       gd_rs2cs_(cm[i], m[i]);
     }
   }
@@ -1308,12 +1346,16 @@ static PyObject *gdpy_entry_getb(struct gdpy_entry_t *self, void *closure)
 
   if (self->E->field_type == GD_LINCOM_ENTRY) {
     obj = PyTuple_New(self->E->EN(lincom,n_fields));
-    for (i = 0; i < self->E->EN(lincom,n_fields); ++i)
-      PyTuple_SetItem(obj, i, (self->E->scalar[i + GD_MAX_LINCOM] == NULL) ?
-          (self->E->flags & GD_EN_COMPSCAL) ?
-          gdpy_from_complex(self->E->EN(lincom,cb)[i]) :
-          PyFloat_FromDouble(self->E->EN(lincom,b)[i]) :
-          PyString_FromString(self->E->scalar[i + GD_MAX_LINCOM]));
+    for (i = 0; i < self->E->EN(lincom,n_fields); ++i) {
+      PyObject *scalar = gdpyobj_from_scalar(self->E, i + GD_MAX_LINCOM,
+          GD_COMPLEX128, &self->E->EN(lincom,cb)[i], self->char_enc);
+      if (scalar == NULL) {
+        Py_DECREF(obj);
+        obj = NULL;
+        break;
+      }
+      PyTuple_SetItem(obj, i, scalar);
+    }
   } else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'b' not available for entry type %s",
@@ -1364,10 +1406,12 @@ static int gdpy_entry_setb(struct gdpy_entry_t *self, PyObject *value,
       b[i] = creal(cb[i]);
       scalar[i] = NULL;
     } else if (comp_scal) {
-      gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, scalar + i, cb + i);
+      gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, scalar + i, self->char_enc,
+          cb + i);
       b[i] = creal(cb[i]);
     } else {
-      gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, scalar + i, b + i);
+      gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, scalar + i, self->char_enc,
+          b + i);
       gd_rs2cs_(cb[i], b[i]);
     }
   }
@@ -1401,7 +1445,7 @@ static PyObject *gdpy_entry_gettable(struct gdpy_entry_t *self, void *closure)
   dtrace("%p, %p", self, closure);
 
   if (self->E->field_type == GD_LINTERP_ENTRY)
-    obj = PyString_FromString(self->E->EN(linterp,table));
+    obj = gdpyobj_from_path(self->E->EN(linterp,table));
   else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'table' not available for entry type %s",
@@ -1417,7 +1461,7 @@ static int gdpy_entry_settable(struct gdpy_entry_t *self, PyObject *value,
   dtrace("%p, %p, %p", self, value, closure);
 
   if (self->E->field_type == GD_LINTERP_ENTRY) {
-    char *s = gdpy_dup_pystring(value);
+    char *s = gdpy_path_from_pyobj(value, self->char_enc, 1);
 
     if (PyErr_Occurred()) {
       dreturn("%i", -1);
@@ -1447,10 +1491,8 @@ static PyObject *gdpy_entry_getbitnum(struct gdpy_entry_t *self, void *closure)
   if (self->E->field_type == GD_BIT_ENTRY ||
       self->E->field_type == GD_SBIT_ENTRY)
   {
-    if (self->E->scalar[0] == NULL)
-      obj = PyInt_FromLong(self->E->EN(bit,bitnum));
-    else
-      obj = PyString_FromString(self->E->scalar[0]);
+    obj = gdpyobj_from_scalar(self->E, 0, GD_INT_TYPE, &self->E->EN(bit,bitnum),
+        self->char_enc);
   } else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'bitnum' not available for entry type %s",
@@ -1477,7 +1519,8 @@ static int gdpy_entry_setbitnum(struct gdpy_entry_t *self, PyObject *value,
     return -1;
   }
 
-  gdpy_set_scalar_from_pyobj(value, GD_INT_TYPE, &scalar, &bitnum);
+  gdpy_set_scalar_from_pyobj(value, GD_INT_TYPE, &scalar, self->char_enc,
+      &bitnum);
   if (PyErr_Occurred()) {
     free(scalar);
     dreturn("%i", -1);
@@ -1501,10 +1544,8 @@ static PyObject *gdpy_entry_getnumbits(struct gdpy_entry_t *self, void *closure)
   if (self->E->field_type == GD_BIT_ENTRY ||
       self->E->field_type == GD_SBIT_ENTRY)
   {
-    if (self->E->scalar[1] == NULL)
-      obj = PyInt_FromLong(self->E->EN(bit,numbits));
-    else
-      obj = PyString_FromString(self->E->scalar[1]);
+    obj = gdpyobj_from_scalar(self->E, 1, GD_INT_TYPE,
+        &self->E->EN(bit,numbits), self->char_enc);
   } else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'numbits' not available for entry type %s",
@@ -1532,7 +1573,8 @@ static int gdpy_entry_setnumbits(struct gdpy_entry_t *self, PyObject *value,
     return -1;
   }
 
-  gdpy_set_scalar_from_pyobj(value, GD_INT_TYPE, &scalar, &numbits);
+  gdpy_set_scalar_from_pyobj(value, GD_INT_TYPE, &scalar, self->char_enc,
+      &numbits);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -1554,14 +1596,10 @@ static PyObject *gdpy_entry_getdividend(struct gdpy_entry_t *self,
 
   dtrace("%p, %p", self, closure);
 
-  if (self->E->field_type == GD_RECIP_ENTRY) {
-    if (self->E->scalar[0])
-      obj = PyString_FromString(self->E->scalar[0]);
-    else if (self->E->flags & GD_EN_COMPSCAL)
-      obj = gdpy_from_complex(self->E->EN(recip,cdividend));
-    else
-      obj = PyFloat_FromDouble(self->E->EN(recip,dividend));
-  } else
+  if (self->E->field_type == GD_RECIP_ENTRY)
+    obj = gdpyobj_from_scalar(self->E, 0, GD_COMPLEX128,
+        &self->E->EN(recip,cdividend), self->char_enc);
+  else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'dividend' not available for entry type %s",
         gdpy_entry_type_names[self->E->field_type]);
@@ -1590,14 +1628,19 @@ static int gdpy_entry_setdividend(struct gdpy_entry_t *self, PyObject *value,
     return -1;
   }
 
-  if (PyComplex_Check(value) || PyString_Check(value))
+  if (PyComplex_Check(value) || PyUnicode_Check(value) ||
+      gdpy_encobj_check(value))
+  {
     comp_scal = GD_EN_COMPSCAL;
+  }
 
   if (comp_scal) {
-    gdpy_set_scalar_from_pyobj(value, GD_COMPLEX128, &scalar, &cdividend);
+    gdpy_set_scalar_from_pyobj(value, GD_COMPLEX128, &scalar, self->char_enc,
+        &cdividend);
     dividend = creal(cdividend);
   } else {
-    gdpy_set_scalar_from_pyobj(value, GD_FLOAT64, &scalar, &dividend);
+    gdpy_set_scalar_from_pyobj(value, GD_FLOAT64, &scalar, self->char_enc,
+        &dividend);
     gd_rs2cs_(cdividend, dividend);
   }
 
@@ -1623,10 +1666,8 @@ static PyObject *gdpy_entry_getshift(struct gdpy_entry_t *self, void *closure)
   dtrace("%p, %p", self, closure);
 
   if (self->E->field_type == GD_PHASE_ENTRY) {
-    if (self->E->scalar[0] == NULL)
-      obj = PyLong_FromLongLong((PY_LONG_LONG)self->E->EN(phase,shift));
-    else
-      obj = PyString_FromString(self->E->scalar[0]);
+    obj = gdpyobj_from_scalar(self->E, 0, GD_INT64, &self->E->EN(phase,shift),
+        self->char_enc);
   } else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'shift' not available for entry type %s",
@@ -1652,7 +1693,7 @@ static int gdpy_entry_setshift(struct gdpy_entry_t *self, PyObject *value,
     return -1;
   }
 
-  gdpy_set_scalar_from_pyobj(value, GD_INT64, &scalar, &shift);
+  gdpy_set_scalar_from_pyobj(value, GD_INT64, &scalar, self->char_enc, &shift);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -1675,10 +1716,8 @@ static PyObject *gdpy_entry_getcountval(struct gdpy_entry_t *self,
   dtrace("%p, %p", self, closure);
 
   if (self->E->field_type == GD_MPLEX_ENTRY) {
-    if (self->E->scalar[0] == NULL)
-      obj = PyInt_FromLong(self->E->EN(mplex,count_val));
-    else
-      obj = PyString_FromString(self->E->scalar[0]);
+    obj = gdpyobj_from_scalar(self->E, 0, GD_INT_TYPE,
+        &self->E->EN(mplex,count_val), self->char_enc);
   } else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'count_val' not available for entry type %s",
@@ -1704,7 +1743,8 @@ static int gdpy_entry_setcountval(struct gdpy_entry_t *self, PyObject *value,
     return -1;
   }
 
-  gdpy_set_scalar_from_pyobj(value, GD_INT_TYPE, &scalar, &count_val);
+  gdpy_set_scalar_from_pyobj(value, GD_INT_TYPE, &scalar, self->char_enc,
+      &count_val);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -1727,10 +1767,8 @@ static PyObject *gdpy_entry_getperiod(struct gdpy_entry_t *self,
   dtrace("%p, %p", self, closure);
 
   if (self->E->field_type == GD_MPLEX_ENTRY) {
-    if (self->E->scalar[0] == NULL)
-      obj = PyInt_FromLong(self->E->EN(mplex,period));
-    else
-      obj = PyString_FromString(self->E->scalar[0]);
+    obj = gdpyobj_from_scalar(self->E, 1, GD_INT_TYPE,
+        &self->E->EN(mplex,period), self->char_enc);
   } else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'period' not available for entry type %s",
@@ -1756,7 +1794,8 @@ static int gdpy_entry_setperiod(struct gdpy_entry_t *self, PyObject *value,
     return -1;
   }
 
-  gdpy_set_scalar_from_pyobj(value, GD_INT_TYPE, &scalar, &period);
+  gdpy_set_scalar_from_pyobj(value, GD_INT_TYPE, &scalar, self->char_enc,
+      &period);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -1780,12 +1819,16 @@ static PyObject *gdpy_entry_geta(struct gdpy_entry_t *self, void *closure)
 
   if (self->E->field_type == GD_POLYNOM_ENTRY) {
     obj = PyTuple_New(self->E->EN(polynom,poly_ord) + 1);
-    for (i = 0; i <= self->E->EN(polynom,poly_ord); ++i)
-      PyTuple_SetItem(obj, i, (self->E->scalar[i] == NULL) ?
-          (self->E->flags & GD_EN_COMPSCAL) ?
-          gdpy_from_complex(self->E->EN(polynom,ca)[i]) :
-          PyFloat_FromDouble(self->E->EN(polynom,a)[i]) :
-          PyString_FromString(self->E->scalar[i]));
+    for (i = 0; i <= self->E->EN(polynom,poly_ord); ++i) {
+      PyObject *scalar = gdpyobj_from_scalar(self->E, i, GD_COMPLEX128,
+          &self->E->EN(lincom,ca)[i], self->char_enc);
+      if (scalar == NULL) {
+        Py_DECREF(obj);
+        obj = NULL;
+        break;
+      }
+      PyTuple_SetItem(obj, i, scalar);
+    }
   } else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'a' not available for entry type %s",
@@ -1836,10 +1879,12 @@ static int gdpy_entry_seta(struct gdpy_entry_t *self, PyObject *value,
       a[i] = creal(ca[i]);
       scalar[i] = NULL;
     } else if (comp_scal) {
-      gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, scalar + i, ca + i);
+      gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, scalar + i,
+          self->char_enc, ca + i);
       a[i] = creal(ca[i]);
     } else {
-      gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, scalar + i, a + i);
+      gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, scalar + i, self->char_enc,
+          a + i);
       gd_rs2cs_(ca[i], a[i]);
     }
   }
@@ -1868,7 +1913,7 @@ static PyObject *gdpy_entry_getpolyord(struct gdpy_entry_t *self, void *closure)
   dtrace("%p, %p", self, closure);
 
   if (self->E->field_type == GD_POLYNOM_ENTRY)
-    obj = PyInt_FromLong(self->E->EN(polynom,poly_ord));
+    obj = gdpyint_fromlong(self->E->EN(polynom,poly_ord));
   else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'poly_ord' not available for entry type %s",
@@ -1914,7 +1959,7 @@ static int gdpy_entry_setpolyord(struct gdpy_entry_t *self, PyObject *value,
 static PyObject *gdpy_entry_getparms(struct gdpy_entry_t *self, void *closure)
 {
   int i;
-  PyObject *a, *tuple = NULL;
+  PyObject *s1, *s2, *s3, *s4, *tuple = NULL;
 
   dtrace("%p, %p", self, closure);
 
@@ -1934,114 +1979,121 @@ static PyObject *gdpy_entry_getparms(struct gdpy_entry_t *self, void *closure)
           self->E->EN(scalar,array_len));
       break;
     case GD_RAW_ENTRY:
-      tuple = Py_BuildValue("(iI)", self->E->EN(raw,data_type),
-          self->E->EN(raw,spf));
+      s1 = gdpyobj_from_scalar(self->E, 0, GD_UINT_TYPE, &self->E->EN(raw,spf),
+          self->char_enc);
+      S1CHECK;
+      tuple = Py_BuildValue("(iN)", self->E->EN(raw,data_type), s1);
       break;
     case GD_LINTERP_ENTRY:
-      tuple = Py_BuildValue("(ss)", self->E->in_fields[0],
-          self->E->EN(linterp,table));
+      s1 = gdpyobj_from_string(self->E->in_fields[0], self->char_enc);
+      S1CHECK;
+      s2 = gdpyobj_from_path(self->E->EN(linterp,table));
+      S2CHECK;
+      tuple = Py_BuildValue("(NN)", s1, s2);
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
-      tuple = Py_BuildValue("(ss)", self->E->in_fields[0],
-          self->E->in_fields[1]);
+      s1 = gdpyobj_from_string(self->E->in_fields[0], self->char_enc);
+      S1CHECK;
+      s2 = gdpyobj_from_string(self->E->in_fields[1], self->char_enc);
+      S2CHECK;
+      tuple = Py_BuildValue("(NN)", s1, s2);
       break;
     case GD_RECIP_ENTRY:
-      if (self->E->flags & GD_EN_COMPSCAL)
-        tuple = Py_BuildValue("(sO)", self->E->in_fields[0],
-            gdpy_from_complex(self->E->EN(recip,cdividend)));
-      else
-        tuple = Py_BuildValue("(sd)", self->E->in_fields[0],
-            self->E->EN(recip,dividend));
+      s1 = gdpyobj_from_string(self->E->in_fields[0], self->char_enc);
+      S1CHECK;
+      s2 = gdpyobj_from_scalar(self->E, 0, GD_COMPLEX128,
+          &self->E->EN(recip,cdividend), self->char_enc);
+      S2CHECK;
+      tuple = Py_BuildValue("(NN)", s1, s2);
       break;
     case GD_PHASE_ENTRY:
-      tuple = Py_BuildValue("(si)", self->E->in_fields[0],
-          self->E->EN(phase,shift));
+      s1 = gdpyobj_from_string(self->E->in_fields[0], self->char_enc);
+      S1CHECK;
+      s2 = gdpyobj_from_scalar(self->E, 0, GD_INT64, &self->E->EN(phase,shift),
+            self->char_enc);
+      S2CHECK;
+      tuple = Py_BuildValue("(NN)", s1, s2);
       break;
     case GD_POLYNOM_ENTRY:
-      a = PyTuple_New(self->E->EN(polynom,poly_ord) + 1);
-      if (self->E->flags & GD_EN_COMPSCAL)
-        for (i = 0; i <= self->E->EN(polynom,poly_ord); ++i)
-          PyTuple_SetItem(a, i, gdpy_from_complex(self->E->EN(polynom,ca)[i]));
-      else
-        for (i = 0; i <= self->E->EN(polynom,poly_ord); ++i)
-          PyTuple_SetItem(a, i, PyFloat_FromDouble(self->E->EN(polynom,a)[i]));
-      tuple = Py_BuildValue("(sO)", self->E->in_fields[0], a);
+      s1 = PyTuple_New(self->E->EN(polynom,poly_ord) + 1);
+      for (i = 0; i <= self->E->EN(polynom,poly_ord); ++i) {
+        s2 = gdpyobj_from_scalar(self->E, i, GD_COMPLEX128,
+            &self->E->EN(polynom,ca)[i], self->char_enc);
+        S2CHECK;
+        PyTuple_SetItem(s1, i, s2);
+      }
+      s2 = gdpyobj_from_string(self->E->in_fields[0], self->char_enc);
+      S2CHECK;
+      tuple = Py_BuildValue("(NN)", s2, s1);
       break;
     case GD_LINCOM_ENTRY:
-      switch (self->E->EN(lincom,n_fields)) {
-        case 1:
-          if (self->E->flags & GD_EN_COMPSCAL)
-            tuple = Py_BuildValue("((s)(O)(O))", self->E->in_fields[0],
-                gdpy_from_complex(self->E->EN(lincom,cm)[0]),
-                gdpy_from_complex(self->E->EN(lincom,cb)[0]));
-          else
-            tuple = Py_BuildValue("((s)(d)(d))", self->E->in_fields[0],
-                self->E->EN(lincom,m)[0], self->E->EN(lincom,b)[0]);
-          break;
-        case 2:
-          if (self->E->flags & GD_EN_COMPSCAL)
-            tuple = Py_BuildValue("((ss)(OO)(OO))", self->E->in_fields[0],
-                self->E->in_fields[1],
-                gdpy_from_complex(self->E->EN(lincom,cm)[0]),
-                gdpy_from_complex(self->E->EN(lincom,cm)[1]),
-                gdpy_from_complex(self->E->EN(lincom,cb)[0]),
-                gdpy_from_complex(self->E->EN(lincom,cb)[1]));
-          else
-            tuple = Py_BuildValue("((ss)(dd)(dd))", self->E->in_fields[0],
-                self->E->in_fields[1], self->E->EN(lincom,m)[0],
-                self->E->EN(lincom,m)[1], self->E->EN(lincom,b)[0],
-                self->E->EN(lincom,b)[1]);
-          break;
-        case 3:
-          if (self->E->flags & GD_EN_COMPSCAL)
-            tuple = Py_BuildValue("((sss)(OOO)(OOO))", self->E->in_fields[0],
-                self->E->in_fields[1], self->E->in_fields[2],
-                gdpy_from_complex(self->E->EN(lincom,cm)[0]),
-                gdpy_from_complex(self->E->EN(lincom,cm)[1]),
-                gdpy_from_complex(self->E->EN(lincom,cm)[2]),
-                gdpy_from_complex(self->E->EN(lincom,cb)[0]),
-                gdpy_from_complex(self->E->EN(lincom,cb)[1]),
-                gdpy_from_complex(self->E->EN(lincom,cb)[2]));
-          else
-            tuple = Py_BuildValue("((sss)(ddd)(ddd))", self->E->in_fields[0],
-                self->E->in_fields[1], self->E->in_fields[2],
-                self->E->EN(lincom,m)[0], self->E->EN(lincom,m)[1],
-                self->E->EN(lincom,m)[2], self->E->EN(lincom,b)[0],
-                self->E->EN(lincom,b)[1], self->E->EN(lincom,b)[2]);
-          break;
+      s1 = PyTuple_New(self->E->EN(lincom,n_fields));
+      s2 = PyTuple_New(self->E->EN(lincom,n_fields));
+      s3 = PyTuple_New(self->E->EN(lincom,n_fields));
+      for (i = 0; i < self->E->EN(lincom,n_fields); ++i) {
+        s4 = gdpyobj_from_string(self->E->in_fields[i], self->char_enc);
+        S4CHECK;
+        PyTuple_SetItem(s1, i, s4);
+        s4 = gdpyobj_from_scalar(self->E, i, GD_COMPLEX128,
+            &self->E->EN(lincom,cm)[i], self->char_enc);
+        S4CHECK;
+        PyTuple_SetItem(s2, i, s4);
+        s4 = gdpyobj_from_scalar(self->E, i + GD_MAX_LINCOM, GD_COMPLEX128,
+            &self->E->EN(lincom,cb)[i], self->char_enc);
+        S4CHECK;
+        PyTuple_SetItem(s3, i, s4);
       }
+      tuple = Py_BuildValue("(NNN)", s1, s2, s3);
       break;
     case GD_WINDOW_ENTRY:
+      s1 = gdpyobj_from_string(self->E->in_fields[0], self->char_enc);
+      S1CHECK;
+      s2 = gdpyobj_from_string(self->E->in_fields[1], self->char_enc);
+      S2CHECK;
       switch (self->E->EN(window,windop)) {
         case GD_WINDOP_EQ:
         case GD_WINDOP_NE:
-          tuple = Py_BuildValue("(ssiL)", self->E->in_fields[0],
-              self->E->in_fields[1], self->E->EN(window,windop),
-              (PY_LONG_LONG)self->E->EN(window,threshold).i);
+          s3 = gdpyobj_from_scalar(self->E, 0, GD_INT64,
+              &self->E->EN(window,threshold).i, self->char_enc);
           break;
         case GD_WINDOP_SET:
         case GD_WINDOP_CLR:
-          tuple = Py_BuildValue("(ssiK)", self->E->in_fields[0],
-              self->E->in_fields[1], self->E->EN(window,windop),
-              (unsigned PY_LONG_LONG)self->E->EN(window,threshold).u);
+          s3 =gdpyobj_from_scalar(self->E, 0, GD_UINT64,
+              &self->E->EN(window,threshold).u, self->char_enc);
           break;
         default:
-          tuple = Py_BuildValue("(ssid)", self->E->in_fields[0],
-              self->E->in_fields[1], self->E->EN(window,windop),
-              self->E->EN(window,threshold).r);
+          s3 = gdpyobj_from_scalar(self->E, 0, GD_FLOAT64,
+              &self->E->EN(window,threshold).r, self->char_enc);
           break;
       }
+      S3CHECK;
+      tuple = Py_BuildValue("(NNiN)", s1, s2, self->E->EN(window,windop), s3);
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      tuple = Py_BuildValue("(sii)", self->E->in_fields[0],
-          self->E->EN(bit,bitnum), self->E->EN(bit,numbits));
+      s1 = gdpyobj_from_string(self->E->in_fields[0], self->char_enc);
+      S1CHECK;
+      s2 = gdpyobj_from_scalar(self->E, 0, GD_INT_TYPE,
+          &self->E->EN(bit,bitnum), self->char_enc);
+      S2CHECK;
+      s3 = gdpyobj_from_scalar(self->E, 1, GD_INT_TYPE,
+            &self->E->EN(bit,numbits), self->char_enc);
+      S3CHECK;
+      tuple = Py_BuildValue("(NNN)", s1, s2, s3);
       break;
     case GD_MPLEX_ENTRY:
-      tuple = Py_BuildValue("(ssII)", self->E->in_fields[0],
-          self->E->in_fields[1], (unsigned int)self->E->EN(mplex,count_val),
-          (unsigned int)self->E->EN(mplex,period));
+      s1 = gdpyobj_from_string(self->E->in_fields[0], self->char_enc);
+      S1CHECK;
+      s2 = gdpyobj_from_string(self->E->in_fields[1], self->char_enc);
+      S2CHECK;
+      s3 = gdpyobj_from_scalar(self->E, 0, GD_INT_TYPE,
+          &self->E->EN(mplex,count_val), self->char_enc);
+      S3CHECK;
+      s4 = gdpyobj_from_scalar(self->E, 1, GD_INT_TYPE,
+            &self->E->EN(mplex,period), self->char_enc);
+      S4CHECK;
+      tuple = Py_BuildValue("(NNNN)", s1, s2, s3, s4);
       break;
   }
 
@@ -2063,9 +2115,9 @@ static int gdpy_entry_setparms(struct gdpy_entry_t *self, PyObject *value,
   E.fragment_index = self->E->fragment_index;
 
   if (PyDict_Check(value))
-    gdpy_set_entry_from_dict(&E, value, "pygetdata.entry");
+    gdpy_set_entry_from_dict(&E, value, self->char_enc, "pygetdata.entry");
   else if (PyTuple_Check(value))
-    gdpy_set_entry_from_tuple(&E, value, "pygetdata.entry");
+    gdpy_set_entry_from_tuple(&E, value, self->char_enc, "pygetdata.entry");
   else
     PyErr_SetString(PyExc_TypeError, "'pygetdata.entry' "
         "attribute 'parameters' must be a tuple or dictionary");
@@ -2091,7 +2143,7 @@ static PyObject *gdpy_entry_getwindop(struct gdpy_entry_t *self, void *closure)
   dtrace("%p, %p", self, closure);
 
   if (self->E->field_type == GD_WINDOW_ENTRY)
-    obj = PyInt_FromLong(self->E->EN(window,windop));
+    obj = gdpyint_fromlong(self->E->EN(window,windop));
   else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'windop' not available for entry type %s",
@@ -2116,7 +2168,7 @@ static int gdpy_entry_setwindop(struct gdpy_entry_t *self, PyObject *value,
     return -1;
   }
 
-  t = PyInt_AsLong(value);
+  t = gdpy_long_from_pyobj(value);
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
     return -1;
@@ -2205,6 +2257,73 @@ static int gdpy_entry_setthreshold(struct gdpy_entry_t *self, PyObject *value,
   return 0;
 }
 
+static PyObject *gdpy_entry_getcharencoding(struct gdpy_entry_t *self,
+    void *closure)
+{
+  dtrace("%p, %p", self, closure);
+
+  PyObject *pyobj = gdpy_charenc_obj(self->char_enc);
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static int gdpy_entry_setcharencoding(struct gdpy_entry_t *self,
+    PyObject *value, void *closure)
+{
+  dtrace("%p, %p, %p", self, value, closure);
+
+  if (gdpy_parse_charenc(&self->char_enc, value)) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+#if (PY_MAJOR_VERSION > 2) || (PY_MINOR_VERSION >= 6)
+static PyObject *gdpy_entry_repr(struct gdpy_entry_t *self)
+{
+  PyObject *urepr, *repr, *parms, *name;
+
+  dtrace("%p", self);
+
+  /* decode name */
+  name = gdpyobj_from_string(self->E->field, self->char_enc);
+
+  /* the parameter tuple */
+  parms = gdpy_entry_getparms(self, NULL);
+  if (PyErr_Occurred()) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  /* repr-ify */
+  if (self->char_enc == NULL)
+    urepr = PyUnicode_FromFormat(
+        "pygetdata.entry(pygetdata.%s, %R, %i, %R, character_encoding=None)",
+        gdpy_entry_type_names[self->E->field_type], name,
+        self->E->fragment_index, parms);
+  else
+    urepr = PyUnicode_FromFormat(
+        "pygetdata.entry(pygetdata.%s, %R, %i, %R, character_encoding=\"%s\")",
+        gdpy_entry_type_names[self->E->field_type], name,
+        self->E->fragment_index, parms, self->char_enc);
+
+  /* now encode */
+  repr = PyUnicode_AsEncodedString(urepr, "ascii", "backslashreplace");
+  Py_DECREF(urepr);
+  Py_DECREF(name);
+  Py_DECREF(parms);
+
+  dreturn("%p", repr);
+  return repr;
+}
+#else
+#define gdpy_entry_repr NULL
+#endif
+
 static PyGetSetDef gdpy_entry_getset[] = {
   { "a", (getter)gdpy_entry_geta, (setter)gdpy_entry_seta,
     "The POLYNOM co-efficients.  A tuple of numerical and/or string data.\n"
@@ -2235,6 +2354,20 @@ static PyGetSetDef gdpy_entry_getset[] = {
     "The starting bit for a BIT field.  If this is specified using a\n"
       "CONST scalar field, this will be the field code of that field,\n"
       "otherwise, it will be the number itself.",
+    NULL },
+  { "character_encoding", (getter)gdpy_entry_getcharencoding,
+    (setter)gdpy_entry_setcharencoding,
+    "The character encoding to use when representing Dirfile string data\n"
+      "and metadata in Python.  For entry objects created with the\n"
+      "pygetdata.entry() function, the initial value of this attribute is\n"
+      "copied from the value of the global pygetdata.character_encoding\n"
+      "at the time that the dirfile object is created, if the global value\n"
+      "is valid.  If the global pygetdata.character_encoding is invalid, the\n"
+      "initial value of this attribute is simply None.  For entry objects\n"
+      "returned by pygetdata.dirfile.entry(), the value is copied from the\n"
+      "dirfile object (which is always valid).  Subsequent changes\n"
+      "affect only this object.  See the CHARACTER STRINGS section in the\n"
+      "pygetdata module documentation for further details.",
     NULL },
   { "const_type", (getter)gdpy_entry_getdatatype,
     (setter)gdpy_entry_setdatatype, "An alias for the data_type attribute.",
@@ -2364,7 +2497,7 @@ static PyGetSetDef gdpy_entry_getset[] = {
 };
 
 #define ENTRY_DOC \
-  "entry(type, name, fragment_index [, parameters])\n\n"\
+  "entry(type, name, fragment_index [, parameters, character_encoding])\n\n"\
 "Returns an entry object containing the metadata for one dirfile field.\n"\
 "The field type is specified by 'type', which should be one of the\n"\
 "pygetdata.*_ENTRY symbols.  The field name is specified by 'name', and\n"\
@@ -2372,6 +2505,10 @@ static PyGetSetDef gdpy_entry_getset[] = {
 "the specification line of this field, once the entry is added to a\n"\
 "dirfile.  To add this field to the primary format file, set\n"\
 "'fragment_index' to zero.\n\n"\
+"The 'character_encoding' parameter sets the initial value of the\n"\
+"character_encoding attribute (q.v.).  If this parameter is omitted, the\n"\
+"default value is copied from the global pygetdata.character_encoding\n"\
+"instead.\n"\
 "The 'parameters' parameter is a tuple or dictionary containing field-\n"\
 "specific metadata parameters, and must be present for all field types\n"\
 "except STRING, which has no parameters.  If a tuple, 'parameters' should\n"\
@@ -2451,8 +2588,7 @@ static PyGetSetDef gdpy_entry_getset[] = {
 "dirfile.rename() or dirfile.move() should be used.\n"
 
 PyTypeObject gdpy_entry = {
-  PyObject_HEAD_INIT(NULL)
-    0,                           /* ob_size */
+  PyVarObject_HEAD_INIT(NULL, 0)
   "pygetdata.entry",             /* tp_name */
   sizeof(struct gdpy_entry_t),   /* tp_basicsize */
   0,                             /* tp_itemsize */
@@ -2461,7 +2597,7 @@ PyTypeObject gdpy_entry = {
   0,                             /* tp_getattr */
   0,                             /* tp_setattr */
   0,                             /* tp_compare */
-  0,                             /* tp_repr */
+  (reprfunc)gdpy_entry_repr,     /* tp_repr */
   0,                             /* tp_as_number */
   0,                             /* tp_as_sequence */
   0,                             /* tp_as_mapping */

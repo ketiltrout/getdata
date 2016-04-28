@@ -46,7 +46,7 @@ char *_GD_GetLine(FILE *restrict fp, size_t *restrict n, int *restrict linenum)
 
   char *line = NULL;
 
-  dtrace("%p, %p, %p", fp, n, linenum);
+  dtrace("%p, %p, %p(%i)", fp, n, linenum, *linenum);
 
   do {
     errno = 0;
@@ -59,12 +59,12 @@ char *_GD_GetLine(FILE *restrict fp, size_t *restrict n, int *restrict linenum)
 
 
   if (len != -1) {
-    dreturn("\"%s\" (%" PRIuSIZE ")", line, *n);
+    dreturn("%i: \"%s\" (%" PRIuSIZE ")", *linenum, line, *n);
     return line; /* a line was read */
   }
 
   free(line);
-  dreturn("%p", NULL);
+  dreturn("%i: %p", *linenum, NULL);
   return NULL;  /* there were no valid lines */
 }
 
@@ -219,6 +219,12 @@ int _GD_SetTablePath(DIRFILE *restrict D, const gd_entry_t *restrict E,
 
   e->u.linterp.table_dirfd = _GD_GrabDir(D,
       D->fragment[E->fragment_index].dirfd, E->EN(linterp,table), 0);
+  if (e->u.linterp.table_dirfd < 0 && D->error == GD_E_OK)
+    _GD_SetError(D, GD_E_IO, GD_E_IO_OPEN, E->EN(linterp,table), 0, NULL);
+  if (D->error) {
+    dreturn("%i", 1);
+    return 1;
+  }
 
   temp_buffer = _GD_Strdup(D, E->EN(linterp,table));
   if (temp_buffer == NULL) {

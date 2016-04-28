@@ -295,6 +295,10 @@ int _GD_Include(DIRFILE *D, struct parser_state *p, const char *ename,
     if (!oldp.pedantic)
       p->pedantic = 0;
   }
+  
+  /* pop file location */
+  p->line = oldp.line;
+  p->file = oldp.file;
 
   /* pop namespace, if necessary */
   if (pop_ns) {

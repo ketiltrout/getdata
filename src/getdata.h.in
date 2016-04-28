@@ -169,7 +169,7 @@ extern "C" {
 /* the maximum number of input vectors in a LINCOM */
 #define GD_MAX_LINCOM 3
 
-/* the following MUST be at least one less than twice GD_MAX_LINCOM */
+/* the following MUST be at most one less than twice GD_MAX_LINCOM */
 #define GD_MAX_POLYORD (GD_MAX_LINCOM * 2 - 1)
 
 /* syntax suberrors */

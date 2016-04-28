@@ -1,3 +1,141 @@
+2016-04-28   D. V. Wiebe <getdata@ketiltrout.net> svn:1063
+	Python3 and PyUnicode support:
+
+	* bindings/python/pygetdata.h: Define gdpyint_fromlong, gdpyint_check,
+	gdpyint_fromlong based on python version.
+	* bindings/python/pygetdata.c (gdpy_ulong_from_pyobj gdpy_long_from_pyobj):
+	Abstractify PyInt/PyLong differences.  Everything that used to call
+	PyInt_AsLong, PyLong_AsUnsignedLong now uses one of these or the macros
+	defined in pygetdata.h as appropriate.
+
+	* bindings/python/pygetdata.h: Define gdpy_encobj_check,
+	gdpystrobj_from_string, gdpy_string_from_encobj, gdpy_encobj_from_string to
+	handle encoded strings (i.e. PyString in Python2 or PyBytes in Python3).
+	* bindings/python/pygetdata.c (gdpyobj_from_estring): Added.
+
+	* bindings/python/pygetdata.c (gdpy_string_from_pyobj gdpyobj_from_string):
+	Added, replacing most PyString_AsString and PyString_FromString calls.
+	* bindings/python/pygetdata.c (gdpy_encobj_check): Added, replacing
+	PyString_Check calls.
+	* bindings/python/pyentry.c (gdpy_dup_pystring): Deleted (now handled by
+	gdpy_string_from_pyobj).
+	* bindings/python/pygetdata.c (
+
+	* bindings/python/pygetdata.c (gdpy_path_from_pyobj_): Added for Python3.
+	* bindings/python/pygetdata.h: Define gdpy_path_from_pyobj to either
+	gdpy_string_from_pyobj (Python2) or else gdpy_path_from_pyobj_ (Python3).
+	Define gdpyobj_from_path to either PyString_FromString (Python2) or else
+	PyUnicode_DecodeFSDefault (Python3).
+
+	* bindings/python/pygetdata.c (gdpy_convert_from_pylist
+	gdpy_convert_from_pyobj): Skip GDPY_INT_AS_LONG in python3.
+
+	* bindings/python/pydirfile.c bindings/python/pyentry.c
+	bindings/python/pyfragment.c: Use PyVarObject_HEAD_INIT for PyTypeObject
+	initialisation.
+
+	* bindings/python/test/check_enc1.py bindings/python/test/check_enc2.py
+	bindings/python/test/check_enc3.py: Added.
+	
+  * bindings/python/pygetdata.h: Define GDPY_MODINITFUNC,
+	GDPY_MODINITSUCCESS, GDPY_MODINITFAILURE based on python version.  Also
+	define PyVarObject_HEAD_INIT if needed.
+	* bindings/python/pygetdata.c (GDPY_MODINITFUNC): version-agnostic name for
+	initpygetdata.  Remember the module as global gdpy_mod.
+
+	* bindings/python/pygetdata.h: Add struct gdpy_charenc_t char_enc to struct
+	gdpy_dirfile_t and struct gdpy_charenc_t char_enc.
+	* bindings/python/pygetdata.h (PYGD_CHECK_ERROR PYGD_CHECK_ERROR2
+	PYGD_REPORT_ERROR): Add ce parameter.
+	* bindings/python/pygetdata.c (GDPY_MODINITFUNC): Initialise
+	pygetdata.character_encoding to Py_None.
+	* bindings/python/pygetdata.c (gdpy_charenc_repr gdpy_parse_charenc
+	gdpy_copy_global_charenc) bindings/python/pydirfile.c
+	(gdpy_dirfile_getcharencoding gdpy_dirfile_setcharencoding)
+	bindings/python/pyentry.c (gdpy_entry_getcharencoding
+	gdpy_entry_setcharencoding): Added.
+	* bindings/python/pyentry.c (gdpy_set_entry_from_tuple
+	gdpy_set_entry_from_dict gdpy_set_scalar_from_pyobj): Add char_enc parameter.
+	* bindings/python/pydirfile.c (gdpy_dirfile_create) bindings/python/pyentry.c
+	(gdpy_entry_create): Call gdpy_copy_global_charenc to initialise
+	self->char_enc.
+	* bindings/python/pydirfile.c (gdpy_dirfile_getentry): Copy dirfile's
+	char_enc instead of the global one.
+	* bindings/python/pydirfile.c (gdpy_dirfile_init) bindings/python/pyentry.c
+	(gdpy_entry_init): Add character_encoding parameter.
+	* bindings/python/pydirfile.c bindings/python/pyentry.c
+	bindings/python/pyfragment.c: Replace "s" with "et" and, pass self->char_enc
+	where appropriate, in most PyArg_ParseTupleAndKeywords calls to automatically
+	encode Unicode objects.
+	* bindings/python/test/char_enc1.py bindings/python/test/char_enc2.py
+	bindings/python/test/char_enc3.py: Added.
+
+	* bindings/python/pydirfile.c (gdpyobj_from_strarr): Renamed from
+	gdpy_to_pystringlist, moved from pygetdata.c, and made static.
+
+	* bindings/python/pyentry.c (S1CHECK S2CHECK S3CHECK S4CHECK): Define to
+	handle unicode decoding errors.
+
+	* bindings/python/test/big_test.py (L B): Added to deal with python2/3
+	differences.
+	* bindings/python/test/big_test.py (CheckOK CheckOK2 CheckException
+	CheckException2): Use sys.exc_info()[0] instead of sys.exc_type.
+
+	* m4/python.m4 (GD_LOG_SHELL GD_PYTHON_CONFIGVAR GD_PYTHON3
+	GD_PYTHON_MIN_VERSION): Added.
+	* m4/python.m4 (GD_PYTHON): Look for python3.  Determine PYTHON_LDVERSION.
+	Don't use python-config to avoid buggy ones.  Use the right sysconfig.
+
+	* m4/python.m4 (GD_PYTHON): Figure out PYTHON_OBJECT_SUFFIX.
+	* bindings/python/Makefile.am: Use PYTHON_OBJECT_SUFFIX.
+
+	Also:
+
+	* configure.ac: Bump minimum Python2 to 2.4 due to bugs in the 2.3 branch.
+
+	* bindings/python/pygetdata.h (GDPY_CHECK_ERROR GDPY_CHECK_ERROR2
+	GDPY_REPORT_ERROR): Rename from PYGD_CHECK_ERROR PYGD_CHECK_ERROR2
+	PYGD_REPORT_ERROR for consistency.
+
+	* bindings/python/pygetdata.c (gdpylist_append): Return error if item ==
+	NULL.
+
+	* bindings/python/pyentry.c (gdpy_entry_repr): Added.
+
+	* bindings/python/pyfragment.c (gdpy_fragment_init): Fix
+	PyArg_ParseTupleAndKeywords call.
+
+	* bindings/python/pygetdata.c (gdpy_coerce_from_pyobj): Added.
+	* bindings/python/pyentry.c (gdpy_set_scalar_from_pyobj): Call
+	gdpy_string_from_pyobj or gdpy_coerce_from_pyobj to do all the work.
+	* bindings/python/pyentry.c (gdpyobj_from_scalar): Added.
+	* bindings/python/pyentry.c (gdpy_entry_getspf gdpy_entry_getm
+	gdpy_entry_getb gdpy_entry_getbitnum gdpy_entry_getnumbits
+	gdpy_entry_getdividend gdpy_entry_getshift gdpy_entry_getcountval
+	gdpy_entry_getperiod gdpy_entry_geta gdpy_entry_getparms): Call
+	gdpyobj_from_scalar.
+
+	* bindings/python/pygetdata.c (gdpy_maybe_complex): Added.
+	* bindings/python/pygetdata.c (gdpy_convert_to_pyobj): Add force_complex
+	flag.  Call gdpy_maybe_complex().
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_carrays gdpy_dirfile_mcarrays):
+	Don't crash if return_type = GD_NULL.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_carraylen): Use PyErr_Warn
+	instead of PyErr_WarnEx for backwards compatibility.
+
+	* src/common.c (_GD_SetTablePath): If _GD_GrabDir fails, report the error.
+	* test/get_linterp_nodir.c: Added.
+
+	* configure.ac: Add AC_BOTTOM call.
+	* src/gd_extra_config.h: Added for Apple universal binaries
+
+	* src/include.c (_GD_Include): Pop file location from oldp.
+	* src/parse.c (_GD_ParseFragment): Use p->line for linenumbers.
+
+	* src/name.c (_GD_ValidateField): Handle CHAR_MIN != 0.
+
 2016-03-29   D. V. Wiebe <getdata@ketiltrout.net> svn:1055
 	GetData-0.9.2.1 released:
 

@@ -204,18 +204,19 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_lincom3 get_lincom3s get_lincom_mdt get_lincom_noin \
 					get_lincom_non get_lincom_null get_lincom_spf get_linterp \
 					get_linterp1 get_linterp_abs get_linterp_complex get_linterp_empty \
-					get_linterp_noin get_linterp_notab get_linterp_sort get_mplex \
-					get_mplex_bof get_mplex_complex get_mplex_lb get_mplex_lball \
-					get_mplex_nolb get_mplex_s get_mplex_saved get_multiply \
-					get_multiply_ccin get_multiply_crin get_multiply_crinr \
-					get_multiply_noin get_multiply_rcin get_multiply_s get_neg get_none \
-					get_nonexistent get_null get_off64 get_phase get_phase_affix \
-					get_polynom get_polynom_cmpin get_polynom_noin get_range get_recip \
-					get_recip_const get_recurse get_rofs get_sbit get_sf get_ss \
-					get_string get_type get_uint16 get_uint32 get_uint64 get_window \
-					get_window_clr get_window_complex get_window_ge get_window_gt \
-					get_window_le get_window_lt get_window_ne get_window_s \
-					get_window_set get_zero get_zero_complex get_zero_float
+					get_linterp_nodir get_linterp_noin get_linterp_notab \
+					get_linterp_sort get_mplex get_mplex_bof get_mplex_complex \
+					get_mplex_lb get_mplex_lball get_mplex_nolb get_mplex_s \
+					get_mplex_saved get_multiply get_multiply_ccin get_multiply_crin \
+					get_multiply_crinr get_multiply_noin get_multiply_rcin \
+					get_multiply_s get_neg get_none get_nonexistent get_null get_off64 \
+					get_phase get_phase_affix get_polynom get_polynom_cmpin \
+					get_polynom_noin get_range get_recip get_recip_const get_recurse \
+					get_rofs get_sbit get_sf get_ss get_string get_type get_uint16 \
+					get_uint32 get_uint64 get_window get_window_clr get_window_complex \
+					get_window_ge get_window_gt get_window_le get_window_lt \
+					get_window_ne get_window_s get_window_set get_zero get_zero_complex \
+					get_zero_float
 
 GLOBAL_TESTS=global_flags global_name global_ref global_ref_empty global_ref_set
 

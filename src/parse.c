@@ -363,7 +363,7 @@ static int _GD_SetField(DIRFILE *restrict D,
   int offset;
   int is_dot = 0;
 
-  dtrace("%p, %p, %p, %p, %i, \"%s\", %i", D, p, E, P, me, name, no_dot);
+  dtrace("%p, %p{%s,%i}, %p, %p, %i, \"%s\", %i", D, p, p->file, p->line, E, P, me, name, no_dot);
 
   E->field = _GD_CodeFromFrag(D, p, P, me, name, NULL, &offset);
   if (E->field && _GD_ValidateField(E->field + offset, p->standards,
@@ -2411,7 +2411,6 @@ char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *D, struct parser_state *p,
   char *outstring = NULL;
   const char *tok_pos = NULL;
   char *in_cols[MAX_IN_COLS];
-  int linenum = 0;
   char* ref_name = NULL;
   int n_cols;
   size_t n;
@@ -2420,7 +2419,6 @@ char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *D, struct parser_state *p,
   int se_action = GD_SYNTAX_ABORT;
   gd_entry_t* first_raw = NULL;
   gd_parser_data_t pdata;
-
   int saved_error = 0;
   int saved_suberror = 0;
   int saved_line = 0;
@@ -2433,7 +2431,7 @@ char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *D, struct parser_state *p,
   p->file = D->fragment[me].cname;
 
   /* start parsing */
-  while (rescan || (instring = _GD_GetLine(fp, &n, &linenum))) {
+  while (rescan || (instring = _GD_GetLine(fp, &n, &p->line))) {
     rescan = 0;
     n_cols = _GD_Tokenise(D, p, instring, &outstring, &tok_pos, MAX_IN_COLS,
         in_cols);
@@ -2465,7 +2463,7 @@ char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *D, struct parser_state *p,
         }
         pdata.dirfile = D;
         pdata.suberror = D->suberror;
-        pdata.linenum = linenum;
+        pdata.linenum = p->line;
         pdata.filename = D->fragment[me].cname;
         pdata.line = instring;
         pdata.buflen = n;

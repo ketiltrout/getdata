@@ -1,4 +1,4 @@
-dnl Copyright (C) 2009, 2011, 2013 D. V. Wiebe
+dnl Copyright (C) 2009, 2011, 2013, 2016 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -18,24 +18,82 @@ dnl You should have received a copy of the GNU Lesser General Public License
 dnl along with GetData; if not, write to the Free Software Foundation, Inc.,
 dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+dnl GD_LOG_SHELL(STUFF)
+dnl ---------------------------------------------------------------
+dnl Run STUFF as a shell command and log it
+AC_DEFUN([AM_LOG_SHELL],
+[{ echo "$as_me:$LINENO: $1" >&AS_MESSAGE_LOG_FD
+($1) >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD
+ac_status=$?
+echo "$as_me:$LINENO: \$? = $ac_status" >&AS_MESSAGE_LOG_FD
+(exit $ac_status); }])
+
+dnl GD_PYTHON_CONFIGVAR(VAR, KEY)
+dnl ---------------------------------------------------------------
+dnl Store the value of config_var KEY in VAR
+AC_DEFUN([GD_PYTHON_CONFIGVAR],
+[
+  $1=$(${PYTHON} - <<EOF 2>/dev/null
+try:
+  import sysconfig
+except ImportError:
+  from distutils import sysconfig
+
+print (sysconfig.get_config_var("$2"))
+EOF
+)
+
+  if test "x${$1}" = "x"; then $1=None; fi
+])
+
+dnl GD_PYTHON3(PROG)
+dnl ---------------------------------------------------------------
+dnl If PROG is a Python3 interpreter, set have_python3 to "yes"
+dnl otherwise set it to "no"
+AC_DEFUN([GD_PYTHON3],
+[
+AS_IF(AM_LOG_SHELL([$1 -c 'import sys; sys.exit(int(sys.version@<:@:1@:>@) - 3)']),
+  [have_python3=yes],[have_python3=no])
+])
+
+dnl GD_PYTHON_MIN_VERSION(PROG,VERSION2,VERSION3,ACTION-IF-TRUE,ACTION-IF_FALSE)
+dnl ---------------------------------------------------------------
+dnl Make sure Python interpreter PROG is at least VERSION2 for Python2 or
+dnl VERSION3 for Python3.  If new enough, run ACTION-IF-TRUE, otherwise
+dnl run ACTION-IF-FALSE.
+AC_DEFUN([GD_PYTHON_MIN_VERSION],
+[
+GD_PYTHON3([$1])
+if test "$have_python3" = "no"; then
+  AM_PYTHON_CHECK_VERSION([$1],[$2],[$4],[$5])
+else
+  AM_PYTHON_CHECK_VERSION([$1],[$3],[$4],[$5])
+fi
+])
+
 dnl GD_PYTHON
 dnl ---------------------------------------------------------------
-dnl Look for python.  Then determine whether we can build extension modules.
+dnl Look for Python.  Then determine whether we can build extension modules.
 AC_DEFUN([GD_PYTHON],
 [
-last_python=2.7
-first_python=$1
+first_python2=$1
+last_python2=2.7
+
+first_python3=$2
+last_python3=3.9 dnl have to stop somewhere
 
 if test "x$SEQ" == "xnot found"; then
   if test "x$JOT" == "xnot found"; then
-    python_prog_list="python python2"
+    python_prog_list="python python3 python2"
   else
-    python_prog_list="python python2 dnl
-    `$JOT -w 'python%.1f' - $last_python $first_python -0.1`" #'
+    python_prog_list="python dnl
+    python3 `$JOT -w 'python%.1f' - $last_python3 $first_python3 -0.1` dnl
+    python2 `$JOT -w 'python%.1f' - $last_python2 $first_python2 -0.1`" #'
   fi
 else
-  python_prog_list="python python2 dnl
-  `$SEQ -f 'python%.1f' $last_python -0.1 $first_python`" #'
+  python_prog_list="python dnl
+  python3 `$SEQ -f 'python%.1f' $last_python3 -0.1 $first_python3` dnl
+  python2 `$SEQ -f 'python%.1f' $last_python2 -0.1 $first_python2`" #'
 fi
 
 dnl --without-python basically does the same as --disable-python
@@ -60,23 +118,24 @@ AC_ARG_WITH([python-module-dir], AS_HELP_STRING([--with-python-module-dir=PATH],
 
 if test "x${have_python}" != "xno"; then
 
-dnl try to find a sufficiently new python.
+dnl try to find a sufficiently new Python - it would be nice to use
+dnl AM_PATH_PYTHON, but it's buggy.
 if test "x$user_python" != "x"; then
-  AC_MSG_CHECKING([whether $user_python version >= $first_python])
-  AM_PYTHON_CHECK_VERSION([$user_python], [$first_python],
+  AC_MSG_CHECKING([whether $user_python is new enough])
+  GD_PYTHON_MIN_VERSION([$user_python], [$first_python2], [$first_python3],
   [AC_MSG_RESULT([yes])
   PYTHON=$user_python],
   [AC_MSG_RESULT([no])
   PYTHON="not found"])
 else
-  AC_MSG_CHECKING([for Python interpreter version >= $first_python])
+  AC_MSG_CHECKING([for Python interpreter version >= $first_python2])
   PYTHON="not found"
   for py in $python_prog_list; do
   _AS_PATH_WALK([$PATH],
   [for exec_ext in '' $ac_executable_extensions; do
     if AS_EXECUTABLE_P(["$as_dir/$py$exec_ext"]); then
-      AM_PYTHON_CHECK_VERSION( ["$as_dir/$py$exec_ext"],
-      [$first_python], [ PYTHON="$as_dir/$py$exec_ext"; break 3] )
+      GD_PYTHON_MIN_VERSION( ["$as_dir/$py$exec_ext"], [$first_python2],
+      [$first_python3], [ PYTHON="$as_dir/$py$exec_ext"; break 3] )
     fi
   done])
   done
@@ -92,26 +151,37 @@ AC_SUBST([PYTHON])
 fi
 
 if test "x${have_python}" != "xno"; then
-dnl python version
+
+dnl Python version
+AC_MSG_CHECKING([if we're using a Python3 interpreter])
+AC_MSG_RESULT([$have_python3])
+
 AC_MSG_CHECKING([$PYTHON version])
-PYTHON_VERSION=`$PYTHON -c "import sys; print sys.version[[:3]]"`
+PYTHON_VERSION=`$PYTHON -c "import sys; print (sys.version[[:3]])"`
 AC_MSG_RESULT([$PYTHON_VERSION])
 AC_SUBST([PYTHON_VERSION])
 
-dnl calculate python CPPFLAGS
+dnl Python ABI version (which can be different than VERISON in python3)
+AC_MSG_CHECKING([Python ABI version])
+GD_PYTHON_CONFIGVAR([PYTHON_LDVERSION], [LDVERSION])
+if test "${PYTHON_LDVERSION}" = "None"; then
+  PYTHON_LDVERSION=${PYTHON_VERSION}
+fi
+AC_MSG_RESULT([$PYTHON_LDVERSION])
+
+dnl calculate Python CPPFLAGS
 AC_MSG_CHECKING([Python includes])
-if test -x $PYTHON-config; then
-  PYTHON_CPPFLAGS=`$PYTHON-config --includes 2>/dev/null`
-else
-  python_prefix=`$PYTHON -c "import sys; print sys.prefix"`
-  python_exec_prefix=`$PYTHON -c "import sys; print sys.exec_prefix"`
-  PYTHON_CPPFLAGS="-I${python_prefix}/include/python${PYTHON_VERSION} -I${python_exec_prefix}/include/python${PYTHON_VERSION}"
+python_prefix=`$PYTHON -c "import sys; print (sys.prefix)"`
+python_exec_prefix=`$PYTHON -c "import sys; print (sys.exec_prefix)"`
+PYTHON_CPPFLAGS="-I${python_prefix}/include/python${PYTHON_LDVERSION}"
+if test "x${python_prefix}" != "x${python_exec_prefix}"; then
+  PYTHON_CPPFLAGS="${PYTHON_CPPFLAGS} -I${python_exec_prefix}/include/python${PYTHON_LDVERSION}"
 fi
 AC_MSG_RESULT([$PYTHON_CPPFLAGS])
 
 dnl figure out the platform name
 AC_MSG_CHECKING([Python platform name])
-PYTHON_PLATFORM=`$PYTHON -c "from distutils import util; print util.get_platform()"`
+PYTHON_PLATFORM=`$PYTHON -c "from distutils import util; print (util.get_platform())"`
 AC_MSG_RESULT([$PYTHON_PLATFORM])
 AC_SUBST([PYTHON_PLATFORM])
 
@@ -123,12 +193,51 @@ test "x$pyexec_prefix" = xNONE && pyexec_prefix=$ac_default_prefix
 dnl calculate the extension module directory
 AC_MSG_CHECKING([Python extension module directory])
 if test "x${local_python_modpath}" = "x"; then
-  pythondir=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_python_lib(1,0,prefix='${pyexec_prefix}')" 2>/dev/null || echo "${pyexec_prefix}/lib/python${PYTHON_VERSION}/site-packages"`
+  pythondir=$(${PYTHON} - <<EOF 2>/dev/null
+import sys
+if sys.version[[:1]] == '3':
+  import sysconfig
+  print (sysconfig.get_path('platlib', vars={'platbase': '\${python_exec_prefix}'}))
+else:
+  from distutils import sysconfig
+  print (sysconfig.get_python_lib(1,0,prefix='\${python_exec_prefix}'))
+EOF
+)
+  if test "x${pythondir}" = "xNone" -o "x${pythondir}" = "x"; then
+    pythondir='${python_exec_prefix}/lib/python${PYTHON_VERSION}/site-packages'
+  fi
 else
   pythondir=$local_python_modpath
 fi
-AC_SUBST([pythondir])
 AC_MSG_RESULT([$pythondir])
+AC_SUBST([pythondir])
+
+dnl figure out object suffix
+AC_MSG_CHECKING([Python object suffix])
+GD_PYTHON_CONFIGVAR([PYTHON_OBJECT_SUFFIX], [SO])
+if test "x${PYTHON_OBJECT_SUFFIX}" = "xNone"; then
+  GD_PYTHON_CONFIGVAR([PYTHON_OBJECT_SUFFIX], [EXT_SUFFIX])
+fi
+AC_MSG_RESULT([$PYTHON_OBJECT_SUFFIX])
+AC_SUBST([PYTHON_OBJECT_SUFFIX])
+
+if test "$have_python3" = "no"; then
+saved_CPPFLAGS=${CPPFLAGS}
+CPPFLAGS="${PYTHON_CPPFLAGS} ${CPPFLAGS}"
+AC_CHECK_DECLS([Py_USING_UNICODE],[have_pyunicode=yes],
+    [have_pyunicode="no (required)"], [
+#include <Python.h>
+    ])
+CPPFLAGS=${saved_CPPFLAGS}
+else
+have_pyunicode=yes
+fi
+
+AC_MSG_CHECKING([for Unicode support in Python])
+if test "${have_pyunicode}" != "yes"; then
+  have_python=no
+fi
+AC_MSG_RESULT([$have_pyunicode])
 
 fi
 ])

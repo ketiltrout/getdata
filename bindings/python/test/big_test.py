@@ -25,71 +25,85 @@ import array
 import pygetdata
 import numpy
 
+# These two functions abstractify differences between Python2 and 3.
+def L(n):
+  if sys.version[:1] == '3':
+    return n
+  return long(n)
+
+def B(s):
+  if sys.version[:1] == '3':
+    return bytes(s, "ASCII")
+  return s
+
+
+
+
 def CheckOK(t):
   global ne
   ne+=1
-  print "e[", t, "] =", sys.exc_type, sys.exc_value
+  print ("e[", t, "] =", sys.exc_info()[0], sys.exc_value)
 
 def CheckOK2(t,m):
   global ne
   ne+=1
-  print "e[", t, ",", m, "] =", sys.exc_type, sys.exc_value
+  print ("e[", t, ",", m, "] =", sys.exc_info()[0], sys.exc_value)
 
 def CheckException(t,g):
   global ne
-  if (sys.exc_type != g):
+  if (sys.exc_info()[0] != g):
     ne+=1
-    print "e[", t, "] =", sys.exc_type, "expected", g
+    print ("e[", t, "] =", sys.exc_info()[0], "expected", g)
 
 def CheckException2(t,m,g):
   global ne
-  if (sys.exc_type != g):
+  if (sys.exc_info()[0] != g):
     ne+=1
-    print "e[", t, ",", m, "] =", sys.exc_type, "expected", g
+    print ("e[", t, ",", m, "] =", sys.exc_info()[0], "expected", g)
 
 def CheckNumpy(t,v,g):
   global ne
   if (numpy.any(v - g)):
     ne+=1
-    print "a[", t, "] =", v, "expected", g
+    print ("a[", t, "] =", v, "expected", g)
 
 def CheckNumpy2(t,m,v,g):
   global ne
   if (numpy.any(v - g)):
     ne+=1
-    print "a[", t, ",", m, "] =", v, "expected", g
+    print ("a[", t, ",", m, "] =", v, "expected", g)
 
 def CheckSimple(t,v,g):
   global ne
   if (v != g):
     ne+=1
-    print "n[", t, "] =", v, "expected", g
+    print ("n[", t, "] =", v, "expected", g)
 
 def CheckSimple2(t,m,v,g):
   global ne
   if (v != g):
     ne+=1
-    print "n[", t, ",", m, "] =", v, "expected", g
+    print ("n[", t, ",", m, "] =", v, "expected", g)
 
 def CheckEOS(t,v,g):
   global ne
   if (re.search(g + "$", v) == None):
     ne+=1
-    print "n[", t, "] =", v, "expected", g
+    print ("n[", t, "] =", v, "expected", g)
 
 # create the dirfile first
 data=array.array("B",range(1,81))
 os.system("rm -rf dirfile")
 os.mkdir("dirfile")
-file=open("dirfile/data", 'w')
+file=open("dirfile/data", 'wb')
 data.tofile(file)
 file.close()
 
 ne = 0
 
-fields = ["INDEX", "alias", "bit", "carray", "const", "data", "div", "lincom",
-"linterp", "mplex", "mult", "phase", "polynom", "recip", "sbit", "string",
-"window"]
+fields = [B("INDEX"), B("alias"), B("bit"), B("carray"), B("const"), B("data"),
+    B("div"), B("lincom"), B("linterp"), B("mplex"), B("mult"), B("phase"),
+    B("polynom"), B("recip"), B("sbit"), B("string"), B("window")]
 
 nfields = 17
 file=open("dirfile/format", 'w')
@@ -148,7 +162,7 @@ try:
 except:
   CheckOK(6)
 CheckSimple(6,len(n),8)
-CheckNumpy(6,n,numpy.arange(41L,49L))
+CheckNumpy(6,n,numpy.arange(L(41),L(49)))
 
 # 8: getdata (float) check
 try:
@@ -171,7 +185,7 @@ try:
   n = d.getdata("data", pygetdata.NULL, first_frame=5, num_frames=1)
 except:
   CheckOK(11)
-CheckSimple(11, n, 8);
+CheckSimple(11, n, 8)
 
 # 12: constant (int) check
 try:
@@ -185,7 +199,7 @@ try:
   n = d.get_constant("const", pygetdata.LONG)
 except:
   CheckOK(15)
-CheckSimple(15,n,5L)
+CheckSimple(15,n,L(5))
 
 # 16: constant (float) check
 try:
@@ -241,7 +255,7 @@ try:
   n = d.mfield_list("data")
 except:
   CheckOK(27)
-CheckSimple(27,n,["mstr", "mconst", "mcarray", "mlut"])
+CheckSimple(27,n,[B("mstr"), B("mconst"), B("mcarray"), B("mlut")])
 
 # 28: nframes check
 try:
@@ -286,7 +300,7 @@ except:
 CheckNumpy2(32,2,n,numpy.array([41, 73, 74, 75, 76, 46, 47, 48]))
 
 # 33: putdata (long) check
-p = [ 23L, 24L, 25L, 26L ]
+p = [ L(23), L(24), L(25), L(26) ]
 try:
   n = d.putdata("data", p, pygetdata.LONG, first_frame=5, first_sample=1)
 except:
@@ -355,9 +369,9 @@ CheckSimple2(42,1,ent.field_type,pygetdata.LINCOM_ENTRY)
 CheckSimple2(42,2,ent.field_type_name,"LINCOM_ENTRY")
 CheckSimple2(42,3,ent.fragment,0)
 CheckSimple2(42,4,ent.n_fields,3)
-CheckSimple2(42,5,ent.in_fields,( "data", "INDEX", "linterp" ))
-CheckSimple2(42,6,ent.m,(1.1, 2.2, "const"))
-CheckSimple2(42,7,ent.b,(2.2, 3.3 + 4.4j, "const"))
+CheckSimple2(42,5,ent.in_fields,(B("data"), B("INDEX"), B("linterp")))
+CheckSimple2(42,6,ent.m,(1.1, 2.2, B("const")))
+CheckSimple2(42,7,ent.b,(2.2, 3.3 + 4.4j, B("const")))
 
 # 44: entry (polynom) check
 try:
@@ -368,8 +382,8 @@ CheckSimple2(44,1,ent.field_type,pygetdata.POLYNOM_ENTRY)
 CheckSimple2(44,2,ent.field_type_name,"POLYNOM_ENTRY")
 CheckSimple2(44,3,ent.fragment,0)
 CheckSimple2(44,4,ent.poly_ord,5)
-CheckSimple2(44,5,ent.in_fields,( "data", ))
-CheckSimple2(44,6,ent.a,(1.1, 2.2, 2.2, 3.3 + 4.4j, "const", "const"))
+CheckSimple2(44,5,ent.in_fields,( B("data"), ))
+CheckSimple2(44,6,ent.a,(1.1, 2.2, 2.2, 3.3 + 4.4j, B("const"), B("const")))
 
 # 45: entry (linterp) check
 try:
@@ -379,7 +393,7 @@ except:
 CheckSimple2(45,1,ent.field_type,pygetdata.LINTERP_ENTRY)
 CheckSimple2(45,2,ent.field_type_name,"LINTERP_ENTRY")
 CheckSimple2(45,3,ent.fragment,0)
-CheckSimple2(45,4,ent.in_fields,( "data", ))
+CheckSimple2(45,4,ent.in_fields,( B("data"), ))
 CheckSimple2(45,5,ent.table,"./lut")
 
 # 46: entry (bit) check
@@ -390,7 +404,7 @@ except:
 CheckSimple2(46,1,ent.field_type,pygetdata.BIT_ENTRY)
 CheckSimple2(46,2,ent.field_type_name,"BIT_ENTRY")
 CheckSimple2(46,3,ent.fragment,0)
-CheckSimple2(46,4,ent.in_fields,( "data", ))
+CheckSimple2(46,4,ent.in_fields,( B("data"), ))
 CheckSimple2(46,5,ent.numbits,4)
 CheckSimple2(46,6,ent.bitnum,3)
 
@@ -402,7 +416,7 @@ except:
 CheckSimple2(47,1,ent.field_type,pygetdata.SBIT_ENTRY)
 CheckSimple2(47,2,ent.field_type_name,"SBIT_ENTRY")
 CheckSimple2(47,3,ent.fragment,0)
-CheckSimple2(47,4,ent.in_fields,( "data", ))
+CheckSimple2(47,4,ent.in_fields,( B("data"), ))
 CheckSimple2(47,5,ent.numbits,6)
 CheckSimple2(47,6,ent.bitnum,5)
 
@@ -414,7 +428,7 @@ except:
 CheckSimple2(48,1,ent.field_type,pygetdata.MULTIPLY_ENTRY)
 CheckSimple2(48,2,ent.field_type_name,"MULTIPLY_ENTRY")
 CheckSimple2(48,3,ent.fragment,0)
-CheckSimple2(48,4,ent.in_fields,( "data", "sbit"))
+CheckSimple2(48,4,ent.in_fields,( B("data"), B("sbit")))
 
 # 49: entry (phase) check
 try:
@@ -424,7 +438,7 @@ except:
 CheckSimple2(49,1,ent.field_type,pygetdata.PHASE_ENTRY)
 CheckSimple2(49,2,ent.field_type_name,"PHASE_ENTRY")
 CheckSimple2(49,3,ent.fragment,0)
-CheckSimple2(49,4,ent.in_fields,( "data", ))
+CheckSimple2(49,4,ent.in_fields,( B("data"), ))
 CheckSimple2(49,5,ent.shift,11)
 
 # 50: entry (const) check
@@ -488,13 +502,13 @@ CheckSimple2(54,1,ent.field_type,pygetdata.LINCOM_ENTRY)
 CheckSimple2(54,2,ent.field_type_name,"LINCOM_ENTRY")
 CheckSimple2(54,3,ent.fragment,0)
 CheckSimple2(54,4,ent.n_fields,2)
-CheckSimple2(54,5,ent.in_fields,( "in1", "in2" ))
+CheckSimple2(54,5,ent.in_fields,( B("in1"), B("in2") ))
 CheckSimple2(54,6,ent.m,(9.9, 7.7))
 CheckSimple2(54,7,ent.b,(8.8, 6.6))
 
 # 56: add / entry (polynom) check
 ent = pygetdata.entry(pygetdata.POLYNOM_ENTRY, "new4", 0,
-    ("in1", (3.9, 4.8, 5.7, 6.6)))
+    (B("in1"), (3.9, 4.8, 5.7, 6.6)))
 try:
   d.add(ent)
 except:
@@ -508,12 +522,12 @@ CheckSimple2(56,1,ent.field_type,pygetdata.POLYNOM_ENTRY)
 CheckSimple2(56,2,ent.field_type_name,"POLYNOM_ENTRY")
 CheckSimple2(56,3,ent.fragment,0)
 CheckSimple2(56,4,ent.poly_ord,3)
-CheckSimple2(56,5,ent.in_fields,( "in1", ))
+CheckSimple2(56,5,ent.in_fields,( B("in1"), ))
 CheckSimple2(56,6,ent.a,(3.9, 4.8, 5.7, 6.6))
 
 # 58: add / entry (linterp) check
 ent = pygetdata.entry(pygetdata.LINTERP_ENTRY, "new6", 0,
-    ("in", "./some/table"))
+    (B("in"), "./some/table"))
 try:
   d.add(ent)
 except:
@@ -526,7 +540,7 @@ except:
 CheckSimple2(58,1,ent.field_type,pygetdata.LINTERP_ENTRY)
 CheckSimple2(58,2,ent.field_type_name,"LINTERP_ENTRY")
 CheckSimple2(58,3,ent.fragment,0)
-CheckSimple2(58,4,ent.in_fields,( "in", ))
+CheckSimple2(58,4,ent.in_fields,( B("in"), ))
 CheckSimple2(58,5,ent.table,"./some/table")
 
 # 59: add / entry (bit) check
@@ -543,7 +557,7 @@ except:
 CheckSimple2(59,1,ent.field_type,pygetdata.BIT_ENTRY)
 CheckSimple2(59,2,ent.field_type_name,"BIT_ENTRY")
 CheckSimple2(59,3,ent.fragment,0)
-CheckSimple2(59,4,ent.in_fields,( "in", ))
+CheckSimple2(59,4,ent.in_fields,( B("in"), ))
 CheckSimple2(59,5,ent.numbits,12)
 CheckSimple2(59,6,ent.bitnum,13)
 
@@ -561,7 +575,7 @@ except:
 CheckSimple2(60,1,ent.field_type,pygetdata.SBIT_ENTRY)
 CheckSimple2(60,2,ent.field_type_name,"SBIT_ENTRY")
 CheckSimple2(60,3,ent.fragment,0)
-CheckSimple2(60,4,ent.in_fields,( "in2", ))
+CheckSimple2(60,4,ent.in_fields,( B("in2"), ))
 CheckSimple2(60,5,ent.bitnum,14)
 CheckSimple2(60,6,ent.numbits,15)
 
@@ -579,7 +593,7 @@ except:
 CheckSimple2(61,1,ent.field_type,pygetdata.MULTIPLY_ENTRY)
 CheckSimple2(61,2,ent.field_type_name,"MULTIPLY_ENTRY")
 CheckSimple2(61,3,ent.fragment,0)
-CheckSimple2(61,4,ent.in_fields,( "in1", "in2"))
+CheckSimple2(61,4,ent.in_fields,( B("in1"), B("in2")))
 
 # 62: add / entry (phase) check
 ent = pygetdata.entry(pygetdata.PHASE_ENTRY, "new10", 0, ("in1", 22))
@@ -595,7 +609,7 @@ except:
 CheckSimple2(62,1,ent.field_type,pygetdata.PHASE_ENTRY)
 CheckSimple2(62,2,ent.field_type_name,"PHASE_ENTRY")
 CheckSimple2(62,3,ent.fragment,0)
-CheckSimple2(62,4,ent.in_fields,( "in1", ))
+CheckSimple2(62,4,ent.in_fields,( B("in1"), ))
 CheckSimple2(62,5,ent.shift,22)
 
 # 63: add / entry (const) check
@@ -654,7 +668,7 @@ try:
   n = d.field_list(pygetdata.LINCOM_ENTRY)
 except:
   CheckOK(68)
-CheckSimple(68,n,["lincom", "new2"])
+CheckSimple(68,n,[B("lincom"), B("new2")])
 
 # 69: nvectors check
 try:
@@ -668,9 +682,10 @@ try:
   n = d.vector_list()
 except:
   CheckOK(70)
-CheckSimple(70,n,['INDEX', 'alias', 'bit', 'data', 'div', 'lincom', 'linterp',
-  'mplex', 'mult', 'new1', 'new10', 'new2', 'new4', 'new6', 'new7', 'new8',
-  'new9', 'phase', 'polynom', 'recip', 'sbit', 'window'])
+CheckSimple(70,n,[B('INDEX'), B('alias'), B('bit'), B('data'), B('div'),
+    B('lincom'), B('linterp'), B('mplex'), B('mult'), B('new1'), B('new10'),
+    B('new2'), B('new4'), B('new6'), B('new7'), B('new8'), B('new9'),
+    B('phase'), B('polynom'), B('recip'), B('sbit'), B('window')])
 
 # 71: add / entry (lincom) check
 ent = pygetdata.entry(pygetdata.LINCOM_ENTRY, "mnew1", 0,
@@ -688,7 +703,7 @@ CheckSimple2(71,1,ent.field_type,pygetdata.LINCOM_ENTRY)
 CheckSimple2(71,2,ent.field_type_name,"LINCOM_ENTRY")
 CheckSimple2(71,3,ent.fragment,0)
 CheckSimple2(71,4,ent.n_fields,2)
-CheckSimple2(71,5,ent.in_fields,( "in1", "in2" ))
+CheckSimple2(71,5,ent.in_fields,( B("in1"), B("in2") ))
 CheckSimple2(71,6,ent.m,(9.9, 7.7))
 CheckSimple2(71,7,ent.b,(8.8, 6.6))
 
@@ -708,7 +723,7 @@ CheckSimple2(73,1,ent.field_type,pygetdata.POLYNOM_ENTRY)
 CheckSimple2(73,2,ent.field_type_name,"POLYNOM_ENTRY")
 CheckSimple2(73,3,ent.fragment,0)
 CheckSimple2(73,4,ent.poly_ord,3)
-CheckSimple2(73,5,ent.in_fields,( "in1", ))
+CheckSimple2(73,5,ent.in_fields,( B("in1"), ))
 CheckSimple2(73,6,ent.a,(3.9, 4.8, 5.7, 6.6))
 
 # 75: add / entry (linterp) check
@@ -726,7 +741,7 @@ except:
 CheckSimple2(75,1,ent.field_type,pygetdata.LINTERP_ENTRY)
 CheckSimple2(75,2,ent.field_type_name,"LINTERP_ENTRY")
 CheckSimple2(75,3,ent.fragment,0)
-CheckSimple2(75,4,ent.in_fields,( "in", ))
+CheckSimple2(75,4,ent.in_fields,( B("in"), ))
 CheckSimple2(75,5,ent.table,"./more/table")
 
 # 76: add / entry (bit) check
@@ -744,7 +759,7 @@ except:
 CheckSimple2(76,1,ent.field_type,pygetdata.BIT_ENTRY)
 CheckSimple2(76,2,ent.field_type_name,"BIT_ENTRY")
 CheckSimple2(76,3,ent.fragment,0)
-CheckSimple2(76,4,ent.in_fields,( "in1", ))
+CheckSimple2(76,4,ent.in_fields,( B("in1"), ))
 CheckSimple2(76,5,ent.numbits,2)
 CheckSimple2(76,6,ent.bitnum,3)
 
@@ -763,7 +778,7 @@ except:
 CheckSimple2(77,1,ent.field_type,pygetdata.SBIT_ENTRY)
 CheckSimple2(77,2,ent.field_type_name,"SBIT_ENTRY")
 CheckSimple2(77,3,ent.fragment,0)
-CheckSimple2(77,4,ent.in_fields,( "in2", ))
+CheckSimple2(77,4,ent.in_fields,( B("in2"), ))
 CheckSimple2(77,5,ent.numbits,5)
 CheckSimple2(77,6,ent.bitnum,4)
 
@@ -782,7 +797,7 @@ except:
 CheckSimple2(78,1,ent.field_type,pygetdata.MULTIPLY_ENTRY)
 CheckSimple2(78,2,ent.field_type_name,"MULTIPLY_ENTRY")
 CheckSimple2(78,3,ent.fragment,0)
-CheckSimple2(78,4,ent.in_fields,( "in3", "in2"))
+CheckSimple2(78,4,ent.in_fields,( B("in3"), B("in2")))
 
 # 79: add / entry (phase) check
 ent = pygetdata.entry(pygetdata.PHASE_ENTRY, "mnew10", 0,
@@ -799,7 +814,7 @@ except:
 CheckSimple2(79,1,ent.field_type,pygetdata.PHASE_ENTRY)
 CheckSimple2(79,2,ent.field_type_name,"PHASE_ENTRY")
 CheckSimple2(79,3,ent.fragment,0)
-CheckSimple2(79,4,ent.in_fields,( "in3", ))
+CheckSimple2(79,4,ent.in_fields,( B("in3"), ))
 CheckSimple2(79,5,ent.shift,44)
 
 # 80: add / entry (const) check
@@ -825,7 +840,7 @@ try:
   n = d.get_string("string")
 except:
   CheckOK(81)
-CheckSimple(81,n,"Zaphod Beeblebrox")
+CheckSimple(81,n,B("Zaphod Beeblebrox"))
 
 # 82: entry (string) check
 ent = pygetdata.entry(pygetdata.STRING_ENTRY, "new12", 0)
@@ -852,7 +867,7 @@ try:
   n = d.get_string("lorem")
 except:
   CheckOK2(84,2)
-CheckSimple(84,n,"Lorem ipsum")
+CheckSimple(84,n,B("Lorem ipsum"))
 
 # 85: madd_spec check
 try:
@@ -864,7 +879,7 @@ try:
   n = d.get_string("lorem/ipsum")
 except:
   CheckOK2(85,2)
-CheckSimple(85,n,"dolor sit amet.")
+CheckSimple(85,n,B("dolor sit amet."))
 
 # 86: put_constant / int check
 try:
@@ -880,7 +895,7 @@ CheckSimple(86,n,86)
 
 # 88: put_constant / int check
 try:
-  d.put_constant("const", 128L)
+  d.put_constant("const", L(128))
 except:
   CheckOK2(88,1)
 
@@ -888,11 +903,11 @@ try:
   n = d.get_constant("const",pygetdata.ULONG)
 except:
   CheckOK2(88,2)
-CheckSimple(88,n,128L)
+CheckSimple(88,n,L(128))
 
 # 89: put_constant / int check
 try:
-  d.put_constant("const", 89L)
+  d.put_constant("const", L(89))
 except:
   CheckOK2(89,1)
 
@@ -900,7 +915,7 @@ try:
   n = d.get_constant("const",pygetdata.LONG)
 except:
   CheckOK2(89,2)
-CheckSimple(89,n,89L)
+CheckSimple(89,n,L(89))
 
 # 91: put_constant / float check
 try:
@@ -936,7 +951,7 @@ try:
   n = d.get_string("string")
 except:
   CheckOK2(94,2)
-CheckSimple(94,n,"Arthur Dent")
+CheckSimple(94,n,B("Arthur Dent"))
 
 # 95: nmfields_by_type check
 try:
@@ -950,7 +965,7 @@ try:
   n = d.mfield_list("data",pygetdata.LINCOM_ENTRY)
 except:
   CheckOK(96)
-CheckSimple(96,n,["mnew1"])
+CheckSimple(96,n,[B("mnew1")])
 
 # 97: nmvectors check
 try:
@@ -964,8 +979,8 @@ try:
   n = d.mvector_list("data")
 except:
   CheckOK(98)
-CheckSimple(98,n,['mlut', 'mnew1', 'mnew3', 'mnew6', 'mnew7', 'mnew8', 'mnew9',
-  'mnew10'])
+CheckSimple(98,n,[B('mlut'), B('mnew1'), B('mnew3'), B('mnew6'), B('mnew7'),
+    B('mnew8'), B('mnew9'), B('mnew10')])
 
 # 99: alter / raw check
 ent = pygetdata.entry(pygetdata.RAW_ENTRY, "new1", 0,
@@ -1040,7 +1055,7 @@ except:
   CheckOK2(117,1)
 
 try:
-  CheckSimple(117,d.reference,"new1")
+  CheckSimple(117,d.reference,B("new1"))
 except:
   CheckOK2(117,2)
 
@@ -1077,7 +1092,7 @@ except:
 CheckSimple2(121,1,ent.field_type,pygetdata.PHASE_ENTRY)
 CheckSimple2(121,2,ent.field_type_name,"PHASE_ENTRY")
 CheckSimple2(121,3,ent.fragment,0)
-CheckSimple2(121,4,ent.in_fields,( "in5", ))
+CheckSimple2(121,4,ent.in_fields,( B("in5"), ))
 CheckSimple2(121,5,ent.shift,3)
 
 # 122: delete check
@@ -1104,7 +1119,7 @@ except:
 CheckSimple2(123,1,ent.field_type,pygetdata.PHASE_ENTRY)
 CheckSimple2(123,2,ent.field_type_name,"PHASE_ENTRY")
 CheckSimple2(123,3,ent.fragment,0)
-CheckSimple2(123,4,ent.in_fields,( "in4", ))
+CheckSimple2(123,4,ent.in_fields,( B("in4"), ))
 CheckSimple2(123,5,ent.shift,11)
 
 # 124: move check
@@ -1120,7 +1135,7 @@ except:
 CheckSimple2(124,1,ent.field_type,pygetdata.MULTIPLY_ENTRY)
 CheckSimple2(124,2,ent.field_type_name,"MULTIPLY_ENTRY")
 CheckSimple2(124,3,ent.fragment,1)
-CheckSimple2(124,4,ent.in_fields,( "in1", "in2"))
+CheckSimple2(124,4,ent.in_fields,( B("in1"), B("in2")))
 
 # 125: rename check
 try:
@@ -1140,7 +1155,7 @@ except:
 CheckSimple2(125,1,ent.field_type,pygetdata.MULTIPLY_ENTRY)
 CheckSimple2(125,2,ent.field_type_name,"MULTIPLY_ENTRY")
 CheckSimple2(125,3,ent.fragment,1)
-CheckSimple2(125,4,ent.in_fields,( "in1", "in2"))
+CheckSimple2(125,4,ent.in_fields,( B("in1"), B("in2")))
 
 # 126: uninclude check
 try:
@@ -1223,7 +1238,7 @@ except:
 CheckSimple2(143,1,ent.field_type,pygetdata.DIVIDE_ENTRY)
 CheckSimple2(143,2,ent.field_type_name,"DIVIDE_ENTRY")
 CheckSimple2(143,3,ent.fragment,0)
-CheckSimple2(143,4,ent.in_fields,( "mult", "bit"))
+CheckSimple2(143,4,ent.in_fields,( B("mult"), B("bit")))
 
 # 145: entry (recip) check
 try:
@@ -1233,7 +1248,7 @@ except:
 CheckSimple2(145,1,ent.field_type,pygetdata.RECIP_ENTRY)
 CheckSimple2(145,2,ent.field_type_name,"RECIP_ENTRY")
 CheckSimple2(145,3,ent.fragment,0)
-CheckSimple2(145,4,ent.in_fields,( "div",))
+CheckSimple2(145,4,ent.in_fields,( B("div"),))
 CheckSimple2(145,6,ent.dividend,6.5+4.3j)
 
 # 146: add / entry (divide) check
@@ -1249,7 +1264,7 @@ except:
   CheckOK2(146,2)
 CheckSimple2(146,1,ent.field_type,pygetdata.DIVIDE_ENTRY)
 CheckSimple2(146,2,ent.fragment,0)
-CheckSimple2(146,3,ent.in_fields,( "in1", "in2"))
+CheckSimple2(146,3,ent.in_fields,( B("in1"), B("in2")))
 
 # 148: add / entry (recip) check
 ent = pygetdata.entry(pygetdata.RECIP_ENTRY, "new16", 0, ("in3", 33.3))
@@ -1264,7 +1279,7 @@ except:
   CheckOK2(148,2)
 CheckSimple2(148,1,ent.field_type,pygetdata.RECIP_ENTRY)
 CheckSimple2(148,2,ent.fragment,0)
-CheckSimple2(148,3,ent.in_fields,( "in3",))
+CheckSimple2(148,3,ent.in_fields,( B("in3"),))
 CheckSimple2(148,4,ent.dividend,33.3)
 
 # 149: madd / entry (div) check
@@ -1281,7 +1296,7 @@ except:
   CheckOK2(149,2)
 CheckSimple2(149,1,ent.field_type,pygetdata.DIVIDE_ENTRY)
 CheckSimple2(149,2,ent.fragment,0)
-CheckSimple2(149,3,ent.in_fields,( "in3", "in2"))
+CheckSimple2(149,3,ent.in_fields,( B("in3"), B("in2")))
 
 # 151: madd / entry (recip) check
 ent = pygetdata.entry(pygetdata.RECIP_ENTRY, "mnew16", 0,
@@ -1297,8 +1312,8 @@ except:
   CheckOK2(151,2)
 CheckSimple2(151,1,ent.field_type,pygetdata.RECIP_ENTRY)
 CheckSimple2(151,2,ent.fragment,0)
-CheckSimple2(151,3,ent.in_fields,( "in3",))
-CheckSimple2(151,4,ent.dividend,"const")
+CheckSimple2(151,3,ent.in_fields,( B("in3"),))
+CheckSimple2(151,4,ent.dividend,B("const"))
 
 # 155: fragment.rewrite check
 try:
@@ -1356,7 +1371,7 @@ try:
 except:
   CheckOK(162)
 
-CheckNumpy(162,n,numpy.arange(3L,5L))
+CheckNumpy(162,n,numpy.arange(L(3),L(5)))
 
 # 163: gd_get_carray_slice (auto-type)
 try:
@@ -1389,7 +1404,7 @@ except:
   CheckOK(167)
 
 CheckSimple2(167,1,len(n),1)
-CheckSimple2(167,2,n[0][0],"carray")
+CheckSimple2(167,2,n[0][0],B("carray"))
 CheckNumpy2(167,3,n[0][1],numpy.arange(1,7))
 
 # 168: gd_put_carray
@@ -1420,7 +1435,7 @@ CheckNumpy(169,n,numpy.array([9,8,169,169,5,4]))
 
 # 172: gd_put_carray_slice (INT64)
 try:
-  d.put_carray("carray", [172L,172L], start=2)
+  d.put_carray("carray", [L(172),L(172)], start=2)
 except:
   CheckOK2(172,1)
 
@@ -1519,71 +1534,71 @@ try:
   n = d.constants(pygetdata.INT)
 except:
   CheckOK(183)
-CheckSimple(183,n,[('const', 93), ('new11', 0)])
+CheckSimple(183,n,[(B('const'), 93), (B('new11'), 0)])
 
 # 186: gd_constants (long)
 try:
   n = d.constants(pygetdata.LONG)
 except:
   CheckOK(186)
-CheckSimple(186,n,[('const', 93L), ('new11', 0L)])
+CheckSimple(186,n,[(B('const'), L(93)), (B('new11'), L(0))])
 
 # 188: gd_constants (float)
 try:
   n = d.constants(pygetdata.FLOAT)
 except:
   CheckOK(188)
-CheckSimple(188,n,[('const', 93.0), ('new11', 0.0)])
+CheckSimple(188,n,[(B('const'), 93.0), (B('new11'), 0.0)])
 
 # 190: gd_constants (complex)
 try:
   n = d.constants(pygetdata.COMPLEX)
 except:
   CheckOK(190)
-CheckSimple(190,n,[('const', 93.0), ('new11', 0.0)])
+CheckSimple(190,n,[(B('const'), 93.0), (B('new11'), 0.0)])
 
 # 191: gd_constants (int)
 try:
   n = d.mconstants("data", pygetdata.INT)
 except:
   CheckOK(191)
-CheckSimple(191,n,[('mconst', 3), ('mnew11', 0)])
+CheckSimple(191,n,[(B('mconst'), 3), (B('mnew11'), 0)])
 
 # 194: gd_constants (long)
 try:
   n = d.mconstants("data", pygetdata.LONG)
 except:
   CheckOK(194)
-CheckSimple(194,n,[('mconst', 3L), ('mnew11', 0L)])
+CheckSimple(194,n,[(B('mconst'), L(3)), (B('mnew11'), L(0))])
 
 # 196: gd_constants (float)
 try:
   n = d.mconstants("data", pygetdata.FLOAT)
 except:
   CheckOK(196)
-CheckSimple(196,n,[('mconst', 3.3), ('mnew11', 0.)])
+CheckSimple(196,n,[(B('mconst'), 3.3), (B('mnew11'), 0.)])
 
 # 198: gd_constants (complex)
 try:
   n = d.mconstants("data", pygetdata.COMPLEX)
 except:
   CheckOK(198)
-CheckSimple(198,n,[('mconst', 3.3+4.4j), ('mnew11', 0j)])
+CheckSimple(198,n,[(B('mconst'), 3.3+4.4j), (B('mnew11'), 0j)])
 
 # 199: gd_strings
 try:
   n = d.strings()
 except:
   CheckOK(199)
-CheckSimple(199,n,[('lorem', 'Lorem ipsum'), ('new12', ''), 
-  ('string', 'Arthur Dent')])
+CheckSimple(199,n,[(B('lorem'), B('Lorem ipsum')), (B('new12'), B('')), 
+  (B('string'), B('Arthur Dent'))])
 
 # 200: gd_strings
 try:
   n = d.mstrings("data")
 except:
   CheckOK(200)
-CheckSimple(200,n,[('mstr', 'This is a string constant.')])
+CheckSimple(200,n,[(B('mstr'), B('This is a string constant.'))])
 
 # 203: gd_seek
 try:
@@ -1663,7 +1678,7 @@ except:
 CheckSimple2(211, 1, ent.field_type, pygetdata.WINDOW_ENTRY)
 CheckSimple2(211, 2, ent.fragment, 0)
 CheckSimple2(211, 3, ent.windop, pygetdata.WINDOP_LT)
-CheckSimple2(211, 4, ent.in_fields, ( 'linterp', 'mult' ))
+CheckSimple2(211, 4, ent.in_fields, ( B('linterp'), B('mult') ))
 CheckSimple2(211, 5, ent.threshold, 4.1)
 
 # 212: gd_add_window check
@@ -1681,7 +1696,7 @@ except:
 CheckSimple2(212, 1, ent.field_type, pygetdata.WINDOW_ENTRY)
 CheckSimple2(212, 2, ent.fragment, 0)
 CheckSimple2(212, 3, ent.windop, pygetdata.WINDOP_NE)
-CheckSimple2(212, 4, ent.in_fields, ( 'in1', 'in2' ))
+CheckSimple2(212, 4, ent.in_fields, ( B('in1'), B('in2') ))
 CheckSimple2(212, 5, ent.threshold, 32)
 
 # 214: gd_madd_window check
@@ -1699,7 +1714,7 @@ except:
 CheckSimple2(214, 1, ent.field_type, pygetdata.WINDOW_ENTRY)
 CheckSimple2(214, 2, ent.fragment, 0)
 CheckSimple2(214, 3, ent.windop, pygetdata.WINDOP_SET)
-CheckSimple2(214, 4, ent.in_fields, ( 'in2', 'in3' ))
+CheckSimple2(214, 4, ent.in_fields, ( B('in2'), B('in3') ))
 CheckSimple2(214, 5, ent.threshold, 128)
 
 # 217: gd_alter_window check
@@ -1717,7 +1732,7 @@ except:
 CheckSimple2(217, 1, ent.field_type, pygetdata.WINDOW_ENTRY)
 CheckSimple2(217, 2, ent.fragment, 0)
 CheckSimple2(217, 3, ent.windop, pygetdata.WINDOP_GE)
-CheckSimple2(217, 4, ent.in_fields, ( 'in3', 'in4' ))
+CheckSimple2(217, 4, ent.in_fields, ( B('in3'), B('in4') ))
 CheckSimple2(217, 5, ent.threshold, 32e3)
 
 # 218: gd_alias_target check
@@ -1725,7 +1740,7 @@ try:
   str = d.alias_target('alias')
 except:
   CheckOK(218)
-CheckSimple(218, str, 'data')
+CheckSimple(218, str, B('data'))
 
 # 219: gd_add_alias check
 try:
@@ -1737,7 +1752,7 @@ try:
   str = d.alias_target('new20')
 except:
   CheckOK2(219, 2)
-CheckSimple(219, str, 'data')
+CheckSimple(219, str, B('data'))
 
 # 220: gd_madd_alias check
 try:
@@ -1749,7 +1764,7 @@ try:
   str = d.alias_target('data/mnew20')
 except:
   CheckOK2(220, 2)
-CheckSimple(220, str, 'data')
+CheckSimple(220, str, B('data'))
 
 # 221: gd_naliases check
 try:
@@ -1763,7 +1778,7 @@ try:
   n = d.aliases('data')
 except:
   CheckOK(222)
-CheckSimple(222, n, [ 'data', 'alias', 'data/mnew20', 'new20' ])
+CheckSimple(222, n, [ B('data'), B('alias'), B('data/mnew20'), B('new20') ])
 
 # 223: gd_include_affix check
 try:
@@ -1778,8 +1793,8 @@ try:
   m = d.fragment(1).suffix
 except:
   CheckOK(226)
-CheckSimple2(226, 1, n, "A")
-CheckSimple2(226, 2, m, "Z")
+CheckSimple2(226, 1, n, B("A"))
+CheckSimple2(226, 2, m, B("Z"))
 
 # 227: gd_alter_affixes check
 try:
@@ -1793,8 +1808,8 @@ try:
   m = d.fragment(1).suffix
 except:
   CheckOK2(227, 2)
-CheckSimple2(227, 1, n, "B")
-CheckSimple2(227, 2, m, "")
+CheckSimple2(227, 1, n, B("B"))
+CheckSimple2(227, 2, m, B(""))
 
 # 228: gd_entry (MPLEX) check
 try:
@@ -1804,7 +1819,7 @@ except:
 CheckSimple2(228, 1, ent.field_type, pygetdata.MPLEX_ENTRY)
 CheckSimple2(228, 2, ent.fragment, 0)
 CheckSimple2(228, 3, ent.count_val, 1)
-CheckSimple2(228, 4, ent.in_fields, ( 'data', 'sbit' ))
+CheckSimple2(228, 4, ent.in_fields, ( B('data'), B('sbit') ))
 CheckSimple2(228, 5, ent.period, 10)
 
 # 229: gd_add_mplex check
@@ -1821,7 +1836,7 @@ except:
 CheckSimple2(229, 1, ent.field_type, pygetdata.MPLEX_ENTRY)
 CheckSimple2(229, 2, ent.fragment, 0)
 CheckSimple2(229, 3, ent.count_val, 5)
-CheckSimple2(229, 4, ent.in_fields, ( 'in1', 'in2' ))
+CheckSimple2(229, 4, ent.in_fields, ( B('in1'), B('in2') ))
 CheckSimple2(229, 5, ent.period, 6)
 
 # 230: gd_madd_mplex check
@@ -1838,7 +1853,7 @@ except:
 CheckSimple2(230, 1, ent.field_type, pygetdata.MPLEX_ENTRY)
 CheckSimple2(230, 2, ent.fragment, 0)
 CheckSimple2(230, 3, ent.count_val, 0)
-CheckSimple2(230, 4, ent.in_fields, ( 'in2', 'in3' ))
+CheckSimple2(230, 4, ent.in_fields, ( B('in2'), B('in3') ))
 CheckSimple2(230, 5, ent.period, 12)
 
 # 231: gd_alter_mplex check
@@ -1856,7 +1871,7 @@ except:
 CheckSimple2(231, 1, ent.field_type, pygetdata.MPLEX_ENTRY)
 CheckSimple2(231, 2, ent.fragment, 0)
 CheckSimple2(231, 3, ent.count_val, 3)
-CheckSimple2(231, 4, ent.in_fields, ( 'in3', 'in4' ))
+CheckSimple2(231, 4, ent.in_fields, ( B('in3'), B('in4') ))
 CheckSimple2(231, 5, ent.period, 7)
 
 # 232: gd_strtok check
@@ -1864,13 +1879,13 @@ try:
   str = d.strtok("\"test1 test2\" test3\ test4")
 except:
   CheckOK2(232, 1)
-CheckSimple2(232, 2, str, "test1 test2")
+CheckSimple2(232, 2, str, B("test1 test2"))
 
 try:
   str = d.strtok()
 except:
   CheckOK2(232, 3)
-CheckSimple2(232, 4, str, "test3 test4")
+CheckSimple2(232, 4, str, B("test3 test4"))
 
 # 233: gd_raw_close check
 try:
@@ -1915,6 +1930,7 @@ try:
 except:
   CheckOK2(237, 1)
 CheckSimple2(237, 1, n, 5)
+#n = d.nentries(type = pygetdata.VECTOR_ENTRIES, flags = pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
 try:
   n = d.nentries(type = pygetdata.VECTOR_ENTRIES,
       flags = pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
@@ -1928,9 +1944,10 @@ try:
       flags = pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
 except:
   CheckOK(239)
-CheckSimple(239,n, ['INDEX', 'bit', 'data', 'div', 'lincom', 'linterp',
-  'mplex', 'mult', 'new1', 'new14', 'new16', 'new18', 'new2', 'new21', 'new4',
-  'new6', 'new7', 'new8', 'phase', 'polynom', 'recip', 'sbit', 'window'])
+CheckSimple(239,n, [B('INDEX'), B('bit'), B('data'), B('div'), B('lincom'),
+    B('linterp'), B('mplex'), B('mult'), B('new1'), B('new14'), B('new16'),
+    B('new18'), B('new2'), B('new21'), B('new4'), B('new6'), B('new7'),
+    B('new8'), B('phase'), B('polynom'), B('recip'), B('sbit'), B('window')])
 
 # 240: gd_mplex_lookback check
 try:
@@ -1958,9 +1975,9 @@ except:
   CheckOK(242)
 
 CheckSimple2(242,1,len(n),2)
-CheckSimple2(242,2,n[0][0],"mcarray")
+CheckSimple2(242,2,n[0][0],B("mcarray"))
 CheckNumpy2(242,3,n[0][1],1.9 + 0.9 * numpy.arange(0,5))
-CheckSimple2(242,4,n[1][0],"mnew17")
+CheckSimple2(242,4,n[1][0],B("mnew17"))
 CheckNumpy2(242,5,n[1][1],[0,0])
 
 # 271: encoding_support
@@ -1975,8 +1992,8 @@ except:
   CheckOK2(272, 1)
 
 try:
-  n = m.reference;
-  CheckSimple(272, n, None);
+  n = m.reference
+  CheckSimple(272, n, None)
 except:
   CheckOK2(272, 2)
 
@@ -1985,7 +2002,7 @@ try:
   n = d.get_carray("carray", pygetdata.NULL, start=2, len=2)
 except:
   CheckOK(274)
-CheckSimple(274, n, None);
+CheckSimple(274, n, None)
 
 
 
@@ -2007,5 +2024,5 @@ del d
 os.system("rm -rf dirfile")
 
 if (ne > 0):
-  print "ne =", ne
+  print ("ne =", ne)
   sys.exit(1)

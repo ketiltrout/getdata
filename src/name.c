@@ -262,14 +262,20 @@ int _GD_ValidateField(const char* field_code, int standards, int strict,
   if ((type == GD_VF_NAME) && (field_code[0] == '\0' || (strict &&
           ((len > 50 && standards < 5) || (len > 16 && standards < 3)))))
   {
-    dreturn("%i", 1);
+    dreturn("%i [a]", 1);
     return 1;
   }
 
   for (i = 0; i < len; ++i)
-    if (field_code[i] == '/' || field_code[i] < 0x20) {
+    if (field_code[i] == '/' || (
+          field_code[i] < 0x20
+#if CHAR_MIN != 0
+        && field_code[i] >= 0x00
+#endif
+        ))
+    {
       /* these characters are always forbidden */
-      dreturn("%i", 1);
+      dreturn("%i [b]", 1);
       return 1;
     } else if (strict && ((standards >= 5 && (field_code[i] == '<' ||
               field_code[i] == '>' || field_code[i] == ';' ||
@@ -277,21 +283,21 @@ int _GD_ValidateField(const char* field_code, int standards, int strict,
           (standards == 5 && (field_code[i] == '\\' || field_code[i] == '#'))))
     {
       /* these characters are sometimes forbidden */
-      dreturn("%i", 1);
+      dreturn("%i [c]", 1);
       return 1;
     } else if (field_code[i] == '.') {
       if (type == GD_VF_NS ||
           (type == GD_VF_CODE && (!strict || standards >= 10)))
       {
         if (last_dot) { /* multiple consecutive dots are forbidden */
-          dreturn("%i", 1);
+          dreturn("%i [d]", 1);
           return 1;
         }
         last_dot = 1;
       } else if (type == GD_VF_AFFIX || is_dot == NULL ||
           (standards >= 6 && strict))
       {
-        dreturn("%i", 1);
+        dreturn("%i [e]", 1);
         return 1;
       } else
         local_dot = 1;
@@ -300,7 +306,7 @@ int _GD_ValidateField(const char* field_code, int standards, int strict,
 
   /* Field codes may not end in a dot */
   if (type == GD_VF_CODE && last_dot) {
-    dreturn("%i", 1);
+    dreturn("%i [f]", 1);
     return 1;
   }
 
@@ -316,7 +322,7 @@ int _GD_ValidateField(const char* field_code, int standards, int strict,
           || (strcmp("PROTECT", field_code) == 0 && standards >= 6)
           || (strcmp("REFERENCE", field_code) == 0 && standards >= 6))
       {
-        dreturn("%i", 1);
+        dreturn("%i [g]", 1);
         return 1;
       }
   }

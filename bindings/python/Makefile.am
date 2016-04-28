@@ -22,17 +22,17 @@ AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS=test
 
-nodist_python_SCRIPTS = pygetdata.so
+nodist_python_SCRIPTS = pygetdata${PYTHON_OBJECT_SUFFIX}
 
 BUILT_SOURCES = pyconstants.c
 
 EXTRA_DIST = pydirfile.c pygetdata.c pyentry.c pygetdata.h pyfragment.c
 
 distutils_path=build/lib.${PYTHON_PLATFORM}-${PYTHON_VERSION}
-pygetdata.so: ${distutils_path}/pygetdata.so
+pygetdata${PYTHON_OBJECT_SUFFIX}: ${distutils_path}/pygetdata${PYTHON_OBJECT_SUFFIX}
 	cp $< $@
 
-${distutils_path}/pygetdata.so: setup.py ${BUILT_SOURCES} ${EXTRA_DIST}
+${distutils_path}/pygetdata${PYTHON_OBJECT_SUFFIX}: setup.py ${BUILT_SOURCES} ${EXTRA_DIST}
 	${PYTHON} setup.py build
 
 pyconstants.c: ../make_parameters
@@ -45,7 +45,7 @@ clean-local:
 if MAKE_PYBINDINGS
 	test ! -f setup.py || ${PYTHON} setup.py clean
 endif
-	rm -rf build pygetdata.so ${BUILT_SOURCES} debug.c *~ 
+	rm -rf build pygetdata${PYTHON_OBJECT_SUFFIX} ${BUILT_SOURCES} debug.c *~ 
 
 # Avoid a race condition from distclean deleting setup.py between the test and
 # the ${PYTHON} in the clean-local rule.  The variable shennanigans here are to

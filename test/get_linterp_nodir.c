@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,19 +24,40 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int h1, e1, r = 0;
+  const char *data = "dirfile/data";
+  const char *table = "dirfile/table";
+  const char *format_data =
+    "linterp LINTERP data ./somewhere/table\n"
+    "data RAW UINT8 1\n";
+  unsigned char data_data[64];
+  int fd, n, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
+  mkdir(filedir, 0777);
 
-  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL);
-  h1 = gd_delete(D, "something", 0);
-  e1 = gd_error(D);
+  for (fd = 0; fd < 64; ++fd)
+    data_data[fd] = (unsigned char)fd;
 
-  CHECKI(e1, GD_E_BAD_CODE);
-  CHECKI(h1, -1);
+  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format_data, strlen(format_data));
+  close(fd);
+
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
+  write(fd, data_data, 64);
+  close(fd);
+
+  D = gd_open(filedir, GD_RDONLY);
+  n = gd_getdata(D, "linterp", 5, 0, 1, 0, GD_NULL, NULL);
+  error = gd_error(D);
+
+  CHECKI(error, GD_E_IO);
+  CHECKI(n, 0);
 
   gd_discard(D);
+
+  unlink(table);
+  unlink(data);
   unlink(format);
   rmdir(filedir);
 

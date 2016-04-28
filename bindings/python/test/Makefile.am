@@ -22,7 +22,7 @@ AUTOMAKE_OPTIONS = foreign serial-tests
 
 if TEST_PYTHON
 TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=../../../src/.libs:${${DL_LIBRARY_PATH}} PYTHONPATH=..:${PYTHONPATH} ${PYTHON}
-pyTESTS=callback.py big_test.py
+pyTESTS=callback.py char_enc1.py char_enc2.py char_enc3.py big_test.py
 TESTS=$(addprefix ${srcdir}/,$(pyTESTS))
 endif
 

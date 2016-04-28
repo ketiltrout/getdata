@@ -1,6 +1,6 @@
 .\" gd_carrays.3.  The gd_carrays man page.
 .\"
-.\" Copyright (C) 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2010, 2011, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_carrays 3 "17 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_carrays 3 "19 April 2016" "Version 0.9.3" "GETDATA"
 .SH NAME
 gd_carrays \(em retrieve a list of CARRAY values from a dirfile
 .SH SYNOPSIS
@@ -97,7 +97,12 @@ specifies the length of the
 .B CARRAY
 data, and
 .I d
-is an array of the data values themselves.  The caller should cast the
+is an array of the data values themselves. If
+.I return_type
+was
+.BR GD_NULL ,
+.I d
+will be NULL.  Otherwise, the caller should cast the
 .B void
 pointer to a type appropriate for the
 .I return_type

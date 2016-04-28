@@ -20,7 +20,8 @@
  */
 #include "pygetdata.h"
 
-static PyObject *GdPy_DirfileError;
+static PyObject *gdpy_mod = NULL;
+
 static const char *gdpy_exception_list[GD_N_ERROR_CODES] = {
   NULL,
   NULL, /* 1 */
@@ -83,38 +84,22 @@ static struct {
   { NULL, 0}
 };
 
-/* Like PyList_Append, but steal the object's reference */
 int gdpylist_append(PyObject *list, PyObject *item)
 {
-  dtrace("%p, %p", list, item);
   int ret;
+
+  dtrace("%p, %p", list, item);
+
+  if (item == NULL) {
+    dreturn("%i", 1);
+    return 1;
+  }
 
   ret = PyList_Append(list, item);
   Py_DECREF(item);
 
   dreturn("%i", ret);
   return ret;
-}
-
-/* Create an array of strings from a NULL-terminated string list */
-PyObject *gdpy_to_pystringlist(const char **list)
-{
-  PyObject *pyobj;
-  size_t i;
-
-  dtrace("%p", list);
-
-  pyobj = PyList_New(0);
-  if (pyobj)
-    for (i = 0; list[i] != NULL; ++i)
-      if (gdpylist_append(pyobj, PyString_FromString(list[i]))) {
-        Py_DECREF(pyobj);
-        pyobj = NULL;
-        break;
-      }
-
-  dreturn("%p", pyobj);
-  return pyobj;
 }
 
 int gdpy_convert_from_pyobj(PyObject *value, union gdpy_quadruple_value *data,
@@ -125,6 +110,7 @@ int gdpy_convert_from_pyobj(PyObject *value, union gdpy_quadruple_value *data,
   dtrace("%p, %p, %02x", value, data, type);
 
   /* check value type, and figure out autotype, if needed */
+#if PY_MAJOR_VERSION < 3
   if (PyInt_Check(value)) {
     data->s = PyInt_AsLong(value);
     data_type = GDPY_INT_AS_LONG;
@@ -133,93 +119,310 @@ int gdpy_convert_from_pyobj(PyObject *value, union gdpy_quadruple_value *data,
       dreturn("%i", -1);
       return -1;
     }
-  } else if (PyLong_Check(value)) {
-    if (type == GD_UNKNOWN) {
-      /* try unsigned long long first */
-      data->u = PyLong_AsUnsignedLongLong(value);
-      data_type = GDPY_LONG_AS_ULL;
+  } else
+#endif
+  {
+    if (PyLong_Check(value)) {
+      if (type == GD_UNKNOWN) {
+        /* try unsigned long long first */
+        data->u = PyLong_AsUnsignedLongLong(value);
+        data_type = GDPY_LONG_AS_ULL;
 
-      if (PyErr_Occurred()) {
-        if (PyErr_ExceptionMatches(PyExc_OverflowError)) { /* too big */
-          data->f = PyLong_AsDouble(value);
-          data_type = GDPY_LONG_AS_DOUBLE;
+        if (PyErr_Occurred()) {
+          if (PyErr_ExceptionMatches(PyExc_OverflowError)) { /* too big */
+            data->f = PyLong_AsDouble(value);
+            data_type = GDPY_LONG_AS_DOUBLE;
 
-          if (PyErr_Occurred()) {
-            dreturn("%i", -1);
-            return -1;
-          }
-        } else if (PyErr_ExceptionMatches(PyExc_TypeError)) { /* too small */
-          data->f = PyLong_AsDouble(value);
-          data_type = GDPY_LONG_AS_DOUBLE;
-
-          if (PyErr_Occurred()) {
-            if (PyErr_ExceptionMatches(PyExc_TypeError)) { /* still too small */
-              data->s = PyLong_AsLongLong(value);
-              data_type = GDPY_LONG_AS_SLL;
-
-              if (PyErr_Occurred()) {
-                dreturn("%i", -1);
-                return -1;
-              }
-            } else { /* some other error */
+            if (PyErr_Occurred()) {
               dreturn("%i", -1);
               return -1;
             }
+          } else if (PyErr_ExceptionMatches(PyExc_TypeError)) { /* too small */
+            data->f = PyLong_AsDouble(value);
+            data_type = GDPY_LONG_AS_DOUBLE;
+
+            if (PyErr_Occurred()) {
+              if (PyErr_ExceptionMatches(PyExc_TypeError)) { /*still too small*/
+                data->s = PyLong_AsLongLong(value);
+                data_type = GDPY_LONG_AS_SLL;
+
+                if (PyErr_Occurred()) {
+                  dreturn("%i", -1);
+                  return -1;
+                }
+              } else { /* some other error */
+                dreturn("%i", -1);
+                return -1;
+              }
+            }
+          } else { /* some other error */
+            dreturn("%i", -1);
+            return -1;
           }
-        } else { /* some other error */
+        }
+      } else if (type & GD_SIGNED) {
+        data->s = PyLong_AsLongLong(value);
+        data_type = GDPY_LONG_AS_SLL;
+
+        if (PyErr_Occurred()) {
+          dreturn("%i", -1);
+          return -1;
+        }
+      } else if (type & GD_IEEE754) {
+        data->f = PyLong_AsDouble(value);
+        data_type = GDPY_LONG_AS_DOUBLE;
+
+        if (PyErr_Occurred()) {
+          dreturn("%i", -1);
+          return -1;
+        }
+      } else {
+        data->u = PyLong_AsLongLong(value);
+        data_type = GDPY_LONG_AS_ULL;
+
+        if (PyErr_Occurred()) {
           dreturn("%i", -1);
           return -1;
         }
       }
-    } else if (type & GD_SIGNED) {
-      data->s = PyLong_AsLongLong(value);
-      data_type = GDPY_LONG_AS_SLL;
+    } else if (PyFloat_Check(value)) {
+      data->f = PyFloat_AsDouble(value);
+      data_type = GDPY_FLOAT_AS_DOUBLE;
 
       if (PyErr_Occurred()) {
         dreturn("%i", -1);
         return -1;
       }
-    } else if (type & GD_IEEE754) {
-      data->f = PyLong_AsDouble(value);
-      data_type = GDPY_LONG_AS_DOUBLE;
+    } else if (PyComplex_Check(value)) {
+      gdpy_as_complex(gd_csp_(data->c), value);
+      data_type = GDPY_COMPLEX_AS_COMPLEX;
 
       if (PyErr_Occurred()) {
         dreturn("%i", -1);
         return -1;
       }
-    } else {
-      data->u = PyLong_AsLongLong(value);
-      data_type = GDPY_LONG_AS_ULL;
-
-      if (PyErr_Occurred()) {
-        dreturn("%i", -1);
-        return -1;
-      }
-    }
-  } else if (PyFloat_Check(value)) {
-    data->f = PyFloat_AsDouble(value);
-    data_type = GDPY_FLOAT_AS_DOUBLE;
-
-    if (PyErr_Occurred()) {
+    } else { /* a non-numeric type */
+      PyErr_SetString(PyExc_TypeError, "a numeric type was expected");
       dreturn("%i", -1);
       return -1;
     }
-  } else if (PyComplex_Check(value)) {
-    gdpy_as_complex(gd_csp_(data->c), value);
-    data_type = GDPY_COMPLEX_AS_COMPLEX;
-
-    if (PyErr_Occurred()) {
-      dreturn("%i", -1);
-      return -1;
-    }
-  } else { /* a non-numeric type */
-    PyErr_SetString(PyExc_TypeError, "a numeric type was expected");
-    dreturn("%i", -1);
-    return -1;
   }
 
   dreturn("%02x", data_type);
   return data_type;
+}
+
+unsigned long gdpy_ulong_from_pyobj(PyObject *pyobj)
+{
+  unsigned long v = 0;
+
+  dtrace("%p", pyobj);
+
+  if (PyLong_Check(pyobj))
+    v = PyLong_AsUnsignedLong(pyobj);
+#if PY_MAJOR_VERSION < 3
+  else if (PyInt_Check(pyobj))
+    v = (unsigned long)PyInt_AsLong(pyobj);
+#endif
+  else
+    PyErr_SetString(PyExc_TypeError, "an integer type was expected");
+
+  dreturn("%lu", v);
+  return v;
+}
+
+long gdpy_long_from_pyobj(PyObject *pyobj)
+{
+  long v = 0;
+
+  dtrace("%p", pyobj);
+
+  if (PyLong_Check(pyobj))
+    v = PyLong_AsLong(pyobj);
+#if PY_MAJOR_VERSION < 3
+  else if (PyInt_Check(pyobj))
+    v = PyInt_AsLong(pyobj);
+#endif
+  else
+    PyErr_SetString(PyExc_TypeError, "an integer type was expected");
+
+  dreturn("%li", v);
+  return v;
+}
+
+/* Convert a Python string-like object to a C string */
+char *gdpy_string_from_pyobj(PyObject *pyobj, const char *char_enc,
+    const char *err_string, int dup)
+{
+  char *s = NULL;
+
+  dtrace("%p, \"%s\", %i", pyobj, char_enc, dup);
+
+  if (PyUnicode_Check(pyobj)) {
+    /* Encode string */
+    if (char_enc == NULL)
+      pyobj = PyUnicode_AsUTF8String(pyobj);
+    else
+      pyobj = PyUnicode_AsEncodedString(pyobj, char_enc, "strict");
+  } else if (!gdpy_encobj_check(pyobj)) {
+    if (err_string)
+      PyErr_SetString(PyExc_TypeError, err_string);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  /* now convert to python object */
+  s = gdpy_string_from_encobj(pyobj);
+
+  /* strdup, if requested */
+  if (s && dup) {
+    s = strdup(s);
+
+    if (s == NULL)
+      PyErr_NoMemory();
+  }
+
+  dreturn("\"%s\"", s);
+  return s;
+}
+
+/* Return a python string, optionally decoding it */
+PyObject *gdpyobj_from_string(const char *string, const char *char_enc)
+{
+  PyObject *pyobj;
+
+  dtrace("\"%s\", %p", string, char_enc);
+
+  if (char_enc == NULL)
+    pyobj = gdpy_encobj_from_string(string); /* don't decode */
+  else
+    pyobj = PyUnicode_Decode(string, strlen(string), char_enc, "strict");
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+/* Convert a GetData error string into a Python string.  These are always
+ * first decoded, if possible, and then ASCII re-encoded, since we can't know
+ * the capabilities of the controlling tty */
+PyObject *gdpyobj_from_estring(const char* string, const char *char_enc)
+{
+  PyObject *pyobj, *unicode = NULL;
+
+  dtrace("\"%s\", %p", string, char_enc);
+
+  if (char_enc) 
+    unicode = PyUnicode_Decode(string, strlen(string), char_enc, "strict");
+
+  if (unicode) {
+    pyobj = PyUnicode_AsEncodedString(unicode, "ascii", "backslashreplace");
+    Py_DECREF(unicode);
+  } else {
+    PyErr_Clear();
+    pyobj = gdpy_encobj_from_string(string);
+  }
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+#if PY_MAJOR_VERSION >= 3
+/* In Python3, filesystem encoding from Unicode is handled specially */
+char *gdpy_path_from_pyobj_(PyObject *pyobj, int dup)
+{
+  char *s;
+
+  dtrace("%p, %i", pyobj, dup);
+
+  /* Encode */
+  if (PyUnicode_Check(pyobj))
+    pyobj = PyUnicode_EncodeFSDefault(pyobj);
+  else if (!gdpy_encobj_check(pyobj)) {
+    PyErr_SetString(PyExc_TypeError, "a path was expected");
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  s = gdpy_string_from_encobj(pyobj);
+
+  /* strdup, if requested */
+  if (s && dup) {
+    s = strdup(s);
+
+    if (s == NULL)
+      PyErr_NoMemory();
+  }
+
+  dreturn("\"%s\"", s);
+  return s;
+}
+#endif
+
+#define GDPY_COERCE_REAL(t,p,v,d) \
+  if ((p) == GDPY_INT_AS_LONG || (p) == GDPY_LONG_AS_SLL) \
+    *((t*)(v)) = (t)(d).s; \
+  else if ((p) == GDPY_LONG_AS_ULL) \
+    *((t*)(v)) = (t)(d).u; \
+  else if ((p) == GDPY_LONG_AS_DOUBLE || (p) == GDPY_FLOAT_AS_DOUBLE) \
+    *((t*)(v)) = (t)(d).f; \
+  else \
+    *((t*)(v)) = (t)creal((d).c);
+
+#ifdef GD_NO_C99_API
+#define GDPY_COERCE_CPLX(t,p,v,d) \
+  if ((p) == GDPY_INT_AS_LONG || (p) == GDPY_LONG_AS_SLL) { \
+    ((t*)(v))[0] = (t)(d).s; ((t*)(v))[1] = 0; \
+  } else if ((p) == GDPY_LONG_AS_ULL) { \
+    ((t*)(v))[0] = (t)(d).u; ((t*)(v))[1] = 0; \
+  } else if ((p) == GDPY_LONG_AS_DOUBLE || (p) == GDPY_FLOAT_AS_DOUBLE) { \
+    ((t*)(v))[0] = (t)(d).f; ((t*)(v))[1] = 0; \
+  } else { \
+    ((t*)(v))[0] = (t)(d).c[0]; ((t*)(v))[1] = (t)(d).c[1]; \
+  }
+#else
+#define GDPY_COERCE_CPLX(t,p,v,d) \
+  if ((p) == GDPY_INT_AS_LONG || (p) == GDPY_LONG_AS_SLL) \
+    *((t _Complex*)(v)) = (t)(d).s; \
+  else if ((p) == GDPY_LONG_AS_ULL) \
+    *((t _Complex*)(v)) = (t)(d).u; \
+  else if ((p) == GDPY_LONG_AS_DOUBLE || (p) == GDPY_FLOAT_AS_DOUBLE) \
+    *((t _Complex*)(v)) = (t)(d).f; \
+  else \
+    *((t _Complex*)(v)) = (t _Complex)(d).c;
+#endif
+
+int gdpy_coerce_from_pyobj(PyObject *pyobj, gd_type_t type, void *value)
+{
+  union gdpy_quadruple_value d;
+  int conv;
+
+  dtrace("%p, 0x%X, %p", pyobj, type, value);
+  
+  conv = gdpy_convert_from_pyobj(pyobj, &d, type);
+
+  if (conv == -1) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  switch (type) {
+    case GD_UINT8:      GDPY_COERCE_REAL(uint8_t,  conv, value, d); break;
+    case GD_INT8:       GDPY_COERCE_REAL(int8_t,   conv, value, d); break;
+    case GD_UINT16:     GDPY_COERCE_REAL(uint16_t, conv, value, d); break;
+    case GD_INT16:      GDPY_COERCE_REAL(int16_t,  conv, value, d); break;
+    case GD_UINT32:     GDPY_COERCE_REAL(uint32_t, conv, value, d); break;
+    case GD_INT32:      GDPY_COERCE_REAL(int32_t,  conv, value, d); break;
+    case GD_UINT64:     GDPY_COERCE_REAL(uint64_t, conv, value, d); break;
+    case GD_INT64:      GDPY_COERCE_REAL(int64_t , conv, value, d); break;
+    case GD_FLOAT32:    GDPY_COERCE_REAL(float   , conv, value, d); break;
+    case GD_FLOAT64:    GDPY_COERCE_REAL(double  , conv, value, d); break;
+    case GD_COMPLEX64:  GDPY_COERCE_CPLX(float   , conv, value, d); break;
+    case GD_COMPLEX128: GDPY_COERCE_CPLX(double  , conv, value, d); break;
+    default: break;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 gd_type_t gdpy_convert_from_pylist(PyObject *value, void *data, gd_type_t type,
@@ -240,12 +443,14 @@ gd_type_t gdpy_convert_from_pylist(PyObject *value, void *data, gd_type_t type,
   }
 
   switch(data_type) {
+#if PY_MAJOR_VERSION < 3
     case GDPY_INT_AS_LONG:
       type = GD_INT32;
       *(int32_t*)data = (int32_t)tmp.s;
       for (i = 1; i < ns; ++i)
         ((int32_t*)data)[i] = (int32_t)PyInt_AsLong(PyList_GetItem(value, i));
       break;
+#endif
     case GDPY_LONG_AS_ULL: 
       type = GD_UINT64;
       *(uint64_t*)data = tmp.u;
@@ -408,6 +613,21 @@ int gdpy_npytype_from_type(gd_type_t type)
   return npytype;
 }
 
+static PyObject *gdpy_maybe_complex(double re, double im, int force)
+{
+  PyObject *pyobj;
+
+  dtrace("%g, %g, %i", re, im, force);
+
+  if (force || im)
+    pyobj = PyComplex_FromDoubles(re, im);
+  else
+    pyobj = PyFloat_FromDouble(re);
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
 PyObject *gdpy_convert_to_pylist(const void *data, gd_type_t type, size_t ns)
 {
   size_t i;
@@ -425,22 +645,25 @@ PyObject *gdpy_convert_to_pylist(const void *data, gd_type_t type, size_t ns)
   switch(type) {
     case GD_UINT8:
       for (i = 0; i < ns; ++i)
-        if (gdpylist_append(pyobj, PyInt_FromLong((long)((uint8_t*)data)[i])))
+        if (gdpylist_append(pyobj, gdpyint_fromlong((long)((uint8_t*)data)[i])))
           return NULL;
       break;
     case GD_INT8:
       for (i = 0; i < ns; ++i)
-        if (gdpylist_append(pyobj, PyInt_FromLong((long)((int8_t*)data)[i])))
+        if (gdpylist_append(pyobj, gdpyint_fromlong((long)((int8_t*)data)[i])))
           return NULL;
       break;
     case GD_UINT16:
       for (i = 0; i < ns; ++i)
-        if (gdpylist_append(pyobj, PyInt_FromLong((long)((uint16_t*)data)[i])))
+        if (gdpylist_append(pyobj,
+              gdpyint_fromlong((long)((uint16_t*)data)[i])))
+        {
           return NULL;
+        }
       break;
     case GD_INT16:
       for (i = 0; i < ns; ++i)
-        if (gdpylist_append(pyobj, PyInt_FromLong((long)((int16_t*)data)[i])))
+        if (gdpylist_append(pyobj, gdpyint_fromlong((long)((int16_t*)data)[i])))
           return NULL;
       break;
     case GD_UINT32:
@@ -451,7 +674,7 @@ PyObject *gdpy_convert_to_pylist(const void *data, gd_type_t type, size_t ns)
       break;
     case GD_INT32:
       for (i = 0; i < ns; ++i)
-        if (gdpylist_append(pyobj, PyInt_FromLong((long)((int32_t*)data)[i])))
+        if (gdpylist_append(pyobj, gdpyint_fromlong((long)((int32_t*)data)[i])))
           return NULL;
       break;
     case GD_UINT64:
@@ -496,11 +719,12 @@ PyObject *gdpy_convert_to_pylist(const void *data, gd_type_t type, size_t ns)
   return pyobj;
 }
 
-PyObject *gdpy_convert_to_pyobj(const void *data, gd_type_t type)
+PyObject *gdpy_convert_to_pyobj(const void *data, gd_type_t type,
+    int force_complex)
 {
   PyObject *pyobj = NULL;
 
-  dtrace("%p, 0x%X", data, type);
+  dtrace("%p, 0x%X, %i", data, type, force_complex);
 
   switch(type) {
     case GD_NULL:
@@ -508,22 +732,22 @@ PyObject *gdpy_convert_to_pyobj(const void *data, gd_type_t type)
       pyobj = Py_None;
       break;
     case GD_UINT8:
-      pyobj = PyInt_FromLong((long)*(uint8_t*)data);
+      pyobj = gdpyint_fromlong((long)*(uint8_t*)data);
       break;
     case GD_INT8:
-      pyobj = PyInt_FromLong((long)*(int8_t*)data);
+      pyobj = gdpyint_fromlong((long)*(int8_t*)data);
       break;
     case GD_UINT16:
-      pyobj = PyInt_FromLong((long)*(uint16_t*)data);
+      pyobj = gdpyint_fromlong((long)*(uint16_t*)data);
       break;
     case GD_INT16:
-      pyobj = PyInt_FromLong((long)*(int16_t*)data);
+      pyobj = gdpyint_fromlong((long)*(int16_t*)data);
       break;
     case GD_UINT32:
       pyobj = PyLong_FromUnsignedLong((unsigned long)*(uint32_t*)data);
       break;
     case GD_INT32:
-      pyobj = PyInt_FromLong((long)*(int32_t*)data);
+      pyobj = gdpyint_fromlong((long)*(int32_t*)data);
       break;
     case GD_UINT64:
       pyobj = PyLong_FromUnsignedLongLong(
@@ -539,10 +763,12 @@ PyObject *gdpy_convert_to_pyobj(const void *data, gd_type_t type)
       pyobj = PyFloat_FromDouble(*(double*)data);
       break;
     case GD_COMPLEX64:
-      pyobj = gdpy_from_complexp((float*)data);
+      pyobj = gdpy_maybe_complex(((float*)data)[0], ((float*)data)[1],
+          force_complex);
       break;
     case GD_COMPLEX128:
-      pyobj = gdpy_from_complexp((double*)data);
+      pyobj = gdpy_maybe_complex(((double*)data)[0], ((double*)data)[1],
+          force_complex);
       break;
     case GD_UNKNOWN: /* prevent compiler warning */
       break;
@@ -550,6 +776,72 @@ PyObject *gdpy_convert_to_pyobj(const void *data, gd_type_t type)
 
   dreturn("%p", pyobj);
   return pyobj;
+}
+
+/* If value is a valid encoding (or None), free the old *char_enc and update */
+int gdpy_parse_charenc(char** char_enc, PyObject *value)
+{
+  dtrace("%p, %p", char_enc, value);
+
+  if (value == Py_None) {
+    free(*char_enc);
+    *char_enc = NULL;
+  } else {
+    char *new_enc = gdpy_string_from_pyobj(value, NULL,
+        "character_encoding must be string or None", 1);
+  
+    if (PyErr_Occurred()) {
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    free(*char_enc);
+    *char_enc = new_enc;
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+
+/* Convert an object's character_encoding data to an appropriate Python
+ * attribute (the module global character_encoding is stored as a PyObject
+ * so we don't have to do anything about that). */
+PyObject *gdpy_charenc_obj(const char *char_enc)
+{
+  PyObject *pyobj;
+
+  dtrace("%p", char_enc);
+
+  if (char_enc == NULL) {
+    Py_INCREF(Py_None);
+    pyobj = Py_None;
+  } else
+    pyobj = gdpystrobj_from_string(char_enc);
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+/* Copy the current value of the global pygetdata.character_encoding into
+ * the indicated gdpy_charenc_t struct, if it's a valid value.  Otherwise,
+ * NULLify it (i.e. set the corresponding character_encoding attribute to None)
+ */
+void gdpy_copy_global_charenc(char *char_enc)
+{
+  PyObject *global;
+
+  dtrace("%p", char_enc);
+
+  global = PyDict_GetItemString(PyModule_GetDict(gdpy_mod),
+      "character_encoding");
+
+  if (global == NULL)
+    char_enc = NULL;
+  else
+    char_enc = gdpy_string_from_pyobj(global, NULL, NULL, 0);
+
+  dreturnvoid();
 }
 
 static PyObject *gdpy_encoding_support(struct gdpy_fragment_t *self,
@@ -577,7 +869,7 @@ static PyObject *gdpy_encoding_support(struct gdpy_fragment_t *self,
     return Py_None;
   }
 
-  pyobj = PyInt_FromLong(n);
+  pyobj = gdpyint_fromlong(n);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -597,121 +889,189 @@ static PyMethodDef GetDataMethods[] = {
   { NULL, NULL, 0, NULL }
 };
 
-PyMODINIT_FUNC initpygetdata(void)
+/* Documentation differences between Python2 and Python3 */
+#if PY_MAJOR_VERSION >= 3
+#define GDPY_MODULE_DOC23(two,three) three
+#else
+#define GDPY_MODULE_DOC23(two,three) two
+#endif
+
+#define GDPY_MODULE_DOC \
+  "Bindings to the GetData library for Dirfile access\n" \
+"\n" \
+"This module provides interfaces to the C GetData library.  It defines\n" \
+"three main classes:\n" \
+"\n" \
+"  o dirfile, encapsulating the C API's DIRFILE object,\n" \
+"  o entry, encapsulating the C API's gd_entry_t object, and\n" \
+"  o fragment, containing fragment metadata.\n" \
+"\n" \
+"Second, it defines various symbolic constants defined by the C API.  These\n" \
+"symbols are identical to the C API's symbols, except lacking the GD_\n" \
+"prefix.  So, for example, the C API's GD_INT8 is available in these\n" \
+"bindings as pygetdata.INT8.\n" \
+"\n" \
+"Finally, it defines a number of exceptions corresponding to C API dirfile\n" \
+"nerror codes.  These exceptions have similar names to the C API's error\n" \
+"names, so, for example, pygetdata.BadCodeError corresponds to the C API's\n" \
+"GD_E_BAD_CODE error code.  All these exceptions are derived from a common\n" \
+"pygetdata.DirfileError exception class, itself derived from RuntimeError.\n" \
+"Exceptions are thrown by the bindings in lieu of returning a dirfile error\n" \
+"value.\n" \
+"\n" \
+"Where possible, pygetdata will, by default, return vector data as NumPy\n" \
+"arrays.  If pygetdata has been built with NumPy support,\n" \
+"pygetdata.__numpy_supported__ will be non-zero.  If NumPy support is not\n" \
+"npresent, vector data will be returned as Python lists.  Vector data\n" \
+"passed to pygetdata may either be a Python list or a NumPy array.\n" \
+"\n" \
+"The input data type argument to bindings for functions such as\n" \
+"gd_putdata(3), which is required in the C API, are typically optional,\n" \
+"as pygetdata can determine the input data type by itself, and convert it\n" \
+"to an appropriate type for the C API.  If the data type is supplied,\n" \
+"pygetdata will coerce the input data to the specified C type as best it\n" \
+"can.  For gd_getdata(3) and similar, the C API types are converted to\n" \
+"Python types as follows:\n\n" \
+"  o int     -- UINT8, INT8, UINT16, INT16, INT32\n" \
+"  o long    -- UINT32, UINT64, INT64\n" \
+"  o float   -- FLOAT32, FLOAT64\n" \
+"  o complex -- COMPLEX64, COMPLEX128\n\n" \
+"or to NumPy data types, as appropriate.  For convenience, the following\n" \
+"type code aliases are defined:\n" \
+"\n" \
+"  o pygetdata.INT     = pygetdata.INT32\n" \
+"  o pygetdata.LONG    = pygetdata.INT64\n" \
+"  o pygetdata.ULONG   = pygetdata.UINT64\n" \
+"  o pygetdata.FLOAT   = pygetdata.FLOAT64\n" \
+"  o pygetdata.COMPLEX = pygetdata.COMPLEX128\n\n" \
+"Note that pygetdata.FLOAT is different than the C API's GD_FLOAT alias.\n" \
+"\n" \
+"All pygetdata functions may be given positional or keyword parameters.\n" \
+"\n" \
+"CHARACTER STRINGS AND ENCODINGS:\n" \
+"\n" \
+"The Dirfile Standards do not specify the character encoding scheme used\n" \
+"in the Dirfile metadata (other than requiring it to be 7-bit ASCII\n" \
+"compatible).  As a result, pygetdata does not by default decode most\n" \
+"strings provided by the library, instead returning them as encoded" \
+GDPY_MODULE_DOC23("bytes\nobjects.\n\n", "\nstrings.\n\n") \
+"This behaviour may be changed by specifying the character encoding to use\n" \
+"for decoding strings, either globally, by assigning to the\n" \
+"pygetdata.character_encoding, or else per-object by assigning to a \n"\
+"pygetdata.dirfile or pygetdata.entry object's character_encoding attribute.\n"\
+"(pygetdata.fragment objects use the character_encoding of their containing\n"\
+"dirfile.)  The value assigned should either be None, indicating no decoding\n"\
+"should occur (this is the default), or else a string giving the name of the\n"\
+"character encoding to use.  This should be one of the encodings supported\n"\
+"by the " \
+GDPY_MODULE_DOC23("unicode()","str()") \
+"built-in." \
+"\n"\
+"The global pygetdata.character_encoding is never used directly, but is\n" \
+"copied when new pygetdata objects are created.  If the global value is\n" \
+"not valid when an object is created, it is ignored and that object's\n" \
+"character encoding attribute is simply set to None.\n" \
+"\n" \
+"This also determines how Unicode strings passed to pygetdata are encoding\n" \
+"before being passed to the C library.  If character_encoding is None, the\n" \
+"current locale's default encoding is used instead.\n" \
+"\n"\
+"String conversion occurs on demand: changing an object's character_encoding\n"\
+"attribute affects all strings subsequently passed to or returned by the\n" \
+"object.  Changing the global pygetdata.character_encoding only affects\n" \
+"object created after the change: it does not alter the character_encoding\n" \
+"attribute of pre-existing objects, even if the attribute is None.\n"
+
+GDPY_MODINITFUNC
 {
   int i;
-  PyObject *mod;
-  PyObject *mdict;
+  PyObject *mdict, *dirfileerror;
+#if PY_MAJOR_VERSION >= 3
+  static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "pygetdata",     /* m_name */
+    GDPY_MODULE_DOC, /* m_doc */
+    -1,              /* m_size */
+    GetDataMethods,  /* m_methods */
+    NULL,            /* m_reload */
+    NULL,            /* m_traverse */
+    NULL,            /* m_clear */
+    NULL             /* m_free */
+  };
+#endif
 
   dtracevoid();
 
   if (PyType_Ready(&gdpy_dirfile) < 0)
-    return;
+    GDPY_MODINITFAILURE;
 
   if (PyType_Ready(&gdpy_entry) < 0)
-    return;
+    GDPY_MODINITFAILURE;
 
   if (PyType_Ready(&gdpy_fragment) < 0)
-    return;
+    GDPY_MODINITFAILURE;
 
   /* The following macro will cause this function to return if importing numpy
    * fails */
   import_array()
 
-  mod = Py_InitModule3("pygetdata", GetDataMethods,
-      "Bindings to the GetData library for Dirfile access\n\n"
-      "This module provides interfaces to the C GetData library.  It defines "
-      "three\nmain classes:\n\n"
-      "  o dirfile, encapsulating the C API's DIRFILE object,\n"
-      "  o entry, encapsulating the C API's gd_entry_t object, and\n"
-      "  o fragment, containing fragment metadata.\n\n"
-      "Second, it defines various symbolic constants defined by the C API.  "
-      "These\nsymbols are identical to the C API's symbols, except lacking the "
-      "GD_ prefix.\nSo, for example, the C API's GD_INT8 is available in these "
-      "bindings as\npygetdata.INT8.\n\n"
-      "Finally, it defines a number of exceptions corresponding to C API "
-      "dirfile\nerror codes.  These exceptions have similar names to the C "
-      "API's error\nnames, so, for example, pygetdata.BadCodeError corresponds "
-      "to the C API's\nGD_E_BAD_CODE error code.  All these exceptions are "
-      "derived from a common\npygetdata.DirfileError exception class, itself "
-      "derived from RuntimeError.\nExceptions are thrown by the bindings in "
-      "lieu of returning a dirfile error\nvalue.\n\n"
-      "Where possible, pygetdata will, by default, return vector data as "
-      "NumPy\narrays.  If "
-      "pygetdata has been built with NumPy support,\n"
-      "pygetdata.__numpy_supported__ will be non-zero.  If NumPy support is "
-      "not\npresent, vector data will be returned as Python lists.  Vector "
-      "data passed\nto pygetdata may either be a Python list or a NumPy array."
-      "\n\n"
-      "The input data type argument to bindings for functions such as\n"
-      "gd_putdata(3), which is required in the C API, are typically optional,\n"
-      "as pygetdata can determine the input data type by itself, and convert "
-      "it to\nan appropriate type for the C API.  If the data type is supplied,"
-      " pygetdata\nwill coerce the input data to the specified C type as best "
-      "it can.  For\ngd_getdata(3) and similar, the C API types are converted "
-      "to Python types as\nfollows:\n\n"
-      "  o int     -- UINT8, INT8, UINT16, INT16, INT32\n"
-      "  o long    -- UINT32, UINT64, INT64\n"
-      "  o float   -- FLOAT32, FLOAT64\n"
-      "  o complex -- COMPLEX64, COMPLEX128\n\n"
-      "or to NumPy data types, as appropriate.  "
-      "For convenience, the following type\ncode aliases are defined:\n\n"
-      "  o pygetdata.INT     = pygetdata.INT32\n"
-      "  o pygetdata.LONG    = pygetdata.INT64\n"
-      "  o pygetdata.ULONG   = pygetdata.UINT64\n"
-      "  o pygetdata.FLOAT   = pygetdata.FLOAT64\n"
-      "  o pygetdata.COMPLEX = pygetdata.COMPLEX128\n\n"
-      "Note that pygetdata.FLOAT is different than the C API's GD_FLOAT "
-      "alias.\n\n"
-      "All pygetdata functions may be given positional or keyword parameters."
-      );
+#if PY_MAJOR_VERSION < 3
+  gdpy_mod = Py_InitModule3("pygetdata", GetDataMethods, GDPY_MODULE_DOC);
+#else
+  gdpy_mod = PyModule_Create(&moduledef);
+#endif
 
-  if (mod == NULL)
-    return;
+  if (gdpy_mod == NULL)
+    GDPY_MODINITFAILURE;
 
   Py_INCREF(&gdpy_dirfile);
-  PyModule_AddObject(mod, "dirfile", (PyObject *)&gdpy_dirfile);
+  PyModule_AddObject(gdpy_mod, "dirfile", (PyObject *)&gdpy_dirfile);
 
   Py_INCREF(&gdpy_entry);
-  PyModule_AddObject(mod, "entry", (PyObject *)&gdpy_entry);
+  PyModule_AddObject(gdpy_mod, "entry", (PyObject *)&gdpy_entry);
 
   Py_INCREF(&gdpy_fragment);
-  PyModule_AddObject(mod, "fragment", (PyObject *)&gdpy_fragment);
+  PyModule_AddObject(gdpy_mod, "fragment", (PyObject *)&gdpy_fragment);
 
   /* version */
-  PyModule_AddObject(mod, "__version__", Py_BuildValue("(iiis)", GETDATA_MAJOR,
-        GETDATA_MINOR, GETDATA_REVISION, GETDATA_VERSION_SUFFIX));
+  PyModule_AddObject(gdpy_mod, "__version__", Py_BuildValue("(iiis)",
+        GETDATA_MAJOR, GETDATA_MINOR, GETDATA_REVISION,
+        GETDATA_VERSION_SUFFIX));
 
   /* author */
-  PyModule_AddStringConstant(mod, "__author__",
+  PyModule_AddStringConstant(gdpy_mod, "__author__",
       "The GetData Project <http://getdata.sourceforge.net/>");
+
+  /* character_encoding */
+  Py_INCREF(Py_None);
+  PyModule_AddObject(gdpy_mod, "character_encoding", Py_None);
 
   /* add constants */
   for (i = 0; gdpy_constant_list[i].name != NULL; ++i)
-    PyModule_AddIntConstant(mod, gdpy_constant_list[i].name,
+    PyModule_AddIntConstant(gdpy_mod, gdpy_constant_list[i].name,
         gdpy_constant_list[i].value);
 
-  PyModule_AddIntConstant(mod, "__numpy_supported__", 1);
+  PyModule_AddIntConstant(gdpy_mod, "__numpy_supported__", 1);
 
   /* add exceptions */
-  GdPy_DirfileError = PyErr_NewException("pygetdata.DirfileError",
+  dirfileerror = PyErr_NewException("pygetdata.DirfileError",
       PyExc_RuntimeError, NULL);
-  Py_INCREF(GdPy_DirfileError);
-  PyModule_AddObject(mod, "DirfileError", GdPy_DirfileError);
+  Py_INCREF(dirfileerror);
+  PyModule_AddObject(gdpy_mod, "DirfileError", dirfileerror);
 
   for (i = 1; i < GD_N_ERROR_CODES; ++i) {
     if (gdpy_exception_list[i]) {
       char name[40];
       sprintf(name, "pygetdata.%sError", gdpy_exception_list[i]);
-      gdpy_exceptions[i] = PyErr_NewException(name, GdPy_DirfileError, NULL);
+      gdpy_exceptions[i] = PyErr_NewException(name, dirfileerror, NULL);
       Py_INCREF(gdpy_exceptions[i]);
-      PyModule_AddObject(mod, name + 10, gdpy_exceptions[i]);
+      PyModule_AddObject(gdpy_mod, name + 10, gdpy_exceptions[i]);
     } else
-      gdpy_exceptions[i] = GdPy_DirfileError;
+      gdpy_exceptions[i] = dirfileerror;
   }
 
   /* add dead exceptions -- we do this through manual dictionary editing */
-  mdict = PyModule_GetDict(mod);
+  mdict = PyModule_GetDict(gdpy_mod);
   if (mdict)
     for (i = 0; gdpy_dead_exceptions[i].name; ++i) {
       char name[40];
@@ -721,5 +1081,6 @@ PyMODINIT_FUNC initpygetdata(void)
           gdpy_exceptions[gdpy_dead_exceptions[i].e]);
     }
 
-  dreturnvoid();
+  dreturn("%p", gdpy_mod);
+  GDPY_MODINITSUCCESS;
 }
