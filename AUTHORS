@@ -17,7 +17,7 @@ library.
 Joseph Fowler <jfowler@princeton.edu> provided code which was adapted to
 create the slimlib encoding support.
 
-Adam D Hincks <adam.hincks@utoronto.ca> provided code whic was adapted to
+Adam D Hincks <adam.hincks@utoronto.ca> provided code which was adapted to
 create the zzip encoding support.  The original zzip encoding (ZIRFILE) was
 developed by Mike Nolta <nolta@cita.utoronto.ca>.
 
