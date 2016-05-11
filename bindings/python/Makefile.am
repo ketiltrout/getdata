@@ -23,15 +23,15 @@ AUTOMAKE_OPTIONS = foreign
 SUBDIRS=test
 
 if MAKE_PYGETDATA_CAPI
-CPYGETDATA_H=cpygetdata.h
+PYGETDATA_H=pygetdata.h
 endif
 
-nodist_python_SCRIPTS = pygetdata${PYTHON_OBJECT_SUFFIX} ${CPYGETDATA_H}
+nodist_python_SCRIPTS = pygetdata${PYTHON_OBJECT_SUFFIX} ${PYGETDATA_H}
+python_HEADERS = ${PYGETDATA_H}
 
 BUILT_SOURCES = pyconstants.c
 
-EXTRA_DIST = pydirfile.c pygetdata.c pyentry.c pygd_intern.h pyfragment.c \
-						 cpygetdata.h
+EXTRA_DIST = pydirfile.c pygetdata.c pyentry.c pygd_intern.h pyfragment.c
 
 distutils_path=build/lib.${PYTHON_PLATFORM}-${PYTHON_VERSION}
 pygetdata${PYTHON_OBJECT_SUFFIX}: ${distutils_path}/pygetdata${PYTHON_OBJECT_SUFFIX}

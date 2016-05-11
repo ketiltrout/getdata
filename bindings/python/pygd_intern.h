@@ -44,9 +44,9 @@
 #define GDPY_PYCOMPLEX       0x40
 
 #if HAVE_DECL_PYCAPSULE_CHECKEXACT
-#define PYGETDATA_CAPI
 #define PYGETDATA_MODULE
-#include "cpygetdata.h"
+#include "pygetdata.h"
+#define PYGETDATA_CAPI
 #endif
 
 #define GDPY_INT_AS_LONG        (GDPY_INT       | GDPY_SIGNED)

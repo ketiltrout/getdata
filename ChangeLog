@@ -1,3 +1,6 @@
+2016-05-11   D. V. Wiebe <getdata@ketiltrout.net> svn:1072
+	* bindings/python/pygetdata.h: Renamed from cpygetdata.h
+
 2016-05-11   D. V. Wiebe <getdata@ketiltrout.net> svn:1070
 	* bindings/pyghon/pygd_intern.h: Renamed from pygetdata.h
 

@@ -20,8 +20,7 @@ New in version 0.9.3a:
   * PYTHON: Python3 support has been added based on a patch from Matthew
     Petroff.  The earliest supported Python3 version is 3.2.  Python2 is
     still supported from version 2.4, but Unicode support must be enabled
-    in Python2.  (Support for Python 2.3 has been dropped due to bugs in
-    the 2.3 branch we're not interested in working around.)
+    in Python2.  Support for Python 2.3 has been dropped.
 
   * PYTHON: Under Python3, the bindings run into the issue of GetData not
     knowing the character encoding of Dirfile metadata (the C library
@@ -52,6 +51,11 @@ New in version 0.9.3a:
 
   * PYTHON: When using Python 2.6 or newer, calling repr() on a
     pygetdata.entry object now returns an eval()able string.
+
+  * PYTHON: When using Python 2.7 or newer, a very small C API is produced
+    for pygetdata.  It is defined in pygetdata.h installed alongside the
+    pygetdata module.  This C API is needed by daisie, the stand-alone SIE
+    encoding library.
 
   * PYTHON BUG FIX: Calling pygetdata.dirfile.[m]carrays no longer crashes
     if return_type=pygetdata.NULL.  In this case, None is returned in place
