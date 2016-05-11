@@ -1087,7 +1087,8 @@ GDPY_MODINITFUNC
   /* Create the CAPI Capsule, if we can */
 #ifdef PYGETDATA_CAPI
   gdpy_api[PyDirfile_Type_NUM] = &gdpy_dirfile;
-  gdpy_api[PyDirfile_DIRFILE_NUM] = &gdpy_dirfile_dirfile;
+  gdpy_api[PyDirfile_Dirfile_NUM] = &gdpy_dirfile_dirfile;
+  gdpy_api[PyDirfile_Raise_NUM] = &gdpy_dirfile_raise;
 
   capi = PyCapsule_New(gdpy_api, PYDIRFILE_CAPSULENAME, NULL);
   

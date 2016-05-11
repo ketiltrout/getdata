@@ -60,6 +60,16 @@ DIRFILE *gdpy_dirfile_dirfile(struct gdpy_dirfile_t *self)
   dreturn("%p", self->D);
   return self->D;
 }
+
+int gdpy_dirfile_raise(struct gdpy_dirfile_t *self)
+{
+  dtrace("%p", self);
+
+  GDPY_CHECK_ERROR(self->D, -1, self->char_enc);
+
+  dreturn("%i", 0);
+  return 0;
+}
 #endif
 
 /* Dirfile */

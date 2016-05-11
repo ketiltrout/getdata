@@ -30,9 +30,10 @@ extern "C" {
 #include <getdata.h>
 
 #define PyDirfile_Type_NUM 0
-#define PyDirfile_DIRFILE_NUM 1
+#define PyDirfile_Dirfile_NUM 1
+#define PyDirfile_Raise_NUM 2
 
-#define PyDirfile_API_length 2
+#define PyDirfile_API_length 3
 
 #define PYDIRFILE_CAPSULENAME "pygetdata.__CAPI"
 
@@ -42,7 +43,9 @@ extern "C" {
 
 #define PyDirfile_Type (*(PyTypeObject*)PyDirfile_API[PyDirfile_Type_NUM])
 #define PyDirfile_Dirfile \
-  (*(DIRFILE *(*)(PyObject*))PyDirfile_API[PyDirfile_DIRFILE_NUM])
+  (*(DIRFILE *(*)(PyObject*))PyDirfile_API[PyDirfile_Dirfile_NUM])
+#define PyDirfile_Raise \
+  (*(int (*)(PyObject*))PyDirfile_API[PyDirfile_Raise_NUM])
 
 #define PyDirfile_Check(o) PyObject_TypeCheck(o, &PyDirfile_Type)
 

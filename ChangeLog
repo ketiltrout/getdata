@@ -1,3 +1,7 @@
+2016-05-11   D. V. Wiebe <getdata@ketiltrout.net> svn:1069
+	* getdata/bindings/python/cpygetdata.h (PyDirfile_Raise)
+	getdata/bindings/python/pydirfile.c (gdpy_dirfile_raise): Added.
+
 2016-05-11   D. V. Wiebe <getdata@ketiltrout.net> svn:1067
 	* bindings/python/cpygetdata.h: Added.
 	* bindings/python/pydirfile.c (gdpy_dirfile_dirfile): Added.

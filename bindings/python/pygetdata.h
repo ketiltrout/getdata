@@ -202,6 +202,7 @@ extern char *gdpy_path_from_pyobj_(PyObject*, int);
 /* Declarations for the CAPI */
 #ifdef PYGETDATA_CAPI
 extern DIRFILE *gdpy_dirfile_dirfile(struct gdpy_dirfile_t *);
+extern int gdpy_dirfile_raise(struct gdpy_dirfile_t *);
 #endif
 
 extern void gdpy_copy_global_charenc(char*);
