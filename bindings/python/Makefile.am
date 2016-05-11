@@ -30,7 +30,7 @@ nodist_python_SCRIPTS = pygetdata${PYTHON_OBJECT_SUFFIX} ${CPYGETDATA_H}
 
 BUILT_SOURCES = pyconstants.c
 
-EXTRA_DIST = pydirfile.c pygetdata.c pyentry.c pygetdata.h pyfragment.c \
+EXTRA_DIST = pydirfile.c pygetdata.c pyentry.c pygd_intern.h pyfragment.c \
 						 cpygetdata.h
 
 distutils_path=build/lib.${PYTHON_PLATFORM}-${PYTHON_VERSION}

@@ -19,7 +19,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #define NO_IMPORT_ARRAY
-#include "pygetdata.h"
+#include "pygd_intern.h"
 
 /* Create an array of strings from a NULL-terminated string list */
 static PyObject *gdpyobj_from_strarr(const char **list,

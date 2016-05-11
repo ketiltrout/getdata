@@ -18,7 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "pygetdata.h"
+#include "pygd_intern.h"
 
 static PyObject *gdpy_mod = NULL;
 

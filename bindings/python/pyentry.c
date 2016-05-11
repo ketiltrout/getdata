@@ -19,7 +19,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #define NO_IMPORT_ARRAY
-#include "pygetdata.h"
+#include "pygd_intern.h"
 
 static const char *gdpy_entry_type_names[] =
 {
