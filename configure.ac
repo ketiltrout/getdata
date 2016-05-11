@@ -271,16 +271,6 @@ AC_ARG_ENABLE(perl, AS_HELP_STRING([--disable-perl],
 AC_MSG_CHECKING([whether to include the Perl bindings])
 AC_MSG_RESULT([$make_perlbindings])
 
-dnl PHP bindings
-AC_ARG_ENABLE(php, AS_HELP_STRING([--disable-php],
-              [don't build the PHP bindings]),dnl'
-              [
-               case "${enableval}" in
-                 no) make_phpbindings="no" ;;
-                 *) make_phpbindings="yes" ;;
-               esac
-              ])
-
 dnl Python bindings
 AC_ARG_ENABLE(python, AS_HELP_STRING([--disable-python],
               [don't build the Python bindings (pygetdata)]),dnl'
@@ -293,6 +283,16 @@ AC_ARG_ENABLE(python, AS_HELP_STRING([--disable-python],
 
 AC_MSG_CHECKING([whether to include the Python bindings])
 AC_MSG_RESULT([$make_pybindings])
+
+dnl PHP bindings
+AC_ARG_ENABLE(php, AS_HELP_STRING([--disable-php],
+              [don't build the PHP bindings]),dnl'
+              [
+               case "${enableval}" in
+                 no) make_phpbindings="no" ;;
+                 *) make_phpbindings="yes" ;;
+               esac
+              ])
 
 AC_MSG_CHECKING([whether to include the PHP bindings])
 AC_MSG_RESULT([$make_phpbindings])
@@ -944,6 +944,16 @@ if test "x$make_pybindings" = "xyes"; then
   if test "x$have_python" = "xno"; then
     make_pybindings="no"
   else
+    dnl Check for PyCapsule
+    saved_CPPFLAGS=${CPPFLAGS}
+    CPPFLAGS="${PYTHON_CPPFLAGS} ${CPPFLAGS}"
+    AC_CHECK_DECLS([PyCapsule_CheckExact],[have_pycapsule=yes],
+                   [have_pycapsule=no],
+                   [
+#include <Python.h>
+])
+    CPPFLAGS="${saved_CPPFLAGSS}"
+
     AC_MSG_CHECKING([for NumPy])
     cat > conftest.py << EOF
 import sys
@@ -1134,6 +1144,7 @@ AM_CONDITIONAL(MAKE_CXXBINDINGS, [test "x$make_cxxbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_F77BINDINGS, [test "x$make_f77bindings" != "xno"])
 AM_CONDITIONAL(MAKE_F95BINDINGS, [test "x$make_f95bindings" = "xyes"])
 AM_CONDITIONAL(MAKE_PYBINDINGS, [test "x$make_pybindings" = "xyes"])
+AM_CONDITIONAL(MAKE_PYGETDATA_CAPI, [test "x$have_pycapsule" = "xyes"])
 AM_CONDITIONAL(MAKE_IDLBINDINGS, [test "x$make_idlbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_PERLBINDINGS, [test "x$make_perlbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_MATLABBINDINGS, [test "x$make_matlabbindings" = "xyes"])

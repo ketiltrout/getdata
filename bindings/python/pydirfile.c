@@ -51,6 +51,17 @@ static PyObject *gdpyobj_from_strarr(const char **list,
   return pyobj;
 }
 
+#ifdef PYGETDATA_CAPI
+/* Dirfile CAPI */
+DIRFILE *gdpy_dirfile_dirfile(struct gdpy_dirfile_t *self)
+{
+  dtrace("%p", self);
+
+  dreturn("%p", self->D);
+  return self->D;
+}
+#endif
+
 /* Dirfile */
 static int gdpy_callback_func(gd_parser_data_t *pdata, void *extra)
 {

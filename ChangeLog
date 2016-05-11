@@ -1,3 +1,12 @@
+2016-05-11   D. V. Wiebe <getdata@ketiltrout.net> svn:1067
+	* bindings/python/cpygetdata.h: Added.
+	* bindings/python/pydirfile.c (gdpy_dirfile_dirfile): Added.
+	* bindings/python/pygetdata.c (GDPY_MODINITFUNC): Create the PyCapsule
+	object if including the C API.
+	* bindings/python/pygetdata.h: Include cpygetdata.h if building the C API.
+	* bindings/python/Makefile.am: Install cpygetdata.h if appropriate.
+	* configure.ac: Check for PyCapsule and enable pygetdata C API if found.
+
 2016-04-28   D. V. Wiebe <getdata@ketiltrout.net> svn:1063
 	Python3 and PyUnicode support:
 

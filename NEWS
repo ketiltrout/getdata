@@ -13,7 +13,7 @@ New in version 0.9.3a:
     also affected parser metadata sent to a registered parser callback.
 
   * BUG FIX: On platforms where char is signed, the library no longer
-    rejects field names with bytes having the top bit set.
+    rejects field names containing bytes with the top bit set.
 
   Bindings Changes:
 

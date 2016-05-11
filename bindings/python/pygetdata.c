@@ -1000,7 +1000,10 @@ GDPY_MODINITFUNC
   };
 #endif
 
-  dtracevoid();
+#ifdef PYGETDATA_CAPI
+  PyObject *capi;
+  static void *gdpy_api[PyDirfile_API_length];
+#endif
 
   if (PyType_Ready(&gdpy_dirfile) < 0)
     GDPY_MODINITFAILURE;
@@ -1081,6 +1084,16 @@ GDPY_MODINITFUNC
           gdpy_exceptions[gdpy_dead_exceptions[i].e]);
     }
 
-  dreturn("%p", gdpy_mod);
+  /* Create the CAPI Capsule, if we can */
+#ifdef PYGETDATA_CAPI
+  gdpy_api[PyDirfile_Type_NUM] = &gdpy_dirfile;
+  gdpy_api[PyDirfile_DIRFILE_NUM] = &gdpy_dirfile_dirfile;
+
+  capi = PyCapsule_New(gdpy_api, PYDIRFILE_CAPSULENAME, NULL);
+  
+  if (capi)
+    PyModule_AddObject(gdpy_mod, "__CAPI", capi);
+#endif
+
   GDPY_MODINITSUCCESS;
 }

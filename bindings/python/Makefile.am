@@ -1,4 +1,4 @@
-# Copyright (C) 2009, 2013, 2014 D. V. Wiebe
+# Copyright (C) 2009, 2013, 2014, 2016 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -22,11 +22,16 @@ AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS=test
 
-nodist_python_SCRIPTS = pygetdata${PYTHON_OBJECT_SUFFIX}
+if MAKE_PYGETDATA_CAPI
+CPYGETDATA_H=cpygetdata.h
+endif
+
+nodist_python_SCRIPTS = pygetdata${PYTHON_OBJECT_SUFFIX} ${CPYGETDATA_H}
 
 BUILT_SOURCES = pyconstants.c
 
-EXTRA_DIST = pydirfile.c pygetdata.c pyentry.c pygetdata.h pyfragment.c
+EXTRA_DIST = pydirfile.c pygetdata.c pyentry.c pygetdata.h pyfragment.c \
+						 cpygetdata.h
 
 distutils_path=build/lib.${PYTHON_PLATFORM}-${PYTHON_VERSION}
 pygetdata${PYTHON_OBJECT_SUFFIX}: ${distutils_path}/pygetdata${PYTHON_OBJECT_SUFFIX}

@@ -43,6 +43,12 @@
 #define GDPY_FLOAT           0x20
 #define GDPY_PYCOMPLEX       0x40
 
+#if HAVE_DECL_PYCAPSULE_CHECKEXACT
+#define PYGETDATA_CAPI
+#define PYGETDATA_MODULE
+#include "cpygetdata.h"
+#endif
+
 #define GDPY_INT_AS_LONG        (GDPY_INT       | GDPY_SIGNED)
 #define GDPY_LONG_AS_ULL        (GDPY_LONG      | GDPY_UNSIGNED)
 #define GDPY_LONG_AS_SLL        (GDPY_LONG      | GDPY_SIGNED)
@@ -191,6 +197,11 @@ union gdpy_quadruple_value {
 extern char *gdpy_path_from_pyobj_(PyObject*, int);
 #define gdpy_path_from_pyobj(o,c,d) gdpy_path_from_pyobj_(o,d)
 #define gdpyobj_from_path PyUnicode_DecodeFSDefault
+#endif
+
+/* Declarations for the CAPI */
+#ifdef PYGETDATA_CAPI
+extern DIRFILE *gdpy_dirfile_dirfile(struct gdpy_dirfile_t *);
 #endif
 
 extern void gdpy_copy_global_charenc(char*);
