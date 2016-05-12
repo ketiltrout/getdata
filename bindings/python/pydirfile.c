@@ -19,6 +19,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #define NO_IMPORT_ARRAY
+#define GDPY_INCLUDE_NUMPY
 #include "pygd_intern.h"
 
 /* Create an array of strings from a NULL-terminated string list */
@@ -65,7 +66,10 @@ int gdpy_dirfile_raise(struct gdpy_dirfile_t *self)
 {
   dtrace("%p", self);
 
-  GDPY_CHECK_ERROR(self->D, -1, self->char_enc);
+  if (gdpy_report_error(self->D, self->char_enc)) {
+    dreturn("%i", -1);
+    return -1;
+  }
 
   dreturn("%i", 0);
   return 0;
@@ -134,9 +138,10 @@ static int gdpy_callback_func(gd_parser_data_t *pdata, void *extra)
             r = GD_SYNTAX_ABORT;
           }
 
+          /* new_string will be free'd by GetData */
           new_string = gdpy_string_from_pyobj(PyTuple_GetItem(result, 1),
               self->char_enc,
-              "Element two of tuple returned from callback must be string", 0);
+              "Element two of tuple returned from callback must be string");
 
           if (new_string == NULL) {
             self->callback_exception = 1;
@@ -146,7 +151,8 @@ static int gdpy_callback_func(gd_parser_data_t *pdata, void *extra)
           pdata->line = new_string;
       }
     } else if (gdpy_encobj_check(result) || PyUnicode_Check(result)) {
-      new_string = gdpy_string_from_pyobj(result, self->char_enc, NULL, 0);
+      /* new_string will be free'd by GetData */
+      new_string = gdpy_string_from_pyobj(result, self->char_enc, NULL);
 
       if (new_string == NULL) {
         self->callback_exception = 1;
@@ -197,7 +203,7 @@ static PyObject *gdpy_dirfile_create(PyTypeObject *type, PyObject *args,
     self->verbose_prefix = NULL;
     self->callback = NULL;
     self->callback_data = NULL;
-    gdpy_copy_global_charenc(self->char_enc);
+    self->char_enc = gdpy_copy_global_charenc();
   }
 
   dreturn("%p", self);
@@ -214,6 +220,7 @@ static int gdpy_dirfile_init(struct gdpy_dirfile_t *self, PyObject *args,
     "character_encoding", NULL};
   PyObject *name = NULL;
   unsigned long flags = GD_RDONLY;
+  char *dirfilename;
 
   dtrace("%p, %p, %p", self, args, keys);
 
@@ -263,9 +270,17 @@ static int gdpy_dirfile_init(struct gdpy_dirfile_t *self, PyObject *args,
   self->callback_data = pycallback_data;
   self->callback_exception = 0;
 
-  self->D = gd_cbopen(gdpy_path_from_pyobj(name, self->char_enc, 0),
-      (unsigned int)flags, (pycallback == NULL) ? NULL : gdpy_callback_func,
-      self);
+  dirfilename = gdpy_path_from_pyobj(name, self->char_enc);
+
+  if (dirfilename == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  self->D = gd_cbopen(dirfilename, (unsigned int)flags,
+      (pycallback == NULL) ? NULL : gdpy_callback_func, self);
+
+  free(dirfilename);
 
   if (self->callback_exception) {
     dreturn("%i", -1);
@@ -1856,12 +1871,15 @@ static PyObject *gdpy_dirfile_getreference(struct gdpy_dirfile_t *self,
 static int gdpy_dirfile_setreference(struct gdpy_dirfile_t *self,
     PyObject *value, void *closure)
 {
-  const char *ref;
+  char *ref = NULL;
 
   dtrace("%p, %p, %p", self, value, closure);
 
-  ref = gdpy_string_from_pyobj(value, self->char_enc,
-      "reference field must be string", 0);
+  if (value == NULL)
+    PyErr_SetString(PyExc_TypeError, "deletion of reference is not supported");
+  else
+    ref = gdpy_string_from_pyobj(value, self->char_enc,
+        "reference field must be string");
 
   /* TypeError already raised on error */
   if (ref == NULL) {
@@ -1870,6 +1888,7 @@ static int gdpy_dirfile_setreference(struct gdpy_dirfile_t *self,
   }
 
   gd_reference(self->D, ref);
+  free(ref);
 
   GDPY_CHECK_ERROR(self->D, -1, self->char_enc);
 
@@ -2475,11 +2494,14 @@ static PyObject *gdpy_dirfile_getstandards(struct gdpy_dirfile_t *self,
 static int gdpy_dirfile_setstandards(struct gdpy_dirfile_t *self,
     PyObject *value, void *closure)
 {
-  int vers;
+  int vers = 0;
 
   dtrace("%p, %p, %p", self, value, closure);
 
-  vers = (int)gdpy_long_from_pyobj(value);
+  if (value == NULL)
+    PyErr_SetString(PyExc_TypeError, "deletion of standards is not supported");
+  else
+    vers = (int)gdpy_long_from_pyobj(value);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -2843,11 +2865,12 @@ static PyObject *gdpy_dirfile_getflags(struct gdpy_dirfile_t *self,
 static int gdpy_dirfile_setflags(struct gdpy_dirfile_t *self,
     PyObject *value, void *closure)
 {
-  unsigned long new_flags;
+  unsigned long new_flags = 0;
 
   dtrace("%p, %p, %p", self, value, closure);
 
-  new_flags = gdpy_ulong_from_pyobj(value);
+  if (value)
+    new_flags = gdpy_ulong_from_pyobj(value);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -2886,11 +2909,11 @@ static int gdpy_dirfile_setverboseprefix(struct gdpy_dirfile_t *self,
   dtrace("%p, %p, %p", self, value, closure);
 
   free(self->verbose_prefix);
-  if (value == Py_None)
+  if (value == NULL || value == Py_None)
     self->verbose_prefix = NULL;
   else
     self->verbose_prefix = gdpy_string_from_pyobj(value, self->char_enc,
-        "prefix must be string", 1);
+        "prefix must be string");
 
   gd_verbose_prefix(self->D, self->verbose_prefix);
 
@@ -2915,11 +2938,14 @@ static PyObject *gdpy_dirfile_getmplexlookback(struct gdpy_dirfile_t *self,
 static int gdpy_dirfile_setmplexlookback(struct gdpy_dirfile_t *self,
     PyObject *value, void *closure)
 {
-  int lookback;
+  int lookback = 0;
 
   dtrace("%p, %p, %p", self, value, closure);
 
-  lookback = (int)gdpy_long_from_pyobj(value);
+  if (value == NULL)
+    PyErr_SetString(PyExc_TypeError, "deletion of lookback is not supported");
+  else
+    lookback = (int)gdpy_long_from_pyobj(value);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -3058,10 +3084,10 @@ static PyGetSetDef gdpy_dirfile_getset[] = {
       "and metadata in Python.  The initial value of this attribute is\n"
       "copied from the value of the global pygetdata.character_encoding\n"
       "at the time that the dirfile object is created, if the global value\n"
-      "is valid.  If the global pygetdata.character_encoding is invalid, the\n"
-      "initial value of this attribute is simply None.  Subsequent changes\n"
-      "affect only this object.  See the CHARACTER STRINGS section in the\n"
-      "pygetdata module documentation for further details.",
+      "is valid.  If the global pygetdata.character_encoding is invalid,\n"
+      "the initial value of this attribute is simply None.  Subsequent\n"
+      "changes affect only this object.  See the CHARACTER STRINGS section\n"
+      "in the pygetdata module documentation for further details.",
     NULL },
   { "error", (getter)gdpy_dirfile_geterror, NULL,
     "The numerical error code encountered by the last call to the GetData\n"
@@ -3094,9 +3120,10 @@ static PyGetSetDef gdpy_dirfile_getset[] = {
     "The number of frames in the dirfile.  See gd_nframes(3).", NULL },
   { "reference", (getter)gdpy_dirfile_getreference,
     (setter)gdpy_dirfile_setreference,
-    "The reference field for the dirfile, which may be set to any existing\n"
-      "RAW field.  If no RAW fields are defined in the dirfile, this will\n"
-      "be None.  See gd_reference(3).",
+    "The reference field for the dirfile, which may be set to any\n"
+      "existing RAW field.  If no RAW fields are defined in the dirfile,\n"
+      /*--- handy ruler: closing quote as indicated (or earlier)---------\n" */
+      "this will be None.  See gd_reference(3).",
     NULL },
   { "standards", (getter)gdpy_dirfile_getstandards,
     (setter)gdpy_dirfile_setstandards,
@@ -3643,9 +3670,10 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   },
   {"naliases", (PyCFunction)gdpy_dirfile_naliases, METH_VARARGS | METH_KEYWORDS,
     "naliases(field_code)\n\n"
-      "This function returns the number of aliases defined for the specified\n"
-      "field.  If field_code is valid, this will be at least one.  See\n"
-      "gd_naliases(3)."
+      /*--- handy ruler: closing quote as indicated (or earlier)---------\n" */
+      "This function returns the number of aliases defined for the\n"
+      "specified field.  If field_code is valid, this will be at least\n"
+      "one.  See gd_naliases(3)."
   },
   {"alias_target", (PyCFunction)gdpy_dirfile_aliastarget,
     METH_VARARGS | METH_KEYWORDS,

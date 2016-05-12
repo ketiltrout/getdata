@@ -1,6 +1,6 @@
 .\" gd_verbose_prefix.3.  The gd_verbose_prefix man page.
 .\"
-.\" Copyright (C) 2012 D. V. Wiebe
+.\" Copyright (C) 2012, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_verbose_prefix 3 "1 April 2012" "Version 0.8.0" "GETDATA"
+.TH gd_verbose_prefix 3 "12 May 2016" "Version 0.9.3" "GETDATA"
 .SH NAME
 gd_verbose_prefix \(em set the prefix on error messages printed by GetData
 .SH SYNOPSIS
@@ -47,9 +47,8 @@ is set, when the library encounters an error, it prints the supplied prefix (if
 any), followed immediately by the error message (which is the message returned
 by
 .BR gd_error_string (3)),
-followed by a newline.  All output goes to the standard error I/O stream
-.RB ( stderr (3))
-of the caller.
+followed by a newline.  All output goes to the caller's standard error
+.RB ( stderr (3)).
 
 The 
 .I dirfile
@@ -59,14 +58,11 @@ argument must point to a valid DIRFILE object previously created by a call to
 .SH RETURN VALUE
 Upon successful completion,
 .BR gd_verbose_prefix ()
-returns the zero.  On error, it returns -1 and sets the dirfile error
+returns zero.  On error, it returns -1 and sets the dirfile error
 to a non-zero error value.  Possible error values are:
 .TP
 .B GD_E_ALLOC
 The library was unable to allocate memory.
-.TP
-.B GD_E_BAD_DIRFILE
-The supplied dirfile was invalid.
 .PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).

@@ -170,7 +170,7 @@ fi
 AC_MSG_RESULT([$PYTHON_LDVERSION])
 
 dnl calculate Python CPPFLAGS
-AC_MSG_CHECKING([Python includes])
+AC_MSG_CHECKING([Python CPPFLAGS])
 python_prefix=`$PYTHON -c "import sys; print (sys.prefix)"`
 python_exec_prefix=`$PYTHON -c "import sys; print (sys.exec_prefix)"`
 PYTHON_CPPFLAGS="-I${python_prefix}/include/python${PYTHON_LDVERSION}"
@@ -178,6 +178,12 @@ if test "x${python_prefix}" != "x${python_exec_prefix}"; then
   PYTHON_CPPFLAGS="${PYTHON_CPPFLAGS} -I${python_exec_prefix}/include/python${PYTHON_LDVERSION}"
 fi
 AC_MSG_RESULT([$PYTHON_CPPFLAGS])
+
+dnl calculate Python LDFLAGS -- only needed for these tests
+AC_MSG_CHECKING([Python LDFLAGS])
+GD_PYTHON_CONFIGVAR([PYTHON_LIBDIR], [LIBDIR])
+PYTHON_LDFLAGS="-L${PYTHON_LIBDIR} -lpython${PYTHON_LDVERSION}"
+AC_MSG_RESULT([$PYTHON_LDFLAGS])
 
 dnl figure out the platform name
 AC_MSG_CHECKING([Python platform name])

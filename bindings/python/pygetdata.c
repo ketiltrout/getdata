@@ -18,48 +18,56 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#define GDPY_INCLUDE_NUMPY
 #include "pygd_intern.h"
 
 static PyObject *gdpy_mod = NULL;
 
-static const char *gdpy_exception_list[GD_N_ERROR_CODES] = {
-  NULL,
-  NULL, /* 1 */
-  "Format",
-  NULL, /* 3 */
-  "Creation",
-  "BadCode",
-  "BadType",
-  "IO",
-  NULL, /* 8 */
-  "Internal",
-  "Alloc",
-  "Range",
-  "LUT",
-  "RecurseLevel",
-  "BadDirfile",
-  "BadFieldType",
-  "AccessMode",
-  "Unsupported",
-  "UnknownEncoding",
-  "BadEntry",
-  "Duplicate",
-  "Dimension",
-  "BadIndex",
-  "BadScalar",
-  "BadReference",
-  "Protected",
-  "Deletion",
-  "Argument",
-  "Callback",
-  "Exists",
-  "UncleanDatabase",
-  "Domain",
-  NULL, /* 32 */
-  NULL, /* 33 */
-  NULL, /* 34 */
-  "Bounds",
-  "LineTooLong"
+static struct {
+  char *name;
+  char *doc;
+} gdpy_exception_list[GD_N_ERROR_CODES] = {
+  { NULL, NULL },
+  { NULL, NULL }, /* 1 */
+  { "Format", "Syntax error in Dirfile metadata (GD_E_FORMAT)." },
+  { NULL, NULL }, /* 3 */
+  { "Creation", "Unable to create a Dirfile. (GD_E_CREAT)." },
+  { "BadCode", "Bad field code. (GD_E_BAD_CODE)." },
+  { "BadType", "Bad data type. (GD_E_BAD_TYPE)." },
+  { "IO", "I/O error encountered. (GD_E_IO)." },
+  { NULL, NULL }, /* 8 */
+  { "Internal", "Internal library error (GD_E_INTERNAL_ERROR).\nPlease report "
+    "to <" PACKAGE_BUGREPORT ">" },
+  { NULL, NULL }, /* 10 -- GD_E_ALLOC.  Reported via PyErr_NoMemory() */
+  { "Range", "Invalid frame or sample number (GD_E_RANGE)." },
+  { "LUT", "Malformed LINTERP table file (GD_E_LUT)." },
+  { "RecurseLevel", "Recursion too deep (GD_E_RECURSE_LEVEL)." },
+  { "BadDirfile", "Dirfile is invalid (GD_E_BAD_DIRFILE)." },
+  { "BadFieldType", "Bad field type (GD_E_BAD_FIELD_TYPE)." },
+  { "AccessMode", "Write attempt on read-only Dirfile (GD_E_ACCMODE)." },
+  { "Unsupported",
+    "Operation not supported by current encoding scheme (GD_E_UNSUPPORTED)." },
+  { "UnknownEncoding", "Unknown encoding scheme (GD_E_UNKNOWN_ENCODING)." },
+  { "BadEntry", "Invalid entry metadata (GD_E_BAD_ENTRY)." },
+  { "Duplicate", "Duplicate field name (GD_E_DUPLICATE)." },
+  { "Dimension",
+    "Scalar field found where vector field expected. (GD_E_DIMENSION)." },
+  { "BadIndex", "Invalid Fragment index (GD_E_BAD_INDEX)." },
+  { "BadScalar", "Scalar field code not found (GD_E_BAD_SCALAR)." },
+  { "BadReference", "Bad reference field (GD_E_BAD_REFERENCE)." },
+  { "Protected", "Operation prohibited by protection level (GD_E_PROTECTED)." },
+  { "Deletion", "Error deleting field (GD_E_DELETE)." },
+  { "Argument", "Bad argument passed to function (GD_E_BAD_ARGUMENT)." },
+  { "Callback", "Bad return from parser callback (GD_E_CALLBACK)." },
+  { "Exists", "Dirfile already exists (GD_E_EXISTS)." },
+  { "UncleanDatabase",
+    "Error updating Dirfile: database is unclean (GD_E_UNCLEAN_DB)." },
+  { "Domain", "Improper domain (GD_E_DOMAIN)." },
+  { NULL, NULL }, /* 32 */
+  { NULL, NULL }, /* 33 */
+  { NULL, NULL }, /* 34 */
+  { "Bounds", "CARRAY access out-of-bounds (GD_E_BOUNDS)." },
+  { "LineTooLong", "Metadata line is too long (GD_E_LINE_TOO_LONG)." }
 };
 PyObject *gdpy_exceptions[GD_N_ERROR_CODES];
 
@@ -250,15 +258,18 @@ long gdpy_long_from_pyobj(PyObject *pyobj)
   return v;
 }
 
-/* Convert a Python string-like object to a C string */
+/* Convert a Python string-like object to a C string, returns a malloc'd
+ * string in all cases */
 char *gdpy_string_from_pyobj(PyObject *pyobj, const char *char_enc,
-    const char *err_string, int dup)
+    const char *err_string)
 {
   char *s = NULL;
+  int del_pyobj = 0;
 
-  dtrace("%p, \"%s\", %i", pyobj, char_enc, dup);
+  dtrace("%p, \"%s\"", pyobj, char_enc);
 
   if (PyUnicode_Check(pyobj)) {
+    del_pyobj = 1;
     /* Encode string */
     if (char_enc == NULL)
       pyobj = PyUnicode_AsUTF8String(pyobj);
@@ -274,13 +285,16 @@ char *gdpy_string_from_pyobj(PyObject *pyobj, const char *char_enc,
   /* now convert to python object */
   s = gdpy_string_from_encobj(pyobj);
 
-  /* strdup, if requested */
-  if (s && dup) {
+  /* strdup */
+  if (s) {
     s = strdup(s);
 
     if (s == NULL)
       PyErr_NoMemory();
   }
+
+  if (del_pyobj)
+    Py_DECREF(pyobj);
 
   dreturn("\"%s\"", s);
   return s;
@@ -628,6 +642,30 @@ static PyObject *gdpy_maybe_complex(double re, double im, int force)
   return pyobj;
 }
 
+int gdpy_report_error(DIRFILE *D, char *char_enc)
+{
+  int e;
+  
+  dtrace("%p, \"%s\"", D, char_enc);
+
+  e = gd_error(D);
+
+  if (e == GD_E_ALLOC) {
+    PyErr_NoMemory();
+  } else if (e) {
+    char *buffer = gd_error_string(D, NULL, 0);
+    if (buffer) {
+      PyErr_SetObject(gdpy_exceptions[e], gdpyobj_from_estring(buffer,
+            char_enc));
+      free(buffer); 
+    } else
+      PyErr_NoMemory(); /* Errors with errors */
+  }
+
+  dreturn("%i", e);
+  return e;
+}
+
 PyObject *gdpy_convert_to_pylist(const void *data, gd_type_t type, size_t ns)
 {
   size_t i;
@@ -783,12 +821,12 @@ int gdpy_parse_charenc(char** char_enc, PyObject *value)
 {
   dtrace("%p, %p", char_enc, value);
 
-  if (value == Py_None) {
+  if (value == NULL || value == Py_None) {
     free(*char_enc);
     *char_enc = NULL;
   } else {
     char *new_enc = gdpy_string_from_pyobj(value, NULL,
-        "character_encoding must be string or None", 1);
+        "character_encoding must be string or None");
   
     if (PyErr_Occurred()) {
       dreturn("%i", -1);
@@ -823,15 +861,15 @@ PyObject *gdpy_charenc_obj(const char *char_enc)
   return pyobj;
 }
 
-/* Copy the current value of the global pygetdata.character_encoding into
- * the indicated gdpy_charenc_t struct, if it's a valid value.  Otherwise,
- * NULLify it (i.e. set the corresponding character_encoding attribute to None)
+/* Return a copy of the current value of the global
+ * pygetdata.character_encoding, or NULL.
  */
-void gdpy_copy_global_charenc(char *char_enc)
+char *gdpy_copy_global_charenc(void)
 {
   PyObject *global;
+  char *char_enc;
 
-  dtrace("%p", char_enc);
+  dtracevoid();
 
   global = PyDict_GetItemString(PyModule_GetDict(gdpy_mod),
       "character_encoding");
@@ -839,9 +877,10 @@ void gdpy_copy_global_charenc(char *char_enc)
   if (global == NULL)
     char_enc = NULL;
   else
-    char_enc = gdpy_string_from_pyobj(global, NULL, NULL, 0);
+    char_enc = gdpy_string_from_pyobj(global, NULL, NULL);
 
-  dreturnvoid();
+  dreturn("\"%s\"", char_enc);
+  return char_enc;
 }
 
 static PyObject *gdpy_encoding_support(struct gdpy_fragment_t *self,
@@ -906,18 +945,20 @@ static PyMethodDef GetDataMethods[] = {
 "  o entry, encapsulating the C API's gd_entry_t object, and\n" \
 "  o fragment, containing fragment metadata.\n" \
 "\n" \
-"Second, it defines various symbolic constants defined by the C API.  These\n" \
-"symbols are identical to the C API's symbols, except lacking the GD_\n" \
-"prefix.  So, for example, the C API's GD_INT8 is available in these\n" \
+"Second, it defines various symbolic constants defined by the C API.\n" \
+"These symbols are identical to the C API's symbols, except lacking the\n" \
+"GD_ prefix.  So, for example, the C API's GD_INT8 is available in these\n" \
 "bindings as pygetdata.INT8.\n" \
 "\n" \
-"Finally, it defines a number of exceptions corresponding to C API dirfile\n" \
-"nerror codes.  These exceptions have similar names to the C API's error\n" \
-"names, so, for example, pygetdata.BadCodeError corresponds to the C API's\n" \
-"GD_E_BAD_CODE error code.  All these exceptions are derived from a common\n" \
-"pygetdata.DirfileError exception class, itself derived from RuntimeError.\n" \
-"Exceptions are thrown by the bindings in lieu of returning a dirfile error\n" \
-"value.\n" \
+"Finally, it defines a number of exceptions corresponding to C API\n" \
+"dirfile error codes.  These exceptions have similar names to the C API's\n" \
+"names, so, for example, pygetdata.BadCodeError corresponds to the C\n"\
+"API's GD_E_BAD_CODE error code.  Excluding pygetdata.AllocError, which\n"\
+/*---- handy ruler: closing quote as indicated (or earlier)--------------\n" */\
+"is simply an alias for the standard MemoryError, these exceptions are\n"\
+"derived from a common pygetdata.DirfileError exception class, itself\n"\
+"derived from RuntimeError.  Exceptions are thrown by the bindings in\n"\
+"lieu of returning a dirfile error value.\n" \
 "\n" \
 "Where possible, pygetdata will, by default, return vector data as NumPy\n" \
 "arrays.  If pygetdata has been built with NumPy support,\n" \
@@ -1057,16 +1098,18 @@ GDPY_MODINITFUNC
   PyModule_AddIntConstant(gdpy_mod, "__numpy_supported__", 1);
 
   /* add exceptions */
-  dirfileerror = PyErr_NewException("pygetdata.DirfileError",
+  dirfileerror = PyErr_NewExceptionWithDoc("pygetdata.DirfileError",
+      "The base exception for all Dirfile-specific exceptions.",
       PyExc_RuntimeError, NULL);
   Py_INCREF(dirfileerror);
   PyModule_AddObject(gdpy_mod, "DirfileError", dirfileerror);
 
   for (i = 1; i < GD_N_ERROR_CODES; ++i) {
-    if (gdpy_exception_list[i]) {
+    if (gdpy_exception_list[i].name) {
       char name[40];
-      sprintf(name, "pygetdata.%sError", gdpy_exception_list[i]);
-      gdpy_exceptions[i] = PyErr_NewException(name, dirfileerror, NULL);
+      sprintf(name, "pygetdata.%sError", gdpy_exception_list[i].name);
+      gdpy_exceptions[i] = PyErr_NewExceptionWithDoc(name,
+          gdpy_exception_list[i].doc, dirfileerror, NULL);
       Py_INCREF(gdpy_exceptions[i]);
       PyModule_AddObject(gdpy_mod, name + 10, gdpy_exceptions[i]);
     } else
@@ -1083,6 +1126,12 @@ GDPY_MODINITFUNC
       PyDict_SetItemString(mdict, name,
           gdpy_exceptions[gdpy_dead_exceptions[i].e]);
     }
+
+  /* Also add an alias for AllocError */
+  if (mdict) {
+    Py_INCREF(PyExc_MemoryError);
+    PyDict_SetItemString(mdict, "AllocError", PyExc_MemoryError);
+  }
 
   /* Create the CAPI Capsule, if we can */
 #ifdef PYGETDATA_CAPI

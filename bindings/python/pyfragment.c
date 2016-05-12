@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#define NO_IMPORT_ARRAY
 #include "pygd_intern.h"
 
 /* Fragment */
@@ -282,11 +281,12 @@ static PyObject *gdpy_fragment_getprotection(struct gdpy_fragment_t *self,
 static int gdpy_fragment_setprotection(struct gdpy_fragment_t *self,
     PyObject *value, void *closure)
 {
-  int p;
+  int p = GD_PROTECT_NONE;
 
   dtrace("%p, %p, %p", self, value, closure);
 
-  p = (int)gdpy_long_from_pyobj(value);
+  if (value)
+    p = (int)gdpy_long_from_pyobj(value);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -330,12 +330,26 @@ static PyObject *gdpy_fragment_getprefix(struct gdpy_fragment_t *self,
 static int gdpy_fragment_setprefix(struct gdpy_fragment_t *self,
     PyObject *value, void *closure)
 {
-  const char *prefix;
+  char *prefix;
 
   dtrace("%p, %p, %p", self, value, closure);
 
-  prefix = gdpy_string_from_pyobj(value, self->dirfile->char_enc,
-      "prefix must be string", 0);
+  if (value == NULL) {
+    if (self->n == 0) {
+      prefix = strdup("");
+      if (prefix == NULL)
+        PyErr_NoMemory();
+    } else {
+      char *suffix;
+      gd_fragment_affixes(self->dirfile->D, self->n, &prefix, &suffix);
+
+      GDPY_CHECK_ERROR(self->dirfile->D, -1, self->dirfile->char_enc);
+
+      free(suffix);
+    }
+  } else
+    prefix = gdpy_string_from_pyobj(value, self->dirfile->char_enc,
+        "prefix must be string");
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -343,6 +357,8 @@ static int gdpy_fragment_setprefix(struct gdpy_fragment_t *self,
   }
 
   gd_alter_affixes(self->dirfile->D, self->n, prefix, NULL);
+
+  free(prefix);
 
   GDPY_CHECK_ERROR(self->dirfile->D, -1, self->dirfile->char_enc);
 
@@ -379,12 +395,26 @@ static PyObject *gdpy_fragment_getsuffix(struct gdpy_fragment_t *self,
 static int gdpy_fragment_setsuffix(struct gdpy_fragment_t *self,
     PyObject *value, void *closure)
 {
-  const char *suffix;
+  char *suffix;
 
   dtrace("%p, %p, %p", self, value, closure);
 
-  suffix = gdpy_string_from_pyobj(value, self->dirfile->char_enc,
-      "suffix must be string", 0);
+  if (value == NULL) {
+    if (self->n == 0) {
+      suffix = strdup("");
+      if (suffix == NULL)
+        PyErr_NoMemory();
+    } else {
+      char *prefix;
+      gd_fragment_affixes(self->dirfile->D, self->n, &prefix, &suffix);
+
+      GDPY_CHECK_ERROR(self->dirfile->D, -1, self->dirfile->char_enc);
+
+      free(prefix);
+    }
+  } else
+    suffix = gdpy_string_from_pyobj(value, self->dirfile->char_enc,
+        "suffix must be string");
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -392,6 +422,8 @@ static int gdpy_fragment_setsuffix(struct gdpy_fragment_t *self,
   }
 
   gd_alter_affixes(self->dirfile->D, self->n, NULL, suffix);
+
+  free(suffix);
 
   GDPY_CHECK_ERROR(self->dirfile->D, -1, self->dirfile->char_enc);
 

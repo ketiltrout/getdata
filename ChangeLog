@@ -1,3 +1,56 @@
+2016-05-12   D. V. Wiebe <getdata@ketiltrout.net> svn:1073
+	* bindings/python/pygd_intern.h: Don't include numpy/arrayobject.h unless
+	GDPY_INCLUDE_NUMPY id defined.
+	* bindings/python/pygetdata.c bindings/python/pydirfile.c: Define
+	GDPY_INCLUDE_NUMPY.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_setreference
+	gdpy_dirfile_setstandards gdpy_dirfile_setmplexlookback)
+	bindings/python/pyentry.c (gdpy_entry_setname gdpy_entry_setfragment
+	gdpy_entry_setinfields gdpy_entry_setdatatype gdpy_entry_setarraylen
+	gdpy_entry_setnfields gdpy_entry_setm gdpy_entry_setb gdpy_entry_settable
+	gdpy_entry_setdividend gdpy_entry_seta gdpy_entry_setpolyord
+	gdpy_entry_setparms gdpy_entry_setwindop): Prohibit deletion.
+	* bindings/python/pydirfile.c (gdpy_dirfile_getflags): Zero flags on delete.
+	* bindings/python/pydirfile.c (gdpy_dirfile_setverboseprefix): Set prefix to
+	NULL on delete.
+	* bindings/python/pyentry.c (gdpy_entry_getnumbits): Set numbits to 1 on
+	delete.
+	* bindings/python/pyentry.c (gdpy_entry_setperiod): Set period to 0 on
+	delete.
+	* bindings/python/pyfragment.c (gdpy_fragment_setprotection): Set to
+	GD_PROTECT_NONE on delete.
+	* bindings/python/pyfragment.c (gdpy_fragment_setprefix
+	gdpy_fragment_setsuffix): Set to parent's affix on delete.
+	* bindings/python/pyentry.c (gdpy_set_scalar_from_pyobj): Handle pyobj =
+	NULL (i.e. attribute deletion).
+	* bindings/python/pygetdata.c (gdpy_parse_charenc): Handle value == NULL. 
+
+	* configure.ac: Look for PyErr_NewExceptionWithDoc.
+	* m4/python.m4 (GD_PYTHON): Compute PYTHON_LDFLAGS for configure's use.
+	* bindings/python/pygd_intern.h: Handle HAVE_PYERR_NEWEXCEPTIONWITHDOC.
+	* bindings/python/pygetdata.c (gdpy_exception_list GDPY_MODINITFUNC): Add
+	docstrings to Exception objects.
+
+	* bindings/python/pygetdata.c (gdpy_copy_global_charenc): Take no arguments;
+	return a strdup'd string or NULL.
+
+	* bindings/python/pyentry.c (gdpy_entry_setthreshold): Call
+	gdpy_set_scalar_from_pyobj to properly handle scalar field codes.
+
+	* bindings/python/pygetdata.c (gdpy_string_from_pyobj): delete dup
+	parameter: now we always strdup the string.  Also clean up the encoded pyobj
+	when appropriate.
+
+	* bindings/python/pygetdata.c (gdpy_report_error): Added.  Handle GD_E_ALLOC
+	errors and gd_error_string() failures with PyErr_NoMemory().
+	* bindings/python/pygetdata.c (GDPY_MODINITFUNC): Make pygetdata.AllocError
+	an alias of MemoryError
+	* bindings/python/pygd_intern.h (GDPY_REPORT_ERROR): Deleted.
+	* bindings/python/pygd_intern.h (GDPY_CHECK_ERROR2): Call gdpy_report_error.
+	* bindings/python/pydirfile.c (gdpy_dirfile_raise): Call gdpy_report_error
+	directly.
+
 2016-05-11   D. V. Wiebe <getdata@ketiltrout.net> svn:1072
 	* bindings/python/pygetdata.h: Renamed from cpygetdata.h
 

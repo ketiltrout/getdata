@@ -2,6 +2,10 @@ New in version 0.9.3a:
 
   API Changes:
 
+  * gd_verbose_prefix() can now be used on invalid dirfiles.  Previously,
+    this function would return GD_E_BAD_DIRFILE when passed an invalid
+    DIRFILE pointer.
+
   * BUG FIX: When trying to access a LINTERP table file in a non-existent
     directory, GetData now reports the correct error (No such file or
     directory).  Reported by Johanna Nagy.
@@ -63,6 +67,21 @@ New in version 0.9.3a:
   
   * PYTHON BUG FIX: Entry objects returned by dirfile.entry() now properly
     represent scalar field codes.
+
+  * PYTHON BUG FIX: An out-of-memory condition encountered by the underlying
+    C library is now reported using the standard MemoryError exception.
+    Previously, the bindings would attempt to instantiate a new
+    pygetdata.AllocError exception when this happened, which wouldn't work
+    if no memory was available.  (The Python interpreter pre-allocates an
+    instance of MemoryError to deal with this situation.)  For backwards
+    compatibility, pygetdata.AllocError is now an alias for MemoryError.
+
+  * PYTHON BUG FIX: a scalar field code string can now be assigned to the
+    threshold attribute of WINDOW entries.
+
+  * PYTHON BUG FIX: Attempting to delete various attributes from
+    pygetdata objects now succeeds or else raises an exception, instead of
+    crashing.
 
 |=========================================================================|
 

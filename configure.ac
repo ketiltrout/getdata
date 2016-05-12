@@ -944,15 +944,11 @@ if test "x$make_pybindings" = "xyes"; then
   if test "x$have_python" = "xno"; then
     make_pybindings="no"
   else
-    dnl Check for PyCapsule
-    saved_CPPFLAGS=${CPPFLAGS}
-    CPPFLAGS="${PYTHON_CPPFLAGS} ${CPPFLAGS}"
-    AC_CHECK_DECLS([PyCapsule_CheckExact],[have_pycapsule=yes],
-                   [have_pycapsule=no],
-                   [
-#include <Python.h>
-])
-    CPPFLAGS="${saved_CPPFLAGSS}"
+    dnl Check for optional components
+    saved_LDFLAGS=${LDFLAGS}
+    LDFLAGS="${PYTHON_LDFLAGS} ${LDFLAGS}"
+    AC_CHECK_FUNCS([PyCapsule_New PyErr_NewExceptionWithDoc])
+    LDFLAGS=${saved_LDFLAGS}
 
     AC_MSG_CHECKING([for NumPy])
     cat > conftest.py << EOF
@@ -968,7 +964,7 @@ EOF
     AC_MSG_RESULT([$have_numpy])
   fi
   if test "x$have_numpy" = "xyes"; then
-    AC_MSG_CHECKING([NumPy includes])
+    AC_MSG_CHECKING([NumPy CPPFLAGS])
     NUMPY_CPPFLAGS=-I`$PYTHON -c "import numpy; print (numpy.get_include())"`
     AC_MSG_RESULT([$NUMPY_CPPFLAGS])
 
@@ -1144,7 +1140,8 @@ AM_CONDITIONAL(MAKE_CXXBINDINGS, [test "x$make_cxxbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_F77BINDINGS, [test "x$make_f77bindings" != "xno"])
 AM_CONDITIONAL(MAKE_F95BINDINGS, [test "x$make_f95bindings" = "xyes"])
 AM_CONDITIONAL(MAKE_PYBINDINGS, [test "x$make_pybindings" = "xyes"])
-AM_CONDITIONAL(MAKE_PYGETDATA_CAPI, [test "x$have_pycapsule" = "xyes"])
+AM_CONDITIONAL(MAKE_PYGETDATA_CAPI,
+               [test "x$ac_cv_func_PyCapsule_New" = "xyes"])
 AM_CONDITIONAL(MAKE_IDLBINDINGS, [test "x$make_idlbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_PERLBINDINGS, [test "x$make_perlbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_MATLABBINDINGS, [test "x$make_matlabbindings" = "xyes"])

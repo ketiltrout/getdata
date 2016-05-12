@@ -400,7 +400,7 @@ void Python(void)
 
   printf(
       "/* This code is automatically generated.  "
-      "Changes made here will be lost. */\n#define NO_IMPORT_ARRAY\n"
+      "Changes made here will be lost. */\n"
       "#include \"pygd_intern.h\"\n"
       "const struct gdpy_constant_t gdpy_constant_list[] = {\n");
   

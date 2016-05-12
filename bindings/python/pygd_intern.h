@@ -28,9 +28,11 @@
 
 #include <Python.h>
 
-#ifdef HAVE_NUMPY_ARRAYOBJECT_H
-# define PY_ARRAY_UNIQUE_SYMBOL gdpy_array_api
-# include <numpy/arrayobject.h>
+#ifdef GDPY_INCLUDE_NUMPY
+# ifdef HAVE_NUMPY_ARRAYOBJECT_H
+#  define PY_ARRAY_UNIQUE_SYMBOL gdpy_array_api
+#  include <numpy/arrayobject.h>
+# endif
 #endif
 
 #define GDPY_UNSIGNED        0x00
@@ -43,7 +45,7 @@
 #define GDPY_FLOAT           0x20
 #define GDPY_PYCOMPLEX       0x40
 
-#if HAVE_DECL_PYCAPSULE_CHECKEXACT
+#if HAVE_PYCAPSULE_NEW
 #define PYGETDATA_MODULE
 #include "pygetdata.h"
 #define PYGETDATA_CAPI
@@ -55,6 +57,10 @@
 #define GDPY_LONG_AS_DOUBLE     (GDPY_LONG      | GDPY_IEEE754)
 #define GDPY_FLOAT_AS_DOUBLE    (GDPY_FLOAT     | GDPY_IEEE754)
 #define GDPY_COMPLEX_AS_COMPLEX (GDPY_PYCOMPLEX | GDPY_COMPLEX)
+
+#ifndef HAVE_PYERR_NEWEXCEPTIONWITHDOC
+#define PyErr_NewExceptionWithDoc(a,b,c,d) PyErr_NewException(a,c,d)
+#endif
 
 /* Python3 does away with Int objects */
 #if PY_MAJOR_VERSION < 3
@@ -83,25 +89,12 @@
 
 #define GDPY_CHECK_ERROR2(D,R,E,ce) \
   do { \
-    int e; \
-    if ((e = gd_error(D))) { \
-      GDPY_REPORT_ERROR(D,e,ce); \
+    if (gdpy_report_error(D,ce)) { \
       E; \
       dreturnvoid(); \
       return (R); \
     } \
   } while(0)
-
-#define GDPY_REPORT_ERROR(D,e,ce) \
-  do { \
-    char *buffer = gd_error_string((D), NULL, 0); \
-    if (buffer) { \
-      PyErr_SetObject(gdpy_exceptions[e], gdpyobj_from_estring(buffer, (ce))); \
-      free(buffer); \
-    } else \
-      PyErr_SetString(gdpy_exceptions[e], "Unspecified error"); \
-  } while (0)
-
 
 extern PyObject *gdpy_exceptions[GD_N_ERROR_CODES];
 extern PyTypeObject gdpy_dirfile;
@@ -191,7 +184,7 @@ union gdpy_quadruple_value {
 
 /* Handle filesystem encoding */
 #if PY_MAJOR_VERSION < 3
-#define gdpy_path_from_pyobj(o,c,d) gdpy_string_from_pyobj(o,c,NULL,d)
+#define gdpy_path_from_pyobj(o,c) gdpy_string_from_pyobj(o,c,NULL)
 #define gdpyobj_from_path PyString_FromString
 #else
 extern char *gdpy_path_from_pyobj_(PyObject*, int);
@@ -205,14 +198,15 @@ extern DIRFILE *gdpy_dirfile_dirfile(struct gdpy_dirfile_t *);
 extern int gdpy_dirfile_raise(struct gdpy_dirfile_t *);
 #endif
 
-extern void gdpy_copy_global_charenc(char*);
+extern int gdpy_report_error(DIRFILE*, char*);
+extern char *gdpy_copy_global_charenc(void);
 extern PyObject *gdpyobj_from_string(const char*, const char*);
 extern PyObject *gdpyobj_from_estring(const char*, const char*);
 extern PyObject *gdpy_charenc_obj(const char*);
 extern int gdpy_parse_charenc(char**, PyObject*);
 extern long gdpy_long_from_pyobj(PyObject*);
 extern unsigned long gdpy_ulong_from_pyobj(PyObject*);
-extern char *gdpy_string_from_pyobj(PyObject*, const char*, const char*, int);
+extern char *gdpy_string_from_pyobj(PyObject*, const char*, const char*);
 extern int gdpylist_append(PyObject*, PyObject*);
 extern int gdpy_convert_from_pyobj(PyObject*, union gdpy_quadruple_value*,
     gd_type_t);
