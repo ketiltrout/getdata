@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2014 D. V. Wiebe
+# Copyright (C) 2008-2014, 2016 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -60,7 +60,7 @@ SUBDIRS = . ${F77_SUBDIR} ${CXX_SUBDIR} ${IDL_SUBDIR} ${PY_SUBDIR} \
 
 make_parameters$(EXEEXT): $(make_parameters_SOURCES) \
 				    $(nodist_make_parameters_SOURCES)
-	${BUILDCC} $(DEFS) -I../src -o make_parameters$(EXEEXT) \
+	${BUILDCC} $(DEFS) -I$(top_srcdir)/src -I../src -o make_parameters$(EXEEXT) \
 		$(srcdir)/$(make_parameters_SOURCES)
 
 clean-local:

@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2013, 2015 D. V. Wiebe
+# Copyright (C) 2008-2013, 2015, 2016 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -134,7 +134,7 @@ libgetdata_la_SOURCES = add.c ascii.c ${BZIP2_C} close.c common.c compat.c \
 												mod.c move.c name.c native.c nfields.c nframes.c \
 												open.c parse.c protect.c putdata.c raw.c sie.c \
 												${SLIM_C} spf.c string.c types.c ${ZZIP_C} ${ZZSLIM_C} \
-												${GETDATA_LEGACY_H} internal.h
+												${GETDATA_LEGACY_H} gd_extra_config.h internal.h
 libgetdata_la_LDFLAGS = $(EXPORT_DYNAMIC) -export-symbols-regex '^[^_]' \
 												-version-info \
 												${GETDATA_IFACE_VERSION}:${GETDATA_IMPL_REVISION}:${GETDATA_IFACE_AGE} \

@@ -43,6 +43,7 @@ else
   AC_PATH_PROG([MEX], [mex], [not found])
 fi
 
+dnl TexLive contains a /usr/bin/mex
 if test "x$MEX" != "xnot found"; then
   AC_MSG_CHECKING([if $MEX is a MATLAB mex compiler])
   mex_out=`$MEX 2>&1`

@@ -68,9 +68,9 @@ New in version 0.9.3a:
   * PYTHON BUG FIX: Entry objects returned by dirfile.entry() now properly
     represent scalar field codes.
 
-  * PYTHON BUG FIX: An out-of-memory condition encountered by the underlying
-    C library is now reported using the standard MemoryError exception.
-    Previously, the bindings would attempt to instantiate a new
+  * PYTHON BUG FIX: An out-of-memory condition encountered by the
+    underlying C library is now reported using the standard MemoryError
+    exception.  Previously, the bindings would attempt to instantiate a new
     pygetdata.AllocError exception when this happened, which wouldn't work
     if no memory was available.  (The Python interpreter pre-allocates an
     instance of MemoryError to deal with this situation.)  For backwards
@@ -80,8 +80,8 @@ New in version 0.9.3a:
     threshold attribute of WINDOW entries.
 
   * PYTHON BUG FIX: Attempting to delete various attributes from
-    pygetdata objects now succeeds or else raises an exception, instead of
-    crashing.
+    pygetdata objects now either succeeds or else raises an exception,
+    instead of crashing.
 
 |=========================================================================|
 
