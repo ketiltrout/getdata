@@ -34,7 +34,8 @@ getdata_include_HEADERS = getdata/dirfile.h getdata/entry.h getdata/rawentry.h \
 													getdata/sbitentry.h getdata/polynomentry.h \
 													getdata/fragment.h getdata/divideentry.h \
 													getdata/recipentry.h getdata/carrayentry.h \
-													getdata/windowentry.h getdata/mplexentry.h
+													getdata/windowentry.h getdata/mplexentry.h \
+													getdata/types.h
 
 lib_LTLIBRARIES=libgetdata++.la
 libgetdata___la_SOURCES = dirfile.cpp bitentry.cpp carrayentry.cpp \

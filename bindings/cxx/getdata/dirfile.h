@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2012, 2014 D. V. Wiebe
+// Copyright (C) 2008-2012, 2014, 2016 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -22,24 +22,7 @@
 #ifndef GETDATA_DIRFILE_H
 #define GETDATA_DIRFILE_H
 
-// Enable the explicit 64-bit API (gd_getdata64() &c.)
-#ifndef GD_64BIT_API
-# define GD_64BIT_API
-#endif
-
-// Disable the legacy API since its symbols clash with us.
-#ifndef GD_NO_LEGACY_API
-# define GD_NO_LEGACY_API
-#endif
-
-// Use the C89 API since C++ compilers aren't required to support the
-// C99 _Complex keyword
-#ifndef GD_C89_API
-# define GD_C89_API
-#endif
-
-#include <getdata.h>
-
+#include <getdata/types.h>
 #include <getdata/fragment.h>
 #include <getdata/entry.h>
 #include <getdata/rawentry.h>

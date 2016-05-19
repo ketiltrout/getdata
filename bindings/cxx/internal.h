@@ -21,7 +21,34 @@
 #ifdef HAVE_CONFIG_H
 #include "gd_config.h"
 #endif
+
+/* To avoid including stuff out of tree, we include everything here,
+ * even though getdata/dirfile.h will try to include it again.
+ */
 #undef GETDATA_LEGACY_API
+#define GD_NO_LEGACY_API
+#define GD_C89_API
+#define GD_64BIT_API
+
+#include "getdata/types.h"
+#include "getdata/fragment.h"
+#include "getdata/entry.h"
+#include "getdata/rawentry.h"
+#include "getdata/lincomentry.h"
+#include "getdata/linterpentry.h"
+#include "getdata/bitentry.h"
+#include "getdata/sbitentry.h"
+#include "getdata/phaseentry.h"
+#include "getdata/indexentry.h"
+#include "getdata/polynomentry.h"
+#include "getdata/constentry.h"
+#include "getdata/carrayentry.h"
+#include "getdata/stringentry.h"
+#include "getdata/mplexentry.h"
+#include "getdata/multiplyentry.h"
+#include "getdata/divideentry.h"
+#include "getdata/recipentry.h"
+#include "getdata/windowentry.h"
 #include "getdata/dirfile.h"
 
 #include <cstring>

@@ -1,3 +1,16 @@
+2016-05-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1075
+	* bindings/cxx/getdata/types.h: Added.
+	* bindings/cxx/getdata/dirfile.h: include getdata/types.h instead of
+	getdata.h directly.
+	* bindings/cxx/getdata/entry.h: include getdata/types.h instead of
+	getdata/dirfile.h.  DataType, EntryType, WindOpType moved to
+	getdata/types.h.
+	* bindings/cxx/getdata/fragment.h: include getdata/types.h instead of
+	getdata/dirfile.h.  EncodingScheme moved to getdata/types.h
+
+	* bindings/cxx/internal.h: Include everything explicitly to avoid
+	accidentally including a file outside the source tree instead.
+
 2016-05-12   D. V. Wiebe <getdata@ketiltrout.net> svn:1073
 	* bindings/python/pygd_intern.h: Don't include numpy/arrayobject.h unless
 	GDPY_INCLUDE_NUMPY id defined.

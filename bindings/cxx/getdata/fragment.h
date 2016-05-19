@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2012 D. V. Wiebe
+// Copyright (C) 2008-2012, 2016 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -22,24 +22,9 @@
 #ifndef GETDATA_FRAGMENT_H
 #define GETDATA_FRAGMENT_H
 
-#include <getdata/dirfile.h>
-#include <sys/types.h>
+#include <getdata/types.h>
 
 namespace GetData {
-
-  enum EncodingScheme {
-    AutoEncoding   = GD_AUTO_ENCODED,
-    Bzip2Encoding  = GD_BZIP2_ENCODED,
-    FlacEncoding   = GD_FLAC_ENCODED,
-    GzipEncoding   = GD_GZIP_ENCODED,
-    RawEncoding    = GD_UNENCODED,
-    SieEncoding    = GD_SIE_ENCODED,
-    SlimEncoding   = GD_SLIM_ENCODED,
-    TextEncoding   = GD_TEXT_ENCODED,
-    ZzipEncoding   = GD_ZZIP_ENCODED,
-    ZzslimEncoding = GD_ZZSLIM_ENCODED,
-    UnsupportedEncoding = GD_ENC_UNSUPPORTED
-  };
 
   class Dirfile;
 

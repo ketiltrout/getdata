@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2013, 2015 D. V. Wiebe
+// Copyright (C) 2008-2013, 2015, 2016 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -22,53 +22,12 @@
 #ifndef GETDATA_ENTRY_H
 #define GETDATA_ENTRY_H
 
-#include <getdata/dirfile.h>
+#include <getdata/types.h>
 #include <complex>
 
 namespace GetData {
 
   class Dirfile;
-
-  enum DataType {
-    Null      = GD_NULL,      Unknown    = GD_UNKNOWN,
-    UInt8     = GD_UINT8,     Int8       = GD_INT8,
-    UInt16    = GD_UINT16,    Int16      = GD_INT16,
-    UInt32    = GD_UINT32,    Int32      = GD_INT32,
-    UInt64    = GD_UINT64,    Int64      = GD_INT64,
-    Float32   = GD_FLOAT32,   Float64    = GD_FLOAT64,
-    Complex64 = GD_COMPLEX64, Complex128 = GD_COMPLEX128
-  };
-
-  enum EntryType {
-    NoEntryType       = GD_NO_ENTRY,
-    RawEntryType      = GD_RAW_ENTRY,
-    LincomEntryType   = GD_LINCOM_ENTRY,
-    LinterpEntryType  = GD_LINTERP_ENTRY,
-    BitEntryType      = GD_BIT_ENTRY,
-    MultiplyEntryType = GD_MULTIPLY_ENTRY,
-    PhaseEntryType    = GD_PHASE_ENTRY,
-    SBitEntryType     = GD_SBIT_ENTRY,
-    PolynomEntryType  = GD_POLYNOM_ENTRY,
-    ConstEntryType    = GD_CONST_ENTRY,
-    CarrayEntryType   = GD_CARRAY_ENTRY,
-    StringEntryType   = GD_STRING_ENTRY,
-    IndexEntryType    = GD_INDEX_ENTRY,
-    DivideEntryType   = GD_DIVIDE_ENTRY,
-    RecipEntryType    = GD_RECIP_ENTRY,
-    WindowEntryType   = GD_WINDOW_ENTRY,
-    MplexEntryType    = GD_MPLEX_ENTRY
-  };
-
-  enum WindOpType {
-    WindOpEq = GD_WINDOP_EQ,
-    WindOpNe = GD_WINDOP_NE,
-    WindOpGe = GD_WINDOP_GE,
-    WindOpGt = GD_WINDOP_GT,
-    WindOpLe = GD_WINDOP_LE,
-    WindOpLt = GD_WINDOP_LT,
-    WindOpSet = GD_WINDOP_SET,
-    WindOpClr = GD_WINDOP_CLR
-  };
 
   class Entry {
     friend class Dirfile;
