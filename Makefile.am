@@ -37,13 +37,10 @@ clean-local:
 %.sig: %
 	gpg -abo $@ $<
 
-DISTCHECK_CONFIGURE_FLAGS = --enable-legacy-api --enable-modules \
-														--with-idl-dlm-dir="$$dc_install_base/idl" \
-														--with-perl-dir="$$dc_install_base/perl" \
-														--with-php-dir="$$dc_install_base/php" \
-														--with-python-module-dir="$$dc_install_base/python"
+DISTCHECK_CONFIGURE_FLAGS = --enable-legacy-api --enable-modules 
 
-# a locally-installed library for building and testing the IDL and matlab packages
+# a locally-installed library for building and testing the IDL and matlab
+# packages
 $(distdir)/_inst/lib/pkgconfig: $(distdir).tar.gz
 	tar -zxvf $(distdir).tar.gz
 	cd $(distdir) && \

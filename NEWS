@@ -86,6 +86,12 @@ New in version 0.9.3a:
     pygetdata objects now either succeeds or else raises an exception,
     instead of crashing.
 
+  Miscellaneous:
+
+    The default install directory for the IDL, Perl, PHP, and Python
+    bindings has changed: they are now all installed under ${exec_prefix}
+    when possible.
+
 |=========================================================================|
 
 New in version 0.9.2.1:

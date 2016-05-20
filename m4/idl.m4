@@ -18,6 +18,18 @@ dnl You should have received a copy of the GNU Lesser General Public License
 dnl along with GetData; if not, write to the Free Software Foundation, Inc.,
 dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+dnl GD_IDL_VAR(NAME, IDLVAR, [SEDEXPR])
+dnl ---------------------------------------------------------
+dnl Assign the value of IDL variable IDLVAR to the variable NAME after
+dnl optionally processing it with the sed script SEDEXPR
+AC_DEFUN([GD_IDL_VAR],
+[
+gd_idl_var=$(echo 'print,"@@@"+$2' | $IDL 2>/dev/null | \
+      ${GREP} '@@@' | ${SED} -e 's/^@@@//')
+ifelse(`$#', `2', [$1=${gd_idl_var}],
+  [$1=$(echo $gd_idl_var | sed -e '$3')])
+])
+
 dnl GD_IDL_CHECK_VERSION
 dnl ---------------------------------------------------------------
 dnl Define IDL_VERSION to the version of the idl interpreter
@@ -26,8 +38,9 @@ AC_DEFUN([GD_IDL_CHECK_VERSION],
 idl_version_ok="no"
 idl_header=`( echo | $1 2>&1 )` #''
 IDL_VERSION="unknown"
-if echo $idl_header | grep -q "IDL Version"; then
-  IDL_VERSION=`echo $idl_header | grep Version | sed -e 's/IDL Version \(@<:@^ @:>@*\).*/\1/'` #'
+if echo $idl_header | ${GREP} -q "IDL Version"; then
+  IDL_VERSION=$(echo $idl_header | ${GREP} Version | \
+    ${SED} -e 's/IDL Version \(@<:@^ @:>@*\).*/\1/')
   AX_COMPARE_VERSION([$IDL_VERSION],[ge],[$2],[idl_version_ok="yes"])
 fi
 if test "x$idl_version_ok" = "xyes"; then
@@ -103,10 +116,42 @@ dnl idl version
 AC_MSG_CHECKING([$IDL version])
 AC_MSG_RESULT([$IDL_VERSION])
 
+dnl IDL prefix
+AC_MSG_CHECKING([the IDL prefix])
+GD_IDL_VAR([idl_prefix], [!DIR])
+AC_MSG_RESULT([${idl_prefix}])
+AC_SUBST([idl_prefix])
+
 dnl calculate idl CPPFLAGS and LIBS
 AC_MSG_CHECKING([for $IDL DLM directory])
 if test "x${local_idl_dlm_path}" = "x"; then
-  idldir=`(echo 'print,"@@@"+!DLM_PATH' | $IDL 2>&1) | $GREP '@@@' | sed -e 's/@@@\(@<:@^:@:>@*\)/\1/'`
+  GD_IDL_VAR([prefixed_idldir], [!DLM_PATH], [s/^\(@<:@^:@:>@*\)/\1/])
+
+  esc_idlprefix=$(echo ${idl_prefix} | ${SED} -e 's/\//\\\//g')
+
+  dnl if ${idl_prefix} isn't in contained in ${exec_prefix}, then replace
+  dnl idl_prefix with exec_prefix in the DLM path, so that IDL is installed
+  dnl under ${exec_prefix}.
+
+  dnl We really should do this at build time, I suppose...
+  config_eprefix=${exec_prefix}
+  if test "x${exec_prefix}" = "xNONE"; then
+    if test "x${prefix}" = "xNONE"; then
+      config_prefix=$ac_default_prefix
+    else
+      config_prefix=${prefix}
+    fi
+  else
+    config_prefix=${exec_prefix}
+  fi
+
+  if echo $prefixed_idldir | ${GREP} -q "^$config_prefix"; then
+    idldir=$(echo ${prefixed_idldir} | \
+        ${SED} -e "s/^${esc_idlprefix}/\${idl_prefix}/")
+  else
+    idldir=$(echo ${prefixed_idldir} | \
+        ${SED} -e "s/^${esc_idlprefix}/\${exec_prefix}/")
+  fi
 else
   idldir="$local_idl_dlm_path"
 fi
@@ -114,13 +159,14 @@ AC_MSG_RESULT([$idldir])
 AC_SUBST([idldir])
 
 AC_MSG_CHECKING([IDL compiler flags])
-IDL_CFLAGS=`(echo 'print,"@@@"+!MAKE_DLL.CC' | $IDL 2>&1) | $GREP '@@@' | sed -e 's/@@@.*%X \(.*\) %C.*/\1/' | sed -e 's/\(.* \)-c\(.*\)/\1\2/' | sed -e 's/"//g'`
+GD_IDL_VAR([IDL_CFLAGS],[!MAKE_DLL.CC],
+    [s/^.*%X \(.*\) %C.*/\1/; s/\(.* \)-c\(.*\)/\1\2/; s/"//g])
 AC_MSG_RESULT([$IDL_CFLAGS])
 AC_SUBST([IDL_CFLAGS])
 
-AC_SUBST([IDL_CFLAGS])
-IDL_LIBS=`(echo 'print,"@@@"+!MAKE_DLL.LD' | $IDL 2>&1) | $GREP '@@@' | sed -e 's/@@@@<:@^ @:>@* \(.*\?\) -o.*/\1/' | sed -e 's/-m \?[\w]*//g'`
 AC_MSG_CHECKING([IDL linker flags])
+GD_IDL_VAR([IDL_LIBS],[!MAKE_DLL.LD],
+    [s/^@<:@^ @:>@* \(.*\?\) -o.*/\1/; s/-m \?[\w]*//g])
 AC_MSG_RESULT([$IDL_LIBS])
 AC_SUBST([IDL_LIBS])
 

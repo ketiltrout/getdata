@@ -24,8 +24,6 @@ ACLOCAL_AMFLAGS = -I m4
 
 BUILDCC=@BUILDCC@
 
-DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl"
-
 noinst_PROGRAMS=make_parameters
 
 make_parameters_SOURCES = make_parameters.c

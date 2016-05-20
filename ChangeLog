@@ -1,3 +1,20 @@
+2016-05-20   D. V. Wiebe <getdata@ketiltrout.net> svn:1078
+	* configure.ac: Require SED and GREP to build the IDL bindings.
+	* m4/idl.m4 (GD_IDL): Define and AC_SUBST idl_prefix.  Replace idl_prefix
+	with exec_prefix in idldir if needed.
+	* m4/idl.m4 (GD_IDL_VAR): Added.
+
+	* m4/perl.m4 (GD_PERL) m4/php.m4 (GD_PHP): Replace the interpreter's prefix
+	with ${exec_prefix} in install directories if possible.
+
+	* m4/python.m4 (GD_PYTHON): Fix pythondir calculation to use exec_prefix.
+	And also PYTHON_LDVERSION instead of PYTHON_VERSION.
+
+	* Makefile.am bindings/idl/package/Makefile.am: remove all the directory
+	options from DISTCHECK_CONFIGURE_FLAGS.
+
+	* bindings/idl/package/configure.ac: Abort if GREP and SED aren't defined.
+
 2016-05-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1075
 	* bindings/cxx/getdata/types.h: Added.
 	* bindings/cxx/getdata/dirfile.h: include getdata/types.h instead of

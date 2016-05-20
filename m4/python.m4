@@ -179,7 +179,7 @@ if test "x${python_prefix}" != "x${python_exec_prefix}"; then
 fi
 AC_MSG_RESULT([$PYTHON_CPPFLAGS])
 
-dnl calculate Python LDFLAGS -- only needed for these tests
+dnl calculate Python LDFLAGS -- only needed during configure
 AC_MSG_CHECKING([Python LDFLAGS])
 GD_PYTHON_CONFIGVAR([PYTHON_LIBDIR], [LIBDIR])
 PYTHON_LDFLAGS="-L${PYTHON_LIBDIR} -lpython${PYTHON_LDVERSION}"
@@ -191,11 +191,6 @@ PYTHON_PLATFORM=`$PYTHON -c "from distutils import util; print (util.get_platfor
 AC_MSG_RESULT([$PYTHON_PLATFORM])
 AC_SUBST([PYTHON_PLATFORM])
 
-dnl calculate the exec prefix
-pyexec_prefix=$exec_prefix
-test "x$pyexec_prefix" = xNONE && pyexec_prefix=$prefix
-test "x$pyexec_prefix" = xNONE && pyexec_prefix=$ac_default_prefix
-
 dnl calculate the extension module directory
 AC_MSG_CHECKING([Python extension module directory])
 if test "x${local_python_modpath}" = "x"; then
@@ -203,14 +198,14 @@ if test "x${local_python_modpath}" = "x"; then
 import sys
 if sys.version[[:1]] == '3':
   import sysconfig
-  print (sysconfig.get_path('platlib', vars={'platbase': '\${python_exec_prefix}'}))
+  print (sysconfig.get_path('platlib', vars={'platbase': '\${exec_prefix}'}))
 else:
   from distutils import sysconfig
-  print (sysconfig.get_python_lib(1,0,prefix='\${python_exec_prefix}'))
+  print (sysconfig.get_python_lib(1,0,prefix='\${exec_prefix}'))
 EOF
 )
   if test "x${pythondir}" = "xNone" -o "x${pythondir}" = "x"; then
-    pythondir='${python_exec_prefix}/lib/python${PYTHON_VERSION}/site-packages'
+    pythondir='\${exec_prefix}/lib/python${PYTHON_LDVERSION}/site-packages'
   fi
 else
   pythondir=$local_python_modpath

@@ -885,6 +885,25 @@ if test "x$make_idlbindings" = "xyes"; then
     make_idlbindings=no
   fi
 fi
+
+dnl IDL config needs sed and grep
+if test "x$make_idlbindings" = "xyes"; then
+  AC_MSG_CHECKING([for sed])
+  if test "x${SED}" = "x"; then
+    AC_MSG_RESULT([not found])
+    make_idlbindings=no
+  else
+    AC_MSG_RESULT([${SED}])
+  fi
+  AC_MSG_CHECKING([for grep])
+  if test "x${GREP}" = "x"; then
+    AC_MSG_RESULT([not found])
+    make_idlbindings=no
+  else
+    AC_MSG_RESULT([${GREP}])
+  fi
+fi
+
 if test "x$make_idlbindings" = "xyes"; then
   GD_IDL([5.5])
   if test "x$have_idl" = "xno"; then
@@ -1082,8 +1101,8 @@ dnl Calculate absolute docdir
 cat <<EOF > conftest.sh
 prefix=$prefix
 test "x$prefix" = xNONE && prefix=$ac_default_prefix
-test "x$exec_prefix" = xNONE && exec_prefix=\$prefix
 exec_prefix=$exec_prefix
+test "x$exec_prefix" = xNONE && exec_prefix=\$prefix
 datarootdir=$datarootdir
 PACKAGE_TARNAME=$PACKAGE_TARNAME
 echo $docdir

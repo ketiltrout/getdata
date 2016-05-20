@@ -1,4 +1,4 @@
-dnl Copyright (C) 2008-2015 D. V. Wiebe
+dnl Copyright (C) 2008-2016 D. V. Wiebe
 dnl
 dnllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -26,7 +26,7 @@ AC_INIT([IDL_GetData],[getdata_pkg_version],
         [http://getdata.sourceforge.net/])
 
 AC_COPYRIGHT(
-[Parts of this program are copyright (C) 2008-2015 D. V. Wiebe.
+[Parts of this program are copyright (C) 2008-2016 D. V. Wiebe.
 
 These parts may be redistributed and/or modified under the terms of the GNU
 Lesser General Public License as published by the Free Software Foundation;
@@ -67,8 +67,16 @@ echo
 AM_INIT_AUTOMAKE
 AC_PROG_LN_S
 AC_PROG_AWK
+
 AC_PROG_GREP
+if test "x${GREP}" = "x"; then
+  AC_MSG_ERROR([Building the GetData IDL bindings requires a working grep.])
+fi
+
 AC_PROG_SED
+if test "x${SED}" = "x"; then
+  AC_MSG_ERROR([Building the GetData IDL bindings requires a working sed.])
+fi
 
 AC_ARG_VAR([DATE], \
            [a date program which supports '+%...' conversion specifiers])

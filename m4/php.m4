@@ -64,6 +64,13 @@ if test "x${have_php}" != "xno"; then
   AC_SUBST([PHP_CONFIG])
 fi
 
+dnl php CLI
+if test "x${have_php}" != "xno"; then
+  AC_MSG_CHECKING([PHP interpreter path])
+  GD_PHP_CONFIG([PHP], [php-binary], [UNKNOWN])
+  AC_MSG_RESULT([$PHP])
+fi
+
 dnl extension dir
 AC_ARG_WITH([php-dir], AS_HELP_STRING([--with-php-dir=DIR],
       [install the GetData PHP extension into DIR [default: autodetect]]),
@@ -75,23 +82,21 @@ AC_ARG_WITH([php-dir], AS_HELP_STRING([--with-php-dir=DIR],
       fi
       ], [phpdir=UNKNOWN])
 
-dnl php CLI
-if test "x${have_php}" != "xno"; then
-  AC_MSG_CHECKING([PHP interpreter path])
-  GD_PHP_CONFIG([PHP], [php-binary], [UNKNOWN])
-  AC_MSG_RESULT([$PHP])
-fi
-
 if test "x${have_php}" != "xno"; then
   AC_SUBST([PHP])
   AC_MSG_CHECKING([the PHP extension directory])
   if test "x${phpdir}" = "xUNKNOWN"; then
-    GD_PHP_CONFIG([phpdir], [extension-dir], [UNKNOWN])
+    GD_PHP_CONFIG([phpprefix], [prefix], [UNKNOWN])
+    GD_PHP_CONFIG([prefixed_phpdir], [extension-dir], [UNKNOWN])
+    if test "x${prefixed_phpdir}" = "xUNKNOWN"; then
+      phpdir=${libdir}/php/extensions
+    elif test "x${SED}" != "x"; then
+      esc_phpprefix=$(echo ${phpprefix} | ${SED} -e 's/\//\\\//g')
+      phpdir=$(echo ${prefixed_phpdir} | \
+          ${SED} -e "s/^${esc_phpprefix}/\${exec_prefix}/")
+    fi
   fi
   AC_MSG_RESULT([$phpdir])
-  if test "x${phpdir}" = "xUNKNOWN"; then
-    have_php=no
-  fi
   AC_SUBST([phpdir])
 
   AC_MSG_CHECKING([PHP CPPFLAGS])

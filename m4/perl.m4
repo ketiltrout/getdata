@@ -78,13 +78,7 @@ dnl Look for perl5.  Then determine whether we can build XSUBs.
 AC_DEFUN([GD_PERL],
 [
 first_perl=5.8.0
-perl_prog_list="perl perl5 \
-perl5.14 perl5.12 perl5.10 perl5.8 \
-perl5.14.0 \
-perl5.12.3 perl5.12.2 perl5.12.1 perl5.12.0 \
-perl5.10.1 perl5.10.0 \
-perl5.8.9 perl5.8.8 perl5.8.7 perl5.8.6 perl5.8.5 perl5.8.4 perl5.8.3 \
-perl5.8.2 perl5.8.1 perl5.8.0"
+perl_prog_list="perl perl5"
 
 dnl --without-perl basically does the same as --disable-perl
 AC_ARG_WITH([perl], AS_HELP_STRING([--with-perl=PATH],
@@ -166,22 +160,35 @@ if test "x${have_perl}" != "xno"; then
   dnl calculate the extension module directory
   AC_MSG_CHECKING([Perl module directory])
   if test $perl_inst_type = "vendor"; then
-    GD_PERL_CONFIG([perldir], [vendorarchexp])
-    GD_PERL_CONFIG([perlmandir], [vendorman3direxp])
+    GD_PERL_CONFIG([perlprefix], [vendorprefix])
+    GD_PERL_CONFIG([prefixed_perldir], [vendorarchexp])
+    GD_PERL_CONFIG([prefixed_perlmandir], [vendorman3direxp])
     if test perldir = "UNKNOWN"; then
       perl_inst_type = "site";
     fi
   fi
 
   if test $perl_inst_type = "site"; then
-    GD_PERL_CONFIG([perldir], [sitearchexp])
-    GD_PERL_CONFIG([perlmandir], [siteman3direxp])
-  elif test $perl_inst_type != "vendor"; then
-    perldir="${local_perl_path}"
-    perlmandir="UNKNOWN"
+    GD_PERL_CONFIG([perlprefix], [siteprefix])
+    GD_PERL_CONFIG([prefixed_perldir], [sitearchexp])
+    GD_PERL_CONFIG([prefixed_perlmandir], [siteman3direxp])
   fi
 
-  if test $perlmandir = "UNKNOWN"; then
+  if test $perl_inst_type = "local"; then
+    perldir="${local_perl_path}"
+    perlmandir="UNKNOWN"
+  elif test "x$SED" != "x"; then
+    esc_perlprefix=$(echo ${perlprefix} | ${SED} -e 's/\//\\\//g')
+    perldir=$(echo ${prefixed_perldir} | \
+        ${SED} -e "s/^${esc_perlprefix}/\${exec_prefix}/")
+    perlmandir=$(echo ${prefixed_perlmandir} | \
+        ${SED} -e "s/^${esc_perlprefix}/\${prefix}/")
+  else
+    perldir=${prefixed_perldir}
+    perlmandir=${prefixed_perlmandir}
+  fi
+
+  if test "x$perlmandir" = "xUNKNOWN"; then
     perlmandir="${mandir}/man3"
   fi
 
