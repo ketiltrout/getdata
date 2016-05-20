@@ -81,7 +81,7 @@ AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 
 dnl Legacy API
-AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--enaable-legacy-api],
+AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--enable-legacy-api],
               [include the legacy API wrapper in the library]), dnl'
               [
                case "${enableval}" in
