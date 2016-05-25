@@ -88,9 +88,10 @@ New in version 0.9.3a:
 
   Miscellaneous:
 
-    The default install directory for the IDL, Perl, PHP, and Python
+  * The default install directory for the IDL, Perl, PHP, and Python
     bindings has changed: they are now all installed under ${exec_prefix}
-    when possible.
+    when possible.  The install directories can still be overridden by
+    ./configure options.
 
 |=========================================================================|
 

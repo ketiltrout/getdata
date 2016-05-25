@@ -1,4 +1,4 @@
-dnl Copyright (C) 2013, 2014 D. V. Wiebe
+dnl Copyright (C) 2013, 2014, 2016 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -49,7 +49,7 @@ if test "x$MEX" != "xnot found"; then
   mex_out=`$MEX 2>&1`
   mex_status=$?
   if test $mex_status -eq 1; then
-    if ! echo $mex_out | grep -q 'consult the MATLAB External Interfaces Guide'; then
+    if ! echo $mex_out | grep 'consult the MATLAB External Interfaces Guide' >/dev/null 2>/dev/null; then
       MEX="not found";
     fi
   fi

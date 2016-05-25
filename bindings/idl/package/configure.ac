@@ -68,16 +68,6 @@ AM_INIT_AUTOMAKE
 AC_PROG_LN_S
 AC_PROG_AWK
 
-AC_PROG_GREP
-if test "x${GREP}" = "x"; then
-  AC_MSG_ERROR([Building the GetData IDL bindings requires a working grep.])
-fi
-
-AC_PROG_SED
-if test "x${SED}" = "x"; then
-  AC_MSG_ERROR([Building the GetData IDL bindings requires a working sed.])
-fi
-
 AC_ARG_VAR([DATE], \
            [a date program which supports '+%...' conversion specifiers])
 AC_CHECK_PROGS([DATE], [date], [not found])

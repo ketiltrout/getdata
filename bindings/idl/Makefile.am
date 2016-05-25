@@ -1,4 +1,4 @@
-# Copyright (C) 2009, 2010, 2011, 2013 D. V. Wiebe
+# Copyright (C) 2009, 2010, 2011, 2013, 2016 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -83,7 +83,7 @@ all-local: .libs/idl_getdata.dlm
 
 # This is required to properly run the test suite
 .libs/idl_getdata.dlm: idl_getdata.dlm
-	if [ ! -e .libs ]; then mkdir -p .libs; fi
+	if [ ! -e .libs ]; then mkdir .libs; fi
 	cp $< .libs
 
 clean-local:

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (C) 2013 D. V. Wiebe
+# Copyright (C) 2013, 2016 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -21,11 +21,9 @@
 # 
 # @configure_input@
 
-AWK=@AWK@
+LC_ALL=C
 DATE=@DATE@
-GREP=@GREP@
 PRINTF=@PRINTF@
-SED=@SED@
 VERSION=@GETDATA_MAJOR@.@GETDATA_MINOR@
 REVISION=R@GETDATA_REVISION@@GETDATA_VERSION_SUFFIX@
 SRCDIR=$1
@@ -48,8 +46,8 @@ if test "x$PRINTF" != "xnot found"; then
   (
   ls getdata*.m gd_*.m ${BUILT_FILES} | while read x; do
     ${PRINTF} "%%   %-22s - %s\n" \
-      "`basename $x | ${AWK} 'BEGIN{FS="."} { print toupper($1) }'`" \
-      "`${GREP} -m 1 '^%' $x | ${SED} 's/% *[A-Z_]* *\(.*\)/\1/'`"
+      "`expr "./$x" : '.*\/\(.*\).m' | tr '[a-z]' '[A-Z]'`" \
+      "`grep '^%' $x | head -n 1 | sed 's/% *[A-Z_]* *\(.*\)/\1/'`"
   done
   ) | sort
 fi

@@ -1,5 +1,5 @@
 #!/bin/sh
-s=`basename $2 .m`
+s=`expr ./$2 : '.*/\(.*\).m'`
 rm -f ./test_failed
 $1 -nodesktop -nodisplay -nosplash -nojvm -r "$s; quit;"
 

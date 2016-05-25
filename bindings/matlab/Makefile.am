@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2015 D. V. Wiebe
+# Copyright (C) 2013-2016 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -96,7 +96,7 @@ libgetdata_matlab_la_CPPFLAGS=${MATLAB_CPPFLAGS} ${AM_CPPFLAGS}
 libgetdata_matlab_la_LDFLAGS=-version-info @MATLABGETDATA_VERSION@
 
 %.m: %.c ${srcdir}/doc.tail
-	${GREP} '^ %' $< | ${SED} -e 's/^ //' > $@
+	grep '^ %' $< | ${SED} -e 's/^ //' > $@
 	cat ${srcdir}/doc.tail >> $@
 
 %.@mexext@: %.c libgetdata-matlab.la

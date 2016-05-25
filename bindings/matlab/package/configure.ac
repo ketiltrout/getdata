@@ -1,4 +1,4 @@
-dnl Copyright (C) 2008-2015 D. V. Wiebe
+dnl Copyright (C) 2008-2016 D. V. Wiebe
 dnl
 dnllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -69,8 +69,6 @@ echo
 AM_INIT_AUTOMAKE
 AC_PROG_LN_S
 AC_PROG_AWK
-AC_PROG_GREP
-AC_PROG_SED
 
 AC_ARG_VAR([DATE], \
            [a date program which supports '+%...' conversion specifiers])

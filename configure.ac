@@ -352,7 +352,6 @@ echo
 AM_INIT_AUTOMAKE
 AC_PROG_LN_S
 AC_PROG_AWK
-AC_PROG_GREP
 AC_PROG_SED
 
 AC_ARG_VAR([DATE], \
@@ -872,6 +871,18 @@ AC_CHECK_DECLS([get_unaligned, put_unaligned],,,
 #endif
 ])
 
+dnl The Fortran build needs a non-truncating sed
+if test "x$make_f77bindings" = "xyes"; then
+  echo
+  echo "*** Configuring Fortran bindings"
+  echo
+  AC_PROG_SED
+  if test "x${SED}" = "x"; then
+    make_f77bindings=no
+    make_f95bindings=no
+  fi
+fi
+
 dnl idl
 if test "x$make_idlbindings" = "xyes"; then
   echo
@@ -883,24 +894,6 @@ if test "x$make_idlbindings" = "xyes"; then
   else
     AC_MSG_RESULT([no])
     make_idlbindings=no
-  fi
-fi
-
-dnl IDL config needs sed and grep
-if test "x$make_idlbindings" = "xyes"; then
-  AC_MSG_CHECKING([for sed])
-  if test "x${SED}" = "x"; then
-    AC_MSG_RESULT([not found])
-    make_idlbindings=no
-  else
-    AC_MSG_RESULT([${SED}])
-  fi
-  AC_MSG_CHECKING([for grep])
-  if test "x${GREP}" = "x"; then
-    AC_MSG_RESULT([not found])
-    make_idlbindings=no
-  else
-    AC_MSG_RESULT([${GREP}])
   fi
 fi
 
@@ -927,9 +920,14 @@ if test "x$make_perlbindings" = "xyes"; then
   echo
   echo "*** Configuring Perl bindings"
   echo
-  GD_PERL
-  if test "x$have_perl" = "xno"; then
+  AC_PROG_SED
+  if test "x${SED}" = "x"; then
     make_perlbindings=no
+  else
+    GD_PERL
+    if test "x$have_perl" = "xno"; then
+      make_perlbindings=no
+    fi
   fi
 fi
 

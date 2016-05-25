@@ -1,3 +1,34 @@
+2016-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1080
+	* bindings/idl/Makefile.am: Remove -p from mkdir call
+
+	* bindings/idl/makedlm.sh.in bindings/matlab/Makefile.am
+	bindings/matlab/make_contents.sh.in m4/idl.m4 (GD_IDL_VAR
+	GD_IDL_CHECK_VERSION GD_IDL): Use "grep" instead of "${GREP}"
+	* configure.ac bindings/idl/package/configure.ac
+	bindings/matlab/package/configure.ac: Remove AC_PROG_GREP call:
+	baseline grep should be sufficient for us, whatever it is.
+	* bindings/matlab/make_contents.sh.in: use "grep | head" instead of
+	"grep -m"
+	* m4/compiler.m4 (GD_LANG_F77_COMPILER_INTEL GD_LANG_FC_COMPILER_INTEL)
+	m4/idl.m4 (GD_IDL_CHECK_VERSION GD_IDL) m4/matlab.m4 (GD_MATLAB):
+	Redirect grep output to /dev/null instead of using "grep -q"
+
+	* bindings/matlab/make_contents.sh.in bindings/matlab/test/test.sh: Use
+	expr instead of basename
+
+	* bindings/matlab/make_contents.sh.in: Use tr instead of ${AWK}
+
+	* bindings/idl/package/configure.ac bindings/matlab/package/configure.ac:
+	Remove AC_PROG_SED call: baseline sed should be sufficient for us,
+	whatever it is.
+	* configure.ac: Don't make Fortran or Perl bindings if we don't have ${SED}:
+	baseline sed isn't necessarily good enough.
+	* m4/idl.m4 (GD_IDL_CHECK_VERSION GD_IDL): Use sed instead of ${SED}
+
+	* bindings/idl/makedlm.sh.in: set LC_ALL=C
+
+	* m4/win32.m4 (GD_MSYS_SHELL): Use ${AWK} instead of "grep | awk"
+
 2016-05-20   D. V. Wiebe <getdata@ketiltrout.net> svn:1078
 	* configure.ac: Require SED and GREP to build the IDL bindings.
 	* m4/idl.m4 (GD_IDL): Define and AC_SUBST idl_prefix.  Replace idl_prefix

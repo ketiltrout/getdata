@@ -1,4 +1,4 @@
-dnl Copyright (C) 2010, 2011 D. V. Wiebe
+dnl Copyright (C) 2010, 2011, 2016 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -33,7 +33,7 @@ AC_MSG_RESULT([$this_is_msys])
 
 if test "$this_is_msys" = "yes"; then
 AC_MSG_CHECKING([for the Win32 MSYS shell])
-msys_root=`mount | ${GREP} 'on / ' | awk '{print [$]1}'`
+msys_root=`mount | ${AWK} '/on \/ / {print [$]1}'`
 msys_shell1="$msys_root`echo $SHELL | ${SED} -e 's/\//\\\\/g'`.exe"
 msys_shell=`echo "$msys_shell1" | ${SED} -e 's/\\\\/\\\\\\\\/g'`
 AC_MSG_RESULT([$msys_shell1])

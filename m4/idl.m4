@@ -1,4 +1,4 @@
-dnl Copyright (C) 2009, 2011, 2012, 2013 D. V. Wiebe
+dnl Copyright (C) 2009, 2011, 2012, 2013, 2016 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -25,7 +25,7 @@ dnl optionally processing it with the sed script SEDEXPR
 AC_DEFUN([GD_IDL_VAR],
 [
 gd_idl_var=$(echo 'print,"@@@"+$2' | $IDL 2>/dev/null | \
-      ${GREP} '@@@' | ${SED} -e 's/^@@@//')
+      grep '@@@' | sed -e 's/^@@@//')
 ifelse(`$#', `2', [$1=${gd_idl_var}],
   [$1=$(echo $gd_idl_var | sed -e '$3')])
 ])
@@ -38,9 +38,9 @@ AC_DEFUN([GD_IDL_CHECK_VERSION],
 idl_version_ok="no"
 idl_header=`( echo | $1 2>&1 )` #''
 IDL_VERSION="unknown"
-if echo $idl_header | ${GREP} -q "IDL Version"; then
-  IDL_VERSION=$(echo $idl_header | ${GREP} Version | \
-    ${SED} -e 's/IDL Version \(@<:@^ @:>@*\).*/\1/')
+if echo $idl_header | grep "IDL Version" >/dev/null 2>/dev/null; then
+  IDL_VERSION=$(echo $idl_header | grep Version | \
+    sed -e 's/IDL Version \(@<:@^ @:>@*\).*/\1/')
   AX_COMPARE_VERSION([$IDL_VERSION],[ge],[$2],[idl_version_ok="yes"])
 fi
 if test "x$idl_version_ok" = "xyes"; then
@@ -127,7 +127,7 @@ AC_MSG_CHECKING([for $IDL DLM directory])
 if test "x${local_idl_dlm_path}" = "x"; then
   GD_IDL_VAR([prefixed_idldir], [!DLM_PATH], [s/^\(@<:@^:@:>@*\)/\1/])
 
-  esc_idlprefix=$(echo ${idl_prefix} | ${SED} -e 's/\//\\\//g')
+  esc_idlprefix=$(echo ${idl_prefix} | sed -e 's/\//\\\//g')
 
   dnl if ${idl_prefix} isn't in contained in ${exec_prefix}, then replace
   dnl idl_prefix with exec_prefix in the DLM path, so that IDL is installed
@@ -145,12 +145,13 @@ if test "x${local_idl_dlm_path}" = "x"; then
     config_prefix=${exec_prefix}
   fi
 
-  if echo $prefixed_idldir | ${GREP} -q "^$config_prefix"; then
+  if echo $prefixed_idldir | \
+    grep "^$config_prefix" >/dev/null 2>/dev/null; then
     idldir=$(echo ${prefixed_idldir} | \
-        ${SED} -e "s/^${esc_idlprefix}/\${idl_prefix}/")
+        sed -e "s/^${esc_idlprefix}/\${idl_prefix}/")
   else
     idldir=$(echo ${prefixed_idldir} | \
-        ${SED} -e "s/^${esc_idlprefix}/\${exec_prefix}/")
+        sed -e "s/^${esc_idlprefix}/\${exec_prefix}/")
   fi
 else
   idldir="$local_idl_dlm_path"
