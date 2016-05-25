@@ -96,7 +96,7 @@ libgetdata_matlab_la_CPPFLAGS=${MATLAB_CPPFLAGS} ${AM_CPPFLAGS}
 libgetdata_matlab_la_LDFLAGS=-version-info @MATLABGETDATA_VERSION@
 
 %.m: %.c ${srcdir}/doc.tail
-	grep '^ %' $< | ${SED} -e 's/^ //' > $@
+	grep '^ %' $< | sed -e 's/^ //' > $@
 	cat ${srcdir}/doc.tail >> $@
 
 %.@mexext@: %.c libgetdata-matlab.la

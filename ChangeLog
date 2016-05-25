@@ -1,4 +1,4 @@
-2016-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1080
+2016-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1080,1081
 	* bindings/idl/Makefile.am: Remove -p from mkdir call
 
 	* bindings/idl/makedlm.sh.in bindings/matlab/Makefile.am
@@ -23,7 +23,8 @@
 	whatever it is.
 	* configure.ac: Don't make Fortran or Perl bindings if we don't have ${SED}:
 	baseline sed isn't necessarily good enough.
-	* m4/idl.m4 (GD_IDL_CHECK_VERSION GD_IDL): Use sed instead of ${SED}
+	* m4/idl.m4 (GD_IDL_CHECK_VERSION GD_IDL) bindings/matlab/Makefile.am: Use
+	sed instead of ${SED}
 
 	* bindings/idl/makedlm.sh.in: set LC_ALL=C
 
