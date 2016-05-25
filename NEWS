@@ -61,8 +61,8 @@ New in version 0.9.3a:
     pygetdata module.  This C API is needed by daisie, the stand-alone SIE
     encoding library.
 
-  * C++ BUG FIX: Including another header file before getdata/dirfile.h no
-    longer results in a fatal circular dependency.
+  * C++ BUG FIX: Including another GetData header before getdata/dirfile.h
+    no longer results in a fatal circular dependency.
 
   * PYTHON BUG FIX: Calling pygetdata.dirfile.[m]carrays no longer crashes
     if return_type=pygetdata.NULL.  In this case, None is returned in place

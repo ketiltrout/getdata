@@ -20,7 +20,7 @@
  */
 #define NO_IMPORT_ARRAY
 #define GDPY_INCLUDE_NUMPY
-#include "pygd_intern.h"
+#include "gdpy_intern.h"
 
 /* Create an array of strings from a NULL-terminated string list */
 static PyObject *gdpyobj_from_strarr(const char **list,

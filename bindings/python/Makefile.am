@@ -31,7 +31,7 @@ python_HEADERS = ${PYGETDATA_H}
 
 BUILT_SOURCES = pyconstants.c
 
-EXTRA_DIST = pydirfile.c pygetdata.c pyentry.c pygd_intern.h pyfragment.c
+EXTRA_DIST = pydirfile.c pygetdata.c pyentry.c gdpy_intern.h pyfragment.c
 
 distutils_path=build/lib.${PYTHON_PLATFORM}-${PYTHON_VERSION}
 pygetdata${PYTHON_OBJECT_SUFFIX}: ${distutils_path}/pygetdata${PYTHON_OBJECT_SUFFIX}

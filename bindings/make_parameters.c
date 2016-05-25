@@ -401,7 +401,7 @@ void Python(void)
   printf(
       "/* This code is automatically generated.  "
       "Changes made here will be lost. */\n"
-      "#include \"pygd_intern.h\"\n"
+      "#include \"gdpy_intern.h\"\n"
       "const struct gdpy_constant_t gdpy_constant_list[] = {\n");
   
   for (i = 0; constant_list[i].lname != NULL; ++i)

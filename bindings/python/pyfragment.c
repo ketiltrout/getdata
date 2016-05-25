@@ -18,7 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "pygd_intern.h"
+#include "gdpy_intern.h"
 
 /* Fragment */
 static void gdpy_fragment_delete(struct gdpy_fragment_t *self)

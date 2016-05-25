@@ -1,4 +1,7 @@
 2016-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1080,1081
+	* bindings/python/gdpy_intern.h: Renamed from pygd_intern.h
+
+2016-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1080,1081
 	* bindings/idl/Makefile.am: Remove -p from mkdir call
 
 	* bindings/idl/makedlm.sh.in bindings/matlab/Makefile.am

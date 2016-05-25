@@ -19,7 +19,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #define GDPY_INCLUDE_NUMPY
-#include "pygd_intern.h"
+#include "gdpy_intern.h"
 
 static PyObject *gdpy_mod = NULL;
 
