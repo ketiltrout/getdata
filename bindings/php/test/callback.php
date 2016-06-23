@@ -28,7 +28,10 @@ function callback($pdata, $extra)
 
   $ret = 0;
 
-  if ($extra != 'extra stuff') {
+  if (!isset($extra)) {
+    echo "extra is unset\n";
+    $ret = 1;
+  } else if ($extra != 'extra stuff') {
     echo 'extra = ', $extra, "\n";
     $ret = 1;
   }

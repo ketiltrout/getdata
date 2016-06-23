@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2013, 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -58,6 +58,10 @@ extern zend_module_entry getdata_module_entry;
 #ifndef ZEND_FE_END
 #define ZEND_FE_END { NULL, NULL, NULL, 0, 0 }
 #endif
+
+#define GDPHP_REGISTER_LONG_CONSTANT(name,value,module_number) \
+  zend_register_long_constant(ZEND_STRS(name), value, \
+      CONST_CS | CONST_PERSISTENT, module_number TSRMLS_CC)
 
 void gdphp_register_constants(int module_number);
 

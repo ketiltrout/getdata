@@ -111,7 +111,7 @@
 #define SIZEOF_SIZE_T (sizeof size_t)
 #endif
 
-/* MSCVRT defines ssize_t but not ssize_t */
+/* MSCVRT defines size_t but not ssize_t */
 #ifdef __MSVCRT__
 #if SIZEOF_SIZE_T == 8
 typedef __int64 ssize_t;

@@ -1,4 +1,21 @@
-2016-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1080,1081
+2016-06-23   D. V. Wiebe <getdata@ketiltrout.net> svn:1083
+	* bindings/make_parameters.c (PHP): in constants.c, use the macro
+	GDPHP_REGISTER_LONG_CONSTANT instead of zend_register_long_constant
+	directly.
+
+	* bindings/php/getdata.c: There's a large section at the top abstracting
+	PHP5 and PHP7.
+
+	* bindings/php/getdata.c (gdphp_add_assoc_complex gdphp_add_assoc_cmparray
+	gdphp_data_to_array gd_carrays gd_mcarrays): In PHP7, allocate a zval on the
+	stack to pass to gdphp_from_complex because it can't allocate one anymore.
+
+	* bindings/php/getdata.c (gd_getdata): Free data on error.
+
+	* bindings/php/getdata.c (gd_madd_bit gd_madd_sbit): Correctly deal with
+	NULL numbits.
+
+2016-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1082
 	* bindings/python/gdpy_intern.h: Renamed from pygd_intern.h
 
 2016-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1080,1081

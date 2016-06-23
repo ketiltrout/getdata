@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2015 D. V. Wiebe
+/* Copyright (C) 2008-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -576,9 +576,8 @@ void PHP(void)
   
   for (i = 0; constant_list[i].lname != NULL; ++i)
     if (constant_list[i].type != GDMP_DEPERR)
-      printf("zend_register_long_constant(ZEND_STRS(\"%s\"), %li, CONST_CS, "
-          "module_number TSRMLS_CC);", constant_list[i].lname,
-          constant_list[i].value);
+      printf("GDPHP_REGISTER_LONG_CONSTANT(\"%s\", %li, module_number); ",
+          constant_list[i].lname, constant_list[i].value);
 
   puts("dreturnvoid();}");
 }

@@ -24,12 +24,123 @@
 
 /* corresponding type of the PHP integer */
 #if SIZEOF_LONG == 4
-#define GDPHP_LONG GD_INT32
+#define GDPHP_LONG_TYPE GD_INT32
 typedef int32_t gdphp_long_t;
 #elif SIZEOF_LONG == 8
-#define GDPHP_LONG GD_INT64
+#define GDPHP_LONG_TYPE GD_INT64
 typedef int64_t gdphp_long_t;
 #endif
+
+/* PHP7 malarkey */
+#if ZEND_MODULE_API_NO >= 20151012
+/* PHP7 */
+
+/* Resources are now bona fide zvals */
+#define GDPHP_RESOURCE zend_resource
+#define GDPHP_RET_RES(r,le) RETVAL_RES(zend_register_resource((r),(le)))
+#define gdphp_fetch_resource(z) zend_fetch_resource2_ex((z), "Dirfile", \
+    le_gdphp_dirfile, le_gdphp_dirfile_persist)
+#define gdphp_list_close(z) zend_list_close(Z_RES_P(z))
+
+/* Strings now always duplicate */
+#define gdphp_add_index_string add_index_string
+#define GDPHP_RET_STRL_COPY RETURN_STRINGL
+#define GDPHP_RET_STR_COPY(s) GDPHP_RET_STRL_COPY((s),strlen(s))
+#define GDPHP_STRINGL ZVAL_STRINGL
+#define GDPHP_COPY_DATA(z,s,l,d) do { \
+  ZVAL_STRINGL((z),(s),(l)); \
+  if (!(d)) efree(s); \
+} while(0)
+#define GDPHP_RETVAL_STRING RETVAL_STRING
+#define gdphp_add_assoc_string add_assoc_string
+
+/* Hashes basically suck */
+#define GDPHP_HASH_FINDL(v,ht,key,len) \
+  (v = zend_hash_str_find((ht), (key), len))
+#define GDPHP_HASH_ADD(ht,key,len,data) \
+  zend_hash_str_update_mem((ht), (key), (len), &(data), sizeof(data))
+#define GDPHP_FIND_RES(v,ht,key,len) \
+  (v = zend_hash_str_find_ptr((ht), (key), len))
+#define GDPHP_HASH_INDEX_FIND(v,ht,h) (v = zend_hash_index_find((ht),(h)))
+#define GDPHP_HASH_KEY_DECL(n) zend_string* n
+#define GDPHP_HASH_GET_CURRENT_KEY(ht,key,idx,pos) \
+  zend_hash_get_current_key_ex(ht, &key, &idx, &pos)
+#define GDPHP_HASH_GET_CURRENT_DATA(v,ht,pos) \
+  (v = zend_hash_get_current_data_ex(ht, &pos))
+#define GDPHP_HASH_FIND(v,ht,key) GDPHP_HASH_FINDL((v),(ht),(key),strlen(key))
+
+/* Booleans are gone */
+#define Z_BVAL_P(z) ((Z_TYPE_P(z) == IS_TRUE) ? 1 : 0)
+#define BOOL_CASE /**/
+
+/* Most things that used to use zval** now just uses zval* */
+#define GDPHP_ZVALP zval*
+#define ZP(z) z
+#define ZR(z) z
+
+/* We now can allocate zvals directly on the stack */
+#define GDPHP_ZVAL zval
+#define GDPHP_ZVAL_NULL(z) zval z
+#define GDPHP_INIT_ZVAL(z) /**/
+#define RZ(z) &z
+#define GDPHP_PTR_DTOR(z) /**/
+
+/* Changes to zend_parse_parameters */
+#define GDPHP_LONG zend_long
+#define GDPHP_SLEN size_t
+#define ZPP_Z "z"
+
+#else
+/* PHP5 */
+
+#define gdphp_fetch_resource(z) zend_fetch_resource(&(z) TSRMLS_CC, -1, \
+    "Dirfile", NULL, 2, le_gdphp_dirfile, le_gdphp_dirfile_persist)
+#define gdphp_add_index_string(a,i,s) add_index_string((a),(i),(s),1)
+#define GDPHP_RET_STRL_COPY(s,l) RETURN_STRINGL((s), (l), 1)
+#define GDPHP_RET_STR_COPY(s) RETURN_STRING((s), 1)
+#define GDPHP_RET_RES(r,le) ZEND_REGISTER_RESOURCE(return_value, (r), (le))
+#define GDPHP_HASH_FINDL(v,ht,key,len) \
+  (zend_hash_find((ht), (key), (len), (void**)&(v)) == SUCCESS)
+#define GDPHP_RESOURCE zend_rsrc_list_entry
+#define GDPHP_HASH_ADD(ht,key,len,data) \
+  zend_hash_add((ht), (key), (len), &(data), sizeof(data), NULL)
+#define GDPHP_FIND_RES GDPHP_HASH_FINDL
+#define GDPHP_RETVAL_STRING(s) RETVAL_STRING(s, 1)
+#define gdphp_list_close(z) zend_list_delete(Z_LVAL_P(z))
+#define GDPHP_STRINGL(z,s,l) ZVAL_STRINGL((z),(s),(l),1)
+#define GDPHP_COPY_DATA(z,s,l,d) do { \
+  if (!d) { /* trim excess */ \
+    void *ptr = erealloc((s), (l)); \
+    if (ptr) data = ptr; \
+  } \
+  ZVAL_STRINGL((z),(s),(l),1); \
+} while(0);
+#define GDPHP_ZVALP zval**
+#define ZP(z) *z
+#define ZR(z) &z
+#define GDPHP_HASH_INDEX_FIND(v,ht,h) \
+  (zend_hash_index_find((ht),(h), (void**)&(v)) == SUCCESS)
+#define GDPHP_HASH_KEY_DECL(n) char*n; unsigned int n ## _len
+#define GDPHP_HASH_GET_CURRENT_KEY(ht,key,idx,pos) \
+  zend_hash_get_current_key_ex(ht, &key, &key ## _len, &idx, 0, &pos)
+#define GDPHP_HASH_GET_CURRENT_DATA(v,ht,pos) \
+  (zend_hash_get_current_data_ex(ht, (void*)&v, &pos) == SUCCESS)
+#define BOOL_CASE case IS_BOOL:
+#define gdphp_add_assoc_string(a,k,s) add_assoc_string((a),(k),(s),1)
+#define GDPHP_HASH_FIND(v,ht,key) GDPHP_HASH_FINDL((v),(ht),(key),strlen(key)+1)
+
+#define GDPHP_ZVAL zval*
+#define GDPHP_ZVAL_NULL(z) zval* z = NULL
+#define GDPHP_INIT_ZVAL ALLOC_INIT_ZVAL
+#define RZ(z) z
+#define GDPHP_PTR_DTOR(z) zval_ptr_dtor(&z)
+
+#define GDPHP_LONG long
+#define GDPHP_SLEN int
+#define ZPP_Z "Z"
+
+#endif
+
 
 /* PHP globals */
 ZEND_BEGIN_MODULE_GLOBALS(getdata)
@@ -56,9 +167,9 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 /* Common idioms */
+
 #define GDPHP_FETCH_DIRFILE(r, z) do { \
-  r = (gdphp_dirfile*)zend_fetch_resource(&(z) TSRMLS_CC, -1, "Dirfile", NULL, \
-      2, le_gdphp_dirfile, le_gdphp_dirfile_persist); \
+  r = (gdphp_dirfile*)gdphp_fetch_resource(z); \
   if (!r) { GDPHP_RETURN_F; } \
 } while(0)
 
@@ -95,8 +206,7 @@ PHP_INI_END()
   D = gdphp_dirfile_rsrc->D; \
 } while(0)
 
-#define dtracephp() dtrace("%i, %p, %p, %p, %i", ht, return_value, \
-    return_value_ptr, this_ptr, return_value_used)
+#define dtracephp() dtrace("..., %p, ...", return_value);
 
 struct gdphp_din {
   void *data;
@@ -154,7 +264,7 @@ typedef struct gdphp_dirfile_ {
   DIRFILE *D;
   char *callback;
   int callback_len;
-  zval **callback_data;
+  GDPHP_ZVALP callback_data;
   char *key;
   int key_len;
 
@@ -165,7 +275,7 @@ typedef struct gdphp_dirfile_ {
 int le_gdphp_dirfile;
 int le_gdphp_dirfile_persist;
 
-static void gdphp_dirfile_dtor(zend_rsrc_list_entry *z TSRMLS_DC)
+static void gdphp_dirfile_dtor(GDPHP_RESOURCE *z TSRMLS_DC)
 {
   dtracetsrm("%p", z);
 
@@ -175,15 +285,15 @@ static void gdphp_dirfile_dtor(zend_rsrc_list_entry *z TSRMLS_DC)
 
   if (r->callback)
     efree(r->callback);
-  if (r->callback_data && *(r->callback_data))
-    Z_DELREF_PP(r->callback_data);
+  if (r->callback_data && ZP(r->callback_data))
+    Z_DELREF_P(ZP(r->callback_data));
   efree(r->key);
   efree(r);
 
   dreturnvoid();
 }
 
-static void gdphp_dirfile_pdtor(zend_rsrc_list_entry *z TSRMLS_DC)
+static void gdphp_dirfile_pdtor(GDPHP_RESOURCE *z TSRMLS_DC)
 {
   dtracetsrm("%p", z);
 
@@ -194,7 +304,7 @@ static void gdphp_dirfile_pdtor(zend_rsrc_list_entry *z TSRMLS_DC)
   if (r->callback)
     pefree(r->callback, 1);
   if (r->callback_data)
-    Z_DELREF_PP(r->callback_data);
+    Z_DELREF_P(ZP(r->callback_data));
   pefree(r->key, 1);
   pefree(r, 1);
 
@@ -208,12 +318,24 @@ static int gdphp_callback(gd_parser_data_t *pdata, void *extra)
   int new_line = 0;
   char *ptr;
   gdphp_dirfile *r = (gdphp_dirfile*)extra;
-  zval *response;
-  zval *function_name;
   zval *zpdata;
+  GDPHP_ZVAL function_name;
+  GDPHP_ZVAL response;
+#if ZEND_MODULE_API_NO >= 20151012
+  zval params[2];
+#else
   zval **params[2] = { &zpdata, r->callback_data };
+#endif
 
   dtrace("%p, %p", pdata, r->callback_data);
+
+#if ZEND_MODULE_API_NO >= 20151012
+  zpdata = &params[0];
+  if (r->callback_data == NULL) 
+    ZVAL_UNDEF(params + 1);
+  else
+    ZVAL_COPY_VALUE(params + 1, r->callback_data);
+#endif
 
   if (r->callback == NULL) { /* nothing to do */
     dreturn("%i", GD_SYNTAX_ABORT);
@@ -223,33 +345,33 @@ static int gdphp_callback(gd_parser_data_t *pdata, void *extra)
   TSRMLS_FETCH();
 
   /* make a zval for the function name */
-  ALLOC_INIT_ZVAL(function_name);
-  ZVAL_STRINGL(function_name, r->callback, r->callback_len, 1);
+  GDPHP_INIT_ZVAL(function_name);
+  GDPHP_STRINGL(RZ(function_name), r->callback, r->callback_len);
 
   /* make a hashtable for the parser data */
-  ALLOC_INIT_ZVAL(zpdata);
+  GDPHP_INIT_ZVAL(zpdata);
   array_init(zpdata);
   add_assoc_long(zpdata, "suberror", pdata->suberror);
   add_assoc_long(zpdata, "linenum", pdata->linenum);
-  add_assoc_string(zpdata, "line", pdata->line, 1);
-  add_assoc_string(zpdata, "filename", (char*)pdata->filename, 1);
+  gdphp_add_assoc_string(zpdata, "line", pdata->line);
+  gdphp_add_assoc_string(zpdata, "filename", (char*)pdata->filename);
 
   /* call the callback */
-  if (call_user_function_ex(CG(function_table), NULL, function_name, &response,
-        2, params, 0, NULL TSRMLS_CC) != SUCCESS)
+  if (call_user_function_ex(CG(function_table), NULL, RZ(function_name),
+        &response, 2, params, 0, NULL TSRMLS_CC) != SUCCESS)
   {
     zend_error(E_ERROR, "Unable to execute GetData callback");
   }
 
-  zval_ptr_dtor(&function_name);
+  GDPHP_PTR_DTOR(function_name);
 
   /* interpret the response */
-  switch (Z_TYPE_P(response)) {
+  switch (Z_TYPE_P(RZ(response))) {
     case IS_LONG:
-      sem = (int)Z_LVAL_P(response);
+      sem = (int)Z_LVAL_P(RZ(response));
       break;
     case IS_STRING: /* this means rescan */
-      ptr = strdup(Z_STRVAL_P(response));
+      ptr = strdup(Z_STRVAL_P(RZ(response)));
       if (ptr == NULL)
         zend_error(E_ERROR, "Out of memory");
       pdata->line = ptr;
@@ -263,11 +385,9 @@ static int gdphp_callback(gd_parser_data_t *pdata, void *extra)
   /* copy the line out of the zpdata hash, if necessary and possible */
   if (sem == GD_SYNTAX_RESCAN && new_line == 0) {
     zval *line;
-    if (zend_hash_find(Z_ARRVAL_P(zpdata), "line", sizeof("line"),
-          (void**)&line) == SUCCESS)
-    {
+    if (GDPHP_HASH_FIND(line, Z_ARRVAL_P(zpdata), "line")) {
       if (Z_TYPE_P(line) == IS_STRING) {
-        ptr = strdup(Z_STRVAL_P(response));
+        ptr = strdup(Z_STRVAL_P(RZ(response)));
         if (ptr == NULL)
           zend_error(E_ERROR, "Out of memory");
         pdata->line = ptr;
@@ -275,7 +395,7 @@ static int gdphp_callback(gd_parser_data_t *pdata, void *extra)
     }
   }
 
-  zval_ptr_dtor(&zpdata);
+  zval_ptr_dtor(ZR(zpdata));
 
   dreturn("%i", sem);
   return sem;
@@ -283,7 +403,8 @@ static int gdphp_callback(gd_parser_data_t *pdata, void *extra)
 
 /* create a dirfile resource */
 static gdphp_dirfile *gdphp_open(const char *dirfilename, int len, long flags,
-    const char *callback, int callback_len, zval **callback_data, int persist)
+    const char *callback, int callback_len, GDPHP_ZVALP callback_data,
+    int persist)
 {
   gdphp_dirfile *r;
   DIRFILE *D;
@@ -306,7 +427,7 @@ static gdphp_dirfile *gdphp_open(const char *dirfilename, int len, long flags,
   }
 
   if (callback_data) {
-    Z_ADDREF_PP(callback_data);
+    Z_ADDREF_P(ZP(callback_data));
     r->callback_data = callback_data;
   }
 
@@ -332,7 +453,7 @@ static zval *gdphp_from_complex(zval *z, double r, double i)
   TSRMLS_FETCH();
 
   if (z == NULL)
-    ALLOC_INIT_ZVAL(z);
+    GDPHP_INIT_ZVAL(z);
 
   if (i == 0 && GDPHP_G(degrade_complex)) {
     ZVAL_DOUBLE(z, r);
@@ -350,9 +471,11 @@ static zval *gdphp_from_complex(zval *z, double r, double i)
 static void gdphp_add_assoc_complex(zval *z, const char *key, double r,
     double i)
 {
+  GDPHP_ZVAL_NULL(tmp);
+
   dtrace("%p, \"%s\", %g, %g", z, key, r, i);
 
-  add_assoc_zval(z, key, gdphp_from_complex(NULL, r, i));
+  add_assoc_zval(z, key, gdphp_from_complex(RZ(tmp), r, i));
 
   dreturnvoid();
 }
@@ -361,18 +484,20 @@ static void gdphp_add_assoc_complex(zval *z, const char *key, double r,
 static void gdphp_add_assoc_cmparray(zval *z, const char *key, double *l,
     int n)
 {
-  zval *a;
+  GDPHP_ZVAL a;
   int i;
+  GDPHP_ZVAL_NULL(tmp);
 
   dtrace("%p, \"%s\", %p, %i", z, key, l, n);
 
-  ALLOC_INIT_ZVAL(a);
-  array_init(a);
+  GDPHP_INIT_ZVAL(a);
+  array_init(RZ(a));
 
   for (i = 0; i < n; ++i)
-    add_index_zval(a, i, gdphp_from_complex(NULL, l[i * 2], l[i * 2 + 1]));
+    add_index_zval(RZ(a), i, gdphp_from_complex(RZ(tmp), l[i * 2],
+          l[i * 2 + 1]));
 
-  add_assoc_zval(z, key, a);
+  add_assoc_zval(z, key, RZ(a));
 
   dreturnvoid();
 }
@@ -381,18 +506,18 @@ static void gdphp_add_assoc_cmparray(zval *z, const char *key, double *l,
 static void gdphp_add_assoc_string_arr(zval *z, const char *key, char **l,
     int n)
 {
-  zval *a;
+  GDPHP_ZVAL a;
   int i;
 
   dtrace("%p, \"%s\", %p, %i", z, key, l, n);
 
-  ALLOC_INIT_ZVAL(a);
-  array_init(a);
+  GDPHP_INIT_ZVAL(a);
+  array_init(RZ(a));
 
   for (i = 0; i < n; ++i)
-    add_index_string(a, i, l[i], 1);
+    gdphp_add_index_string(RZ(a), i, l[i]);
 
-  add_assoc_zval(z, key, a);
+  add_assoc_zval(z, key, RZ(a));
 
   dreturnvoid();
 }
@@ -402,25 +527,25 @@ static void gdphp_add_assoc_scalars(zval *z, gd_entry_t *E, unsigned mask)
 {
   int i;
 
-  zval *scalar;
-  zval *lm;
+  GDPHP_ZVAL scalar;
+  GDPHP_ZVAL lm;
 
   dtrace("%p, %p, 0x%X", z, E, mask);
 
-  ALLOC_INIT_ZVAL(scalar);
-  array_init(scalar);
+  GDPHP_INIT_ZVAL(scalar);
+  array_init(RZ(scalar));
 
   for (i = 0; i <= GD_MAX_POLYORD; ++i)
     if (mask & (1 << i))
       if (E->scalar[i]) {
-        ALLOC_INIT_ZVAL(lm);
-        array_init(lm);
-        add_index_string(lm, 0, E->scalar[i], 1);
-        add_index_long(lm, 1, E->scalar_ind[i]);
-        add_index_zval(scalar, i, lm);
+        GDPHP_INIT_ZVAL(lm);
+        array_init(RZ(lm));
+        gdphp_add_index_string(RZ(lm), 0, E->scalar[i]);
+        add_index_long(RZ(lm), 1, E->scalar_ind[i]);
+        add_index_zval(RZ(scalar), i, RZ(lm));
       }
 
-  add_assoc_zval(z, "scalar", scalar);
+  add_assoc_zval(z, "scalar", RZ(scalar));
 
   dreturnvoid();
 }
@@ -432,7 +557,7 @@ static void gdphp_from_entry(zval *z, gd_entry_t *E)
   
   array_init(z);
 
-  add_assoc_string(z, "field", E->field, 1);
+  gdphp_add_assoc_string(z, "field", E->field);
   add_assoc_long(z, "field_type", E->field_type);
   add_assoc_long(z, "fragment_index", E->fragment_index);
   switch (E->field_type) {
@@ -461,7 +586,7 @@ static void gdphp_from_entry(zval *z, gd_entry_t *E)
       break;
     case GD_LINTERP_ENTRY:
       gdphp_add_assoc_string_arr(z, "in_fields", E->in_fields, 1);
-      add_assoc_string(z, "table", E->EN(linterp,table), 1);
+      gdphp_add_assoc_string(z, "table", E->EN(linterp,table));
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
@@ -571,14 +696,14 @@ static int gdphp_to_complex(double *r, double *i, zval *z, int complain,
   n = zend_hash_num_elements(a);
 
   if (n == 2) {
-    zval **d;
+    GDPHP_ZVALP d;
 
-    if (zend_hash_index_find(a, 0, (void**)&d) == SUCCESS)
-      if (gdphp_to_datum(r, GD_FLOAT64, *d, 0, ctx) == 0)
+    if (GDPHP_HASH_INDEX_FIND(d, a, 0))
+      if (gdphp_to_datum(r, GD_FLOAT64, ZP(d), 0, ctx) == 0)
         converted++;
 
-    if (zend_hash_index_find(a, 1, (void**)&d) == SUCCESS)
-      if (gdphp_to_datum(i, GD_FLOAT64, *d, 0, ctx) == 0)
+    if (GDPHP_HASH_INDEX_FIND(d, a, 1))
+      if (gdphp_to_datum(i, GD_FLOAT64, ZP(d), 0, ctx) == 0)
         converted++;
   }
 
@@ -605,8 +730,7 @@ static gd_type_t gdphp_get_type(zval *z, struct gdphp_context_t *ctx)
     case IS_NULL:
       t = GD_NULL;
       break;
-    case IS_LONG:
-    case IS_BOOL:
+    case IS_LONG: BOOL_CASE
       t = GD_INT64;
       break;
     case IS_DOUBLE:
@@ -626,7 +750,7 @@ static gd_type_t gdphp_get_type(zval *z, struct gdphp_context_t *ctx)
     switch (Z_TYPE_P(src)) { \
       double r, i; \
       case IS_NULL:               ((t*)dst)[0] = ((t*)dst)[1] = 0; break; \
-      case IS_LONG: case IS_BOOL: ((t*)dst)[0] = Z_LVAL_P(src); \
+      case IS_LONG: BOOL_CASE     ((t*)dst)[0] = Z_LVAL_P(src); \
                                   ((t*)dst)[1] = 0; break; \
       case IS_DOUBLE:             ((t*)dst)[0] = Z_DVAL_P(src); \
                                   ((t*)dst)[1] = 0; break; \
@@ -640,7 +764,7 @@ static gd_type_t gdphp_get_type(zval *z, struct gdphp_context_t *ctx)
   do { \
     switch (Z_TYPE_P(src)) { \
       double r, i; \
-      case IS_LONG: case IS_BOOL: *((t*)dst) = Z_LVAL_P(src); break; \
+      case IS_LONG: BOOL_CASE     *((t*)dst) = Z_LVAL_P(src); break; \
       case IS_DOUBLE:             *((t*)dst) = Z_DVAL_P(src); break; \
       case IS_ARRAY: gdphp_to_complex(&r, &i, src, 1, ctx); \
                      *((t*)dst) = r; break; \
@@ -684,7 +808,7 @@ static gd_type_t gdphp_to_datum_and_type(void *datum, zval *z,
 
   switch (Z_TYPE_P(z)) {
     case IS_LONG:
-      t = GDPHP_LONG;
+      t = GDPHP_LONG_TYPE;
       *((gdphp_long_t*)datum) = Z_LVAL_P(z);
       break;
     case IS_DOUBLE:
@@ -756,10 +880,9 @@ static int gdphp_convert_cmparray(double *out, zval *z, int min, int max,
 {
   HashTable *a = Z_ARRVAL_P(z);
   HashPosition i;
-  zval **d = NULL;
+  GDPHP_ZVALP d = NULL;
   int n = -1;
-  unsigned key_len;
-  char *key;
+  GDPHP_HASH_KEY_DECL(key);
   long index;
 
   int *have;
@@ -776,19 +899,17 @@ static int gdphp_convert_cmparray(double *out, zval *z, int min, int max,
 
   /* populate the C array */
   for (zend_hash_internal_pointer_reset_ex(a, &i);
-      zend_hash_get_current_data_ex(a, (void*)&d, &i) == SUCCESS;
+      GDPHP_HASH_GET_CURRENT_DATA(d, a, i);
       zend_hash_move_forward_ex(a, &i))
   {
     /* check key */
-    if (zend_hash_get_current_key_ex(a, &key, &key_len, (ulong*)&index, 0, &i)
-        == HASH_KEY_IS_STRING)
-    {
+    if (GDPHP_HASH_GET_CURRENT_KEY(a, key, index, i) == HASH_KEY_IS_STRING) {
       GDPHP_DIE(ctx, "cannot use associative array");
     } else if (index < 0 || index >= max)
       GDPHP_DIE2(ctx, "bad array index (%li)", index);
 
     if (!have[index]) {
-      gdphp_to_datum(out + index * 2, GD_COMPLEX128, *d, 1, ctx);
+      gdphp_to_datum(out + index * 2, GD_COMPLEX128, ZP(d), 1, ctx);
       have[index] = 1;
     }
   }
@@ -817,10 +938,9 @@ static int gdphp_convert_nsarray(char **out, zval *z, int min, int max,
 {
   HashTable *a = Z_ARRVAL_P(z);
   HashPosition i;
-  zval **d = NULL;
+  GDPHP_ZVALP d = NULL;
   int n = -1;
-  unsigned key_len;
-  char *key;
+  GDPHP_HASH_KEY_DECL(key);
   long index;
 
   dtracectx("%p, %p, %i, %i", out, z, min, max);
@@ -830,21 +950,20 @@ static int gdphp_convert_nsarray(char **out, zval *z, int min, int max,
 
   /* populate the C array */
   for (zend_hash_internal_pointer_reset_ex(a, &i);
-      zend_hash_get_current_data_ex(a, (void*)&d, &i) == SUCCESS;
+      GDPHP_HASH_GET_CURRENT_DATA(d, a, i);
       zend_hash_move_forward_ex(a, &i))
   {
     /* check key */
-    if (zend_hash_get_current_key_ex(a, &key, &key_len, (ulong*)&index, 0, &i)
-        == HASH_KEY_IS_STRING)
+    if (GDPHP_HASH_GET_CURRENT_KEY(a, key, index, i) == HASH_KEY_IS_STRING)
     {
       GDPHP_DIE(ctx, "cannot use associative array");
     } else if (index < 0 || index >= max)
       GDPHP_DIE2(ctx, "bad array index (%li)", index);
 
-    if (Z_TYPE_PP(d) != IS_STRING)
+    if (Z_TYPE_P(ZP(d)) != IS_STRING)
       GDPHP_DIE(ctx, "string array required");
 
-    out[index] = Z_STRVAL_PP(d);
+    out[index] = Z_STRVAL_P(ZP(d));
   }
 
   /* check for holes and calculate n */
@@ -868,9 +987,8 @@ static void gdphp_convert_array(struct gdphp_din *din, zval *zdata,
 {
   HashTable *a = Z_ARRVAL_P(zdata);
   HashPosition i;
-  zval **d = NULL;
-  char *key;
-  unsigned key_len;
+  GDPHP_ZVALP d = NULL;
+  GDPHP_HASH_KEY_DECL(key);
   long index;
 
   dtracectx("%p, %p", din, zdata);
@@ -879,13 +997,11 @@ static void gdphp_convert_array(struct gdphp_din *din, zval *zdata,
 
   /* pass 1: validate data and determine ns */
   for (zend_hash_internal_pointer_reset_ex(a, &i);
-      zend_hash_get_current_data_ex(a, (void*)&d, &i) == SUCCESS;
+      GDPHP_HASH_GET_CURRENT_DATA(d, a, i);
       zend_hash_move_forward_ex(a, &i))
   {
     /* make sure this isn't an associative array */
-    if (zend_hash_get_current_key_ex(a, &key, &key_len, (ulong*)&index, 0, &i)
-        == HASH_KEY_IS_STRING)
-    {
+    if (GDPHP_HASH_GET_CURRENT_KEY(a, key, index, i) == HASH_KEY_IS_STRING) {
       GDPHP_DIE(ctx, "cannot use associative arrays");
     } else if (index < 0) /* does zend_hash_get_current_key_ex return ulong
                              or a long? */
@@ -895,7 +1011,7 @@ static void gdphp_convert_array(struct gdphp_din *din, zval *zdata,
       din->ns = index + 1;
 
     if (din->type == GD_UNKNOWN) {
-        din->type = gdphp_get_type(*d, ctx);
+        din->type = gdphp_get_type(ZP(d), ctx);
         if (din->type == GD_UNKNOWN)
           GDPHP_DIE(ctx, "bad numeric type");
         else if (din->type == GD_NULL)
@@ -933,13 +1049,13 @@ static void gdphp_convert_array(struct gdphp_din *din, zval *zdata,
 
     /* pass 2: convert the data */
     for (zend_hash_internal_pointer_reset_ex(a, &i);
-        zend_hash_get_current_data_ex(a, (void*)&d, &i) == SUCCESS;
+        GDPHP_HASH_GET_CURRENT_DATA(d, a, i);
         zend_hash_move_forward_ex(a, &i))
     {
-      zend_hash_get_current_key_ex(a, &key, &key_len, (ulong*)&index, 0, &i);
+      GDPHP_HASH_GET_CURRENT_KEY(a, key, index, i);
 
       gdphp_to_datum(((char*)(din->data)) + index * GD_SIZE(din->type),
-          din->type, *d, 1, ctx);
+          din->type, ZP(d), 1, ctx);
     }
   }
 
@@ -1044,15 +1160,15 @@ static char *gdphp_convert_string(zval *z, struct gdphp_context_t *ctx)
 }
 
 static void gdphp_entry_complex(double *v, HashTable *a, const char *key,
-    size_t len, int partial, struct gdphp_context_t *ctx)
+    int partial, struct gdphp_context_t *ctx)
 {
-  zval **z;
+  GDPHP_ZVALP z;
 
-  dtracectx("%p, %p, \"%s\", %zu, %i", v, a, key, len, partial);
+  dtracectx("%p, %p, \"%s\", %i", v, a, key, partial);
 
-  if (zend_hash_find(a, key, len, (void**)&z) == SUCCESS) {
+  if (GDPHP_HASH_FIND(z, a, key)) {
     ctx->k = key;
-    gdphp_to_datum(v, GD_COMPLEX128, *z, 1, ctx);
+    gdphp_to_datum(v, GD_COMPLEX128, ZP(z), 1, ctx);
     ctx->k = NULL;
   } else if (!partial)
     GDPHP_DIE2(ctx, "required key '%s' not found", key);
@@ -1060,17 +1176,17 @@ static void gdphp_entry_complex(double *v, HashTable *a, const char *key,
   dreturnvoid();
 }
 
-static long gdphp_entry_long(HashTable *a, const char *key, size_t len,
-    int *missing, int partial, struct gdphp_context_t *ctx)
+static long gdphp_entry_long(HashTable *a, const char *key, int *missing,
+    int partial, struct gdphp_context_t *ctx)
 {
   long r = 0;
-  zval **z;
+  GDPHP_ZVALP z;
 
-  dtracectx("%p, \"%s\", %zu, %p, %i", a, key, len, missing, partial);
+  dtracectx("%p, \"%s\", %p, %i", a, key, missing, partial);
 
-  if (zend_hash_find(a, key, len, (void**)&z) == SUCCESS) {
+  if (GDPHP_HASH_FIND(z, a, key)) {
     ctx->k = key;
-    r = gdphp_convert_long(*z, ctx);
+    r = gdphp_convert_long(ZP(z), ctx);
     ctx->k = NULL;
     if (missing != NULL)
       *missing = 0;
@@ -1083,17 +1199,17 @@ static long gdphp_entry_long(HashTable *a, const char *key, size_t len,
   return r;
 }
 
-static double gdphp_entry_double(HashTable *a, const char *key, size_t len,
-    int partial, struct gdphp_context_t *ctx)
+static double gdphp_entry_double(HashTable *a, const char *key, int partial,
+    struct gdphp_context_t *ctx)
 {
   double r = 0;
-  zval **z;
+  GDPHP_ZVALP z;
 
-  dtracectx("%p, \"%s\", %zu, %i", a, key, len, partial);
+  dtracectx("%p, \"%s\", %i", a, key, partial);
 
-  if (zend_hash_find(a, key, len, (void**)&z) == SUCCESS) {
+  if (GDPHP_HASH_FIND(z, a, key)) {
     ctx->k = key;
-    r = gdphp_convert_double(*z, ctx);
+    r = gdphp_convert_double(ZP(z), ctx);
     ctx->k = NULL;
   } else if (!partial)
     GDPHP_DIE2(ctx, "required key '%s' not found", key);
@@ -1105,22 +1221,20 @@ static double gdphp_entry_double(HashTable *a, const char *key, size_t len,
 static int gdphp_entry_infields(char **l, HashTable *a, int min, int max,
     int partial, struct gdphp_context_t *ctx)
 {
-  zval **z;
   int n = 0;
+  GDPHP_ZVALP z;
 
   dtracectx("%p, %p, %i, %i, %i", l, a, min, max, partial);
 
-  if (zend_hash_find(a, "in_fields", sizeof("in_fields"), (void**)&z) ==
-      SUCCESS)
-  {
+  if (GDPHP_HASH_FIND(z, a, "in_fields")) {
     ctx->k = "in_fields";
-    if (Z_TYPE_PP(z) == IS_ARRAY)
-      n = gdphp_convert_nsarray(l, *z, min, max, ctx);
-    else if (Z_TYPE_PP(z) == IS_STRING) {
+    if (Z_TYPE_P(ZP(z)) == IS_ARRAY)
+      n = gdphp_convert_nsarray(l, ZP(z), min, max, ctx);
+    else if (Z_TYPE_P(ZP(z)) == IS_STRING) {
       if (min > 1)
         GDPHP_DIE(ctx, "bad string array count");
       n = 1;
-      l[0] = gdphp_convert_string(*z, ctx);
+      l[0] = gdphp_convert_string(ZP(z), ctx);
     } else
       GDPHP_DIE(ctx, "expected string or string array");
     ctx->k = NULL;
@@ -1131,24 +1245,23 @@ static int gdphp_entry_infields(char **l, HashTable *a, int min, int max,
   return n;
 }
 
-static int gdphp_entry_cmparray(double *l, HashTable *a, char *key, size_t len,
-    int min, int max, unsigned mask, int partial, struct gdphp_context_t *ctx)
+static int gdphp_entry_cmparray(double *l, HashTable *a, char *key, int min,
+    int max, unsigned mask, int partial, struct gdphp_context_t *ctx)
 {
-  zval **z;
   int n = 0;
+  GDPHP_ZVALP z;
 
-  dtracectx("%p, %p, \"%s\", %zu, %i, %i, 0x%X", l, a, key, len, min, max,
-      mask);
+  dtracectx("%p, %p, \"%s\", %i, %i, 0x%X", l, a, key, min, max, mask);
 
-  if (zend_hash_find(a, key, len, (void**)&z) == SUCCESS) {
+  if (GDPHP_HASH_FIND(z, a, key)) {
     ctx->k = key;
-    if (Z_TYPE_PP(z) == IS_ARRAY)
-      n = gdphp_convert_cmparray(l, *z, min, max, mask, ctx);
-    else if (Z_TYPE_PP(z) == IS_DOUBLE) {
+    if (Z_TYPE_P(ZP(z)) == IS_ARRAY)
+      n = gdphp_convert_cmparray(l, ZP(z), min, max, mask, ctx);
+    else if (Z_TYPE_P(ZP(z)) == IS_DOUBLE) {
       if (min > 1)
         GDPHP_DIE(ctx, "bad array count");
       n = 1;
-      l[0] = Z_DVAL_PP(z);
+      l[0] = Z_DVAL_P(ZP(z));
     } else
       GDPHP_DIE(ctx, "expected array or float");
     ctx->k = NULL;
@@ -1165,13 +1278,13 @@ static unsigned gdphp_entry_scalars(char** scalar, int *scalar_ind,
     HashTable *a, unsigned mask, struct gdphp_context_t *ctx)
 {
   unsigned mask_out = 0;
-  zval **z;
+  GDPHP_ZVALP z;
   int i;
 
   dtracectx("%p, %p, %p, 0x%X", scalar, scalar_ind, a, mask);
   
   /* find 'scalar' in the entry array */
-  if (zend_hash_find(a, "scalar", sizeof("scalar"), (void**)&z) != SUCCESS) {
+  if (!GDPHP_HASH_FIND(z, a, "scalar")) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1179,45 +1292,45 @@ static unsigned gdphp_entry_scalars(char** scalar, int *scalar_ind,
   ctx->k = "scalar";
 
   /* 'scalar' must be an array (or null) */
-  if (Z_TYPE_PP(z) == IS_NULL) {
+  if (z == NULL || Z_TYPE_P(ZP(z)) == IS_NULL) {
     ctx->k = NULL;
     dreturn("%i", 0);
     return 0;
-  } else if (Z_TYPE_PP(z) != IS_ARRAY)
+  } else if (Z_TYPE_P(ZP(z)) != IS_ARRAY)
     GDPHP_DIE(ctx, "expected array");
 
   /* loop through the array of scalars */
-  a = Z_ARRVAL_PP(z);
+  a = Z_ARRVAL_P(ZP(z));
   for (i = 0; i < 2 * GD_MAX_LINCOM; ++i) {
     if (!(mask & (1 << i)))
       continue;
 
     /* get the i'th scalar array element */
     ctx->i = i;
-    if (zend_hash_index_find(a, i, (void**)&z) == SUCCESS) {
+    if (GDPHP_HASH_INDEX_FIND(z, a,i)) {
       HashTable *sa;
 
-      if (Z_TYPE_PP(z) == IS_NULL)
+      if (Z_TYPE_P(ZP(z)) == IS_NULL)
         continue;
-      if (Z_TYPE_PP(z) != IS_ARRAY)
+      if (Z_TYPE_P(ZP(z)) != IS_ARRAY)
         GDPHP_DIE(ctx, "expected array");
 
-      sa = Z_ARRVAL_PP(z);
+      sa = Z_ARRVAL_P(ZP(z));
 
       /* element zero should be the name of a scalar field. */
-      if (zend_hash_index_find(sa, 0, (void**)&z) == SUCCESS) {
-        if (Z_TYPE_PP(z) != IS_STRING)
+      if (GDPHP_HASH_INDEX_FIND(z, sa, 0)) {
+        if (Z_TYPE_P(ZP(z)) != IS_STRING)
           GDPHP_DIE(ctx, "expected scalar field name");
-        scalar[i] = Z_STRVAL_PP(z);
+        scalar[i] = Z_STRVAL_P(ZP(z));
       } else
-        GDPHP_DIE(ctx, "element zero of should be scalar field name");
+        GDPHP_DIE(ctx, "element zero should be scalar field name");
 
       mask_out |= 1 << i;
 
       /* element one should be the index; if missing zero is assumed */
-      if (zend_hash_index_find(sa, 1, (void**)&z) == SUCCESS) {
-        convert_to_long(*z); /* coerce */
-        scalar_ind[i] = Z_LVAL_PP(z);
+      if (GDPHP_HASH_INDEX_FIND(z, sa, 1)) {
+        convert_to_long(ZP(z)); /* coerce */
+        scalar_ind[i] = Z_LVAL_P(ZP(z));
       } else
         scalar_ind[i] = 0;
     }
@@ -1229,17 +1342,17 @@ static unsigned gdphp_entry_scalars(char** scalar, int *scalar_ind,
   return mask_out;
 }
 
-static char *gdphp_entry_string(HashTable *a, const char *key,
-    size_t len, int partial, struct gdphp_context_t *ctx)
+static char *gdphp_entry_string(HashTable *a, const char *key, int partial,
+    struct gdphp_context_t *ctx)
 {
   char *s = NULL;
-  zval **z;
+  GDPHP_ZVALP z;
   
-  dtracectx("%p, \"%s\", %zu, %i", a, key, len, partial);
+  dtracectx("%p, \"%s\", %i", a, key, partial);
 
-  if (zend_hash_find(a, key, len, (void**)&z) == SUCCESS) {
+  if (GDPHP_HASH_FIND(z, a, key)) {
     ctx->k = key;
-    s = gdphp_convert_string(*z, ctx);
+    s = gdphp_convert_string(ZP(z), ctx);
     ctx->k = NULL;
   } else if (!partial)
     GDPHP_DIE2(ctx, "required key '%s' not found", key);
@@ -1268,16 +1381,15 @@ static void gdphp_to_entry(gd_entry_t *E, zval *z, const gd_entry_t *old_E,
     memset(E, 0, sizeof(gd_entry_t));
 
   if (!partial)
-    E->field = gdphp_entry_string(a, "field", sizeof("field"), partial, ctx);
+    E->field = gdphp_entry_string(a, "field", partial, ctx);
 
-  E->field_type = gdphp_entry_long(a, "field_type", sizeof("field_type"), NULL,
-      partial, ctx);
+  E->field_type = gdphp_entry_long(a, "field_type", NULL, partial, ctx);
 
   if (no_fragment)
     E->fragment_index = 0;
   else
-    E->fragment_index = gdphp_entry_long(a, "fragment_index",
-        sizeof("fragment_index"), NULL, partial, ctx);
+    E->fragment_index = gdphp_entry_long(a, "fragment_index", NULL, partial,
+        ctx);
 
 
   switch (E->field_type) {
@@ -1288,29 +1400,27 @@ static void gdphp_to_entry(gd_entry_t *E, zval *z, const gd_entry_t *old_E,
       mask = gdphp_entry_scalars(E->scalar, E->scalar_ind, a, 3, ctx);
 
       if (!(mask & 1))
-        E->EN(bit,bitnum) = gdphp_entry_long(a, "bitnum", sizeof("bitnum"),
-            NULL, partial, ctx);
+        E->EN(bit,bitnum) = gdphp_entry_long(a, "bitnum", NULL, partial, ctx);
 
       if (!(mask & 2)) {
-        E->EN(bit,numbits) = gdphp_entry_long(a, "numbits", sizeof("numbits"),
-            &missing, partial, ctx);
+        E->EN(bit,numbits) = gdphp_entry_long(a, "numbits", &missing, partial,
+            ctx);
 
         if (missing && !partial)
           E->EN(bit,numbits) = 1;
       }
       break;
     case GD_CARRAY_ENTRY:
-      E->EN(scalar,array_len) = gdphp_entry_long(a, "array_len",
-          sizeof("array_len"), NULL, partial, ctx);
+      E->EN(scalar,array_len) = gdphp_entry_long(a, "array_len", NULL, partial,
+          ctx);
       /* FALLTHROUGH */
     case GD_CONST_ENTRY:
-      E->EN(scalar,const_type) = gdphp_entry_long(a, "const_type",
-          sizeof("const_type"), NULL, partial, ctx);
+      E->EN(scalar,const_type) = gdphp_entry_long(a, "const_type", NULL,
+          partial, ctx);
       break;
     case GD_LINCOM_ENTRY:
       /* honour n_fields, if given */
-      n = gdphp_entry_long(a, "n_fields", sizeof("n_fields"), &missing,
-          partial, ctx);
+      n = gdphp_entry_long(a, "n_fields", &missing, partial, ctx);
       if (missing) {
         min = 1;
         max = GD_MAX_LINCOM;
@@ -1332,31 +1442,30 @@ static void gdphp_to_entry(gd_entry_t *E, zval *z, const gd_entry_t *old_E,
       tmask = (1 << max) - 1;
 
       if ((mask & tmask) != tmask)
-        gdphp_entry_cmparray((double*)E->EN(lincom,cm), a, "m", sizeof("m"),
-            min, max, mask, partial, ctx);
+        gdphp_entry_cmparray((double*)E->EN(lincom,cm), a, "m", min, max, mask,
+            partial, ctx);
 
       if (((mask >> GD_MAX_LINCOM) & tmask) != tmask)
-        gdphp_entry_cmparray((double*)E->EN(lincom,cb), a, "b", sizeof("m"),
-            min, max, mask >> GD_MAX_LINCOM, partial, ctx);
+        gdphp_entry_cmparray((double*)E->EN(lincom,cb), a, "b", min, max,
+            mask >> GD_MAX_LINCOM, partial, ctx);
       else
         E->EN(lincom,n_fields) = max;
       break;
     case GD_LINTERP_ENTRY:
       gdphp_entry_infields((char**)E->in_fields, a, 1, 1, partial, ctx);
-      E->EN(linterp,table) = gdphp_entry_string(a, "table", sizeof("table"),
-          partial, ctx);
+      E->EN(linterp,table) = gdphp_entry_string(a, "table", partial, ctx);
       break;
     case GD_MPLEX_ENTRY:
       gdphp_entry_infields((char**)E->in_fields, a, 2, 2, partial, ctx);
       mask = gdphp_entry_scalars(E->scalar, E->scalar_ind, a, 3, ctx);
 
       if (!(mask & 1))
-        E->EN(mplex,count_val) = gdphp_entry_long(a, "count_val",
-            sizeof("count_val"), NULL, partial, ctx);
+        E->EN(mplex,count_val) = gdphp_entry_long(a, "count_val", NULL, partial,
+            ctx);
       
       if (!(mask & 2)) {
-        E->EN(mplex,period) = gdphp_entry_long(a, "period", sizeof("period"),
-            &missing, partial, ctx);
+        E->EN(mplex,period) = gdphp_entry_long(a, "period", &missing, partial,
+            ctx);
 
         if (missing)
           E->EN(mplex,period) = 0;
@@ -1370,13 +1479,11 @@ static void gdphp_to_entry(gd_entry_t *E, zval *z, const gd_entry_t *old_E,
       gdphp_entry_infields((char**)E->in_fields, a, 1, 1, partial, ctx);
       mask = gdphp_entry_scalars(E->scalar, E->scalar_ind, a, 1, ctx);
       if (!(mask & 1))
-        E->EN(phase,shift) = gdphp_entry_long(a, "shift", sizeof("shift"), NULL,
-            partial, ctx);
+        E->EN(phase,shift) = gdphp_entry_long(a, "shift", NULL, partial, ctx);
       break;
     case GD_POLYNOM_ENTRY:
       /* honour poly_ord, if given */
-      n = gdphp_entry_long(a, "poly_ord", sizeof("poly_ord"), &missing, partial,
-          ctx);
+      n = gdphp_entry_long(a, "poly_ord", &missing, partial, ctx);
       if (missing) {
         min = 2;
         max = GD_MAX_POLYORD + 1;
@@ -1394,16 +1501,15 @@ static void gdphp_to_entry(gd_entry_t *E, zval *z, const gd_entry_t *old_E,
       tmask = (1 << max) - 1;
       if ((mask & tmask) != tmask)
         E->EN(polynom,poly_ord) =
-          gdphp_entry_cmparray((double*)E->EN(polynom,ca), a, "a", sizeof("a"),
-            min, max, mask, partial, ctx) - 1;
+          gdphp_entry_cmparray((double*)E->EN(polynom,ca), a, "a", min, max,
+              mask, partial, ctx) - 1;
       else
         E->EN(polynom,poly_ord) = max - 1;
       break;
     case GD_RAW_ENTRY:
-      E->EN(raw,data_type) = gdphp_entry_long(a, "data_type",
-          sizeof("data_type"), NULL, partial, ctx);
-      E->EN(raw,spf) = gdphp_entry_long(a, "spf", sizeof("spf"), NULL, partial,
+      E->EN(raw,data_type) = gdphp_entry_long(a, "data_type", NULL, partial,
           ctx);
+      E->EN(raw,spf) = gdphp_entry_long(a, "spf", NULL, partial, ctx);
       break;
     case GD_RECIP_ENTRY:
       gdphp_entry_infields((char**)E->in_fields, a, 1, 1, partial, ctx);
@@ -1411,7 +1517,7 @@ static void gdphp_to_entry(gd_entry_t *E, zval *z, const gd_entry_t *old_E,
       E->flags |= GD_EN_COMPSCAL;
       if (!(mask & 1))
         gdphp_entry_complex((double*)gd_csp_(E->EN(recip,cdividend)), a,
-            "dividend", sizeof("dividend"), partial, ctx);
+            "dividend", partial, ctx);
       break;
     case GD_STRING_ENTRY:
       /* nothing to do */
@@ -1419,23 +1525,22 @@ static void gdphp_to_entry(gd_entry_t *E, zval *z, const gd_entry_t *old_E,
     case GD_WINDOW_ENTRY:
       gdphp_entry_infields((char**)E->in_fields, a, 2, 2, partial, ctx);
       mask = gdphp_entry_scalars(E->scalar, E->scalar_ind, a, 1, ctx);
-      E->EN(window,windop) = gdphp_entry_long(a, "windop", sizeof("windop"),
-          NULL, partial, ctx);
+      E->EN(window,windop) = gdphp_entry_long(a, "windop", NULL, partial, ctx);
       if (!(mask & 1))
         switch (E->EN(window,windop)) {
           case GD_WINDOP_EQ:
           case GD_WINDOP_NE:
-            E->EN(window,threshold.i) = gdphp_entry_long(a, "threshold",
-                sizeof("threshold"), NULL, partial, ctx);
+            E->EN(window,threshold.i) = gdphp_entry_long(a, "threshold", NULL,
+                partial, ctx);
             break;
           case GD_WINDOP_SET:
           case GD_WINDOP_CLR:
-            E->EN(window,threshold.u) = gdphp_entry_long(a, "threshold",
-                sizeof("threshold"), NULL, partial, ctx);
+            E->EN(window,threshold.u) = gdphp_entry_long(a, "threshold", NULL,
+                partial, ctx);
             break;
           default:
             E->EN(window,threshold.r) = gdphp_entry_double(a, "threshold",
-                sizeof("threshold"), partial, ctx);
+                partial, ctx);
             break;
         }
       break;
@@ -1455,7 +1560,7 @@ static zval *gdphp_to_string_array(zval *z, const char **l, int n)
   dtrace("%p, %p, %i", z, l, n);
 
   if (z == NULL)
-    ALLOC_INIT_ZVAL(z);
+    GDPHP_INIT_ZVAL(z);
 
   array_init(z);
 
@@ -1463,7 +1568,7 @@ static zval *gdphp_to_string_array(zval *z, const char **l, int n)
     if (l[i] == NULL)
       add_index_null(z, i);
     else
-      add_index_string(z, i, l[i], 1);
+      gdphp_add_index_string(z, i, l[i]);
 
   dreturn("%p", z);
   return z;
@@ -1570,14 +1675,18 @@ static void gdphp_data_to_array(zval *a, const void *data, gd_type_t type,
         add_index_double(a, i, ((double*)(data))[i]);
       break;
     case GD_COMPLEX64:
-      for (i = 0; i < n; ++i)
-        add_index_zval(a, i, gdphp_from_complex(NULL, ((float*)(data))[i * 2],
-              ((float*)(data))[i * 2 + 1]));
+      for (i = 0; i < n; ++i) {
+        GDPHP_ZVAL_NULL(tmp);
+        add_index_zval(a, i, gdphp_from_complex(RZ(tmp),
+              ((float*)(data))[i * 2], ((float*)(data))[i * 2 + 1]));
+        }
       break;
     case GD_COMPLEX128:
-      for (i = 0; i < n; ++i)
-        add_index_zval(a, i, gdphp_from_complex(NULL, ((double*)(data))[i * 2],
-              ((double*)(data))[i * 2 + 1]));
+      for (i = 0; i < n; ++i) {
+        GDPHP_ZVAL_NULL(tmp);
+        add_index_zval(a, i, gdphp_from_complex(RZ(tmp),
+              ((double*)(data))[i * 2], ((double*)(data))[i * 2 + 1]));
+      }
       break;
     default:
       /* fill with nulls */
@@ -1595,7 +1704,7 @@ static zval *gdphp_from_data(zval *z, size_t n, gd_type_t data_type, void *data,
   dtrace("%p, %zu, 0x%X, %p, %i, %i", z, n, data_type, data, duplicate, unpack);
 
   if (z == NULL)
-    ALLOC_INIT_ZVAL(z);
+    GDPHP_INIT_ZVAL(z);
 
   if (unpack) {
     array_init(z);
@@ -1607,11 +1716,8 @@ static zval *gdphp_from_data(zval *z, size_t n, gd_type_t data_type, void *data,
       if (!duplicate)
         efree(data);
       ZVAL_EMPTY_STRING(z);
-    } else {
-      if (!duplicate)
-        data = erealloc(data, n * GD_SIZE(data_type)); /* trim excess */
-      ZVAL_STRINGL(z, data, n * GD_SIZE(data_type), duplicate);
-    }
+    } else
+      GDPHP_COPY_DATA(z, data, n * GD_SIZE(data_type), duplicate);
   }
 
   dreturn("%p", z);
@@ -1620,7 +1726,7 @@ static zval *gdphp_from_data(zval *z, size_t n, gd_type_t data_type, void *data,
 
 /* convert a zval to a long, with null checking - unfortunately PHP
  * automatically converts nulls passed as longs into zero */
-static int gdphp_long_from_zval_null(zval *z, long dflt)
+static long gdphp_long_from_zval_null(zval *z, long dflt)
 {
   long v = dflt;
 
@@ -1636,9 +1742,9 @@ static int gdphp_long_from_zval_null(zval *z, long dflt)
 }
 
 /* get the unpack value */
-static zend_bool gdphp_unpack(zval *z)
+static int gdphp_unpack(zval *z)
 {
-  zend_bool unpack;
+  int unpack;
 
   dtrace("%p", z);
 
@@ -1679,10 +1785,8 @@ PHP_MINIT_FUNCTION(getdata)
   gdphp_register_constants(module_number);
 
   /* conveniences */
-  zend_register_long_constant(ZEND_STRS("GD_INT"), GDPHP_LONG, CONST_CS,
-      module_number TSRMLS_CC);
-  zend_register_long_constant(ZEND_STRS("GD_FLOAT"), GD_FLOAT64, CONST_CS,
-      module_number TSRMLS_CC);
+  GDPHP_REGISTER_LONG_CONSTANT("GD_FLOAT", GD_FLOAT64, module_number);
+  GDPHP_REGISTER_LONG_CONSTANT("GD_INT", GDPHP_LONG_TYPE, module_number);
 
   /* dirfile resource */
   le_gdphp_dirfile = zend_register_list_destructors_ex(gdphp_dirfile_dtor, NULL,
@@ -1740,8 +1844,8 @@ PHP_FUNCTION(gd_add)
 PHP_FUNCTION(gd_add_alias)
 {
   char *field_code, *target;
-  int field_code_len, target_len;
-  long index = 0;
+  GDPHP_SLEN field_code_len, target_len;
+  GDPHP_LONG index = 0;
 
   DIRFILE *D;
 
@@ -1756,8 +1860,8 @@ PHP_FUNCTION(gd_add_alias)
 PHP_FUNCTION(gd_add_bit)
 {
   char *field_code, *in_field;
-  int field_code_len, in_field_len;
-  long bitnum, index = 0;
+  GDPHP_SLEN field_code_len, in_field_len;
+  GDPHP_LONG bitnum, index = 0;
   zval *znumbits = NULL;
 
   int numbits;
@@ -1777,8 +1881,8 @@ PHP_FUNCTION(gd_add_bit)
 PHP_FUNCTION(gd_add_carray)
 {
   char *field_code;
-  int field_code_len;
-  long data_type;
+  GDPHP_SLEN field_code_len;
+  GDPHP_LONG data_type;
   zval *z1, *z2 = NULL, *z3 = NULL;
   DIRFILE *D;
 
@@ -1824,8 +1928,8 @@ PHP_FUNCTION(gd_add_carray)
 PHP_FUNCTION(gd_add_const)
 {
   char *field_code;
-  int field_code_len;
-  long data_type, index = 0;
+  GDPHP_SLEN field_code_len;
+  GDPHP_LONG data_type, index = 0;
   zval *z;
 
   DIRFILE *D;
@@ -1846,8 +1950,8 @@ PHP_FUNCTION(gd_add_const)
 PHP_FUNCTION(gd_add_divide)
 {
   char *field_code, *in1, *in2;
-  int field_code_len, in1_len, in2_len;
-  long index = 0;
+  GDPHP_SLEN field_code_len, in1_len, in2_len;
+  GDPHP_LONG index = 0;
 
   DIRFILE *D;
 
@@ -1862,8 +1966,8 @@ PHP_FUNCTION(gd_add_divide)
 PHP_FUNCTION(gd_add_lincom)
 {
   char *field_code;
-  int field_code_len;
-  long index = 0;
+  GDPHP_SLEN field_code_len;
+  GDPHP_LONG index = 0;
   zval *zin, *zm, *zb;
 
   char *in[GD_MAX_LINCOM];
@@ -1893,8 +1997,8 @@ PHP_FUNCTION(gd_add_lincom)
 PHP_FUNCTION(gd_add_linterp)
 {
   char *field_code, *in_field, *table;
-  int field_code_len, in_field_len, table_len;
-  long index = 0;
+  GDPHP_SLEN field_code_len, in_field_len, table_len;
+  GDPHP_LONG index = 0;
 
   DIRFILE *D;
 
@@ -1909,8 +2013,8 @@ PHP_FUNCTION(gd_add_linterp)
 PHP_FUNCTION(gd_add_mplex)
 {
   char *field_code, *in1, *in2;
-  int field_code_len, in1_len, in2_len;
-  long count, period = 0, index = 0;
+  GDPHP_SLEN field_code_len, in1_len, in2_len;
+  GDPHP_LONG count, period = 0, index = 0;
 
   DIRFILE *D;
 
@@ -1926,8 +2030,8 @@ PHP_FUNCTION(gd_add_mplex)
 PHP_FUNCTION(gd_add_multiply)
 {
   char *field_code, *in1, *in2;
-  int field_code_len, in1_len, in2_len;
-  long index = 0;
+  GDPHP_SLEN field_code_len, in1_len, in2_len;
+  GDPHP_LONG index = 0;
 
   DIRFILE *D;
 
@@ -1942,8 +2046,8 @@ PHP_FUNCTION(gd_add_multiply)
 PHP_FUNCTION(gd_add_phase)
 {
   char *field_code, *in_field;
-  int field_code_len, in_field_len;
-  long shift, index = 0;
+  GDPHP_SLEN field_code_len, in_field_len;
+  GDPHP_LONG shift, index = 0;
 
   DIRFILE *D;
 
@@ -1958,8 +2062,8 @@ PHP_FUNCTION(gd_add_phase)
 PHP_FUNCTION(gd_add_polynom)
 {
   char *field_code, *in_field;
-  int field_code_len, in_field_len;
-  long index = 0;
+  GDPHP_SLEN field_code_len, in_field_len;
+  GDPHP_LONG index = 0;
   zval *za;
 
   double a[2 * (GD_MAX_POLYORD + 1)];
@@ -1983,8 +2087,8 @@ PHP_FUNCTION(gd_add_polynom)
 PHP_FUNCTION(gd_add_raw)
 {
   char *field_code;
-  int field_code_len;
-  long data_type, spf, index = 0;
+  GDPHP_SLEN field_code_len;
+  GDPHP_LONG data_type, spf, index = 0;
 
   DIRFILE *D;
 
@@ -1999,9 +2103,9 @@ PHP_FUNCTION(gd_add_raw)
 PHP_FUNCTION(gd_add_recip)
 {
   char *field_code, *in_field;
-  int field_code_len, in_field_len;
+  GDPHP_SLEN field_code_len, in_field_len;
   zval *zdividend;
-  long index = 0;
+  GDPHP_LONG index = 0;
 
   double dividend[2];
   DIRFILE *D;
@@ -2020,8 +2124,8 @@ PHP_FUNCTION(gd_add_recip)
 PHP_FUNCTION(gd_add_sbit)
 {
   char *field_code, *in_field;
-  int field_code_len, in_field_len;
-  long bitnum, index = 0;
+  GDPHP_SLEN field_code_len, in_field_len;
+  GDPHP_LONG bitnum, index = 0;
   zval *znumbits = NULL;
 
   int numbits;
@@ -2041,8 +2145,8 @@ PHP_FUNCTION(gd_add_sbit)
 PHP_FUNCTION(gd_add_spec)
 {
   char *spec;
-  int spec_len;
-  long index = 0;
+  GDPHP_SLEN spec_len;
+  GDPHP_LONG index = 0;
 
   DIRFILE *D;
 
@@ -2056,8 +2160,8 @@ PHP_FUNCTION(gd_add_spec)
 PHP_FUNCTION(gd_add_string)
 {
   char *field_code, *value;
-  int field_code_len, value_len;
-  long index = 0;
+  GDPHP_SLEN field_code_len, value_len;
+  GDPHP_LONG index = 0;
 
   DIRFILE *D;
 
@@ -2072,8 +2176,8 @@ PHP_FUNCTION(gd_add_string)
 PHP_FUNCTION(gd_add_window)
 {
   char *field_code, *in1, *in2;
-  int field_code_len, in1_len, in2_len;
-  long windop, index = 0;
+  GDPHP_SLEN field_code_len, in1_len, in2_len;
+  GDPHP_LONG windop, index = 0;
   zval *zthreshold;
 
   gd_triplet_t threshold;
@@ -2094,7 +2198,7 @@ PHP_FUNCTION(gd_add_window)
 PHP_FUNCTION(gd_alias_target)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   const char *s;
@@ -2109,13 +2213,13 @@ PHP_FUNCTION(gd_alias_target)
     GDPHP_RETURN_F;
 
   dreturn("\"%s\"", s);
-  RETURN_STRING(s, 1);
+  GDPHP_RET_STR_COPY(s);
 }
 
 PHP_FUNCTION(gd_aliases)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   const char **fl;
@@ -2137,7 +2241,7 @@ PHP_FUNCTION(gd_aliases)
 PHP_FUNCTION(gd_alter_affixes)
 {
   zval *zprefix, *zsuffix;
-  long index;
+  GDPHP_LONG index;
   
   char *prefix = NULL, *suffix = NULL;
   DIRFILE *D;
@@ -2162,8 +2266,8 @@ PHP_FUNCTION(gd_alter_affixes)
 PHP_FUNCTION(gd_alter_bit)
 {
   char *field_code, *in_field = NULL;
-  int field_code_len, in_field_len;
-  long numbits = 0;
+  GDPHP_SLEN field_code_len, in_field_len;
+  GDPHP_LONG numbits = 0;
   zval *zbitnum = NULL;
 
   DIRFILE *D;
@@ -2185,8 +2289,8 @@ PHP_FUNCTION(gd_alter_bit)
 PHP_FUNCTION(gd_alter_carray)
 {
   char *field_code;
-  int field_code_len;
-  long type = GD_NULL, len = 0;
+  GDPHP_SLEN field_code_len;
+  GDPHP_LONG type = GD_NULL, len = 0;
 
   DIRFILE *D;
 
@@ -2200,8 +2304,8 @@ PHP_FUNCTION(gd_alter_carray)
 PHP_FUNCTION(gd_alter_const)
 {
   char *field_code;
-  int field_code_len;
-  long type = GD_NULL;
+  GDPHP_SLEN field_code_len;
+  GDPHP_LONG type = GD_NULL;
 
   DIRFILE *D;
 
@@ -2214,7 +2318,7 @@ PHP_FUNCTION(gd_alter_const)
 
 PHP_FUNCTION(gd_alter_encoding)
 {
-  long e, i;
+  GDPHP_LONG e, i;
   zend_bool recode = 0;
 
   DIRFILE *D;
@@ -2228,7 +2332,7 @@ PHP_FUNCTION(gd_alter_encoding)
 
 PHP_FUNCTION(gd_alter_endianness)
 {
-  long e, i;
+  GDPHP_LONG e, i;
   zend_bool recode = 0;
 
   DIRFILE *D;
@@ -2243,7 +2347,7 @@ PHP_FUNCTION(gd_alter_endianness)
 PHP_FUNCTION(gd_alter_entry)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
   zend_bool recode = 0;
   zval *z;
 
@@ -2268,7 +2372,7 @@ PHP_FUNCTION(gd_alter_entry)
 
 PHP_FUNCTION(gd_alter_frameoffset)
 {
-  long i, o;
+  GDPHP_LONG i, o;
   zend_bool recode = 0;
 
   DIRFILE *D;
@@ -2283,7 +2387,7 @@ PHP_FUNCTION(gd_alter_frameoffset)
 PHP_FUNCTION(gd_alter_divide)
 {
   char *field_code, *in_field1 = NULL, *in_field2 = NULL;
-  int field_code_len, in_field1_len, in_field2_len;
+  GDPHP_SLEN field_code_len, in_field1_len, in_field2_len;
   
   DIRFILE *D;
   char *in_field1p, *in_field2p;
@@ -2302,8 +2406,8 @@ PHP_FUNCTION(gd_alter_divide)
 PHP_FUNCTION(gd_alter_lincom)
 {
   char *field_code;
-  int field_code_len;
-  long n = 0;
+  GDPHP_SLEN field_code_len;
+  GDPHP_LONG n = 0;
   zval *zin = NULL, *zm = NULL, *zb = NULL;
 
   DIRFILE *D;
@@ -2368,7 +2472,7 @@ PHP_FUNCTION(gd_alter_lincom)
 PHP_FUNCTION(gd_alter_linterp)
 {
   char *field_code, *in_field = NULL, *table = NULL;
-  int field_code_len, in_field_len, table_len;
+  GDPHP_SLEN field_code_len, in_field_len, table_len;
   zend_bool rename = 0;
   
   DIRFILE *D;
@@ -2388,7 +2492,7 @@ PHP_FUNCTION(gd_alter_linterp)
 PHP_FUNCTION(gd_alter_mplex)
 {
   char *field_code, *in_field1 = NULL, *in_field2 = NULL;
-  int field_code_len, in_field1_len, in_field2_len;
+  GDPHP_SLEN field_code_len, in_field1_len, in_field2_len;
   zval *zcount_val = NULL, *zperiod = NULL;
   
   DIRFILE *D;
@@ -2423,7 +2527,7 @@ PHP_FUNCTION(gd_alter_mplex)
 PHP_FUNCTION(gd_alter_multiply)
 {
   char *field_code, *in_field1 = NULL, *in_field2 = NULL;
-  int field_code_len, in_field1_len, in_field2_len;
+  GDPHP_SLEN field_code_len, in_field1_len, in_field2_len;
   
   DIRFILE *D;
   char *in_field1p, *in_field2p;
@@ -2442,7 +2546,7 @@ PHP_FUNCTION(gd_alter_multiply)
 PHP_FUNCTION(gd_alter_phase)
 {
   char *field_code, *in_field = NULL;
-  int field_code_len, in_field_len;
+  GDPHP_SLEN field_code_len, in_field_len;
   zval *zshift = NULL;
   
   DIRFILE *D;
@@ -2476,8 +2580,8 @@ PHP_FUNCTION(gd_alter_phase)
 PHP_FUNCTION(gd_alter_polynom)
 {
   char *field_code, *in_field = NULL;
-  int field_code_len, in_field_len;
-  long o = 0;
+  GDPHP_SLEN field_code_len, in_field_len;
+  GDPHP_LONG o = 0;
   zval *za = NULL;
 
   DIRFILE *D;
@@ -2515,7 +2619,7 @@ PHP_FUNCTION(gd_alter_polynom)
 
 PHP_FUNCTION(gd_alter_protection)
 {
-  long p, i;
+  GDPHP_LONG p, i;
 
   DIRFILE *D;
 
@@ -2529,8 +2633,8 @@ PHP_FUNCTION(gd_alter_protection)
 PHP_FUNCTION(gd_alter_raw)
 {
   char *field_code;
-  int field_code_len;
-  long type = GD_NULL, spf = 0;
+  GDPHP_SLEN field_code_len;
+  GDPHP_LONG type = GD_NULL, spf = 0;
   zend_bool recode = 0;
 
   DIRFILE *D;
@@ -2545,7 +2649,7 @@ PHP_FUNCTION(gd_alter_raw)
 PHP_FUNCTION(gd_alter_recip)
 {
   char *field_code, *in_field = NULL;
-  int field_code_len, in_field_len;
+  GDPHP_SLEN field_code_len, in_field_len;
   zval *zdividend = NULL;
 
   DIRFILE *D;
@@ -2571,8 +2675,8 @@ PHP_FUNCTION(gd_alter_recip)
 PHP_FUNCTION(gd_alter_sbit)
 {
   char *field_code, *in_field = NULL;
-  int field_code_len, in_field_len;
-  long numbits = 0;
+  GDPHP_SLEN field_code_len, in_field_len;
+  GDPHP_LONG numbits = 0;
   zval *zbitnum = NULL;
 
   DIRFILE *D;
@@ -2594,7 +2698,7 @@ PHP_FUNCTION(gd_alter_sbit)
 PHP_FUNCTION(gd_alter_spec)
 {
   char *spec;
-  int spec_len;
+  GDPHP_SLEN spec_len;
   zend_bool recode = 0;
 
   DIRFILE *D;
@@ -2609,8 +2713,8 @@ PHP_FUNCTION(gd_alter_spec)
 PHP_FUNCTION(gd_alter_window)
 {
   char *field_code, *in1 = NULL, *in2 = NULL;
-  int field_code_len, in1_len, in2_len;
-  long windop;
+  GDPHP_SLEN field_code_len, in1_len, in2_len;
+  GDPHP_LONG windop = GD_WINDOP_UNK;
   zval *zthreshold = NULL;
 
   gd_triplet_t threshold;
@@ -2643,7 +2747,7 @@ PHP_FUNCTION(gd_alter_window)
 PHP_FUNCTION(gd_bof)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   long bof;
@@ -2664,7 +2768,7 @@ PHP_FUNCTION(gd_bof)
 PHP_FUNCTION(gd_carray_len)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   size_t n;
@@ -2688,7 +2792,7 @@ PHP_FUNCTION(gd_carray_len)
 PHP_FUNCTION(gd_array_len)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   size_t n;
@@ -2709,7 +2813,8 @@ PHP_FUNCTION(gd_array_len)
 PHP_FUNCTION(gd_carrays)
 {
   zval *zunpack = NULL;
-  long data_type;
+  GDPHP_LONG data_type;
+  GDPHP_ZVAL_NULL(tmp);
 
   DIRFILE *D;
   int unpack, i;
@@ -2730,7 +2835,7 @@ PHP_FUNCTION(gd_carrays)
   array_init(return_value);
 
   for (i = 0; c[i].n; ++i)
-    add_index_zval(return_value, i, gdphp_from_data(NULL, c[i].n, data_type,
+    add_index_zval(return_value, i, gdphp_from_data(RZ(tmp), c[i].n, data_type,
           c[i].d, 1, unpack));
 
   dreturnvoid();
@@ -2752,7 +2857,7 @@ PHP_FUNCTION(gd_close)
 
     /* delete the resource on success */
     r->D = NULL; /* avoid double close */
-    zend_list_delete(Z_LVAL_P(z));
+    gdphp_list_close(z);
   }
 
   GDPHP_RETURN_T;
@@ -2760,7 +2865,7 @@ PHP_FUNCTION(gd_close)
 
 PHP_FUNCTION(gd_constants)
 {
-  long data_type;
+  GDPHP_LONG data_type;
   zval *zunpack = NULL;
 
   void *data;
@@ -2791,8 +2896,8 @@ PHP_FUNCTION(gd_constants)
 PHP_FUNCTION(gd_delete)
 {
   char *field_code;
-  int field_code_len;
-  long flags = 0;
+  GDPHP_SLEN field_code_len;
+  GDPHP_LONG flags = 0;
 
   DIRFILE *D;
 
@@ -2805,7 +2910,7 @@ PHP_FUNCTION(gd_delete)
 
 PHP_FUNCTION(gd_desync)
 {
-  long flags = 0;
+  GDPHP_LONG flags = 0;
 
   int r;
   DIRFILE *D;
@@ -2855,7 +2960,7 @@ PHP_FUNCTION(gd_dirfilekey)
   GDPHP_FETCH_DIRFILE(r, z);
 
   dreturn("\"%s\"", r->key);
-  RETURN_STRINGL(r->key, r->key_len, 1);
+  GDPHP_RET_STRL_COPY(r->key, r->key_len);
 }
 
 PHP_FUNCTION(gd_dirfilename)
@@ -2869,7 +2974,7 @@ PHP_FUNCTION(gd_dirfilename)
 
   s = gd_dirfilename(D);
   dreturn("\"%s\"", s);
-  RETURN_STRING(s, 1);
+  GDPHP_RET_STR_COPY(s);
 }
 
 PHP_FUNCTION(gd_discard)
@@ -2888,7 +2993,7 @@ PHP_FUNCTION(gd_discard)
 
     /* delete the resource on success */
     r->D = NULL; /* avoid double close */
-    zend_list_delete(Z_LVAL_P(z));
+    gdphp_list_close(z);
   }
 
   GDPHP_RETURN_T;
@@ -2896,7 +3001,7 @@ PHP_FUNCTION(gd_discard)
 
 PHP_FUNCTION(gd_encoding)
 {
-  long i = 0;
+  GDPHP_LONG i = 0;
 
   DIRFILE *D;
 
@@ -2915,7 +3020,7 @@ PHP_FUNCTION(gd_encoding)
 
 PHP_FUNCTION(gd_endianness)
 {
-  long i = 0;
+  GDPHP_LONG i = 0;
 
   DIRFILE *D;
 
@@ -2935,7 +3040,7 @@ PHP_FUNCTION(gd_endianness)
 PHP_FUNCTION(gd_entry)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   gd_entry_t E;
@@ -2955,8 +3060,8 @@ PHP_FUNCTION(gd_entry)
 PHP_FUNCTION(gd_entry_list)
 {
   char *parent;
-  int parent_len;
-  long type = 0, flags = 0;
+  GDPHP_SLEN parent_len;
+  GDPHP_LONG type = 0, flags = 0;
   DIRFILE *D;
 
   const char **fl;
@@ -2980,7 +3085,7 @@ PHP_FUNCTION(gd_entry_list)
 PHP_FUNCTION(gd_entry_type)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   gd_entype_t entype;
@@ -3001,7 +3106,7 @@ PHP_FUNCTION(gd_entry_type)
 PHP_FUNCTION(gd_eof)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   long eof;
@@ -3046,7 +3151,7 @@ PHP_FUNCTION(gd_error_string)
   s = gd_error_string(D, NULL, 0);
 
   if (s) {
-    RETVAL_STRING(s, 1);
+    GDPHP_RETVAL_STRING(s);
     dreturn("\"%s\"", s);
     free(s);
   } else
@@ -3076,7 +3181,7 @@ PHP_FUNCTION(gd_field_list_by_type)
 {
   DIRFILE *D;
   const char **fl;
-  long type;
+  GDPHP_LONG type;
 
   dtracephp();
 
@@ -3094,7 +3199,7 @@ PHP_FUNCTION(gd_field_list_by_type)
 
 PHP_FUNCTION(gd_flags)
 {
-  long set = 0, reset = 0;
+  GDPHP_LONG set = 0, reset = 0;
   unsigned long flags;
 
   DIRFILE *D;
@@ -3112,7 +3217,7 @@ PHP_FUNCTION(gd_flags)
 PHP_FUNCTION(gd_flush)
 {
   char *field_code = NULL;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   char *field_codep;
   DIRFILE *D;
@@ -3128,7 +3233,7 @@ PHP_FUNCTION(gd_flush)
 
 PHP_FUNCTION(gd_fragment_affixes)
 {
-  long index;
+  GDPHP_LONG index;
 
   DIRFILE *D;
   char *affixes[2] = {NULL, NULL};
@@ -3149,7 +3254,7 @@ PHP_FUNCTION(gd_fragment_affixes)
 PHP_FUNCTION(gd_fragment_index)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   int i;
@@ -3169,7 +3274,7 @@ PHP_FUNCTION(gd_fragment_index)
 
 PHP_FUNCTION(gd_fragmentname)
 {
-  long i;
+  GDPHP_LONG i;
   const char *s;
 
   DIRFILE *D;
@@ -3181,12 +3286,12 @@ PHP_FUNCTION(gd_fragmentname)
   s = gd_fragmentname(D, i);
 
   dreturn("\"%s\"", s);
-  RETURN_STRING(s, 1);
+  GDPHP_RET_STR_COPY(s);
 }
 
 PHP_FUNCTION(gd_frameoffset)
 {
-  long i = 0;
+  GDPHP_LONG i = 0;
   
   DIRFILE *D;
 
@@ -3203,9 +3308,9 @@ PHP_FUNCTION(gd_frameoffset)
 PHP_FUNCTION(gd_framenum)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
   double value;
-  long start = 0, stop = 0;
+  GDPHP_LONG start = 0, stop = 0;
 
   DIRFILE *D;
 
@@ -3225,10 +3330,10 @@ PHP_FUNCTION(gd_framenum)
 
 PHP_FUNCTION(gd_get_carray)
 {
-  long data_type;
+  GDPHP_LONG data_type;
   char *field_code;
-  int field_code_len;
-  long start = 0;
+  GDPHP_SLEN field_code_len;
+  GDPHP_LONG start = 0;
   zval *zlen = NULL, *zunpack = NULL;
 
   long len;
@@ -3282,9 +3387,9 @@ PHP_FUNCTION(gd_get_carray)
 
 PHP_FUNCTION(gd_get_constant)
 {
-  long data_type;
+  GDPHP_LONG data_type;
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   char datum[16];
   DIRFILE *D;
@@ -3306,9 +3411,15 @@ PHP_FUNCTION(gd_get_constant)
 PHP_FUNCTION(gd_get_string)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
+#if ZEND_MODULE_API_NO >= 20151012
+  zend_string *s;
+#else
   char *s;
+#endif
+  char *p;
+
   size_t len;
   DIRFILE *D;
 
@@ -3327,24 +3438,40 @@ PHP_FUNCTION(gd_get_string)
   }
 
   /* allocate a buffer and get the string */
-  s = emalloc(len);
+#if ZEND_MODULE_API_NO >= 20151012
+  s = zend_string_alloc(len - 1, 0);
+  p = ZSTR_VAL(s);
+#else
+  p = s = emalloc(len);
+#endif
 
-  if (gd_get_string(D, field_code, len, s) != len)
+  if (gd_get_string(D, field_code, len, p) != len) {
+#if ZEND_MODULE_API_NO >= 20151012
+    zend_string_release(s);
+#else
+    efree(s);
+#endif
+
     GDPHP_RETURN_F;
+  }
 
-  dreturn("\"%s\"", s);
+  dreturn("\"%s\"", p);
+#if ZEND_MODULE_API_NO >= 20151012
+  RETURN_STR(s);
+#else
   RETURN_STRINGL(s, len - 1, 0);
+#endif
 }
 
 PHP_FUNCTION(gd_getdata)
 {
-  long first_frame, first_sample, num_frames, num_samples;
+  GDPHP_LONG first_frame, first_sample, num_frames, num_samples;
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
   size_t ns;
   zval *zunpack = NULL;
 
-  long data_type = GD_UNKNOWN;
+  GDPHP_LONG data_type = GD_UNKNOWN;
   DIRFILE *D;
   zend_bool unpack;
   size_t n = 0;
@@ -3387,7 +3514,10 @@ PHP_FUNCTION(gd_getdata)
     n = gd_getdata(D, field_code, first_frame, first_sample, 0, ns, data_type,
         data);
 
-    GDPHP_CHECK_ERROR(D);
+    if (gd_error(D)) {
+      efree(data);
+      GDPHP_RETURN_F;
+    }
 
     gdphp_from_data(return_value, n, data_type, data, 0, unpack);
 
@@ -3398,7 +3528,7 @@ PHP_FUNCTION(gd_getdata)
 PHP_FUNCTION(gd_hidden)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   int hidden;
@@ -3420,7 +3550,7 @@ PHP_FUNCTION(gd_hidden)
 PHP_FUNCTION(gd_hide)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
 
@@ -3434,8 +3564,8 @@ PHP_FUNCTION(gd_hide)
 PHP_FUNCTION(gd_include)
 {
   char *path, *prefix = NULL, *suffix = NULL;
-  int path_len, prefix_len, suffix_len;
-  long i, parent, flags = 0;
+  GDPHP_SLEN path_len, prefix_len, suffix_len;
+  GDPHP_LONG i, parent, flags = 0;
 
   DIRFILE *D;
 
@@ -3470,14 +3600,14 @@ PHP_FUNCTION(gd_invalid_dirfile)
   r->D = gd_invalid_dirfile();
   r->persist = 0;
 
-  ZEND_REGISTER_RESOURCE(return_value, r, le_gdphp_dirfile);
+  GDPHP_RET_RES(r, le_gdphp_dirfile);
   dreturn("%p", r);
 }
 
 PHP_FUNCTION(gd_linterp_tablename)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   const char *s;
@@ -3490,13 +3620,13 @@ PHP_FUNCTION(gd_linterp_tablename)
     GDPHP_RETURN_F;
 
   dreturn("\"%s\"", s);
-  RETURN_STRING(s, 1);
+  GDPHP_RET_STR_COPY(s);
 }
 
 PHP_FUNCTION(gd_madd)
 {
   char *parent;
-  int parent_len;
+  GDPHP_SLEN parent_len;
   zval *z;
 
   gd_entry_t E;
@@ -3518,7 +3648,7 @@ PHP_FUNCTION(gd_madd)
 PHP_FUNCTION(gd_madd_alias)
 {
   char *field_code, *target, *parent;
-  int field_code_len, target_len, parent_len;
+  GDPHP_SLEN field_code_len, target_len, parent_len;
 
   DIRFILE *D;
 
@@ -3533,15 +3663,19 @@ PHP_FUNCTION(gd_madd_alias)
 PHP_FUNCTION(gd_madd_bit)
 {
   char *field_code, *in_field, *parent;
-  int field_code_len, in_field_len, parent_len;
-  long bitnum, numbits = 1;
+  GDPHP_SLEN field_code_len, in_field_len, parent_len;
+  GDPHP_LONG bitnum;
+  long numbits;
+  zval *znumbits;
 
   DIRFILE *D;
 
   dtracephp();
 
-  GDPHP_PARSED("sssl|l", &parent, &parent_len, &field_code, &field_code_len,
-      &in_field, &in_field_len, &bitnum, &numbits);
+  GDPHP_PARSED("sssl|z", &parent, &parent_len, &field_code, &field_code_len,
+      &in_field, &in_field_len, &bitnum, &znumbits);
+
+  numbits = gdphp_long_from_zval_null(znumbits, 1);
 
   GDPHP_RETURN_BOOL(gd_madd_bit(D, parent, field_code, in_field, bitnum,
         numbits));
@@ -3550,8 +3684,8 @@ PHP_FUNCTION(gd_madd_bit)
 PHP_FUNCTION(gd_madd_carray)
 {
   char *field_code, *parent;
-  int field_code_len, parent_len;
-  long data_type;
+  GDPHP_SLEN field_code_len, parent_len;
+  GDPHP_LONG data_type;
   zval *zdata1, *zdata2 = NULL;
   DIRFILE *D;
 
@@ -3577,8 +3711,8 @@ PHP_FUNCTION(gd_madd_carray)
 PHP_FUNCTION(gd_madd_const)
 {
   char *field_code, *parent;
-  int field_code_len, parent_len;
-  long data_type;
+  GDPHP_SLEN field_code_len, parent_len;
+  GDPHP_LONG data_type;
   zval *z;
 
   DIRFILE *D;
@@ -3600,7 +3734,7 @@ PHP_FUNCTION(gd_madd_const)
 PHP_FUNCTION(gd_madd_divide)
 {
   char *field_code, *in1, *in2, *parent;
-  int field_code_len, in1_len, in2_len, parent_len;
+  GDPHP_SLEN field_code_len, in1_len, in2_len, parent_len;
 
   DIRFILE *D;
 
@@ -3615,7 +3749,7 @@ PHP_FUNCTION(gd_madd_divide)
 PHP_FUNCTION(gd_madd_lincom)
 {
   char *field_code, *parent;
-  int field_code_len, parent_len;
+  GDPHP_SLEN field_code_len, parent_len;
   zval *zin, *zm, *zb;
 
   char *in[GD_MAX_LINCOM];
@@ -3646,7 +3780,7 @@ PHP_FUNCTION(gd_madd_lincom)
 PHP_FUNCTION(gd_madd_linterp)
 {
   char *field_code, *in_field, *table, *parent;
-  int field_code_len, in_field_len, table_len, parent_len;
+  GDPHP_SLEN field_code_len, in_field_len, table_len, parent_len;
 
   DIRFILE *D;
 
@@ -3661,8 +3795,8 @@ PHP_FUNCTION(gd_madd_linterp)
 PHP_FUNCTION(gd_madd_mplex)
 {
   char *field_code, *in1, *in2, *parent;
-  int field_code_len, in1_len, in2_len, parent_len;
-  long count, period = 0;
+  GDPHP_SLEN field_code_len, in1_len, in2_len, parent_len;
+  GDPHP_LONG count, period = 0;
 
   DIRFILE *D;
 
@@ -3678,7 +3812,7 @@ PHP_FUNCTION(gd_madd_mplex)
 PHP_FUNCTION(gd_madd_multiply)
 {
   char *field_code, *in1, *in2, *parent;
-  int field_code_len, in1_len, in2_len, parent_len;
+  GDPHP_SLEN field_code_len, in1_len, in2_len, parent_len;
 
   DIRFILE *D;
 
@@ -3693,8 +3827,8 @@ PHP_FUNCTION(gd_madd_multiply)
 PHP_FUNCTION(gd_madd_phase)
 {
   char *field_code, *in_field, *parent;
-  int field_code_len, in_field_len, parent_len;
-  long shift;
+  GDPHP_SLEN field_code_len, in_field_len, parent_len;
+  GDPHP_LONG shift;
 
   DIRFILE *D;
 
@@ -3709,7 +3843,7 @@ PHP_FUNCTION(gd_madd_phase)
 PHP_FUNCTION(gd_madd_polynom)
 {
   char *field_code, *in_field, *parent;
-  int field_code_len, in_field_len, parent_len;
+  GDPHP_SLEN field_code_len, in_field_len, parent_len;
   zval *za;
 
   double a[2 * (GD_MAX_POLYORD + 1)];
@@ -3733,7 +3867,7 @@ PHP_FUNCTION(gd_madd_polynom)
 PHP_FUNCTION(gd_madd_recip)
 {
   char *field_code, *in_field, *parent;
-  int field_code_len, in_field_len, parent_len;
+  GDPHP_SLEN field_code_len, in_field_len, parent_len;
   zval *zdividend;
 
   double dividend[2];
@@ -3754,15 +3888,19 @@ PHP_FUNCTION(gd_madd_recip)
 PHP_FUNCTION(gd_madd_sbit)
 {
   char *field_code, *in_field, *parent;
-  int field_code_len, in_field_len, parent_len;
-  long bitnum, numbits = 1;
+  GDPHP_SLEN field_code_len, in_field_len, parent_len;
+  GDPHP_LONG bitnum;
+  long numbits;
+  zval *znumbits;
 
   DIRFILE *D;
 
   dtracephp();
 
-  GDPHP_PARSED("sssll", &parent, &parent_len, &field_code, &field_code_len,
-      &in_field, &in_field_len, &bitnum, &numbits);
+  GDPHP_PARSED("sssl|z", &parent, &parent_len, &field_code, &field_code_len,
+      &in_field, &in_field_len, &bitnum, &znumbits);
+
+  numbits = gdphp_long_from_zval_null(znumbits, 1);
 
   GDPHP_RETURN_BOOL(gd_madd_sbit(D, parent, field_code, in_field, bitnum,
         numbits));
@@ -3771,7 +3909,7 @@ PHP_FUNCTION(gd_madd_sbit)
 PHP_FUNCTION(gd_madd_spec)
 {
   char *spec, *parent;
-  int spec_len, parent_len;
+  GDPHP_SLEN spec_len, parent_len;
 
   DIRFILE *D;
 
@@ -3785,7 +3923,7 @@ PHP_FUNCTION(gd_madd_spec)
 PHP_FUNCTION(gd_madd_string)
 {
   char *field_code, *value, *parent;
-  int field_code_len, value_len, parent_len;
+  GDPHP_SLEN field_code_len, value_len, parent_len;
 
   DIRFILE *D;
 
@@ -3800,8 +3938,8 @@ PHP_FUNCTION(gd_madd_string)
 PHP_FUNCTION(gd_madd_window)
 {
   char *field_code, *in1, *in2, *parent;
-  int field_code_len, in1_len, in2_len, parent_len;
-  long windop;
+  GDPHP_SLEN field_code_len, in1_len, in2_len, parent_len;
+  GDPHP_LONG windop;
   zval *zthreshold;
 
   gd_triplet_t threshold;
@@ -3822,7 +3960,7 @@ PHP_FUNCTION(gd_madd_window)
 PHP_FUNCTION(gd_malter_spec)
 {
   char *spec, *parent;
-  int spec_len, parent_len;
+  GDPHP_SLEN spec_len, parent_len;
   zend_bool recode = 0;
 
   DIRFILE *D;
@@ -3837,9 +3975,10 @@ PHP_FUNCTION(gd_malter_spec)
 PHP_FUNCTION(gd_mcarrays)
 {
   char *parent;
-  int parent_len;
+  GDPHP_SLEN parent_len;
   zval *zunpack = NULL;
-  long data_type;
+  GDPHP_LONG data_type;
+  GDPHP_ZVAL_NULL(tmp);
 
   DIRFILE *D;
   int unpack, i;
@@ -3860,7 +3999,7 @@ PHP_FUNCTION(gd_mcarrays)
   array_init(return_value);
 
   for (i = 0; c[i].n; ++i)
-    add_index_zval(return_value, i, gdphp_from_data(NULL, c[i].n, data_type,
+    add_index_zval(return_value, i, gdphp_from_data(RZ(tmp), c[i].n, data_type,
           c[i].d, 1, unpack));
 
   dreturnvoid();
@@ -3869,8 +4008,8 @@ PHP_FUNCTION(gd_mcarrays)
 PHP_FUNCTION(gd_mconstants)
 {
   char *parent;
-  int parent_len;
-  long data_type;
+  GDPHP_SLEN parent_len;
+  GDPHP_LONG data_type;
   zval *zunpack = NULL;
 
   void *data;
@@ -3912,7 +4051,7 @@ PHP_FUNCTION(gd_metaflush)
 PHP_FUNCTION(gd_mfield_list)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   const char **fl;
@@ -3933,9 +4072,9 @@ PHP_FUNCTION(gd_mfield_list)
 
 PHP_FUNCTION(gd_mfield_list_by_type)
 {
-  long type;
+  GDPHP_LONG type;
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   const char **fl;
@@ -3957,9 +4096,9 @@ PHP_FUNCTION(gd_mfield_list_by_type)
 PHP_FUNCTION(gd_move)
 {
   char *field_code;
-  int field_code_len;
-  long new_fragment;
-  long flags = 0;
+  GDPHP_SLEN field_code_len;
+  GDPHP_LONG new_fragment;
+  GDPHP_LONG flags = 0;
 
   DIRFILE *D;
 
@@ -3972,7 +4111,7 @@ PHP_FUNCTION(gd_move)
 
 PHP_FUNCTION(gd_mplex_lookback)
 {
-  long lookback;
+  GDPHP_LONG lookback;
 
   DIRFILE *D;
 
@@ -3988,7 +4127,7 @@ PHP_FUNCTION(gd_mplex_lookback)
 PHP_FUNCTION(gd_mstrings)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   const char **l;
@@ -4010,7 +4149,7 @@ PHP_FUNCTION(gd_mstrings)
 PHP_FUNCTION(gd_mvector_list)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   const char **fl;
@@ -4032,7 +4171,7 @@ PHP_FUNCTION(gd_mvector_list)
 PHP_FUNCTION(gd_naliases)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   long n;
   DIRFILE *D;
@@ -4053,7 +4192,7 @@ PHP_FUNCTION(gd_naliases)
 PHP_FUNCTION(gd_native_type)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   gd_type_t t;
@@ -4074,8 +4213,8 @@ PHP_FUNCTION(gd_native_type)
 PHP_FUNCTION(gd_nentries)
 {
   char *parent;
-  int parent_len;
-  long n, type = 0, flags = 0;
+  GDPHP_SLEN parent_len;
+  GDPHP_LONG n, type = 0, flags = 0;
   DIRFILE *D;
 
   char *parentp;
@@ -4112,7 +4251,7 @@ PHP_FUNCTION(gd_nfields)
 
 PHP_FUNCTION(gd_nfields_by_type)
 {
-  long n, type;
+  GDPHP_LONG n, type;
   DIRFILE *D;
 
   dtracephp();
@@ -4164,7 +4303,7 @@ PHP_FUNCTION(gd_nframes)
 PHP_FUNCTION(gd_nmfields)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   long n;
   DIRFILE *D;
@@ -4184,9 +4323,9 @@ PHP_FUNCTION(gd_nmfields)
 PHP_FUNCTION(gd_nmfields_by_type)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
-  long n, type;
+  GDPHP_LONG n, type;
   DIRFILE *D;
 
   dtracephp();
@@ -4204,7 +4343,7 @@ PHP_FUNCTION(gd_nmfields_by_type)
 PHP_FUNCTION(gd_nmvectors)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   long n;
   DIRFILE *D;
@@ -4240,31 +4379,31 @@ PHP_FUNCTION(gd_nvectors)
 
 PHP_FUNCTION(gd_open)
 {
-  long flags = GD_RDONLY;
+  GDPHP_LONG flags = GD_RDONLY;
   char *dirfilename;
-  int len;
+  GDPHP_SLEN len;
   gdphp_dirfile *r;
   char *callback = NULL;
-  int callback_len = -1;
-  zval **callback_data = NULL;
+  GDPHP_SLEN callback_len = -1;
+  GDPHP_ZVALP callback_data = NULL;
 
   dtracephp();
 
   /* parse input */
-  GDPHP_PARSE("s|lsZ", &dirfilename, &len, &flags, &callback, &callback_len,
-      &callback_data);
+  GDPHP_PARSE("s|ls" ZPP_Z, &dirfilename, &len, &flags, &callback,
+      &callback_len, &callback_data);
 
-  r = gdphp_open(dirfilename, len, flags, callback, callback_len, callback_data,
-      0);
+  r = gdphp_open(dirfilename, len, flags, callback, callback_len,
+      callback_data, 0);
 
   /* return */
-  ZEND_REGISTER_RESOURCE(return_value, r, le_gdphp_dirfile);
+  GDPHP_RET_RES(r, le_gdphp_dirfile);
   dreturn("%p", r);
 }
 
 PHP_FUNCTION(gd_parent_fragment)
 {
-  long i;
+  GDPHP_LONG i;
 
   DIRFILE *D;
 
@@ -4283,47 +4422,44 @@ PHP_FUNCTION(gd_parent_fragment)
 
 PHP_FUNCTION(gd_popen)
 {
-  long flags = GD_RDONLY;
+  GDPHP_LONG flags = GD_RDONLY;
   char *dirfilename;
-  int len;
+  GDPHP_SLEN len;
   gdphp_dirfile *r;
-  zend_rsrc_list_entry *le, new_le;
+  GDPHP_RESOURCE *le, new_le;
   char *callback = NULL;
-  int callback_len;
-  zval **callback_data = NULL;
+  GDPHP_SLEN callback_len;
+  GDPHP_ZVALP callback_data = NULL;
 
   dtracephp();
 
   /* parse input */
-  GDPHP_PARSE("s|lsz", &dirfilename, &len, &flags, &callback, &callback_len,
-      &callback_data);
+  GDPHP_PARSE("s|ls" ZPP_Z, &dirfilename, &len, &flags, &callback,
+      &callback_len, &callback_data);
 
   /* look for an existing dirfile */
-  if (zend_hash_find(&EG(persistent_list), dirfilename, len, (void**)&le)
-      == SUCCESS)
-  {
-    ZEND_REGISTER_RESOURCE(return_value, le->ptr, le_gdphp_dirfile_persist);
+  if (GDPHP_FIND_RES(le, &EG(persistent_list), dirfilename, len)) {
+    GDPHP_RET_RES(le->ptr, le_gdphp_dirfile_persist);
     dreturn("%p", le->ptr);
     return;
   }
 
   /* nope, open */
-  r = gdphp_open(dirfilename, len, flags, callback, callback_len, callback_data,
-      1);
+  r = gdphp_open(dirfilename, len, flags, callback, callback_len,
+      callback_data, 1);
 
   /* register and store */
-  ZEND_REGISTER_RESOURCE(return_value, r, le_gdphp_dirfile_persist);
+  GDPHP_RET_RES(r, le_gdphp_dirfile_persist);
   new_le.ptr = r;
   new_le.type = le_gdphp_dirfile_persist;
-  zend_hash_add(&EG(persistent_list), dirfilename, len, &new_le,
-      sizeof(zend_rsrc_list_entry), NULL);
+  GDPHP_HASH_ADD(&EG(persistent_list), dirfilename, len, new_le);
 
   dreturn("%p", r);
 }
 
 PHP_FUNCTION(gd_protection)
 {
-  long i;
+  GDPHP_LONG i;
 
   DIRFILE *D;
 
@@ -4343,7 +4479,7 @@ PHP_FUNCTION(gd_protection)
 PHP_FUNCTION(gd_put_carray)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
   zval *z1, *z2 = NULL, *z3 = NULL;
 
   DIRFILE *D;
@@ -4392,7 +4528,7 @@ PHP_FUNCTION(gd_put_carray)
 PHP_FUNCTION(gd_put_constant)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
   zval *z;
 
   DIRFILE *D;
@@ -4412,7 +4548,7 @@ PHP_FUNCTION(gd_put_constant)
 PHP_FUNCTION(gd_put_string)
 {
   char *field_code, *value;
-  int field_code_len, value_len;
+  GDPHP_SLEN field_code_len, value_len;
 
   DIRFILE *D;
 
@@ -4427,8 +4563,8 @@ PHP_FUNCTION(gd_put_string)
 PHP_FUNCTION(gd_putdata)
 {
   char *field_code;
-  int field_code_len;
-  long first_frame, first_sample;
+  GDPHP_SLEN field_code_len;
+  GDPHP_LONG first_frame, first_sample;
   zval *zdata1, *zdata2 = NULL;
   DIRFILE *D;
   size_t n;
@@ -4457,7 +4593,7 @@ PHP_FUNCTION(gd_putdata)
 PHP_FUNCTION(gd_raw_close)
 {
   char *field_code = NULL;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   char *field_codep;
   DIRFILE *D;
@@ -4474,7 +4610,7 @@ PHP_FUNCTION(gd_raw_close)
 PHP_FUNCTION(gd_raw_filename)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   const char *s;
@@ -4487,13 +4623,13 @@ PHP_FUNCTION(gd_raw_filename)
     GDPHP_RETURN_F;
 
   dreturn("\"%s\"", s);
-  RETURN_STRING(s, 1);
+  GDPHP_RET_STR_COPY(s);
 }
 
 PHP_FUNCTION(gd_reference)
 {
   const char *field_code = NULL;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   const char *s;
@@ -4509,14 +4645,14 @@ PHP_FUNCTION(gd_reference)
   if (s == NULL)
     RETURN_NULL();
 
-  RETURN_STRING(s, 1);
+  GDPHP_RET_STR_COPY(s);
 }
 
 PHP_FUNCTION(gd_rename)
 {
   const char *old_code, *new_name;
-  int old_code_len, new_name_len;
-  long flags = 0;
+  GDPHP_SLEN old_code_len, new_name_len;
+  GDPHP_LONG flags = 0;
 
   DIRFILE *D;
 
@@ -4548,8 +4684,8 @@ PHP_FUNCTION(gd_rewrite_fragment)
 PHP_FUNCTION(gd_seek)
 {
   char *field_code;
-  int field_code_len;
-  long frame_num, sample_num, flags = 0;
+  GDPHP_SLEN field_code_len;
+  GDPHP_LONG frame_num, sample_num, flags = 0;
 
   DIRFILE *D;
   long pos;
@@ -4571,7 +4707,7 @@ PHP_FUNCTION(gd_seek)
 PHP_FUNCTION(gd_spf)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   unsigned spf;
@@ -4611,7 +4747,8 @@ PHP_FUNCTION(gd_strings)
 PHP_FUNCTION(gd_strtok)
 {
   char *s, *p;
-  int slen, i = 0;
+  GDPHP_SLEN slen;
+  int i = 0;
   
   DIRFILE *D;
 
@@ -4622,7 +4759,7 @@ PHP_FUNCTION(gd_strtok)
   array_init(return_value);
 
   for (p = gd_strtok(D, s); p; p = gd_strtok(D, NULL)) {
-    add_index_string(return_value, i++, p, 1);
+    gdphp_add_index_string(return_value, i++, p);
     free(p);
   }
 
@@ -4633,7 +4770,7 @@ PHP_FUNCTION(gd_strtok)
 PHP_FUNCTION(gd_sync)
 {
   char *field_code = NULL;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   char *field_codep;
   DIRFILE *D;
@@ -4650,7 +4787,7 @@ PHP_FUNCTION(gd_sync)
 PHP_FUNCTION(gd_tell)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
   long pos;
@@ -4671,7 +4808,7 @@ PHP_FUNCTION(gd_tell)
 PHP_FUNCTION(gd_unhide)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
 
@@ -4685,7 +4822,7 @@ PHP_FUNCTION(gd_unhide)
 PHP_FUNCTION(gd_uninclude)
 {
   DIRFILE *D;
-  long i;
+  GDPHP_LONG i;
   zend_bool del = 0;
 
   dtracephp();
@@ -4698,7 +4835,7 @@ PHP_FUNCTION(gd_uninclude)
 PHP_FUNCTION(gd_validate)
 {
   char *field_code;
-  int field_code_len;
+  GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
 
@@ -4731,7 +4868,7 @@ PHP_FUNCTION(gd_vector_list)
 PHP_FUNCTION(gd_verbose_prefix)
 {
   char *prefix = NULL;
-  int prefix_len;
+  GDPHP_SLEN prefix_len;
 
   char *prefixp;
   DIRFILE *D;
@@ -4747,7 +4884,7 @@ PHP_FUNCTION(gd_verbose_prefix)
 
 PHP_FUNCTION(gd_encoding_support)
 {
-  unsigned long e;
+  GDPHP_LONG e;
   long r;
 
   dtracephp();
@@ -4762,7 +4899,6 @@ PHP_FUNCTION(gd_encoding_support)
   dreturn("%li", r);
   RETURN_LONG(r);
 }
-
 
 /* MODULE DECLARATIONS */
 static const zend_function_entry getdata_functions[] = {

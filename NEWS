@@ -21,6 +21,8 @@ New in version 0.9.3a:
 
   Bindings Changes:
 
+  * PHP: PHP7 support has been added.
+
   * PYTHON: Python3 support has been added based on a patch from Matthew
     Petroff.  The earliest supported Python3 version is 3.2.  Python2 is
     still supported from version 2.4, but Unicode support must be enabled
@@ -64,6 +66,11 @@ New in version 0.9.3a:
   * C++ BUG FIX: Including another GetData header before getdata/dirfile.h
     no longer results in a fatal circular dependency.
 
+  * PHP BUG FIX: The numbits parameter to gd_madd_sbit() is now optional
+    and defaults to 1, as with other similar functions.
+
+  * PHP BUG FIX: Fixed a memory leak on error in gd_getdata().
+
   * PYTHON BUG FIX: Calling pygetdata.dirfile.[m]carrays no longer crashes
     if return_type=pygetdata.NULL.  In this case, None is returned in place
     of the data arrays.
@@ -75,7 +82,7 @@ New in version 0.9.3a:
     underlying C library is now reported using the standard MemoryError
     exception.  Previously, the bindings would attempt to instantiate a new
     pygetdata.AllocError exception when this happened, which wouldn't work
-    if no memory was available.  (The Python interpreter pre-allocates an
+    if no memory was available.  (The CPython interpreter pre-allocates an
     instance of MemoryError to deal with this situation.)  For backwards
     compatibility, pygetdata.AllocError is now an alias for MemoryError.
 

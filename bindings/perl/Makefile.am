@@ -53,7 +53,7 @@ build/build.stamp: src/Makefile.PL src/GetData.xs src/typemap
 	mkdir build/lib
 	touch $@
 
-# this enssures that the test files are present and up-to-date
+# this ensures that the test files are present and up-to-date
 build/test.stamp: build/build.stamp ${plTESTS}
 	[ -e build/t ] || mkdir build/t
 	cp -r $(srcdir)/t/* build/t

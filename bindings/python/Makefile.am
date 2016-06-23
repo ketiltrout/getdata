@@ -26,7 +26,7 @@ if MAKE_PYGETDATA_CAPI
 PYGETDATA_H=pygetdata.h
 endif
 
-nodist_python_SCRIPTS = pygetdata${PYTHON_OBJECT_SUFFIX} ${PYGETDATA_H}
+nodist_python_SCRIPTS = pygetdata${PYTHON_OBJECT_SUFFIX}
 python_HEADERS = ${PYGETDATA_H}
 
 BUILT_SOURCES = pyconstants.c
