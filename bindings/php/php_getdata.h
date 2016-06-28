@@ -59,8 +59,19 @@ extern zend_module_entry getdata_module_entry;
 #define ZEND_FE_END { NULL, NULL, NULL, 0, 0 }
 #endif
 
+/* These expand to: string, length(string) where length() either includes
+ * (ZEND_STRS) or omits (ZEND_STRL) the trailing NUL.
+ */
+#if ZEND_MODULE_API_NO >= 20151012
+/* PHP7 */
+#define GDPHP_STR ZEND_STRL
+#else
+/* PHP5 */
+#define GDPHP_STR ZEND_STRS
+#endif
+
 #define GDPHP_REGISTER_LONG_CONSTANT(name,value,module_number) \
-  zend_register_long_constant(ZEND_STRS(name), value, \
+  zend_register_long_constant(GDPHP_STR(name), value, \
       CONST_CS | CONST_PERSISTENT, module_number TSRMLS_CC)
 
 void gdphp_register_constants(int module_number);

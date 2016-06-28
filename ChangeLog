@@ -1,3 +1,7 @@
+2016-06-28   D. V. Wiebe <getdata@ketiltrout.net> svn:1088
+	* bindings/php/php_getdata.h: Handle zend_register_long_constant() call
+	changes in PHP7.
+
 2016-06-28   D. V. Wiebe <getdata@ketiltrout.net> svn:1087
 	* src/sie.c (_GD_SampIndSeek): Check fread return value.
 
