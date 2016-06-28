@@ -259,7 +259,10 @@ off64_t _GD_SampIndSeek(struct gd_raw_file_ *file, off64_t sample,
     /* Advance past header if necessary */
     if (f->header) {
       char header[HEADSIZE];
-      fread(header, HEADSIZE, 1, f->fp);
+      if (fread(header, HEADSIZE, 1, f->fp) < 1) {
+        dreturn("%i", -1);
+        return -1;
+      }
     }
 
     file->idata = 0;

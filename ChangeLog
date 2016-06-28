@@ -1,3 +1,6 @@
+2016-06-28   D. V. Wiebe <getdata@ketiltrout.net> svn:1087
+	* src/sie.c (_GD_SampIndSeek): Check fread return value.
+
 2016-06-28   D. V. Wiebe <getdata@ketiltrout.net> svn:1086
 	* src/sie.c (_GD_SampIndDiscardHeader): Added.
 	* src/sie.c (_GD_SampIndDoOpen): Call _GD_SampIndDiscardHeader to look for
