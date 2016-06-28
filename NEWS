@@ -12,6 +12,14 @@ New in version 0.9.3a:
 
   Library Changes:
 
+  * GetData can now read SIE files containing the optional nine-byte header
+    (which can be created by daisie).  When read by GetData, information in
+    the header is completely ignored (because the GetData metadata contains
+    all the necessary information).  GetData never writes the header, but
+    calls to gd_putdata() will preserve an existing header.  Calls which
+    re-code the file (like gd_alter_endianness(), gd_alter_raw(), &c.) will
+    result in an existing header being deleted.
+
   * BUG FIX: Filenames and line numbers appearing in GD_E_FORMAT error
     strings returned by gd_error_string() are correct again.  This bug
     also affected parser metadata sent to a registered parser callback.

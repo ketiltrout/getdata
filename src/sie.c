@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2015 D. V. Wiebe
+/* Copyright (C) 2011-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -23,13 +23,23 @@
 /* define to debug this unit */
 #undef DEBUG_SIE
 
+/* Note: when using STDIO, glibc reads files in 4kiB chunks, so for small SIE
+ * files (4kiB = 170-455 records, depending on data size), all the I/O in this
+ * file happens in RAM, which probably means it's not terribly much slower than
+ * an in-RAM implementation like daisie, with the added benefit of not having
+ * to contort ourselves to play nice with the bookkeeping layer.
+ *
+ * On the other hand, this means we're basically unable to read SIE files
+ * concurrently (which we really shouldn't have expected to work anyways).
+ */
+
 #ifdef DEBUG_SIE
 #define dprintf_sie dprintf
 #else
 #define dprintf_sie(...)
 #endif
 
-#define DPRINTF dprintf_sie("F  r:%zi p:0x%" PRIX64 " s:%i,0x%" PRIX64 " " \
+#define DPRINTF dprintf_sie("F  r:%" PRIdSIZE " p:0x%" PRIX64 " s:%i,0x%" PRIX64 " " \
     "d:0x%" PRIX64 ",0x%" PRIX64 " l:%i/0x%" PRIX64 ",0x%" PRIX64 " @%li", \
     f->r, f->p, f->bof, f->s, f->d[0], f->d[1], f->have_l, f->l[0], f->l[1], \
     ftell(f->fp));
@@ -47,10 +57,59 @@ struct gd_siedata {
   int64_t l[3]; /* the previous record */
   int have_l; /* a flag to indicate that l is initialised */
   int bof;    /* this is the first record */
+  int header; /* non-zero if we have a header */
 };
+
+/* Header size in bytes */
+#define HEADSIZE 9
 
 /* correct for byte sex */
 #define FIXSEX(swap,v) ((swap) ? (int64_t)gd_swap64(v) : (v))
+
+static int _GD_SampIndDiscardHeader(FILE *stream)
+{
+  int have = 0;
+  unsigned char header[HEADSIZE];
+  static const unsigned char header_magic[8] = { 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff };
+
+  dtrace("%p", stream);
+
+  if (fread(header, HEADSIZE, 1, stream) < 1) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* Check for magic */
+#ifdef DEBUG_SIE
+  dprintf("header: 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X "
+      "0x%02X", header[0], header[1], header[2], header[3], header[4],
+      header[5], header[6], header[7], header[8]);
+#endif
+  if (memcmp(header, header_magic, 8) == 0) {
+    int c;
+    /* We have magic, check for trailing data, which indicates there's another
+     * record (so what we have is indeed a header) */
+    c = getc(stream);
+    if (c == EOF) {
+      if (ferror(stream)) {
+        dreturn("%i", -1);
+        return -1;
+      } /* not a header; rewind so we can read it again */
+      rewind(stream);
+    } else { /* trailing data, unget it so it's available for the first read */
+      if (ungetc(c, stream) == EOF) {
+        dreturn("%i", -1);
+        return -1;
+      }
+      have = 1;
+    }
+  } else /* Bad header magic = no header: rewind */
+    rewind(stream);
+
+  dreturn("%i", have);
+  return have;
+}
 
 static int _GD_SampIndDoOpen(int fdin, struct gd_raw_file_ *file,
     struct gd_siedata *f, int swap, unsigned int mode)
@@ -79,10 +138,21 @@ static int _GD_SampIndDoOpen(int fdin, struct gd_raw_file_ *file,
     return -1;
   }
 
+  if (!(mode & GD_FILE_WRITE)) {
+    f->header = _GD_SampIndDiscardHeader(stream);
+    if (f->header < 0) {
+      fclose(stream);
+      dreturn("%i", -1);
+      return -1;
+    }
+  } else
+    f->header = 0;
+
   memset(f, 0, sizeof(struct gd_siedata));
   f->r = f->s = f->p = f->d[0] = -1;
   f->fp = stream;
   f->swap = swap;
+
   dreturn("%i", fd);
   return fd;
 }
@@ -185,6 +255,13 @@ off64_t _GD_SampIndSeek(struct gd_raw_file_ *file, off64_t sample,
     /* seek backwards -- reading a file backwards doesn't necessarily work
      * that well.  So, let's just rewind to the beginning and try again. */
     rewind(f->fp);
+
+    /* Advance past header if necessary */
+    if (f->header) {
+      char header[HEADSIZE];
+      fread(header, HEADSIZE, 1, f->fp);
+    }
+
     file->idata = 0;
     f->r = f->s = f->p = f->d[0] = -1;
     f->bof = 1;

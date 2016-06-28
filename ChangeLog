@@ -1,4 +1,11 @@
-2016-06-23   D. V. Wiebe <getdata@ketiltrout.net> svn:1083
+2016-06-28   D. V. Wiebe <getdata@ketiltrout.net> svn:1086
+	* src/sie.c (_GD_SampIndDiscardHeader): Added.
+	* src/sie.c (_GD_SampIndDoOpen): Call _GD_SampIndDiscardHeader to look for
+	(and skip) the header.
+	* src/sie.c (_GD_SampIndSeek): Seek past the header on rewind.
+	* test/sie_get_header.c test/sie_put_header.c: Added.
+
+2016-06-23   D. V. Wiebe <getdata@ketiltrout.net> svn:1085
 	* bindings/make_parameters.c (PHP): in constants.c, use the macro
 	GDPHP_REGISTER_LONG_CONSTANT instead of zend_register_long_constant
 	directly.
