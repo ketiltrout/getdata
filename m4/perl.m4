@@ -53,7 +53,8 @@ dnl ExtUtils::MakeMaker
 AC_DEFUN([GD_PERL_MAN3EXT],
 [
 AC_MSG_CHECKING([for the section 3 manual page extension])
-PERL_MAN3EXT=`$PERL -MExtUtils::MakeMaker::Config -e 'print "\n>>GD ", @S|@Config{man3ext}, " GD<<";' | $AWK '/>>GD .* GD<</ { print @S|@2 }'`
+PERL_MAN3EXT=`$PERL -MExtUtils::MakeMaker::Config -e 'print "\n>>GD ", \
+  @S|@Config{man3ext}, " GD<<";' | $AWK '/>>GD .* GD<</ { print @S|@2 }'`
 AC_MSG_RESULT([.$PERL_MAN3EXT])
 AC_SUBST([PERL_MAN3EXT])
 ])

@@ -37,7 +37,8 @@ AC_ARG_WITH([lib$2], AS_HELP_STRING([--with-lib$2=PREFIX],
              esac
              ], [ use_[]gd_encoding="yes"; gd_encoding[]_prefix=; ])
 m4_divert_once([HELP_WITH], AS_HELP_STRING([--without-lib$2],
-            [disable encodings supported by lib$2, even if the library is present]))
+            [disable encodings supported by lib$2, even if the library is ]
+            [present]))
 
 echo
 echo "*** Configuring gd_encoding support"
@@ -88,7 +89,8 @@ if test "x$have_this_header" = "xyes" -a "x$have_this_lib" = "xyes"; then
     AS_TR_CPP(gd_encoding[_LIBS])="-l$2"
     AS_TR_CPP(gd_encoding[_SEARCHPATH])="$gd_encoding[]_prefix/bin:$PATH"
   fi
-  AC_DEFINE(AS_TR_CPP([USE_]gd_encoding), [], [ Define to enable ]gd_encoding[ support ])
+  AC_DEFINE(AS_TR_CPP([USE_]gd_encoding), [], [ Define to ]
+  [enable ]gd_encoding[ support ])
 else
   use_[]gd_encoding="no";
   AS_TR_CPP(gd_encoding[_SEARCHPATH])="$PATH"
@@ -99,7 +101,8 @@ AC_SUBST(AS_TR_CPP(gd_encoding[_LIBS]))
 
 dnl executables needed for tests
 m4_define([gd_progname], regexp([$5 ], [^\([^ ]*\) ], [\1]))
-AC_PATH_PROGS([path_]gd_progname, [$5], [not found], [$AS_TR_CPP(gd_encoding[_SEARCHPATH])])
+AC_PATH_PROGS([path_]gd_progname, [$5], [not found],
+  [$AS_TR_CPP(gd_encoding[_SEARCHPATH])])
 
 if test "x$path_[]gd_progname" != "xnot found"; then
   AC_DEFINE_UNQUOTED(AS_TR_CPP(gd_progname), ["$path_]gd_progname["],
@@ -108,18 +111,21 @@ fi
 
 ifelse(`x$6', `x',,[
 m4_define([gd_unprogname], regexp([$6 ], [^\([^ ]*\) ], [\1]))
-AC_PATH_PROGS([path_]gd_unprogname, [$6], [not found], [$AS_TR_CPP(gd_encoding[_SEARCHPATH])])
+AC_PATH_PROGS([path_]gd_unprogname, [$6], [not found],
+  [$AS_TR_CPP(gd_encoding[_SEARCHPATH])])
 
 if test "x$path_[]gd_unprogname" != "xnot found"; then
   AC_DEFINE_UNQUOTED(AS_TR_CPP(gd_unprogname), ["$path_]gd_unprogname["],
-                     [ Define to the full path to the `]gd_unprogname[' binary ])
+    [ Define to the full path to the `]gd_unprogname[' binary ])
 fi
 ])
-AM_CONDITIONAL(AS_TR_CPP([USE_]gd_encoding), [test "x$use_]gd_encoding[" = "xyes"])
+AM_CONDITIONAL(AS_TR_CPP([USE_]gd_encoding),
+    [test "x$use_]gd_encoding[" = "xyes"])
 
 if test "x$path_[]gd_progname" != "xnot found" -a \
   "x$path_[]gd_unprogname" != "xnot found"; then
-  AC_DEFINE(AS_TR_CPP([TEST_]gd_encoding), [], [ Define to enable ]gd_encoding[ tests ])
+  AC_DEFINE(AS_TR_CPP([TEST_]gd_encoding), [],
+      [ Define to enable ]gd_encoding[ tests ])
 fi
 
 dnl add to summary and private lib list

@@ -49,7 +49,9 @@ if test "x$MEX" != "xnot found"; then
   mex_out=`$MEX 2>&1`
   mex_status=$?
   if test $mex_status -eq 1; then
-    if ! echo $mex_out | grep 'consult the MATLAB External Interfaces Guide' >/dev/null 2>/dev/null; then
+    if ! echo $mex_out | grep 'consult the MATLAB External Interfaces Guide' \
+      >/dev/null 2>/dev/null;
+    then
       MEX="not found";
     fi
   fi
@@ -84,7 +86,9 @@ dnl variable
 AC_DEFUN([GD_MATLAB_EVAL],
 [
 ifelse(`$#', `2', [matlab_int=$MATLAB], [matlab_int=$3])
-$1=`$matlab_int -nodisplay -nosplash -nojvm -nodesktop -r "fprintf(2, '@@@%s@@@\n', $2); quit" 2>&1 >/dev/null | ${AWK} 'BEGIN { FS="@@@" } /^@@@/ { print @S|@2 }'`
+$1=`$matlab_int -nodisplay -nosplash -nojvm -nodesktop -r \
+  "fprintf(2, '@@@%s@@@\n', $2); quit" 2>&1 >/dev/null | \
+  ${AWK} 'BEGIN { FS="@@@" } /^@@@/ { print @S|@2 }'`
 ])
 
 dnl GD_MATLAB

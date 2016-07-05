@@ -82,7 +82,8 @@ if test "x${have_idl}" != "xno"; then
 
 dnl try to find a sufficiently new IDL.
 if test "x$user_idl" != "x"; then
-  AC_MSG_CHECKING([whether $user_idl is an IDL interpreter version >= $idl_min_version])
+  AC_MSG_CHECKING([whether $user_idl is an IDL interpreter version >= ]
+      [$idl_min_version])
   GD_IDL_CHECK_VERSION([$user_idl], [$idl_min_version],
   [AC_MSG_RESULT([yes])
   IDL=$user_idl],

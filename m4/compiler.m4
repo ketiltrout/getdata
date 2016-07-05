@@ -70,7 +70,9 @@ dnl Check whether the compiler for Fortran is Intel.
 AC_DEFUN([GD_LANG_F77_COMPILER_INTEL],
 [AC_CACHE_CHECK([whether we are using the Intel Fortran-77 compiler],
 [gd_cv_f77_compiler_intel],
-[if $F77 -help 2>/dev/null | grep 'Intel.R. Fortran Compiler' >/dev/null 2>/dev/null; then
+[
+if $F77 -help 2>/dev/null | \
+  grep 'Intel.R. Fortran Compiler' >/dev/null 2>/dev/null; then
 gd_cv_f77_compiler_intel=yes
 else
 gd_cv_f77_compiler_intel=no
@@ -83,7 +85,9 @@ dnl Check whether the compiler for free-form Fortran is Intel.
 AC_DEFUN([GD_LANG_FC_COMPILER_INTEL],
 [AC_CACHE_CHECK([whether we are using the Intel Fortran compiler],
 [gd_cv_fc_compiler_intel],
-[if $FC -help 2>/dev/null | grep 'Intel.R. Fortran Compiler' >/dev/null 2>/dev/null; then
+[
+if $FC -help 2>/dev/null | \
+  grep 'Intel.R. Fortran Compiler' >/dev/null 2>/dev/null; then
 gd_cv_fc_compiler_intel=yes
 else
 gd_cv_fc_compiler_intel=no

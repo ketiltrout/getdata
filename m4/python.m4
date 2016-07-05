@@ -52,8 +52,9 @@ dnl If PROG is a Python3 interpreter, set have_python3 to "yes"
 dnl otherwise set it to "no"
 AC_DEFUN([GD_PYTHON3],
 [
-AS_IF(AM_LOG_SHELL([$1 -c 'import sys; sys.exit(int(sys.version@<:@:1@:>@) - 3)']),
-  [have_python3=yes],[have_python3=no])
+AS_IF(AM_LOG_SHELL(
+    [$1 -c 'import sys; sys.exit(int(sys.version@<:@:1@:>@) - 3)']
+  ), [have_python3=yes],[have_python3=no])
 ])
 
 dnl GD_PYTHON_MIN_VERSION(PROG,VERSION2,VERSION3,ACTION-IF-TRUE,ACTION-IF_FALSE)
@@ -187,7 +188,8 @@ AC_MSG_RESULT([$PYTHON_LDFLAGS])
 
 dnl figure out the platform name
 AC_MSG_CHECKING([Python platform name])
-PYTHON_PLATFORM=`$PYTHON -c "from distutils import util; print (util.get_platform())"`
+PYTHON_PLATFORM=`$PYTHON -c \
+  "from distutils import util; print (util.get_platform())"`
 AC_MSG_RESULT([$PYTHON_PLATFORM])
 AC_SUBST([PYTHON_PLATFORM])
 
