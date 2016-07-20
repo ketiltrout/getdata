@@ -1,3 +1,6 @@
+2016-07-20   D. V. Wiebe <getdata@ketiltrout.net> svn:1091
+	GetData-0.9.3 released.
+
 2016-06-28   D. V. Wiebe <getdata@ketiltrout.net> svn:1088
 	* bindings/php/php_getdata.h: Handle zend_register_long_constant() call
 	changes in PHP7.
