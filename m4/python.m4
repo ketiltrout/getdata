@@ -21,7 +21,7 @@ dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 dnl GD_LOG_SHELL(STUFF)
 dnl ---------------------------------------------------------------
 dnl Run STUFF as a shell command and log it
-AC_DEFUN([AM_LOG_SHELL],
+AC_DEFUN([GD_LOG_SHELL],
 [{ echo "$as_me:$LINENO: $1" >&AS_MESSAGE_LOG_FD
 ($1) >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD
 ac_status=$?
@@ -31,9 +31,12 @@ echo "$as_me:$LINENO: \$? = $ac_status" >&AS_MESSAGE_LOG_FD
 dnl GD_PYTHON_CONFIGVAR(VAR, KEY)
 dnl ---------------------------------------------------------------
 dnl Store the value of config_var KEY in VAR
+dnl
+dnl the superfluous exec call here is to work around a bug in
+dnl bash-4.1's parser. (See change 1.hh in bash-4.2-alpha)
 AC_DEFUN([GD_PYTHON_CONFIGVAR],
 [
-  $1=$(${PYTHON} - <<EOF 2>/dev/null
+  $1=$(exec ${PYTHON} - <<EOF 2>/dev/null
 try:
   import sysconfig
 except ImportError:
@@ -52,7 +55,7 @@ dnl If PROG is a Python3 interpreter, set have_python3 to "yes"
 dnl otherwise set it to "no"
 AC_DEFUN([GD_PYTHON3],
 [
-AS_IF(AM_LOG_SHELL(
+AS_IF(GD_LOG_SHELL(
     [$1 -c 'import sys; sys.exit(int(sys.version@<:@:1@:>@) - 3)']
   ), [have_python3=yes],[have_python3=no])
 ])
@@ -194,9 +197,12 @@ AC_MSG_RESULT([$PYTHON_PLATFORM])
 AC_SUBST([PYTHON_PLATFORM])
 
 dnl calculate the extension module directory
+dnl
+dnl See the comment under GD_PYTHON_CONFIGVAR for the reason for the
+dnl exec call here
 AC_MSG_CHECKING([Python extension module directory])
 if test "x${local_python_modpath}" = "x"; then
-  pythondir=$(${PYTHON} - <<EOF 2>/dev/null
+  pythondir=$(exec ${PYTHON} - <<EOF 2>/dev/null
 import sys
 if sys.version[[:1]] == '3':
   import sysconfig

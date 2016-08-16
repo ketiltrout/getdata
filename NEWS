@@ -1,14 +1,13 @@
+New in version 0.9.4a:
+
+  Miscellaneous:
+
+  * A work-around has been implemented in the configure script to avoid a
+    bug in bash 4.1's parser.  Reported by Akito Kusaka.
+
+|=========================================================================|
+
 New in version 0.9.3:
-
-  API Changes:
-
-  * gd_verbose_prefix() can now be used on invalid dirfiles.  Previously,
-    this function would return GD_E_BAD_DIRFILE when passed an invalid
-    DIRFILE pointer.
-
-  * BUG FIX: When trying to access a LINTERP table file in a non-existent
-    directory, GetData now reports the correct error (No such file or
-    directory).  Reported by Johanna Nagy.
 
   Library Changes:
 
@@ -26,6 +25,16 @@ New in version 0.9.3:
 
   * BUG FIX: On platforms where char is signed, the library no longer
     rejects field names containing bytes with the top bit set.
+
+  API Changes:
+
+  * gd_verbose_prefix() can now be used on invalid dirfiles.  Previously,
+    this function would return GD_E_BAD_DIRFILE when passed an invalid
+    DIRFILE pointer.
+
+  * BUG FIX: When trying to access a LINTERP table file in a non-existent
+    directory, GetData now reports the correct error (No such file or
+    directory).  Reported by Johanna Nagy.
 
   Bindings Changes:
 
@@ -1053,7 +1062,7 @@ New in version 0.8.0:
     these fields' metadata caches or else change the name in those
     definitions as well.
 
-  * BUG FIX: The invalid syntax "/META parent/child granchild ..." is now
+  * BUG FIX: The invalid syntax "/META parent/child grandchild ..." is now
     properly rejected by the parser.  Previously it half-worked, resulting
     in a segfault in gd_close().
 
@@ -1387,7 +1396,7 @@ New in version 0.7.0:
     computes A/X for vector X and scalar A, and CARRAY, which is an array
     of CONST scalars.  A few other changes are listed below.
 
-  * Like CONST fields, CARRAY elements can be used as parametersin the
+  * Like CONST fields, CARRAY elements can be used as parameters in the
     definition of other fields.  Syntax is 'field<n>', where 'field' is the
     field name and 'n' the element index in the CARRAY (and the angle
     brackets are literal angle brackets).  If the '<n>' is omitted, the
