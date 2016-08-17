@@ -27,10 +27,22 @@ import pygetdata
 
 # Python2/3 abstraction:
 
+# an encoded character (byte)
+def E(c):
+  if sys.version[:1] == '3':
+    return bytes([c])
+  return chr(c)
+
 # an encoded string
 def B(s):
   if sys.version[:1] == '3':
     return bytes(s, "UTF-8")
+  return s
+
+# a filesystem decoded string
+def F(s):
+  if sys.version[:1] == '3':
+    return os.fsdecode(s)
   return s
 
 # a decoded string
@@ -91,13 +103,13 @@ os.system("rm -rf dirfile")
 os.mkdir("dirfile")
 
 # Encoded string (koi8-r)
-estring =  B('\xF3\xD4\xD2\xCF\xCB\xC1')
+estring =  E(0xF3) + E(0xD4) + E(0xD2) + E(0xCF) + E(0xCB) + E(0xC1)
+
+# Filesystem *decoded* string
+fstring = F(estring)
 
 # byte-escaped (used for Dirfile metadata)
 xstring = B('\\xF3\\xD4\\xD2\\xCF\\xCB\\xC1')
-
-# Unicode escaped, which will show up in ASCII-ified error messages
-xustring = B("\\u0421\\u0442\\u0440\\u043e\\u043a\\u0430")
 
 f=open("dirfile/format", "wb")
 f.write(
@@ -221,7 +233,7 @@ CheckExc(6)
 
 try:
   e = 1
-  c = D.alias_target(estring + "_al")
+  c = D.alias_target(estring + B("_al"))
 except UnicodeDecodeError:
   e = 0
 
@@ -239,7 +251,7 @@ CheckParms(9,c)
 
 # This works because LINTERP table is FS encoded
 c = D.entry("l1")
-CheckSimple(10,c.parameters,("in", estring))
+CheckSimple(10,c.parameters,("in", fstring))
 
 c = D.entry("d1")
 CheckIns(11, c)

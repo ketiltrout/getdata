@@ -188,7 +188,7 @@ union gdpy_quadruple_value {
 #define gdpyobj_from_path PyString_FromString
 #else
 extern char *gdpy_path_from_pyobj_(PyObject*, int);
-#define gdpy_path_from_pyobj(o,c,d) gdpy_path_from_pyobj_(o,d)
+#define gdpy_path_from_pyobj(o,c) gdpy_path_from_pyobj_(o,1)
 #define gdpyobj_from_path PyUnicode_DecodeFSDefault
 #endif
 

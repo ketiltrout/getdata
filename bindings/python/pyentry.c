@@ -1151,7 +1151,7 @@ static int gdpy_entry_setspf(struct gdpy_entry_t *self, PyObject *value,
     void *closure)
 {
   unsigned int spf = 0;
-  char *scalar;
+  char *scalar = NULL;
 
   dtrace("%p, %p, %p", self, value, closure);
 
@@ -1587,7 +1587,7 @@ static int gdpy_entry_setbitnum(struct gdpy_entry_t *self, PyObject *value,
     void *closure)
 {
   int bitnum = 0;
-  char *scalar;
+  char *scalar = NULL;
   dtrace("%p, %p, %p", self, value, closure);
 
   if (self->E->field_type != GD_BIT_ENTRY &&
@@ -1768,7 +1768,7 @@ static int gdpy_entry_setshift(struct gdpy_entry_t *self, PyObject *value,
     void *closure)
 {
   int64_t shift = 0;
-  char *scalar;
+  char *scalar = NULL;
 
   dtrace("%p, %p, %p", self, value, closure);
 
@@ -1819,7 +1819,7 @@ static int gdpy_entry_setcountval(struct gdpy_entry_t *self, PyObject *value,
     void *closure)
 {
   int count_val = 0;
-  char *scalar;
+  char *scalar = NULL;
 
   dtrace("%p, %p, %p", self, value, closure);
 
@@ -2334,7 +2334,7 @@ static int gdpy_entry_setthreshold(struct gdpy_entry_t *self, PyObject *value,
     void *closure)
 {
   gd_triplet_t t;
-  char *scalar;
+  char *scalar = NULL;
 
   dtrace("%p, %p, %p", self, value, closure);
 

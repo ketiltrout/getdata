@@ -346,7 +346,7 @@ try:
   n = d.getdata("x", pygetdata.INT, first_frame=5, num_frames=1)
 except:
   CheckException(38,pygetdata.BadCodeError)
-  CheckSimple(38,d.error_string,"Field not found: x")
+  CheckSimple(38,d.error_string,B("Field not found: x"))
 
 # 40: entry (raw) check
 try:

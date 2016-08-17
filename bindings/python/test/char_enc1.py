@@ -27,6 +27,24 @@ import pygetdata
 
 # Python2/3 abstraction:
 
+# a unicode character
+def C(c):
+  if sys.version[:1] == '3':
+    return chr(c)
+  return unichr(c)
+
+# an encoded character (byte)
+def E(c):
+  if sys.version[:1] == '3':
+    return bytes([c])
+  return chr(c)
+
+# a filesystem decoded string
+def F(s):
+  if sys.version[:1] == '3':
+    return os.fsdecode(s)
+  return s
+
 # an encoded string
 def B(s):
   if sys.version[:1] == '3':
@@ -54,7 +72,7 @@ def CheckSimple(t,v,g):
 
 def CheckEOS(t,v,g):
   global ne
-  if (U(v)[-len(U(g)):] != U(g)):
+  if (v[-len(g):] != g):
     ne+=1
     print ("n[", t, "] =", repr(v), "expected", repr(g))
 
@@ -63,14 +81,17 @@ os.system("rm -rf dirfile")
 os.mkdir("dirfile")
 
 # Encoded string (koi8-r)
-estring =  B('\xF3\xD4\xD2\xCF\xCB\xC1')
+estring =  E(0xF3) + E(0xD4) + E(0xD2) + E(0xCF) + E(0xCB) + E(0xC1)
+
+# Filesystem *decoded* string
+fstring = F(estring)
 
 # byte-escaped (used for Dirfile metadata)
 xstring = B('\\xF3\\xD4\\xD2\\xCF\\xCB\\xC1')
 
 # The decoded version
-ustring = unichr(0x421) + unichr(0x442) + unichr(0x440) + unichr(0x43E) + \
-    unichr(0x43A) + unichr(0x430)
+ustring = C(0x421) + C(0x442) + C(0x440) + C(0x43E) + \
+    C(0x43A) + C(0x430)
 
 # Unicode escaped, which will show up in ASCII-ified error messages
 xustring = B("\\u0421\\u0442\\u0440\\u043e\\u043a\\u0430")
@@ -85,6 +106,7 @@ f.write(
         xstring + B("_c1 CONST UINT8 1\n") +
         xstring + B("_c2 CONST UINT8 1\n") +
         xstring + B("_r1 RAW UINT8 ") + xstring + B("_spf\n") +
+        B("r2 RAW UINT8 ") + xstring + B("_spf\n") +
         B("l1 LINTERP in ") + xstring + B("\n") +
         B("l1/") + xstring + B("_s1 STRING ") + xstring + B("1\n") +
         B("l1/") + xstring + B("_s2 STRING ") + xstring + B("2\n") +
@@ -179,7 +201,7 @@ CheckSimple(29,c.spf,ustring + "_spf")
 CheckSimple(30,c.parameters,(1, ustring + "_spf"))
 
 c = D.entry("l1")
-CheckSimple(31,c.parameters,("in", estring))
+CheckSimple(31,c.parameters,("in", fstring))
 
 c = D.entry("d1")
 CheckSimple(32,c.in_fields,(ustring + "_i1", ustring + "_i2"))

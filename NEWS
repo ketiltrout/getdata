@@ -1,5 +1,11 @@
 New in version 0.9.4a:
 
+  Bindings Changes:
+
+  * PYTHON BUG FIX: An erroreous preprocessor definition which made the
+    Python bindings unbuildable for Python 3 has been fixed.  Reported by
+    Akito Kusaka.
+
   Miscellaneous:
 
   * A work-around has been implemented in the configure script to avoid a

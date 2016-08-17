@@ -1,3 +1,19 @@
+2016-08-17   D. V. Wiebe <getdata@ketiltrout.net> svn:1095
+	* m4/python.m4: Add some superfluous exec's to work around a
+	bug in bash-4.1.
+
+	* bindings/python/gdpy_intern.h (gdpy_path_from_pyobj): Fix Python3
+	definition.
+
+	* bindings/python/pyentry.c (gdpy_entry_setspf gdpy_entry_setbitnum
+	gdpy_entry_setshift gdpy_entry_setcountval gdpy_entry_setthreshold):
+	initialise scalar to suppress compiler warning.
+
+	* bindings/python/test/big_test.py bindings/python/test/char_enc1.py
+	bindings/python/test/char_enc2.py bindings/python/test/char_enc3.py: Fix
+	all the encodings for Python3.  Use os.fsdecode in Python3 for filename
+	checks.
+
 2016-07-20   D. V. Wiebe <getdata@ketiltrout.net> svn:1091
 	GetData-0.9.3 released.
 
