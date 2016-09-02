@@ -106,7 +106,7 @@ static FLAC__StreamDecoderWriteStatus _GD_FlacWriteCallback(
   ptr = (int16_t*)gdfl->data;
 
   /* Copy and dechannelise the decoded data to our local buffer */
-  if (gdfl->bps == 1)
+  if (gdfl->bps == 8)
     for (u = 0; u < frame->header.blocksize; ++u)
       /* there's only one channel in this case */
       gdfl->data[u] = (int8_t)buffer[0][u];
@@ -267,8 +267,10 @@ static size_t _GD_FlacOutput(struct gd_flacdata *gdfl, gd_type_t data_type,
   if (ns > gdfl->dlen - gdfl->pos)
     ns = gdfl->dlen - gdfl->pos;
 
-  memcpy(output, gdfl->data + gdfl->pos, ns * GD_SIZE(data_type));
-  gdfl->pos += ns;
+  if (ns > 0) {
+    memcpy(output, gdfl->data + gdfl->pos, ns * GD_SIZE(data_type));
+    gdfl->pos += ns;
+  }
 
   dreturn("%" PRIuSIZE, ns);
   return ns;
@@ -278,15 +280,17 @@ ssize_t _GD_FlacRead(struct gd_raw_file_ *restrict file, void *restrict data,
     gd_type_t data_type, size_t nmemb)
 {
   struct gd_flacdata *gdfl = (struct gd_flacdata *)file->edata;
-  void *output = data;
-  size_t ns = nmemb;
+  char *output = data;
+  size_t s, ns = nmemb;
 
   dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, data, data_type, nmemb);
 
   for (;;) {
     /* copy the currently loaded frame to the output */
-    ns -= _GD_FlacOutput(gdfl, data_type, output, ns);
-    if (ns == 0)
+    s = _GD_FlacOutput(gdfl, data_type, output, ns);
+    output += s * GD_SIZE(data_type);
+
+    if ((ns -= s) == 0)
       break;
 
     /* Decode one frame */

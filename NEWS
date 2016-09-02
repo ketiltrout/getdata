@@ -1,5 +1,17 @@
 New in version 0.9.4a:
 
+  Library Changes:
+
+  * BUG FIX: Arbitrarily-long reads of FLAC-encoded files now work.
+    Previously, each FLAC frame was written to the start of the output
+    buffer, overwriting the previous frame, and leaving most of the
+    buffer uninitialised.  Reported by S. J. Benton.
+
+  * BUG FIX: Data read from FLAC-encoded 1-byte types are now correct.
+    Previously, although all data requested was read, only the first half
+    would be returned, encoded as 16-bit data (i.e., with a zero-byte
+    between every sample).
+
   Bindings Changes:
 
   * PYTHON BUG FIX: An erroreous preprocessor definition which made the
@@ -10,6 +22,10 @@ New in version 0.9.4a:
 
   * A work-around has been implemented in the configure script to avoid a
     bug in bash 4.1's parser.  Reported by Akito Kusaka.
+
+  * The way configure decides the Python module path has changed slightly
+    to provide a better default under debian-based systems when using
+    debhelper.  Reported by S. J. Benton.
 
 |=========================================================================|
 

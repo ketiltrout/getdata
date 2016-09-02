@@ -1,3 +1,17 @@
+2016-09-01   D. V. Wiebe <getdata@ketiltrout.net> svn:1096
+	* src/flac.c (_GD_FlacOutput): Skip pointless memcpy when ns == 0.
+	* src/flac.c (_GD_FlacRead): Advance output after write.
+	* test/flac_get_long.c: Added.
+
+	* src/flac.c (_GD_FlacWriteCallback): Fix 1-byte data type check.
+	* test/flac_get_int8.c: Added.
+
+	* test/flac_get_int64.c: Added.
+
+	* m4/python.m4 (GD_PYTHON): Do the standard strip-exec_prefix-after-the-
+	fact thing with the pythondir to work around the debianification of
+	distutils in debian.
+
 2016-08-17   D. V. Wiebe <getdata@ketiltrout.net> svn:1095
 	* m4/python.m4: Add some superfluous exec's to work around a
 	bug in bash-4.1.

@@ -198,22 +198,40 @@ AC_SUBST([PYTHON_PLATFORM])
 
 dnl calculate the extension module directory
 dnl
+dnl Debian's version of distutils is too clever.  Its install paths change
+dnl based on the prefix you provide.  We pass the current best-guess for
+dnl ${exec_prefix} as a result.  This may lead to incorrect behaviour at
+dnl make install time, if the user changes PREFIX then, but this should do
+dnl the right thing in the common case, where prefix doesn't change after
+dnl configure-time.
+dnl
 dnl See the comment under GD_PYTHON_CONFIGVAR for the reason for the
 dnl exec call here
 AC_MSG_CHECKING([Python extension module directory])
 if test "x${local_python_modpath}" = "x"; then
-  pythondir=$(exec ${PYTHON} - <<EOF 2>/dev/null
+
+dnl Calculate current exec_prefix
+  pyexec_prefix=$exec_prefix
+  test "x$pyexec_prefix" = xNONE && pyexec_prefix=$prefix
+  test "x$pyexec_prefix" = xNONE && pyexec_prefix=$ac_default_prefix
+
+  prefixed_pythondir=$(exec ${PYTHON} - <<EOF 2>/dev/null
 import sys
 if sys.version[[:1]] == '3':
   import sysconfig
-  print (sysconfig.get_path('platlib', vars={'platbase': '\${exec_prefix}'}))
+  print (sysconfig.get_path('platlib', vars={'platbase': "${pyexec_prefix}"}))
 else:
   from distutils import sysconfig
-  print (sysconfig.get_python_lib(1,0,prefix='\${exec_prefix}'))
+  print (sysconfig.get_python_lib(1,0,prefix="${pyexec_prefix}"))
 EOF
 )
-  if test "x${pythondir}" = "xNone" -o "x${pythondir}" = "x"; then
+  if test "x${prefixed_pythondir}" = "xNone" -o "x${prefixed_pythondir}" = "x";
+  then
     pythondir='\${exec_prefix}/lib/python${PYTHON_LDVERSION}/site-packages'
+  else
+    esc_pyexec_prefix=$(echo ${pyexec_prefix} | ${SED} -e 's/\//\\\//g')
+    pythondir=$(echo ${prefixed_pythondir} | \
+      ${SED} -e "s/^${esc_pyexec_prefix}/\${exec_prefix}/")
   fi
 else
   pythondir=$local_python_modpath

@@ -166,9 +166,9 @@ ERROR_TESTS=error error_error error_num error_short error_verbose \
 FILE_TESTS=file file_code file_type
 
 FLAC_TESTS=flac_add flac_get_big flac_get_far flac_get_get flac_get_get2 \
-					 flac_get_little flac_nframes flac_put_big flac_put_complex128 \
-					 flac_put_float64 flac_put_int32 flac_put_little flac_seek \
-					 flac_seek_far flac_sync
+					 flac_get_int8 flac_get_int64 flac_get_little flac_get_long \
+					 flac_nframes flac_put_big flac_put_complex128 flac_put_float64 \
+					 flac_put_int32 flac_put_little flac_seek flac_seek_far flac_sync
 
 FLIST_TESTS=flist flist0 flist2 flist_hidden flist_invalid flist_meta \
 						flist_meta2 flist_meta_hidden flist_meta_invalid flist_type \
