@@ -21,7 +21,7 @@ dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 m4_define(getdata_major,    0)
 m4_define(getdata_minor,    9)
 m4_define(getdata_revision, 4)
-m4_define(getdata_extra,    [a])
+m4_define(getdata_extra,    [])
 m4_define(getdata_pkg_extra,[])
 m4_define(getdata_version,
           getdata_major.getdata_minor.getdata_revision[]getdata_extra)
@@ -31,7 +31,7 @@ m4_define(getdata_pkg_version,
 dnl libgetdata current interface version
 m4_define(getdata_iface_version,    7)
 dnl libgetdata current interface implementation revision
-m4_define(getdata_impl_revision,    3)
+m4_define(getdata_impl_revision,    4)
 dnl libgetdata interface age (current interface - oldest supported interface)
 m4_define(getdata_iface_age,        0)
 

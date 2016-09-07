@@ -1,3 +1,16 @@
+2016-09-07   D. V. Wiebe <getdata@ketiltrout.net> svn:1097
+	GetData-0.9.4 released.
+
+	* doc/README.python doc/README.php: Update for PHP7/Py3.
+
+	* bindings/python/pyentry.c (gdpy_set_entry_from_tuple): Fix printf format.
+
+	* test/flac_get_big.c test/flac_get_far.c test/flac_get_get.c
+		test/flac_get_get2.c test/flac_get_int64.c test/flac_get_int8.c
+		test/flac_get_little.c test/flac_get_long.c test/flac_nframes.c
+		test/flac_seek.c test/flac_seek_far.c test/flac_sync.c: Discard
+		flac(1)'s stderr.  If flac fails, the test will, too.
+
 2016-09-01   D. V. Wiebe <getdata@ketiltrout.net> svn:1096
 	* src/flac.c (_GD_FlacOutput): Skip pointless memcpy when ns == 0.
 	* src/flac.c (_GD_FlacRead): Advance output after write.

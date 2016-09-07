@@ -53,7 +53,8 @@ int main(void)
   /* encode */
   snprintf(command, 4096,
       "%s --endian=little --silent --sample-rate=1 --channels=1 --bps=16 "
-      "--sign=signed --delete-input-file %s > /dev/null", FLAC, data);
+      "--sign=signed --delete-input-file %s >/dev/null 2>/dev/null", FLAC,
+      data);
   if (gd_system(command))
     return 1;
 

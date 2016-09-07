@@ -66,8 +66,8 @@ int main(void)
 
   /* uncompress */
   snprintf(command, 4096, "%s --silent --decode --delete-input-file "
-      "--force-raw-format --sign=signed --endian=little %s --output-name=%s",
-      FLAC, data_flac, data);
+      "--force-raw-format --sign=signed --endian=little %s --output-name=%s "
+      ">/dev/null 2>/dev/null", FLAC, data_flac, data);
   if (gd_system(command)) {
     r = 1;
   } else {

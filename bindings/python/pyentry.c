@@ -196,8 +196,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
   size = PyTuple_Size(tuple);
   if (size < min) {
     PyErr_Format(PyExc_TypeError, "'pygetdata.entry' "
-        "%s: needed %d entry parameters, but got only %" PRIdSIZE,
-        name, min, size);
+        "%s: needed %d entry parameters, but got only %li", name, min, size);
     dreturnvoid();
     return;
   }

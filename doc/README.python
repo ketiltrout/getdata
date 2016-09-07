@@ -1,12 +1,18 @@
 PYTHON BINDINGS FOR GETDATA
 ===========================
 
-The python bindings consist of a python extension module, `pygetdata.so'.  They
-should work with Python version 2.3, or any later 2.x version.
+The python bindings consist of a python extension module, pygetdata.  They
+should work with:
+* Python2: version 2.4, or later
+* Python3: version 3.2, or later
 
 Numerical Python (NumPy) is required to build and use the bindings.  By default,
 data returned from the bindings will be returned in NumPy arrays, but the
 bindings can be persuaded to return data as Python lists, if desired.
+
+Under Python3, string values are returned as bytes objects unless a character
+encoding is specified which is used to convert to (Unicode) strings.  See the
+character_encoding member.
 
 Full documentation for the Python bindings to the GetData library is contained
 within the pygetdata module itself.  To read this documentation, execute
