@@ -340,18 +340,17 @@ static int gdpy_fragment_setprefix(struct gdpy_fragment_t *self,
       if (prefix == NULL)
         PyErr_NoMemory();
     } else {
-      char *suffix;
+      char *suffix = NULL;
       gd_fragment_affixes(self->dirfile->D, self->n, &prefix, &suffix);
+      free(suffix);
 
       GDPY_CHECK_ERROR(self->dirfile->D, -1, self->dirfile->char_enc);
-
-      free(suffix);
     }
   } else
     prefix = gdpy_string_from_pyobj(value, self->dirfile->char_enc,
         "prefix must be string");
 
-  if (PyErr_Occurred()) {
+  if (prefix == NULL) {
     dreturn("%i", -1);
     return -1;
   }
@@ -405,18 +404,17 @@ static int gdpy_fragment_setsuffix(struct gdpy_fragment_t *self,
       if (suffix == NULL)
         PyErr_NoMemory();
     } else {
-      char *prefix;
+      char *prefix = NULL;
       gd_fragment_affixes(self->dirfile->D, self->n, &prefix, &suffix);
+      free(prefix);
 
       GDPY_CHECK_ERROR(self->dirfile->D, -1, self->dirfile->char_enc);
-
-      free(prefix);
     }
   } else
     suffix = gdpy_string_from_pyobj(value, self->dirfile->char_enc,
         "suffix must be string");
 
-  if (PyErr_Occurred()) {
+  if (suffix == NULL) {
     dreturn("%i", -1);
     return -1;
   }

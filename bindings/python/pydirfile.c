@@ -2911,9 +2911,16 @@ static int gdpy_dirfile_setverboseprefix(struct gdpy_dirfile_t *self,
   free(self->verbose_prefix);
   if (value == NULL || value == Py_None)
     self->verbose_prefix = NULL;
-  else
-    self->verbose_prefix = gdpy_string_from_pyobj(value, self->char_enc,
+  else {
+    char *new_prefix = gdpy_string_from_pyobj(value, self->char_enc,
         "prefix must be string");
+
+    if (new_prefix == NULL) {
+      dreturn("%i", -1);
+      return -1;
+    }
+    self->verbose_prefix = new_prefix;
+  }
 
   gd_verbose_prefix(self->D, self->verbose_prefix);
 

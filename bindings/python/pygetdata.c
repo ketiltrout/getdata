@@ -259,22 +259,26 @@ long gdpy_long_from_pyobj(PyObject *pyobj)
 }
 
 /* Convert a Python string-like object to a C string, returns a malloc'd
- * string in all cases */
+ * string except on error */
 char *gdpy_string_from_pyobj(PyObject *pyobj, const char *char_enc,
     const char *err_string)
 {
+  PyObject *encobj = NULL;
   char *s = NULL;
-  int del_pyobj = 0;
 
   dtrace("%p, \"%s\"", pyobj, char_enc);
 
   if (PyUnicode_Check(pyobj)) {
-    del_pyobj = 1;
     /* Encode string */
     if (char_enc == NULL)
-      pyobj = PyUnicode_AsUTF8String(pyobj);
+      encobj = PyUnicode_AsUTF8String(pyobj);
     else
-      pyobj = PyUnicode_AsEncodedString(pyobj, char_enc, "strict");
+      encobj = PyUnicode_AsEncodedString(pyobj, char_enc, "strict");
+
+    if (encobj == NULL) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
   } else if (!gdpy_encobj_check(pyobj)) {
     if (err_string)
       PyErr_SetString(PyExc_TypeError, err_string);
@@ -283,7 +287,11 @@ char *gdpy_string_from_pyobj(PyObject *pyobj, const char *char_enc,
   }
 
   /* now convert to python object */
-  s = gdpy_string_from_encobj(pyobj);
+  if (encobj) {
+    s = gdpy_string_from_encobj(encobj);
+    Py_DECREF(encobj);
+  } else
+    s = gdpy_string_from_encobj(pyobj);
 
   /* strdup */
   if (s) {
@@ -292,9 +300,6 @@ char *gdpy_string_from_pyobj(PyObject *pyobj, const char *char_enc,
     if (s == NULL)
       PyErr_NoMemory();
   }
-
-  if (del_pyobj)
-    Py_DECREF(pyobj);
 
   dreturn("\"%s\"", s);
   return s;
@@ -828,7 +833,7 @@ int gdpy_parse_charenc(char** char_enc, PyObject *value)
     char *new_enc = gdpy_string_from_pyobj(value, NULL,
         "character_encoding must be string or None");
   
-    if (PyErr_Occurred()) {
+    if (new_enc == NULL) {
       dreturn("%i", -1);
       return -1;
     }

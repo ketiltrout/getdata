@@ -241,7 +241,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
         E->in_fields[i] = gdpy_string_from_pyobj(PyTuple_GetItem(parm1, i),
             char_enc, "in_fields must be string");
 
-        if (PyErr_Occurred()) {
+        if (E->in_fields[i] == NULL) {
           dreturnvoid();
           return;
         }
@@ -289,7 +289,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
           char_enc, "in_fields must be string");
 
-      if (PyErr_Occurred()) {
+      if (E->in_fields[0] == NULL) {
         dreturnvoid();
         return;
       }
@@ -307,7 +307,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
           char_enc, "in_fields must be string");
 
-      if (PyErr_Occurred()) {
+      if (E->in_fields[0] == NULL) {
         dreturnvoid();
         return;
       }
@@ -327,7 +327,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
           char_enc, "in_fields must be string");
 
-      if (PyErr_Occurred()) {
+      if (E->in_fields[0] == NULL) {
         dreturnvoid();
         return;
       }
@@ -335,7 +335,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       E->in_fields[1] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 1),
           char_enc, "in_fields must be string");
 
-      if (PyErr_Occurred()) {
+      if (E->in_fields[1] == NULL) {
         dreturnvoid();
         return;
       }
@@ -344,7 +344,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
           char_enc, "in_fields must be string");
 
-      if (PyErr_Occurred()) {
+      if (E->in_fields[0] == NULL) {
         dreturnvoid();
         return;
       }
@@ -371,7 +371,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
           char_enc, "in_fields must be string");
 
-      if (PyErr_Occurred()) {
+      if (E->in_fields[0] == NULL) {
         dreturnvoid();
         return;
       }
@@ -395,7 +395,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
           char_enc, "in_fields must be string");
 
-      if (PyErr_Occurred()) {
+      if (E->in_fields[0] == NULL) {
         dreturnvoid();
         return;
       }
@@ -425,7 +425,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
           char_enc, "in_fields must be string");
 
-      if (PyErr_Occurred()) {
+      if (E->in_fields[0] == NULL) {
         dreturnvoid();
         return;
       }
@@ -433,7 +433,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       E->in_fields[1] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 1),
           char_enc, "in_fields must be string");
 
-      if (PyErr_Occurred()) {
+      if (E->in_fields[1] == NULL) {
         dreturnvoid();
         return;
       }
@@ -471,7 +471,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
           char_enc, "in_fields must be string");
 
-      if (PyErr_Occurred()) {
+      if (E->in_fields[0] == NULL) {
         dreturnvoid();
         return;
       }
@@ -479,7 +479,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       E->in_fields[1] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 1),
           char_enc, "in_fields must be string");
 
-      if (PyErr_Occurred()) {
+      if (E->in_fields[1] == NULL) {
         dreturnvoid();
         return;
       }
@@ -675,7 +675,7 @@ static int gdpy_entry_init(struct gdpy_entry_t *self, PyObject *args,
   E.field = gdpy_string_from_pyobj(field_name, self->char_enc,
       "field name should be string");
 
-  if (PyErr_Occurred()) {
+  if (E.field == NULL) {
     dreturn("%i", -1);
     return -1;
   }
@@ -757,7 +757,7 @@ static int gdpy_entry_setname(struct gdpy_entry_t *self, PyObject *value,
   s = gdpy_string_from_pyobj(value, self->char_enc,
       "field name should be string");
 
-  if (PyErr_Occurred()) {
+  if (s == NULL) {
     dreturn("%i", -1);
     return -1;
   }
@@ -863,7 +863,6 @@ static PyObject *gdpy_entry_getinfields(struct gdpy_entry_t *self,
       s1 = gdpyobj_from_string(self->E->in_fields[0], self->char_enc);
       S1CHECK;
       tuple = Py_BuildValue("(N)", s1);
-      S1CHECK;
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
@@ -925,13 +924,14 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t *self, PyObject *value,
         return -1;
       }
 
-      for (i = 0; i < self->E->EN(lincom,n_fields); ++i)
+      for (i = 0; i < self->E->EN(lincom,n_fields); ++i) {
         s[i] = gdpy_string_from_pyobj(PyTuple_GetItem(value, i), self->char_enc,
             "in_fields should be strings");
 
-      if (PyErr_Occurred()) {
-        dreturn("%i", -1);
-        return -1;
+        if (s[i] == NULL) {
+          dreturn("%i", -1);
+          return -1;
+        }
       }
 
       for (i = 0; i < self->E->EN(lincom,n_fields); ++i) {
@@ -966,7 +966,7 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t *self, PyObject *value,
             "in_fields should be strings");
       }
 
-      if (PyErr_Occurred()) {
+      if (s[0] == NULL) {
         dreturn("%i", -1);
         return -1;
       }
@@ -999,13 +999,14 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t *self, PyObject *value,
         return -1;
       }
 
-      for (i = 0; i < 2; ++i)
+      for (i = 0; i < 2; ++i) {
         s[i] = gdpy_string_from_pyobj(PyTuple_GetItem(value, i), self->char_enc,
             "in_fields should be strings");
 
-      if (PyErr_Occurred()) {
-        dreturn("%i", -1);
-        return -1;
+        if (s[i] == NULL) {
+          dreturn("%i", -1);
+          return -1;
+        }
       }
 
       for (i = 0; i < 2; ++i) {
