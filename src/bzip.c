@@ -53,6 +53,8 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct gd_raw_file_* file,
 
   dtrace("%i, %p, 0x%X", dirfd, file, mode);
 
+  file->error = BZ_IO_ERROR;
+
   if (mode & GD_FILE_READ) {
     fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666);
   } else if (mode & GD_FILE_TEMP) {
@@ -215,38 +217,38 @@ ssize_t _GD_Bzip2Write(struct gd_raw_file_ *file, const void *data,
   return n;
 }
 
-off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t count,
+off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t offset,
     gd_type_t data_type, unsigned int mode)
 {
   struct gd_bzdata *ptr;
 
-  dtrace("%p, %" PRId64 ", 0x%X, 0x%X", file, (int64_t)count, data_type, mode);
+  dtrace("%p, %" PRId64 ", 0x%X, 0x%X", file, (int64_t)offset, data_type, mode);
 
-  ptr = (struct gd_bzdata *)(file[(mode == GD_FILE_WRITE) ? 1 : 0].edata);
+  ptr = (struct gd_bzdata *)(file->edata);
 
   /* nothing to do */
-  if (ptr->base + ptr->pos == count * GD_SIZE(data_type)) {
-    dreturn("%" PRId64, (int64_t)count);
-    return count;
+  if (file->pos == offset) {
+    dreturn("%" PRId64, (int64_t)offset);
+    return offset;
   }
 
-  count *= GD_SIZE(data_type);
+  offset *= GD_SIZE(data_type);
 
   if (mode == GD_FILE_WRITE) {
+    off64_t remaining = offset - file->pos * GD_SIZE(data_type);
     /* we only get here when we need to pad */
-    count -= file->pos * GD_SIZE(data_type);
-    while (ptr->base < count) {
+    while (ptr->base + ptr->end < offset) {
       int n;
-      if (count > GD_BZIP_BUFFER_SIZE)
+      if (remaining > GD_BZIP_BUFFER_SIZE)
         n = GD_BZIP_BUFFER_SIZE;
       else
-        n = count;
+        n = remaining;
 
-      _GD_Bzip2Write(file + 1, ptr->data, GD_UINT8, n);
-      count -= n;
+      _GD_Bzip2Write(file, ptr->data, GD_UINT8, n);
+      remaining -= n;
     }
   } else {
-    if (ptr->base > count) {
+    if (ptr->base > offset) {
       /* a backwards seek: reopen the file */
       ptr->bzerror = 0;
       BZ2_bzReadClose(&ptr->bzerror, ptr->bzfile);
@@ -272,7 +274,7 @@ off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t count,
     }
 
     /* seek forward the slow way */
-    while (ptr->base + ptr->end < count) {
+    while (ptr->base + ptr->end < offset) {
       int n;
 
       /* eof */
@@ -295,8 +297,8 @@ off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t count,
       }
     }
 
-    ptr->pos = (ptr->stream_end && count >= ptr->base + ptr->end) ? ptr->end :
-      count - ptr->base;
+    ptr->pos = (ptr->stream_end && offset >= ptr->base + ptr->end) ? ptr->end :
+      offset - ptr->base;
   }
   
   file->pos = (ptr->base + ptr->pos) / GD_SIZE(data_type);

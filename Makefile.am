@@ -50,6 +50,7 @@ $(distdir)/_inst/lib/pkgconfig: $(distdir).tar.gz
 		${MAKE} install
 
 # matlab-only package
+matlab_$(distdir).tar.gz: matlabdist
 matlabdist: $(DISTFILES) $(distdir)/_inst/lib/pkgconfig
 	rm -rf svn_export
 	svn export $(top_srcdir) svn_export
@@ -92,6 +93,7 @@ matlabdistcheck: matlab_$(distdir).tar.gz $(distdir)/_inst/lib/pkgconfig
 	rm -rf $(distdir)
 
 # idl-only package
+idl_$(distdir).tar.gz: idldist
 idldist: $(DISTFILES) $(distdir)/_inst/lib/pkgconfig
 	rm -rf svn_export
 	svn export $(top_srcdir) svn_export

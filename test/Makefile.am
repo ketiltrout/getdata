@@ -23,7 +23,7 @@ AUTOMAKE_OPTIONS = foreign serial-tests
 LDADD=../src/libgetdata.la
 AM_CPPFLAGS=${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
 
-EXTRA_DIST=test.h
+EXTRA_DIST=test.h enc_put_offs.c
 
 ADD_TESTS=add_add add_affix add_alias add_alias_affix add_alias_meta \
 					add_amb_code7 add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
@@ -68,10 +68,10 @@ ASCII_TESTS=ascii_add ascii_get ascii_get_complex ascii_get_get ascii_get_here \
 
 BOF_TESTS=bof bof_bit bof_index bof_lincom bof_phase bof_phase_neg
 
-BZIP_TESTS=bzip_add bzip_get bzip_get_far bzip_get_get bzip_get_get2 \
-					 bzip_get_put bzip_move_from bzip_move_to bzip_nframes bzip_put \
-					 bzip_put_back bzip_put_endian bzip_put_get bzip_put_pad \
-					 bzip_put_sub bzip_seek bzip_seek_far bzip_sync
+BZIP_TESTS=bzip_add bzip_enoent bzip_get bzip_get_far bzip_get_get \
+					 bzip_get_get2 bzip_get_put bzip_move_from bzip_move_to bzip_nframes \
+					 bzip_put bzip_put_back bzip_put_endian bzip_put_get bzip_put_offs \
+					 bzip_put_pad bzip_put_sub bzip_seek bzip_seek_far bzip_sync
 
 CLOSE_TESTS=close_bad close_close close_discard close_null
 
@@ -165,10 +165,11 @@ ERROR_TESTS=error error_error error_num error_short error_verbose \
 
 FILE_TESTS=file file_code file_type
 
-FLAC_TESTS=flac_add flac_get_big flac_get_far flac_get_get flac_get_get2 \
-					 flac_get_int8 flac_get_int64 flac_get_little flac_get_long \
-					 flac_nframes flac_put_big flac_put_complex128 flac_put_float64 \
-					 flac_put_int32 flac_put_little flac_seek flac_seek_far flac_sync
+FLAC_TESTS=flac_add flac_enoent flac_get_big flac_get_far flac_get_get \
+					 flac_get_get2 flac_get_int8 flac_get_int64 flac_get_little \
+					 flac_get_long flac_nframes flac_put_big flac_put_complex128 \
+					 flac_put_float64 flac_put_int32 flac_put_little flac_put_offs \
+					 flac_seek flac_seek_far flac_sync
 
 FLIST_TESTS=flist flist0 flist2 flist_hidden flist_invalid flist_meta \
 						flist_meta2 flist_meta_hidden flist_meta_invalid flist_type \
@@ -220,11 +221,11 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 
 GLOBAL_TESTS=global_flags global_name global_ref global_ref_empty global_ref_set
 
-GZIP_TESTS=gzip_add gzip_del gzip_get gzip_get_far gzip_get_get gzip_get_get2 \
-					 gzip_get_put gzip_move_from gzip_move_to gzip_nframes gzip_put \
-					 gzip_put_back gzip_put_endian gzip_put_get gzip_put_nframes \
-					 gzip_put_off gzip_put_pad gzip_put_sub gzip_seek gzip_seek_far \
-					 gzip_seek_put gzip_sync
+GZIP_TESTS=gzip_add gzip_del gzip_enoent gzip_get gzip_get_far gzip_get_get \
+					 gzip_get_get2 gzip_get_put gzip_move_from gzip_move_to gzip_nframes \
+					 gzip_put gzip_put_back gzip_put_endian gzip_put_get \
+					 gzip_put_nframes gzip_put_off gzip_put_offs gzip_put_pad \
+					 gzip_put_sub gzip_seek gzip_seek_far gzip_seek_put gzip_sync
 
 HEADER_TESTS=header_complex header_off64t
 
@@ -244,11 +245,12 @@ LEGACY_TESTS=legacy_error legacy_estring legacy_format legacy_get \
 						 legacy_put legacy_spf
 endif
 
-LZMA_TESTS=lzma_get lzma_nframes lzma_put lzma_xz_add lzma_xz_get \
+LZMA_TESTS=lzma_enoent lzma_get lzma_nframes lzma_put lzma_xz_add lzma_xz_get \
 					 lzma_xz_get_far lzma_xz_get_get lzma_xz_get_get2 lzma_xz_get_put \
-					 lzma_xz_move_to lzma_xz_nframes lzma_xz_put lzma_xz_put_back \
-					 lzma_xz_put_endian lzma_xz_put_get lzma_xz_put_pad lzma_xz_seek \
-					 lzma_xz_seek_far lzma_xz_sync
+					 lzma_xz_move_to lzma_xz_nframes lzma_xz_offs_clear lzma_xz_put \
+					 lzma_xz_put_back lzma_xz_put_endian lzma_xz_put_get \
+					 lzma_xz_put_offs lzma_xz_put_pad lzma_xz_seek lzma_xz_seek_far \
+					 lzma_xz_sync
 
 MADD_TESTS=madd madd_affix madd_alias madd_alias_affix madd_bit \
 					 madd_bit_invalid madd_carray madd_clincom madd_const madd_cpolynom \

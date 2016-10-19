@@ -1,3 +1,84 @@
+2016-09-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1101
+	* src/flac.c (_GD_FlacDecodeCallback): Renamed from _GD_FlacWriteCallback
+	because that name was confusing.  (The callback is invoked via
+	_GD_FlacRead).
+
+	* src/flac.c (_GD_FlacSeek): Fix write-seek.
+
+	* src/gzip.c (_GD_GzipOpen): Set errno when fdopen fails.
+	* test/bzip_enoent.c test/flac_enoent.c test/gzip_enoent.c
+	test/lzma_enoent.c test/lzma_xz_put_offs.c
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getentry
+	gdpy_dirfile_getfragment): Remove Py_INCREF call on new object: tp_alloc
+	already sets the refcount to 1.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getentry): strdup() the char_enc
+	to avoid double free.
+
+	* bindings/python/pyfragment.c (gdpy_dirfile_getfragment): Call Py_INCREF on
+	self to match the decref in gdpy_fragment_delete().
+
+	* src/encoding.c (_GD_FiniRawIO): When closing an OOP write, count passed
+	to _GD_ef->read should be samples, not bytes.
+	* test/lzma_xz_offs_clear.c: Added.
+
+	* src/bzip.c (_GD_Bzip2Seek) src/flac.c (_GD_FlacSeek) src/gzip.c
+	(_GD_GzipSeek _GD_GzipWrite) src/lzma.c (_GD_LzmaSeek _GD_LzmaSync): Treat
+	file as a simple struct pointer, not an array for better encapsulation.  (All
+	dealings with the array should occur in the bookkeeping layer.)
+	* src/encoding.c (_GD_InitRawIO): Initialise E->e->u.raw.file[1].subenc for
+	OOP writes.
+	* src/flush.c (_GD_SyncRaw): Added.
+	* src/flush.c (_GD_Flush): sync the correct file for OOP write encodings.
+
+	* src/bzip.c (_GD_Bzip2Seek): Rename count parameter to offset to reduce
+	confusion.  Handle byte counting in a separate variable (remaining).
+
+	* src/encoding.c (_GD_FiniRawIO): count to read call should be samples, not
+	bytes.
+
+	* src/iopos.c (_GD_DoSeek): Fix OOP seek check.
+
+	* src/lzma.c: Increased GD_LZMA_DATA_IN to 32752 from 4096.
+
+	* src/lzma.c (_GD_LzmaReady): Don't read more data if we already have some
+	ready.
+
+	* src/lzma.c (_GD_LzmaClear): Set lzd->offset after move.
+
+	* src/lzma.c (_GD_LzmaWrite _GD_LzmaRead): Update file->pos on success.
+
+	* src/lzma.c (_GD_LzmaSeek): count to _GD_LzmaWrite is samples not bytes.
+
+	* src/lzma.c (_GD_LzmaRead): Only call _GD_LzmaClear when there's no
+	data ready.
+	
+	* test/enc_put_offs.c test/bzip_put_offs.c test/flac_put_offs.c
+	test/gzip_put_offs.c test/lzma_xz_offs_clear.c test/lzma_xz_put_offs.c
+
+2016-09-17   D. V. Wiebe <getdata@ketiltrout.net> svn:1099
+	* bindings/python/pydirfile.c (gdpy_dirfile_setverboseprefix): Report
+	encoding errors.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_setverboseprefix): Don't
+	trash the value of self->verbose_prefix (= dirfile.verbose_prefix) if
+	encoding fails.
+
+	* bindings/python/pyentry.c (gdpy_entry_getinfields): Remove dead code.
+
+	* bindings/python/pyentry.c (gdpy_entry_setinfields): Return error on first
+	encoding failure.
+
+	* bindings/python/pyentry.c (gdpy_set_entry_from_tuple gdpy_entry_init
+	gdpy_entry_setname gdpy_entry_setinfields) bindings/python/pyfragment.c
+	(gdpy_fragment_setprefix gdpy_fragment_setsuffix)
+	bindings/python/pygetdata.c (gdpy_parse_charenc): Re-arrange things a bit
+	to help Coverity Scan figure out what's going on.
+
+	* bindings/python/pygetdata.c (gdpy_string_from_pyobj): Return error on
+	encoding failure.
+
 2016-09-07   D. V. Wiebe <getdata@ketiltrout.net> svn:1097
 	GetData-0.9.4 released.
 
@@ -233,7 +314,6 @@
 	PyString_Check calls.
 	* bindings/python/pyentry.c (gdpy_dup_pystring): Deleted (now handled by
 	gdpy_string_from_pyobj).
-	* bindings/python/pygetdata.c (
 
 	* bindings/python/pygetdata.c (gdpy_path_from_pyobj_): Added for Python3.
 	* bindings/python/pygetdata.h: Define gdpy_path_from_pyobj to either

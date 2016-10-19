@@ -25,7 +25,7 @@
  * --------------------------------------------------
  *
  * Several preprocessor symbols may be defined before including this file to
- * modify it's use:
+ * modify its use:
  *
  * - defining GD_NO_LEGACY_API will prevent the Legacy API declarations in
  *   getdata_legacy.h from being declared.  If the Legacy API was omitted from
@@ -33,13 +33,15 @@
  *
  * - defining GD_C89_API will prevent declarations herein from using the C99
  *   keyword `_Complex'.  Affected declarations will instead use a two-element
- *   array of doubles in place of the complex types.  This symbol permits
- *   including these declarations using a non-C99 conforming compiler.
+ *   array of doubles in place of the complex types.  It also changes the
+ *   gd_entry_t object as described in the gd_entry(3) manual page.  This
+ *   symbol permits including these declarations using a non-C99 conforming
+ *   compiler.
  *
  * - defining GD_64BIT_API will expose the declaration of versions of funtions
  *   using an explicitly 64-bit off_t type, regardless of the actual size of
  *   off_t itself.  These functions have "64" appended to their name (e.g.
- *   gd_getdata64()).  It will also define th gd_off64_t type, which is used in
+ *   gd_getdata64()).  It will also define the gd_off64_t type, which is used in
  *   these exposed definitions as a replacement for off_t.  This symbol is
  *   automatically defined if _LARGEFILE64_SOURCE has been defined before
  *   including this file, and may also be defined on certain platforms where
@@ -49,6 +51,17 @@
  *   which map the version 0.7 function names to the names used in GetData-0.6.
  *   This feature is provided only to ease transistion, and will be removed in
  *   some unpecified future release.
+ *
+ * API DOCUMENTATION
+ * -----------------
+ *
+ * The GetData APIs which are declared in this file are documented in section 3
+ * of the Unix manual.  You should be able to access it using the standard
+ * man(1) command, e.g.:
+ *
+ *   man gd_getdata
+ *
+ * or equivalent.
  */
 
 #ifndef GETDATA_H

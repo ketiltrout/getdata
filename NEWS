@@ -1,3 +1,37 @@
+New in version 0.9.5a:
+
+  Library Changes:
+
+  * BUG FIX: A bug in the I/O positioning performed before a write to
+    FLAC-encoded data has been fixed.  Previously, written data could
+    end up in the wrong place in the data stream.  Reported by
+    S. J. Benton.
+
+  * BUG FIX: Trying to open a non-existent, gzip-encoded data file now
+    reports the correct error (GD_E_IO; "No such file or directory"),
+    instead of segfaulting.  Reported by Matthew Petroff.
+
+  * BUG FIX: A segfault encountered when closing very large compressed
+    files after writing to them has been fixed.
+
+  * BUG FIX: A number of bugs associated with random-access writes to
+    compressed data files which were causing data corruption have been
+    fixed.
+
+  Bindings Changes:
+
+  * PYTHON BUG FIX: A UnicodeEncodeError while assigning to
+    dirfile.verbose_prefix no longer results in that attribute being set
+    to None.  Instead, it retains its former value, which reflects what
+    actually happens in the underlying C library in this case.
+
+  * PYTHON BUG FIX: Objects returned by dirfile.entry() and
+    dirfile.fragment() weren't being initialised with the correct reference
+    count, leading to memory leaks when they went out of scope.  Reported
+    by Alexandra Rahlin.
+
+|=========================================================================|
+
 New in version 0.9.4:
 
   Library Changes:

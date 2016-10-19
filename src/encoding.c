@@ -450,7 +450,8 @@ int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
 
         do {
           n_to_write = n_read = (*_GD_ef[E->e->u.raw.file[0].subenc].read)(
-              E->e->u.raw.file, buffer, E->EN(raw,data_type), GD_BUFFER_SIZE);
+              E->e->u.raw.file, buffer, E->EN(raw,data_type),
+              GD_BUFFER_SIZE / GD_SIZE(E->EN(raw,data_type)));
           if (n_read < 0) {
             free(buffer);
             _GD_SetEncIOError(D, GD_E_IO_READ, E->e->u.raw.file + 0);
@@ -467,7 +468,7 @@ int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
             }
             n_to_write -= n_wrote;
           }
-        } while (n_read == GD_BUFFER_SIZE);
+        } while (n_read > 0);
 
         free(buffer);
       }
@@ -602,6 +603,8 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
         return 1;
       }
     }
+    if (oop_write)
+      E->e->u.raw.file[1].subenc = E->e->u.raw.file[0].subenc;
   }
 
   if (filebase == NULL)

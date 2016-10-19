@@ -926,9 +926,9 @@ static PyObject *gdpy_dirfile_getentry(struct gdpy_dirfile_t *self,
   obj = (struct gdpy_entry_t*)gdpy_entry.tp_alloc(&gdpy_entry, 0);
 
   if (obj == NULL) {
-    PyErr_NoMemory();
     gd_free_entry_strings(E);
     free(E);
+    PyErr_NoMemory();
     dreturn("%p", NULL);
     return NULL;
   }
@@ -938,8 +938,16 @@ static PyObject *gdpy_dirfile_getentry(struct gdpy_dirfile_t *self,
   /* These entry objects copy the dirfile's character_encoding, not the global
    * pygetdata.character_encoding
    */
-  obj->char_enc = self->char_enc;
-  Py_INCREF(obj);
+  if (self->char_enc) {
+    obj->char_enc = strdup(self->char_enc);
+    if (obj->char_enc == NULL) {
+      Py_DECREF(obj);
+      PyErr_NoMemory();
+      obj = NULL;
+    }
+  } else
+    obj->char_enc = NULL;
+
   dreturn("%p", obj);
   return (PyObject*)obj;
 }
@@ -995,9 +1003,9 @@ static PyObject *gdpy_dirfile_getfragment(struct gdpy_dirfile_t *self,
   }
 
   obj->n = fragment_index;
+  Py_INCREF(self);
   obj->dirfile = self;
 
-  Py_INCREF(obj);
   dreturn("%p", obj);
   return (PyObject*)obj;
 }

@@ -160,9 +160,10 @@ off64_t _GD_DoSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
     off64_t offset, unsigned int mode)
 {
   off64_t pos;
-  const int which = (mode & GD_FILE_TEMP) ? 1 : 0;
   const int oop_write = ((enc->flags & GD_EF_OOP) && (mode & GD_FILE_WRITE))
     ? 1 : 0;
+  const int temp = (mode & GD_FILE_TEMP) ? 1 : 0;
+  const int which = (oop_write || temp) ? 1 : 0;
 
   dtrace("%p, %p, %p, %" PRId64 ", 0x%X", D, E, enc, (int64_t)offset, mode);
 
@@ -177,7 +178,7 @@ off64_t _GD_DoSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
 
   if (oop_write) {
     /* in this case we need to close and then re-open the file */
-    if (offset < E->e->u.raw.file[which].pos) {
+    if (offset < E->e->u.raw.file[1].pos) {
       if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP)) {
         dreturn("%i", -1);
         return -1;
@@ -189,14 +190,19 @@ off64_t _GD_DoSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
       }
     }
 
-    if (E->e->u.raw.file[0].idata >= 0) {
-      /* read from the old file until we reach the point we're interested in or
-       * run out of data */
+    /* If the read-side file is open, and the read and write pointers agree,
+     * and the I/O pointers are less than the target offset, then read data
+     * from the read-side until we reach the point we're interested in, or
+     * we run out of data */
+    if (E->e->u.raw.file[0].idata >= 0 &&
+        E->e->u.raw.file[0].pos == E->e->u.raw.file[1].pos &&
+        offset > E->e->u.raw.file[1].pos)
+    {
       char *buffer, *ptr;
       ssize_t n_read, n_wrote;
       const off64_t chunk_size = GD_BUFFER_SIZE / GD_SIZE(E->EN(raw,data_type));
 
-      off64_t count, remaining = offset - E->e->u.raw.file[which].pos;
+      off64_t count, remaining = offset - E->e->u.raw.file[1].pos;
 
       buffer = _GD_Malloc(D, GD_BUFFER_SIZE);
       if (buffer == NULL) {
@@ -204,6 +210,7 @@ off64_t _GD_DoSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
         return -1;
       }
 
+      /* Read loop */
       while (remaining > 0) {
         if (remaining > chunk_size)
           count = chunk_size;
@@ -218,9 +225,10 @@ off64_t _GD_DoSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
           free(buffer);
           dreturn("%i", -1);
           return -1;
-        } else if (n_read == 0) /* EOF */
+        } else if (n_read == 0) /* early EOF - will need to pad writer */
           break;
 
+        /* Write loop */
         ptr = buffer;
         while (n_read > 0) {
           n_wrote = (*enc->write)(E->e->u.raw.file + 1, ptr,
@@ -238,11 +246,25 @@ off64_t _GD_DoSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
       }
 
       free(buffer);
+
+      /* We can exit early if there's nothing remaining, since that means
+       * we successfully moved the write pointer to the right place
+       */
+      if (remaining == 0) {
+        dreturn("%" PRId64, (int64_t)offset);
+        return offset;
+      }
     }
   }
 
+  /* Do the seek.  For OOP writes, this function is only called when we need
+   * to pad, since the OOP loop above should have already copied everything
+   * appropriate from the read-side to the write-side.
+   */
   pos = (*enc->seek)(E->e->u.raw.file + which, offset, E->EN(raw,data_type),
       mode);
+
+  /* Seek error */
   if (pos < 0)
     _GD_SetEncIOError(D, (mode & GD_FILE_WRITE) ? GD_E_IO_WRITE : GD_E_IO_READ,
         E->e->u.raw.file + 0);

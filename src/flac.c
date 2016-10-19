@@ -49,6 +49,7 @@ struct gd_flacdata {
   int error; /* error flag */
   int *errnum; /* file->error */
 
+  /* Decoder (reader) only */
   char *data; /* Dechannelised frame of data */
   unsigned dlen; /* Length in samples of data */
   unsigned pos; /* offset into the frame data */
@@ -59,7 +60,7 @@ struct gd_flacdata {
  * open, idata = 0 otherwise idata = -1. */
 
 /* The decoder callback */
-static FLAC__StreamDecoderWriteStatus _GD_FlacWriteCallback(
+static FLAC__StreamDecoderWriteStatus _GD_FlacDecodeCallback(
     const FLAC__StreamDecoder *decoder gd_unused_, const FLAC__Frame *frame,
     const FLAC__int32 *const buffer[], void *client_data)
 {
@@ -196,7 +197,7 @@ static struct gd_flacdata *_GD_FlacDoOpen(int dirfd, struct gd_raw_file_* file,
     }
 
     status = FLAC__stream_decoder_init_FILE(gdfl->codec.d, stream,
-          _GD_FlacWriteCallback, NULL, _GD_FlacErrorCallback, gdfl);
+          _GD_FlacDecodeCallback, NULL, _GD_FlacErrorCallback, gdfl);
 
     if (status != FLAC__STREAM_DECODER_INIT_STATUS_OK) {
       file->error = GD_FLAC_E_SDIS | status;
@@ -378,22 +379,22 @@ WRITE_ERROR:
   return n;
 }
 
-off64_t _GD_FlacSeek(struct gd_raw_file_* file, off64_t count,
+off64_t _GD_FlacSeek(struct gd_raw_file_* file, off64_t offset,
     gd_type_t data_type, unsigned int mode)
 {
   struct gd_flacdata *gdfl;
 
-  dtrace("%p, %" PRId64 ", 0x%X, 0x%X", file, (int64_t)count, data_type, mode);
+  dtrace("%p, %" PRId64 ", 0x%X, 0x%X", file, (int64_t)offset, data_type, mode);
 
-  gdfl = (struct gd_flacdata *)(file[(mode == GD_FILE_WRITE) ? 1 : 0].edata);
-
-  /* nothing to do */
-  if (gdfl->base + gdfl->pos == count) {
-    dreturn("%" PRId64, (int64_t)count);
-    return count;
-  }
+  gdfl = (struct gd_flacdata *)(file->edata);
 
   if (mode == GD_FILE_WRITE) {
+    /* nothing to do */
+    if (file->pos == offset) {
+      dreturn("%" PRId64, (int64_t)offset);
+      return offset;
+    }
+
     /* we only get here when we need to pad */
     char *zero = malloc(GD_BUFFER_SIZE);
     if (zero == NULL) {
@@ -403,22 +404,27 @@ off64_t _GD_FlacSeek(struct gd_raw_file_* file, off64_t count,
     }
     memset(zero, 0, GD_BUFFER_SIZE);
 
-    count -= file->pos;
-    while (gdfl->base < count) {
-      int n = GD_BUFFER_SIZE / GD_SIZE(data_type);;
-      if (n > count)
-        n = count;
+    while (file->pos < offset) {
+      off64_t remaining = offset - file->pos;
+      int n = GD_BUFFER_SIZE / GD_SIZE(data_type);
+      if (n > remaining)
+        n = remaining;
 
-      _GD_FlacWrite(file + 1, zero, GD_UINT8, n);
+      _GD_FlacWrite(file, zero, GD_UINT8, n);
       if (file->error) {
         free(zero);
         dreturn("%i", -1);
         return -1;
       }
-      count -= n;
     }
     free(zero);
   } else {
+    /* nothing to do */
+    if (gdfl->base + gdfl->pos == offset) {
+      dreturn("%" PRId64, (int64_t)offset);
+      return offset;
+    }
+
     int eof = 0;
     off64_t last = FLAC__stream_decoder_get_total_samples(gdfl->codec.d) - 1;
 
@@ -428,12 +434,12 @@ off64_t _GD_FlacSeek(struct gd_raw_file_* file, off64_t count,
       return 0;
     }
 
-    if (count > last) {
-      count = last;
+    if (offset > last) {
+      offset = last;
       eof = 1;
     }
 
-    if (!FLAC__stream_decoder_seek_absolute(gdfl->codec.d, count)) {
+    if (!FLAC__stream_decoder_seek_absolute(gdfl->codec.d, offset)) {
       file->error = GD_FLAC_E_SDS |
         FLAC__stream_decoder_get_state(gdfl->codec.d);
       dreturn("%i", -1);
@@ -450,11 +456,11 @@ off64_t _GD_FlacSeek(struct gd_raw_file_* file, off64_t count,
       gdfl->pos = gdfl->dlen;
 
       gdfl->stream_end = 1;
-      count++;
+      offset++;
     }
   }
   
-  file->pos = count;
+  file->pos = offset;
 
   dreturn("%" PRId64, (int64_t)file->pos);
   return file->pos;

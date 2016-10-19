@@ -65,6 +65,7 @@ int _GD_GzipOpen(int fd, struct gd_raw_file_* file,
 
   if (file->edata == NULL) {
     close(file->idata);
+    errno = ENOMEM;
     file->idata = -1;
     dreturn("%i", 1);
     return 1;
@@ -76,37 +77,34 @@ int _GD_GzipOpen(int fd, struct gd_raw_file_* file,
   return 0;
 }
 
-off64_t _GD_GzipSeek(struct gd_raw_file_* file, off64_t count,
+off64_t _GD_GzipSeek(struct gd_raw_file_* file, off64_t offset,
     gd_type_t data_type, unsigned int mode)
 {
   off64_t n = 0;
 
-  dtrace("%p, %" PRId64 ", 0x%X, 0x%X", file, (int64_t)count, data_type, mode);
+  dtrace("%p, %" PRId64 ", 0x%X, 0x%X", file, (int64_t)offset, data_type, mode);
 
-  if (file->pos == count) {
-    dreturn("%" PRId64, (int64_t)count);
-    return count;
+  if (file->pos == offset) {
+    dreturn("%" PRId64, (int64_t)offset);
+    return offset;
   }
 
-  count *= GD_SIZE(data_type);
+  offset *= GD_SIZE(data_type);
 
-  if (count >= 0) {
-    n = gd_gzseek((gzFile)file[(mode == GD_FILE_WRITE) ? 1 : 0].edata, count,
-        SEEK_SET);
+  n = gd_gzseek((gzFile)file->edata, offset, SEEK_SET);
 
-    if (n == -1) {
-      /* gzseek returns error on attempts to seek past the EOF in read mode */
-      if (mode != GD_FILE_WRITE && gzeof((gzFile)file[0].edata))
-        n = gd_gztell((gzFile)file[0].edata);
-      else {
-        dreturn("%i", -1);
-        return -1;
-      }
+  if (n == -1) {
+    /* gzseek returns error on attempts to seek past the EOF in read mode */
+    if (mode != GD_FILE_WRITE && gzeof((gzFile)file->edata))
+      n = gd_gztell((gzFile)file->edata);
+    else {
+      dreturn("%i", -1);
+      return -1;
     }
-
-    n /= GD_SIZE(data_type);
-    file->pos = n;
   }
+
+  n /= GD_SIZE(data_type);
+  file->pos = n;
 
   dreturn("%" PRId64, (int64_t)n);
   return n;
@@ -149,7 +147,7 @@ ssize_t _GD_GzipWrite(struct gd_raw_file_ *file, const void *ptr,
     n /= GD_SIZE(data_type);
     file->pos += n;
   } else {
-    gzerror((gzFile)file[1].edata, &errnum);
+    gzerror((gzFile)file->edata, &errnum);
     if (errnum < 0)
       n = -1;
   }
@@ -220,13 +218,14 @@ int _GD_GzipStrerr(const struct gd_raw_file_ *file, char *buf, size_t buflen)
 {
   int r = 0;
   int gzerrnum = 0;
-  const char *gzerr;
+  const char *gzerr = NULL;
 
   dtrace("%p, %p, %" PRIuSIZE, file, buf, buflen);
 
-  gzerr = gzerror((gzFile)file->edata, &gzerrnum);
+  if (file->edata)
+    gzerr = gzerror((gzFile)file->edata, &gzerrnum);
 
-  if (gzerrnum == Z_ERRNO)
+  if (gzerrnum == Z_ERRNO || gzerr == NULL)
     r = gd_StrError(errno, buf, buflen);
   else {
     strncpy(buf, gzerr, buflen);

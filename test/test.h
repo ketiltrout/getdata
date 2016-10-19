@@ -53,7 +53,7 @@ int gd_system(const char* command)
 #define gd_system system
 #endif
 
-/* rm for MSVC */
+/* rm for WIN32 */
 #ifdef _WIN32
 #define rmdirfile() system("rmdir /q/s dirfile");
 #else
@@ -64,6 +64,12 @@ int gd_system(const char* command)
 #if defined _WIN32 || defined _WIN64
 #include <windows.h>
 #define sleep(x) Sleep(1000 * (x))
+#endif
+
+#ifdef NO_LARGE_TESTS
+#define BIG_JUMP 10000
+#else
+#define BIG_JUMP 1000000
 #endif
 
 /* path munging for format files */

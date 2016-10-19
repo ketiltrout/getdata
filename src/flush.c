@@ -22,6 +22,20 @@
 
 #define GD_MAX_PRETTY_FIELD_WIDTH 80
 
+static void _GD_SyncRaw(DIRFILE *D, struct gd_raw_file_ *file)
+{
+  dtrace("%p, %p", D, file);
+  
+  if ((D->flags & GD_ACCMODE) == GD_RDWR && file->idata >= 0 && 
+      (file->mode & GD_FILE_WRITE) && _GD_ef[file->subenc].sync != NULL &&
+      (*_GD_ef[file->subenc].sync)(file))
+  {
+    _GD_SetEncIOError(D, GD_E_IO_WRITE, file);
+  }
+
+  dreturnvoid();
+}
+
 void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
 {
   int i;
@@ -37,21 +51,21 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      if (E->e->u.raw.file[0].idata >= 0 ||
-          ((_GD_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_OOP) &&
-           (E->e->u.raw.file[1].idata >= 0)))
+      if (syn) {
+        /* We can't get here when a temporary file is open, so if we're dealing
+         * with an GD_EF_OOP encoding and file[1] is open, then it's a
+         * write-side file which we should sync.
+         */
+        if (_GD_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_OOP)
+          _GD_SyncRaw(D, E->e->u.raw.file + 1);
+        else
+          _GD_SyncRaw(D, E->e->u.raw.file);
+      }
+      if (clo && D->error == 0 && (E->e->u.raw.file[0].idata >= 0 ||
+            ((_GD_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_OOP) &&
+             (E->e->u.raw.file[1].idata >= 0))))
       {
-        if (syn && (D->flags & GD_ACCMODE) == GD_RDWR &&
-            (E->e->u.raw.file[0].mode & GD_FILE_WRITE) &&
-            _GD_ef[E->e->u.raw.file[0].subenc].sync != NULL &&
-            (*_GD_ef[E->e->u.raw.file[0].subenc].sync)(E->e->u.raw.file))
-        {
-          _GD_SetEncIOError(D, GD_E_IO_WRITE, E->e->u.raw.file + 0);
-        } else if (clo && _GD_FiniRawIO(D, E, E->fragment_index,
-              GD_FINIRAW_KEEP))
-        {
-          ; /* error already set */
-        }
+        _GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP);
       }
       break;
     case GD_LINCOM_ENTRY:
