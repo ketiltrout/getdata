@@ -200,8 +200,7 @@ static int _GD_LzmaReady(struct gd_lzmadata *lzd, size_t nreq, int *errnum)
   return ready;
 }
 
-/* delete all the used up data from the buffer, but retain a bit for lookback
- * purposes when possible.  If discard is true, assume all data has been used */
+/* clear the output buffer, retaining a bit of data for lookback purposes */
 static void _GD_LzmaClear(struct gd_lzmadata *lzd)
 {
   int n = 0;
