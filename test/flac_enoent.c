@@ -46,6 +46,7 @@ int main(void)
   
   CHECKI(error, GD_E_IO);
   CHECKPN(estr);
+  free(estr);
 
   gd_discard(D);
 
