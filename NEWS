@@ -18,6 +18,9 @@ New in version 0.9.5a:
     compressed data files which were causing data corruption have been
     fixed.
 
+  * BUG FIX: Attempting to open a SIE-encoded data file a second time
+    after a first attempt failed no longer results in a segfault.
+
   Bindings Changes:
 
   * PYTHON BUG FIX: A UnicodeEncodeError while assigning to

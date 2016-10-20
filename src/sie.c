@@ -162,13 +162,7 @@ int _GD_SampIndOpen(int fd, struct gd_raw_file_ *file,
 {
   dtrace("%i, %p, <unused>, %i, 0x%X", fd, file, swap, mode);
 
-  if (file->mode & mode) {
-    dreturn("%i", 0);
-    return 0;
-  } else if (file->edata)
-    fclose(((struct gd_siedata *)(file->edata))->fp);
-  else
-    file->edata = malloc(sizeof(struct gd_siedata));
+  file->edata = malloc(sizeof(struct gd_siedata));
 
   if (file->edata == NULL) {
     dreturn("%i", -1);

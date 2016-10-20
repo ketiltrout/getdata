@@ -376,11 +376,12 @@ SEEK_TESTS=seek64 seek_cur seek_end seek_far seek_foffs seek_foffs2 seek_index \
 					 seek_lincom seek_mult seek_neg seek_phase seek_range seek_range2 \
 					 seek_set seek_sub
 
-SIE_TESTS=sie_get_big sie_get_header sie_get_little sie_move_from sie_move_to \
-					sie_nframes_big sie_nframes_little sie_put_append sie_put_append2 \
-					sie_put_back sie_put_big sie_put_header sie_put_little sie_put_many \
-					sie_put_newo sie_put_newo0 sie_put_pad sie_put_pad0 sie_put_trunc \
-					sie_put_trunc2 sie_put_trunc_nf sie_seek sie_seek_far sie_sync
+SIE_TESTS=sie_err_open sie_get_big sie_get_header sie_get_little sie_move_from \
+					sie_move_to sie_nframes_big sie_nframes_little sie_put_append \
+					sie_put_append2 sie_put_back sie_put_big sie_put_header sie_put_little \
+					sie_put_many sie_put_newo sie_put_newo0 sie_put_pad sie_put_pad0 \
+					sie_put_trunc sie_put_trunc2 sie_put_trunc_nf sie_seek sie_seek_far \
+					sie_sync
 
 SLIM_TESTS=slim_get slim_nframes slim_seek slim_seek_far
 

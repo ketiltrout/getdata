@@ -271,6 +271,7 @@ void _GD_SetEncIOError(DIRFILE *D, int suberror, const struct gd_raw_file_ *f)
     _GD_SetError2(D, GD_E_IO, GD_E_IO_ENC_OFFSET + suberror, f->name, 0,
         buffer, 0);
   }
+  dreturnvoid();
 }
 
 /* Return the error */

@@ -1,3 +1,9 @@
+2016-09-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1104
+	* src/sie.c (_GD_SampIndOpen): Remove all the weird existing file checks
+	before the malloc.  That kind of stuff got put in the bookkeeping layer
+	a loooong time ago.
+	* test/sie_err_open.c: Added.
+
 2016-09-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1101
 	* src/flac.c (_GD_FlacDecodeCallback): Renamed from _GD_FlacWriteCallback
 	because that name was confusing.  (The callback is invoked via
