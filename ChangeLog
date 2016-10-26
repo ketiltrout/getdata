@@ -1,3 +1,6 @@
+2016-09-26   D. V. Wiebe <getdata@ketiltrout.net> svn:1106
+	* configure.ac: Make --enable-modules the default.
+
 2016-09-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1105
 
 	Merge in getdata-dsv10 branch:

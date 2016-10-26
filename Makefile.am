@@ -37,7 +37,7 @@ clean-local:
 %.sig: %
 	gpg -abo $@ $<
 
-DISTCHECK_CONFIGURE_FLAGS = --enable-legacy-api --enable-modules 
+DISTCHECK_CONFIGURE_FLAGS = --enable-legacy-api
 
 # a locally-installed library for building and testing the IDL and matlab
 # packages

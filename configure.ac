@@ -298,15 +298,15 @@ AC_MSG_CHECKING([whether to include the PHP bindings])
 AC_MSG_RESULT([$make_phpbindings])
 
 dnl Modules
-AC_ARG_ENABLE(modules, AS_HELP_STRING([--enable-modules],
-              [build external encodings in dynamically loaded modules instead
-               of directly into the core GetData library]),
+AC_ARG_ENABLE(modules, AS_HELP_STRING([--disable-modules],
+              [put support for external encodings directly in the core GetData
+               library, instead of in dynamically loaded modules]),
                [
                 case "${enableval}" in
                   no) use_modules="no" ;;
                   *) use_modules="yes" ;;
                 esac
-                ], [ use_modules="no" ])
+                ], [ use_modules="yes" ])
 AC_MSG_CHECKING([whether to enable getdata modules])
 AC_MSG_RESULT([$use_modules])
 if test "x$use_modules" != "xno"; then
