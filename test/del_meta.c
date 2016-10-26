@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,16 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to delete a field */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
 
 int main(void)
 {
@@ -53,13 +44,14 @@ int main(void)
   D = gd_open(filedir, GD_RDWR);
   ret = gd_delete(D, "data", 0);
   error = gd_error(D);
+
+  CHECKI(error, GD_E_DELETE);
+  CHECKI(ret, GD_E_DELETE);
+
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, GD_E_DELETE);
-  CHECKI(ret, -1);
 
   return r;
 }

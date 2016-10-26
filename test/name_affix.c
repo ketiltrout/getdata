@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -45,7 +45,7 @@ int main(void)
   D = gd_open(filedir, GD_RDWR);
   r1 = gd_rename(D, "AdataZ", "BdataY", 0);
   e1 = gd_error(D);
-  CHECKI(r1, -1);
+  CHECKI(r1, GD_E_BAD_CODE);
   CHECKI(e1, GD_E_BAD_CODE);
 
   r2 = gd_rename(D, "AdataZ", "AzataZ", 0);

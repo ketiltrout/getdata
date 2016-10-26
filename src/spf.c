@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2015 D. V. Wiebe
+ * Copyright (C) 2005-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -54,6 +54,8 @@ unsigned int _GD_GetSPF(DIRFILE *D, gd_entry_t *E)
     case GD_SBIT_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
         break;
 
@@ -65,6 +67,7 @@ unsigned int _GD_GetSPF(DIRFILE *D, gd_entry_t *E)
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_ALIAS_ENTRY:
     case GD_NO_ENTRY:
       _GD_InternalError(D);
@@ -84,13 +87,7 @@ unsigned int gd_spf(DIRFILE* D, const char *field_code) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%u", 0);
-    return 0;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_IF_INVALID(D, "%u", 0);
 
   entry = _GD_FindEntry(D, field_code);
 

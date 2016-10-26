@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012, 2014 D. V. Wiebe
+/* Copyright (C) 2008-2012, 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -28,13 +28,7 @@ const char *gd_dirfilename(DIRFILE* D) gd_nothrow
 {
   dtrace("%p", D);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   dreturn("\"%s\"", D->dir[0].path);
   return D->dir[0].path;
@@ -47,13 +41,7 @@ const char *gd_reference(DIRFILE* D, const char* field_code) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_IF_INVALID(D, "%p", NULL);
   
   /* if no field specified, return only the field name */
   if (field_code == NULL) {
@@ -142,10 +130,8 @@ int gd_verbose_prefix(DIRFILE *D, const char *prefix) gd_nothrow
 
   if (prefix) {
     ptr = _GD_Strdup(D, prefix);
-    if (D->error) {
-      dreturn("%i", -1);
-      return -1;
-    }
+    if (D->error) 
+      GD_RETURN_ERROR(D);
   }
 
   free(D->error_prefix);

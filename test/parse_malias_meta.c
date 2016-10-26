@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2012 D. V. Wiebe
+/* Copyright (C) 2011-2012, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Parser check */
 #include "test.h"
 
 int main(void)
@@ -48,6 +47,6 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(e1,0);
-  CHECKI(e2,-1);
+  CHECKI(e2, GD_E_BAD_CODE);
   return r;
 }

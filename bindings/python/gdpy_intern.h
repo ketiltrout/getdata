@@ -96,7 +96,6 @@
     } \
   } while(0)
 
-extern PyObject *gdpy_exceptions[GD_N_ERROR_CODES];
 extern PyTypeObject gdpy_dirfile;
 extern PyTypeObject gdpy_entry;
 extern PyTypeObject gdpy_fragment;

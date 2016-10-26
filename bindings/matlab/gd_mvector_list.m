@@ -3,17 +3,17 @@ function field_list = gd_mvector_list(D, parent)
 %
 %   GD_MVECTOR_LIST(DIRFILE,PARENT)
 %             is equivalent to calling GD_ENTRY_LIST(DIRFILE,PARENT, ...
-%                                                           GD.VECTOR_ENTRIES,0)
+%                                          GD.ALL_FRAGMENTS,GD.VECTOR_ENTRIES,0)
 %
 %   For GD, see GETDATA_CONSTANTS.
 %
 %   See also GD_ENTRY_LIST, GETDATA_CONSTANTS
 
   GD = getdata_constants();
-  field_list = gd_entry_list(D, parent, GD.VECTOR_ENTRIES, 0);
+  field_list = gd_entry_list(D, parent, GD.ALL_FRAGMENTS, GD.VECTOR_ENTRIES, 0);
 end
 
-% Copyright (C) 2013 D. V. Wiebe
+% Copyright (C) 2013, 2016 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %

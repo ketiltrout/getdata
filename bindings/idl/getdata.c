@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2015 D. V. Wiebe
+/* Copyright (C) 2009-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -305,6 +305,7 @@ gd_static_inline_ IDL_ALLTYPES gdidl_to_alltypes(gd_type_t t, void* d)
       v.cmp.i = cimag(dc);
       break;
     case GD_NULL:
+    case GD_STRING:
     case GD_UNKNOWN:
       ;
   }
@@ -456,7 +457,8 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
       || E->field_type == GD_MULTIPLY_ENTRY || E->field_type == GD_PHASE_ENTRY
       || E->field_type == GD_SBIT_ENTRY || E->field_type == GD_POLYNOM_ENTRY
       || E->field_type == GD_DIVIDE_ENTRY || E->field_type == GD_RECIP_ENTRY
-      || E->field_type == GD_WINDOW_ENTRY || E->field_type == GD_MPLEX_ENTRY)
+      || E->field_type == GD_WINDOW_ENTRY || E->field_type == GD_MPLEX_ENTRY
+      || E->field_type == GD_INDIR_ENTRY || E->field_type == GD_SINDIR_ENTRY)
   {
     IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
             "IN_FIELDS", IDL_MSG_LONGJMP, NULL)), E->in_fields[0]);
@@ -532,6 +534,8 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
               "IN_FIELDS", IDL_MSG_LONGJMP, NULL)) + 1, E->in_fields[1]);
       break;
@@ -622,10 +626,12 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
           "SCALAR_IND", IDL_MSG_LONGJMP, NULL)))[1] = (int16_t)E->scalar_ind[1];
       break;
     case GD_CARRAY_ENTRY:
-      *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "ARRAY_LEN",
-            IDL_MSG_LONGJMP, NULL)) = E->array_len;
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "DATA_TYPE",
             IDL_MSG_LONGJMP, NULL)) = E->const_type;
+      /* Fallthrough */
+    case GD_SARRAY_ENTRY:
+      *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "ARRAY_LEN",
+            IDL_MSG_LONGJMP, NULL)) = E->array_len;
       break;
     case GD_CONST_ENTRY:
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "DATA_TYPE",
@@ -705,6 +711,7 @@ static void gdidl_convert_entry_num(void *dst, gd_type_t dtype, const char *key,
   switch (dtype) {
     case GD_NULL:
     case GD_UNKNOWN:
+    case GD_STRING:
       break;
     case GD_UINT8:
       GDIDL_CONVERT_ENTRY_ELEMENT(*(( uint8_t*)dst), src, key, offset, stype);
@@ -1021,6 +1028,8 @@ static void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int no_fragment,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       gdidl_get_in_fields((char**)E->in_fields, v, 2, 2, miss_ok);
       break;
     case GD_RECIP_ENTRY:
@@ -1115,8 +1124,10 @@ static void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int no_fragment,
         gdidl_get_entry_num(&E->period, GD_INT_TYPE, v, "PERIOD", 1);
       break;
     case GD_CARRAY_ENTRY:
-      gdidl_get_entry_num(&E->array_len, GD_INT_TYPE, v, "ARRAY_LEN", miss_ok);
       gdidl_get_entry_num(&E->const_type, GD_INT_TYPE, v, "DATA_TYPE", miss_ok);
+      /* FALLTHROUGH */
+    case GD_SARRAY_ENTRY:
+      gdidl_get_entry_num(&E->array_len, GD_INT_TYPE, v, "ARRAY_LEN", miss_ok);
       break;
     case GD_CONST_ENTRY:
       gdidl_get_entry_num(&E->const_type, GD_INT_TYPE, v, "DATA_TYPE", miss_ok);
@@ -3660,6 +3671,7 @@ IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
 
   /* check for metadata */
   unsigned int spf = 1;
+  gd_entype_t t = gd_entry_type(D, field_code);
   if (!gd_error(D) && kw.n_frames > 0)
     spf = gd_spf(D, field_code);
 
@@ -3672,11 +3684,25 @@ IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
     }
     kw.n_samples += kw.n_frames * spf;
 
-    /* no signed 8-bit type in IDL */
-    if (kw.return_type == GD_INT8)
-      GDIDL_KW_ABORT("Cannot return data as a signed 8-bit integer.");
+    if (t == GD_SINDIR_ENTRY) {
+      const char **data = malloc(kw.n_samples * sizeof(*data));
 
-    if (kw.return_type == GD_NULL) {
+      n = gd_getdata64(D, field_code, kw.first_frame, kw.first_sample, 0,
+          kw.n_samples, GD_STRING, data);
+
+      if (n == 0)
+        r = IDL_GettmpInt(0);
+      else {
+        int i;
+        IDL_STRING *idata = (IDL_STRING*)IDL_MakeTempVector(IDL_TYP_STRING, n,
+            IDL_ARR_INI_ZERO, &r);
+        for (i = 0; i < n; ++i)
+          IDL_StrStore(idata + i, (char*)data[i]);
+      }
+      free(data);
+    } else if (kw.return_type == GD_INT8) /* no signed 8-bit type in IDL */
+      GDIDL_KW_ABORT("Cannot return data as a signed 8-bit integer.");
+		else if (kw.return_type == GD_NULL) {
       n = gd_getdata64(D, field_code, kw.first_frame, kw.first_sample, 0,
           kw.n_samples, GD_NULL, NULL);
 
@@ -4123,19 +4149,21 @@ IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
     int type;
     IDL_STRING parent;
     int parent_x;
-    int hidden, noalias, scalars, vectors, aliases;
+    int hidden, noalias, scalars, vectors, aliases, fragment;
   } KW_RESULT;
   KW_RESULT kw;
 
   GDIDL_KW_INIT_ERROR;
   kw.type = 0;
   kw.hidden = kw.noalias = kw.scalars = kw.vectors = kw.aliases = 0;
+  kw.fragment = GD_ALL_FRAGMENTS;
   kw.parent_x = 0;
 
   static IDL_KW_PAR kw_pars[] = {
     { "ALIASES", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(aliases) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
+	  { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment) },	
     { "HIDDEN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(hidden) },
     { "NOALIAS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(noalias) },
     { "PARENT", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(parent_x),
@@ -4167,8 +4195,8 @@ IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
       kw.type = GD_ALIAS_ENTRIES;
   }
 
-  nentries = gd_nentries(D, parent, kw.type, flags);
-  list = gd_entry_list(D, parent, kw.type, flags);
+  nentries = gd_nentries(D, parent, kw.fragment, kw.type, flags);
+  list = gd_entry_list(D, parent, kw.fragment, kw.type, flags);
 
   GDIDL_SET_ERROR(D);
 
@@ -4348,19 +4376,21 @@ IDL_VPTR gdidl_get_nfields(int argc, IDL_VPTR argv[], char *argk)
     int type;
     IDL_STRING parent;
     int parent_x;
-    int aliases, hidden, noalias, scalars, vectors;
+    int aliases, hidden, noalias, scalars, vectors, fragment;
   } KW_RESULT;
   KW_RESULT kw;
 
   GDIDL_KW_INIT_ERROR;
   kw.type = 0;
   kw.hidden = kw.noalias = kw.scalars = kw.vectors = kw.aliases = 0;
+  kw.fragment = GD_ALL_FRAGMENTS;
   kw.parent_x = 0;
 
   static IDL_KW_PAR kw_pars[] = {
     { "ALIASES", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(aliases) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
+    { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment) },
     { "HIDDEN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(hidden) },
     { "NOALIAS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(noalias) },
     { "PARENT", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(parent_x),
@@ -4392,7 +4422,7 @@ IDL_VPTR gdidl_get_nfields(int argc, IDL_VPTR argv[], char *argk)
       kw.type = GD_ALIAS_ENTRIES;
   }
 
-  nentries = gd_nentries(D, parent, kw.type, flags);
+  nentries = gd_nentries(D, parent, kw.fragment, kw.type, flags);
 
   GDIDL_SET_ERROR(D);
 
@@ -5938,6 +5968,262 @@ IDL_VPTR gdidl_encoding_support(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
+/* @@DLM: P gdidl_add_sarray GD_ADD_SARRAY 2 2 KEYWORDS */
+void gdidl_add_sarray(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  const char **data = NULL;
+  int i;
+
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    int n;
+    IDL_VPTR value;
+    int fragment_index;
+    IDL_STRING parent;
+    int parent_x;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  GDIDL_KW_INIT_ERROR;
+  kw.value = NULL;
+  kw.fragment_index = kw.n = 0;
+  kw.parent_x = 0;
+
+  static IDL_KW_PAR kw_pars[] = {
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment_index) },
+    { "LENGTH", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(n) },
+    { "PARENT", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(parent_x),
+      IDL_KW_OFFSETOF(parent) },
+    { "VALUE", 0, 1, IDL_KW_VIN, 0, IDL_KW_OFFSETOF(value) },
+    { NULL }
+  };
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+  if (kw.value) {
+    IDL_ENSURE_ARRAY(kw.value);
+    IDL_ENSURE_STRING(kw.value);
+    if (kw.value->value.arr->n_dim != 1)
+      GDIDL_KW_ABORT("VALUE must be a vector, not a multidimensional array");
+    kw.n = kw.value->value.arr->n_elts;
+    data = malloc(kw.n * sizeof(const char*));
+    for (i = 0; i < kw.n; ++i)
+      data[i] = IDL_STRING_STR((IDL_STRING*)(kw.value->value.arr->data) + i);
+  } else if (kw.n) {
+    data = malloc(kw.n * sizeof(const char*));
+    for (i = 0; i < kw.n; ++i)
+      data[i] = "";
+  } else
+    GDIDL_KW_ABORT("either LENGTH or VALUE must be specified");
+
+  if (kw.parent_x) {
+    const char* parent = IDL_STRING_STR(&kw.parent);
+    gd_madd_sarray(D, parent, field_code, kw.n, data);
+  } else
+    gd_add_sarray(D, field_code, kw.n, data, kw.fragment_index);
+
+  free(data);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  dreturnvoid();
+}
+
+/* @@DLM: F gdidl_get_sarray GD_GET_SARRAY 2 2 KEYWORDS */
+IDL_VPTR gdidl_get_sarray(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+  int ret = 1;
+  const char **data = NULL;
+
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    unsigned int start;
+    unsigned int n;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  GDIDL_KW_INIT_ERROR;
+  kw.start = kw.n = 0;
+
+  static IDL_KW_PAR kw_pars[] = {
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "LENGTH", IDL_TYP_UINT, 1, 0, 0, IDL_KW_OFFSETOF(n) },
+    { "START", IDL_TYP_UINT, 1, 0, 0, IDL_KW_OFFSETOF(start) },
+    { NULL }
+  };
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+  if (kw.n == 0) {
+    kw.n = gd_array_len(D, field_code);
+    if (kw.n > kw.start)
+      kw.n -= kw.start;
+    else
+      kw.n = 0;
+  }
+
+  data = malloc(sizeof(*data) * kw.n);
+  ret = gd_get_sarray_slice(D, field_code, kw.start, kw.n, data);
+
+  IDL_VPTR r;
+  if (!ret) {
+    int i;
+    IDL_STRING *idata = (IDL_STRING*)IDL_MakeTempVector(IDL_TYP_STRING, kw.n,
+        IDL_ARR_INI_ZERO, &r);
+    for (i = 0; i < kw.n; ++i)
+      IDL_StrStore(idata + i, (char*)data[i]);
+  } else {
+    GDIDL_SET_ERROR(D);
+    r = IDL_GettmpInt(0);
+  }
+
+  free(data);
+  IDL_KW_FREE;
+
+  dreturn("%p", r);
+  return r;
+}
+
+/* @@DLM: P gdidl_alter_sarray GD_ALTER_SARRAY 2 2 KEYWORDS */
+void gdidl_alter_sarray(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    int len;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  GDIDL_KW_INIT_ERROR;
+  kw.len = 0;
+
+  static IDL_KW_PAR kw_pars[] = {
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "LENGTH", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(len) },
+    { NULL }
+  };
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+
+  gd_alter_sarray(D, field_code, (size_t)kw.len);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  dreturnvoid();
+}
+
+/* @@DLM: P gdidl_put_sarray GD_PUT_SARRAY 3 3 KEYWORDS */
+void gdidl_put_sarray(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  const char **data;
+  int i;
+
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    int start;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  GDIDL_KW_INIT_ERROR;
+  kw.start = 0;
+
+  static IDL_KW_PAR kw_pars[] = {
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "START", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(start) },
+    { NULL }
+  };
+
+  argc = IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+
+  IDL_ENSURE_ARRAY(argv[2]);
+  IDL_ENSURE_STRING(argv[2]);
+  if (argv[2]->value.arr->n_dim != 1)
+    GDIDL_KW_ABORT("data must be a vector, not a multidimensional array");
+
+  int length = argv[2]->value.arr->n_elts;
+  data = malloc(sizeof(*data) * length);
+  for (i = 0; i < length; ++i)
+    data[i] = IDL_STRING_STR((IDL_STRING*)(argv[2]->value.arr->data) + i);
+
+  gd_put_sarray_slice(D, field_code, kw.start, length, data);
+
+  GDIDL_SET_ERROR(D);
+
+  free(data);
+  IDL_KW_FREE;
+
+  dreturnvoid();
+}
+
+/* @@DLM: P gdidl_add_indir GD_ADD_INDIR 4 4 KEYWORDS */
+void gdidl_add_indir(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  gdidl_add_yoke_(GD_INDIR_ENTRY, argc, argv, argk);
+
+  dreturnvoid();
+}
+
+/* @@DLM: P gdidl_alter_indir GD_ALTER_INDIR 2 2 KEYWORDS */
+void gdidl_alter_indir(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  gdidl_alter_yoke_(GD_INDIR_ENTRY, argc, argv, argk);
+
+  dreturnvoid();
+}
+
+/* @@DLM: P gdidl_add_sindir GD_ADD_SINDIR 4 4 KEYWORDS */
+void gdidl_add_sindir(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  gdidl_add_yoke_(GD_SINDIR_ENTRY, argc, argv, argk);
+
+  dreturnvoid();
+}
+
+/* @@DLM: P gdidl_alter_sindir GD_ALTER_SINDIR 2 2 KEYWORDS */
+void gdidl_alter_sindir(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  gdidl_alter_yoke_(GD_SINDIR_ENTRY, argc, argv, argk);
+
+  dreturnvoid();
+}
+
 /**** Module initialisation ****/
 
 /* These are defined in the automatically generated sublist.c */
@@ -5963,7 +6249,7 @@ static IDL_STRUCT_TAG_DEF gdidl_entry[] = {
   { "IN_FIELDS",  lincom_dims, (void*)IDL_TYP_STRING },
   { "A",          polynom_dims, (void*)IDL_TYP_DOUBLE }, /* POLYNOM */
   { "CA",         polynom_dims, (void*)IDL_TYP_DCOMPLEX }, /* POLYNOM */
-  { "ARRAY_LEN",  0, (void*)IDL_TYP_INT }, /* CARRAY */
+  { "ARRAY_LEN",  0, (void*)IDL_TYP_INT }, /* CARRAY / SARRAY */
   { "B",          lincom_dims, (void*)IDL_TYP_DOUBLE }, /* LINCOM */
   { "CB",         lincom_dims, (void*)IDL_TYP_DCOMPLEX }, /* LINCOM */
   { "BITNUM",     0, (void*)IDL_TYP_INT }, /* (S)BIT */

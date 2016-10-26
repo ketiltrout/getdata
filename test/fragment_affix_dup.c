@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -46,21 +46,25 @@ int main(void)
   D = gd_open(filedir, GD_RDWR);
   ret = gd_alter_affixes(D, 1, "C", "D");
   e1 = gd_error(D);
+
+  CHECKI(ret,GD_E_DUPLICATE);
+  CHECKI(e1,GD_E_DUPLICATE);
+
   gd_fragment_affixes(D, 1, &prefix, &suffix);
   e2 = gd_error(D);
+
+  CHECKS(prefix,"A");
+  CHECKS(suffix,"Z");
+  CHECKI(e2,0);
+
+  free(prefix);
+  free(suffix);
+
   gd_discard(D);
 
   unlink(format1);
   unlink(format);
   rmdir(filedir);
-
-  CHECKS(prefix,"A");
-  CHECKS(suffix,"Z");
-  CHECKI(ret,-1);
-  CHECKI(e1,GD_E_DUPLICATE);
-  CHECKI(e2,0);
-  free(prefix);
-  free(suffix);
 
   return r;
 }

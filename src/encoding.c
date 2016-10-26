@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2015 D. V. Wiebe
+/* Copyright (C) 2008-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -908,33 +908,15 @@ int gd_alter_encoding(DIRFILE* D, unsigned long encoding, int fragment,
 
   dtrace("%p, %lu, %i, %i", D, (unsigned long)encoding, fragment, move);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  GD_RETURN_ERR_IF_INVALID(D);
 
-  if ((D->flags & GD_ACCMODE) != GD_RDWR) {
+  if ((D->flags & GD_ACCMODE) != GD_RDWR)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment) {
+  else if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment)
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (!_GD_EncodingUnderstood(encoding)) {
+  else if (!_GD_EncodingUnderstood(encoding))
     _GD_SetError(D, GD_E_UNKNOWN_ENCODING, GD_E_UNENC_TARGET, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  _GD_ClearError(D);
-
-  if (fragment == GD_ALL_FRAGMENTS) {
+  else if (fragment == GD_ALL_FRAGMENTS) {
     for (i = 0; i < D->n_fragment; ++i) {
       _GD_RecodeFragment(D, encoding, i, move);
 
@@ -944,8 +926,7 @@ int gd_alter_encoding(DIRFILE* D, unsigned long encoding, int fragment,
   } else
     _GD_RecodeFragment(D, encoding, fragment, move);
 
-  dreturn("%i", (D->error) ? -1 : 0);
-  return (D->error) ? -1 : 0;
+  GD_RETURN_ERROR(D);
 }
 
 unsigned long gd_encoding(DIRFILE* D, int fragment) gd_nothrow
@@ -955,19 +936,13 @@ unsigned long gd_encoding(DIRFILE* D, int fragment) gd_nothrow
 
   dtrace("%p, %i", D, fragment);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", 0);
-    return 0;
-  }
+  GD_RETURN_IF_INVALID(D, "%i", 0);
 
   if (fragment < 0 || fragment >= D->n_fragment) {
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
   }
-
-  _GD_ClearError(D);
 
   /* Attempt to figure out the encoding, if it's not known */
   if (D->fragment[fragment].encoding == GD_AUTO_ENCODED) {
@@ -1007,8 +982,8 @@ int gd_encoding_support(unsigned long encoding) gd_nothrow
 
   /* make sure we have a valid encoding */
   if (!_GD_EncodingUnderstood(encoding)) {
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", GD_E_UNKNOWN_ENCODING);
+    return GD_E_UNKNOWN_ENCODING;
   }
 
   /* spin up ltdl if needed */
@@ -1033,8 +1008,8 @@ int gd_encoding_support(unsigned long encoding) gd_nothrow
     }
 
   /* nope */
-  dreturn("%i", -1);
-  return -1;
+  dreturn("%i", GD_E_UNSUPPORTED);
+  return GD_E_UNSUPPORTED;
 }
 
 /* This is basically the non-existant POSIX funcion mkstempat.  There are two

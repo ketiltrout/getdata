@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -19,14 +19,6 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
 
 int main(void)
 {
@@ -50,7 +42,7 @@ int main(void)
   E.scalar[0] = "2";
   ret = gd_alter_entry(D, "phase", &E, 0);
   error = gd_error(D);
-  CHECKI(ret, -1);
+  CHECKI(ret, GD_E_BAD_CODE);
   CHECKI(error, GD_E_BAD_CODE);
 
   E.scalar[0] = NULL;

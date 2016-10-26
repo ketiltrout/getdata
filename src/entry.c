@@ -37,12 +37,19 @@ void _GD_FreeFL(struct gd_flist_ *fl)
     free(fl->carray_value_list);
   }
 
+  if (fl->sarray_value_list) {
+    for (i = 0; fl->sarray_value_list[i] != NULL; ++i)
+      free(fl->sarray_value_list[i]);
+    free(fl->sarray_value_list);
+  }
+
   dreturnvoid();
 }
 
 void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
 {
   int i;
+  size_t n;
 
   dtrace("%p, %p, %i", D, entry, priv);
 
@@ -74,6 +81,8 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       free(entry->in_fields[1]);
       free(entry->in_fields[0]);
       break;
@@ -96,6 +105,13 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
     case GD_STRING_ENTRY:
       if (priv)
         free(entry->e->u.string);
+      break;
+    case GD_SARRAY_ENTRY:
+      if (priv) {
+        for (n = 0; n < entry->EN(scalar,array_len); ++n)
+          free(((char **)entry->e->u.scalar.d)[n]);
+        free(entry->e->u.scalar.d);
+      }
       break;
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
@@ -328,6 +344,9 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
     case GD_STRING_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_ALIAS_ENTRY:
       break;
@@ -352,13 +371,7 @@ char* gd_raw_filename(DIRFILE* D, const char* field_code) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  _GD_ClearError(D);
-
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
+  GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   /* Check field */
   E = _GD_FindEntry(D, field_code);
@@ -408,20 +421,12 @@ int gd_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry) gd_nothrow
 
   dtrace("%p, \"%s\", %p", D, field_code, entry);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", 1);
-    return -1;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_ERR_IF_INVALID(D);
 
   E = _GD_FindEntry(D, field_code);
 
-  if (D->error) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (D->error) 
+    GD_RETURN_ERROR(D);
 
   /* Calculate the entry, if necessary */
   if (!(E->flags & GD_EN_CALC))
@@ -457,6 +462,8 @@ int gd_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry) gd_nothrow
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       entry->in_fields[0] = strdup(E->in_fields[0]);
       entry->in_fields[1] = strdup(E->in_fields[1]);
       break;
@@ -495,6 +502,7 @@ int gd_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry) gd_nothrow
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_NO_ENTRY:
     case GD_ALIAS_ENTRY:
@@ -511,11 +519,7 @@ const char *gd_alias_target(DIRFILE *D, const char *field_code) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
+  GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
 
@@ -543,11 +547,7 @@ const char **gd_aliases(DIRFILE *D, const char *field_code) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
+  GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   n = gd_naliases(D, field_code) + 1;
 
@@ -595,11 +595,7 @@ unsigned int gd_naliases(DIRFILE *D, const char *field_code) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%u", 0);
-    return 0;
-  }
+  GD_RETURN_IF_INVALID(D, "%u", 0);
 
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
 
@@ -626,13 +622,7 @@ gd_entype_t gd_entry_type(DIRFILE* D, const char* field_code) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", GD_NO_ENTRY);
-    return GD_NO_ENTRY;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_IF_INVALID(D, "%i", GD_NO_ENTRY);
 
   E = _GD_FindEntry(D, field_code);
 
@@ -651,21 +641,13 @@ int gd_fragment_index(DIRFILE *D, const char *field_code) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_ERR_IF_INVALID(D);
 
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
 
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (E == NULL)
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0,
+        field_code);
 
   dreturn("%i", E->fragment_index);
   return E->fragment_index;
@@ -677,40 +659,25 @@ int gd_hide(DIRFILE *D, const char *field_code) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  } else if ((D->flags & GD_ACCMODE) != GD_RDWR) {
+  GD_RETURN_ERR_IF_INVALID(D);
+
+  if ((D->flags & GD_ACCMODE) != GD_RDWR)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+  else {
+    E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
+
+    if (E == NULL)
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    else if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT)
+      _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+          D->fragment[E->fragment_index].cname);
+    else if (!(E->flags & GD_EN_HIDDEN)) {
+      E->flags |= GD_EN_HIDDEN;
+      D->fragment[E->fragment_index].modified = 1;
+    }
   }
 
-  _GD_ClearError(D);
-
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
-
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
-    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
-        D->fragment[E->fragment_index].cname);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (!(E->flags & GD_EN_HIDDEN)) {
-    E->flags |= GD_EN_HIDDEN;
-    D->fragment[E->fragment_index].modified = 1;
-  }
-
-  dreturn("%i", 0);
-  return 0;
+  GD_RETURN_ERROR(D);
 }
 
 int gd_hidden(DIRFILE *D, const char *field_code) gd_nothrow
@@ -719,21 +686,13 @@ int gd_hidden(DIRFILE *D, const char *field_code) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_ERR_IF_INVALID(D);
 
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
 
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (E == NULL)
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0,
+        field_code);
 
   dreturn("%i", (E->flags & GD_EN_HIDDEN) ? 1 : 0);
   return (E->flags & GD_EN_HIDDEN) ? 1 : 0;
@@ -745,40 +704,25 @@ int gd_unhide(DIRFILE *D, const char *field_code) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  } else if ((D->flags & GD_ACCMODE) != GD_RDWR) {
+  GD_RETURN_ERR_IF_INVALID(D);
+
+  if ((D->flags & GD_ACCMODE) != GD_RDWR)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+  else {
+    E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
+
+    if (E == NULL)
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    else if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT)
+      _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+          D->fragment[E->fragment_index].cname);
+    else if (E->flags & GD_EN_HIDDEN) {
+      E->flags &= ~GD_EN_HIDDEN;
+      D->fragment[E->fragment_index].modified = 1;
+    }
   }
 
-  _GD_ClearError(D);
-
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
-
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
-    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
-        D->fragment[E->fragment_index].cname);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (E->flags & GD_EN_HIDDEN) {
-    E->flags &= ~GD_EN_HIDDEN;
-    D->fragment[E->fragment_index].modified = 1;
-  }
-
-  dreturn("%i", 0);
-  return 0;
+  GD_RETURN_ERROR(D);
 }
 
 int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
@@ -789,20 +733,12 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code_in);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_ERR_IF_INVALID(D);
 
   E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1, 1);
 
-  if (D->error) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (D->error)
+    GD_RETURN_ERROR(D);
 
   if (field_code != field_code_in)
     free(field_code);
@@ -816,6 +752,14 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->EN(lincom,n_fields); ++i)
         _GD_BadInput(D, E, i, GD_NO_ENTRY, 1);
+      break;
+    case GD_INDIR_ENTRY:
+      _GD_BadInput(D, E, 0, GD_NO_ENTRY, 1);
+      _GD_BadInput(D, E, 0, GD_CARRAY_ENTRY, 1);
+      break;
+    case GD_SINDIR_ENTRY:
+      _GD_BadInput(D, E, 0, GD_NO_ENTRY, 1);
+      _GD_BadInput(D, E, 0, GD_SARRAY_ENTRY, 1);
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
@@ -834,6 +778,7 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
     case GD_RAW_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
@@ -841,13 +786,7 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
       break;
   }
 
-  if (D->error) {
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  dreturn("%i", 0);
-  return 0;
+  GD_RETURN_ERROR(D);
 }
 
 char *gd_linterp_tablename(DIRFILE *D, const char *field_code) gd_nothrow
@@ -857,13 +796,7 @@ char *gd_linterp_tablename(DIRFILE *D, const char *field_code) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   E = _GD_FindEntry(D, field_code);
 

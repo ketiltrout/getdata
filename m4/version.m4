@@ -19,8 +19,8 @@ dnl along with GetData; if not, write to the Free Software Foundation, Inc.,
 dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 m4_define(getdata_major,    0)
-m4_define(getdata_minor,    9)
-m4_define(getdata_revision, 5)
+m4_define(getdata_minor,    10)
+m4_define(getdata_revision, 0)
 m4_define(getdata_extra,    [a])
 m4_define(getdata_pkg_extra,[])
 m4_define(getdata_version,

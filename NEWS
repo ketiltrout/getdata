@@ -1,4 +1,29 @@
-New in version 0.9.5a:
+New in version 0.10.0a:
+
+  Dirfile Changes:
+
+  * Dirfile Standards Version 10 has been released.  It adds three new
+    field types: SARRAY, which is an array of STRING scalars (like a CARRAY,
+    but with STRINGs instead of CONSTs), and INDIR and SINDIR, which are
+    vector fields provide indexed look-ups from CARRAY (INDIR) or SARRAY
+    (SINDIR) scalar arrays.  It also adds field code namespaces, which
+    can be specified with the new /NAMESPACE directive, or else as part
+    of an /INCLUDE directive.
+
+    - A note on namespaces: Namespaces were created to provide an alternative
+      to the prefix and suffix added to the /INCLUDE driective in Standards
+      Version 9, which have some unfortunate side-effects due to their modifying
+      field names directly.  Because namespaces nest and are syntactically
+      separate from field names, they do a better job of encapsulation.
+      Especially important is the implicit INDEX vector, which appears
+      automatically in all namespaces, which contrasts with the behaviour in
+      the presence of affixes where it appears or disappears based on the
+      effects of the affixes creating or modifying the specific field name
+      "INDEX".
+
+    - A note on the SINDIR field: Unlike every other vector field, this field
+      produces character string data at the sample rate of it's input vector,
+      which may be surprising, in certain instances.
 
   Library Changes:
 
@@ -20,6 +45,12 @@ New in version 0.9.5a:
 
   * BUG FIX: Attempting to open a SIE-encoded data file a second time
     after a first attempt failed no longer results in a segfault.
+
+  API Changes:
+
+  * gd_entry_list() and gd_nentries() now take an additional paremter, fragment,
+    which optionally allows searching only one metadata fragment.  Setting this
+    to GD_ALL_FRAGMENTS restores the previous behaviour (search all fragments).
 
   Bindings Changes:
 

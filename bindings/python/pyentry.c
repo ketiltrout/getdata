@@ -36,14 +36,16 @@ static const char *gdpy_entry_type_names[] =
   "RECIP_ENTRY",    /* 0x0B */
   "WINDOW_ENTRY",   /* 0x0C */
   "MPLEX_ENTRY",    /* 0x0D */
-  NULL,             /* 0x0E */
-  NULL,             /* 0x0F */
+  "INDIR_ENTRY",    /* 0x0E */
+  "SINDIR_ENTRY",   /* 0x0F */
   "CONST_ENTRY",    /* 0x10 */
   "STRING_ENTRY",   /* 0x11 */
   "CARRAY_ENTRY",   /* 0x12 */
+  "SARRAY_ENTRY"    /* 0x13 */
 };
-#define GDPY_N_ENTYPES 0x12
+#define GDPY_LAST_ENTYPE 0x13
 
+/* Routine unicode failure check routines */
 #define S1CHECK do { \
   if (s1 == NULL) { dreturn("%p", NULL); return NULL; } \
 } while(0)
@@ -161,6 +163,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       min = 0;
       break;
     case GD_CONST_ENTRY:
+    case GD_SARRAY_ENTRY:
       min = 1;
       break;
     case GD_RAW_ENTRY:
@@ -169,6 +172,8 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
     case GD_SBIT_ENTRY:
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
     case GD_RECIP_ENTRY:
     case GD_PHASE_ENTRY:
     case GD_POLYNOM_ENTRY:
@@ -324,6 +329,8 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       E->in_fields[0] = gdpy_string_from_pyobj(PyTuple_GetItem(tuple, 0),
           char_enc, "in_fields must be string");
 
@@ -490,6 +497,10 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
       gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 3), GD_INT_TYPE,
           &E->scalar[1], char_enc, &E->EN(mplex,period), NULL);
       break;
+    case GD_SARRAY_ENTRY:
+      E->EN(scalar,array_len) =
+        (size_t)gdpy_ulong_from_pyobj(PyTuple_GetItem(tuple, 0));
+      break;
     case GD_CARRAY_ENTRY:
       E->EN(scalar,array_len) =
         (size_t)gdpy_ulong_from_pyobj(PyTuple_GetItem(tuple, 1));
@@ -529,12 +540,15 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject *parms,
    * PHASE:    in_field, shift             = 2
    * MULTIPLY: in_field1, in_field2        = 2
    * DIVIDE:   in_field1, in_field2        = 2
+   * INDIR:    in_field1, in_field2        = 2
+   * SINDIR:   in_field1, in_field2        = 2
    * RECIP:    in_field, dividend          = 2
    * POLYNOM:  in_field, a                 = 2
    * WINDOW:   in_field1, in_field2, op, thresh = 4
    * MPLEX:    in_field1, in_field2, val, max = 4
    * CONST:    type                        = 1
    * CARRAY:   type, array_len             = 2
+   * SARRAY:   array_len                   = 1
    * STRING:   (none)                      = 0
    * INDEX:    (none)                      = 0
    */
@@ -569,6 +583,8 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject *parms,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       key[0] = "in_field1";
       key[1] = "in_field2";
       size = 2;
@@ -606,6 +622,10 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject *parms,
       key[0] = "type";
       key[1] = "array_len";
       size = 2;
+      break;
+    case GD_SARRAY_ENTRY:
+      key[0] = "array_len";
+      size = 1;
       break;
     case GD_CONST_ENTRY:
       key[0] = "type";
@@ -683,7 +703,7 @@ static int gdpy_entry_init(struct gdpy_entry_t *self, PyObject *args,
   E.field_type = field_type;
 
   /* check for valid field type */
-  if (E.field_type > GDPY_N_ENTYPES || E.field_type <= 0 ||
+  if (E.field_type > GDPY_LAST_ENTYPE || E.field_type <= 0 ||
       gdpy_entry_type_names[E.field_type] == NULL)
   {
     PyErr_SetString(PyExc_ValueError,
@@ -866,6 +886,8 @@ static PyObject *gdpy_entry_getinfields(struct gdpy_entry_t *self,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
       s1 = gdpyobj_from_string(self->E->in_fields[0], self->char_enc);
@@ -880,6 +902,7 @@ static PyObject *gdpy_entry_getinfields(struct gdpy_entry_t *self,
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
       PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
           "attribute 'in_fields' not available for entry type %s",
@@ -976,6 +999,8 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t *self, PyObject *value,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
       if (value == NULL) {
@@ -1020,6 +1045,7 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t *self, PyObject *value,
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
       PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
           "attribute 'in_fields' not available for entry type %s",
@@ -1187,7 +1213,9 @@ static PyObject *gdpy_entry_getarraylen(struct gdpy_entry_t *self,
 
   dtrace("%p, %p", self, closure);
 
-  if (self->E->field_type == GD_CARRAY_ENTRY) {
+  if (self->E->field_type == GD_CARRAY_ENTRY ||
+      self->E->field_type == GD_SARRAY_ENTRY)
+  {
       obj = PyLong_FromUnsignedLong(self->E->EN(scalar,array_len));
   } else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
@@ -2078,6 +2106,9 @@ static PyObject *gdpy_entry_getparms(struct gdpy_entry_t *self, void *closure)
       tuple = Py_BuildValue("(iI)", self->E->EN(scalar,const_type),
           self->E->EN(scalar,array_len));
       break;
+    case GD_SARRAY_ENTRY:
+      tuple = Py_BuildValue("(I)", self->E->EN(scalar,array_len));
+      break;
     case GD_RAW_ENTRY:
       s1 = gdpyobj_from_scalar(self->E, 0, GD_UINT_TYPE, &self->E->EN(raw,spf),
           self->char_enc);
@@ -2093,6 +2124,8 @@ static PyObject *gdpy_entry_getparms(struct gdpy_entry_t *self, void *closure)
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       s1 = gdpyobj_from_string(self->E->in_fields[0], self->char_enc);
       S1CHECK;
       s2 = gdpyobj_from_string(self->E->in_fields[1], self->char_enc);
@@ -2414,6 +2447,7 @@ static PyObject *gdpy_entry_repr(struct gdpy_entry_t *self)
   /* the parameter tuple */
   parms = gdpy_entry_getparms(self, NULL);
   if (PyErr_Occurred()) {
+    Py_DECREF(name);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -2430,9 +2464,13 @@ static PyObject *gdpy_entry_repr(struct gdpy_entry_t *self)
         gdpy_entry_type_names[self->E->field_type], name,
         self->E->fragment_index, parms, self->char_enc);
 
+#if PY_MAJOR_VERSION < 3
   /* now encode */
   repr = PyUnicode_AsEncodedString(urepr, "ascii", "backslashreplace");
   Py_DECREF(urepr);
+#else
+  repr = urepr;
+#endif
   Py_DECREF(name);
   Py_DECREF(parms);
 

@@ -28,17 +28,14 @@ static struct {
   char *doc;
 } gdpy_exception_list[GD_N_ERROR_CODES] = {
   { NULL, NULL },
-  { NULL, NULL }, /* 1 */
   { "Format", "Syntax error in Dirfile metadata (GD_E_FORMAT)." },
-  { NULL, NULL }, /* 3 */
   { "Creation", "Unable to create a Dirfile. (GD_E_CREAT)." },
   { "BadCode", "Bad field code. (GD_E_BAD_CODE)." },
   { "BadType", "Bad data type. (GD_E_BAD_TYPE)." },
   { "IO", "I/O error encountered. (GD_E_IO)." },
-  { NULL, NULL }, /* 8 */
-  { "Internal", "Internal library error (GD_E_INTERNAL_ERROR).\nPlease report "
-    "to <" PACKAGE_BUGREPORT ">" },
-  { NULL, NULL }, /* 10 -- GD_E_ALLOC.  Reported via PyErr_NoMemory() */
+  { "Internal", "Internal library error (GD_E_INTERNAL_ERROR).\n"
+    "Please report to <" PACKAGE_BUGREPORT ">" },
+  { NULL, NULL }, /* GD_E_ALLOC.  Reported via PyErr_NoMemory() */
   { "Range", "Invalid frame or sample number (GD_E_RANGE)." },
   { "LUT", "Malformed LINTERP table file (GD_E_LUT)." },
   { "RecurseLevel", "Recursion too deep (GD_E_RECURSE_LEVEL)." },
@@ -63,13 +60,10 @@ static struct {
   { "UncleanDatabase",
     "Error updating Dirfile: database is unclean (GD_E_UNCLEAN_DB)." },
   { "Domain", "Improper domain (GD_E_DOMAIN)." },
-  { NULL, NULL }, /* 32 */
-  { NULL, NULL }, /* 33 */
-  { NULL, NULL }, /* 34 */
   { "Bounds", "CARRAY access out-of-bounds (GD_E_BOUNDS)." },
   { "LineTooLong", "Metadata line is too long (GD_E_LINE_TOO_LONG)." }
 };
-PyObject *gdpy_exceptions[GD_N_ERROR_CODES];
+static PyObject *gdpy_exceptions[GD_N_ERROR_CODES];
 
 /* These are unused but for backwards compatibility are defined as aliases of
  * current exceptions */
@@ -77,18 +71,18 @@ static struct {
   const char *name;
   int e;
 } gdpy_dead_exceptions[] = {
-  { "BadEndianness", GD_E_ARGUMENT },
-  { "BadProtection", GD_E_ARGUMENT },
-  { "BadRepr", GD_E_BAD_CODE },
-  { "BadVersion", GD_E_ARGUMENT },
-  { "OpenLinfile", GD_E_LUT },
-  { "Flush", GD_E_IO },
-  { "Open", GD_E_IO },
-  { "OpenFragment", GD_E_IO },
-  { "OpenFragment", GD_E_IO },
-  { "OpenInclude", GD_E_IO },
-  { "RawIO", GD_E_IO },
-  { "Trunc", GD_E_IO },
+  { "BadEndianness", -GD_E_ARGUMENT },
+  { "BadProtection", -GD_E_ARGUMENT },
+  { "BadRepr", -GD_E_BAD_CODE },
+  { "BadVersion", -GD_E_ARGUMENT },
+  { "OpenLinfile", -GD_E_LUT },
+  { "Flush", -GD_E_IO },
+  { "Open", -GD_E_IO },
+  { "OpenFragment", -GD_E_IO },
+  { "OpenFragment", -GD_E_IO },
+  { "OpenInclude", -GD_E_IO },
+  { "RawIO", -GD_E_IO },
+  { "Trunc", -GD_E_IO },
   { NULL, 0}
 };
 
@@ -655,12 +649,12 @@ int gdpy_report_error(DIRFILE *D, char *char_enc)
 
   e = gd_error(D);
 
-  if (e == GD_E_ALLOC) {
+  if (e == GD_E_ALLOC)
     PyErr_NoMemory();
-  } else if (e) {
+  else if (e) {
     char *buffer = gd_error_string(D, NULL, 0);
     if (buffer) {
-      PyErr_SetObject(gdpy_exceptions[e], gdpyobj_from_estring(buffer,
+      PyErr_SetObject(gdpy_exceptions[-e], gdpyobj_from_estring(buffer,
             char_enc));
       free(buffer); 
     } else
@@ -753,6 +747,7 @@ PyObject *gdpy_convert_to_pylist(const void *data, gd_type_t type, size_t ns)
         if (gdpylist_append(pyobj, gdpy_from_complexp(((double*)data) + 2 * i)))
           return NULL;
       break;
+    case GD_STRING:
     case GD_NULL:
     case GD_UNKNOWN: /* prevent compiler warning */
       break;
@@ -813,6 +808,7 @@ PyObject *gdpy_convert_to_pyobj(const void *data, gd_type_t type,
       pyobj = gdpy_maybe_complex(((double*)data)[0], ((double*)data)[1],
           force_complex);
       break;
+    case GD_STRING:
     case GD_UNKNOWN: /* prevent compiler warning */
       break;
   }

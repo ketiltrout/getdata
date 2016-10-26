@@ -31,7 +31,7 @@ Fortran program to define these constants.
 
 All integer type parameters passed to the compatibility library are of type
 INTEGER (i.e. the native size of the platform).  As a result, largefile support
-are not be available in the Fortran 77 bindings.
+is not be available in the Fortran 77 bindings.
 
 All character string arguments require also an integer indicating the size of
 the character buffer.  In cases where the bindings return a string value, the

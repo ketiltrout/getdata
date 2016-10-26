@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,15 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* gd_seek() */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
 
 int main(void)
 {
@@ -57,14 +49,14 @@ int main(void)
   m = gd_seek(D, "data", -3, 0, GD_SEEK_CUR);
   e1 = gd_error(D);
 
+  CHECKI(e1, GD_E_RANGE);
+  CHECKI(m, GD_E_RANGE);
+
   gd_discard(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(e1, GD_E_RANGE);
-  CHECKI(m, -1);
 
   return r;
 }

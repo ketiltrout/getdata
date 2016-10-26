@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2015 D. V. Wiebe
+/* Copyright (C) 2008-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -323,21 +323,15 @@ static int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
 
   dtrace("%p, %p, %i, 0x%X", D, E, new_fragment, flags);
 
-  /* check access mode */
-  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
-    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if ((D->flags & GD_ACCMODE) == GD_RDONLY)
+    GD_SET_RETURN_ERROR(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
 
   /* check metadata protection */
   if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT ||
       D->fragment[new_fragment].protection & GD_PROTECT_FORMAT)
   {
-    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+    GD_SET_RETURN_ERROR(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[E->fragment_index].cname);
-    dreturn("%i", -1);
-    return -1;
   }
 
   /* Compose the field's new name */
@@ -350,8 +344,7 @@ static int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
   
   if (!new_filebase) {
     _GD_InternalError(D); /* the prefix/suffix wasn't found */
-    dreturn("%i", -1);
-    return -1;
+    GD_RETURN_ERROR(D);
   }
 
   /* add the new affixes */
@@ -365,8 +358,7 @@ static int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
       _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, new_code);
       free(new_filebase);
       free(new_code);
-      dreturn("%i", -1);
-      return -1;
+      GD_RETURN_ERROR(D);
     }
 
     /* moving a field can't add or remove a field from the dot list, so
@@ -376,8 +368,7 @@ static int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
     if (rdat == NULL) {
       free(new_filebase);
       free(new_code);
-      dreturn("%i", -1);
-      return -1;
+      GD_RETURN_ERROR(D);
     }
   } else {
     free(new_code);
@@ -401,8 +392,7 @@ static int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
     {
       _GD_CleanUpRename(rdat, 1);
       free(new_code);
-      dreturn("%i", -1);
-      return -1;
+      GD_RETURN_ERROR(D);
     }
   } else
     free(new_filebase);
@@ -437,33 +427,22 @@ int gd_move(DIRFILE *D, const char *field_code, int new_fragment,
 
   dtrace("%p, \"%s\", %i, 0x%X", D, field_code, new_fragment, flags);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_ERR_IF_INVALID(D);
 
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
 
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (E == NULL)
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0,
+        field_code);
 
-  if (E->field_type == GD_INDEX_ENTRY) {
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, "INDEX");
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (E->field_type == GD_INDEX_ENTRY)
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0,
+        "INDEX");
 
-  if (new_fragment < 0 || new_fragment >= D->n_fragment) {
-    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, new_fragment, NULL);
-    dreturn("%i", -1);
-    return -1;
-  } else if (E->fragment_index == new_fragment) {
+  if (new_fragment < 0 || new_fragment >= D->n_fragment) 
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, new_fragment, NULL);
+
+  if (E->fragment_index == new_fragment) {
     dreturn("%i", 0);
     return 0;
   }

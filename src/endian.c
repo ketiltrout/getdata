@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013, 2014, 2015 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -112,33 +112,15 @@ int gd_alter_endianness(DIRFILE* D, unsigned long byte_sex, int fragment,
 
   dtrace("%p, %lx, %i, %i", D, (unsigned long)byte_sex, fragment, move);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  GD_RETURN_ERR_IF_INVALID(D);
 
-  if ((D->flags & GD_ACCMODE) != GD_RDWR) {
+  if ((D->flags & GD_ACCMODE) != GD_RDWR) 
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment) {
+  else if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment)
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (byte_sex != GD_BIG_ENDIAN && byte_sex != GD_LITTLE_ENDIAN) {
+  else if (byte_sex != GD_BIG_ENDIAN && byte_sex != GD_LITTLE_ENDIAN)
     _GD_SetError(D, GD_E_ARGUMENT, GD_E_ARG_ENDIANNESS, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  _GD_ClearError(D);
-
-  if (fragment == GD_ALL_FRAGMENTS) {
+  else if (fragment == GD_ALL_FRAGMENTS) {
     for (i = 0; i < D->n_fragment; ++i) {
       _GD_ByteSwapFragment(D, byte_sex, i, move);
 
@@ -148,27 +130,20 @@ int gd_alter_endianness(DIRFILE* D, unsigned long byte_sex, int fragment,
   } else
     _GD_ByteSwapFragment(D, byte_sex, fragment, move);
 
-  dreturn("%i", (D->error) ? -1 : 0);
-  return (D->error) ? -1 : 0;
+  GD_RETURN_ERROR(D);
 }
 
 unsigned long gd_endianness(DIRFILE* D, int fragment) gd_nothrow
 {
   dtrace("%p, %i", D, fragment);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", 0);
-    return 0;
-  }
+  GD_RETURN_IF_INVALID(D, "%i", 0);
 
   if (fragment < 0 || fragment >= D->n_fragment) {
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
   }
-
-  _GD_ClearError(D);
 
   dreturn("0x%lx", (unsigned long)D->fragment[fragment].byte_sex);
   return D->fragment[fragment].byte_sex;

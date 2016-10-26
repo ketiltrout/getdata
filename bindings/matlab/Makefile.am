@@ -24,24 +24,28 @@ SUBDIRS=test
 
 matlabdir=$(matlabbasedir)/getdata
 
-matlabfiles=gd_add_bit.m gd_add_divide.m gd_add_lincom.m gd_add_linterp.m \
-						gd_add_mplex.m gd_add_multiply.m gd_add_phase.m gd_add_polynom.m \
-						gd_add_raw.m gd_add_recip.m gd_add_sbit.m gd_add_window.m \
+matlabfiles=gd_add_bit.m gd_add_divide.m gd_add_indir.m gd_add_lincom.m \
+						gd_add_linterp.m gd_add_mplex.m gd_add_multiply.m gd_add_phase.m \
+						gd_add_polynom.m gd_add_raw.m gd_add_recip.m gd_add_sbit.m \
+						gd_add_sindir.m gd_add_window.m \
 						gd_alter_bit.m gd_alter_carray.m gd_alter_const.m \
-						gd_alter_divide.m gd_alter_lincom.m gd_alter_linterp.m \
+						gd_alter_divide.m gd_alter_indir.m \
+						gd_alter_lincom.m gd_alter_linterp.m \
 						gd_alter_mplex.m gd_alter_multiply.m gd_alter_phase.m \
-						gd_alter_polynom.m gd_alter_raw.m gd_alter_recip.m gd_alter_sbit.m \
+						gd_alter_polynom.m gd_alter_raw.m gd_alter_recip.m \
+						gd_alter_sarray.m gd_alter_sbit.m gd_alter_sindir.m \
 						gd_alter_window.m gd_field_list_by_type.m gd_field_list.m \
-						gd_get_constant.m gd_madd_bit.m gd_madd_divide.m gd_madd_lincom.m \
-						gd_madd_linterp.m gd_madd_mplex.m gd_madd_multiply.m \
-						gd_madd_phase.m gd_madd_polynom.m gd_madd_recip.m gd_madd_sbit.m \
-						gd_madd_window.m gd_mfield_list_by_type.m gd_mfield_list.m \
-						gd_mvector_list.m gd_nfields_by_type.m gd_nfields.m \
-						gd_nmfields_by_type.m gd_nmfields.m gd_nmvectors.m gd_nvectors.m \
-						gd_put_carray.m gd_put_constant.m gd_vector_list.m \
+						gd_get_constant.m gd_madd_bit.m gd_madd_divide.m gd_madd_indir.m \
+						gd_madd_lincom.m gd_madd_linterp.m gd_madd_mplex.m \
+						gd_madd_multiply.m gd_madd_phase.m gd_madd_polynom.m \
+						gd_madd_recip.m gd_madd_sbit.m gd_madd_sindir.m gd_madd_window.m \
+						gd_mfield_list_by_type.m gd_mfield_list.m gd_mvector_list.m \
+						gd_nfields_by_type.m gd_nfields.m gd_nmfields_by_type.m \
+						gd_nmfields.m gd_nmvectors.m gd_nvectors.m gd_put_carray.m \
+						gd_put_constant.m gd_put_sarray.m gd_vector_list.m \
 						getdata_constants.m
 mexfiles=gd_add gd_add_alias \
-				 gd_add_carray gd_add_const \
+				 gd_add_carray gd_add_const gd_add_sarray \
 				 gd_add_spec gd_add_string gd_aliases \
 				 gd_alias_target gd_alter_affixes \
 				 gd_alter_encoding gd_alter_endianness gd_alter_entry \
@@ -54,19 +58,20 @@ mexfiles=gd_add gd_add_alias \
 				 gd_error gd_error_string gd_flags gd_flush gd_fragment_affixes \
 				 gd_fragment_index gd_fragmentname \
 				 gd_framenum gd_frameoffset gd_get_carray gd_get_carray_slice \
-				 gd_getdata \
+				 gd_getdata gd_get_sarray gd_get_sarray_slice \
 				 gd_get_string gd_hidden gd_hide gd_include gd_invalid_dirfile \
 				 gd_linterp_tablename gd_madd gd_madd_alias \
-				 gd_madd_carray gd_madd_const \
+				 gd_madd_carray gd_madd_const gd_madd_sarray \
 				 gd_madd_spec gd_madd_string \
 				 gd_malter_spec gd_mcarrays \
-				 gd_mconstants gd_metaflush gd_move gd_mplex_lookback \
+				 gd_mconstants gd_metaflush gd_move gd_mplex_lookback gd_msarrays \
 				 gd_mstrings gd_naliases gd_native_type gd_nentries gd_nfragments \
 				 gd_nframes gd_open gd_parent_fragment gd_protection \
 				 gd_put_carray_slice \
-				 gd_putdata gd_put_string gd_raw_close gd_raw_filename \
+				 gd_putdata gd_put_sarray_slice \
+				 gd_put_string gd_raw_close gd_raw_filename \
 				 gd_reference gd_rename gd_rewrite_fragment \
-				 gd_seek gd_spf gd_strings gd_strtok \
+				 gd_sarrays gd_seek gd_spf gd_strings gd_strtok \
 				 gd_sync gd_tell gd_unhide gd_uninclude gd_validate gd_verbose_prefix
 
 matlabcfiles=$(addsuffix .c,${mexfiles})
@@ -114,4 +119,4 @@ getdata_constants.m: ../make_parameters
 	cd .. && ${MAKE} make_parameters
 
 clean-local:
-	rm -rf $(nodist_matlab_SCRIPTS)
+	rm -rf $(nodist_matlab_SCRIPTS) *~

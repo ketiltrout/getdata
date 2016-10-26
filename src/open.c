@@ -468,6 +468,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
 
   /* user specified flags (used if we're forced to re-open) */
   D->open_flags = flags;
+
   /* clear GD_PERMISSIVE if it was specified along with GD_PEDANTIC */
   if (flags & GD_PERMISSIVE && flags & GD_PEDANTIC)
     flags &= ~GD_PERMISSIVE;

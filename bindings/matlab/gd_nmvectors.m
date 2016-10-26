@@ -3,17 +3,17 @@ function nfields = gd_nmvectors(D, parent)
 %
 %   GD_NMVECTORS(DIRFILE,PARENT)
 %             is equivalent to calling GD_NENTRIES(DIRFILE,PARENT, ...
-%                                                           GD.VECTOR_ENTRIES,0)
+%                                          GD.ALL_FRAGMENTS,GD.VECTOR_ENTRIES,0)
 %
 %   For GD, see GETDATA_CONSTANTS.
 %
 %   See also GD_NENTRIES, GETDATA_CONSTANTS
 
   GD = getdata_constants();
-  nfields = gd_nentries(D, parent, GD.VECTOR_ENTRIES, 0);
+  nfields = gd_nentries(D, parent, GD.ALL_FRAGMENTS, GD.VECTOR_ENTRIES, 0);
 end
 
-% Copyright (C) 2013 D. V. Wiebe
+% Copyright (C) 2013, 2016 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %

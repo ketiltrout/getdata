@@ -50,6 +50,7 @@ int Entry::CheckIndex(gd_entype_t field_type, int n_fields, int index)
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_NO_ENTRY:
     case GD_ALIAS_ENTRY:
@@ -60,6 +61,8 @@ int Entry::CheckIndex(gd_entype_t field_type, int n_fields, int index)
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
       if (index > 2)
@@ -182,9 +185,12 @@ static inline int scalar_ok(const gd_entry_t &E, int index)
     case GD_LINTERP_ENTRY:
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_NO_ENTRY:
     case GD_ALIAS_ENTRY:

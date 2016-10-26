@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. V. Wiebe
+/* Copyright (C) 2012-2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,12 +20,6 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -40,6 +34,8 @@ int main(void)
 
   D = gd_open(filedir, GD_RDONLY);
   e1 = gd_error(D);
+
+  CHECKI(e1, GD_E_OK);
   
   /* ensure mtime ticks over */
   sleep(1);
@@ -51,18 +47,19 @@ int main(void)
 
   n1 = gd_desync(D, GD_DESYNC_REOPEN);
   e2 = gd_error(D);
+
+  CHECKI(n1, GD_E_FORMAT);
+  CHECKI(e2, GD_E_FORMAT);
+
   n2 = gd_validate(D, "data");
   e3 = gd_error(D);
+
+  CHECKI(e3, GD_E_BAD_DIRFILE);
+  CHECKI(n2, GD_E_BAD_DIRFILE);
 
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(e1, GD_E_OK);
-  CHECKI(e2, GD_E_FORMAT);
-  CHECKI(e3, GD_E_BAD_DIRFILE);
-  CHECKI(n1, -1);
-  CHECKI(n2, -1);
   return r;
 }

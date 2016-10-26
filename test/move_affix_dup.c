@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -46,14 +46,15 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
   ret = gd_move(D, "AdataB", 2, 0);
   error = gd_error(D);
+
+  CHECKI(ret, GD_E_DUPLICATE);
+  CHECKI(error, GD_E_DUPLICATE);
+
   gd_discard(D);
 
   unlink(format1);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(ret, -1);
-  CHECKI(error, GD_E_DUPLICATE);
 
   return r;
 }

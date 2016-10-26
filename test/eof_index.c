@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -19,13 +19,6 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
 
 int main(void)
 {
@@ -62,20 +55,21 @@ int main(void)
   error2 = gd_error(D);
   eof_mult3 = gd_eof(D, "mult3");
   error3 = gd_error(D);
+
+  CHECKI(error0, GD_E_BAD_FIELD_TYPE);
+  CHECKI(eof_INDEX, GD_E_BAD_FIELD_TYPE);
+  CHECKI(error1, GD_E_OK);
+  CHECKI(eof_mult1, (int)len / 2);
+  CHECKI(error2, GD_E_BAD_FIELD_TYPE);
+  CHECKI(eof_mult2, GD_E_BAD_FIELD_TYPE);
+  CHECKI(error3, GD_E_OK);
+  CHECKI(eof_mult3, (int)len / 2);
+
   gd_discard(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error0, GD_E_BAD_FIELD_TYPE);
-  CHECKI(eof_INDEX, -1);
-  CHECKI(error1, GD_E_OK);
-  CHECKI(eof_mult1, (int)len / 2);
-  CHECKI(error2, GD_E_BAD_FIELD_TYPE);
-  CHECKI(eof_mult2, -1);
-  CHECKI(error3, GD_E_OK);
-  CHECKI(eof_mult3, (int)len / 2);
 
   return r;
 }

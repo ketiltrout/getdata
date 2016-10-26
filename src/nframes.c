@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2009, 2011-2015 D. V. Wiebe
+ * Copyright (C) 2005-2009, 2011-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -28,31 +28,22 @@ off64_t gd_nframes64(DIRFILE* D)
 
   dtrace("%p", D);
 
-  _GD_ClearError(D);
-
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", 0);
-    return 0;
-  }
+  GD_RETURN_ERR_IF_INVALID(D);
 
   if (D->reference_field == NULL) {
     dreturn("%i", 0);
     return 0;
   }
 
-  if (!_GD_Supports(D, D->reference_field, GD_EF_NAME | GD_EF_SIZE)) {
-    dreturn("%i", 0);
-    return 0;
-  }
+  if (!_GD_Supports(D, D->reference_field, GD_EF_NAME | GD_EF_SIZE))
+    GD_RETURN_ERROR(D);
 
   if ((*_GD_ef[D->reference_field->e->u.raw.file[0].subenc].name)(D,
         (const char*)D->fragment[D->reference_field->fragment_index].enc_data,
         D->reference_field->e->u.raw.file,
         D->reference_field->e->u.raw.filebase, 0, 0))
   {
-    dreturn("%i", 0);
-    return 0;
+    GD_RETURN_ERROR(D);
   }
 
   /* If the reference field is open for writing, close it first to flush the
@@ -61,10 +52,8 @@ off64_t gd_nframes64(DIRFILE* D)
   if (D->reference_field->e->u.raw.file[0].mode & GD_FILE_WRITE) {
     _GD_FiniRawIO(D, D->reference_field, D->reference_field->fragment_index,
         GD_FINIRAW_KEEP);
-    if (D->error) {
-      dreturn("%i", 0);
-      return 0;
-    }
+    if (D->error)
+      GD_RETURN_ERROR(D);
   }
 
   nf = (*_GD_ef[D->reference_field->e->u.raw.file[0].subenc].size)(
@@ -74,8 +63,7 @@ off64_t gd_nframes64(DIRFILE* D)
 
   if (nf < 0) {
     _GD_SetEncIOError(D, GD_E_IO_READ, D->reference_field->e->u.raw.file);
-    dreturn("%i", 0);
-    return 0;
+    GD_RETURN_ERROR(D);
   }
 
   nf /= D->reference_field->EN(raw,spf);

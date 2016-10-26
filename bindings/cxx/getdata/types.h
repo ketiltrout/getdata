@@ -63,7 +63,8 @@ namespace GetData {
     UInt32    = GD_UINT32,    Int32      = GD_INT32,
     UInt64    = GD_UINT64,    Int64      = GD_INT64,
     Float32   = GD_FLOAT32,   Float64    = GD_FLOAT64,
-    Complex64 = GD_COMPLEX64, Complex128 = GD_COMPLEX128
+    Complex64 = GD_COMPLEX64, Complex128 = GD_COMPLEX128,
+    String    = GD_STRING
   };
 
   enum EntryType {
@@ -78,12 +79,15 @@ namespace GetData {
     PolynomEntryType  = GD_POLYNOM_ENTRY,
     ConstEntryType    = GD_CONST_ENTRY,
     CarrayEntryType   = GD_CARRAY_ENTRY,
+    SarrayEntryType   = GD_SARRAY_ENTRY,
     StringEntryType   = GD_STRING_ENTRY,
     IndexEntryType    = GD_INDEX_ENTRY,
     DivideEntryType   = GD_DIVIDE_ENTRY,
     RecipEntryType    = GD_RECIP_ENTRY,
     WindowEntryType   = GD_WINDOW_ENTRY,
-    MplexEntryType    = GD_MPLEX_ENTRY
+    MplexEntryType    = GD_MPLEX_ENTRY,
+    IndirEntryType    = GD_INDIR_ENTRY,
+    SindirEntryType   = GD_SINDIR_ENTRY
   };
 
   enum WindOpType {

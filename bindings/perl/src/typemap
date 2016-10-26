@@ -36,8 +36,8 @@ gd_windop_t T_IV
 # GetData Perl pseudotypes
 gdp_complex_in T_COMPLEXIN
 gdp_complex_undef T_COMPLEX_UNDEF
-gdp_bitnum_t T_IV_FFFF
 gdp_char * T_PV_NULL
+gdp_ffff_t T_IV_FFFF
 gdp_int T_IV_ZERO
 gdp_numbits_t T_IV_ZERO
 gdp_shift_t T_IV_ZERO

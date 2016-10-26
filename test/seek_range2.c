@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2015, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -48,9 +48,8 @@ int main(void)
   D = gd_open(filedir, GD_RDONLY);
   /* Sample position: INT64_MAX (OK), byte position INT64_MAX * 2 (bad) */;
   m = gd_seek64(D, "data", GD_INT64_MAX, 0, GD_SEEK_SET);
-  CHECKI(m, -1);
-
   e1 = gd_error(D);
+  CHECKI(m, GD_E_RANGE);
   CHECKI(e1, GD_E_RANGE);
 
   gd_discard(D);

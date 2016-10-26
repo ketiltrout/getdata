@@ -40,7 +40,7 @@ int main(void)
 
   type = gd_native_type(D, "string");
   error = gd_error(D);
-  CHECKU(type, GD_NULL);
+  CHECKU(type, GD_STRING);
   CHECKI(error, 0);
 
   gd_discard(D);

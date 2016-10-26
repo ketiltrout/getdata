@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
  * Copyright (C) 2003-2005 Theodore Kisner
- * Copyright (C) 2005-2015 D. V. Wiebe
+ * Copyright (C) 2005-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -45,14 +45,11 @@ static DIRFILE _GD_GlobalErrors = {
 /* old error strings */
 const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Success", /* GD_E_OK */
-  NULL, /* unused */
   "Error in Format file", /* GD_E_FORMAT */
-  NULL, /* unused */
   NULL, /* GD_E_CREAT */
   "Bad field code", /* GD_E_BAD_CODE */
   "Bad data type", /* GD_E_BAD_TYPE */
   "I/O error", /* GD_E_IO */
-  NULL, /* unused */
   "Internal error", /* GD_E_INTERNAL_ERROR */
   "Memory allocation failed", /* GD_E_ALLOC */
   "Request out-of-range", /* GD_E_RANGE */
@@ -76,9 +73,6 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   NULL, /* GD_E_EXISTS */
   NULL, /* GD_E_UNCLEAN_DB */
   "Improper domain", /* GD_E_DOMAIN */
-  NULL, /* unused */
-  NULL, /* unused */
-  NULL, /* unused */
   NULL, /* GD_E_BOUNDS */
   "Line too long", /* GD_E_LINE_TOO_LONG */
 };
@@ -125,7 +119,7 @@ static DIRFILE *_GD_GetDirfile(const char *filename_in, int mode,
   filedir = strdup(filename_in);
 
   if (!filedir) {
-    *error_code = GD_E_ALLOC;
+    *error_code = -GD_E_ALLOC;
     dreturn("%p", NULL);
     return NULL;
   }
@@ -160,7 +154,7 @@ static DIRFILE *_GD_GetDirfile(const char *filename_in, int mode,
   /*  we will have to free the memory... */
   ptr = realloc(_GD_Dirfiles.D, (_GD_Dirfiles.n + 1) * sizeof(*_GD_Dirfiles.D));
   if (ptr == NULL) {
-    *error_code = _GD_GlobalErrors.error = GD_E_ALLOC;
+    *error_code = -(_GD_GlobalErrors.error = GD_E_ALLOC);
     free(filedir);
     dreturn("%p", NULL);
     return NULL;
@@ -174,7 +168,7 @@ static DIRFILE *_GD_GetDirfile(const char *filename_in, int mode,
 
   /* Error encountered -- clean up */
   if (_GD_Dirfiles.D[_GD_Dirfiles.n]->error != GD_E_OK) {
-    *error_code = _GD_CopyGlobalError(_GD_Dirfiles.D[_GD_Dirfiles.n]);
+    *error_code = -_GD_CopyGlobalError(_GD_Dirfiles.D[_GD_Dirfiles.n]);
     gd_discard(_GD_Dirfiles.D[_GD_Dirfiles.n]);
     dreturn("%p", NULL);
     return NULL;
@@ -441,6 +435,8 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
         break;
       case GD_MULTIPLY_ENTRY:
       case GD_DIVIDE_ENTRY:
+      case GD_INDIR_ENTRY:
+      case GD_SINDIR_ENTRY:
         Format.n_multiply++;
         break;
       case GD_PHASE_ENTRY:
@@ -454,6 +450,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
       case GD_ALIAS_ENTRY:
       case GD_CONST_ENTRY:
       case GD_CARRAY_ENTRY:
+      case GD_SARRAY_ENTRY:
       case GD_INDEX_ENTRY:
       case GD_STRING_ENTRY:
         break;
@@ -485,7 +482,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
       Format.phaseEntries == NULL)
   {
     D->error = GD_E_ALLOC;
-    *error_code = _GD_CopyGlobalError(D);
+    *error_code = -_GD_CopyGlobalError(D);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -514,6 +511,8 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
         break;
       case GD_MULTIPLY_ENTRY:
       case GD_DIVIDE_ENTRY:
+      case GD_INDIR_ENTRY:
+      case GD_SINDIR_ENTRY:
         CopyMultDivEntry(&Format.multiplyEntries[nmultiply++], D->entry[i]);
         break;
       case GD_PHASE_ENTRY:
@@ -528,6 +527,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
       case GD_STRING_ENTRY:
       case GD_CONST_ENTRY:
       case GD_CARRAY_ENTRY:
+      case GD_SARRAY_ENTRY:
       case GD_INDEX_ENTRY:
       case GD_ALIAS_ENTRY:
       case GD_NO_ENTRY:
@@ -560,7 +560,7 @@ int GetData(const char *filename, const char *field_code,
   nread = (int)gd_getdata64(D, field_code, (off64_t)first_frame,
       (off64_t)first_samp, (size_t)num_frames, (size_t)num_samp,
       _GD_LegacyType(return_type), data_out);
-  *error_code = _GD_CopyGlobalError(D);
+  *error_code = -_GD_CopyGlobalError(D);
 
   dreturn("%i", nread);
   return nread;
@@ -586,7 +586,7 @@ int GetNFrames(const char *filename, int *error_code,
   }
 
   nf = (int)gd_nframes(D);
-  *error_code = _GD_CopyGlobalError(D);
+  *error_code = -_GD_CopyGlobalError(D);
 
   dreturn("%i", nf);
   return nf;
@@ -610,7 +610,7 @@ int GetSamplesPerFrame(const char *filename, const char *field_code,
   }
 
   spf = (int)gd_spf(D, field_code);
-  *error_code = _GD_CopyGlobalError(D);
+  *error_code = -_GD_CopyGlobalError(D);
 
   dreturn("%i", spf);
   return spf;
@@ -639,7 +639,7 @@ int PutData(const char *filename, const char *field_code,
   n_write = (int)gd_putdata64(D, field_code, (off64_t)first_frame,
       (off64_t)first_samp, (size_t)num_frames, (size_t)num_samp,
       _GD_LegacyType(data_type), data_in);
-  *error_code = _GD_CopyGlobalError(D);
+  *error_code = -_GD_CopyGlobalError(D);
 
   dreturn("%i", n_write);
   return n_write;

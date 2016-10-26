@@ -61,7 +61,7 @@ sub printfmt {
     return "%g;%g";
   } elsif ($_ eq "double") {
     return "%g";
-  } elsif ($_ eq "gdp_bitnum_t" or $_ eq "gdp_numbits_t"
+  } elsif ($_ eq "gdp_ffff_t" or $_ eq "gdp_numbits_t"
       or $_ eq "gd_windop_t")
   {
     return "%i";

@@ -87,10 +87,13 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       if (!_GD_BadInput(D, E, 0, GD_NO_ENTRY, 0))
         _GD_Flush(D, E->e->entry[0], syn, clo);
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
@@ -738,6 +741,56 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
           goto WRITE_ERR;
         }
         break;
+      case GD_SARRAY_ENTRY:
+        pos = fprintf(stream, " SARRAY%s", pretty ? "  " : "");
+        if (pos < 0)
+          goto WRITE_ERR;
+
+        for (z = 0; z < E->EN(scalar,array_len); ++z) {
+          if (fputc(' ', stream) == EOF)
+            goto WRITE_ERR;
+          pos++;
+
+          /* compute length */
+          len = _GD_StringEscapeise(NULL, ((char**)E->e->u.scalar.d)[z], 0,
+              permissive, D->standards);
+
+          /* don't write lines that are too long
+           * also, add one to length for the trailing '\n' */
+          if (GD_SSIZE_T_MAX - (len + 1) <= pos) {
+            _GD_SetError(D, GD_E_LINE_TOO_LONG, GD_E_LONG_FLUSH, E->field, 0,
+                NULL);
+            dreturn("%i", -1);
+            return -1;
+          }
+
+          if (_GD_StringEscapeise(stream, ((char**)E->e->u.scalar.d)[z], 0,
+                permissive, D->standards) < 0)
+          {
+            goto WRITE_ERR;
+          }
+        }
+        break;
+      case GD_INDIR_ENTRY:
+        if (fprintf(stream, " INDIR%s ", pretty ? "   " : "") < 0 ||
+            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
+              D->standards, GD_WFC_SPACE) < 0 ||
+            _GD_WriteFieldCode(D, stream, me, E->in_fields[1], 0, permissive,
+              D->standards, 0) < 0)
+        {
+          goto WRITE_ERR;
+        }
+        break;
+      case GD_SINDIR_ENTRY:
+        if (fprintf(stream, " SINDIR%s ", pretty ? "  " : "") < 0 ||
+            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
+              D->standards, GD_WFC_SPACE) < 0 ||
+            _GD_WriteFieldCode(D, stream, me, E->in_fields[1], 0, permissive,
+              D->standards, 0) < 0)
+        {
+          goto WRITE_ERR;
+        }
+        break;
       case GD_INDEX_ENTRY:
       case GD_ALIAS_ENTRY:
       case GD_NO_ENTRY:
@@ -1103,54 +1156,30 @@ int gd_metaflush(DIRFILE* D)
 {
   dtrace("%p", D);
 
-  _GD_ClearError(D);
+  GD_RETURN_ERR_IF_INVALID(D);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
-    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if ((D->flags & GD_ACCMODE) == GD_RDONLY)
+    GD_SET_RETURN_ERROR(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
 
   _GD_FlushMeta(D, GD_ALL_FRAGMENTS, 0);
 
-  dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
-  return (D->error == GD_E_OK) ? 0 : -1;
+  GD_RETURN_ERROR(D);
 }
 
 int gd_rewrite_fragment(DIRFILE* D, int fragment)
 {
   dtrace("%p, %i", D, fragment);
 
-  _GD_ClearError(D);
+  GD_RETURN_ERR_IF_INVALID(D);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", 1);
-    return -1;
-  }
-
-  if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment) {
+  if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment)
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+  else if ((D->flags & GD_ACCMODE) == GD_RDONLY)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  else
+    _GD_FlushMeta(D, fragment, 1);
 
-  _GD_FlushMeta(D, fragment, 1);
-
-  dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
-  return (D->error == GD_E_OK) ? 0 : -1;
+  GD_RETURN_ERROR(D);
 }
 
 static int _GD_SyncOrClose(DIRFILE* D, const char* field_code, int syn, int clo)
@@ -1160,11 +1189,9 @@ static int _GD_SyncOrClose(DIRFILE* D, const char* field_code, int syn, int clo)
 
   dtrace("%p, \"%s\", %i, %i", D, field_code, syn, clo);
 
-  _GD_ClearError(D);
+  GD_RETURN_ERR_IF_INVALID(D);
 
-  if (D->flags & GD_INVALID) /* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-  else if (field_code == NULL) {
+  if (field_code == NULL) {
     _GD_FlushMeta(D, GD_ALL_FRAGMENTS, 0);
     if (!D->error)
       for (i = 0; i < D->n_entries; ++i)
@@ -1177,8 +1204,7 @@ static int _GD_SyncOrClose(DIRFILE* D, const char* field_code, int syn, int clo)
       _GD_Flush(D, E, syn, clo);
   }
 
-  dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
-  return (D->error == GD_E_OK) ? 0 : -1;
+  GD_RETURN_ERROR(D);
 }
 
 int gd_sync(DIRFILE *D, const char *field_code)
@@ -1217,26 +1243,28 @@ int gd_flush(DIRFILE *D, const char *field_code)
   return ret;
 }
 
-#define GD_VERS_GE_1  0xFFFFFFFEUL
-#define GD_VERS_GE_2  0xFFFFFFFCUL
-#define GD_VERS_GE_3  0xFFFFFFF8UL
-#define GD_VERS_GE_4  0xFFFFFFF0UL
-#define GD_VERS_GE_5  0xFFFFFFE0UL
-#define GD_VERS_GE_6  0xFFFFFFC0UL
-#define GD_VERS_GE_7  0xFFFFFF80UL
-#define GD_VERS_GE_8  0xFFFFFF00UL
-#define GD_VERS_GE_9  0xFFFFFE00UL
+#define GD_VERS_GE_1   0xFFFFFFFEUL
+#define GD_VERS_GE_2   0xFFFFFFFCUL
+#define GD_VERS_GE_3   0xFFFFFFF8UL
+#define GD_VERS_GE_4   0xFFFFFFF0UL
+#define GD_VERS_GE_5   0xFFFFFFE0UL
+#define GD_VERS_GE_6   0xFFFFFFC0UL
+#define GD_VERS_GE_7   0xFFFFFF80UL
+#define GD_VERS_GE_8   0xFFFFFF00UL
+#define GD_VERS_GE_9   0xFFFFFE00UL
+#define GD_VERS_GE_10  0xFFFFFC00UL
 
-#define GD_VERS_LE_0  0x00000001UL
-#define GD_VERS_LE_1  0x00000003UL
-#define GD_VERS_LE_2  0x00000007UL
-#define GD_VERS_LE_3  0x0000000fUL
-#define GD_VERS_LE_4  0x0000001fUL
-#define GD_VERS_LE_5  0x0000003fUL
-#define GD_VERS_LE_6  0x0000007fUL
-#define GD_VERS_LE_7  0x000000ffUL
-#define GD_VERS_LE_8  0x000001ffUL
-#define GD_VERS_LE_9  0x000003ffUL
+#define GD_VERS_LE_0   0x00000001UL
+#define GD_VERS_LE_1   0x00000003UL
+#define GD_VERS_LE_2   0x00000007UL
+#define GD_VERS_LE_3   0x0000000fUL
+#define GD_VERS_LE_4   0x0000001fUL
+#define GD_VERS_LE_5   0x0000003fUL
+#define GD_VERS_LE_6   0x0000007fUL
+#define GD_VERS_LE_7   0x000000ffUL
+#define GD_VERS_LE_8   0x000001ffUL
+#define GD_VERS_LE_9   0x000003ffUL
+#define GD_VERS_LE_10  0x000007ffUL
 
 uint64_t _GD_FindVersion(DIRFILE *D)
 {
@@ -1322,6 +1350,11 @@ uint64_t _GD_FindVersion(DIRFILE *D)
         case GD_STRING_ENTRY:
           D->av &= GD_VERS_GE_6;
           break;
+        case GD_SARRAY_ENTRY:
+        case GD_INDIR_ENTRY:
+        case GD_SINDIR_ENTRY:
+          D->av &= GD_VERS_GE_10;
+          break;
         case GD_BIT_ENTRY:
           if (D->entry[i]->EN(bit,numbits) > 1)
             D->av &= GD_VERS_GE_1;
@@ -1370,6 +1403,8 @@ uint64_t _GD_FindVersion(DIRFILE *D)
         case '.':
           if (D->entry[i]->flags & GD_EN_DOTTED)
             D->av &= GD_VERS_LE_5;
+          else
+            D->av &= GD_VERS_GE_10;
           break;
         case '&':
         case ';':
@@ -1420,13 +1455,7 @@ int gd_dirfile_standards(DIRFILE *D, int vers) gd_nothrow
 
   dtrace("%p, %i", D, vers);
 
-  _GD_ClearError(D);
-
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  GD_RETURN_ERR_IF_INVALID(D);
 
   if (~D->flags & GD_HAVE_VERSION)
     _GD_FindVersion(D);
@@ -1445,10 +1474,8 @@ int gd_dirfile_standards(DIRFILE *D, int vers) gd_nothrow
   if (vers < 0 || vers > GD_DIRFILE_STANDARDS_VERSION ||
       ~D->av & (1ULL << vers))
   {
-    _GD_SetError(D, GD_E_ARGUMENT, (D->av == 0) ? GD_E_ARG_NO_VERS :
+    GD_SET_RETURN_ERROR(D, GD_E_ARGUMENT, (D->av == 0) ? GD_E_ARG_NO_VERS :
         GD_E_ARG_BAD_VERS, NULL, vers, NULL);
-    dreturn("%i", -1);
-    return -1;
   }
 
   D->standards = vers;

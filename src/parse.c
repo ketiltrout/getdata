@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2015 D. V. Wiebe
+ * Copyright (C) 2005-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -769,7 +769,7 @@ static gd_entry_t *_GD_ParseLinterp(DIRFILE *restrict D,
 }
 
 /* _GD_ParseYoke: parse a field specified by two input fields only (MULTIPLY,
- * DIVIDE)
+ * DIVIDE, INDIR, SINDIR)
 */
 static gd_entry_t *_GD_ParseYoke(DIRFILE *restrict D, gd_entype_t type,
     const struct parser_state *restrict p,
@@ -1254,6 +1254,7 @@ gd_type_t _GD_ConstType(DIRFILE *D, gd_type_t type)
       return GD_COMPLEX128;
     case GD_NULL:
     case GD_UNKNOWN:
+    case GD_STRING:
       _GD_InternalError(D);
   }
 
@@ -1345,7 +1346,7 @@ static gd_entry_t *_GD_ParseConst(DIRFILE *restrict D,
 
 /* _GD_ParseArray: parse [CS]ARRAY entry in formats file.
 */
-static gd_entry_t *_GD_ParseArray(DIRFILE *restrict D,
+static gd_entry_t *_GD_ParseArray(DIRFILE *restrict D, int string,
     const struct parser_state *restrict p, char *in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t *restrict parent, int me, char **outstring,
     const char *tok_pos)
@@ -1357,10 +1358,11 @@ static gd_entry_t *_GD_ParseArray(DIRFILE *restrict D,
   void *data = NULL;
   gd_entry_t *E;
 
-  dtrace("%p, %p, %p, %i, %p, %i, %p, %p", D, p, in_cols, n_cols, parent, me,
-      outstring, tok_pos);
+  dtrace("%p, %i, %p, %p, %i, %p, %i, %p, %p", D, string, p, in_cols, n_cols,
+      parent, me, outstring, tok_pos);
 
-  if (n_cols < 4) {
+  /* CARRAYs have a data_type token which SARRAYs lack */
+  if (n_cols < 4 - string) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, p->file, p->line, NULL);
     dreturn("%p", NULL);
     return NULL;
@@ -1382,7 +1384,7 @@ static gd_entry_t *_GD_ParseArray(DIRFILE *restrict D,
   }
   memset(E->e, 0, sizeof(struct gd_private_entry_));
 
-  E->field_type = GD_CARRAY_ENTRY;
+  E->field_type = string ? GD_SARRAY_ENTRY : GD_CARRAY_ENTRY;
   E->flags |= GD_EN_CALC;
 
   if (_GD_SetField(D, p, E, parent, me, in_cols[0], 0)) {
@@ -1390,18 +1392,23 @@ static gd_entry_t *_GD_ParseArray(DIRFILE *restrict D,
     return NULL;
   }
 
-  E->EN(scalar,const_type) = _GD_RawType(in_cols[2], p->standards,
-      p->pedantic);
-  t = _GD_ConstType(D, E->EN(scalar,const_type));
-  first = 3;
-  s = GD_SIZE(t);
+  if (string) {
+    s = sizeof(const char *);
+    first = 2;
+  } else {
+    E->EN(scalar,const_type) = _GD_RawType(in_cols[2], p->standards,
+        p->pedantic);
+    t = _GD_ConstType(D, E->EN(scalar,const_type));
+    first = 3;
+    s = GD_SIZE(t);
 
-  if (GD_SIZE(E->EN(scalar,const_type)) == 0 || E->EN(raw,data_type) & 0x40) {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, p->file, p->line,
-        in_cols[2]);
-    _GD_FreeE(D, E, 1);
-    dreturn("%p", NULL);
-    return NULL;
+    if (GD_SIZE(E->EN(scalar,const_type)) == 0 || E->EN(raw,data_type) & 0x40) {
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, p->file, p->line,
+          in_cols[2]);
+      _GD_FreeE(D, E, 1);
+      dreturn("%p", NULL);
+      return NULL;
+    }
   }
 
   /* spool in the data */
@@ -1424,17 +1431,32 @@ static gd_entry_t *_GD_ParseArray(DIRFILE *restrict D,
       if (n == GD_SIZE_T_MAX)
         break;
 
-      ptr = _GD_SetScalar(D, p, in_cols[c], (char *)data + s * n++, t, me,
-          &offset, NULL);
+      if (string) {
+        ((char**)data)[n++] = _GD_Strdup(D, in_cols[c]);
 
-      if (ptr) {
-        free(ptr);
-        free(data);
-        _GD_FreeE(D, E, 1);
-        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, p->file, p->line,
-            in_cols[c]);
-        dreturn("%p", NULL);
-        return NULL;
+        if (D->error) {
+          size_t i;
+
+          for (i = 0; i < n; ++i)
+            free(((char**)data)[i]);
+          free(data);
+          _GD_FreeE(D, E, 1);
+          dreturn("%p", NULL);
+          return NULL;
+        }
+      } else {
+        ptr = _GD_SetScalar(D, p, in_cols[c], (char *)data + s * n++, t, me,
+            &offset, NULL);
+
+        if (ptr) {
+          free(ptr);
+          free(data);
+          _GD_FreeE(D, E, 1);
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, p->file, p->line,
+              in_cols[c]);
+          dreturn("%p", NULL);
+          return NULL;
+        }
       }
     }
 
@@ -1656,7 +1678,7 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D,
         break;
       case 'C':
         if (strcmp(in_cols[1], "CARRAY") == 0 && GD_PVERS_GE(*p, 8))
-          E = _GD_ParseArray(D, p, in_cols, n_cols, P, me, outstring,
+          E = _GD_ParseArray(D, 0, p, in_cols, n_cols, P, me, outstring,
               tok_pos);
         else if (strcmp(in_cols[1], "CONST") == 0 && GD_PVERS_GE(*p, 6))
           E = _GD_ParseConst(D, p, in_cols, n_cols, P, me);
@@ -1666,6 +1688,12 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D,
       case 'D':
         if (strcmp(in_cols[1], "DIVIDE") == 0 && GD_PVERS_GE(*p, 8))
           E = _GD_ParseYoke(D, GD_DIVIDE_ENTRY, p, in_cols, n_cols, P, me);
+        else
+          goto NO_MATCH;
+        break;
+      case 'I':
+        if (strcmp(in_cols[1], "INDIR") == 0 && GD_PVERS_GE(*p, 10))
+          E = _GD_ParseYoke(D, GD_INDIR_ENTRY, p, in_cols, n_cols, P, me);
         else
           goto NO_MATCH;
         break;
@@ -1727,6 +1755,11 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D,
       case 'S':
         if (strcmp(in_cols[1], "SBIT") == 0 && GD_PVERS_GE(*p, 7))
           E = _GD_ParseBit(D, 1, p, in_cols, n_cols, P, me);
+        else if (strcmp(in_cols[1], "SINDIR") == 0 && GD_PVERS_GE(*p, 2))
+          E = _GD_ParseYoke(D, GD_SINDIR_ENTRY, p, in_cols, n_cols, P, me);
+        else if (strcmp(in_cols[1], "SARRAY") == 0 && GD_PVERS_GE(*p, 10))
+          E = _GD_ParseArray(D, 1, p, in_cols, n_cols, P, me, outstring,
+              tok_pos);
         else if (strcmp(in_cols[1], "STRING") == 0 && GD_PVERS_GE(*p, 6))
           E = _GD_ParseString(D, p, in_cols, n_cols, P, me);
         else
@@ -2027,7 +2060,7 @@ int _GD_Tokenise(DIRFILE *restrict D, const struct parser_state *restrict p,
 }
 
 /* _GD_ParseAlias: set up an alias
-*/
+ */
 static void _GD_ParseAlias(DIRFILE *restrict D,
     const struct parser_state *restrict p, char **restrict name,
     const char *restrict target, int me)
@@ -2120,6 +2153,105 @@ static void _GD_ParseAlias(DIRFILE *restrict D,
   D->n_entries++;
 
   dreturnvoid();
+}
+
+static void _GD_ParseNamespace(DIRFILE *D, struct parser_state *restrict p,
+    const char *ns, int me)
+{
+  size_t len;
+  int i;
+  char *ptr;
+  const char *parent;
+
+  dtrace("%p, %p, \"%s\", %i", D, p, ns, me);
+
+  if (ns[0] == '\0') {
+    /* the NULL token is not a valid argument to /NAMESPACE */
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, p->file, p->line, ns);
+    dreturnvoid();
+    return;
+  } else if (ns[0] == '.') {
+    if (ns[1] == '\0') {
+      /* root space */
+      free(p->ns);
+      p->ns = NULL;
+      dreturnvoid();
+      return;
+    } else if (ns[1] == '.' && ns[2] == '\0') {
+      if (p->ns) {
+        /* parent space */
+        for (i = p->nsl - 1; i >= 0; --i)
+          if (p->ns[i] == '.') {
+            p->ns[i] = 0;
+            p->nsl = i;
+            dreturn("(nil) [\"%s\", %" PRIuSIZE "]", p->ns, p->nsl);
+            return;
+          }
+        
+        /* no parent--revert to root space */
+        free(p->ns);
+        p->ns = NULL;
+        dreturnvoid();
+        return;
+      } else { 
+        /* root space's parent is root space */
+        dreturnvoid();
+        return;
+      }
+    } else if (ns[1] == '.') {
+      /* too many leading dots */
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, p->file, p->line, ns);
+      dreturnvoid();
+      return;
+    } else {
+      /* an absolute namespace.  Strip leading dot,
+       * return to root space and continue as normal */
+      ns++;
+      free(p->ns);
+      p->ns = NULL;
+    }
+  }
+
+  /* check new namespace name */
+  if (_GD_ValidateField(ns, p->standards, p->pedantic, GD_VF_NS, NULL))
+  {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, p->file, p->line, ns);
+    dreturnvoid();
+    return;
+  }
+
+  /* honour fragment root space */
+  if (p->ns == NULL)
+    parent = D->fragment[me].ns;
+  else
+    parent = p->ns;
+
+  if (parent == NULL) {
+    /* new namespace */
+    len = strlen(ns);
+    ptr = _GD_Strdup(D, ns);
+  } else {
+    /* append namespace */
+    len = strlen(parent) + strlen(ns) + 1;
+    ptr = _GD_Malloc(D, len + 1);
+    if (ptr)
+      sprintf(ptr, "%s.%s", parent, ns);
+  }
+
+  if (ptr) {
+    free(p->ns);
+    p->ns = ptr;
+    p->nsl = len;
+
+    /* strip trailing dot */
+    if (p->ns[len] == '.') {
+      p->ns[len] = 0;
+      p->nsl--;
+    }
+
+  }
+
+  dreturn("(nil) [\"%s\", %" PRIuSIZE "]", p->ns, p->nsl);
 }
 
 /* _GD_ParseDirective: Actually parse a single format file line.
@@ -2301,6 +2433,12 @@ static int _GD_ParseDirective(DIRFILE *D, struct parser_state *restrict p,
         else
           _GD_ParseFieldSpec(D, p, n_cols - 2, in_cols + 2, E, me, 0, 1,
               outstring, tok_pos);
+      }
+      break;
+    case 'N':
+      if (strcmp(ptr, "NAMESPACE") == 0 && GD_PVERS_GE(*p, 10)) {
+        matched = 1;
+        _GD_ParseNamespace(D, p, in_cols[1], me);
       }
       break;
     case 'P':
@@ -2570,13 +2708,7 @@ char *gd_strtok(DIRFILE *D, const char *string) gd_nothrow
 
   dtrace("%p, \"%s\"", D, string);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   if (string) {
     free(D->tok_base);

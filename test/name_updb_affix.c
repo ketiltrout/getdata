@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -61,7 +61,7 @@ int main(void)
 
   r1 = gd_rename(D, "AphaseZ", "zata", GD_REN_UPDB);
   e3 = gd_error(D);
-  CHECKI(r1, -1);
+  CHECKI(r1, GD_E_BAD_CODE);
   CHECKI(e3, GD_E_BAD_CODE);
 
   r2 = gd_rename(D, "AphaseZ", "zata", GD_REN_UPDB | GD_REN_FORCE);

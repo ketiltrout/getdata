@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2015, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -34,7 +34,7 @@ int main(void)
   e1 = gd_error(D);
 
   CHECKI(e1, GD_E_BAD_CODE);
-  CHECKI(h1, -1);
+  CHECKI(h1, GD_E_BAD_CODE);
 
   gd_discard(D);
   unlink(format);

@@ -66,10 +66,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     gdmx_err(D, 0);
   }
 
-  if (type == GD_NULL) {
+  if (gd_entry_type(D, field_code) == GD_SINDIR_ENTRY) {
+    const char **data = mxMalloc(sizeof(*data) * nsamp);
+
+    nsamp = gd_getdata64(D, field_code, (gd_off64_t)first_frame,
+        (gd_off64_t)first_samp, 0, nsamp, GD_STRING, data);
+
+    mxFree(field_code);
+    gdmx_err(D, 0);
+
+    plhs[0] = gdmx_from_nstring_list(data, nsamp);
+    mxFree(data);
+  } else if (type == GD_NULL) {
     nsamp = gd_getdata64(D, field_code, (gd_off64_t)first_frame,
         (gd_off64_t)first_samp, 0, nsamp, GD_NULL, NULL);
 
+    mxFree(field_code);
     gdmx_err(D, 0);
 
     plhs[0] = gdmx_from_int64(nsamp);
@@ -81,7 +93,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
     mxFree(field_code);
     gdmx_err(D, 0);
-
 
     gdmx_fix_vector(plhs[0], type, nsamp, data);
   }

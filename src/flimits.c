@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2015 D. V. Wiebe
+/* Copyright (C) 2008-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -96,33 +96,15 @@ int gd_alter_frameoffset64(DIRFILE* D, off64_t offset, int fragment, int move)
 
   dtrace("%p, %" PRId64 ", %i, %i", D, (int64_t)offset, fragment, move);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  GD_RETURN_ERR_IF_INVALID(D);
 
-  if ((D->flags & GD_ACCMODE) != GD_RDWR) {
+  if ((D->flags & GD_ACCMODE) != GD_RDWR)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment) {
+  else if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment)
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (offset < 0) {
+  else if (offset < 0)
     _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  _GD_ClearError(D);
-
-  if (fragment == GD_ALL_FRAGMENTS) {
+  else if (fragment == GD_ALL_FRAGMENTS) {
     for (i = 0; i < D->n_fragment; ++i) {
       _GD_ShiftFragment(D, offset, i, move);
 
@@ -132,27 +114,17 @@ int gd_alter_frameoffset64(DIRFILE* D, off64_t offset, int fragment, int move)
   } else
     _GD_ShiftFragment(D, offset, fragment, move);
 
-  dreturn("%i", (D->error) ? -1 : 0);
-  return (D->error) ? -1 : 0;
+  GD_RETURN_ERROR(D);
 }
 
 off64_t gd_frameoffset64(DIRFILE* D, int fragment)
 {
   dtrace("%p, %i", D, fragment);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  GD_RETURN_ERR_IF_INVALID(D);
 
-  if (fragment < 0 || fragment >= D->n_fragment) {
-    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  _GD_ClearError(D);
+  if (fragment < 0 || fragment >= D->n_fragment)
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
 
   dreturn("%" PRId64, (int64_t)D->fragment[fragment].frame_offset);
   return D->fragment[fragment].frame_offset;
@@ -179,10 +151,9 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
   dtrace("%p, %p, \"%s\", %p", D, E, parent, is_index);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
-    _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
     D->recurse_level--;
-    dreturn("%i ?", -1);
-    return -1;
+    GD_SET_RETURN_ERROR(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0,
+        E->field);
   }
 
   *is_index = 0;
@@ -215,6 +186,8 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
     case GD_SBIT_ENTRY:
     case GD_POLYNOM_ENTRY:
     case GD_RECIP_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
         break;
 
@@ -332,6 +305,7 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
       break;
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
       if (parent)
         _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_FORMAT, parent, 0, E->field);
@@ -348,6 +322,9 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
 
   D->recurse_level--;
 
+  if (D->error) 
+    GD_RETURN_ERROR(D);
+
   dreturn("%" PRId64 " %i", (int64_t)ns, *is_index);
   return ns;
 }
@@ -360,25 +337,18 @@ off64_t gd_eof64(DIRFILE* D, const char *field_code)
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  _GD_ClearError(D);
-
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  GD_RETURN_ERR_IF_INVALID(D);
 
   entry = _GD_FindEntry(D, field_code);
 
-  if (D->error) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (D->error)
+    GD_RETURN_ERROR(D);
 
   ns = _GD_GetEOF(D, entry, NULL, &is_index);
 
-  if (is_index)
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+  if (!D->error && is_index)
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0,
+        field_code);
 
   dreturn("%" PRId64, (int64_t)ns);
   return ns;
@@ -402,10 +372,9 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
   dtrace("%p, %p, \"%s\", %p, %p", D, E, parent, spf, ds);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
-    _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
     D->recurse_level--;
-    dreturn("%i", -1);
-    return -1;
+    GD_SET_RETURN_ERROR(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0,
+        E->field);
   }
 
   switch (E->field_type) {
@@ -419,6 +388,8 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
     case GD_LINTERP_ENTRY:
     case GD_POLYNOM_ENTRY:
     case GD_RECIP_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
       if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
         break;
 
@@ -520,6 +491,7 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
       break;
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_STRING_ENTRY:
       if (parent)
         _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_FORMAT, parent, 0, E->field);
@@ -534,6 +506,9 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
 
   D->recurse_level--;
 
+  if (D->error)
+    GD_RETURN_ERROR(D);
+
   dreturn("%" PRIu64 " %u %" PRId64, bof, *spf, *ds);
   return bof;
 }
@@ -547,24 +522,16 @@ off64_t gd_bof64(DIRFILE* D, const char *field_code) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  _GD_ClearError(D);
-
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  GD_RETURN_ERR_IF_INVALID(D);
 
   entry = _GD_FindEntry(D, field_code);
 
-  if (D->error) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (D->error)
+    GD_RETURN_ERROR(D);
 
   bof = _GD_GetBOF(D, entry, NULL, &spf, &ds);
 
-  if (bof != -1)
+  if (bof >= 0) /* i.e. not an error code */
     bof = bof * spf + ds;
 
   dreturn("%" PRId64, (int64_t)bof);

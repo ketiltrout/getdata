@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2010, 2012, 2014, 2015 D. V. Wiebe
+/* Copyright (C) 2007-2010, 2012, 2014-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -58,13 +58,13 @@ int main(int argc, char* argv[])
 
   if (argc < 2 || !strcmp(argv[1], "--version") || !strcmp(argv[1], "--help")) {
     printf("Usage:\n"
-        "  checkdirfile DIRFILE                 Check the DirFile database "
+        "  checkdirfile DIRFILE                 Check the Dirfile database "
         "DIRFILE for\n"
         "                                         errors.\n"
         "  checkdirfile [ --help | --version ]  Print this message and exit.\n"
         "\n\n"
         "This program is part of %s.\n"
-        "Copyright (C) 2008-2010, 2012  D. V. Wiebe\n"
+        "Copyright (C) 2008-2010, 2012, 2014-2016  D. V. Wiebe\n"
         "Please send reports of bugs and other communication to:\n\n  %s\n\n"
         "This program comes with NO WARRANTY, not even for MERCHANTABILITY "
         "or FITNESS\n"
@@ -99,7 +99,8 @@ int main(int argc, char* argv[])
   }
 
   if (ne > 0)
-    printf("  Found %i line%s with syntax errors.\n", ne, (ne == 1) ? "" : "s");
+    printf("  Found %i %s with syntax errors.\n", ne,
+        (ne == 1) ? "line" : "lines");
   else {
     int vers[GD_DIRFILE_STANDARDS_VERSION + 1];
     int nvers = 0;
@@ -170,8 +171,8 @@ int main(int argc, char* argv[])
   /* Check the validity of each entry defined */
   ne = 0;
   puts("\nChecking fields...");
-  flist = gd_entry_list(dirfile, NULL, 0, GD_ENTRIES_HIDDEN |
-      GD_ENTRIES_NOALIAS);
+  flist = gd_entry_list(dirfile, NULL, GD_ALL_FRAGMENTS, 0,
+      GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   for (i = 0; flist[i] != NULL; ++i) {
     if (gd_validate(dirfile, flist[i])) {
       printf("  getdata error checking %s: %s\n", flist[i],
@@ -179,8 +180,8 @@ int main(int argc, char* argv[])
       ne++;
     }
     nfields++;
-    mflist = gd_entry_list(dirfile, flist[i], 0, GD_ENTRIES_HIDDEN | 
-        GD_ENTRIES_NOALIAS);
+    mflist = gd_entry_list(dirfile, flist[i], GD_ALL_FRAGMENTS, 0,
+        GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
     for (j = 0; mflist[j] != NULL; ++j) {
       char code[GD_MAX_LINE_LENGTH];
       snprintf(code, GD_MAX_LINE_LENGTH, "%s/%s", flist[i], mflist[j]);
@@ -194,8 +195,8 @@ int main(int argc, char* argv[])
 
     /* ferret out dangling meta ALIASes by first collecting a list
      * of all of them, and then trying to use them as field codes */
-    mflist = gd_entry_list(dirfile, flist[i], GD_ALIAS_ENTRIES,
-        GD_ENTRIES_HIDDEN);
+    mflist = gd_entry_list(dirfile, flist[i], GD_ALL_FRAGMENTS,
+        GD_ALIAS_ENTRIES, GD_ENTRIES_HIDDEN);
     for (j = 0; mflist[j] != NULL; ++j) {
       char code[GD_MAX_LINE_LENGTH];
       snprintf(code, GD_MAX_LINE_LENGTH, "%s/%s", flist[i], mflist[j]);
@@ -215,7 +216,8 @@ int main(int argc, char* argv[])
 
   /* ferret out dangling ALIASes by first collecting a list
    * of all of them, and then trying to use them as field codes */
-  flist = gd_entry_list(dirfile, NULL, GD_ALIAS_ENTRIES, GD_ENTRIES_HIDDEN);
+  flist = gd_entry_list(dirfile, NULL, GD_ALL_FRAGMENTS, GD_ALIAS_ENTRIES,
+      GD_ENTRIES_HIDDEN);
   for (i = 0; flist[i] != NULL; ++i) {
     if (gd_entry_type(dirfile, flist[i]) == GD_NO_ENTRY) {
       if (gd_error(dirfile) == GD_E_BAD_CODE) {

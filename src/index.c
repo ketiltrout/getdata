@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2013, 2015 D. V. Wiebe
+/* Copyright (C) 2009-2013, 2015, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -216,13 +216,7 @@ double gd_framenum_subset64(DIRFILE* D, const char* field_code_in,
   dtrace("%p, \"%s\", %g, %" PRId64 ", %" PRId64, D, field_code_in, value,
       (int64_t)field_start, (int64_t)field_end);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%.15g", frame);
-    return frame;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_IF_INVALID(D, "%.15g", frame);
 
   entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
       1);

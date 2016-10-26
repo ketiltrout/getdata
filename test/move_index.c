@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,16 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test move */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
 
 int main(void)
 {
@@ -54,18 +45,21 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
   ret = gd_move(D, "data", 2, 0);
   error = gd_error(D);
+
+  CHECKI(ret, GD_E_BAD_INDEX);
+  CHECKI(error, GD_E_BAD_INDEX);
+
   ge_ret =  gd_entry(D, "data", &E);
+
+  CHECKI(ge_ret, 0);
+  CHECKI(E.fragment_index, 0);
+  gd_free_entry_strings(&E);
+
   gd_discard(D);
 
   unlink(format1);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(ret, -1);
-  CHECKI(error, GD_E_BAD_INDEX);
-  CHECKI(ge_ret, 0);
-  CHECKI(E.fragment_index, 0);
-  gd_free_entry_strings(&E);
 
   return r;
 }

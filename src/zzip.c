@@ -77,7 +77,7 @@ static struct gd_zzipdata *_GD_ZzipDoOpen(int dirfd, struct gd_raw_file_* file)
   dtrace("%i, %p", dirfd, file);
 
   /* open the zip file.  */
-  if ((fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY | O_BINARY)) < 0) {
+  if ((fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666)) < 0) {
     file->error = -1;
     dreturn("%p", NULL);
     return NULL;

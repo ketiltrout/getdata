@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2014 D. V. Wiebe
+/* Copyright (C) 2009-2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -125,8 +125,17 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
     case GD_CARRAY_ENTRY:
       type = _GD_ConstType(D, E->EN(scalar,const_type));
       break;
+    case GD_INDIR_ENTRY:
+      if (_GD_BadInput(D, E, 1, GD_CARRAY_ENTRY, 1))
+        break;
+
+      type = _GD_NativeType(D, E->e->entry[1], E->e->repr[1]);
+
+      break;
     case GD_STRING_ENTRY:
-      type = GD_NULL;
+    case GD_SARRAY_ENTRY:
+    case GD_SINDIR_ENTRY:
+      type = GD_STRING;
       break;
     case GD_NO_ENTRY:
     case GD_ALIAS_ENTRY:
@@ -160,13 +169,7 @@ gd_type_t gd_native_type(DIRFILE* D, const char* field_code_in) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code_in);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("0x%x", GD_UNKNOWN);
-    return GD_UNKNOWN;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_IF_INVALID(D, "0x%X", GD_UNKNOWN);
 
   entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
       1);

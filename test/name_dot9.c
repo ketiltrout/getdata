@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -19,14 +19,6 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
 
 int main(void)
 {
@@ -49,7 +41,7 @@ int main(void)
   gd_dirfile_standards(D, 9);
   r1 = gd_rename(D, "data", "d.ata", 0);
   e1 = gd_error(D);
-  CHECKI(r1,-1);
+  CHECKI(r1,GD_E_BAD_CODE);
   CHECKI(e1,GD_E_BAD_CODE);
 
   gd_discard(D);

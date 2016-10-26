@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2015 D. V. Wiebe
+/* Copyright (C) 2008-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,7 +21,7 @@
 #include "internal.h"
 
 /* zero length lists */
-static const char* zero_list[1] = { NULL };
+static const char *zero_list[1] = { NULL };
 static gd_carray_t zero_carrays[1] = { {0, NULL} };
 
 gd_static_inline_ int _GD_EntryIndex(unsigned int t)
@@ -69,27 +69,36 @@ gd_static_inline_ int _GD_EntryIndex(unsigned int t)
     case GD_MPLEX_ENTRY:
       i = 12;
       break;
-    case GD_CONST_ENTRY:
+    case GD_INDIR_ENTRY:
       i = 13;
       break;
-    case GD_CARRAY_ENTRY:
+    case GD_SINDIR_ENTRY:
       i = 14;
       break;
-    case GD_STRING_ENTRY:
+    case GD_CONST_ENTRY:
       i = 15;
+      break;
+    case GD_CARRAY_ENTRY:
+      i = 16;
+      break;
+    case GD_STRING_ENTRY:
+      i = 17;
+      break;
+    case GD_SARRAY_ENTRY:
+      i = 18;
       break;
 
     case GD_VECTOR_ENTRIES:
-      i = 16;
+      i = 19;
       break;
     case GD_SCALAR_ENTRIES:
-      i = 17;
+      i = 20;
       break;
     case GD_ALIAS_ENTRY:
-      i = 18;
+      i = 21;
       break;
     case GD_ALL_ENTRIES:
-      i = 19;
+      i = 22;
       break;
     default:
       i = -1;
@@ -102,10 +111,10 @@ gd_static_inline_ int _GD_EntryIndex(unsigned int t)
 
 /* returns true if E a member of the given list */
 int _GD_ListEntry(const gd_entry_t *E, int meta_ok, int hidden_ok, int noalias,
-    int special, gd_entype_t type)
+    int special, int fragment, gd_entype_t type)
 {
-  dtrace("%p{%s}, %i, %i, %i, %i, 0x%X", E, E->field, meta_ok, hidden_ok,
-      noalias, special, type);
+  dtrace("%p{%s}, %i, %i, %i, %i, %i, 0x%X", E, E->field, meta_ok, hidden_ok,
+      noalias, special, fragment, type);
 
   /* check hidden */
   if (!hidden_ok && (E->flags & GD_EN_HIDDEN)) {
@@ -116,6 +125,12 @@ int _GD_ListEntry(const gd_entry_t *E, int meta_ok, int hidden_ok, int noalias,
   /* check meta */
   if (!meta_ok && E->e->n_meta == -1) {
     dreturn("%i (meta)", 0);
+    return 0;
+  }
+
+  /* check fragment */
+  if (fragment != GD_ALL_FRAGMENTS && E->fragment_index != fragment) {
+    dreturn("%i (fragment)", 0);
     return 0;
   }
 
@@ -135,7 +150,8 @@ int _GD_ListEntry(const gd_entry_t *E, int meta_ok, int hidden_ok, int noalias,
     }
       
     if (E->e->entry[0])
-      ret = _GD_ListEntry(E->e->entry[0], 1, 1, 0, special, type);
+      ret = _GD_ListEntry(E->e->entry[0], 1, 1, 0, special, GD_ALL_FRAGMENTS,
+          type);
     dreturn("%i", ret);
     return ret;
   }
@@ -162,7 +178,7 @@ int _GD_ListEntry(const gd_entry_t *E, int meta_ok, int hidden_ok, int noalias,
 }
 
 static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
-    size_t offs, int type, unsigned int flags) gd_nothrow
+    size_t offs, int fragment, int type, unsigned int flags) gd_nothrow
 {
   char** el;
   int i, index;
@@ -177,7 +193,8 @@ static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
   struct gd_flist_ *l;
   int nentries;
 
-  dtrace("%p, %p, %" PRIuSIZE ", 0x%X, 0x%X", D, p, offs, type, flags);
+  dtrace("%p, %p, %" PRIuSIZE ", %i, 0x%X, 0x%X", D, p, offs, fragment, type,
+      flags);
 
   index = _GD_EntryIndex(type);
   if (index < 0) {
@@ -222,8 +239,11 @@ static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
       el = ptr;
     }
 
-    if (_GD_ListEntry(entry[i], p ? 1 : 0, hidden, noalias, special, ctype))
+    if (_GD_ListEntry(entry[i], p ? 1 : 0, hidden, noalias, special, fragment,
+          ctype))
+    {
       el[n++] = entry[i]->field + offs;
+    }
   }
 
   if (n == 0) {
@@ -243,20 +263,16 @@ static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
   return (const char **)el;
 }
 
-const char **gd_entry_list(DIRFILE* D, const char *parent, int type,
-    unsigned int flags) gd_nothrow
+const char **gd_entry_list(DIRFILE* D, const char *parent, int fragment,
+    int type, unsigned int flags) gd_nothrow
 {
   const char **el;
   size_t offs = 0;
   struct gd_private_entry_ *p = NULL;
 
-  dtrace("%p, \"%s\", %i, %u", D, parent, type, flags);
+  dtrace("%p, \"%s\", %i, %i, %u", D, parent, fragment, type, flags);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%u", 0);
-    return 0;
-  }
+  GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   if (parent) {
     gd_entry_t *P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
@@ -271,9 +287,7 @@ const char **gd_entry_list(DIRFILE* D, const char *parent, int type,
     offs = strlen(P->field) + 1;
   }
 
-  _GD_ClearError(D);
-
-  el = _GD_EntryList(D, p, offs, type, flags);
+  el = _GD_EntryList(D, p, offs, fragment, type, flags);
   dreturn("%p", el);
   return el;
 }
@@ -292,17 +306,13 @@ static void *_GD_Constants(DIRFILE* D, const char* parent,
 
   dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  } else if (return_type == GD_NULL) {
+  GD_RETURN_IF_INVALID(D, "%p", NULL);
+
+  if (return_type == GD_NULL) {
     _GD_SetError(D, GD_E_BAD_TYPE, GD_E_TYPE_NULL, NULL, return_type, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
-
-  _GD_ClearError(D);
 
   if (parent) {
     P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
@@ -344,7 +354,9 @@ static void *_GD_Constants(DIRFILE* D, const char* parent,
       fl = ptr;
     }
 
-    if (_GD_ListEntry(entry[i], e ? 1 : 0, 0, 0, 0, GD_CONST_ENTRY)) {
+    if (_GD_ListEntry(entry[i], e ? 1 : 0, 0, 0, 0, GD_ALL_FRAGMENTS,
+          GD_CONST_ENTRY))
+    {
       gd_entry_t *E = entry[i];
 
       if (E->field_type == GD_ALIAS_ENTRY)
@@ -384,13 +396,7 @@ static gd_carray_t *_GD_Carrays(DIRFILE* D, const char* parent,
 
   dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   if (parent) {
     P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
@@ -432,7 +438,9 @@ static gd_carray_t *_GD_Carrays(DIRFILE* D, const char* parent,
       fl = ptr;
     }
 
-    if (_GD_ListEntry(entry[i], e ? 1 : 0, 0, 0, 0, GD_CARRAY_ENTRY)) {
+    if (_GD_ListEntry(entry[i], e ? 1 : 0, 0, 0, 0, GD_ALL_FRAGMENTS,
+          GD_CARRAY_ENTRY))
+    {
       gd_entry_t *E = entry[i];
 
       if (E->field_type == GD_ALIAS_ENTRY)
@@ -482,13 +490,7 @@ static const char **_GD_Strings(DIRFILE* D, const char* parent) gd_nothrow
 
   dtrace("%p, \"%s\"", D, parent);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   if (parent) {
     P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
@@ -528,7 +530,8 @@ static const char **_GD_Strings(DIRFILE* D, const char* parent) gd_nothrow
       fl = ptr;
     }
 
-    if (_GD_ListEntry(entry[i], e ? 1 : 0, 0, 0, 0, GD_STRING_ENTRY))
+    if (_GD_ListEntry(entry[i], e ? 1 : 0, 0, 0, 0, GD_ALL_FRAGMENTS,
+          GD_STRING_ENTRY))
     {
       if (entry[i]->field_type == GD_ALIAS_ENTRY)
         fl[n++] = entry[i]->e->entry[0]->e->u.string;
@@ -550,6 +553,93 @@ static const char **_GD_Strings(DIRFILE* D, const char* parent) gd_nothrow
 
   dreturn("%p", fl);
   return fl;
+}
+
+static const char ***_GD_SArrays(DIRFILE* D, const char* parent) gd_nothrow
+{
+  int i, nentries;
+  const char ***fl;
+  gd_entry_t *P;
+  gd_entry_t **entry;
+  const char ****list;
+  struct gd_private_entry_ *e = NULL;
+  size_t n, len = 10;
+
+  dtrace("%p, \"%s\"", D, parent);
+
+  GD_RETURN_IF_INVALID(D, "%p", NULL);
+
+  if (parent) {
+    P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+
+    if (P == NULL || P->e->n_meta == -1) {
+      _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
+          NULL, 0, parent);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    e = P->e;
+    nentries = e->n_meta;
+    entry = e->p.meta_entry;
+    list = &e->fl.sarray_value_list;
+  } else {
+    nentries = D->n_entries;
+    entry = D->entry;
+    list = &D->fl.sarray_value_list;
+  }
+
+  fl = _GD_Malloc(D, sizeof(*fl) * len);
+
+  if (fl == NULL) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  for (i = n = 0; i < nentries; ++i) {
+    if (n == len) {
+      void *ptr = _GD_Realloc(D, fl, sizeof(*fl) * (len *= 2));
+      if (ptr == NULL)
+        goto SARRAYS_ERROR;
+      fl = ptr;
+    }
+
+    if (_GD_ListEntry(entry[i], e ? 1 : 0, 0, 0, 0, GD_ALL_FRAGMENTS,
+          GD_SARRAY_ENTRY))
+    {
+      gd_entry_t *E = entry[i];
+      if (E->field_type == GD_ALIAS_ENTRY)
+        E = E->e->entry[0];
+
+      /* We do it this way so we can append a NULL */
+      fl[n] = _GD_Malloc(D, sizeof(**fl) * (E->EN(scalar,array_len) + 1));
+      if (fl[n] == NULL)
+        goto SARRAYS_ERROR;
+
+      memcpy(fl[n], E->e->u.scalar.d, sizeof(char*) * E->EN(scalar,array_len));
+      fl[n++][E->EN(scalar,array_len)] = NULL;
+    }
+  }
+  fl[n] = NULL;
+
+  if (n == 0) {
+    free(fl);
+    dreturn("%p", zero_list);
+    return (const char***)zero_list;
+  }
+
+  free(*list);
+  *list = fl;
+
+  dreturn("%p", fl);
+  return fl;
+
+SARRAYS_ERROR:
+  for (i = 0; i < (int)n; ++i)
+    free(fl[i]);
+  free(fl);
+  dreturn("%p", NULL);
+  return NULL;
 }
 
 const void *gd_constants(DIRFILE* D, gd_type_t return_type) gd_nothrow
@@ -588,12 +678,24 @@ const char **gd_strings(DIRFILE* D) gd_nothrow
   return ret;
 }
 
+const char ***gd_sarrays(DIRFILE *D) gd_nothrow
+{
+  const char ***ret;
+
+  dtrace("%p", D);
+
+  ret = _GD_SArrays(D, NULL);
+
+  dreturn("%p", ret);
+  return ret;
+}
+
 const char **gd_field_list_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
 {
   const char** el;
   dtrace("%p, 0x%X", D, type);
 
-  el = gd_entry_list(D, NULL, type, 0);
+  el = gd_entry_list(D, NULL, GD_ALL_FRAGMENTS, type, 0);
   dreturn("%p", el);
   return el;
 }
@@ -603,7 +705,7 @@ const char **gd_vector_list(DIRFILE* D) gd_nothrow
   const char **el;
   dtrace("%p", D);
 
-  el = gd_entry_list(D, NULL, GD_VECTOR_ENTRIES, 0);
+  el = gd_entry_list(D, NULL, GD_ALL_FRAGMENTS, GD_VECTOR_ENTRIES, 0);
   dreturn("%p", el);
   return el;
 }
@@ -614,7 +716,7 @@ const char **gd_field_list(DIRFILE* D) gd_nothrow
 
   dtrace("%p", D);
 
-  el = gd_entry_list(D, NULL, GD_ALL_ENTRIES, 0);
+  el = gd_entry_list(D, NULL, GD_ALL_FRAGMENTS, GD_ALL_ENTRIES, 0);
   dreturn("%p", el);
   return el;
 }
@@ -657,13 +759,25 @@ const char **gd_mstrings(DIRFILE* D, const char* parent) gd_nothrow
   return ret;
 }
 
+const char ***gd_msarrays(DIRFILE* D, const char* parent) gd_nothrow
+{
+  const char ***ret;
+
+  dtrace("%p, \"%s\"", D, parent);
+
+  ret = _GD_SArrays(D, parent);
+
+  dreturn("%p", ret);
+  return ret;
+}
+
 const char **gd_mfield_list_by_type(DIRFILE* D, const char* parent,
     gd_entype_t type) gd_nothrow
 {
   const char **el;
   dtrace("%p, \"%s\", 0x%X", D, parent, type);
 
-  el = gd_entry_list(D, parent, type, 0);
+  el = gd_entry_list(D, parent, GD_ALL_FRAGMENTS, type, 0);
   dreturn("%p", el);
   return el;
 }
@@ -673,7 +787,7 @@ const char **gd_mvector_list(DIRFILE* D, const char* parent) gd_nothrow
   const char **el;
   dtrace("%p, \"%s\"", D, parent);
 
-  el = gd_entry_list(D, parent, GD_VECTOR_ENTRIES, 0);
+  el = gd_entry_list(D, parent, GD_ALL_FRAGMENTS, GD_VECTOR_ENTRIES, 0);
   dreturn("%p", el);
   return el;
 }
@@ -683,7 +797,7 @@ const char **gd_mfield_list(DIRFILE* D, const char* parent) gd_nothrow
   const char **el;
   dtrace("%p, \"%s\"", D, parent);
 
-  el = gd_entry_list(D, parent, GD_ALL_ENTRIES, 0);
+  el = gd_entry_list(D, parent, GD_ALL_FRAGMENTS, GD_ALL_ENTRIES, 0);
   dreturn("%p", el);
   return el;
 }

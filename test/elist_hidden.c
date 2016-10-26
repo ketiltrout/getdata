@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -41,7 +41,8 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  entry_list = gd_entry_list(D, NULL, GD_ALL_ENTRIES, GD_ENTRIES_HIDDEN);
+  entry_list = gd_entry_list(D, NULL, GD_ALL_FRAGMENTS, GD_ALL_ENTRIES,
+      GD_ENTRIES_HIDDEN);
 
   error = gd_error(D);
 

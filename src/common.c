@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2015 D. V. Wiebe
+ * Copyright (C) 2005-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -186,24 +186,14 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n)
   void* ptr = NULL;
 
   dtrace("%p, 0x%x, %" PRIuSIZE, D, type, n);
-  if (n == 0) {
+  if (n == 0)
     _GD_InternalError(D);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  if (type == GD_NULL) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  if (GD_SIZE(type) == 0) {
+  else if (type == GD_NULL)
+    ; /* just return the NULL */
+  else if (GD_SIZE(type) == 0)
     _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  ptr = _GD_Malloc(D, n * GD_SIZE(type));
+  else
+    ptr = _GD_Malloc(D, n * GD_SIZE(type));
 
   dreturn("%p", ptr);
   return ptr;
@@ -839,6 +829,9 @@ int _GD_GetRepr(DIRFILE *restrict D, const char *restrict field_code_in,
         break;
       case 'a':
         repr = GD_REPR_ARG;
+        break;
+      case 'z':
+        repr = GD_REPR_NONE;
         break;
       default:
         if (err)

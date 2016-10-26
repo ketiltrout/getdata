@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2015 D. V. Wiebe
+ * Copyright (C) 2005-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1795,6 +1795,99 @@ static size_t _GD_DoConst(DIRFILE *restrict D, const gd_entry_t *restrict E,
   return len;
 }
 
+/* simple */
+static void _GD_IndirData(char *restrict cbuf, gd_type_t ctype,
+        const int64_t *restrict ibuf, size_t n, const void *carray, size_t len)
+{
+  size_t i;
+  const int size = GD_SIZE(ctype);
+
+  /* INDIR can only address the first 2**63 entries in a CARRAY */
+  int64_t ilen =
+#if SIZEOF_SIZE_T == 8
+    (len > GD_INT64_MAX) ? GD_INT64_MAX :
+#endif
+    len;
+
+  dtrace("%p, 0x%X, %p, %" PRIuSIZE ", %p, %" PRIuSIZE, cbuf, ctype, ibuf, n,
+      carray, len);
+
+  for (i = 0; i < n; ++i)
+    if (ibuf[i] < 0 || ibuf[i] >= ilen)
+      _GD_FillZero(cbuf + size * i, ctype, 1);
+    else
+      memcpy(cbuf + size * i, carray + size * ibuf[i], size);
+
+  dreturnvoid();
+}
+
+/* _GD_DoIndir: Read from an indir. */
+static size_t _GD_DoIndir(DIRFILE *restrict D, const gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t return_type,
+    void *restrict data_out)
+{
+  size_t n_read;
+  int64_t *ibuf = NULL;
+  void *cbuf = NULL;
+  gd_type_t ctype;
+
+  dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
+      (int64_t)first_samp, num_samp, return_type, data_out);
+
+  /* Check input fields */
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+  
+  if (_GD_BadInput(D, E, 1, GD_CARRAY_ENTRY, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+  
+  /* index buffer */
+  ibuf = _GD_Alloc(D, GD_INT64, num_samp);
+  if (D->error) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* read the index field and record the number of samples returned */
+  n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp,
+      GD_INT64, ibuf);
+  
+  if (D->error || n_read == 0) {
+    free(ibuf);
+    dreturn("%i", 0);
+    return 0;
+  }
+  
+  /* the intermediate buffer: it has the load type of the carray */
+  ctype = _GD_ConstType(D, E->e->entry[1]->EN(scalar,const_type));
+  cbuf = _GD_Alloc(D, ctype, n_read);
+  if (D->error) {
+    free(ibuf);
+    dreturn("%i", 0);
+    return 0;
+  }
+  
+  _GD_IndirData(cbuf, GD_SIZE(ctype), ibuf, n_read,
+      E->e->entry[1]->e->u.scalar.d, E->e->entry[1]->EN(scalar,array_len));
+  
+  free(ibuf);
+  
+  /* type convert into output buffer */
+  _GD_ConvertType(D, cbuf, ctype, data_out, return_type, n_read);
+  
+  free(cbuf);
+  
+  if (D->error)
+    n_read = 0;
+  
+  dreturn("%" PRIuSIZE, n_read);
+  return n_read;
+}
+
 /* _GD_DoField: Locate the field in the database and read it.
 */
 size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
@@ -1928,7 +2021,12 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
     case GD_CARRAY_ENTRY:
       n_read = _GD_DoConst(D, E, first_samp, num_samp, return_type, data_out);
       break;
+    case GD_INDIR_ENTRY:
+      n_read = _GD_DoIndir(D, E, first_samp, num_samp, return_type, data_out);
+      break;
     case GD_STRING_ENTRY:
+    case GD_SARRAY_ENTRY:
+    case GD_SINDIR_ENTRY:
     case GD_ALIAS_ENTRY:
     case GD_NO_ENTRY:
       /* Can't get here */
@@ -1949,6 +2047,78 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
   return n_read;
 }
 
+/* this returns string vector data; it is called for SINDIRs instead of making
+ * a call to DoField */
+static size_t _GD_DoSindir(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
+    size_t num_samp, gd_type_t return_type, const char **data_out)
+{
+  size_t i, n_read = 0;
+  int64_t *ibuf = NULL;
+  int64_t len;
+
+  dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
+      (int64_t)first_samp, num_samp, return_type, data_out);
+
+  /* Check input fields */
+  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (_GD_BadInput(D, E, 1, GD_SARRAY_ENTRY, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* check return type */
+  if (return_type != GD_STRING && return_type != GD_NULL) {
+    _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, return_type, NULL);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* short circuit: no data requested */
+  if (num_samp == 0) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* index buffer */
+  ibuf = _GD_Alloc(D, GD_INT64, num_samp);
+  if (D->error) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* read the index field and record the number of samples returned */
+  n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp,
+      GD_INT64, ibuf);
+
+  if (n_read == 0 || return_type == GD_NULL) {
+    free(ibuf);
+    dreturn("%" PRIuSIZE, n_read);
+    return n_read;
+  }
+
+  /* SINDIR can only address the first 2**63 entries in a SARRAY */
+  len =
+#if SIZEOF_SIZE_T == 8
+    (E->e->entry[1]->EN(scalar,array_len) > GD_INT64_MAX) ? GD_INT64_MAX :
+#endif
+    E->e->entry[1]->EN(scalar,array_len);
+
+  for (i = 0; i < n_read; ++i)
+    if (ibuf[i] < 0 || ibuf[i] >= len)
+      data_out[i] = NULL;
+    else
+      data_out[i] = ((const char **)E->e->entry[1]->e->u.scalar.d)[ibuf[i]];
+
+  free(ibuf);
+
+  dreturn("%" PRIuSIZE, n_read);
+  return n_read;
+}
+
 /* this function is little more than a public boilerplate for _GD_DoField */
 size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
     off64_t first_samp, size_t num_frames, size_t num_samp,
@@ -1964,13 +2134,7 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
       ", 0x%X, %p", D, field_code_in, (int64_t)first_frame, (int64_t)first_samp,
       num_frames, num_samp, return_type, data_out);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_IF_INVALID(D, "%i", 0);
 
   entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
       1);
@@ -2025,8 +2189,12 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
     return 0;
   }
 
-  n_read = _GD_DoField(D, entry, repr, first_samp, num_samp, return_type,
-      data_out);
+  if (entry->field_type == GD_SINDIR_ENTRY)
+    n_read = _GD_DoSindir(D, entry, first_samp, num_samp, return_type,
+        data_out);
+  else
+    n_read = _GD_DoField(D, entry, repr, first_samp, num_samp, return_type,
+        data_out);
 
   dreturn("%" PRIuSIZE, n_read);
   return n_read;

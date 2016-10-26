@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -44,14 +44,15 @@ int main(void)
   D = gd_open(filedir, GD_RDWR);
   ret = gd_alter_affixes(D, 1, NULL, ".txt");
   e1 = gd_error(D);
+
+  CHECKI(ret,GD_E_BAD_CODE);
+  CHECKI(e1,GD_E_BAD_CODE);
+
   gd_discard(D);
 
   unlink(format1);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(ret,-1);
-  CHECKI(e1,GD_E_BAD_CODE);
 
   return r;
 }

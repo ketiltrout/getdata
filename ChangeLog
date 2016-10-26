@@ -1,3 +1,201 @@
+2016-09-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1105
+
+	Merge in getdata-dsv10 branch:
+
+	* bindings/matlab/matlab.c (gdmx_err) bindings/python/pygetdata.h
+	(PYGD_REPORT_ERROR): Handle negative error codes. (r1027)
+
+  * bindings/perl/src/GetData.xs (fragments): Return undef on error in array
+	context.  (r1027)
+
+  * src/getdata.h.in: Make all error codes negative and remove unused numbers.
+	(r1027)
+  * bindings/matlab/matlab.c (gdmx_msgid) bindings/python/pygetdata.c
+  (gdpy_exception_list) src/legacy.c (GD_ERROR_CODES): Update for renumbered
+  codes. (r1027)
+  * src/legacy.c (_GD_GetDirfile GetFormat GetData GetNFrames
+  GetSamplesPerFrame PutData): Set *error_code to -D->error. (r1027)
+
+  * src/add.c (_GD_AddSpec _GD_AddAlias) src/constant.c (_GD_PutCarraySlice)
+  src/del.c (_GD_Delete) src/flush.c (_GD_SyncOrClose) src/mod.c (_GD_Change)
+  src/mod.c (_GD_AlterYoke _GD_AlterSpec) src/move.c (_GD_Move) src/name.c
+  (_GD_Rename): Return void. (r1027)
+
+  * src/add.c (gd_madd_spec gd_add_spec gd_add gd_add_raw gd_add_lincom
+  gd_add_clincom gd_add_linterp gd_add_bit gd_add_sbit _GD_AddYoke
+  gd_add_multiply gd_add_recip gd_add_crecip89 gd_add_polynom gd_add_cpolynom
+  gd_add_phase gd_add_window gd_add_mplex gd_add_string gd_add_const
+  gd_add_carray gd_add_sarray gd_madd_lincom gd_madd_clincom gd_madd_linterp
+  gd_madd_bit gd_madd_sbit _GD_MAddYoke gd_madd_phase gd_madd_polynom
+  gd_madd_cpolynom gd_madd_recip gd_madd_crecip89 gd_madd_window gd_madd_mplex
+  gd_madd_string gd_madd_const gd_madd_carray gd_madd_sarray gd_add_alias
+  gd_madd_alias) src/constant.c (gd_get_carray_slice gd_get_carray
+  gd_put_carray_slice gd_put_carray) src/del.c (gd_delete) src/encoding.c
+  (gd_alter_encoding gd_encoding_support) src/endian.c (gd_alter_endianness)
+  src/entry.c (gd_entry gd_fragment_index gd_hide gd_hidden gd_unhide
+  gd_validate) src/flimits.c (gd_alter_frameoffset64 gd_frameoffset64
+  gd_eof64 gd_bof64) src/flush.c (gd_metaflush gd_rewrite_fragment gd_sync
+  gd_raw_close gd_flush gd_dirfile_standards) src/fpos.c (_GD_GetFilePos
+  gd_tell64 _GD_DoSeek _GD_Seek gd_seek64) src/fragment.c (gd_fragment_affixes
+  gd_alter_affixes gd_nfragments gd_parent_fragment gd_desync) src/globals.c
+  (gd_verbose_prefix) src/include.c (gd_include_affix gd_uninclude) src/mod.c
+  (gd_alter_entry gd_alter_raw gd_alter_lincom gd_alter_clincom
+  gd_alter_linterp gd_alter_bit gd_alter_sbit gd_alter_recip gd_alter_recip
+  gd_alter_crecip89 gd_alter_divide gd_alter_multiply gd_alter_indir
+  gd_alter_sindir gd_alter_phase gd_alter_const gd_alter_carray
+  gd_alter_sarray gd_alter_polynom gd_alter_cpolynom gd_alter_window
+  gd_alter_mplex gd_alter_spec gd_malter_spec) src/move.c (gd_move) src/name.c
+  (gd_rename) src/nframes.c (gd_nframes64) src/protect.c (gd_protection
+  gd_alter_protection) src/string.c (gd_get_sarray_slice gd_get_sarray
+  gd_put_sarray_slice gd_put_sarray gd_put_string): Return D->error. (r1027)
+
+	Re-enable DSV 10 stuff removed for GetData-0.9, reverting (at least parts 
+	of) revisions 997, 999, 1000, 1001, 1004 through selective merge in from
+	getdata-dsv10 branch:
+
+	* src/add.c (_GD_InvalidEntype _GD_Add) src/close.c (_GD_FreeD)
+	src/constant.c (gd_array_len) src/del.c (_GD_ClearDerived _GD_DeReference)
+	src/entry.c (_GD_FreeE _GD_CalculateEntry gd_entry gd_validate)
+	src/field_list.c (_GD_EntryIndex) src/flimits.c (_GD_GetEOF _GD_GetBOF)
+	src/flush.c (_GD_Flush _GD_FieldSpec _GD_FindVersion) src/fpos.c
+	(_GD_GetFilePos _GD_Seek) src/getdata.c (_GD_DoField gd_getdata64)
+	src/getdata.h.in src/internal.h src/mod.c (_GD_Change) src/name.c
+	(_GD_UpdateInputs) src/native.c (_GD_NativeType) src/parse.c
+	(_GD_ParseArray _GD_ParseFieldSpec _GD_ParseDirective) src/putdata.c
+	(_GD_DoFieldOut) src/spf.c (_GD_GetSPF) src/include.c (_GD_SetFieldAffixes):
+	Restore from getdata-dsv10 branch.
+
+	* src/add.c (gd_add_indir gd_add_sindir gd_add_sarray gd_madd_indir
+	gd_madd_sindir gd_madd_sarray) src/field_list.c (gd_sarrays gd_msarrays)
+	src/getdata.c (_GD_IndirData _GD_DoIndir _GD_DoSindir) src/mod.c
+	(gd_alter_indir gd_alter_sindir gd_alter_sarray) src/parse.c
+	(_GD_ParseNamespace) src/string.c (gd_get_sarray gd_put_sarray_slice
+	gd_put_sarray) src/fragment.c (_GD_CheckChangeNamespace
+	gd_fragment_namespace): Restore from getdata-dsv10 branch.
+	* src/string.c (gd_get_sarray_slice): Remove static.
+
+	* test/add_dot10.c test/add_indir.c test/add_sarray.c test/add_sarray_nil.c
+	test/add_sindir.c test/alter_entry_sarray.c test/alter_indir.c
+	test/alter_sarray.c test/alter_sindir.c test/get_indir.c test/get_sarray.c
+	test/get_sarray_len.c test/get_sarray_slice.c test/get_sindir.c
+	test/get_sindir_none.c test/get_sindir_null.c test/get_sindir_type.c
+	test/get_type_string.c test/madd_indir.c test/madd_sarray.c
+	test/madd_sindir.c test/name_updb_sarray.c test/parse_include_ns2.c
+	test/parse_include_nsabs.c test/parse_include_nsinh.c
+	test/parse_include_nspop.c test/parse_include_nsrabs.c
+	test/parse_include_nsrainh.c test/parse_include_nsrinh.c
+	test/parse_include_nsroot.c test/parse_indir.c test/parse_ns.c
+	test/parse_ns_abs.c test/parse_ns_dot.c test/parse_ns_dotdot.c
+	test/parse_ns_dotdotns.c test/parse_ns_dotns.c test/parse_ns_ndotdots.c
+	test/parse_ns_ndots.c test/parse_ns_nsdot.c test/parse_ns_nsdotdot.c
+	test/parse_ns_par.c test/parse_ns_sub.c test/parse_nsf.c
+	test/parse_nsf_abs.c test/parse_nsf_alias.c test/parse_nsf_dot.c
+	test/parse_nsf_hide.c test/parse_nsf_index.c test/parse_nsf_meta.c
+	test/parse_nsf_meta2.c test/parse_nsf_par.c test/parse_nsf_ref.c
+	test/parse_nsf_refabs.c test/parse_nsf_refrel.c test/parse_nsf_root.c
+	test/parse_nsf_rpar.c test/parse_nsf_sub.c test/parse_sarray.c
+	test/parse_sarray_long.c test/parse_sindir.c put_indir.c test/put_sarray.c
+	test/put_sarray_slice.c test/put_sindir.c test/svlist_array.c
+	test/svlist_array_meta.c test/add_ns.c test/add_ns_frag.c
+	test/add_ns_frag2.c test/include_ns.c test/name_ns.c test/name_ns2.c
+	test/name_nsdot.c test/parse_include_ns.c test/name_dot10.c: Restore from
+	getdata-dsv10 branch.
+	* test/name_updb.c test/name_updb_carray.c test/native_string.c: Restore
+	from getdata-dsv10 branch.
+
+	* bindings/make_parameters.c bindings/cxx/dirfile.cpp (Dirfile::Entry
+	Dirfile::GetData) bindings/cxx/entry.cpp (Entry::CheckIndex scalar_ok)
+	bindings/cxx/getdata/entry.h bindings/f77/fgetdata.c (GDGSCA GDASCA)
+	bindings/f77/getdata.f90.in (fgd_entry fgd_add fgd_madd fgd_alter_entry)
+	bindings/idl/getdata.c (gdidl_make_idl_entry gdidl_convert_entry_num
+	gdidl_read_idl_entry gdidl_getdata) bindings/matlab/gd_getdata.c
+	bindings/matlab/matlab.c (gdmx_from_entry gdmx_to_entry)
+	bindings/perl/GetData.xs (gdp_to_entry entry getdata)
+	bindings/perl/simple_funcs.xsin bindings/php/getdata.c (gdphp_from_entry
+	gdphp_to_entry gd_getdata) bindings/python/pydirfile.c
+	(gdpy_dirfile_getdata) bindings/python/pyentry.c (gdpy_set_entry_from_tuple
+	gdpy_entry_getinfields gdpy_entry_setinfields gdpy_entry_getarraylen
+	gdpy_entry_setarraylen gdpy_entry_getparms) bindings/python/pygetdata.c
+	(gdpy_convert_to_pylist gdpy_convert_to_pyobj): Restore from getdata-dsv10
+	branch.
+
+	* bindings/cxx/dirfile.cpp (Dirfile::GetSarray Dirfile::Sarrays
+	Dirfile::MSarrays Dirfile::PutSarray) bindings/f77/fgetdata.c (GDGEID GDGESD
+	GDGESA GDADID GDADSD GDMDID GDMDSD GDADSA GDMDSA GDALID GDALSD GDSARX GDMSAX
+	GDGTSA GDPTSA GDALSA GDGSTD GDGSTP GDXSTP) bindings/f77/getdata.f90.in
+	(fgd_sarray_value_max fgd_msarray_value_max fgd_get_sarray
+	fgd_get_sarray_slice fgd_put_sarray fgd_put_sarray_slice fgd_add_sarray
+	fgd_madd_sarray fgd_alter_sarray fgd_add_indir fgd_add_sindir fgd_madd_indir
+	fgd_madd_sindir fgd_alter_indir fgd_alter_sindir fgd_getstrdata)
+	bindings/idl/getdata.c (gdidl_add_sarray gdidl_get_sarray gdidl_get_sarray
+	gdidl_alter_sarray gdidl_add_indir gdidl_alter_indir gdidl_add_sindir
+	gdidl_alter_sindir) bindings/matlab/matlab.c (gdmx_from_sarrays)
+	bindings/perl/GetData.xs (get_sarray get_sarray_slice sarrays put_sarray
+	put_sarray_slice add_sarray madd_sarray msarrays) bindings/php/getdata.c
+	(gdphp_convert_sarray gd_add_sarray gd_add_indir gd_add_sindir
+	gd_alter_sarray gd_alter_indir gd_alter_sindir gd_sarrays gd_get_sarray
+	gd_madd_sarray gd_madd_indir gd_madd_sindir gd_msarrays gd_put_sarray)
+	bindings/python/pydirfile.c (gdpy_dirfile_getsarray gdpy_dirfile_sarrays
+	gdpy_dirfile_msarrays gdpy_dirfile_putsarray): Restore from getdata-dsv10
+	branch.
+
+	* bindings/cxx/getdata/indirentry.h bindings/cxx/getdata/sarrayentry.h
+	bindings/cxx/getdata/sindirentry.h bindings/cxx/indirentry.cpp
+	bindings/cxx/sarrayentry.cpp bindings/cxx/sindirentry.cpp
+	bindings/matlab/gd_add_sarray.c bindings/matlab/gd_alter_sarray.m
+	bindings/matlab/gd_get_sarray.c bindings/matlab/gd_get_sarray_slice.c
+	bindings/matlab/gd_madd_sarray.c bindings/matlab/gd_put_sarray.m
+	bindings/matlab/gd_put_sarray_slice.c bindings/matlab/gd_sarrays.c: Restore
+	from getdata-dsv10 branch.
+
+	* src/fragment.c (_GD_SubFragmentList): Restore from getdata-dsv10 branch.
+
+	* src/common.c (_GD_GetRepr): Restore DSV 10 features from getdata-dsv10
+	branch.
+
+	* src/include.c (_GD_SetFieldAffixes): Restore ns and nsl arguments from
+	getdata-dsv10 branch.
+
+	* src/legacy.c (GetFormat): Restore DSV 10 stuff from getdata-dsv10 branch.
+
+	* bindings/cxx/test/big_test.cpp bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro
+	bindings/matlab/test/big_test.m bindings/perl/t/big_test.t
+	bindings/php/test/big_test.php bindings/python/test/big_test.py
+	doc/list.tests: Restore tests 275-301 from getdata-dsv10 branch (where they
+	were numbered 272-298).
+
+	* src/getdata.h.in: Bump GD_DIRFILE_STANDARDS_VERSION.
+
+	Also:
+	
+	* test/svlist_array.c test/svlist_array0.c test/svlist_array_hidden.c
+	test/svlist_array_meta.c test/svlist_array_meta0.c
+	test/svlist_array_meta_free.c test/svlist_array_meta_hidden.c: Added.
+
+	* bindings/perl/src/GetData.xs: Replace gratuitous use of XPUSH with
+	EXTEND + PUSH.
+
+	* src/field_list.c (gd_entry_list) src/nfields.c (gd_nentries): Add fragment
+	argument.
+	* bindings/perl/src/GetData.xs bindings/perl/src/typemap: Rename gdp_bitnum_t
+	to gdp_ffff_t for generic use.
+	* test/elist_fragment.c test/nentries_fragment.c: Added.
+	* bindings/cxx/dirfile.cpp (Dirfile::NEntries Dirfile::EntryList)
+	bindings/f77/fgetdata.c (GDNENT GDENTX GDENTN)
+	bindings/f77/getdata.f90.in (fgd_nentries fgd_entry_list)
+	bindings/idl/getdata.c (gdidl_get_field_list gdidl_get_nfields)
+	bindings/matlab/gd_entry_list.c bindings/matlab/gd_nentries.c
+	bindings/matlab/gd_field_list.m bindings/matlab/gd_field_list_by_type.m
+	bindings/matlab/gd_mfield_list.m bindings/matlab/gd_mfield_list_by_type.m
+	bindings/matlab/gd_mvector_list.m bindings/matlab/gd_nfields.m
+	bindings/matlab/gd_nfields_by_type.m bindings/matlab/gd_nmfields.m
+	bindings/matlab/gd_nmfields_by_type.m bindings/matlab/gd_nmvectors.m
+	bindings/matlab/gd_nvectors.m bindings/matlab/gd_vector_list.m
+	bindings/perl/src/GetData.xs (entry_list) bindings/php/getdata.c
+	(gd_entry_list gd_nentries) bindings/python/pydirfile.c
+	(gdpy_dirfile_nentries gdpy_dirfile_entrylist): Handle fragment parameter.
+
 2016-09-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1104
 	* src/sie.c (_GD_SampIndOpen): Remove all the weird existing file checks
 	before the malloc.  That kind of stuff got put in the bookkeeping layer
@@ -601,7 +799,7 @@
 	* bindings/matlab/matlab.c (gdmx_from_uint64): Renamed from gdmx_from_ullong.
 
 	* src/internal.h: Properly distinguish between _MSC_VER (compiler stuff) and
-	__MSCVRT__ (library stuff).
+	__MSVCRT__ (library stuff).
 
 	* bindings/idl/getdata.c (gdidl_getdata gdidl_get_constant
 	gdidl_get_carray) bindings/matlab/gd_get_carray.c
@@ -4664,7 +4862,7 @@
 2010-06-29   D. V. Wiebe <getdata@ketiltrout.net>   svn:418
 	* m4/compiler.m4 (GD_CHECK_LFS_TYPE): Added.
 	* configure.ac: Better tests for LFS Transitional API types.  Don't rely on
-	the `complex' macro when checking types.  Move the MSCVRT test back to the
+	the `complex' macro when checking types.  Move the MSVCRT test back to the
 	proper place.
 
 2010-06-28   D. V. Wiebe <getdata@ketiltrout.net>   svn:414

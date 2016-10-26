@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,17 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write UINT8 */
 #include "test.h"
-
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
 
 int main(void)
 {
@@ -50,12 +40,12 @@ int main(void)
   n = gd_put_constant(D, "data", GD_UINT8, &d);
   error = gd_error(D);
 
+  CHECKI(error, GD_E_PROTECTED);
+  CHECKI(n, GD_E_PROTECTED);
+
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, GD_E_PROTECTED);
-  CHECKI(n, -1);
   return r;
 }

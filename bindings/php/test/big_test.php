@@ -128,10 +128,10 @@ function check_ok($t, $D)
   check_error($t, $D, 0);
 }
 
-$nfields = 17;
+$nfields = 20;
 $fields = array('INDEX', 'alias', 'bit', 'carray', 'const', 'data', 'div',
-  'lincom', 'linterp', 'mplex', 'mult', 'phase', 'polynom', 'recip', 'sbit',
-  'string', 'window');
+  'indir', 'lincom', 'linterp', 'mplex', 'mult', 'phase', 'polynom', 'recip',
+  'sarray', 'sbit', 'sindir', 'string', 'window');
 
 # make the dirfile
 mkdir('dirfile', 0700);
@@ -157,6 +157,10 @@ phase PHASE data 11
 window WINDOW linterp mult LT 4.1
 ALIAS alias data
 string STRING "Zaphod Beeblebrox"
+sarray SARRAY one two three four five six seven
+data/msarray SARRAY eight nine ten eleven twelve
+indir INDIR data carray
+sindir SINDIR data sarray
 ');
 file_put_contents('dirfile/form2', "const2 CONST INT8 -19\n");
 
@@ -192,11 +196,6 @@ $v = gd_getdata($D, 'data', 5, 0, 1, 0, GD_COMPLEX128, TRUE);
 check_ok(10, $D);
 check_var(10, $v, array(41., 42., 43., 44., 45., 46., 47., 48.));
 
-# 11: getdata (NULL)
-$v = gd_getdata($D, 'data', 5, 0, 1, 0, GD_NULL);
-check_ok(11, $D);
-check_var(11, $v, 8);
-
 # 12: gd_get_constant (INT8)
 $v = gd_get_constant($D, 'const', GD_UINT8);
 check_ok(12, $D);
@@ -206,11 +205,6 @@ check_var(12, $v, 5);
 $v = gd_get_constant($D, 'const', GD_COMPLEX128);
 check_ok(19, $D);
 check_var(19, $v, 5.5);
-
-# 20: gd_get_constant (NULL)
-$v = gd_get_constant($D, 'const', GD_NULL);
-check_ok(20, $D);
-check_var(20, $v, true);
 
 # 23: nfields
 $v = gd_nfields($D);
@@ -225,12 +219,12 @@ check_var(25, $v, $fields);
 # 26: nmfields
 $v = gd_nmfields($D, 'data');
 check_ok(26, $D);
-check_var(26, $v, 4);
+check_var(26, $v, 5);
 
 # 27: mfield_list
 $v = gd_mfield_list($D, 'data');
 check_ok(27, $D);
-check_var(27, $v, array('mstr', 'mconst', 'mcarray', 'mlut'));
+check_var(27, $v, array('mstr', 'mconst', 'mcarray', 'mlut', 'msarray'));
 
 # 28: nframes
 $v = gd_nframes($D);
@@ -502,14 +496,15 @@ check_var(68, $v, array('lincom', 'new3'));
 # 69: nfields by type
 $v = gd_nvectors($D);
 check_ok(69, $D);
-check_var(69, $v, 22);
+check_var(69, $v, 24);
 
 # 70: field list by type
 $v = gd_vector_list($D);
 check_ok(70, $D);
-check_var(70, $v, array('INDEX', 'alias', 'bit', 'data', 'div', 'lincom',
-  'linterp', 'mplex', 'mult', 'new1', 'new10', 'new3', 'new4', 'new6', 'new7',
-  'new8', 'new9', 'phase', 'polynom', 'recip', 'sbit', 'window'));
+check_var(70, $v, array('INDEX', 'alias', 'bit', 'data', 'div', 'indir',
+  'lincom', 'linterp', 'mplex', 'mult', 'new1', 'new10', 'new3', 'new4', 'new6',
+  'new7', 'new8', 'new9', 'phase', 'polynom', 'recip', 'sbit', 'sindir',
+  'window'));
 
 # 72: madd lincom
 $v = gd_madd_lincom($D, 'data', 'mnew3', array('in1', 'in2'),
@@ -1448,18 +1443,19 @@ check_ok(236, $D);
 check_var(236, $v, TRUE);
 
 # 237: nentries
-$v = gd_nentries($D, 'data', GD_SCALAR_ENTRIES,
+$v = gd_nentries($D, 'data', GD_ALL_FRAGMENTS, GD_SCALAR_ENTRIES,
   GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
 check_ok(237, $D);
-check_var(237, $v, 6);
+check_var(237, $v, 7);
 
 # 239: entry_list
-$v = gd_entry_list($D, null, GD_VECTOR_ENTRIES, GD_ENTRIES_NOALIAS);
+$v = gd_entry_list($D, null, GD_ALL_FRAGMENTS, GD_VECTOR_ENTRIES,
+  GD_ENTRIES_NOALIAS);
 check_ok(239, $D);
-check_var(239, $v, array('INDEX', 'bit', 'data', 'div', 'lincom', 'linterp',
-  'mplex', 'mult', 'new1', 'new135', 'new14', 'new16', 'new18', 'new21', 'new3',
-  'new4', 'new6', 'new7', 'new8', 'phase', 'polynom', 'recip', 'sbit',
-  'window'));
+check_var(239, $v, array('INDEX', 'bit', 'data', 'div', 'indir', 'lincom',
+  'linterp', 'mplex', 'mult', 'new1', 'new135', 'new14', 'new16', 'new18',
+  'new21', 'new3', 'new4', 'new6', 'new7', 'new8', 'phase', 'polynom', 'recip',
+  'sbit', 'sindir', 'window'));
 
 # 240: mplex lookback
 $v = gd_mplex_lookback($D, GD_LOOKBACK_ALL);
@@ -1687,6 +1683,218 @@ check_var(273, $v, true);
 $v = gd_get_carray($D, 'carray', GD_NULL, 2, 2);
 check_ok(274, $D);
 check_var(274, $v, true);
+
+# 277: gd_entry (SARRAY)
+$v = gd_entry($D, 'sarray');
+check_ok(277, $D);
+check_var(277, $v, array('field' => 'sarray', 'field_type' => GD_SARRAY_ENTRY,
+  'fragment_index' => 0, 'array_len' => 7));
+
+# 278: get carray
+$v = gd_get_sarray($D, 'sarray');
+check_ok(278, $D);
+check_var(278, $v, array('one', 'two', 'three', 'four', 'five', 'six',
+  'seven'));
+
+# 279: get sarray slice
+$v = gd_get_sarray($D, 'sarray', 2, 2);
+check_ok(279, $D);
+check_var(279, $v, array('three', 'four'));
+
+# 280: gd_sarrays
+$v = gd_sarrays($D);
+check_ok(280, $D);
+check_var(280, $v, array(array('one', 'two', 'three', 'four', 'five', 'six',
+    'seven')));
+
+# 281: gd_put_sarray
+$v = gd_put_sarray($D, 'sarray', array('eka', 'dvi', 'tri', 'catur', 'panca',
+  'sas', 'sapta'));
+check_ok2(281, 0, $D);
+check_var2(281, 1, $v, TRUE);
+
+$v = gd_get_sarray($D, 'sarray');
+check_ok2(281, 2, $D);
+check_var2(168, 3, $v, array('eka', 'dvi', 'tri', 'catur', 'panca', 'sas',
+  'sapta'));
+
+# 282: gd_put_sarray_slice
+$v = gd_put_sarray($D, 'sarray', 2, array('asta', 'nava'));
+check_ok2(282, 0, $D);
+check_var2(282, 1, $v, TRUE);
+
+$v = gd_get_sarray($D, 'sarray');
+check_ok2(282, 2, $D);
+check_var2(282, 3, $v, array('eka', 'dvi', 'asta', 'nava', 'panca', 'sas',
+    'sapta'));
+
+# 283: add sarray
+$v = gd_add_sarray($D, 'new283', array('eins', 'zwei', 'drei'), 0);
+check_ok2(283, 0, $D);
+check_var2(283, 1, $v, TRUE);
+
+$v = gd_entry($D, 'new283');
+check_ok2(283, 2, $D);
+check_var2(283, 3, $v, array('field' => 'new283',
+  'field_type' => GD_SARRAY_ENTRY, 'fragment_index' => 0, 'array_len' => 3));
+
+$v = gd_get_sarray($D, 'new283');
+check_ok2(283, 4, $D);
+check_var2(283, 5, $v, array('eins', 'zwei', 'drei'));
+
+# 284: add (SARRAY)
+$v = gd_add($D, array('field' => 'new284', 'field_type' => GD_SARRAY_ENTRY,
+  'fragment_index' => 0, 'array_len' => 5));
+check_ok2(284, 0, $D);
+check_var2(284, 1, $v, TRUE);
+
+$v = gd_entry($D, 'new284');
+check_ok2(284, 2, $D);
+check_var2(284, 3, $v, array('field' => 'new284',
+  'field_type' => GD_SARRAY_ENTRY, 'fragment_index' => 0, 'array_len' => 5));
+
+$v = gd_get_sarray($D, 'new284');
+check_ok2(284, 4, $D);
+check_var2(284, 5, $v, array('', '', '', '', ''));
+
+# 285: madd sarray
+$v = gd_madd_sarray($D, 'data', 'mnew285', array('un', 'deux', 'trois'));
+check_ok2(285, 0, $D);
+check_var2(285, 1, $v, TRUE);
+
+$v = gd_entry($D, 'data/mnew285');
+check_ok2(285, 2, $D);
+check_var2(285, 3, $v, array('field' => 'data/mnew285',
+  'field_type' => GD_SARRAY_ENTRY, 'fragment_index' => 0, 'array_len' => 3));
+
+$v = gd_get_sarray($D, 'data/mnew285');
+check_ok2(285, 4, $D);
+check_var2(285, 5, $v, array('un', 'deux', 'trois'));
+
+# 286: alter sarray
+$v = gd_alter_sarray($D, 'new283', 2);
+check_ok2(286, 0, $D);
+check_var2(286, 1, $v, TRUE);
+
+$v = gd_entry($D, 'new283');
+check_ok2(286, 2, $D);
+check_var2(286, 3, $v, array('field' => 'new283',
+  'field_type' => GD_SARRAY_ENTRY, 'fragment_index' => 0, 'array_len' => 2));
+
+# 287: msarrays
+$v = gd_msarrays($D, 'data');
+check_ok(287, $D);
+check_var(287, $v, array(array('eight', 'nine', 'ten', 'eleven', 'twelve'),
+  array('un', 'deux', 'trois')));
+
+# 288: INDIR entry
+$v = gd_entry($D, 'indir');
+check_ok(288, $D);
+check_var(288, $v, array('field' => 'indir', 'field_type' => GD_INDIR_ENTRY,
+  'fragment_index' => 0, 'in_fields' => array('data', 'carray')));
+
+# 289: add indir
+$v = gd_add_indir($D, 'new289', 'in2', 'in3');
+check_ok2(289, 0, $D);
+check_var2(289, 1, $v, TRUE);
+
+$v = gd_entry($D, 'new289');
+check_ok2(289, 2, $D);
+check_var2(289, 3, $v, array('field' => 'new289',
+  'field_type' => GD_INDIR_ENTRY, 'fragment_index' => 0,
+  'in_fields' => array('in2', 'in3')));
+
+# 290: madd indir
+$v = gd_madd_indir($D, 'data', 'mnew290', 'in2', 'in3');
+check_ok2(290, 0, $D);
+check_var2(290, 1, $v, TRUE);
+
+$v = gd_entry($D, 'data/mnew290');
+check_ok2(290, 2, $D);
+check_var2(290, 3, $v, array('field' => 'data/mnew290',
+  'field_type' => GD_INDIR_ENTRY, 'fragment_index' => 0,
+  'in_fields' => array('in2', 'in3')));
+
+# 291: alter_indir
+$v = gd_alter_indir($D, 'new289', 'in1');
+check_ok2(291, 0, $D);
+check_var2(291, 1, $v, TRUE);
+
+$v = gd_entry($D, 'new289');
+check_ok2(291, 2, $D);
+check_var2(291, 3, $v, array('field' => 'new289',
+  'field_type' => GD_INDIR_ENTRY, 'fragment_index' => 0,
+  'in_fields' => array('in1', 'in3')));
+
+# 292: SINDIR entry
+$v = gd_entry($D, 'sindir');
+check_ok(292, $D);
+check_var(292, $v, array('field' => 'sindir', 'field_type' => GD_SINDIR_ENTRY,
+  'fragment_index' => 0, 'in_fields' => array('data', 'sarray')));
+
+# 293: add sindir
+$v = gd_add_sindir($D, 'new293', 'in2', 'in3');
+check_ok2(293, 0, $D);
+check_var2(293, 1, $v, TRUE);
+
+$v = gd_entry($D, 'new293');
+check_ok2(293, 2, $D);
+check_var2(293, 3, $v, array('field' => 'new293',
+  'field_type' => GD_SINDIR_ENTRY, 'fragment_index' => 0,
+  'in_fields' => array('in2', 'in3')));
+
+# 294: madd sindir
+$v = gd_madd_sindir($D, 'data', 'mnew294', 'in2', 'in3');
+check_ok2(294, 0, $D);
+check_var2(294, 1, $v, TRUE);
+
+$v = gd_entry($D, 'data/mnew294');
+check_ok2(294, 2, $D);
+check_var2(294, 3, $v, array('field' => 'data/mnew294',
+  'field_type' => GD_SINDIR_ENTRY, 'fragment_index' => 0,
+  'in_fields' => array('in2', 'in3')));
+
+# 295: alter_sindir
+$v = gd_alter_sindir($D, 'new293', 'in1');
+check_ok2(295, 0, $D);
+check_var2(295, 1, $v, TRUE);
+
+$v = gd_entry($D, 'new293');
+check_ok2(295, 2, $D);
+check_var2(295, 3, $v, array('field' => 'new293',
+  'field_type' => GD_SINDIR_ENTRY, 'fragment_index' => 0,
+  'in_fields' => array('in1', 'in3')));
+
+# 296: getdata (SINDIR)
+$v = gd_getdata($D, 'sindir', 0, 0, 1, 0);
+check_ok(296, $D);
+check_var(296, $v, array('eka', 'eka', 'eka', 'eka', 'eka', 'eka', 'eka',
+  'eka'));
+
+# 300: add indir
+$v = gd_add($D, array('field' => 'new300', 'in_fields' => array('in3', 'in0'),
+  'fragment_index' => 0, 'field_type' => GD_INDIR_ENTRY));
+check_ok2(300, 0, $D);
+check_var2(300, 1, $v, TRUE);
+
+$v = gd_entry($D, 'new300');
+check_ok2(300, 2, $D);
+check_var2(300, 3, $v, array('field' => 'new300',
+  'field_type' => GD_INDIR_ENTRY, 'fragment_index' => 0,
+  'in_fields' => array('in3', 'in0')));
+
+# 301: add indir
+$v = gd_add($D, array('field' => 'new301', 'in_fields' => array('in3', 'in1'),
+  'fragment_index' => 0, 'field_type' => GD_SINDIR_ENTRY));
+check_ok2(301, 0, $D);
+check_var2(301, 1, $v, TRUE);
+
+$v = gd_entry($D, 'new301');
+check_ok2(301, 2, $D);
+check_var2(301, 3, $v, array('field' => 'new301',
+  'field_type' => GD_SINDIR_ENTRY, 'fragment_index' => 0,
+  'in_fields' => array('in3', 'in1')));
+
 
 
 

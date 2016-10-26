@@ -2,14 +2,18 @@ function field_list = gd_mfield_list(D, parent)
 % GD_MFIELD_LIST  Retrieve a list of field names
 %
 %   GD_FIELD_LIST(DIRFILE,PARENT)
-%             is equivalent to calling GD_ENTRY_LIST(DIRFILE,PARENT,0,0)
+%             is equivalent to calling GD_ENTRY_LIST(DIRFILE,PARENT, ...
+%                                                          GD.ALL_FRAGMENTS,0,0)
+%
+%   For GD, see GETDATA_CONSTANTS.
 %
 %   See also GD_ENTRY_LIST
 
-  field_list = gd_entry_list(D, parent, 0, 0);
+  GD = getdata_constants();
+  field_list = gd_entry_list(D, parent, GD.ALL_FRAGMENTS, 0, 0);
 end
 
-% Copyright (C) 2013 D. V. Wiebe
+% Copyright (C) 2013, 2016 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %

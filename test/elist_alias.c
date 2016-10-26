@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. V. Wiebe
+/* Copyright (C) 2012-2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,14 +20,6 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -48,7 +40,7 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  field_list = gd_entry_list(D, NULL, GD_ALIAS_ENTRIES, 0);
+  field_list = gd_entry_list(D, NULL, GD_ALL_FRAGMENTS, GD_ALIAS_ENTRIES, 0);
 
   error = gd_error(D);
 

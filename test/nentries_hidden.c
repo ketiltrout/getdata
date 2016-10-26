@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. V. Wiebe
+/* Copyright (C) 2012-2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -52,7 +52,8 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  nfields = gd_nentries(D, NULL, GD_ALL_ENTRIES, GD_ENTRIES_HIDDEN);
+  nfields = gd_nentries(D, NULL, GD_ALL_FRAGMENTS, GD_ALL_ENTRIES,
+      GD_ENTRIES_HIDDEN);
   error = gd_error(D);
   gd_discard(D);
 

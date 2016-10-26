@@ -2,14 +2,18 @@ function field_list = gd_field_list_by_type(D, type)
 % GD_FIELD_LIST_BY_TYPE  Retrieve a list of field names
 %
 %   GD_FIELD_LIST_BY_TYPE(DIRFILE,TYPE)
-%             is equivalent to calling GD_ENTRY_LIST(DIRFILE,0,TYPE,0)
+%             is equivalent to calling GD_ENTRY_LIST(DIRFILE,0, ...
+%                                                       GD.ALL_FRAGMENTS,TYPE,0)
+%
+%   For GD, see GETDATA_CONSTANTS.
 %
 %   See also GD_ENTRY_LIST
 
-  field_list = gd_entry_list(D, 0, type, 0);
+  GD = getdata_constants();
+  field_list = gd_entry_list(D, 0, GD.ALL_FRAGMENTS, type, 0);
 end
 
-% Copyright (C) 2013 D. V. Wiebe
+% Copyright (C) 2013, 2016 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %

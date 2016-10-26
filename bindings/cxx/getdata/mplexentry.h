@@ -60,7 +60,7 @@ namespace GetData {
       virtual int SetPeriod(int period);
       virtual int SetPeriod(const char* period);
 
-      /* deprecated member aliases */
+      /* deprecated in GetData-0.8.4; use Period() or SetPeriod() instead */
       virtual int gd_deprecated CountMax() const { return Period(); };
       virtual int gd_deprecated SetCountMax(int period) {
         return SetPeriod(period);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,21 +18,14 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Requesting the number of frames from an invalid dirfile should fail cleanly */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   int error, r = 0;
   DIRFILE *D;
-  size_t n;
+  off_t n;
 
   rmdirfile();
   D = gd_open(filedir, GD_RDONLY);
@@ -40,7 +33,7 @@ int main(void)
   error = gd_error(D);
   gd_discard(D);
 
-  CHECKU(n, 0);
+  CHECKU(n, GD_E_BAD_DIRFILE);
   CHECKI(error, GD_E_BAD_DIRFILE);
 
   return r;

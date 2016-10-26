@@ -519,14 +519,15 @@ If called in scalar context, returns the entry type of C<$FIELD_CODE>, one
 of the symbols listed above under L</"Entry Types">.  In array context, returns
 a hash describing the indicated field.  See gd_entry_type(3) and gd_entry(3).
 
-=item $dirfile->entry_list ($PARENT, $TYPE, $FLAGS)
+=item $dirfile->entry_list ($PARENT, $FRAGMENT, $TYPE, $FLAGS)
 
 In scalar context, returns the number of entries matching the supplied criteria.
-In list context, returns an array of the names of the entries.  If C<$PARENT>
-is undef, top-level entries are considered, otherwise meta entries under
-C<$PARENT> are considered.  If C<$TYPE> is one of the entry types listed above
-under L</"Entry Types">, only entries of that type are considered.  Alternatley,
-C<$TYPE> may be one of:
+In list context, returns an array of the names of the entries.  If C<$FRAGMENT>
+is $GetData::ALL_FRAGMENTS or undef, all fragments are searched, otherwise, only
+the specified fragment is considered.  If C<$PARENT> is undef, top-level entries
+are considered, otherwise meta entries under C<$PARENT> are considered.  If
+C<$TYPE> is one of the entry types listed above under L</"Entry Types">, only
+entries of that type are considered.  Alternatley, C<$TYPE> may be one of:
 
 =over
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,15 +20,6 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <inttypes.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -47,13 +38,13 @@ int main(void)
   ret = gd_alter_entry(D, "INDEX", &E, 0);
   error = gd_error(D);
 
+  CHECKI(error, GD_E_BAD_FIELD_TYPE);
+  CHECKI(ret, GD_E_BAD_FIELD_TYPE);
+
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, GD_E_BAD_FIELD_TYPE);
-  CHECKI(ret, -1);
 
   return r;
 }

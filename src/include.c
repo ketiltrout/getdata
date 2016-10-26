@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2015 D. V. Wiebe
+/* Copyright (C) 2008-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,10 +24,11 @@
  * on a /INCLUDE line.  Also, change the root namespace, if necessary.  The
  * caller is responsible for freeing strings on error */
 static int _GD_SetFieldAffixes(DIRFILE *D, const struct parser_state *p, int me,
-    const char *prefix_in, const char *suffix_in, char **prefix, char **suffix)
+    const char *prefix_in, const char *suffix_in, char **prefix, char **suffix,
+    char **ns, size_t *nsl)
 {
-  dtrace("%p, %p, %i, \"%s\", \"%s\", %p, %p", D, p, me, prefix_in, suffix_in,
-      prefix, suffix);
+  dtrace("%p, %p, %i, \"%s\", \"%s\", %p, %p, %p, %p", D, p, me, prefix_in,
+      suffix_in, prefix, suffix, ns, nsl);
 
   /* suffix first, for some reason */
   if (suffix_in && suffix_in[0] != '\0') {
@@ -58,6 +59,67 @@ static int _GD_SetFieldAffixes(DIRFILE *D, const struct parser_state *p, int me,
 
   /* now the prefix */
   if (prefix_in && prefix_in[0] != '\0') {
+    if (GD_PVERS_GE(*p, 10)) {
+      int i, root_space = 0;
+
+      /* try to find a namespace */
+      for (i = strlen(prefix_in); i > 0; --i)
+        if (prefix_in[i - 1] == '.')
+          break;
+
+      if (i > 0) { /* found a namespace */
+        if (prefix_in[0] == '.') { /* absolute -- ignore current p->ns */
+          root_space = 1;
+          prefix_in++;
+          i--;
+          if (i == 0) { /* revert to rootspace */
+            if (D->fragment[me].ns) {
+              *ns = _GD_Strdup(D, D->fragment[me].ns);
+              *nsl = D->fragment[me].nsl;
+            } else
+              *ns = _GD_Strdup(D, ""); /* NULL space */
+            goto NO_NS;
+          }
+        }
+
+        if (!root_space && p->ns)
+          *nsl = i + p->nsl;
+        else if (D->fragment[me].ns)
+          *nsl = i + D->fragment[me].nsl;
+        else 
+          *nsl = i - 1;
+
+        if ((*ns = _GD_Malloc(D, *nsl + 1)) == NULL) {
+          dreturn("%i", 1);
+          return 1;
+        }
+
+        if (!root_space && p->ns) {
+          strcpy(*ns, p->ns);
+          (*ns)[p->nsl] = '.';
+          strncpy(*ns + p->nsl + 1, prefix_in, i - 1);
+        } else if (D->fragment[me].ns) {
+          strcpy(*ns, D->fragment[me].ns);
+          (*ns)[D->fragment[me].nsl] = '.';
+          strncpy(*ns + D->fragment[me].nsl + 1, prefix_in, i - 1);
+        } else
+          strncpy(*ns, prefix_in, i - 1);
+        (*ns)[*nsl] = '\0';
+        prefix_in += i;
+
+        if (_GD_ValidateField(*ns, p->standards, p->pedantic, GD_VF_NS, NULL)) {
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, p->file, p->line,
+              *ns);
+          dreturn("%i", 1);
+          return 1;
+        }
+NO_NS:
+
+        if (prefix_in[0] == '\0')
+          goto NO_PREFIX;
+      }
+    }
+
     if (_GD_ValidateField(prefix_in, p->standards, p->pedantic, GD_VF_AFFIX,
           NULL))
     {
@@ -76,6 +138,7 @@ static int _GD_SetFieldAffixes(DIRFILE *D, const struct parser_state *p, int me,
         sprintf(*prefix, "%s%s", D->fragment[me].prefix, prefix_in);
     }
   } else {
+NO_PREFIX:
     if (D->fragment[me].prefix)
       *prefix = _GD_Strdup(D, D->fragment[me].prefix);
   }
@@ -85,7 +148,8 @@ static int _GD_SetFieldAffixes(DIRFILE *D, const struct parser_state *p, int me,
     return 1;
   }
 
-  dreturn("%i (\"%s\", \"%s\")", 0, *prefix, *suffix);
+  dreturn("%i (\"%s\"/%" PRIuSIZE ", \"%s\", \"%s\")", 0, *ns, *nsl, *prefix,
+      *suffix);
   return 0;
 }
 
@@ -116,7 +180,8 @@ int _GD_Include(DIRFILE *D, struct parser_state *p, const char *ename,
     goto include_error;
   }
 
-  if (_GD_SetFieldAffixes(D, p, parent, prefix_in, suffix_in, &prefix, &suffix))
+  if (_GD_SetFieldAffixes(D, p, parent, prefix_in, suffix_in, &prefix, &suffix,
+        &ns, &nsl))
   {
     goto include_error;
   }
@@ -338,34 +403,15 @@ int gd_include_affix(DIRFILE* D, const char* file, int fragment_index,
   dtrace("%p, \"%s\", %i, \"%s\", \"%s\", 0x%lX", D, file, fragment_index,
       prefix, suffix, flags);
 
-  _GD_ClearError(D);
+  GD_RETURN_ERR_IF_INVALID(D);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-  /* check access mode */
-  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
-    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  /* check for include index out of range */
-  if (fragment_index < 0 || fragment_index >= D->n_fragment) {
-    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  /* check protection */
-  if (D->fragment[fragment_index].protection & GD_PROTECT_FORMAT) {
-    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+  if ((D->flags & GD_ACCMODE) == GD_RDONLY) 
+    GD_SET_RETURN_ERROR(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+  else if (fragment_index < 0 || fragment_index >= D->n_fragment) 
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
+  else if (D->fragment[fragment_index].protection & GD_PROTECT_FORMAT)
+    GD_SET_RETURN_ERROR(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[fragment_index].cname);
-    dreturn("%i", -1);
-    return -1;
-  }
 
   if (~D->flags & GD_HAVE_VERSION)
     _GD_FindVersion(D);
@@ -420,6 +466,9 @@ int gd_include_affix(DIRFILE* D, const char* file, int fragment_index,
       D->reference_field = E;
   }
   free(ref_name);
+
+  if (D->error)
+    GD_RETURN_ERROR(D);
 
   dreturn("%i", new_fragment);
   return new_fragment;
@@ -489,42 +538,25 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
 
   dtrace("%p, %i, %i", D, fragment_index, del);
 
-  _GD_ClearError(D);
+  GD_RETURN_ERR_IF_INVALID(D);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
-    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (fragment_index <= 0 || fragment_index >= D->n_fragment) {
-    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if ((D->flags & GD_ACCMODE) == GD_RDONLY) 
+    GD_SET_RETURN_ERROR(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+  if (fragment_index <= 0 || fragment_index >= D->n_fragment)
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
 
   parent = D->fragment[fragment_index].parent;
 
-  if (D->fragment[parent].protection & GD_PROTECT_FORMAT) {
-    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+  if (D->fragment[parent].protection & GD_PROTECT_FORMAT)
+    GD_SET_RETURN_ERROR(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[parent].cname);
-    dreturn("%i", -1);
-    return -1;
-  }
 
   /* find all affected fragments */
   nf = _GD_CollectFragments(D, &f, fragment_index, 0);
 
   if (D->error) {
     free(f);
-    dreturn("%i", -1);
-    return -1;
+    GD_RETURN_ERROR(D);
   }
 
   /* close affected raw fields */
@@ -542,8 +574,7 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
 
   if (D->error) {
     free(f);
-    dreturn("%i", -1);
-    return -1;
+    GD_RETURN_ERROR(D);
   }
 
   /* Nothing from now on may fail */

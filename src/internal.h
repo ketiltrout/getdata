@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2015 D. V. Wiebe
+ * Copyright (C) 2005-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -313,6 +313,10 @@ double cimag(double complex z);
 #define GD_UINT_TYPE ((gd_type_t)(SIZEOF_UNSIGNED_INT))
 
 /* a few integer limits */
+#ifndef SIZEOF_SIZE_T
+#define SIZEOF_SIZE_T (sizeof(size_t))
+#endif
+
 #define GD_INT64_MAX ((int64_t)((uint64_t)-1>>1))
 #define GD_SSIZE_T_MAX ((ssize_t)((size_t)-1>>1))
 #define GD_SIZE_T_MAX ((size_t)-1)
@@ -434,6 +438,34 @@ extern "C" {
 #define dreturn(...)
 #define dwatch(...)
 #endif
+
+/* These doesn't return */
+#define GD_SET_RETURN_ERROR(D,e,s,f,l,t) do { \
+  _GD_SetError(D,e,s,f,l,t); \
+  dreturn("%i", e); \
+  return e; \
+} while(0)
+
+#define GD_RETURN_ERROR(D) do { \
+  dreturn("%i", D->error); \
+  return D->error; \
+} while(0)
+
+#define GD_RETURN_ERR_IF_INVALID(D) do { \
+  if (D->flags & GD_INVALID) \
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL); \
+  else \
+    _GD_ClearError(D); \
+} while(0)
+
+#define GD_RETURN_IF_INVALID(D,f,v) do { \
+  if (D->flags & GD_INVALID) { \
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL); \
+    dreturn(f, v); \
+    return v; \
+  } else \
+    _GD_ClearError(D); \
+} while(0)
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -873,6 +905,7 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_N_ENTRY_LISTS (GD_N_ENTYPES + 4)
 
 #define GD_LIST_VALID_STRING_VALUE 0x01
+#define GD_LIST_VALID_SARRAY_VALUE 0x02
 
 /* name types for ValidateField */
 #define GD_VF_NAME  0
@@ -905,7 +938,7 @@ struct gd_raw_file_ {
   void* edata;
   int subenc;
   int error;
-  const DIRFILE *D;
+  DIRFILE *D;
   unsigned int mode;
   off64_t pos;
 };
@@ -925,6 +958,7 @@ struct gd_flist_ {
   const char **entry_list[GD_N_ENTRY_LISTS];
   unsigned int entry_list_flags[GD_N_ENTRY_LISTS];
   const char **string_value_list;
+  const char ***sarray_value_list;
   void *const_value_list;
   gd_carray_t *carray_value_list;
   uint32_t value_list_validity;
@@ -1083,7 +1117,7 @@ struct gd_fragment_t {
   char* sname; /* Subdirectory name (path relative to dirfile or absolute) */
   char *bname; /* basename (filename) */
   char* ename; /* External name (the one that appears in the format file) */
-  char *ns; /* unused */
+  char *ns; /* root namespace */
   size_t nsl; /* strlen(ns) */
   void *enc_data;
   int modified;
@@ -1305,8 +1339,7 @@ void _GD_LincomData(DIRFILE *restrict, int n, void *restrict,
     const unsigned int *restrict, size_t);
 void _GD_LinterpData(DIRFILE *restrict, void *restrict, gd_type_t, int,
     const double *restrict, size_t, const struct gd_lut_ *restrict, size_t);
-int _GD_ListEntry(const gd_entry_t *E, int meta, int hidden, int noalias,
-    int special, gd_entype_t type);
+int _GD_ListEntry(const gd_entry_t*, int, int, int, int, int, gd_entype_t);
 char *_GD_MakeFullPath(DIRFILE *restrict, int, const char *restrict, int);
 void *_GD_Malloc(DIRFILE *D, size_t size);
 int _GD_MissingFramework(int encoding, unsigned int funcs);
@@ -1317,8 +1350,6 @@ char *_GD_MungeCode(DIRFILE *restrict, const char *restrict, size_t,
     const char *restrict, const char *restrict, char **restrict,
     int *restrict, unsigned);
 gd_type_t _GD_NativeType(DIRFILE *restrict, gd_entry_t *restrict, int);
-unsigned int _GD_NEntries(DIRFILE*, struct gd_private_entry_*, int,
-    unsigned int);
 DIRFILE *_GD_Open(DIRFILE*, int, const char*, unsigned long,
     gd_parser_callback_t, void*);
 gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict,

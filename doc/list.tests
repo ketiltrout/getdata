@@ -273,3 +273,30 @@
 272 F9C.pPm- NULL return from gd_reference
 273 ...I.Pmh gd_get_carray (NULL)
 274 ...IpPmh gd_get_carray_slice (NULL)
+275 F9...... fgd_sarray_value_max
+276 F9...... fgd_msarray_value_max
+277 F9CIpPmh gd_entry (SARRAY)
+278 .9CIpPmh gd_get_sarray
+279 F9CIpPmh gd_get_sarray_slice
+280 ..C.pPmh gd_sarrays
+281 .9CIpPmh gd_put_sarray
+282 F9CIpPmh gd_put_sarray_slice
+283 F9CIpPmh gd_add_sarray
+284 ...I.P.h gd_add (SARRAY)
+285 F9CIpPmh gd_madd_sarray
+286 F9CI.Pmh gd_alter_sarray
+287 ..C.pPmh gd_msarrays
+288 F9CIpPmh gd_entry (INDIR)
+289 F9CIpPmh gd_add_indir
+290 F9..pPmh gd_madd_indir
+291 F9CI.Pmh gd_alter_indir
+292 F9CIpPmh gd_entry (SINDIR)
+293 F9CIpPmh gd_add_sindir
+294 F...pPmh gd_madd_sindir
+295 F9CI.Pmh gd_alter_sindir
+296 F9CIpPmh gd_getstrdata
+297 F....... GDGSTP
+298 F....... GDXSTP
+299 F....... GDDSTP
+300 ...I.P.h gd_add (INDIR)
+301 ...I.P.h gd_add (SINDIR)

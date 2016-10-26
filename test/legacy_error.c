@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2013, 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,8 +20,6 @@
  */
 #include "test.h"
 
-#include <string.h>
-
 #define DIRFILENAME "a non-existant dirfile"
 int main(void)
 {
@@ -36,7 +34,7 @@ int main(void)
   GetDataErrorString(string, 1000);
 
   CHECKI(n, 0);
-  CHECKI(error, GD_E_IO);
+  CHECKI(error, -GD_E_IO);
   CHECKSS(string, DIRFILENAME);
 
   return r;

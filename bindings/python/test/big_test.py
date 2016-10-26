@@ -102,10 +102,11 @@ file.close()
 ne = 0
 
 fields = [B("INDEX"), B("alias"), B("bit"), B("carray"), B("const"), B("data"),
-    B("div"), B("lincom"), B("linterp"), B("mplex"), B("mult"), B("phase"),
-    B("polynom"), B("recip"), B("sbit"), B("string"), B("window")]
+    B("div"), B("indir"), B("lincom"), B("linterp"), B("mplex"), B("mult"),
+    B("phase"), B("polynom"), B("recip"), B("sarray"), B("sbit"), B("sindir"),
+    B("string"), B("window")]
 
-nfields = 17
+nfields = 20
 file=open("dirfile/format", 'w')
 file.write(
     "/ENDIAN little\n"
@@ -129,6 +130,10 @@ file.write(
     "window WINDOW linterp mult LT 4.1\n"
     "/ALIAS alias data\n"
     "string STRING \"Zaphod Beeblebrox\"\n"
+    "sarray SARRAY one two three four five six seven\n"
+    "data/msarray SARRAY eight nine ten eleven twelve\n"
+    "indir INDIR data carray\n"
+    "sindir SINDIR data sarray\n"
     )
 file.close()
 
@@ -248,14 +253,15 @@ try:
   n = d.nmfields("data")
 except:
   CheckOK(26)
-CheckSimple(26,n,4)
+CheckSimple(26,n,5)
 
 # 27: mfield_list check
 try:
   n = d.mfield_list("data")
 except:
   CheckOK(27)
-CheckSimple(27,n,[B("mstr"), B("mconst"), B("mcarray"), B("mlut")])
+CheckSimple(27,n,[B("mstr"), B("mconst"), B("mcarray"), B("mlut"),
+    B("msarray")])
 
 # 28: nframes check
 try:
@@ -675,17 +681,18 @@ try:
   n = d.nvectors()
 except:
   CheckOK(69)
-CheckSimple(69,n,22)
+CheckSimple(69,n,24)
 
-# 70: field_list check
+# 70: vector_list check
 try:
   n = d.vector_list()
 except:
   CheckOK(70)
 CheckSimple(70,n,[B('INDEX'), B('alias'), B('bit'), B('data'), B('div'),
-    B('lincom'), B('linterp'), B('mplex'), B('mult'), B('new1'), B('new10'),
-    B('new2'), B('new4'), B('new6'), B('new7'), B('new8'), B('new9'),
-    B('phase'), B('polynom'), B('recip'), B('sbit'), B('window')])
+    B('indir'), B('lincom'), B('linterp'), B('mplex'), B('mult'), B('new1'),
+    B('new10'), B('new2'), B('new4'), B('new6'), B('new7'), B('new8'),
+    B('new9'), B('phase'), B('polynom'), B('recip'), B('sbit'), B('sindir'),
+    B('window')])
 
 # 71: add / entry (lincom) check
 ent = pygetdata.entry(pygetdata.LINCOM_ENTRY, "mnew1", 0,
@@ -1925,18 +1932,18 @@ CheckSimple(236, d.verbose_prefix, "big_test: ")
 
 # 237: gd_nentries check
 try:
-  n = d.nentries("data", pygetdata.SCALAR_ENTRIES,
+  n = d.nentries("data", pygetdata.ALL_FRAGMENTS, pygetdata.SCALAR_ENTRIES,
       pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
 except:
   CheckOK2(237, 1)
-CheckSimple2(237, 1, n, 5)
-#n = d.nentries(type = pygetdata.VECTOR_ENTRIES, flags = pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
+CheckSimple2(237, 1, n, 6)
+
 try:
   n = d.nentries(type = pygetdata.VECTOR_ENTRIES,
       flags = pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
 except:
   CheckOK2(237, 2)
-CheckSimple2(237, 2, n, 23)
+CheckSimple2(237, 2, n, 25)
 
 # 239: gd_entry_list check
 try:
@@ -1944,10 +1951,11 @@ try:
       flags = pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
 except:
   CheckOK(239)
-CheckSimple(239,n, [B('INDEX'), B('bit'), B('data'), B('div'), B('lincom'),
-    B('linterp'), B('mplex'), B('mult'), B('new1'), B('new14'), B('new16'),
-    B('new18'), B('new2'), B('new21'), B('new4'), B('new6'), B('new7'),
-    B('new8'), B('phase'), B('polynom'), B('recip'), B('sbit'), B('window')])
+CheckSimple(239,n, [B('INDEX'), B('bit'), B('data'), B('div'), B('indir'),
+    B('lincom'), B('linterp'), B('mplex'), B('mult'), B('new1'), B('new14'),
+    B('new16'), B('new18'), B('new2'), B('new21'), B('new4'), B('new6'),
+    B('new7'), B('new8'), B('phase'), B('polynom'), B('recip'), B('sbit'),
+    B('sindir'), B('window')])
 
 # 240: gd_mplex_lookback check
 try:
@@ -2003,6 +2011,201 @@ try:
 except:
   CheckOK(274)
 CheckSimple(274, n, None)
+
+# 277: gd_entry (SARRAY)
+try:
+  ent = d.entry("sarray")
+except:
+  CheckOK(277)
+CheckSimple2(277,1,ent.field_type,pygetdata.SARRAY_ENTRY)
+CheckSimple2(277,2,ent.field_type_name,"SARRAY_ENTRY")
+CheckSimple2(277,3,ent.fragment,0)
+CheckSimple2(277,4,ent.array_len,7)
+
+# 278: gd_get_sarray
+try:
+  n = d.get_sarray("sarray")
+except:
+  CheckOK(278)
+
+CheckSimple(278,n,['one', 'two', 'three', 'four', 'five', 'six', 'seven'])
+
+# 279: gd_get_sarray_slice
+try:
+  n = d.get_sarray("sarray", start=2, len=2)
+except:
+  CheckOK(279)
+
+CheckSimple(279,n,['three', 'four'])
+
+# 280: gd_sarrays
+try:
+  n = d.sarrays()
+except:
+  CheckOK(280)
+
+CheckSimple2(280,1,len(n),1)
+CheckSimple2(280,2,n,[("sarray",
+  ['one', 'two', 'three', 'four', 'five', 'six', 'seven'])])
+
+# 281: gd_put_sarray
+try:
+  d.put_sarray("sarray",
+      ['eka', 'dvi', 'tri', 'catur', 'panca', 'sas', 'sapta'])
+except:
+  CheckOK2(281,1)
+
+try:
+  n = d.get_sarray("sarray")
+except:
+  CheckOK2(281,2)
+
+CheckSimple(281,n,['eka', 'dvi', 'tri', 'catur', 'panca', 'sas', 'sapta'])
+
+# 282: gd_put_sarray_slice
+try:
+  d.put_sarray("sarray", ['asta', 'nava'], start=2)
+except:
+  CheckOK2(282,1)
+
+try:
+  n = d.get_sarray("sarray")
+except:
+  CheckOK2(282,2)
+
+CheckSimple(282,n,['eka', 'dvi', 'asta', 'nava', 'panca', 'sas', 'sapta'])
+
+# 283: gd_add_sarray
+ent = pygetdata.entry(pygetdata.SARRAY_ENTRY, "new283", 0, (2,))
+try:
+  d.add(ent)
+except:
+  CheckOK2(283,1)
+
+try:
+  ent = d.entry("new283")
+except:
+  CheckOK2(283,2)
+CheckSimple2(283,1,ent.field_type,pygetdata.SARRAY_ENTRY)
+CheckSimple2(283,2,ent.field_type_name,"SARRAY_ENTRY")
+CheckSimple2(283,3,ent.fragment,0)
+CheckSimple2(283,4,ent.array_len,2)
+
+# 285: gd_madd_sarray
+ent = pygetdata.entry(pygetdata.SARRAY_ENTRY, "mnew285", 0, {"array_len": 2})
+try:
+  d.madd(ent,"data")
+except:
+  CheckOK2(285,1)
+
+try:
+  ent = d.entry("data/mnew285")
+except:
+  CheckOK2(285,2)
+CheckSimple2(285,1,ent.field_type,pygetdata.SARRAY_ENTRY)
+CheckSimple2(285,2,ent.field_type_name,"SARRAY_ENTRY")
+CheckSimple2(285,3,ent.fragment,0)
+CheckSimple2(285,4,ent.array_len,2)
+
+# 287: gd_msarrays
+try:
+  n = d.msarrays("data")
+except:
+  CheckOK(287)
+
+CheckSimple2(287,1,len(n),2)
+CheckSimple2(287,2,n,[
+  ("msarray", ['eight', 'nine', 'ten', 'eleven', 'twelve']),
+  ("mnew285", ['', ''])])
+
+# 288: entry (indir) check
+try:
+  ent = d.entry("indir")
+except:
+  CheckOK(288)
+CheckSimple2(288,1,ent.field_type,pygetdata.INDIR_ENTRY)
+CheckSimple2(288,2,ent.field_type_name,"INDIR_ENTRY")
+CheckSimple2(288,3,ent.fragment,0)
+CheckSimple2(288,4,ent.in_fields,( "data", "carray"))
+
+# 289: add / entry (indir) check
+ent = pygetdata.entry(pygetdata.INDIR_ENTRY, "new289", 0, ("in1", "in2"))
+try:
+  d.add(ent)
+except:
+  CheckOK2(289,1)
+
+try:
+  ent = d.entry("new289")
+except:
+  CheckOK2(289,2)
+CheckSimple2(289,1,ent.field_type,pygetdata.INDIR_ENTRY)
+CheckSimple2(289,2,ent.fragment,0)
+CheckSimple2(289,3,ent.in_fields,( "in1", "in2"))
+
+# 290: madd / entry (indir) check
+ent = pygetdata.entry(pygetdata.INDIR_ENTRY, "mnew290", 0,
+    {"in_field1": "in3", "in_field2": "in2"})
+try:
+  d.madd(ent,"data")
+except:
+  CheckOK2(290,1)
+
+try:
+  ent = d.entry("data/mnew290")
+except:
+  CheckOK2(290,2)
+CheckSimple2(290,1,ent.field_type,pygetdata.INDIR_ENTRY)
+CheckSimple2(290,2,ent.fragment,0)
+CheckSimple2(290,3,ent.in_fields,( "in3", "in2"))
+
+# 292: entry (sindir) check
+try:
+  ent = d.entry("sindir")
+except:
+  CheckOK(292)
+CheckSimple2(292,1,ent.field_type,pygetdata.SINDIR_ENTRY)
+CheckSimple2(292,2,ent.field_type_name,"SINDIR_ENTRY")
+CheckSimple2(292,3,ent.fragment,0)
+CheckSimple2(292,4,ent.in_fields,( "data", "sarray"))
+
+# 293: add / entry (dindir) check
+ent = pygetdata.entry(pygetdata.SINDIR_ENTRY, "new293", 0, ("in1", "in2"))
+try:
+  d.add(ent)
+except:
+  CheckOK2(293,1)
+
+try:
+  ent = d.entry("new293")
+except:
+  CheckOK2(293,2)
+CheckSimple2(293,1,ent.field_type,pygetdata.SINDIR_ENTRY)
+CheckSimple2(293,2,ent.fragment,0)
+CheckSimple2(293,3,ent.in_fields,( "in1", "in2"))
+
+# 294: madd / entry (sindir) check
+ent = pygetdata.entry(pygetdata.SINDIR_ENTRY, "mnew294", 0,
+    {"in_field1": "in3", "in_field2": "in2"})
+try:
+  d.madd(ent,"data")
+except:
+  CheckOK2(294,1)
+
+try:
+  ent = d.entry("data/mnew294")
+except:
+  CheckOK2(294,2)
+CheckSimple2(294,1,ent.field_type,pygetdata.SINDIR_ENTRY)
+CheckSimple2(294,2,ent.fragment,0)
+CheckSimple2(294,3,ent.in_fields,( "in3", "in2"))
+
+# 296: getstrdata
+try:
+  n = d.getdata("sindir", num_frames=1)
+except:
+  CheckOK(296)
+CheckSimple(296,n,[ "eka", "eka", "eka", "eka", "eka", "eka", "eka", "eka"])
 
 
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008, 2010, 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008, 2010, 2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,19 +24,10 @@ int gd_protection(DIRFILE* D, int fragment_index) gd_nothrow
 {
   dtrace("%p, %i", D, fragment_index);
 
-  _GD_ClearError(D);
+  GD_RETURN_ERR_IF_INVALID(D);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (fragment_index < 0 || fragment_index >= D->n_fragment) {
-    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (fragment_index < 0 || fragment_index >= D->n_fragment)
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
 
   dreturn("%i", D->fragment[fragment_index].protection);
   return D->fragment[fragment_index].protection;
@@ -49,34 +40,20 @@ int gd_alter_protection(DIRFILE *D, int protection_level, int fragment_index)
 
   dtrace("%p, %i, %i", D, protection_level, fragment_index);
 
-  _GD_ClearError(D);
+  GD_RETURN_ERR_IF_INVALID(D);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if ((D->flags & GD_ACCMODE) != GD_RDWR)
+    GD_SET_RETURN_ERROR(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
 
-  if ((D->flags & GD_ACCMODE) != GD_RDWR) {
-    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (fragment_index < GD_ALL_FRAGMENTS || fragment_index >= D->n_fragment) {
-    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (fragment_index < GD_ALL_FRAGMENTS || fragment_index >= D->n_fragment)
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
 
   if (protection_level != GD_PROTECT_NONE &&
       protection_level != GD_PROTECT_FORMAT &&
       protection_level != GD_PROTECT_DATA &&
       protection_level != GD_PROTECT_ALL)
   {
-    _GD_SetError(D, GD_E_ARGUMENT, GD_E_ARG_PROTECTION, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    GD_SET_RETURN_ERROR(D, GD_E_ARGUMENT, GD_E_ARG_PROTECTION, NULL, 0, NULL);
   }
 
   if (fragment_index == GD_ALL_FRAGMENTS)

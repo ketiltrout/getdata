@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,13 +20,6 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
 #ifndef GD_LEGACY_API
@@ -36,7 +29,7 @@ int main(void)
   size_t n = GetNFrames("no such dirfile", &error, NULL);
 
   CHECKI(n,0);
-  CHECKI(error, GD_E_IO);
+  CHECKI(error, -GD_E_IO);
 
   return r;
 #endif

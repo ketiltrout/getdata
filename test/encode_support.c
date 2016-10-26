@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,37 +24,37 @@
 #ifdef USE_SLIM
 #define GD_SLIM_MODE GD_RDONLY
 #else
-#define GD_SLIM_MODE -1
+#define GD_SLIM_MODE GD_E_UNSUPPORTED
 #endif
 
 #ifdef USE_GZIP
 #define GD_GZIP_MODE GD_RDWR
 #else
-#define GD_GZIP_MODE -1
+#define GD_GZIP_MODE GD_E_UNSUPPORTED
 #endif
 
 #ifdef USE_BZIP2
 #define GD_BZIP2_MODE GD_RDWR
 #else
-#define GD_BZIP2_MODE -1
+#define GD_BZIP2_MODE GD_E_UNSUPPORTED
 #endif
 
 #ifdef USE_LZMA
 #define GD_LZMA_MODE GD_RDWR
 #else
-#define GD_LZMA_MODE -1
+#define GD_LZMA_MODE GD_E_UNSUPPORTED
 #endif
 
 #ifdef USE_ZZIP
 #define GD_ZZIP_MODE GD_RDONLY
 #else
-#define GD_ZZIP_MODE -1
+#define GD_ZZIP_MODE GD_E_UNSUPPORTED
 #endif
 
 #ifdef USE_ZZSLIM
 #define GD_ZZSLIM_MODE GD_RDONLY
 #else
-#define GD_ZZSLIM_MODE -1
+#define GD_ZZSLIM_MODE GD_E_UNSUPPORTED
 #endif
 
 #define N 13
@@ -65,7 +65,7 @@ int main(void)
     unsigned long e;
     int v;
   } d[N] = {
-    { GD_AUTO_ENCODED,    -1 }, /* 0 */
+    { GD_AUTO_ENCODED,    GD_E_UNKNOWN_ENCODING }, /* 0 */
     { GD_UNENCODED,       GD_RDWR }, /* 1 */
     { GD_TEXT_ENCODED,    GD_RDWR }, /* 2 */
     { GD_SLIM_ENCODED,    GD_SLIM_MODE }, /* 3 */
@@ -75,9 +75,9 @@ int main(void)
     { GD_SIE_ENCODED,     GD_RDWR }, /* 7 */
     { GD_ZZIP_ENCODED,    GD_ZZIP_MODE }, /* 8 */
     { GD_ZZSLIM_ENCODED,  GD_ZZSLIM_MODE }, /* 9 */
-    { GD_ENC_UNSUPPORTED, -1 }, /* 10 */
-    { GD_ENCODING,        -1 }, /* 11 */
-    { 765,                -1 }  /* 12 */
+    { GD_ENC_UNSUPPORTED, GD_E_UNKNOWN_ENCODING }, /* 10 */
+    { GD_ENCODING,        GD_E_UNKNOWN_ENCODING }, /* 11 */
+    { 765,                GD_E_UNKNOWN_ENCODING }  /* 12 */
   };
   
   for (i = 0; i < N; ++i) {

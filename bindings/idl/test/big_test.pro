@@ -35,7 +35,7 @@ form2   = "test_dirfile/form2"
 data    = "test_dirfile/data"
 
 flen    = 11
-nfields = 17
+nfields = 20
 nume    = 0
 
 spawn, "rm -rf " + filedir
@@ -43,9 +43,9 @@ file_mkdir, filedir
 
 datadata = bindgen(80) + 1
 
-fields = [ 'INDEX', 'alias', 'bit', 'carray', 'const', 'data', 'div', $
-  'lincom', 'linterp', 'mplex', 'mult', 'phase', 'polynom', 'recip', 'sbit', $
-  'string', 'window' ]
+fields = [ 'INDEX', 'alias', 'bit', 'carray', 'const', 'data', 'div', 'indir', $
+  'lincom', 'linterp', 'mplex', 'mult', 'phase', 'polynom', 'recip', 'sarray', $
+  'sbit', 'sindir', 'string', 'window' ]
 
 ; Write the test dirfile
 openw,1,format
@@ -69,6 +69,10 @@ printf,1,'phase PHASE data 11'
 printf,1,'window WINDOW linterp mult LT 4.1'
 printf,1,'/ALIAS alias data'
 printf,1,'string STRING "Zaphod Beeblebrox"'
+printf,1,'sarray SARRAY one two three four five six seven'
+printf,1,'data/msarray SARRAY eight nine ten eleven twelve'
+printf,1,'indir INDIR data carray'
+printf,1,'sindir SINDIR data sarray'
 close,1
 
 openw,1,form2
@@ -127,7 +131,7 @@ nume += check_simple(25, n, fields)
 ;  26: gd_nmfields_check
 n = gd_nfields(d, parent="data")
 nume += check_ok(26, d)
-nume += check_simple(26, n, 3)
+nume += check_simple(26, n, 4)
 
 ;  27: gd_mfield_list check
 n = gd_field_list(d, parent="data")
@@ -434,15 +438,15 @@ nume += check_simple(68, n, [ "lincom", "new2"  ])
 ;  69: gd_nvectors check
 n = gd_nvectors(d)
 nume += check_ok(69, d)
-nume += check_simple(69, n, 22)
+nume += check_simple(69, n, 24)
 
 ;  70: gd_vector_list check
 n = gd_vector_list(d)
 nume += check_ok(70, d)
-nume += check_simple(70, n, [ 'INDEX', 'alias', 'bit', 'data', 'div', $
+nume += check_simple(70, n, [ 'INDEX', 'alias', 'bit', 'data', 'div', 'indir', $
   'lincom', 'linterp', 'mplex', 'mult', 'new1', 'new10', 'new2', 'new4', $
   'new6', 'new7', 'new8', 'new9', 'phase', 'polynom', 'recip', 'sbit', $
-  'window' ])
+  'sindir', 'window' ])
 
 ;  71: gd_madd_lincom
 gd_add_lincom, d, "mnew2", "in1", 9.9D, 8.8D, "in2", 7.7D, 6.6D, $
@@ -903,7 +907,7 @@ nume += check_simple(129,n,!GD.INT8)
 ;  131: gd_validate
 n =  gd_validate(d, "new7")
 nume += check_error(131,d,!GD.E_BAD_CODE)
-nume += check_simple(131,n,-1)
+nume += check_simple(131,n,!GD.E_BAD_CODE)
 
 ;  133: gd_framenum
 n = gd_framenum(d, "data", 33.3, field_start=6)
@@ -1359,18 +1363,18 @@ nume += check_ok(236, d)
 ; 237: gd_nentries check
 n = gd_nentries(d, parent="data", /SCALARS, /HIDDEN, /NOALIAS)
 nume += check_ok2(237, 1, d)
-nume += check_simple2(237, 1, n, 5)
+nume += check_simple2(237, 1, n, 6)
 n = gd_nentries(d, /VECTORS, /HIDDEN, /NOALIAS)
 nume += check_ok2(237, 2, d)
-nume += check_simple2(237, 2, n, 24)
+nume += check_simple2(237, 2, n, 26)
  
 ; 239: gd_entry_list check
 n = gd_entry_list(d, /VECTORS, /HIDDEN, /NOALIAS)
 nume += check_ok(239, d)
-nume += check_simple(239, n, ["INDEX", "bit", "data", "div", "lincom",$
+nume += check_simple(239, n, ["INDEX", "bit", "data", "div", "indir", "lincom",$
   "linterp", "mplex", "mult", "new1", "new135", "new14", "new16", "new18", $
   "new2", "new21", "new4", "new6", "new7", "new8", "phase", "polynom", $
-  "recip", "sbit", "window"])
+  "recip", "sbit", "sindir", "window"])
 
 ; 240: gd_mplex_lookback check
 gd_mplex_lookback, d, /ALL
@@ -1617,7 +1621,174 @@ n = gd_get_carray(d, "carray", type=!GD.NULL, len=2, start=2)
 nume += check_ok(274, d)
 nume += check_simple(274, n, 0)
 
+;  277: gd_entry (SARRAY)
+n = gd_entry(d, "sarray")
+nume += check_ok(277, d)
+nume += check_simple2(277, 1, n.field_type, !GD.SARRAY_ENTRY)
+nume += check_simple2(277, 2, n.field, "sarray")
+nume += check_simple2(277, 3, n.fragment, 0)
+nume += check_simple2(277, 4, n.array_len, 7)
 
+;  278: gd_get_sarray
+n = gd_get_sarray(d, "sarray")
+nume += check_ok(278, d)
+nume += check_simple(278, n, $
+  [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven' ])
+
+;  279: gd_get_sarray_slice
+n = gd_get_sarray(d, "sarray", len=2, start=2)
+nume += check_ok(279, d)
+nume += check_simple(279, n, [ 'three', 'four' ])
+
+;  281: gd_put_sarray
+m = [ 'eka', 'dvi', 'tri', 'catur', 'panca', 'sas', 'sapta' ]
+gd_put_sarray, d, "sarray", m
+nume += check_ok(281, d)
+
+n = gd_get_sarray(d, "sarray")
+nume += check_ok(281, d)
+nume += check_simple(281, n, m)
+
+;  282: gd_put_sarray_slice
+gd_put_sarray, d, "sarray", [ 'asta', 'nava' ], start=2
+nume += check_ok(282, d)
+
+n = gd_get_sarray(d, "sarray")
+nume += check_ok(282, d)
+nume += check_simple(282, n, $
+  [ 'eka', 'dvi', 'asta', 'nava', 'panca', 'sas', 'sapta' ])
+
+;  283: gd_add_sarray
+gd_add_sarray, d, "new283", value=['un', 'deux']
+nume += check_ok2(283, 1, d)
+
+n = gd_entry(d, "new283")
+nume += check_ok2(283, 2, d)
+nume += check_simple2(283, 1, n.field_type, !GD.SARRAY_ENTRY)
+nume += check_simple2(283, 2, n.field, "new283")
+nume += check_simple2(283, 3, n.fragment, 0)
+nume += check_simple2(283, 4, n.array_len, 2)
+
+n = gd_get_sarray(d, "new283")
+nume += check_ok2(283, 3, d)
+nume += check_simple2(283, 5, n, ['un', 'deux'])
+
+;  285: gd_madd_sarray
+gd_add_sarray, d, "mnew285", parent="data", value=['eins', 'zwei']
+nume += check_ok2(285, 1, d)
+
+n = gd_entry(d, "data/mnew285")
+nume += check_ok2(285, 2, d)
+nume += check_simple2(285, 1, n.field_type, !GD.SARRAY_ENTRY)
+nume += check_simple2(285, 2, n.field, "data/mnew285")
+nume += check_simple2(285, 3, n.fragment, 0)
+nume += check_simple2(285, 4, n.array_len, 2)
+
+n = gd_get_sarray(d, "data/mnew285")
+nume += check_ok2(285, 3, d)
+nume += check_simple2(285, 6, n, ['eins', 'zwei'])
+
+;  286: gd_alter_sarray
+gd_alter_sarray, d, "new283", len=3
+nume += check_ok2(286, 1, d)
+
+n = gd_entry(d, "new283")
+nume += check_ok2(286, 2, d)
+nume += check_simple2(286, 1, n.field_type, !GD.SARRAY_ENTRY)
+nume += check_simple2(286, 2, n.field, "new283")
+nume += check_simple2(286, 3, n.fragment, 0)
+nume += check_simple2(286, 4, n.array_len, 3)
+
+;  288: gd_entry (indir)
+n = gd_entry(d, "indir")
+nume += check_ok(288, d)
+nume += check_simple2(288, 1, n.field_type, !GD.INDIR_ENTRY)
+nume += check_simple2(288, 2, n.field, "indir")
+nume += check_simple2(288, 3, n.fragment, 0)
+nume += check_simple2(288, 4, n.in_fields, [ "data", "carray" ])
+
+;  289: gd_add_indir
+gd_add_indir, d, "new289", "in2", "in3"
+nume += check_ok2(289, 1, d)
+
+n = gd_entry(d, "new289")
+nume += check_ok(289, d)
+nume += check_simple2(289, 1, n.field_type, !GD.INDIR_ENTRY)
+nume += check_simple2(289, 2, n.field, "new289")
+nume += check_simple2(289, 3, n.fragment, 0)
+nume += check_simple2(289, 4, n.in_fields, [ "in2", "in3" ])
+
+;  291: gd_alter_indir
+gd_alter_indir, d, "new289", in_field1="in6"
+nume += check_ok2(291, 1, d)
+
+n = gd_entry(d, "new289")
+nume += check_ok(291, d)
+nume += check_simple2(291, 1, n.field_type, !GD.INDIR_ENTRY)
+nume += check_simple2(291, 2, n.field, "new289")
+nume += check_simple2(291, 3, n.fragment, 0)
+
+;  292: gd_entry (sindir)
+n = gd_entry(d, "sindir")
+nume += check_ok(292, d)
+nume += check_simple2(292, 1, n.field_type, !GD.SINDIR_ENTRY)
+nume += check_simple2(292, 2, n.field, "sindir")
+nume += check_simple2(292, 3, n.fragment, 0)
+nume += check_simple2(292, 4, n.in_fields, [ "data", "sarray" ])
+
+;  293: gd_add_sindir
+gd_add_sindir, d, "new293", "in2", "in3"
+nume += check_ok2(293, 1, d)
+
+n = gd_entry(d, "new293")
+nume += check_ok(293, d)
+nume += check_simple2(293, 1, n.field_type, !GD.SINDIR_ENTRY)
+nume += check_simple2(293, 2, n.field, "new293")
+nume += check_simple2(293, 3, n.fragment, 0)
+nume += check_simple2(293, 4, n.in_fields, [ "in2", "in3" ])
+
+;  295: gd_alter_sindir
+gd_alter_sindir, d, "new293", in_field1="in6"
+nume += check_ok2(295, 1, d)
+
+n = gd_entry(d, "new293")
+nume += check_ok(295, d)
+nume += check_simple2(295, 1, n.field_type, !GD.SINDIR_ENTRY)
+nume += check_simple2(295, 2, n.field, "new293")
+nume += check_simple2(295, 3, n.fragment, 0)
+nume += check_simple2(295, 4, n.in_fields, [ "in6", "in3" ])
+
+;  296: gd_getstrdata
+n = gd_getdata(d, "sindir", first_frame=0, num_frames=1)
+nume += check_ok(296, d)
+nume += check_simple(296, n, $
+  ['eka', 'eka', 'eka', 'eka', 'eka', 'eka', 'eka', 'eka'])
+
+;  300: gd_add (INDIR)
+n = {field: 'new300', field_type: !GD.INDIR_ENTRY, fragment: 0, $
+  in_fields: [ "in3", "in0"]};
+gd_add, d, n
+nume += check_ok2(300, 1, d)
+
+n = gd_entry(d, "new300")
+nume += check_ok2(300, 2, d)
+nume += check_simple2(300, 3, n.field_type, !GD.INDIR_ENTRY)
+nume += check_simple2(300, 4, n.field, "new300")
+nume += check_simple2(300, 5, n.fragment, 0)
+nume += check_simple2(300, 6, n.in_fields, [ "in3", "in0" ])
+
+;  301: gd_add (SINDIR)
+n = {field: 'new301', field_type: !GD.SINDIR_ENTRY, fragment: 0, $
+  in_fields: [ "in3", "in1"]};
+gd_add, d, n
+nume += check_ok2(301, 1, d)
+
+n = gd_entry(d, "new301")
+nume += check_ok2(301, 2, d)
+nume += check_simple2(301, 3, n.field_type, !GD.SINDIR_ENTRY)
+nume += check_simple2(301, 4, n.field, "new301")
+nume += check_simple2(301, 5, n.fragment, 0)
+nume += check_simple2(301, 6, n.in_fields, [ "in3", "in1" ])
 
 
 

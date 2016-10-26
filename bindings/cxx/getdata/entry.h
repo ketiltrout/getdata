@@ -194,7 +194,7 @@ namespace GetData {
         return (E.field_type == GD_MPLEX_ENTRY) ? E.u.mplex.period : 0;
       }
 
-      /* deprecated member alias */
+      /* deprecated in GetData-0.8.4; use Period() instead */
       virtual int gd_deprecated CountMax() const { return Period(); }
 
       /* Set methods */

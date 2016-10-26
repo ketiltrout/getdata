@@ -1,6 +1,6 @@
 /* Copyright (C) 2003-2005 C. Barth Netterfield
  * Copyright (C) 2003-2005 Theodore Kisner
- * Copyright (C) 2005-2015 D. V. Wiebe
+ * Copyright (C) 2005-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -82,7 +82,7 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   }
 
   if (_GD_DoSeek(D, E, _GD_ef + E->e->u.raw.file[0].subenc, s0, GD_FILE_WRITE)
-      == -1)
+      < 0)
   {
     free(databuffer);
     dreturn("%i", 0);
@@ -756,10 +756,13 @@ size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
+    case GD_INDIR_ENTRY:
+    case GD_SINDIR_ENTRY:
     case GD_INDEX_ENTRY:
       _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, E->field);
       break;
     case GD_STRING_ENTRY:
+    case GD_SARRAY_ENTRY:
     case GD_ALIAS_ENTRY:
     case GD_NO_ENTRY:
       _GD_InternalError(D);
@@ -784,19 +787,13 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
       ", 0x%X, %p", D, field_code, (int64_t)first_frame, (int64_t)first_samp,
       num_frames, num_samp, data_type, data_in);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", 0);
-    return 0;
-  }
+  GD_RETURN_IF_INVALID(D, "%i", 0);
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
   }
-
-  _GD_ClearError(D);
 
   entry = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
 

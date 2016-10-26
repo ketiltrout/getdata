@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012, 2014, 2015 D. V. Wiebe
+/* Copyright (C) 2008-2012, 2014-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -84,10 +84,8 @@ int _GD_ShutdownDirfile(DIRFILE* D, int flush_meta, int keep_dirfile)
     if (D->entry[i]->field_type == GD_RAW_ENTRY)
       _GD_Flush(D, D->entry[i], 0, 1);
 
-  if (D->error) {
-    dreturn("%i", 1);
-    return -1;
-  }
+  if (D->error)
+    GD_RETURN_ERROR(D);
 
 #ifndef GD_NO_DIR_OPEN
   /* close the directory */
@@ -97,8 +95,8 @@ int _GD_ShutdownDirfile(DIRFILE* D, int flush_meta, int keep_dirfile)
 
   _GD_FreeD(D, keep_dirfile);
 
-  dreturn("%i", 0);
-  return 0;
+  dreturn("%i", GD_E_OK);
+  return GD_E_OK;
 }
 
 int gd_close(DIRFILE *D)
@@ -109,6 +107,7 @@ int gd_close(DIRFILE *D)
 
   ret = _GD_ShutdownDirfile(D, 1, 0);
 
+  /* D->error may no longer be valid here */
   dreturn("%i", ret);
   return ret;
 }
@@ -121,6 +120,7 @@ int gd_discard(DIRFILE* D)
 
   ret = _GD_ShutdownDirfile(D, 0, 0);
 
+  /* D->error may no longer be valid here */
   dreturn("%i", ret);
   return ret;
 }

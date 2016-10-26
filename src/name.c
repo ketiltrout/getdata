@@ -1,4 +1,4 @@
-/* Copyright (C) 2008, 2010-2015 D. V. Wiebe
+/* Copyright (C) 2008, 2010-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -597,11 +597,36 @@ static int _GD_UpdateInputs(DIRFILE *D, struct gd_rename_data_ *rdat,
             return -1;
           }
         break;
+      case GD_INDIR_ENTRY:
+        if (update_vectors)
+          if (_GD_UpdateInField(D, D->entry[u], rdat, 0, search_meta, mode)) {
+            dreturn("%i", -1);
+            return -1;
+          }
+        if (rdat->E->field_type == GD_CARRAY_ENTRY || search_meta)
+          if (_GD_UpdateInField(D, D->entry[u], rdat, 1, search_meta, mode)) {
+            dreturn("%i", -1);
+            return -1;
+          }
+        break;
+      case GD_SINDIR_ENTRY:
+        if (update_vectors)
+          if (_GD_UpdateInField(D, D->entry[u], rdat, 0, search_meta, mode)) {
+            dreturn("%i", -1);
+            return -1;
+          }
+        if (rdat->E->field_type == GD_SARRAY_ENTRY || search_meta)
+          if (_GD_UpdateInField(D, D->entry[u], rdat, 1, search_meta, mode)) {
+            dreturn("%i", -1);
+            return -1;
+          }
+        break;
       case GD_INDEX_ENTRY:
       case GD_RAW_ENTRY:
       case GD_NO_ENTRY:
       case GD_CONST_ENTRY:
       case GD_CARRAY_ENTRY:
+      case GD_SARRAY_ENTRY:
       case GD_STRING_ENTRY:
       case GD_ALIAS_ENTRY:
         break;
@@ -650,6 +675,9 @@ static int _GD_UpdateInputs(DIRFILE *D, struct gd_rename_data_ *rdat,
         case GD_STRING_ENTRY:
         case GD_CONST_ENTRY:
         case GD_CARRAY_ENTRY:
+        case GD_SARRAY_ENTRY:
+        case GD_INDIR_ENTRY:
+        case GD_SINDIR_ENTRY:
         case GD_ALIAS_ENTRY:
           break;
       }
@@ -849,31 +877,22 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
   dtrace("%p, %p, \"%s\", %i, %u, 0x%X", D, E, new_name, old_dot, dot_ind,
       flags);
 
-  if (_GD_ValidateField(new_name, D->standards, 1, GD_VF_CODE, &new_dot)) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, new_name);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (_GD_ValidateField(new_name, D->standards, 1, GD_VF_CODE, &new_dot))
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, new_name);
 
   if (E->e->n_meta == -1) {
     name = _GD_Malloc(D, strlen(E->e->p.parent->field) + strlen(new_name) + 2);
-    if (name == NULL) {
-      dreturn("%i", -1);
-      return -1;
-    }      
+    if (name == NULL)
+      GD_RETURN_ERROR(D);
     sprintf(name, "%s/%s", E->e->p.parent->field, new_name);
   } else {
     /* Verify prefix and suffix */
-    if (_GD_CheckCodeAffixes(D, new_name, E->fragment_index, 1)) {
-      dreturn("%i", -1);
-      return -1;
-    }
+    if (_GD_CheckCodeAffixes(D, new_name, E->fragment_index, 1)) 
+      GD_RETURN_ERROR(D);
 
     name = _GD_Strdup(D, new_name);
-    if (name == NULL) {
-      dreturn("%i", -1);
-      return -1;
-    }
+    if (name == NULL)
+      GD_RETURN_ERROR(D);
   }
 
   /* Duplicate check */
@@ -888,8 +907,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
   if (Q != NULL) {
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, name);
     free(name);
-    dreturn("%i", -1);
-    return -1;
+    GD_RETURN_ERROR(D);
   }
 
   /* prep for metadata update */
@@ -897,8 +915,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
 
   if (rdat == NULL) {
     free(name);
-    dreturn("%i", -1);
-    return -1;
+    GD_RETURN_ERROR(D);
   }
 
   if (E->field_type == GD_RAW_ENTRY) {
@@ -907,16 +924,14 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
 
     if (filebase == NULL) {
       free(name);
-      dreturn("%i", -1);
-      return -1;
+      GD_RETURN_ERROR(D);
     }
 
     /* Close the old file */
     if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP)) {
       free(name);
       free(filebase);
-      dreturn("%i", -1);
-      return -1;
+      GD_RETURN_ERROR(D);
     }
 
     if (flags & GD_REN_DATA) {
@@ -924,19 +939,16 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
 
       /* check data protection */
       if (D->fragment[E->fragment_index].protection & GD_PROTECT_DATA) {
-        _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
-            D->fragment[E->fragment_index].cname);
         free(name);
         free(filebase);
-        dreturn("%i", -1);
-        return -1;
+        GD_SET_RETURN_ERROR(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
+            D->fragment[E->fragment_index].cname);
       }
 
       if (!_GD_Supports(D, E, GD_EF_NAME | GD_EF_MOVE)) {
         free(name);
         free(filebase);
-        dreturn("%i", -1);
-        return -1;
+        GD_RETURN_ERROR(D);
       }
 
       memcpy(&temp, E->e->u.raw.file, sizeof(struct gd_raw_file_));
@@ -947,8 +959,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
       {
         free(name);
         free(filebase);
-        dreturn("%i", -1);
-        return -1;
+        GD_RETURN_ERROR(D);
       }
 
       if ((*_GD_ef[temp.subenc].name)(D,
@@ -957,8 +968,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
       {
         free(name);
         free(filebase);
-        dreturn("%i", -1);
-        return -1;
+        GD_RETURN_ERROR(D);
       }
 
       if ((*_GD_ef[E->e->u.raw.file[0].subenc].move)(
@@ -967,8 +977,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
       {
         _GD_SetEncIOError(D, GD_E_IO_RENAME, E->e->u.raw.file + 0);
         free(filebase);
-        dreturn("%i", -1);
-        return -1;
+        GD_RETURN_ERROR(D);
       }
 
       /* Nothing may fail from now on */
@@ -1002,20 +1011,11 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
 
   dtrace("%p, \"%s\", \"%s\", 0x%X", D, old_code, new_name, flags);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  _GD_ClearError(D);
+  GD_RETURN_ERR_IF_INVALID(D);
 
   /* check access mode */
-  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
-    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if ((D->flags & GD_ACCMODE) == GD_RDONLY)
+    GD_SET_RETURN_ERROR(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
 
   /* check for a dotted field name */
   if (D->n_dot > 0)
@@ -1026,25 +1026,17 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
   else
     E = _GD_FindField(D, old_code, D->entry, D->n_entries, 0, NULL);
 
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, old_code);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (E == NULL)
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, old_code);
 
-  if (E->field_type == GD_INDEX_ENTRY) {
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, "INDEX");
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (E->field_type == GD_INDEX_ENTRY)
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0,
+        "INDEX");
 
   /* check metadata protection */
-  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
-    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT)
+    GD_SET_RETURN_ERROR(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[E->fragment_index].cname);
-    dreturn("%i", -1);
-    return -1;
-  }
 
   ret = _GD_Rename(D, E, new_name, old_dot, dot_ind, flags);
 

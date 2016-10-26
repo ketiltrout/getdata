@@ -3,17 +3,17 @@ function nvectors = gd_nvectors(D)
 %
 %   GD_NVECTORS(DIRFILE)
 %             is equivalent to calling GD_NENTRIES(DIRFILE,0, ...
-%                                                           GD.VECTOR_ENTRIES,0)
+%                                          GD.ALL_FRAGMENTS,GD.VECTOR_ENTRIES,0)
 %
 %   For GD, see GETDATA_CONSTANTS.
 %
 %   See also GD_NENTRIES, GETDATA_CONSTANTS
 
   GD = getdata_constants();
-  nvectors = gd_nentries(D, 0, GD.VECTOR_ENTRIES, 0);
+  nvectors = gd_nentries(D, 0, GD.ALL_FRAGMENTS, GD.VECTOR_ENTRIES, 0);
 end
 
-% Copyright (C) 2013 D. V. Wiebe
+% Copyright (C) 2013, 2016 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
