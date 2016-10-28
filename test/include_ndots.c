@@ -42,10 +42,10 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  gd_include_ns(D, "format1", 0, "ns", 0);
+  gd_include_ns(D, "format1", 0, "n.s", 0);
   error = gd_error(D);
   CHECKI(error, 0);
-  v = gd_validate(D, "ns.data");
+  v = gd_validate(D, "n.s.data");
   CHECKI(v, 0);
   gd_discard(D);
 

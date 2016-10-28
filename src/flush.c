@@ -22,6 +22,7 @@
 
 #define GD_MAX_PRETTY_FIELD_WIDTH 80
 
+/* If we're writing to 'file', call the appropriate sync function */
 static void _GD_SyncRaw(DIRFILE *D, struct gd_raw_file_ *file)
 {
   dtrace("%p, %p", D, file);

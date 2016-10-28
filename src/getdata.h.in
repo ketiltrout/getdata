@@ -1051,6 +1051,9 @@ extern int gd_include_affix(DIRFILE *dirfile, const char *file,
     int fragment_index, const char *prefix, const char *suffix,
     unsigned long int flags) gd_nonnull ((1,2));
 
+extern int gd_include_ns(DIRFILE *D, const char *file, int fragment_index,
+    const char *ns, unsigned long flags) gd_nonnull ((1,2));
+
 extern double gd_framenum(DIRFILE *dirfile, const char *field_code,
     double value) gd_nonnull ((1,2));
 

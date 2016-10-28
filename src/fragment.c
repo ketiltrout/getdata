@@ -404,13 +404,16 @@ static int _GD_CheckChangeNamespace(DIRFILE *D, const char *newns,
   unsigned u;
   int *ilist;
   char **c = *codes;
-  const ssize_t dnsl = newnsl - oldnsl;
+  ssize_t dnsl;
 
   dtrace("%p, \"%s\", %" PRIuSIZE ", %" PRIuSIZE ", %i, %p", D, newns, newnsl,
       oldnsl, i, codes);
 
-  if (newns == NULL)
-    newns = "";
+  dnsl = newnsl - oldnsl;
+  if (oldnsl == 0)
+    dnsl++; /* Because we need to add the missing '.' in this case */
+  else if (newnsl == 0)
+    dnsl--; /* Because we need to remove the '.' in this case */
 
   /* find all affected fragments */
   ni = _GD_SubFragmentList(D, i, &ilist);
@@ -443,9 +446,16 @@ static int _GD_CheckChangeNamespace(DIRFILE *D, const char *newns,
     if (c[u] == NULL)
       goto CHECKS_FAILED;
 
-    /* so much easier than dealing with affixes... */
-    strncpy(c[u], newns, newnsl);
-    strcpy(c[u] + newnsl, D->entry[i]->field + oldnsl);
+    if (oldnsl == 0)
+      /* Need to add a dot in this case */
+      sprintf(c[u], "%s.%s", newns, D->entry[i]->field); 
+    else if (newnsl == 0)
+      /* Need to delete a dot in this case */
+      strcpy(c[u], D->entry[i]->field + oldnsl + 1);
+    else { /* so much easier than dealing with affixes... */
+      strncpy(c[u], newns, newnsl);
+      strcpy(c[u] + newnsl, D->entry[i]->field + oldnsl);
+    }
 
     /* Check whether it already exists */
     if (_GD_FindField(D, c[u], D->entry, D->n_entries, 1, NULL)) {
@@ -484,38 +494,26 @@ const char *gd_fragment_namespace(DIRFILE *D, int index, const char *ns)
 
   if (ns) {
     unsigned u;
-    char **codes, *newns;
-    size_t newnsl;
+    char **codes, *newns, *pns;
+    size_t newnsl, pnsl;
 
     const char *oldns = D->fragment[index].ns;
     size_t oldnsl = D->fragment[index].nsl;
 
-    const char *pns = index > 0 ? D->fragment[D->fragment[index].parent].ns
-      : NULL;
-    size_t pnsl = index > 0 ? D->fragment[D->fragment[index].parent].nsl : 0;
-
-    if (index == 0) {
+    if (index == 0)
       _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
-      dreturn("%p", NULL);
-      return NULL;
-    }
-
-    if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+    else if ((D->flags & GD_ACCMODE) == GD_RDONLY)
       _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-      dreturn("%p", NULL);
-      return NULL;
-    }
-
-    if (D->fragment[D->fragment[index].parent].protection & GD_PROTECT_FORMAT) {
+    else if (D->fragment[D->fragment[index].parent].protection
+        & GD_PROTECT_FORMAT)
+    {
       _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
           D->fragment[D->fragment[index].parent].cname);
-      dreturn("%p", NULL);
-      return NULL;
-    }
-
-    if (_GD_ValidateField(ns, D->standards, 1, GD_VF_NS, NULL)) {
+    } else if (_GD_ValidateField(ns, D->standards, 1, GD_VF_NS, NULL))
       /* invalid namespace */
       _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, ns);
+
+    if (D->error) {
       dreturn("%p", NULL);
       return NULL;
     }
@@ -523,6 +521,9 @@ const char *gd_fragment_namespace(DIRFILE *D, int index, const char *ns)
     /* remove spurious leading dot */
     if (ns[0] == '.')
       ns++;
+
+    pns = D->fragment[D->fragment[index].parent].ns;
+    pnsl = D->fragment[D->fragment[index].parent].nsl;
 
     newnsl = strlen(ns);
 

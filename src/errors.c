@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2015 D. V. Wiebe
+ * Copyright (C) 2005-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -345,7 +345,7 @@ char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen) gd_nothrow
   bufend = buffer + buflen;
 
   if (s == -1) /* Unhandled error */
-    snprintf(buffer, buflen, UNKNOWN, D->error, D->suberror);
+    snprintf(buffer, buflen, UNKNOWN, -D->error, D->suberror);
   else {
     for (ip = error_string[s].format; *ip != '\0' && op < bufend - 1; ++ip) {
       if (*ip == '{') {

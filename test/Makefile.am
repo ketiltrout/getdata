@@ -188,8 +188,11 @@ FOFFS_TESTS=foffs_alter foffs_alter_all foffs_get foffs_move
 
 FRAGMENT_TESTS=fragment_affix fragment_affix_alter fragment_affix_alter2 \
 							 fragment_affix_alter_code fragment_affix_alter_nop \
-							 fragment_affix_dup fragment_index fragment_index_alias \
-							 fragment_name fragment_name_oor fragment_num fragment_parent
+							 fragment_affix_dup fragment_affix_ns fragment_index \
+							 fragment_index_alias fragment_name fragment_name_oor \
+							 fragment_ndotdots fragment_ndots fragment_ns fragment_ns0 \
+							 fragment_ns_add fragment_ns_add0 fragment_ns_alter \
+							 fragment_ns_del fragment_num fragment_parent
 
 GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_carray_c2r get_carray_slice get_char get_clincom get_complex128 \
@@ -237,10 +240,13 @@ HEADER_TESTS=header_complex header_off64t
 HIDE_TESTS=hide hide_bad hide_hidden hide_hidden_bad hide_unhide \
 					 hide_unhide_bad
 
-INCLUDE_TESTS=include_accmode include_affix include_auto include_cb \
-							include_creat include_ignore include_include include_index \
-							include_invalid include_nonexistent include_ns include_pc \
-							include_ref include_sub include_syntax
+INCLUDE_TESTS=include_accmode include_affix include_affix_ns include_auto \
+							include_cb include_creat include_ignore include_include \
+							include_index include_invalid include_nonexistent \
+							include_ndotdots include_ndots include_ns include_ns_dot \
+							include_ns_dotns include_ns_nil include_ns_null \
+							include_ns_prefix include_pc include_ref include_sub \
+							include_syntax
 
 INDEX_TESTS=index_domain index_index index_range index_s index_subset
 
@@ -341,23 +347,23 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_name_pedantic parse_ncols parse_ns parse_ns_dot \
 						parse_ns_dotdot parse_ns_dotdotns parse_ns_dotns parse_ns_ndotdots \
 						parse_ns_ndots parse_ns_nsdot parse_ns_nsdotdot parse_nsf \
-						parse_nsf_abs parse_nsf_dot parse_nsf_hide parse_nsf_index \
-						parse_nsf_meta parse_nsf_meta2 parse_nsf_par parse_nsf_ref \
-						parse_nsf_refabs parse_nsf_refrel parse_nsf_root parse_nsf_rpar \
-						parse_nsf_sub parse_octal_zero parse_phase parse_phase_ncols \
-						parse_phase_scalar parse_polynom parse_polynom_ncols1 \
-						parse_polynom_ncols2 parse_polynom_scalar parse_protect_all \
-						parse_protect_bad parse_protect_data parse_protect_format \
-						parse_protect_none parse_quote parse_quote_mismatch parse_raw \
-						parse_raw_char parse_raw_char_bad parse_raw_ncols parse_raw_scalar \
-						parse_raw_spf parse_raw_type parse_recip parse_ref \
-						parse_ref_nonexistent parse_sarray parse_sarray_long parse_sbit \
-						parse_scalar1 parse_scalar2 parse_scalar_repr parse_sindir \
-						parse_sort parse_string parse_string_ncols parse_string_null \
-						parse_utf8 parse_utf8_invalid parse_utf8_zero parse_version \
-						parse_version_89 parse_version_98 parse_version_include \
-						parse_version_permissive parse_version_p8 parse_version_p9 \
-						parse_version_slash parse_whitespace parse_window \
+						parse_nsf_abs parse_nsf_alias parse_nsf_dot parse_nsf_hide \
+						parse_nsf_index parse_nsf_meta parse_nsf_meta2 parse_nsf_par \
+						parse_nsf_ref parse_nsf_refabs parse_nsf_refrel parse_nsf_root \
+						parse_nsf_rpar parse_nsf_sub parse_octal_zero parse_phase \
+						parse_phase_ncols parse_phase_scalar parse_polynom \
+						parse_polynom_ncols1 parse_polynom_ncols2 parse_polynom_scalar \
+						parse_protect_all parse_protect_bad parse_protect_data \
+						parse_protect_format parse_protect_none parse_quote \
+						parse_quote_mismatch parse_raw parse_raw_char parse_raw_char_bad \
+						parse_raw_ncols parse_raw_scalar parse_raw_spf parse_raw_type \
+						parse_recip parse_ref parse_ref_nonexistent parse_sarray \
+						parse_sarray_long parse_sbit parse_scalar1 parse_scalar2 \
+						parse_scalar_repr parse_sindir parse_sort parse_string \
+						parse_string_ncols parse_string_null parse_utf8 parse_utf8_invalid \
+						parse_utf8_zero parse_version parse_version_89 parse_version_98 \
+						parse_version_include parse_version_permissive parse_version_p8 \
+						parse_version_p9 parse_version_slash parse_whitespace parse_window \
 						parse_window_ncols parse_window_op parse_window_scalar
 
 PROTECT_TESTS=protect_alter protect_alter_all protect_get

@@ -34,9 +34,8 @@ int main(void)
   const char *format_data =
     "/NAMESPACE ns\n"
     "data RAW UINT8 1\n"
-    "/REFERENCE data\n";
+    "/ALIAS alias data\n";
   int fd, e1, e2, r = 0;
-  const char *ref;
   DIRFILE *D;
 
   rmdirfile();
@@ -50,10 +49,8 @@ int main(void)
   e1 = gd_error(D);
   CHECKI(e1,0);
 
-  ref = gd_reference(D, NULL);
-  e2 = gd_error(D);
+  e2 = gd_validate(D, "ns.alias");
   CHECKI(e2,0);
-  CHECKS(ref, "ns.data");
   gd_discard(D);
 
   unlink(format);

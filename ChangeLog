@@ -1,3 +1,24 @@
+2016-09-27   D. V. Wiebe <getdata@ketiltrout.net> svn:1107
+	* src/error.c (gd_error_string): Use -D->error in the UNKNOWN error case.
+
+	* src/fragment.c (_GD_CheckChangeNamespace): Handle both oldns == NULL
+	and newns == NULL, by adding or deleting the dot when appropriate.  Also,
+	don't crash when pns == NULL;
+	* src/include.c (gd_include_ns): Added.
+
+	* test/include_affix_ns.c: Renamed from include_ns.c
+	* fragment_affix_ns.c test/fragment_ns.c test/fragment_ns0.c
+	test/fragment_ns_add.c test/fragment_ns_add0.c test/fragment_ns_alter.c
+	test/fragment_ns_del.c test/include_affix_ns.c test/include_ndotdots.c
+	test/include_ndots.c test/include_ns_dot.c test/include_ns_dotns.c
+	test/include_ns_nil.c test/include_ns.c test/include_ns_null.c
+	test/include_ns_prefix.c test/fragment_ndotdots.c test/fragment_ndots.c:
+	Added.
+	* test/parse_nsf_alias.c: Fix and add to test suite.
+
+	* test/test.h: Don't segfault in CHECKS tests if n == NULL.  (Which
+	shouldn't be true, but can occur when there are bugs in the library.)
+
 2016-09-26   D. V. Wiebe <getdata@ketiltrout.net> svn:1106
 	* configure.ac: Make --enable-modules the default.
 

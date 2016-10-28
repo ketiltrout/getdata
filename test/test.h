@@ -141,14 +141,16 @@ int gd_system(const char* command)
 #define CHECKPi(i,n)   CHECKi(i,(n) != NULL,n,"%p","%s",n,"NULL")
 #define CHECKPN(n)     CHECK((n) == NULL,n,"%p","%s",n,"non-NULL")
 #define CHECKPNi(i,n)  CHECKi(i,(n) == NULL,n,"%p","%s",n,"non-NULL")
-#define CHECKS(n,v)    CHECK(strcmpn((n),(v)),n,"\"%s\"","\"%s\"",(n),(v));
-#define CHECKSi(i,n,v) CHECKi(i,strcmpn((n),(v)),n,"\"%s\"","\"%s\"",(n),(v));
-#define CHECKSp(n,v)   CHECK(strncmp((n),(v), sizeof(v) - 1),n,"\"%s\"",\
+#define CHECKS(n,v)    CHECK((n == NULL) || strcmpn((n),(v)),n,"\"%s\"",\
     "\"%s\"",(n),(v));
-#define CHECKBOS(n,v)  CHECK(strncmp((n),(v),strlen(v)-1),n,"\"%s\"","\"%s\"",\
-    (n),(v));
-#define CHECKSS(n,v)  CHECK(strstr((n),(v)) == NULL,n,"\"%s\"","...\"%s\"...",\
-    (n),(v));
+#define CHECKSi(i,n,v) CHECKi(i,(n == NULL) || strcmpn((n),(v)),n,"\"%s\"",\
+    "\"%s\"",(n),(v));
+#define CHECKSp(n,v)   CHECK((n == NULL) || strncmp((n),(v), sizeof(v) - 1),n,\
+    "\"%s\"","\"%s\"",(n),(v));
+#define CHECKBOS(n,v)  CHECK((n == NULL) || strncmp((n),(v),strlen(v)-1),n,\
+    "\"%s\"","\"%s\"",(n),(v));
+#define CHECKSS(n,v)  CHECK((n == NULL) || strstr((n),(v)) == NULL,n,\
+    "\"%s\"","...\"%s\"...",(n),(v));
 #define CHECKEOS(n,v)  CHECK(strcmp((n) + strlen(n) - sizeof(v) + 1,(v)),n,\
     "...\"%s\"","\"%s\"",(n) + strlen(n) - sizeof(v) + 1,(v));
 #define CHECKU(n,v)    CHECK((n) != (v),n,"%" PRIu64,"%" PRIu64,\

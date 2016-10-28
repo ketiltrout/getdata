@@ -1,4 +1,4 @@
-/* Copyright (C) 2014, 2016 D. V. Wiebe
+/* Copyright (C) 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -25,9 +25,10 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
-  const char *format_data = "#\n";
+  const char *format_data = "INCLUDE format1 ns.\n";
   const char *format1_data = "data RAW UINT8 11\n";
-  int fd, error, r = 0, v;
+  int fd, e1, e2, r = 0;
+  const char *ns;
   DIRFILE *D;
 
   rmdirfile();
@@ -42,11 +43,15 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  gd_include_ns(D, "format1", 0, "ns", 0);
-  error = gd_error(D);
-  CHECKI(error, 0);
-  v = gd_validate(D, "ns.data");
-  CHECKI(v, 0);
+  ns = gd_fragment_namespace(D, 1, "");
+  e1 = gd_error(D);
+
+  CHECKS(ns,"");
+  CHECKI(e1,0);
+
+  e2 = gd_validate(D, "data");
+  CHECKI(e2,0);
+
   gd_discard(D);
 
   unlink(format1);

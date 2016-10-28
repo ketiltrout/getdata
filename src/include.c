@@ -487,6 +487,33 @@ int gd_include(DIRFILE* D, const char* file, int fragment_index,
   return new_fragment;
 }
 
+int gd_include_ns(DIRFILE *D, const char *file, int fragment_index,
+    const char *nsin, unsigned long flags)
+{
+  int new_fragment;
+  char *ns;
+
+  dtrace("%p, \"%s\", %i, \"%s\", 0x%lX", D, file, fragment_index, nsin, flags);
+
+  if (nsin && (nsin[0] || nsin[strlen(nsin) - 1] != '.')) {
+    ns = _GD_Malloc(D, strlen(nsin) + 2);
+    if (D->error)
+      GD_RETURN_ERROR(D);
+
+    sprintf(ns, "%s.", nsin);
+  } else
+    ns = nsin;
+
+  new_fragment = gd_include_affix(D, file, fragment_index, ns, NULL, flags);
+
+  if (ns != nsin)
+    free(ns);
+
+  dreturn("%i", new_fragment);
+  return new_fragment;
+}
+  
+
 static int _GD_CollectFragments(DIRFILE* D, int** f, int fragment, int nf)
 {
   int i;

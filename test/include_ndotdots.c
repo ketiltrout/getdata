@@ -27,7 +27,7 @@ int main(void)
   const char *format1 = "dirfile/format1";
   const char *format_data = "#\n";
   const char *format1_data = "data RAW UINT8 11\n";
-  int fd, error, r = 0, v;
+  int fd, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
@@ -41,12 +41,9 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  gd_include_ns(D, "format1", 0, "ns", 0);
-  error = gd_error(D);
-  CHECKI(error, 0);
-  v = gd_validate(D, "ns.data");
-  CHECKI(v, 0);
+  D = gd_open(filedir, GD_RDWR);
+  error = gd_include_ns(D, "format1", 0, "n..s", 0);
+  CHECKI(error, GD_E_FORMAT);
   gd_discard(D);
 
   unlink(format1);
