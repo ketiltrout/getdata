@@ -87,6 +87,9 @@
 extern "C" {
 #endif
 
+/* initialiser */
+void gdmx_initialise(void);
+
 void gdmx_err(DIRFILE *, int);
 mxClassID gdmx_classid(gd_type_t);
 void gdmx_free_entry(gd_entry_t *);

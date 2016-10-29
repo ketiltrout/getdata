@@ -83,6 +83,17 @@ struct gdp_dirfile_t {
 
 static DIRFILE *gdp_invalid = NULL;
 
+/* Newx wrapper for the C library to use */
+static void *gdp_malloc(size_t n)
+{
+  void *ptr;
+  dtrace("%zu", n);
+
+  Newx(ptr, n, char);
+
+  dreturn("%p", ptr);
+  return ptr;
+}
 
 /* sv might be NULL, indicating undef */
 static gd_type_t gdp_get_type(SV **sv, const char *pkg, const char *func)
@@ -120,7 +131,7 @@ static const char **gdp_convert_const_avpv(SV *src, size_t *len_out,
     AV *av = (AV*)SvRV(src);
     I32 i, len = av_len(av);
 
-    dst = safemalloc(sizeof(char*) * (1 + len));
+    Newx(dst, 1 + len, const char*);
     for (i = 0; i <= len; ++i) {
       SV **sv = av_fetch(av, i, 0);
       if (sv == NULL || SvTYPE(*sv) != SVt_PV) {
@@ -152,7 +163,7 @@ static const char **gdp_convert_strarr(size_t *len_out,  I32 items, I32 ax,
   if (items - offs > 1 || SvTYPE(ST(offs)) == SVt_PVAV) {
     I32 i, len;
     len = items - offs;
-    dst = safemalloc(sizeof(char*) * (items - offs));
+    Newx(dst, items - offs, const char*);
     for (i = 0; i < len; ++i) {
       SV *sv = ST(offs + i);
       if (SvTYPE(sv) != SVt_PV) {
@@ -278,7 +289,7 @@ static int gdp_fetch_cmp_list(GD_DCOMPLEXV(c), HV *hv, int partial, char key,
         key);
   }
 
-  memset(have, 0, sizeof(int) * (GD_MAX_POLYORD + 1));
+  Zero(have, GD_MAX_POLYORD + 1, int);
   for (i = 0; i < max; ++i)
     if (mask & (1 << i))
       have[i] = 1;
@@ -346,7 +357,7 @@ static int gdp_fetch_in_fields(char **in_fields, SV *sv, int partial, int min,
   } else {
     int have[GD_MAX_LINCOM * 2];
 
-    memset(have, 0, sizeof(int) * GD_MAX_LINCOM * 2);
+    Zero(have, GD_MAX_LINCOM * 2, int);
 
     for (i = 0; i < GD_MAX_LINCOM; ++i) {
       v = av_fetch((AV*)vv, i, 0);
@@ -447,9 +458,9 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const gd_entry_t *old_E,
   const int partial = (old_E != NULL);
 
   if (partial)
-    memcpy(E, old_E, sizeof(gd_entry_t));
+    StructCopy(old_E, E, gd_entry_t);
   else
-    memset(E, 0, sizeof(gd_entry_t));
+    Zero(E, 1, gd_entry_t);
 
   /* de-reference as needed */
   while (SvROK(sv))
@@ -763,7 +774,7 @@ static struct gdp_din gdp_convert_data(SV *d, I32 items, I32 ax, size_t idx,
   }
 
   if (din.arg_type != GDP_DATA_IN_PACK)
-    din.data_in = safemalloc(din.nsamp * GD_SIZE(din.type));
+    Newx(din.data_in, din.nsamp * GD_SIZE(din.type), char);
 
   if (din.arg_type == GDP_DATA_IN_LIST) {
     for (i = idx; i < items; ++i)
@@ -794,7 +805,7 @@ static gd_type_t gdp_to_voidp(void *dest, SV *src, gd_type_t hint,
 
   /* treat undef as zero */
   if (src == undef) {
-    memset(dest, 0, 1);
+    Zero(dest, 1, char);
     type = GD_UINT8;
   } else {
     int cmp = 0;
@@ -1028,7 +1039,7 @@ static int gdp_parser_callback(gd_parser_data_t *pdata, void *extra)
         if (SvTYPE(*val) == SVt_IV) {
           sem = SvIV(*val);
         } else if (SvTYPE(*val) == SVt_PV) {
-          pdata->line = strdup(SvPV_nolen(*val));
+          pdata->line = savepv(SvPV_nolen(*val));
           sem = GD_SYNTAX_RESCAN;
         } else {
           croak("GetData: bad data type in array returned by parser callback.");
@@ -1045,7 +1056,7 @@ static int gdp_parser_callback(gd_parser_data_t *pdata, void *extra)
 
         if (SvTYPE(*val0) == SVt_IV && SvTYPE(*val1) == SVt_PV) {
           sem = SvIV(*val0);
-          pdata->line = strdup(SvPV_nolen(*val1));
+          pdata->line = savepv(SvPV_nolen(*val1));
         } else {
           croak("GetData: bad data type in array returned by parser callback.");
           return GD_SYNTAX_ABORT; /* ca'n't get here */
@@ -1053,7 +1064,7 @@ static int gdp_parser_callback(gd_parser_data_t *pdata, void *extra)
       }
       break;
     case SVt_PV:
-    pdata->line = strdup(SvPV_nolen(ret));
+    pdata->line = savepv(SvPV_nolen(ret));
     sem = GD_SYNTAX_RESCAN;
     break;
     default:
@@ -1168,6 +1179,7 @@ MODULE = GetData  PACKAGE = GetData
 PROTOTYPES: ENABLE
 
 BOOT:
+  gd_alloc_funcs(gdp_malloc, safefree);
   gdp_invalid = gd_invalid_dirfile();
 
 void
@@ -1209,10 +1221,10 @@ open(dirfilename, flags, sehandler=undef, extra=undef)
   SV * sehandler
   SV * extra
   PREINIT:
-    struct gdp_dirfile_t *gdp_dirfile =
-    (struct gdp_dirfile_t *)safemalloc(sizeof(struct gdp_dirfile_t));
+    struct gdp_dirfile_t *gdp_dirfile;
   CODE:
     dtrace("\"%s\", %lu, %p, %p", dirfilename, flags, sehandler, extra);
+    Newx(gdp_dirfile, 1, struct gdp_dirfile_t);
     if (sehandler == undef) {
       gdp_dirfile->cbdata.func = NULL;
       gdp_dirfile->cbdata.data = NULL;
@@ -1233,10 +1245,10 @@ open(dirfilename, flags, sehandler=undef, extra=undef)
 DIRFILE *
 invalid_dirfile()
   PREINIT:
-    struct gdp_dirfile_t *gdp_dirfile =
-    (struct gdp_dirfile_t *)safemalloc(sizeof(struct gdp_dirfile_t));
+    struct gdp_dirfile_t *gdp_dirfile;
   CODE:
     dtracevoid();
+    Newx(gdp_dirfile, 1, struct gdp_dirfile_t);
     gdp_dirfile->cbdata.func = NULL;
     gdp_dirfile->cbdata.data = NULL;
 
@@ -1271,7 +1283,7 @@ get_carray(dirfile, field_code, return_type)
       }
     } else {
       size_t len = gd_array_len(dirfile, field_code);
-      data_out = safemalloc(GD_SIZE(return_type) * len);
+      Newx(data_out, GD_SIZE(return_type) * len, char);
       gd_get_carray(dirfile, field_code, return_type, data_out);
 
       GDP_UNDEF_ON_ERROR(safefree(data_out));
@@ -1312,7 +1324,7 @@ get_carray_slice(dirfile, field_code, start, len, return_type)
         XSRETURN_UNDEF;
       }
     } else {
-      data_out = safemalloc(GD_SIZE(return_type) * len);
+      Newx(data_out, GD_SIZE(return_type) * len, char);
       gd_get_carray_slice(dirfile, field_code, start, len, return_type,
         data_out);
 
@@ -1333,14 +1345,13 @@ get_constant(dirfile, field_code, return_type)
   const char * field_code
   gd_type_t return_type
   PREINIT:
-    void *data_out = NULL;
+    char data_out[16];
     GDP_DIRFILE_ALIAS;
   ALIAS:
     GetData::Dirfile::get_constant = 1
   CODE:
     gd_type_t type;
     dtrace("%p, \"%s\", %03x", dirfile, field_code, return_type);
-    data_out = safemalloc(16);
 
     if (return_type == GD_NULL)
       type = GD_NULL;
@@ -1355,10 +1366,9 @@ get_constant(dirfile, field_code, return_type)
 
     gd_get_constant(dirfile, field_code, type, data_out);
 
-    GDP_UNDEF_ON_ERROR(safefree(data_out));
+    GDP_UNDEF_ON_ERROR();
 
     if (type == GD_NULL) {
-      safefree(data_out);
       dreturnvoid();
       XSRETURN_UNDEF;
     } else if (type == GD_COMPLEX128)
@@ -1372,7 +1382,6 @@ get_constant(dirfile, field_code, return_type)
   OUTPUT:
     RETVAL
   CLEANUP:
-    safefree(data_out);
     dreturn("%p", RETVAL);
 
 void
@@ -1612,7 +1621,7 @@ error_string(dirfile)
   OUTPUT:
     RETVAL
   CLEANUP:
-    free(s);
+    safefree(s);
     dreturn("%p", RETVAL);
 
 AV *
@@ -1711,7 +1720,7 @@ get_string(dirfile, field_code)
 
     /* get string length */
     size_t len = gd_get_string(dirfile, field_code, 0, NULL);
-    RETVAL = safemalloc(len);
+    Newx(RETVAL, len, char);
 
     /* get string */
     gd_get_string(dirfile, field_code, len, RETVAL);
@@ -1801,7 +1810,8 @@ getdata(dirfile, field_code, first_frame, first_samp, num_frames, num_samp, \
     }
 
     if (t == GD_SINDIR_ENTRY) {
-      const char **data_out = safemalloc(sizeof(*data_out) * num_samp);
+      const char **data_out;
+      Newx(data_out, num_samp, const char*);
 
       len = gd_getdata64(dirfile, field_code, first_frame, first_samp, 0,
           num_samp, GD_STRING, data_out);
@@ -1834,7 +1844,7 @@ getdata(dirfile, field_code, first_frame, first_samp, num_frames, num_samp, \
         GDP_PUSHuv(len);
       }
     } else {
-      data_out = safemalloc(GD_SIZE(return_type) * num_samp);
+      Newx(data_out, GD_SIZE(return_type) * num_samp, char);
 
       len = gd_getdata64(dirfile, field_code, first_frame, first_samp, 0,
           num_samp, return_type, data_out);
@@ -1917,10 +1927,10 @@ field_list_by_type(dirfile, type)
     dreturnvoid();
 
 void
-entry_list(dirfile, parent, fragment, type, flags)
+entry_list(dirfile, fragment, parent, type, flags)
     DIRFILE * dirfile
-    gdp_char * parent
     gdp_ffff_t fragment
+    gdp_char * parent
     gdp_int    type
     gdp_uint_t flags
   PREINIT:
@@ -1928,13 +1938,13 @@ entry_list(dirfile, parent, fragment, type, flags)
   ALIAS:
     GetData::Dirfile::entry_list = 1
   PPCODE:
-    dtrace("%p, \"%s\", %i, %i, %u; %i", dirfile, parent, fragment, type, flags,
+    dtrace("%p, %i, \"%s\", %i, %u; %i", dirfile, fragment, parent, type, flags,
       (int)GIMME_V);
 
     /* in array context, return the field list, otherwise return nfields */
     if (GIMME_V == G_ARRAY) {
       int i;
-      const char **el = gd_entry_list(dirfile, parent, fragment, type, flags);
+      const char **el = gd_entry_list(dirfile, fragment, parent, type, flags);
 
       GDP_UNDEF_ON_ERROR();
 
@@ -1942,7 +1952,7 @@ entry_list(dirfile, parent, fragment, type, flags)
       for (i = 0; el[i]; ++i)
         GDP_PUSHpvz(el[i]);
     } else {
-      unsigned int ne = gd_nentries(dirfile, parent, fragment, type, flags);
+      unsigned int ne = gd_nentries(dirfile, fragment, parent, type, flags);
 
       GDP_UNDEF_ON_ERROR();
 
@@ -2476,7 +2486,7 @@ strtok(dirfile, string)
 
       EXTEND(sp, 1);
       GDP_PUSHpvz(token);
-      free(token);
+      safefree(token);
     }
 
     dreturnvoid();
@@ -2494,8 +2504,9 @@ include(dirfile, file, fragment_index, flags, prefix=NULL, suffix=NULL)
 	ALIAS:
 		GetData::Dirfile::include = 1
 	CODE:
-		dtrace("%p, \"%s\", %i, %lu, \"%s\", \"%s\"", dirfile, file, fragment_index,
-        flags, prefix, suffix);
+		dtrace("%p, \"%s\", %i, %lu, \"%s\", \"%s\", \"%s\"", dirfile, file,
+        fragment_index, flags, prefix, suffix);
+
 		RETVAL = gd_include_affix(dirfile, file, fragment_index, prefix, suffix,
         flags);
 		GDP_UNDEF_ON_ERROR();
@@ -2527,15 +2538,15 @@ get_sarray(dirfile, field_code)
   DIRFILE * dirfile
   const char * field_code
   PREINIT:
-    size_t i;
+    size_t i, len;
     const char **data_out = NULL;
     GDP_DIRFILE_ALIAS;
   ALIAS:
     GetData::Dirfile::get_sarray = 1
   PPCODE:
     dtrace("%p, \"%s\"; %i", dirfile, field_code, (int)GIMME_V);
-    size_t len = gd_array_len(dirfile, field_code);
-    data_out = safemalloc(sizeof(*data_out) * len);
+    len = gd_array_len(dirfile, field_code);
+    Newx(data_out, len, const char*);
     gd_get_sarray(dirfile, field_code, data_out);
 
     GDP_UNDEF_ON_ERROR(safefree(data_out));
@@ -2566,7 +2577,7 @@ get_sarray_slice(dirfile, field_code, start, len);
   PPCODE:
     dtrace("%p, \"%s\", %u, %" PRIuSIZE "; %i", dirfile, field_code, start, len,
         (int)GIMME_V);
-    data_out = safemalloc(sizeof(*data_out) * len);
+    Newx(data_out, len, const char*);
     gd_get_sarray_slice(dirfile, field_code, start, len, data_out);
 
     GDP_UNDEF_ON_ERROR(safefree(data_out));

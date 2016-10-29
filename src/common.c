@@ -146,7 +146,7 @@ gd_entry_t *_GD_FindField(const DIRFILE *restrict D,
 
       if (E && E->field_type == GD_ALIAS_ENTRY && E->e->entry[0]) {
         size_t plen = strlen(E->e->entry[0]->field);
-        new_code = (char*)malloc(plen + strlen(ptr) + 2);
+        new_code = malloc(plen + strlen(ptr) + 2);
         if (new_code) {
           strcpy(new_code, E->e->entry[0]->field);
           new_code[plen] = '/';
@@ -994,7 +994,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
   if (car && !_GD_AbsPath(cdr)) {
     if (!_GD_AbsPath(car)) {
       /* car is not abosulte -- don't bother trying to do anything fancy */
-      res = (char*)malloc(strlen(car) + strlen(cdr) + 2);
+      res = malloc(strlen(car) + strlen(cdr) + 2);
       if (res == NULL) {
         dreturn("%p", NULL);
         return NULL;
@@ -1022,7 +1022,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
   } else if (_GD_AbsPath(cdr)) {
     /* cdr is absolute: make res "/" and copy cdr relative to / into work;
      * ignore car */
-    res = (char*)malloc(res_size = PATH_MAX);
+    res = malloc(res_size = PATH_MAX);
     if (res == NULL) {
       dreturn("%p", NULL);
       return NULL;
@@ -1046,8 +1046,8 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
      * work CWD/cdr, relative to / if getcwd returned an absolute path.  If
      * getcwd fails, just use cdr, and abandon hope of an absolute path.
      */
-    res = (char*)malloc(res_size = PATH_MAX);
-    work = (char*)malloc(PATH_MAX);
+    res = malloc(res_size = PATH_MAX);
+    work = malloc(PATH_MAX);
     if (res == NULL || work == NULL) {
       free(res);
       dreturn("%p", NULL);
@@ -1067,7 +1067,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
       res_root = res_len = 0;
     } else {
       if ((len = strlen(work) + 2 + strlen(cdr)) < PATH_MAX) {
-        ptr = (char*)realloc(work, len);
+        ptr = realloc(work, len);
         if (ptr == NULL) {
           free(res);
           free(work);
@@ -1127,7 +1127,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
       /* a path element, copy it to res */
       len = strlen(cur) + 1;
       if (res_len + len >= res_size) {
-        ptr = (char*)realloc(res, res_size += (len < 1000) ? 1000 : len);
+        ptr = realloc(res, res_size += (len < 1000) ? 1000 : len);
         if (ptr == NULL) {
           free(res);
           free(work);
@@ -1153,7 +1153,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
             if (*end) {
               len = strlen(end) + 1;
               if (res_len + len >= res_size) {
-                ptr = (char*)realloc(res, res_size += len);
+                ptr = realloc(res, res_size += len);
                 if (ptr == NULL) {
                   free(res);
                   free(work);
@@ -1241,7 +1241,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
               len--;
             }
 
-            new_work = (char*)malloc(len);
+            new_work = malloc(len);
             if (new_work == NULL) {
               free(res);
               free(work);
@@ -1264,7 +1264,7 @@ _GD_CanonicalPath_DONE:
   free(work);
 
   /* trim */
-  ptr = (char*)realloc(res, res_len + 1);
+  ptr = realloc(res, res_len + 1);
   if (ptr)
     res = ptr;
 
@@ -1426,6 +1426,11 @@ void _GD_ReleaseDir(DIRFILE *D, int dirfd)
 
   dreturnvoid();
 }
+
+/* Caller's memory manager */
+void *(*_GD_CMalloc)(size_t) = malloc;
+void (*_GD_CFree)(void*) = free;
+char *(*_GD_CStrdup)(const char*) = strdup;
 
 /* allocation boilerplates */
 void *_GD_Malloc(DIRFILE *D, size_t size)

@@ -1,4 +1,68 @@
-2016-09-27   D. V. Wiebe <getdata@ketiltrout.net> svn:1107
+2016-09-29   D. V. Wiebe <getdata@ketiltrout.net> svn:1109
+	* bindings/cxx/dirfile.cpp (Dirfile::IncludeNS) bindings/cxx/fragment.cpp
+	(Fragment::SetNamespace) bindings/cxx/getdata/fragment.h (Namespace)
+	bindings/f77/fgetdata.c (GDFRNS GDINCN) bindings/f77/getdata.f90.in
+	(fgd_include_ns fgd_fragment_namespace fgd_alter_namespace)
+	bindings/idl/getdata.c (gdidl_fragment_namespace)
+	bindings/matlab/gd_fragment_namespace.c bindings/matlab/gd_include_ns.c
+	bindings/perl/simple_funcs.xsin (include_ns fragment_namespace)
+	bindings/php/getdata.c (gd_fragment_namespace gd_include_ns)
+	bindings/python/pyfragment.c (gdpy_fragment_getns gdpy_fragment_setns): Added.
+	* bindings/idl/getdata.c (gdidl_include) bindings/python/pydirfile.c
+	(gdpy_dirfile_include): Handle both prefix and namespace.
+	* bindings/cxx/fragment.cpp (Fragment::Fragment): Initialise ns.
+	* bindings/cxx/fragment.cpp (Fragment::SetPrefix): Reload ns.
+
+	* bindings/cxx/dirfile.cpp (Dirfile::NEntries Dirfile::EntryList)
+	bindings/f77/fgetdata.c (GDNENT GDENTX GDENTN) bindings/f77/getdata.f90.in
+	(fgd_nentries fgd_entry_list) bindings/idl/getdata.c (gdidl_get_field_list
+	gdidl_get_nfields) bindings/matlab/gd_entry_list.c
+	bindings/matlab/gd_nentries.c bindings/perl/src/GetData.xs (entry_list)
+	bindings/php/getdata.c (gd_entry_list gd_nentries)
+	bindings/python/pydirfile.c (gdpy_dirfile_nentries gdpy_dirfile_entrylist)
+	src/field_list.c (gd_entry_list) src/nfields.c (gd_nentries):
+	Swap order of fragment and parent arguments.
+
+	* src/fragment.c: fix GD_E_BAD_INDEX error initialisation.
+
+	* bindings/matlab/gd_include.c: Make flags optional.
+
+	* bindings/idl/getdata.c (gdidl_get_raw_filename)
+	bindings/matlab/gd_linterp_tablename.c bindings/matlab/gd_raw_filename.c
+	bindings/php/getdata.c (gd_linterp_tablename gd_raw_filename):
+	Free string returned by C API.
+
+	* bindings/cxx/test/big_test.cpp bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro
+	bindings/matlab/test/big_test.m bindings/perl/t/big_test.t
+	bindings/php/test/big_test.php bindings/python/test/big_test.py:
+	Added tests 302, 303, and 304.
+
+	* src/common.c: Initialise _GD_CMalloc, _GD_CFree, _GD_CStrdup.
+	* src/globals.c (_GD_CallerStrdup gd_alloc_funcs): Added.
+	* src/entry.c (_GD_FreeE): Use the correct free function in all cases.
+	* src/entry.c (gd_raw_filename gd_linterp_tablename) src/errors.c
+	(gd_error_string) src/fragment.c (gd_fragment_affixes) src/parse.c
+	(gd_strtok): Move result to caller's heap, if necessary.
+	* src/parse.c (_GD_ParseFragment): Move a callback-returned string off
+	the caller's heap, if necessary.
+	* src/errors.c (_GD_SetError2): Call _GD_CFree.
+	* src/entry.c (gd_entry): Allocate strings on the caller's heap.
+	* bindings/matlab/matlab.c (gdmx_initialise): Added.
+	* bindings/matlab/gd_invalid_dirfile.c bindings/matlab/gd_open.c: Call
+	gdmx_initialise;
+	* bindings/perl/src/GetData.xs (gdp_malloc): Added.
+	* bindings/perl/src/GetData.xs: Call gd_alloc_funcs() in BOOT; use Newx,
+	savepv, &c. everywhere appropriate.
+	* bindings/python/pygetdata.c (gdpy_strdup): Added.
+	* bindings/python/pygetdata.c: (GDPY_MODINITFUNC): Call gd_alloc_funcs.
+	* man/gd_alloc_funcs.3: Added.
+
+	* bindings/matlab/matlab.c (gdmx_err): Errors don't need to be globals.
+
+	* src/getdata.h.in: Remove the GetData-0.6 API (GD_FUNCTION_ALIASES).
+
+2016-09-27   D. V. Wiebe <getdata@ketiltrout.net> svn:1108
 	* src/error.c (gd_error_string): Use -D->error in the UNKNOWN error case.
 
 	* src/fragment.c (_GD_CheckChangeNamespace): Handle both oldns == NULL

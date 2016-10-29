@@ -263,14 +263,14 @@ static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
   return (const char **)el;
 }
 
-const char **gd_entry_list(DIRFILE* D, const char *parent, int fragment,
+const char **gd_entry_list(DIRFILE* D, int fragment, const char *parent,
     int type, unsigned int flags) gd_nothrow
 {
   const char **el;
   size_t offs = 0;
   struct gd_private_entry_ *p = NULL;
 
-  dtrace("%p, \"%s\", %i, %i, %u", D, parent, fragment, type, flags);
+  dtrace("%p, %i, \"%s\", %i, %u", D, fragment, parent, type, flags);
 
   GD_RETURN_IF_INVALID(D, "%p", NULL);
 
@@ -695,7 +695,7 @@ const char **gd_field_list_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
   const char** el;
   dtrace("%p, 0x%X", D, type);
 
-  el = gd_entry_list(D, NULL, GD_ALL_FRAGMENTS, type, 0);
+  el = gd_entry_list(D, GD_ALL_FRAGMENTS, NULL, type, 0);
   dreturn("%p", el);
   return el;
 }
@@ -705,7 +705,7 @@ const char **gd_vector_list(DIRFILE* D) gd_nothrow
   const char **el;
   dtrace("%p", D);
 
-  el = gd_entry_list(D, NULL, GD_ALL_FRAGMENTS, GD_VECTOR_ENTRIES, 0);
+  el = gd_entry_list(D, GD_ALL_FRAGMENTS, NULL, GD_VECTOR_ENTRIES, 0);
   dreturn("%p", el);
   return el;
 }
@@ -716,7 +716,7 @@ const char **gd_field_list(DIRFILE* D) gd_nothrow
 
   dtrace("%p", D);
 
-  el = gd_entry_list(D, NULL, GD_ALL_FRAGMENTS, GD_ALL_ENTRIES, 0);
+  el = gd_entry_list(D, GD_ALL_FRAGMENTS, NULL, GD_ALL_ENTRIES, 0);
   dreturn("%p", el);
   return el;
 }
@@ -777,7 +777,7 @@ const char **gd_mfield_list_by_type(DIRFILE* D, const char* parent,
   const char **el;
   dtrace("%p, \"%s\", 0x%X", D, parent, type);
 
-  el = gd_entry_list(D, parent, GD_ALL_FRAGMENTS, type, 0);
+  el = gd_entry_list(D, GD_ALL_FRAGMENTS, parent, type, 0);
   dreturn("%p", el);
   return el;
 }
@@ -787,7 +787,7 @@ const char **gd_mvector_list(DIRFILE* D, const char* parent) gd_nothrow
   const char **el;
   dtrace("%p, \"%s\"", D, parent);
 
-  el = gd_entry_list(D, parent, GD_ALL_FRAGMENTS, GD_VECTOR_ENTRIES, 0);
+  el = gd_entry_list(D, GD_ALL_FRAGMENTS, parent, GD_VECTOR_ENTRIES, 0);
   dreturn("%p", el);
   return el;
 }
@@ -797,7 +797,7 @@ const char **gd_mfield_list(DIRFILE* D, const char* parent) gd_nothrow
   const char **el;
   dtrace("%p, \"%s\"", D, parent);
 
-  el = gd_entry_list(D, parent, GD_ALL_FRAGMENTS, GD_ALL_ENTRIES, 0);
+  el = gd_entry_list(D, GD_ALL_FRAGMENTS, parent, GD_ALL_ENTRIES, 0);
   dreturn("%p", el);
   return el;
 }

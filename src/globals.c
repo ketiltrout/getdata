@@ -151,3 +151,43 @@ void gd_mplex_lookback(DIRFILE *D, int lookback) gd_nothrow
 
   dreturnvoid();
 }
+
+/* Used only when _GD_CMalloc isn't malloc(3), and always via _GD_CStrdup */
+static __attribute_malloc__ char *_GD_CallerStrdup(const char *str)
+{
+  char *ptr;
+  size_t len;
+  dtrace("%s", str);
+
+  len = strlen(str) + 1;
+  ptr = _GD_CMalloc(len);
+  if (ptr)
+    memcpy(ptr, str, len);
+
+  dreturn("%p", ptr);
+  return ptr;
+}
+
+void gd_alloc_funcs(void *(*malloc_func)(size_t),
+    void (*free_func)(void*)) gd_nothrow
+{
+  dtrace("%p, %p", malloc_func, free_func);
+
+  if (malloc_func == NULL)
+    _GD_CMalloc = malloc;
+  else
+    _GD_CMalloc = malloc_func;
+
+  if (free_func == NULL)
+    _GD_CFree = free;
+  else
+    _GD_CFree = free_func;
+
+  /* Divert strdup if necessary */
+  if (_GD_CMalloc == malloc)
+    _GD_CStrdup = strdup;
+  else
+    _GD_CStrdup = _GD_CallerStrdup;
+
+  dreturnvoid();
+}

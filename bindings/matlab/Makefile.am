@@ -56,11 +56,11 @@ mexfiles=gd_add gd_add_alias \
 				 gd_discard gd_encoding gd_encoding_support gd_endianness \
 				 gd_entry gd_entry_list gd_entry_type gd_eof \
 				 gd_error gd_error_string gd_flags gd_flush gd_fragment_affixes \
-				 gd_fragment_index gd_fragmentname \
+				 gd_fragment_index gd_fragmentname gd_fragment_namespace \
 				 gd_framenum gd_frameoffset gd_get_carray gd_get_carray_slice \
 				 gd_getdata gd_get_sarray gd_get_sarray_slice \
-				 gd_get_string gd_hidden gd_hide gd_include gd_invalid_dirfile \
-				 gd_linterp_tablename gd_madd gd_madd_alias \
+				 gd_get_string gd_hidden gd_hide gd_include gd_include_ns \
+				 gd_invalid_dirfile gd_linterp_tablename gd_madd gd_madd_alias \
 				 gd_madd_carray gd_madd_const gd_madd_sarray \
 				 gd_madd_spec gd_madd_string \
 				 gd_malter_spec gd_mcarrays \
@@ -119,4 +119,4 @@ getdata_constants.m: ../make_parameters
 	cd .. && ${MAKE} make_parameters
 
 clean-local:
-	rm -rf $(nodist_matlab_SCRIPTS) *~
+	rm -rf $(nodist_matlab_SCRIPTS) *~ *.gcno

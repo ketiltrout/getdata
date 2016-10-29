@@ -2,15 +2,15 @@ function nvectors = gd_nvectors(D)
 % GD_NVECTORS  Retrieve a count of fields
 %
 %   GD_NVECTORS(DIRFILE)
-%             is equivalent to calling GD_NENTRIES(DIRFILE,0, ...
-%                                          GD.ALL_FRAGMENTS,GD.VECTOR_ENTRIES,0)
+%             is equivalent to calling GD_NENTRIES(DIRFILE,GD.ALL_FRAGMENTS, ...
+%                                                         0,GD.VECTOR_ENTRIES,0)
 %
 %   For GD, see GETDATA_CONSTANTS.
 %
 %   See also GD_NENTRIES, GETDATA_CONSTANTS
 
   GD = getdata_constants();
-  nvectors = gd_nentries(D, 0, GD.ALL_FRAGMENTS, GD.VECTOR_ENTRIES, 0);
+  nvectors = gd_nentries(D, GD.ALL_FRAGMENTS, 0, GD.VECTOR_ENTRIES);
 end
 
 % Copyright (C) 2013, 2016 D. V. Wiebe

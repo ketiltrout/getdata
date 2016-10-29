@@ -36,8 +36,10 @@ Fragment::Fragment(const GetData::Dirfile *dirfile, int index)
   name = gd_fragmentname(D->D, index);
   parent = (index == 0) ? -1 : gd_parent_fragment(D->D, index);
 
-  if (gd_fragment_affixes(D->D, index, &prefix, &suffix) == -1)
+  if (gd_fragment_affixes(D->D, index, &prefix, &suffix) < 0)
     prefix = suffix = NULL;
+
+  ns = gd_fragment_namespace(D->D, index, NULL);
 
   dreturnvoid();
 }
@@ -93,14 +95,25 @@ int Fragment::SetProtection(int protection_level)
   return ret;
 }
 
+int Fragment::SetNamespace(const char* new_namespace)
+{
+  const char *ret = gd_fragment_namespace(D->D, ind, new_namespace);
+
+  if (ret)
+    ns = ret;
+  return gd_error(D->D);
+}
+
 int Fragment::SetPrefix(const char* new_prefix)
 {
   int ret = gd_alter_affixes(D->D, ind, new_prefix, suffix);
 
   free(prefix);
   free(suffix);
-  if (!ret)
+  if (!ret) {
+    ns = gd_fragment_namespace(D->D, ind, NULL);
     ret = gd_fragment_affixes(D->D, ind, &prefix, &suffix);
+  }
   return ret;
 }
 

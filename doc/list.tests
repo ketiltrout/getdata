@@ -300,3 +300,6 @@
 299 F....... GDDSTP
 300 ...I.P.h gd_add (INDIR)
 301 ...I.P.h gd_add (SINDIR)
+302 F9CIpPmh gd_include_ns
+303 F9CIpPmh gd_fragment_namespace (NULL)
+304 F9CIpPmh gd_fragment_namespace (non-NULL)

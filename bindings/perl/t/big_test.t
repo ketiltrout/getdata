@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1744;
+use Test::More tests => 1750;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -1701,17 +1701,17 @@ CheckOK(236);
 CheckNum(236, $s, 0);
 
 # 237: gd_nentries
-$s = $_->entry_list("data", $GetData::ALL_FRAGMENTS, $GetData::SCALAR_ENTRIES,
+$s = $_->entry_list($GetData::ALL_FRAGMENTS, "data", $GetData::SCALAR_ENTRIES,
   $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
 CheckOK2(237, 1);
 CheckNum2(237, 1, $s, 7);
-$s = $_->entry_list(undef, $GetData::ALL_FRAGMENTS, $GetData::VECTOR_ENTRIES,
+$s = $_->entry_list($GetData::ALL_FRAGMENTS, undef, $GetData::VECTOR_ENTRIES,
   $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
 CheckOK2(237, 2);
 CheckNum2(237, 2, $s, 26);
 
 # 239: gd_entry_list
-@a = $_->entry_list(undef, $GetData::ALL_FRAGMENTS, $GetData::VECTOR_ENTRIES,
+@a = $_->entry_list($GetData::ALL_FRAGMENTS, undef, $GetData::VECTOR_ENTRIES,
   $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
 CheckOK(239);
 CheckSArray(239, \@a, qw(INDEX bit data div indir lincom linterp mplex mult new1
@@ -2259,7 +2259,20 @@ CheckNum2(301, 2, $h{'field_type'}, $GetData::SINDIR_ENTRY);
 CheckNum2(301, 3, $h{'fragment_index'}, 0);
 CheckSArray2(301, 4, $h{'in_fields'}, qw(in3 in4));
 
+# 302: include namespace
+$s = $_->include_ns('format2', 0, 'ns', $GetData::CREAT | $GetData::EXCL);
+CheckOK(302);
+CheckNum(302, $s, 2);
 
+# 303: fragment_namespace (read)
+$s = $_->fragment_namespace(2);
+CheckOK(303);
+CheckString(303, $s, "ns");
+
+# 304: fragment_namespace (alter)
+$s = $_->fragment_namespace(2, 'ns2');
+CheckOK(304);
+CheckString(304, $s, "ns2");
 
 
 

@@ -2627,10 +2627,25 @@ char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *D, struct parser_state *p,
           _GD_ClearError(D);
           rescan = 1; /* rescan the modified instring */
           if (pdata.line != instring) {
-            /* a new line was malloc'd by the caller, delete our old one. */
+            /* a new line was malloc'd by the caller, delete our old one
+             * then copy it from the caller's heap to libc's to avoid
+             * problems later. */
             free(instring);
-            instring = pdata.line;
-            n = pdata.buflen;
+            if (_GD_CFree != free) {
+              instring = strdup(pdata.line);
+              _GD_CFree(pdata.line);
+              if (instring == NULL) {
+                _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+                break;
+              }
+            } else
+              instring = pdata.line;
+
+            /* The callback isn't required to update pdata.buflen when it
+             * updates pdata.line, so just assume the buffer is as large as
+             * the string it contains
+             */
+            n = strlen(instring) + 1;
           }
           break;
         default:
@@ -2732,11 +2747,20 @@ char *gd_strtok(DIRFILE *D, const char *string) gd_nothrow
     free(D->tok_base);
     D->tok_pos = D->tok_base = NULL;
     free(outstring);
-    outstring = NULL;
+    dreturn("%p", NULL);
+    return NULL;
   }
 
-  /* in_col invariably points to outstring, so just let the caller worry about
-   * cleaning up.  Ha! */
+  /* move to caller's heap -- in_col and outstring always end up pointing to
+   * the same thing, so if we don't have to do this, there's nothing else we
+   * need to do */
+  if (_GD_CMalloc != malloc) {
+    outstring = _GD_CStrdup(in_col);
+    free(in_col);
+    if (outstring == NULL)
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  }
+
   dreturn("\"%s\"", outstring);
   return outstring;
 }

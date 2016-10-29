@@ -197,6 +197,7 @@ extern DIRFILE *gdpy_dirfile_dirfile(struct gdpy_dirfile_t *);
 extern int gdpy_dirfile_raise(struct gdpy_dirfile_t *);
 #endif
 
+extern char *gdpy_strdup(const char*);
 extern int gdpy_report_error(DIRFILE*, char*);
 extern char *gdpy_copy_global_charenc(void);
 extern PyObject *gdpyobj_from_string(const char*, const char*);

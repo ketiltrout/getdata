@@ -41,6 +41,9 @@ if (is_file('dirfile/format')) {
 if (is_file('dirfile/format1')) {
   unlink('dirfile/format1');
 }
+if (is_file('dirfile/format2')) {
+  unlink('dirfile/format2');
+}
 if (is_file('dirfile/form2')) {
   unlink('dirfile/form2');
 }
@@ -1443,13 +1446,13 @@ check_ok(236, $D);
 check_var(236, $v, TRUE);
 
 # 237: nentries
-$v = gd_nentries($D, 'data', GD_ALL_FRAGMENTS, GD_SCALAR_ENTRIES,
+$v = gd_nentries($D, GD_ALL_FRAGMENTS, 'data', GD_SCALAR_ENTRIES,
   GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
 check_ok(237, $D);
 check_var(237, $v, 7);
 
 # 239: entry_list
-$v = gd_entry_list($D, null, GD_ALL_FRAGMENTS, GD_VECTOR_ENTRIES,
+$v = gd_entry_list($D, GD_ALL_FRAGMENTS, null, GD_VECTOR_ENTRIES,
   GD_ENTRIES_NOALIAS);
 check_ok(239, $D);
 check_var(239, $v, array('INDEX', 'bit', 'data', 'div', 'indir', 'lincom',
@@ -1895,7 +1898,20 @@ check_var2(301, 3, $v, array('field' => 'new301',
   'field_type' => GD_SINDIR_ENTRY, 'fragment_index' => 0,
   'in_fields' => array('in3', 'in1')));
 
+# 302: gd_include_ns
+$v = gd_include_ns($D, 'format2', 0, 'ns', GD_CREAT | GD_EXCL);
+check_ok2(302, 0, $D);
+check_var2(302, 1, $v, 2);
 
+# 303: gd_fragment_namespace (read)
+$v = gd_fragment_namespace($D, 2);
+check_ok2(303, 0, $D);
+check_var2(303, 1, $v, 'ns');
+
+# 304: gd_fragment_namespace (alter)
+$v = gd_fragment_namespace($D, 2, 'ns2');
+check_ok2(304, 0, $D);
+check_var2(304, 1, $v, 'ns2');
 
 
 
@@ -1911,6 +1927,7 @@ unlink('dirfile/new1');
 unlink('dirfile/new135');
 unlink('dirfile/format');
 unlink('dirfile/format1');
+unlink('dirfile/format2');
 unlink('dirfile/form2');
 rmdir('dirfile');
 

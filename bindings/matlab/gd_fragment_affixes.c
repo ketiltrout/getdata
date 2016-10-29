@@ -55,6 +55,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
   plhs[0] = gdmx_from_string_list((const char**)al);
 
-  free(al[0]);
-  free(al[1]);
+  mxFree(al[0]);
+  mxFree(al[1]);
 }

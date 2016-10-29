@@ -56,7 +56,6 @@ static gd_entry_t *_GD_FixName(DIRFILE *restrict D, char **restrict buffer,
   *buffer = ptr = _GD_Strdup(D, name);
 
   if (ptr == NULL) {
-    free(ptr);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -639,7 +638,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       /* This is the first raw field in this fragment; propagate it upwards */
       for (i = E->fragment_index; i != -1; i = D->fragment[i].parent) {
         if (D->fragment[i].ref_name == NULL) {
-          D->fragment[i].ref_name = (char *)strdup((const char*)new_ref);
+          D->fragment[i].ref_name = strdup((const char*)new_ref);
           D->fragment[i].modified = 1;
         } else
           break;

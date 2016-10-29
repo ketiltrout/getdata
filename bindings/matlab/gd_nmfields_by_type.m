@@ -2,15 +2,15 @@ function nfields = gd_nmfields_by_type(D, parent, type)
 % GD_NMFIELDS_BY_TYPE  Retrieve a count of fields
 %
 %   GD_NMFIELDS_BY_TYPE(DIRFILE,PARENT,TYPE)
-%             is equivalent to calling GD_NENTRIES(DIRFILE,PARENT, ...
-%                                                       GD.ALL_FRAGMENTS,TYPE,0)
+%             is equivalent to calling GD_NENTRIES(DIRFILE,GD.ALL_FRAGMENTS, ...
+%                                                                 PARENT,TYPE,0)
 %
 %   For GD, see GETDATA_CONSTANTS.
 %
 %   See also GD_NENTRIES, GETDATA_CONSTANTS
 
   GD = getdata_constants();
-  nfields = gd_nentries(D, parent, GD.ALL_FRAGMENTS, type, 0);
+  nfields = gd_nentries(D, GD.ALL_FRAGMENTS, parent, type);
 end
 
 % Copyright (C) 2013, 2016 D. V. Wiebe

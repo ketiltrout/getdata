@@ -213,6 +213,8 @@ C     Corresponding to gd_framenum(3)
       EXTERNAL GDFNUM
 C     Corresponding to gd_fragment_affixes(3)
       EXTERNAL GDFRAF
+C     Corresponding to gd_fragment_namespace(3)
+      EXTERNAL GDFRNS
 C     Corresponding to gd_fragment_index(3)
       EXTERNAL GDFRGI
 C     Corresponding to gd_fragmentname(3)
@@ -294,6 +296,8 @@ C     Corresponding to gd_include_affixes(3)
       EXTERNAL GDINCA
 C     Corresponding to gd_include(3)
       EXTERNAL GDINCL
+C     Corresponding to gd_include_ns(3)
+      EXTERNAL GDINCN
 C     Corresponding to gd_invalid_dirfile(3)
       EXTERNAL GDINVD
 C     Corresponding to gd_alter_entry(3) for BIT fields

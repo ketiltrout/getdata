@@ -44,6 +44,8 @@ namespace GetData {
 
       const char* Name() const { return name; }
 
+      const char* Namespace() const { return ns; }
+
       int Parent() const { return parent; }
 
       const char *Prefix() { return prefix; };
@@ -59,6 +61,8 @@ namespace GetData {
       int SetEndianness(unsigned long byte_sex, int recode = 0);
 
       int SetFrameOffset(gd_off64_t offset, int recode = 0);
+
+      int SetNamespace(const char* new_namespace);
 
       int SetPrefix(const char *preix);
 
@@ -76,6 +80,7 @@ namespace GetData {
       int prot;
       gd_off64_t off;
       const char* name;
+      const char* ns;
       char* prefix;
       char* suffix;
       int parent;

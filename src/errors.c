@@ -239,7 +239,7 @@ void _GD_SetError2(DIRFILE* D, int error, int suberror,
     char *error_string = gd_error_string(D, NULL, 0);
     fprintf(stderr, "%slibgetdata: %s\n",
         D->error_prefix ? D->error_prefix : "", error_string);
-    free(error_string);
+    _GD_CFree(error_string);
   }
 
   dreturnvoid();
@@ -335,7 +335,7 @@ char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen) gd_nothrow
         buflen += GD_MAX_LINE_LENGTH;
     }
 
-    buffer = (char *)malloc(buflen);
+    buffer = _GD_CMalloc(buflen);
     if (buffer == NULL) {
       dreturn("%p", NULL);
       return NULL;

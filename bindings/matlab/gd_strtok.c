@@ -57,7 +57,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
     sl = ptr;
     sl[n++] = mxCreateString(tok);
-    free(tok);
+    mxFree(tok);
   }
 
   gdmx_err(D, 0);

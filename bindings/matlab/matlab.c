@@ -51,6 +51,16 @@
 #endif
 #include <string.h>
 
+void gdmx_initialise(void)
+{
+  static int initialised = 0;
+
+  if (!initialised) {
+    gd_alloc_funcs(mxMalloc, mxFree);
+    initialised = 1;
+  }
+}
+
 #define GD_LIBCOMP "GetData:Lib:"
 static const char *gdmx_msgid[GD_N_ERROR_CODES] =
 {
@@ -86,10 +96,6 @@ static const char *gdmx_msgid[GD_N_ERROR_CODES] =
   GD_LIBCOMP "Bounds",
   GD_LIBCOMP "LineTooLong"
 };
-
-/* persistent errors */
-static int gdmx_errno = GD_E_OK;
-static char *gdmx_estring = NULL;
 
 /* for error reporting */
 struct gdmx_context_t {
@@ -131,12 +137,9 @@ const char *gdmx_context(const struct gdmx_context_t *x, int uc)
 /* doesn't return on error */
 void gdmx_err(DIRFILE *D, int discard)
 {
+  char *gdmx_estring;
+  int gdmx_errno;
   dtrace("%p, %i", D, discard);
-
-  if (gdmx_estring) {
-    free(gdmx_estring);
-    gdmx_estring = NULL;
-  }
 
   gdmx_errno = gd_error(D);
 
@@ -155,6 +158,7 @@ void gdmx_err(DIRFILE *D, int discard)
 #endif
 
   mexErrMsgIdAndTxt(gdmx_msgid[-gdmx_errno], gdmx_estring);
+  mxFree(gdmx_estring);
 }
 
 static gd_type_t gdmx_type(const mxArray *a, const struct gdmx_context_t *ctx,

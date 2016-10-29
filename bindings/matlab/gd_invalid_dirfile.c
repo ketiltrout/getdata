@@ -39,6 +39,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
   GDMX_CHECK_RHS(0);
 
+  gdmx_initialise();
+
   D = gd_invalid_dirfile();
 
   plhs[0] = gdmx_from_dirfile(D);

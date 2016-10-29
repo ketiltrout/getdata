@@ -37,7 +37,7 @@
 
 /* Fortran 77 has no facility to take a pointer to a DIRFILE* object.
  * Instead, we keep a list of them here.  If we ever run out of these,
- * the caller will be abort()ed. */
+ * we'll just return the invalid dirfile */
 static DIRFILE* f77dirfiles[GDF_N_DIRFILES];
 static int f77dirfiles_initialised = 0;
 
@@ -3990,6 +3990,29 @@ void F77_FUNC(gdfraf, GDFRAF) (char *prefix, int32_t *prefix_l, char *suffix,
   dreturnvoid();
 }
 
+/* gd_fragment_namespace */
+void F77_FUNC(gdfrns, GDFRNS) (char *nsout, int32_t *nsout_l,
+    const int32_t *dirfile, const int32_t *index, const char *nsin,
+    const int32_t *nsin_l)
+{
+  const char *out; 
+  char *in;
+
+  dtrace("%p, %i, %i, %i, %p, %i", nsout, *nsout_l, *dirfile, *index, nsin,
+      *nsin_l);
+
+  out = gd_fragment_namespace(_GDF_GetDirfile(*dirfile), *index,
+      _GDF_CString(&in, nsin, *nsin_l));
+  free(in);
+
+  if (out)
+    _GDF_FString(nsout, nsout_l, out);
+  else
+    *nsout_l = 0;
+
+  dreturnvoid();
+}
+
 /* gd_hidden */
 void F77_FUNC(gdhidn, GDHIDN) (int32_t *result, const int32_t *dirfile,
     const char *field_code, const int32_t *field_code_l)
@@ -4073,6 +4096,24 @@ void F77_FUNC(gdinca, GDINCA) (const int32_t *dirfile, const char *file,
 
   free(sx);
   free(px);
+  free(fi);
+  dreturnvoid();
+}
+
+/* gd_include_ns wrapper */
+void F77_FUNC(gdincn, GDINCN) (const int32_t *dirfile, const char *file,
+    const int32_t *file_l, const int32_t *fragment_index, const char *nsin,
+    const int32_t *ns_l, const int32_t *flags)
+{
+  char *fi, *ns;
+
+  dtrace("%i, %p, %i, %i, %p, %i, %i", *dirfile, file, *file_l,
+      *fragment_index, nsin, *ns_l, *flags);
+
+  gd_include_ns(_GDF_GetDirfile(*dirfile), _GDF_CString(&fi, file, *file_l),
+      *fragment_index, _GDF_CString(&ns, nsin, *ns_l), *flags);
+
+  free(ns);
   free(fi);
   dreturnvoid();
 }
@@ -4185,16 +4226,17 @@ void F77_FUNC(gdmxlb, GDMXLB) (const int32_t *dirfile, const int32_t *lookback)
 
 /* gd_nentries wrapper */
 void F77_FUNC(gdnent, GDNENT) (int32_t *nentries, const int32_t *dirfile,
-    const char *parent, const int32_t *parent_l, const int32_t *fragment,
+    const int32_t *fragment, const char *parent, const int32_t *parent_l,
     const int32_t *type, const int32_t *flags)
 {
   char *pa;
 
-  dtrace("%p, %i, %p, %i, %i, 0x%X, 0x%X", nentries, *dirfile, parent,
-      *parent_l, *fragment, *type, *flags);
+  dtrace("%p, %i, %i, %p, %i, 0x%X, 0x%X", nentries, *dirfile, *fragment,
+      parent, *parent_l, *type, *flags);
 
-  *nentries = gd_nentries(_GDF_GetDirfile(*dirfile), _GDF_CString(&pa, parent,
-        *parent_l), *fragment, (unsigned int)*type, (unsigned int)*flags);
+  *nentries = gd_nentries(_GDF_GetDirfile(*dirfile), *fragment,
+      _GDF_CString(&pa, parent, *parent_l), (unsigned int)*type,
+      (unsigned int)*flags);
 
   free(pa);
   dreturn("%i", *nentries);
@@ -4202,7 +4244,7 @@ void F77_FUNC(gdnent, GDNENT) (int32_t *nentries, const int32_t *dirfile,
 
 /* Return the maximum field name length */
 void F77_FUNC(gdentx, GDENTX) (int32_t *max, const int32_t *dirfile,
-    const char *parent, const int32_t *parent_l, const int32_t *fragment,
+    const int32_t *fragment, const char *parent, const int32_t *parent_l,
     const int32_t *type, const int32_t *flags)
 {
   const char **el;
@@ -4213,15 +4255,15 @@ void F77_FUNC(gdentx, GDENTX) (int32_t *max, const int32_t *dirfile,
   const unsigned int utype = (unsigned int)*type;
   const unsigned int uflags = (unsigned int)*flags;
 
-  dtrace("%p, %i, %p, %i, %i, 0x%X, 0x%X", max, *dirfile, parent, *parent_l,
-      *fragment, utype, uflags);
+  dtrace("%p, %i, %i, %p, %i, 0x%X, 0x%X", max, *dirfile, *fragment, parent,
+      *parent_l, utype, uflags);
 
   D = _GDF_GetDirfile(*dirfile);
   _GDF_CString(&pa, parent, *parent_l);
-  nentries = gd_nentries(D, pa, *fragment, utype, uflags);
+  nentries = gd_nentries(D, *fragment, pa, utype, uflags);
 
   if (!gd_error(D)) {
-    el = gd_entry_list(D, pa, *fragment, utype, uflags);
+    el = gd_entry_list(D, *fragment, pa, utype, uflags);
 
     for (i = 0; i < nentries; ++i)
       if (strlen(el[i]) > len)
@@ -4235,8 +4277,8 @@ void F77_FUNC(gdentx, GDENTX) (int32_t *max, const int32_t *dirfile,
 
 /* gd_entry_list wrapper -- this only returns one entry name */
 void F77_FUNC(gdentn, GDENTN) (char *name, int32_t *name_l,
-    const int32_t *dirfile, const char *parent, const int32_t *parent_l,
-    const int32_t *fragment, const int32_t *type, const int32_t *flags,
+    const int32_t *dirfile, const int32_t *fragment, const char *parent,
+    const int32_t *parent_l, const int32_t *type, const int32_t *flags,
     const int32_t *field_num)
 {
   const char** el;
@@ -4246,15 +4288,15 @@ void F77_FUNC(gdentn, GDENTN) (char *name, int32_t *name_l,
   const unsigned int utype = (unsigned int)*type;
   const unsigned int uflags = (unsigned int)*flags;
 
-  dtrace("%p, %p, %i, %p, %i, %i, 0x%X, 0x%X, %i", name, name_l, *dirfile,
-      parent, *parent_l, *fragment, utype, uflags, *field_num);
+  dtrace("%p, %p, %i, %i, %p, %i, 0x%X, 0x%X, %i", name, name_l, *dirfile,
+      *fragment, parent, *parent_l, utype, uflags, *field_num);
 
   D = _GDF_GetDirfile(*dirfile);
   _GDF_CString(&pa, parent, *parent_l);
-  nentries = gd_nentries(D, pa, *fragment, utype, uflags);
+  nentries = gd_nentries(D, *fragment, pa, utype, uflags);
 
   if (!gd_error(D) && *field_num > 0 && *field_num <= (int)nentries) {
-    el = gd_entry_list(D, pa, *fragment, utype, uflags);
+    el = gd_entry_list(D, *fragment, pa, utype, uflags);
     _GDF_FString(name, name_l, el[*field_num - 1]);
   } else
     *name_l = 0;

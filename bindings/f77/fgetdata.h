@@ -660,6 +660,10 @@ void F77_FUNC(gdinca, GDINCA) (const int32_t *dirfile, const char *file,
     const int32_t *prefix_l, const char *suffix, const int32_t *suffix_l,
     const int32_t *flags);
 
+void F77_FUNC(gdincn, GDINCN) (const int32_t *dirfile, const char *file,
+    const int32_t *file_l, const int32_t *fragment_index, const char *nsin,
+    const int32_t *ns_l, const int32_t *flags);
+
 void F77_FUNC(gdmova, GDMOVA) (const int32_t *dirfile, const char *field_code,
     const int32_t *field_code_l, const int32_t *new_fragment);
 
@@ -678,6 +682,10 @@ void F77_FUNC(gdhidn, GDHIDN) (int32_t *result, const int32_t *dirfile,
 
 void F77_FUNC(gdfraf, GDFRAF) (char *prefix, int32_t *prefix_l, char *suffix,
     int32_t *suffix_l, const int32_t *dirfile, const int32_t *index);
+
+void F77_FUNC(gdfrns, GDFRNS) (char *nsout, int32_t *nsout_l,
+    const int32_t *dirfile, const int32_t *index, const char *nsin,
+    const int32_t *nsin_l);
 
 void F77_FUNC(gdaafx, GDAAFX) (const int32_t *dirfile, const int32_t *index,
     const char *prefix, const int32_t *prefix_l, const char *suffix,
@@ -715,16 +723,16 @@ void F77_FUNC(gdvbpx, GDVBPX) (const int32_t *dirfile, const char *prefix,
 void F77_FUNC(gdmxlb, GDMXLB) (const int32_t *dirfile, const int32_t *lookback);
 
 void F77_FUNC(gdnent, GDNENT) (int32_t *nentries, const int32_t *dirfile,
-    const char *parent, const int32_t *parent_l, const int32_t *fragment,
+    const int32_t *fragment, const char *parent, const int32_t *parent_l,
     const int32_t *type, const int32_t *flags);
 
 void F77_FUNC(gdentx, GDENTX) (int32_t *max, const int32_t *dirfile,
-    const char *parent, const int32_t *parent_l, const int32_t *fragment,
+    const int32_t *fragment, const char *parent, const int32_t *parent_l,
     const int32_t *type, const int32_t *flags);
 
 void F77_FUNC(gdentn, GDENTN) (char *name, int32_t *name_l,
-    const int32_t *dirfile, const char *parent, const int32_t *parent_l,
-    const int32_t *fragment, const int32_t *type, const int32_t *flags,
+    const int32_t *dirfile, const int32_t *fragment, const char *parent,
+    const int32_t *parent_l, const int32_t *type, const int32_t *flags,
     const int32_t *field_num);
 
 void F77_FUNC(gdgewd, GDGEWD) (char *in_field, int32_t *in_field_l,

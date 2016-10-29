@@ -21,35 +21,46 @@
 #include "gd_matlab.h"
 
 /*
- % GD_ERROR_STRING  retrieve the library error string
+ % GD_INCLUDE  Add a format metadata fragment with a namespace
  %
- %   S = GD_ERROR_STRING(DIRFILE)
- %             returns the error string, S, associated with the last call to the
- %             C GetData library.  Since the MATLAB bindings throw exceptions
- %             on library error, it is only ever useful to use this inside a
- %             CATCH block after a GetData Library error has been thrown.  In
- %             this case, the .message member of thrown MEXCEPTION object also
- %             contains this string.
+ %   GD_INCLUDE(DIRFILE,PATH,PARENT,NS[,FLAGS])
+ %             adds the fragment at PATH to the open dirfile DIRFILE below the
+ %             current fragment indexed by PARENT, using NS as the new
+ %             fragment's root namespace.  If given, FLAGS should be
+ %             zero or more Dirfile open flags provided by GETDATA_CONSTANTS,
+ %             bitwise-or'd together.
  %
  %   The DIRFILE object should have previously been created with GD_OPEN.
  %
- %   See the documentation on the C API function gd_error_string(3) in section 3
- %   of the UNIX manual for more details.
+ %   See the documentation on the C API function gd_include_ns(3) in
+ %   section 3 of the UNIX manual for more details.
  %
- %   See also GD_ERROR, GD_OPEN
+ %   See also GD_INCLUDE, GD_UNINCLUDE, GD_FRAGMENT_NAMESPACE, GD_OPEN
  */
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
-  char *s;
+  void *data;
+  char *filename;
+  char *ns;
+  int parent, n;
+  unsigned long flags = 0;
 
-  GDMX_CHECK_RHS(1);
+  GDMX_CHECK_RHS2(4,5);
 
   D = gdmx_to_dirfile(prhs[0]);
+  filename = gdmx_to_string(prhs, 1, 0);
+  parent = gdmx_to_int(prhs, 2);
+  ns = gdmx_to_string(prhs, 3, 1);
+  if (nrhs > 4)
+    flags = gdmx_to_ulong(prhs, 4);
 
-  s = gd_error_string(D, NULL, 0);
+  n = gd_include_ns(D, filename, parent, ns, flags);
 
-  plhs[0] = gdmx_from_string(s);
-  mxFree(s);
+  mxFree(filename);
+  mxFree(ns);
+  gdmx_err(D, 0);
+
+  plhs[0] = gdmx_from_int(n);
 }

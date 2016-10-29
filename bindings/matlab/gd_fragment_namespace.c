@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,35 +21,41 @@
 #include "gd_matlab.h"
 
 /*
- % GD_ERROR_STRING  retrieve the library error string
+ % GD_FRAGMENT_NAMESPACE  Set and retrieve the root namespace of a fragment
  %
- %   S = GD_ERROR_STRING(DIRFILE)
- %             returns the error string, S, associated with the last call to the
- %             C GetData library.  Since the MATLAB bindings throw exceptions
- %             on library error, it is only ever useful to use this inside a
- %             CATCH block after a GetData Library error has been thrown.  In
- %             this case, the .message member of thrown MEXCEPTION object also
- %             contains this string.
+ %  NS = GD_FRAGMENT_AFFIXES(DIRFILE,FRAGMENT[,NAMESPACE])
+ %             returns the root namespace of the fragment specified by FRAGMENT
+ %             in the dirfile DIRFILE.  If a string NAMESPACE is specified,
+ %             the root namespace of the fragment is first updated to that
+ %             value before being returned.
  %
  %   The DIRFILE object should have previously been created with GD_OPEN.
  %
- %   See the documentation on the C API function gd_error_string(3) in section 3
- %   of the UNIX manual for more details.
+ %   See the documentation on the C API function gd_fragment_namespace(3) in
+ %   section 3 of the UNIX manual for more details.
  %
- %   See also GD_ERROR, GD_OPEN
+ %   See also GD_ALTER_AFFIXES, GD_FRAGMENT_AFFIXES, GD_INCLUDE, GD_OPEN
  */
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
-  char *s;
+  int fragment;
+  char *nsin = NULL;
+  const char *nsout;
 
-  GDMX_CHECK_RHS(1);
+  GDMX_CHECK_RHS2(2,3);
 
   D = gdmx_to_dirfile(prhs[0]);
+  fragment = gdmx_to_int(prhs, 1);
+  if (nrhs > 2)
+    nsin = gdmx_to_string(prhs, 2, 1);
 
-  s = gd_error_string(D, NULL, 0);
+  nsout = gd_fragment_namespace(D, fragment, nsin);
+  fprintf(stderr, "nsin = %p\n", nsin);
+  mxFree(nsin);
 
-  plhs[0] = gdmx_from_string(s);
-  mxFree(s);
+  gdmx_err(D, 0);
+
+  plhs[0] = mxCreateString(nsout);
 }

@@ -51,6 +51,10 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
   int i;
   size_t n;
 
+  /* If priv == 0, then we've been called via gd_free_entry_strings and
+   * need to use the caller's free function on the public strings */
+  void (*free_)(void*) = priv ? free : _GD_CFree;
+
   dtrace("%p, %p, %i", D, entry, priv);
 
   if (!entry || entry->field_type == GD_NO_ENTRY) {
@@ -58,19 +62,19 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
     return;
   }
 
-  free(entry->field);
+  free_(entry->field);
 
   switch(entry->field_type) {
     case GD_LINCOM_ENTRY:
       for (i = 0; i < entry->EN(lincom,n_fields); ++i) {
-        free(entry->in_fields[i]);
-        free(entry->scalar[i]);
-        free(entry->scalar[i + GD_MAX_LINCOM]);
+        free_(entry->in_fields[i]);
+        free_(entry->scalar[i]);
+        free_(entry->scalar[i + GD_MAX_LINCOM]);
       }
       break;
     case GD_LINTERP_ENTRY:
-      free(entry->in_fields[0]);
-      free(entry->EN(linterp,table));
+      free_(entry->in_fields[0]);
+      free_(entry->EN(linterp,table));
       if (priv) {
         if (entry->e->u.linterp.table_dirfd > 0)
           _GD_ReleaseDir(D, entry->e->u.linterp.table_dirfd);
@@ -83,24 +87,24 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
     case GD_MULTIPLY_ENTRY:
     case GD_INDIR_ENTRY:
     case GD_SINDIR_ENTRY:
-      free(entry->in_fields[1]);
-      free(entry->in_fields[0]);
+      free_(entry->in_fields[1]);
+      free_(entry->in_fields[0]);
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      free(entry->scalar[0]);
-      free(entry->scalar[1]);
-      free(entry->in_fields[0]);
+      free_(entry->scalar[0]);
+      free_(entry->scalar[1]);
+      free_(entry->in_fields[0]);
       break;
     case GD_PHASE_ENTRY:
     case GD_RECIP_ENTRY:
-      free(entry->scalar[0]);
-      free(entry->in_fields[0]);
+      free_(entry->scalar[0]);
+      free_(entry->in_fields[0]);
       break;
     case GD_POLYNOM_ENTRY:
-      free(entry->in_fields[0]);
+      free_(entry->in_fields[0]);
       for (i = 0; i <= entry->EN(polynom,poly_ord); ++i)
-        free(entry->scalar[i]);
+        free_(entry->scalar[i]);
       break;
     case GD_STRING_ENTRY:
       if (priv)
@@ -121,7 +125,7 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
       }
       break;
     case GD_RAW_ENTRY:
-      free(entry->scalar[0]);
+      free_(entry->scalar[0]);
       if (priv) {
         free(entry->e->u.raw.filebase);
         free(entry->e->u.raw.file[0].name);
@@ -129,18 +133,18 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
       }
       break;
     case GD_WINDOW_ENTRY:
-      free(entry->scalar[0]);
-      free(entry->in_fields[0]);
-      free(entry->in_fields[1]);
+      free_(entry->scalar[0]);
+      free_(entry->in_fields[0]);
+      free_(entry->in_fields[1]);
       break;
     case GD_MPLEX_ENTRY:
-      free(entry->scalar[0]);
-      free(entry->scalar[1]);
-      free(entry->in_fields[0]);
-      free(entry->in_fields[1]);
+      free_(entry->scalar[0]);
+      free_(entry->scalar[1]);
+      free_(entry->in_fields[0]);
+      free_(entry->in_fields[1]);
       break;
     case GD_ALIAS_ENTRY:
-      free(entry->in_fields[0]);
+      free_(entry->in_fields[0]);
       break;
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
@@ -366,7 +370,7 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
 
 char* gd_raw_filename(DIRFILE* D, const char* field_code) gd_nothrow
 {
-  char *filename;
+  char *filename0, *filename;
   gd_entry_t *E;
 
   dtrace("%p, \"%s\"", D, field_code);
@@ -388,7 +392,7 @@ char* gd_raw_filename(DIRFILE* D, const char* field_code) gd_nothrow
   }
 
   if (E->e->u.raw.file[0].name == NULL) {
-    /* ensure encoding sybtype is known */
+    /* ensure encoding subtype is known */
     if (!_GD_Supports(D, E, GD_EF_NAME)) {
       dreturn("%p", NULL);
       return NULL;
@@ -407,8 +411,22 @@ char* gd_raw_filename(DIRFILE* D, const char* field_code) gd_nothrow
     }
   }
 
-  filename = _GD_MakeFullPath(D, D->fragment[E->fragment_index].dirfd,
+  filename0 = _GD_MakeFullPath(D, D->fragment[E->fragment_index].dirfd,
       E->e->u.raw.file->name, 1);
+
+  if (D->error) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  /* move to caller's heap */
+  if (_GD_CMalloc != malloc) {
+    filename = _GD_CStrdup(filename0);
+    free(filename0);
+    if (filename == NULL)
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  } else
+    filename = filename0;
 
   dreturn("%p", filename);
   return filename;
@@ -436,68 +454,68 @@ int gd_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry) gd_nothrow
   memcpy(entry, E, sizeof(gd_entry_t));
   entry->e = NULL;
 
-  /* duplicate strings */
-  entry->field = strdup(E->field);
+  /* duplicate strings using the caller's memory manager */
+  entry->field = _GD_CStrdup(E->field);
 
   switch(E->field_type) {
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-        entry->in_fields[i] = strdup(E->in_fields[i]);
+        entry->in_fields[i] = _GD_CStrdup(E->in_fields[i]);
         if (E->scalar[i])
-          entry->scalar[i] = strdup(E->scalar[i]);
+          entry->scalar[i] = _GD_CStrdup(E->scalar[i]);
         if (E->scalar[i + GD_MAX_LINCOM])
-          entry->scalar[i + GD_MAX_LINCOM] = strdup(E->scalar[i +
+          entry->scalar[i + GD_MAX_LINCOM] = _GD_CStrdup(E->scalar[i +
               GD_MAX_LINCOM]);
       }
       break;
     case GD_LINTERP_ENTRY:
-      entry->in_fields[0] = strdup(E->in_fields[0]);
-      entry->EN(linterp,table) = strdup(E->EN(linterp,table));
+      entry->in_fields[0] = _GD_CStrdup(E->in_fields[0]);
+      entry->EN(linterp,table) = _GD_CStrdup(E->EN(linterp,table));
       break;
     case GD_POLYNOM_ENTRY:
-      entry->in_fields[0] = strdup(E->in_fields[0]);
+      entry->in_fields[0] = _GD_CStrdup(E->in_fields[0]);
       for (i = 0; i <= E->EN(polynom,poly_ord); ++i)
         if (E->scalar[i])
-          entry->scalar[i] = strdup(E->scalar[i]);
+          entry->scalar[i] = _GD_CStrdup(E->scalar[i]);
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_INDIR_ENTRY:
     case GD_SINDIR_ENTRY:
-      entry->in_fields[0] = strdup(E->in_fields[0]);
-      entry->in_fields[1] = strdup(E->in_fields[1]);
+      entry->in_fields[0] = _GD_CStrdup(E->in_fields[0]);
+      entry->in_fields[1] = _GD_CStrdup(E->in_fields[1]);
       break;
     case GD_RECIP_ENTRY:
     case GD_PHASE_ENTRY:
-      entry->in_fields[0] = strdup(E->in_fields[0]);
+      entry->in_fields[0] = _GD_CStrdup(E->in_fields[0]);
       if (E->scalar[0])
-        entry->scalar[0] = strdup(E->scalar[0]);
+        entry->scalar[0] = _GD_CStrdup(E->scalar[0]);
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      entry->in_fields[0] = strdup(E->in_fields[0]);
+      entry->in_fields[0] = _GD_CStrdup(E->in_fields[0]);
       if (E->scalar[0])
-        entry->scalar[0] = strdup(E->scalar[0]);
+        entry->scalar[0] = _GD_CStrdup(E->scalar[0]);
       if (E->scalar[1])
-        entry->scalar[1] = strdup(E->scalar[1]);
+        entry->scalar[1] = _GD_CStrdup(E->scalar[1]);
       break;
     case GD_RAW_ENTRY:
       if (E->scalar[0])
-        entry->scalar[0] = strdup(E->scalar[0]);
+        entry->scalar[0] = _GD_CStrdup(E->scalar[0]);
       break;
     case GD_WINDOW_ENTRY:
-      entry->in_fields[0] = strdup(E->in_fields[0]);
-      entry->in_fields[1] = strdup(E->in_fields[1]);
+      entry->in_fields[0] = _GD_CStrdup(E->in_fields[0]);
+      entry->in_fields[1] = _GD_CStrdup(E->in_fields[1]);
       if (E->scalar[0])
-        entry->scalar[0] = strdup(E->scalar[0]);
+        entry->scalar[0] = _GD_CStrdup(E->scalar[0]);
       break;
     case GD_MPLEX_ENTRY:
-      entry->in_fields[0] = strdup(E->in_fields[0]);
-      entry->in_fields[1] = strdup(E->in_fields[1]);
+      entry->in_fields[0] = _GD_CStrdup(E->in_fields[0]);
+      entry->in_fields[1] = _GD_CStrdup(E->in_fields[1]);
       if (E->scalar[0])
-        entry->scalar[0] = strdup(E->scalar[0]);
+        entry->scalar[0] = _GD_CStrdup(E->scalar[0]);
       if (E->scalar[1])
-        entry->scalar[1] = strdup(E->scalar[1]);
+        entry->scalar[1] = _GD_CStrdup(E->scalar[1]);
       break;
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
@@ -792,7 +810,7 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
 char *gd_linterp_tablename(DIRFILE *D, const char *field_code) gd_nothrow
 {
   gd_entry_t *E;
-  char *table;
+  char *table0, *table;
 
   dtrace("%p, \"%s\"", D, field_code);
 
@@ -818,8 +836,22 @@ char *gd_linterp_tablename(DIRFILE *D, const char *field_code) gd_nothrow
       return NULL;
     }
 
-  table = _GD_MakeFullPath(D, E->e->u.linterp.table_dirfd,
+  table0 = _GD_MakeFullPath(D, E->e->u.linterp.table_dirfd,
       E->e->u.linterp.table_file, 1);
+
+  if (D->error) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  /* move to caller's heap */
+  if (_GD_CMalloc != malloc) {
+    table = _GD_CStrdup(table0);
+    free(table0);
+    if (table == NULL)
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  } else
+    table = table0;
 
   dreturn("%s", table);
   return table;

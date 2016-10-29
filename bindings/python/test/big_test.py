@@ -1932,7 +1932,7 @@ CheckSimple(236, d.verbose_prefix, "big_test: ")
 
 # 237: gd_nentries check
 try:
-  n = d.nentries("data", pygetdata.ALL_FRAGMENTS, pygetdata.SCALAR_ENTRIES,
+  n = d.nentries(pygetdata.ALL_FRAGMENTS, "data", pygetdata.SCALAR_ENTRIES,
       pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
 except:
   CheckOK2(237, 1)
@@ -2206,6 +2206,41 @@ try:
 except:
   CheckOK(296)
 CheckSimple(296,n,[ "eka", "eka", "eka", "eka", "eka", "eka", "eka", "eka"])
+
+# 302: gd_include_affix check
+try:
+  d.include('format2', 0, namespace='N', flags=pygetdata.CREAT | pygetdata.EXCL)
+except:
+  CheckOK(302)
+
+# 303: get namespace
+try:
+  n = d.fragment(2).namespace
+except:
+  CheckOK(303)
+
+# 304: set namespace
+try:
+  d.fragment(2).namespace = 'S'
+except:
+  CheckOK2(304, 0)
+
+try:
+  n = d.fragment(2).namespace
+except:
+  CheckOK2(304, 1)
+CheckSimple2(304, 2, n, B("S"))
+
+try:
+  del d.fragment(2).namespace
+except:
+  CheckOK2(304, 3)
+
+try:
+  n = d.fragment(2).namespace
+except:
+  CheckOK2(304, 4)
+CheckSimple2(304, 5, n, B(""))
 
 
 

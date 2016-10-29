@@ -1218,6 +1218,11 @@ struct gd_dirfile_ {
   void* sehandler_extra;
 };
 
+/* The caller's preferred memory manager */
+extern void *(*_GD_CMalloc)(size_t);
+extern char *(*_GD_CStrdup)(const char*);
+extern void (*_GD_CFree)(void*);
+
 /* These are internal functions we need to expose so that modules can use them
  */
 #ifdef USE_MODULES
@@ -1341,7 +1346,7 @@ void _GD_LinterpData(DIRFILE *restrict, void *restrict, gd_type_t, int,
     const double *restrict, size_t, const struct gd_lut_ *restrict, size_t);
 int _GD_ListEntry(const gd_entry_t*, int, int, int, int, int, gd_entype_t);
 char *_GD_MakeFullPath(DIRFILE *restrict, int, const char *restrict, int);
-void *_GD_Malloc(DIRFILE *D, size_t size);
+void *_GD_Malloc(DIRFILE *D, size_t size) __attribute_malloc__;
 int _GD_MissingFramework(int encoding, unsigned int funcs);
 int _GD_MogrifyFile(DIRFILE *restrict, gd_entry_t *restrict, unsigned long int,
     unsigned long int, off64_t, int, int, char *restrict);

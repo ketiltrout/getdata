@@ -69,8 +69,8 @@ static void gdpy_entry_delete(struct gdpy_entry_t *self)
   dtrace("%p", self);
 
   gd_free_entry_strings(self->E);
-  free(self->E);
-  free(self->char_enc);
+  PyMem_Free(self->E);
+  PyMem_Free(self->char_enc);
   PyObject_Del(self);
 
   dreturnvoid();
@@ -103,7 +103,7 @@ static PyObject *gdpyobj_from_scalar(const gd_entry_t *E, int i, gd_type_t type,
   if (E->scalar[i]) {
     /* Return the scalar field code */
     if (E->scalar_ind[i] >= 0) {
-      char *buffer = malloc(strlen(E->scalar[i]) + 23);
+      char *buffer = PyMem_Malloc(strlen(E->scalar[i]) + 23);
       if (buffer == NULL) {
         PyErr_NoMemory();
         dreturn("%p", NULL);
@@ -111,7 +111,7 @@ static PyObject *gdpyobj_from_scalar(const gd_entry_t *E, int i, gd_type_t type,
       }
       sprintf(buffer, "%s<%i>", E->scalar[i], E->scalar_ind[i]);
       pyobj = gdpyobj_from_string(buffer, char_enc);
-      free(buffer);
+      PyMem_Free(buffer);
     } else
       pyobj = gdpyobj_from_string(E->scalar[i], char_enc);
   } else /* If scalar is NULL, return the number */
@@ -734,9 +734,10 @@ static int gdpy_entry_init(struct gdpy_entry_t *self, PyObject *args,
   }
 
   if (self->E == NULL) {
-    self->E = malloc(sizeof(gd_entry_t));
+    self->E = PyMem_Malloc(sizeof(gd_entry_t));
 
     if (self->E == NULL) {
+      PyErr_NoMemory();
       dreturn("%i", -1);
       return -1;
     }
@@ -782,7 +783,7 @@ static int gdpy_entry_setname(struct gdpy_entry_t *self, PyObject *value,
     return -1;
   }
 
-  free(self->E->field);
+  PyMem_Free(self->E->field);
   self->E->field = s;
 
   dreturn("%i", 0);
@@ -958,7 +959,7 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t *self, PyObject *value,
       }
 
       for (i = 0; i < self->E->EN(lincom,n_fields); ++i) {
-        free(self->E->in_fields[i]);
+        PyMem_Free(self->E->in_fields[i]);
         self->E->in_fields[i] = s[i];
       }
       break;
@@ -994,7 +995,7 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t *self, PyObject *value,
         return -1;
       }
 
-      free(self->E->in_fields[0]);
+      PyMem_Free(self->E->in_fields[0]);
       self->E->in_fields[0] = s[0];
       break;
     case GD_MULTIPLY_ENTRY:
@@ -1035,7 +1036,7 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t *self, PyObject *value,
       }
 
       for (i = 0; i < 2; ++i) {
-        free(self->E->in_fields[i]);
+        PyMem_Free(self->E->in_fields[i]);
         self->E->in_fields[i] = s[i];
       }
       break;
@@ -1193,12 +1194,12 @@ static int gdpy_entry_setspf(struct gdpy_entry_t *self, PyObject *value,
       &spf, "spf");
 
   if (PyErr_Occurred()) {
-    free(scalar);
+    PyMem_Free(scalar);
     dreturn("%i", -1);
     return -1;
   }
 
-  free(self->E->scalar[0]);
+  PyMem_Free(self->E->scalar[0]);
   self->E->scalar[0] = scalar;
   self->E->EN(raw,spf) = spf;
 
@@ -1311,11 +1312,11 @@ static int gdpy_entry_setnfields(struct gdpy_entry_t *self, PyObject *value,
 
   /* free extra terms */
   for (i = n; i < self->E->EN(lincom,n_fields); ++i)
-    free(self->E->in_fields[i]);
+    PyMem_Free(self->E->in_fields[i]);
 
   /* initialise new terms */
   for (i = self->E->EN(lincom,n_fields); i < n; ++i) {
-    self->E->in_fields[i] = strdup("");
+    self->E->in_fields[i] = gdpy_strdup("");
     self->E->EN(lincom,m)[i] = self->E->EN(lincom,b)[i] = 0;
   }
 
@@ -1412,7 +1413,7 @@ static int gdpy_entry_setm(struct gdpy_entry_t *self, PyObject *value,
 
   if (PyErr_Occurred()) {
     for (i = 0; i < GD_MAX_LINCOM; ++i)
-      free(scalar[i]);
+      PyMem_Free(scalar[i]);
     dreturn("%i", -1);
     return -1;
   }
@@ -1423,7 +1424,7 @@ static int gdpy_entry_setm(struct gdpy_entry_t *self, PyObject *value,
       comp_scal = GD_EN_COMPSCAL;
     gd_cs2cs_(self->E->EN(lincom,cm)[i], cm[i]);
     self->E->EN(lincom,m)[i] = m[i];
-    free(self->E->scalar[i]);
+    PyMem_Free(self->E->scalar[i]);
     self->E->scalar[i] = scalar[i];
   }
   self->E->flags |= comp_scal;
@@ -1519,7 +1520,7 @@ static int gdpy_entry_setb(struct gdpy_entry_t *self, PyObject *value,
 
   if (PyErr_Occurred()) {
     for (i = 0; i < GD_MAX_LINCOM; ++i)
-      free(scalar[i]);
+      PyMem_Free(scalar[i]);
     dreturn("%i", -1);
     return -1;
   }
@@ -1530,7 +1531,7 @@ static int gdpy_entry_setb(struct gdpy_entry_t *self, PyObject *value,
       comp_scal = GD_EN_COMPSCAL;
     gd_cs2cs_(self->E->EN(lincom,cb)[i], cb[i]);
     self->E->EN(lincom,b)[i] = b[i];
-    free(self->E->scalar[i + GD_MAX_LINCOM]);
+    PyMem_Free(self->E->scalar[i + GD_MAX_LINCOM]);
     self->E->scalar[i + GD_MAX_LINCOM] = scalar[i];
   }
   self->E->flags |= comp_scal;
@@ -1584,7 +1585,7 @@ static int gdpy_entry_settable(struct gdpy_entry_t *self, PyObject *value,
     return -1;
   }
 
-  free(self->E->EN(linterp,table));
+  PyMem_Free(self->E->EN(linterp,table));
   self->E->EN(linterp,table) = s;
 
   dreturn("%i", 0);
@@ -1631,13 +1632,13 @@ static int gdpy_entry_setbitnum(struct gdpy_entry_t *self, PyObject *value,
   gdpy_set_scalar_from_pyobj(value, GD_INT_TYPE, &scalar, self->char_enc,
       &bitnum, "bitnum");
   if (PyErr_Occurred()) {
-    free(scalar);
+    PyMem_Free(scalar);
     dreturn("%i", -1);
     return -1;
   }
 
   self->E->EN(bit,bitnum) = bitnum;
-  free(self->E->scalar[0]);
+  PyMem_Free(self->E->scalar[0]);
   self->E->scalar[0] = scalar;
 
   dreturn("%i", 0);
@@ -1691,7 +1692,7 @@ static int gdpy_entry_setnumbits(struct gdpy_entry_t *self, PyObject *value,
   }
 
   self->E->EN(bit,numbits) = numbits;
-  free(self->E->scalar[1]);
+  PyMem_Free(self->E->scalar[1]);
   self->E->scalar[1] = scalar;
 
   dreturn("%i", 0);
@@ -1767,7 +1768,7 @@ static int gdpy_entry_setdividend(struct gdpy_entry_t *self, PyObject *value,
   self->E->flags |= comp_scal;
   gd_cs2cs_(self->E->EN(recip,cdividend), cdividend);
   self->E->EN(recip,dividend) = dividend;
-  free(self->E->scalar[0]);
+  PyMem_Free(self->E->scalar[0]);
   self->E->scalar[0] = scalar;
 
   dreturn("%i", 0);
@@ -1817,7 +1818,7 @@ static int gdpy_entry_setshift(struct gdpy_entry_t *self, PyObject *value,
   }
 
   self->E->EN(phase,shift) = shift;
-  free(self->E->scalar[0]);
+  PyMem_Free(self->E->scalar[0]);
   self->E->scalar[0] = scalar;
 
   dreturn("%i", 0);
@@ -1868,7 +1869,7 @@ static int gdpy_entry_setcountval(struct gdpy_entry_t *self, PyObject *value,
   }
 
   self->E->EN(mplex,count_val) = count_val;
-  free(self->E->scalar[0]);
+  PyMem_Free(self->E->scalar[0]);
   self->E->scalar[0] = scalar;
 
   dreturn("%i", 0);
@@ -1919,7 +1920,7 @@ static int gdpy_entry_setperiod(struct gdpy_entry_t *self, PyObject *value,
   }
 
   self->E->EN(mplex,period) = period;
-  free(self->E->scalar[1]);
+  PyMem_Free(self->E->scalar[1]);
   self->E->scalar[1] = scalar;
 
   dreturn("%i", 0);
@@ -2019,7 +2020,7 @@ static int gdpy_entry_seta(struct gdpy_entry_t *self, PyObject *value,
   for (i = 0; i <= self->E->EN(polynom,poly_ord); ++i) {
     self->E->EN(polynom,a)[i] = a[i];
     gd_cs2cs_(self->E->EN(polynom,ca)[i], ca[i]);
-    free(self->E->scalar[i]);
+    PyMem_Free(self->E->scalar[i]);
     self->E->scalar[i] = scalar[i];
   }
   self->E->flags |= comp_scal;
@@ -2401,7 +2402,7 @@ static int gdpy_entry_setthreshold(struct gdpy_entry_t *self, PyObject *value,
     return -1;
   }
 
-  free(self->E->scalar[0]);
+  PyMem_Free(self->E->scalar[0]);
   self->E->scalar[0] = scalar;
   self->E->EN(window,threshold) = t;
 

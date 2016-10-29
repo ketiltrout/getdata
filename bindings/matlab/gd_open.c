@@ -53,6 +53,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   if (nrhs > 1)
     flags = gdmx_to_ulong(prhs, 1);
 
+  gdmx_initialise();
+
   D = gd_open(filename, flags);
   mxFree(filename);
 

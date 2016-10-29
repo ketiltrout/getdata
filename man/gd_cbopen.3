@@ -1,6 +1,6 @@
 .\" gd_cbopen.3.  The gd_cbopen man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_cbopen 3 "16 October 2014" "Version 0.9.0" "GETDATA"
+.TH gd_cbopen 3 "28 October 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_cbopen, gd_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -564,22 +564,28 @@ member contains a copy of the line containing the syntax error.  This line may
 be freely modified by the callback function.  It will then be reparsed if the
 callback function returns the symbol
 .B GD_SYNTAX_RESCAN
-(see below).  The size of the memory buffer (which may be greater than the
-length of the actual string) is provided in
+(see below).  The size of the memory buffer, which may be greater than the
+length of the actual string, is provided in
 .IR pdata -> buflen ,
-and space is available for at least GD_MAX_LINE_LENGTH bytes.  A larger buffer
-may be used if desired, by assigning a pointer to the new buffer of the desired
-length to
+and space is available for at least
+.B GD_MAX_LINE_LENGTH
+bytes.
+
+If the callback function returns
+.BR GD_SYNTAX_RESCAN ,
+then a different buffer, which may be larger, may be used to hold the new
+string, by assigning a pointer to the new buffer to
 .IR pdata -> line .
-The new buffer should be allocated with
-.BR malloc (3).
-It will be freed by the parser.  Do not call
+This buffer will be deallocated by the library using the
+.I free
+function specified through
+.BR gd_alloc_funcs (3),
+or else
 .BR free (3)
-or
-.BR realloc (3)
-on the original pointer passed to the callback as
+by default.  Do not deallocate the original buffer passed to the callback
+through
 .IR pdata -> line :
-it, too, will be freed by the parser.
+it, too, will be deallocated by the library.
 
 The callback function should return one of the following symbols, which
 tells the parser how to subsequently handle the error:
@@ -719,6 +725,7 @@ specification parsing will fail gloriously on an EBCDIC platform.
 .BR dirfile (5),
 .BR dirfile-encoding (5),
 .BR dirfile-format (5),
+.BR gd_alloc_funcs (3),
 .BR gd_close (3),
 .BR gd_dirfile_standards (3),
 .BR gd_discard (3),

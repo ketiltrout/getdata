@@ -301,6 +301,24 @@ static int gdpy_fragment_setprotection(struct gdpy_fragment_t *self,
   return 0;
 }
 
+static PyObject *gdpy_fragment_getns(struct gdpy_fragment_t *self,
+    void *closure)
+{
+  const char *ns;
+  PyObject *pyobj;
+
+  dtrace("%p, %p", self, closure);
+
+  ns = gd_fragment_namespace(self->dirfile->D, self->n, NULL);
+
+  GDPY_CHECK_ERROR(self->dirfile->D, NULL, self->dirfile->char_enc);
+
+  pyobj = gdpyobj_from_string(ns, self->dirfile->char_enc);
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
 static PyObject *gdpy_fragment_getprefix(struct gdpy_fragment_t *self,
     void *closure)
 {
@@ -313,7 +331,7 @@ static PyObject *gdpy_fragment_getprefix(struct gdpy_fragment_t *self,
 
   GDPY_CHECK_ERROR(self->dirfile->D, NULL, self->dirfile->char_enc);
 
-  free(suffix);
+  PyMem_Free(suffix);
   if (prefix == NULL) {
     Py_INCREF(Py_None);
     dreturn("%p", Py_None);
@@ -321,10 +339,39 @@ static PyObject *gdpy_fragment_getprefix(struct gdpy_fragment_t *self,
   }
 
   pyobj = gdpyobj_from_string(prefix, self->dirfile->char_enc);
-  free(prefix);
+  PyMem_Free(prefix);
 
   dreturn("%p", pyobj);
   return pyobj;
+}
+
+static int gdpy_fragment_setns(struct gdpy_fragment_t *self,
+    PyObject *value, void *closure)
+{
+  char *ns;
+
+  dtrace("%p, %p, %p", self, value, closure);
+
+  /* deleting namespace is equivalent to setting it to "" */
+  if (value == NULL)
+    ns = gdpy_strdup("");
+  else
+    ns = gdpy_string_from_pyobj(value, self->dirfile->char_enc,
+        "namespace must be string");
+
+  if (ns == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  gd_fragment_namespace(self->dirfile->D, self->n, ns);
+
+  PyMem_Free(ns);
+
+  GDPY_CHECK_ERROR(self->dirfile->D, -1, self->dirfile->char_enc);
+
+  dreturn("%i", 0);
+  return 0;
 }
 
 static int gdpy_fragment_setprefix(struct gdpy_fragment_t *self,
@@ -336,13 +383,13 @@ static int gdpy_fragment_setprefix(struct gdpy_fragment_t *self,
 
   if (value == NULL) {
     if (self->n == 0) {
-      prefix = strdup("");
+      prefix = gdpy_strdup("");
       if (prefix == NULL)
         PyErr_NoMemory();
     } else {
       char *suffix = NULL;
       gd_fragment_affixes(self->dirfile->D, self->n, &prefix, &suffix);
-      free(suffix);
+      PyMem_Free(suffix);
 
       GDPY_CHECK_ERROR(self->dirfile->D, -1, self->dirfile->char_enc);
     }
@@ -357,7 +404,7 @@ static int gdpy_fragment_setprefix(struct gdpy_fragment_t *self,
 
   gd_alter_affixes(self->dirfile->D, self->n, prefix, NULL);
 
-  free(prefix);
+  PyMem_Free(prefix);
 
   GDPY_CHECK_ERROR(self->dirfile->D, -1, self->dirfile->char_enc);
 
@@ -377,7 +424,7 @@ static PyObject *gdpy_fragment_getsuffix(struct gdpy_fragment_t *self,
 
   GDPY_CHECK_ERROR(self->dirfile->D, NULL, self->dirfile->char_enc);
 
-  free(prefix);
+  PyMem_Free(prefix);
   if (suffix == NULL) {
     Py_INCREF(Py_None);
     dreturn("%p", Py_None);
@@ -385,7 +432,7 @@ static PyObject *gdpy_fragment_getsuffix(struct gdpy_fragment_t *self,
   }
 
   pyobj = gdpyobj_from_string(suffix, self->dirfile->char_enc);
-  free(suffix);
+  PyMem_Free(suffix);
 
   dreturn("%p", pyobj);
   return pyobj;
@@ -400,13 +447,13 @@ static int gdpy_fragment_setsuffix(struct gdpy_fragment_t *self,
 
   if (value == NULL) {
     if (self->n == 0) {
-      suffix = strdup("");
+      suffix = gdpy_strdup("");
       if (suffix == NULL)
         PyErr_NoMemory();
     } else {
       char *prefix = NULL;
       gd_fragment_affixes(self->dirfile->D, self->n, &prefix, &suffix);
-      free(prefix);
+      PyMem_Free(prefix);
 
       GDPY_CHECK_ERROR(self->dirfile->D, -1, self->dirfile->char_enc);
     }
@@ -421,7 +468,7 @@ static int gdpy_fragment_setsuffix(struct gdpy_fragment_t *self,
 
   gd_alter_affixes(self->dirfile->D, self->n, NULL, suffix);
 
-  free(suffix);
+  PyMem_Free(suffix);
 
   GDPY_CHECK_ERROR(self->dirfile->D, -1, self->dirfile->char_enc);
 
@@ -452,6 +499,9 @@ static PyGetSetDef gdpy_fragment_getset[] = {
   { "name", (getter)gdpy_fragment_getname, NULL,
     "The pathname of this fragment.  This attribute cannot be changed.\n"
       "See gd_fragmentname(3).",
+    NULL },
+  { "namespace", (getter)gdpy_fragment_getns, (setter)gdpy_fragment_setns,
+    "The root namespace of the fragment.  See gd_fragment_affix(3).\n",
     NULL },
   { "parent", (getter)gdpy_fragment_getparent, NULL,
     "The fragment index of this fragment's parent.  Since the primary\n"

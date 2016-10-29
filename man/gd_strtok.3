@@ -1,6 +1,6 @@
 .\" gd_strtok.3.  The gd_strtok man page.
 .\"
-.\" Copyright (C) 2012 D. V. Wiebe
+.\" Copyright (C) 2012, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_strtok 3 "28 June 2012" "Version 0.8.0" "GETDATA"
+.TH gd_strtok 3 "28 October 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_strtok \(em tokenise a string using the GetData parser
 .SH SYNOPSIS
@@ -59,13 +59,20 @@ will parse different strings.
 .SH RETURN VALUE
 Upon successful completion,
 .BR gd_strtok ()
-returns a copy of the first token (if
+returns a copy of the first token, if
 .I string
-is non-NULL), or the subsequent token.  The token strings returned are each
-allocated with
-.BR malloc (3)
-and should be deallocated by the caller when no longer needed using
-.BR free (3).
+is non-NULL, or else a subsequent token from the previously specified string,
+if
+.I string
+is NULL.  Every non-NULL pointer returned by
+.BR gd_strtok ()
+points to a new buffer allocated on the heap.  By default,
+.BR strdup (3)
+is used the allocate the buffers, but an alternate memory manager may be
+used by calling
+.BR gd_alloc_funcs (3)
+before calling this function.  The caller is responsible for deallocating all
+these buffers.
 .PP
 If no more tokens are available, or if an error occurred, NULL is returned.
 If an error has occurred, it will also set the dirfile error a non-zero error

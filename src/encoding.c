@@ -286,7 +286,7 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
     lt_dlhandle lib;
 
     /* make the library name */
-    library = (char *)malloc(sizeof(GETDATA_MODULEDIR) +
+    library = malloc(sizeof(GETDATA_MODULEDIR) +
         strlen(_GD_ef[encoding].affix) + sizeof(GD_GETDATA_VERSION) + 13);
     if (!library) {
       _GD_ef[encoding].provides = 0;
@@ -682,7 +682,7 @@ static unsigned long _GD_ResolveEncoding(DIRFILE *restrict D,
   for (i = 0; _GD_ef[i].scheme != GD_ENC_UNSUPPORTED; i++) {
     if (scheme == GD_AUTO_ENCODED || scheme == _GD_ef[i].scheme) {
       if (_GD_ef[i].ext) {
-        candidate = (char *)malloc(len + strlen(_GD_ef[i].ext) + 1);
+        candidate = malloc(len + strlen(_GD_ef[i].ext) + 1);
         if (!candidate)
           continue;
 

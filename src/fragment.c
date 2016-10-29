@@ -27,7 +27,7 @@ const char *gd_fragmentname(DIRFILE* D, int index) gd_nothrow
   GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   if (index < 0 || index >= D->n_fragment) {
-    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, index, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -45,12 +45,19 @@ int gd_fragment_affixes(DIRFILE *D, int index, char **prefix, char **suffix)
   GD_RETURN_ERR_IF_INVALID(D);
 
   if (index < 0 || index >= D->n_fragment)
-    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, index, NULL);
 
-  if (D->fragment[index].prefix)
-    p = _GD_Strdup(D, D->fragment[index].prefix);
-  if (D->fragment[index].suffix)
-    s = _GD_Strdup(D, D->fragment[index].suffix);
+  /* Copy to caller's heap */
+  if (D->fragment[index].prefix) {
+    p = _GD_CStrdup(D->fragment[index].prefix);
+    if (p == NULL)
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  }
+  if (D->fragment[index].suffix) {
+    s = _GD_CStrdup(D->fragment[index].suffix);
+    if (s == NULL)
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  }
 
   if (D->error) {
     free(p);
@@ -189,7 +196,7 @@ int gd_alter_affixes(DIRFILE *D, int index, const char *prefix,
   GD_RETURN_ERR_IF_INVALID(D);
 
   if (index <= 0 || index >= D->n_fragment) 
-    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, index, NULL);
   else if ((D->flags & GD_ACCMODE) == GD_RDONLY)
     GD_SET_RETURN_ERROR(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
   else if (D->fragment[D->fragment[index].parent].protection &
@@ -254,7 +261,7 @@ int gd_parent_fragment(DIRFILE* D, int fragment_index) gd_nothrow
   GD_RETURN_ERR_IF_INVALID(D);
 
   if (fragment_index <= 0 || fragment_index >= D->n_fragment)
-    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
 
   dreturn("%i", D->fragment[fragment_index].parent);
   return D->fragment[fragment_index].parent;
@@ -487,7 +494,7 @@ const char *gd_fragment_namespace(DIRFILE *D, int index, const char *ns)
   GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   if (index < 0 || index >= D->n_fragment) {
-    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, index, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -501,7 +508,7 @@ const char *gd_fragment_namespace(DIRFILE *D, int index, const char *ns)
     size_t oldnsl = D->fragment[index].nsl;
 
     if (index == 0)
-      _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
+      _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, index, NULL);
     else if ((D->flags & GD_ACCMODE) == GD_RDONLY)
       _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
     else if (D->fragment[D->fragment[index].parent].protection

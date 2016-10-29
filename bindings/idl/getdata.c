@@ -3151,6 +3151,7 @@ void gdidl_include(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
+  int free_prefix = 0;
   char *prefix = NULL;
   char *suffix = NULL;
   typedef struct {
@@ -3178,12 +3179,14 @@ void gdidl_include(int argc, IDL_VPTR argv[], char *argk)
     int prefix_x;
     IDL_STRING suffix;
     int suffix_x;
+    IDL_STRING ns;
+    int ns_x;
   } KW_RESULT;
   KW_RESULT kw;
   kw.big_end = kw.creat = kw.excl = kw.force_enc = kw.force_end =
     kw.ignore_dups = kw.ignore_refs = kw.little_end = kw.pedantic = kw.trunc =
     kw.enc_x = kw.index_x = kw.fragment_index = kw.arm_end = kw.not_arm_end =
-    kw.prefix_x = kw.suffix_x = 0;
+    kw.prefix_x = kw.suffix_x = kw.ns_x = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
@@ -3204,6 +3207,8 @@ void gdidl_include(int argc, IDL_VPTR argv[], char *argk)
     { "IGNORE_DUPS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(ignore_dups) },
     { "IGNORE_REFS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(ignore_dups) },
     { "LITTLE_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(little_end) },
+    { "NAMESPACE", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(ns_x),
+      IDL_KW_OFFSETOF(ns) },
     { "NOT_ARM_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(not_arm_end) },
     { "PEDANTIC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pedantic) },
     { "PERMISSIVE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(permissive) },
@@ -3238,7 +3243,31 @@ void gdidl_include(int argc, IDL_VPTR argv[], char *argk)
   if (kw.enc_x)
     flags |= gdidl_convert_encoding(kw.enc);
 
-  if (kw.prefix_x)
+  /* Handle combinations of prefix and namespace */
+  if (kw.ns_x && kw.prefix_x) {
+    const char *fmt;
+    char *ns = IDL_STRING_STR(&kw.ns);
+    char *prefix0 = IDL_STRING_STR(&kw.prefix);
+
+    prefix = malloc(strlen(prefix0) + strlen(ns) + 2);
+    free_prefix = 1;
+
+    if (ns[strlen(ns) - 1] == '.')
+      fmt = "%s%s";
+    else
+      fmt = "%s.%s";
+    
+    sprintf(prefix, fmt, ns, prefix0);
+  } else if (kw.ns_x) {
+    char *ns = IDL_STRING_STR(&kw.ns);
+    if (ns[strlen(ns) - 1] == '.')
+      prefix = ns;
+    else {
+      prefix = malloc(strlen(ns) + 2);
+      free_prefix = 1;
+      sprintf(prefix, "%s.", ns);
+    }
+  } else if (kw.prefix_x)
     prefix = IDL_STRING_STR(&kw.prefix);
 
   if (kw.suffix_x)
@@ -3246,6 +3275,9 @@ void gdidl_include(int argc, IDL_VPTR argv[], char *argk)
 
   int index = (int16_t)gd_include_affix(D, file, kw.fragment_index, prefix,
       suffix, flags);
+
+  if (free_prefix)
+    free(prefix);
 
   if (kw.index_x) {
     IDL_ALLTYPES v;
@@ -4195,8 +4227,8 @@ IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
       kw.type = GD_ALIAS_ENTRIES;
   }
 
-  nentries = gd_nentries(D, parent, kw.fragment, kw.type, flags);
-  list = gd_entry_list(D, parent, kw.fragment, kw.type, flags);
+  nentries = gd_nentries(D, kw.fragment, parent, kw.type, flags);
+  list = gd_entry_list(D, kw.fragment, parent, kw.type, flags);
 
   GDIDL_SET_ERROR(D);
 
@@ -4422,7 +4454,7 @@ IDL_VPTR gdidl_get_nfields(int argc, IDL_VPTR argv[], char *argk)
       kw.type = GD_ALIAS_ENTRIES;
   }
 
-  nentries = gd_nentries(D, parent, kw.fragment, kw.type, flags);
+  nentries = gd_nentries(D, kw.fragment, parent, kw.type, flags);
 
   GDIDL_SET_ERROR(D);
 
@@ -4601,18 +4633,23 @@ IDL_VPTR gdidl_get_raw_filename(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
+  DIRFILE *D;
+  char *name;
+  const char *field_code;
   GDIDL_KW_ONLY_ERROR;
 
-  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
-  const char* field_code = IDL_VarGetString(argv[1]);
+  D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  field_code = IDL_VarGetString(argv[1]);
 
-  const char* name = gd_raw_filename(D, field_code);
+  name = gd_raw_filename(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
   IDL_KW_FREE;
 
-  IDL_VPTR r = IDL_StrToSTRING((char*)name);
+  IDL_VPTR r = IDL_StrToSTRING(name);
+  free(name);
+
   dreturn("%p", r);
   return r;
 }
@@ -5714,6 +5751,52 @@ IDL_VPTR gdidl_fragment_affixes(int argc, IDL_VPTR argv[], char *argk)
   free(prefix);
   free(suffix);
 
+  dreturn("%p", r);
+  return r;
+}
+
+/* @@DLM: F gdidl_fragment_namespace GD_FRAGMENT_NAMESPACE 1 1 KEYWORDS */
+IDL_VPTR gdidl_fragment_namespace(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  DIRFILE *D;
+  char *nsin = NULL;
+  const char *nsout;
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    IDL_STRING ns;
+    int ns_x, fragment;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  GDIDL_KW_INIT_ERROR;
+  kw.fragment = kw.ns_x = 0;
+
+  static IDL_KW_PAR kw_pars[] = {
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment) },
+    { "NAMESPACE", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(ns_x),
+      IDL_KW_OFFSETOF(ns) },
+    { NULL }
+  };
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+
+  if (kw.ns_x)
+    nsin = IDL_STRING_STR(&kw.ns);
+
+  nsout = gd_fragment_namespace(D, kw.fragment, nsin);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r = IDL_StrToSTRING((char*)nsout);
   dreturn("%p", r);
   return r;
 }

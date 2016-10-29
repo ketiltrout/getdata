@@ -86,6 +86,24 @@ static struct {
   { NULL, 0}
 };
 
+char *gdpy_strdup(const char *str)
+{
+  char *ptr = NULL;
+
+  dtrace("\"%s\"", str);
+
+  if (str) {
+    size_t len = strlen(str) + 1;
+    ptr = PyMem_Malloc(len);
+
+    if (ptr)
+      memcpy(ptr, str, len);
+  }
+
+  dreturn("%p", ptr);
+  return ptr;
+}
+
 int gdpylist_append(PyObject *list, PyObject *item)
 {
   int ret;
@@ -252,7 +270,7 @@ long gdpy_long_from_pyobj(PyObject *pyobj)
   return v;
 }
 
-/* Convert a Python string-like object to a C string, returns a malloc'd
+/* Convert a Python string-like object to a C string, returns a PyMem_Malloc'd
  * string except on error */
 char *gdpy_string_from_pyobj(PyObject *pyobj, const char *char_enc,
     const char *err_string)
@@ -289,7 +307,7 @@ char *gdpy_string_from_pyobj(PyObject *pyobj, const char *char_enc,
 
   /* strdup */
   if (s) {
-    s = strdup(s);
+    s = gdpy_strdup(s);
 
     if (s == NULL)
       PyErr_NoMemory();
@@ -360,7 +378,7 @@ char *gdpy_path_from_pyobj_(PyObject *pyobj, int dup)
 
   /* strdup, if requested */
   if (s && dup) {
-    s = strdup(s);
+    s = gdpy_strdup(s);
 
     if (s == NULL)
       PyErr_NoMemory();
@@ -656,7 +674,7 @@ int gdpy_report_error(DIRFILE *D, char *char_enc)
     if (buffer) {
       PyErr_SetObject(gdpy_exceptions[-e], gdpyobj_from_estring(buffer,
             char_enc));
-      free(buffer); 
+      PyMem_Free(buffer); 
     } else
       PyErr_NoMemory(); /* Errors with errors */
   }
@@ -817,13 +835,14 @@ PyObject *gdpy_convert_to_pyobj(const void *data, gd_type_t type,
   return pyobj;
 }
 
-/* If value is a valid encoding (or None), free the old *char_enc and update */
+/* If value is a valid encoding (or None), PyMem_Free the old *char_enc and
+ * update */
 int gdpy_parse_charenc(char** char_enc, PyObject *value)
 {
   dtrace("%p, %p", char_enc, value);
 
   if (value == NULL || value == Py_None) {
-    free(*char_enc);
+    PyMem_Free(*char_enc);
     *char_enc = NULL;
   } else {
     char *new_enc = gdpy_string_from_pyobj(value, NULL,
@@ -834,7 +853,7 @@ int gdpy_parse_charenc(char** char_enc, PyObject *value)
       return -1;
     }
 
-    free(*char_enc);
+    PyMem_Free(*char_enc);
     *char_enc = new_enc;
   }
 
@@ -1145,6 +1164,9 @@ GDPY_MODINITFUNC
   if (capi)
     PyModule_AddObject(gdpy_mod, "__CAPI", capi);
 #endif
+
+  /* Tell GetData to use Python's heap (in places) */
+  gd_alloc_funcs(PyMem_Malloc, PyMem_Free);
 
   GDPY_MODINITSUCCESS;
 }

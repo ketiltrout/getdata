@@ -24,7 +24,8 @@ nodist_man_MANS = gd_alter_encoding.3 gd_alter_endianness.3 \
 											 gd_alter_frameoffset.3
 dist_man_MANS = checkdirfile.1 dirfile2ascii.1 gd_add.3 gd_add_alias.3 \
 								gd_add_bit.3 gd_add_spec.3 gd_alias_target.3 gd_aliases.3 \
-								gd_alter_affixes.3 gd_alter_bit.3 gd_alter_entry.3 \
+								gd_alloc_funcs.3 gd_alter_affixes.3 gd_alter_bit.3 \
+								gd_alter_entry.3 \
 								gd_alter_protection.3 gd_alter_spec.3 gd_array_len.3 gd_bof.3 \
 								gd_bof64.3 gd_carrays.3 gd_cbopen.3 gd_close.3 gd_constants.3 \
 								gd_delete.3 gd_desync.3 gd_dirfile_standards.3 \

@@ -1820,7 +1820,7 @@ try
   try
     gd_include(D, 'format1', 0, GD.CREAT + GD.EXCL, 'A', 'Z');
   catch exc
-    ne = ne + check_ok2(exc, 41, 1);
+    ne = ne + check_ok2(exc, 223, 1);
   end
 
   % 226: fragment_affixes
@@ -1955,16 +1955,16 @@ try
 
   % 237: gd_nentries
   try
-    d = gd_nentries(D, 'data', GD.ALL_FRAGMENTS, GD.SCALAR_ENTRIES, ...
+    d = gd_nentries(D, GD.ALL_FRAGMENTS, 'data', GD.SCALAR_ENTRIES, ...
     GD.ENTRIES_HIDDEN + GD.ENTRIES_NOALIAS);
     ne = ne + check_num(237, d, 7);
   catch exc
     ne = ne + check_ok(exc, 237);
   end
 
-  % 239: gd_nentries
+  % 239: gd_entry_list
   try
-    d = gd_entry_list(D, 'data', GD.ALL_FRAGMENTS, GD.SCALAR_ENTRIES, ...
+    d = gd_entry_list(D, GD.ALL_FRAGMENTS, 'data', GD.SCALAR_ENTRIES, ...
     GD.ENTRIES_HIDDEN + GD.ENTRIES_NOALIAS);
     ne = ne + check_sarray(239, d, {'mstr', 'mconst', 'mcarray', 'msarray', ...
     'mnew11', 'mnew12', 'mnew17'});
@@ -2307,6 +2307,29 @@ try
     {'eka'; 'eka'; 'eka'; 'eka'; 'eka'; 'eka'; 'eka'; 'eka';});
   catch exc
     ne = ne + check_ok(exc, 296);
+  end
+
+  % 302: gd_include_ns
+  try
+    gd_include_ns(D, 'format2', 0, 'ns', GD.CREAT + GD.EXCL);
+  catch exc
+    ne = ne + check_ok2(exc, 302, 1);
+  end
+
+  % 303: gd_fragment_namespace (read)
+  try
+    d = gd_fragment_namespace(D, 2);
+    ne = ne + check_string(303, d, 'ns');
+  catch exc
+    ne = ne + check_ok(exc, 303);
+  end
+
+  % 304: gd_fragment_namespace (alter)
+  try
+    d = gd_fragment_namespace(D, 2, 'ns2');
+    ne = ne + check_string(304, d, 'ns2');
+  catch exc
+    ne = ne + check_ok(exc, 304);
   end
 
 

@@ -248,7 +248,7 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   /* Error reading the format file, and we weren't asked to create it; do
    * nothing else. */
   if (format_error == EACCES || (format_error && !(D->flags & GD_CREAT))) {
-    char *format_file = (char *)malloc(strlen(dirfile) + 8);
+    char *format_file = malloc(strlen(dirfile) + 8);
     sprintf(format_file, "%s%cformat", dirfile, GD_DIRSEP);
     _GD_SetError2(D, GD_E_IO, GD_E_IO_OPEN, format_file, 0, NULL, format_error);
     free(format_file);
@@ -332,7 +332,7 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
     if ((fd = gd_OpenAt(D, dirfd, "format", O_RDWR | O_CREAT | O_BINARY |
             (format_trunc ? O_TRUNC : O_EXCL), 0666)) < 0)
     {
-      char *format_file = (char *)malloc(strlen(dirfile) + 8);
+      char *format_file = malloc(strlen(dirfile) + 8);
       sprintf(format_file, "%s/format", dirfile);
       _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, 0, NULL);
       free(dirfile);
@@ -352,7 +352,7 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
 
   /* associate a stream with the format file */
   if ((fp = fdopen(fd, "rb")) == NULL) {
-    char *format_file = (char *)malloc(strlen(dirfile) + 8);
+    char *format_file = malloc(strlen(dirfile) + 8);
     sprintf(format_file, "%s/format", dirfile);
     _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, 0, NULL);
     free(dirfile);
@@ -367,7 +367,7 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   }
 
   /* open succeeds */
-  D->dir = (struct gd_dir_t *)malloc(sizeof(struct gd_dir_t));
+  D->dir = malloc(sizeof(struct gd_dir_t));
   D->dir[0].fd = dirfd;
   D->dir[0].rc = 1;
   D->dir[0].path = dirfile;
@@ -398,7 +398,7 @@ DIRFILE* gd_invalid_dirfile(void) gd_nothrow
 
   dtracevoid();
 
-  D = (DIRFILE *)malloc(sizeof(DIRFILE));
+  D = malloc(sizeof(DIRFILE));
   if (D) {
     memset(D, 0, sizeof(DIRFILE));
     D->flags = GD_INVALID;
@@ -454,7 +454,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   _GD_InitialiseFramework();
 
   if (D == NULL)
-    D = (DIRFILE *)malloc(sizeof(DIRFILE));
+    D = malloc(sizeof(DIRFILE));
   if (D == NULL) {
     free(dirfile);
 #ifndef GD_NO_DIR_OPEN

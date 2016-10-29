@@ -118,8 +118,8 @@ namespace GetData {
 
       GetData::Entry* Entry(const char *field_code) const;
 
-      const char **EntryList(const char *parent = NULL,
-          int fragment = GD_ALL_FRAGMENTS, int type = 0,
+      const char **EntryList(int fragment = GD_ALL_FRAGMENTS,
+          const char *parent = NULL, int type = 0,
           unsigned int flags = 0) const;
 
       gd_off64_t EoF(const char *field_code) const;
@@ -177,6 +177,9 @@ namespace GetData {
           const char* prefix = NULL, const char* suffix = NULL,
           unsigned long flags = 0) const;
 
+      int IncludeNS(const char *file, int fragment_index = 0,
+          const char* ns = NULL, unsigned long flags = 0) const;
+
       char *LinterpTableName(const char *field_code);
 
       int MAdd(GetData::Entry &entry, const char *parent) const;
@@ -210,8 +213,8 @@ namespace GetData {
 
       int NAliases(const char* field_code) const;
 
-      unsigned int NEntries(const char *parent = NULL,
-          int fragment = GD_ALL_FRAGMENTS, int type = 0,
+      unsigned int NEntries(int fragment = GD_ALL_FRAGMENTS,
+          const char *parent = NULL, int type = 0,
           unsigned int flags = 0) const;
 
       unsigned int NFields() const;

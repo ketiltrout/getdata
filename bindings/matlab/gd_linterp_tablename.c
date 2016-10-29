@@ -38,8 +38,7 @@
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
-  const char *s;
-  char *field_code;
+  char *s, *field_code;
 
   GDMX_CHECK_RHS(2);
 
@@ -52,4 +51,5 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   gdmx_err(D, 0);
 
   plhs[0] = mxCreateString(s);
+  mxFree(s);
 }

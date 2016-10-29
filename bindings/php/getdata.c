@@ -3277,11 +3277,11 @@ PHP_FUNCTION(gd_entry_list)
   char *parentp;
   dtracephp();
 
-  GDPHP_PARSED("|slll", &parent, &parent_len, &fragment, &type, &flags);
+  GDPHP_PARSED("|lsll", &fragment, &parent, &parent_len, &type, &flags);
 
   parentp = gdphp_check_null_string(parent);
 
-  fl = gd_entry_list(D, parentp, fragment, type, flags);
+  fl = gd_entry_list(D, fragment, parentp, type, flags);
 
   if (fl == NULL)
     GDPHP_RETURN_F;
@@ -3438,6 +3438,27 @@ PHP_FUNCTION(gd_flush)
   field_codep = gdphp_check_null_string(field_code);
 
   GDPHP_RETURN_BOOL(gd_flush(D, field_codep));
+}
+
+PHP_FUNCTION(gd_fragment_namespace)
+{
+  GDPHP_LONG index;
+  const char *nsin = NULL;
+  GDPHP_SLEN nsin_len;
+  const char *nsout;
+  DIRFILE *D;
+
+  dtracephp();
+
+  GDPHP_PARSED("l|s", &index, &nsin, &nsin_len);
+
+  nsout = gd_fragment_namespace(D, index, nsin);
+
+  if (nsout) {
+    dreturn("\"%s\"", nsout);
+    GDPHP_RET_STR_COPY(nsout);
+  } else
+    GDPHP_RETURN_F;
 }
 
 PHP_FUNCTION(gd_fragment_affixes)
@@ -3850,6 +3871,27 @@ PHP_FUNCTION(gd_include)
   RETURN_LONG(i);
 }
 
+PHP_FUNCTION(gd_include_ns)
+{
+  char *path, *ns = NULL;
+  GDPHP_SLEN path_len, ns_len;
+  GDPHP_LONG i, parent, flags = 0;
+
+  DIRFILE *D;
+
+  dtracephp();
+
+  GDPHP_PARSED("sl|sl", &path, &path_len, &parent, &ns, &ns_len, &flags);
+
+  i = gd_include_ns(D, path, parent, ns, flags);
+
+  if (i < 0)
+    GDPHP_RETURN_F;
+
+  dreturn("%li", i);
+  RETURN_LONG(i);
+}
+
 PHP_FUNCTION(gd_invalid_dirfile)
 {
   gdphp_dirfile *r;
@@ -3877,17 +3919,20 @@ PHP_FUNCTION(gd_linterp_tablename)
   GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
-  const char *s;
+  char *s;
 
   dtracephp();
 
   GDPHP_PARSED("s", &field_code, &field_code_len);
 
-  if ((s = gd_linterp_tablename(D, field_code)) == NULL)
-    GDPHP_RETURN_F;
+  s = gd_linterp_tablename(D, field_code);
 
-  dreturn("\"%s\"", s);
-  GDPHP_RET_STR_COPY(s);
+  if (s) {
+    GDPHP_RETVAL_STRING(s);
+    dreturn("\"%s\"", s);
+    free(s);
+  } else
+    GDPHP_RETURN_F;
 }
 
 PHP_FUNCTION(gd_madd)
@@ -4569,11 +4614,11 @@ PHP_FUNCTION(gd_nentries)
   char *parentp;
   dtracephp();
 
-  GDPHP_PARSED("|slll", &parent, &parent_len, &fragment, &type, &flags);
+  GDPHP_PARSED("|lsll", &fragment, &parent, &parent_len, &type, &flags);
 
   parentp = gdphp_check_null_string(parent);
 
-  n = gd_nentries(D, parentp, fragment, type, flags);
+  n = gd_nentries(D, fragment, parentp, type, flags);
 
   GDPHP_CHECK_ERROR(D);
 
@@ -4993,17 +5038,20 @@ PHP_FUNCTION(gd_raw_filename)
   GDPHP_SLEN field_code_len;
 
   DIRFILE *D;
-  const char *s;
+  char *s;
 
   dtracephp();
 
   GDPHP_PARSED("s", &field_code, &field_code_len);
 
-  if ((s = gd_raw_filename(D, field_code)) == NULL)
-    GDPHP_RETURN_F;
+  s = gd_raw_filename(D, field_code);
 
-  dreturn("\"%s\"", s);
-  GDPHP_RET_STR_COPY(s);
+  if (s) {
+    GDPHP_RETVAL_STRING(s);
+    dreturn("\"%s\"", s);
+    free(s);
+  } else
+    GDPHP_RETURN_F;
 }
 
 PHP_FUNCTION(gd_reference)
@@ -5356,6 +5404,7 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_flush, NULL)
     PHP_FE(gd_fragment_affixes, NULL)
     PHP_FE(gd_fragment_index, NULL)
+    PHP_FE(gd_fragment_namespace, NULL)
     PHP_FE(gd_fragmentname, NULL)
     PHP_FE(gd_framenum, NULL)
     PHP_FE(gd_frameoffset, NULL)
@@ -5367,6 +5416,7 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_hidden, NULL)
     PHP_FE(gd_hide, NULL)
     PHP_FE(gd_include, NULL)
+    PHP_FE(gd_include_ns, NULL)
     PHP_FE(gd_invalid_dirfile, NULL)
     PHP_FE(gd_linterp_tablename, NULL)
     PHP_FE(gd_madd, NULL)

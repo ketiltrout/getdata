@@ -2125,15 +2125,15 @@ C     236: GDVBPX check
       CALL CHKEOK(ne, 236, d)
 
 C     237: GDNENT check
-      CALL GDNENT(n, d, "data", 4, GD_ALL, GDEN_S, GDEN_H + GDEN_N)
+      CALL GDNENT(n, d, GD_ALL, "data", 4, GDEN_S, GDEN_H + GDEN_N)
       CALL CHKOK2(ne, 237, 1, d)
       CALL CHKIN2(ne, 237, 1, n, 6)
-      CALL GDNENT(n, d, "", -1, GD_ALL, GDEN_V, GDEN_H + GDEN_N)
+      CALL GDNENT(n, d, GD_ALL, "", -1, GDEN_V, GDEN_H + GDEN_N)
       CALL CHKOK2(ne, 237, 2, d)
       CALL CHKIN2(ne, 237, 2, n, 29)
 
 C     238: GDENTX check
-      CALL GDENTX(l, d, "", -1, GD_ALL, GDEN_V, GDEN_H + GDEN_N)
+      CALL GDENTX(l, d, GD_ALL, "", -1, GDEN_V, GDEN_H + GDEN_N)
       CALL CHKEOK(ne, 238, d)
       CALL CHKINT(ne, 238, l, 7)
 
@@ -2169,7 +2169,7 @@ C     239: GDENTN check
       fields(29) = "window"
       DO 2390 i = 1, n
       l = flen
-      CALL GDENTN(fn, l, d, "", -1, GD_ALL, GDEN_V, GDEN_H + GDEN_N, i)
+      CALL GDENTN(fn, l, d, GD_ALL, "", -1, GDEN_V, GDEN_H + GDEN_N, i)
       CALL CHKOK2(ne, 239, i, d)
       CALL CHKIN2(ne, 239, i, l, flen)
       CALL CHKST2(ne, 239, i, fn, fields(i))
@@ -3198,6 +3198,24 @@ C     298: GDXSTP check
 
 C     299: GDDSTP check
       CALL GDDSTP(fn)
+
+C     302: GDINCA check
+      CALL GDINCN(d, 'format2', 7, 0, 'NS', 2, GD_CR + GD_EX)
+      CALL CHKEOK(ne, 302, d)
+
+C     303: GDFRNS check (read)
+      l = flen
+      CALL GDFRNS(fields(1), l, d, 2, "", -1)
+      CALL CHKEOK(ne, 303, d)
+      CALL CHKIN2(ne, 303, 1, l, flen)
+      CALL CHKST2(ne, 303, 2, fields(1), 'NS')
+
+C     304: GDFRNS check (update)
+      l = flen
+      CALL GDFRNS(fields(1), l, d, 2, "NS2", 3)
+      CALL CHKEOK(ne, 304, d)
+      CALL CHKIN2(ne, 304, 1, l, flen)
+      CALL CHKST2(ne, 304, 2, fields(1), 'NS2')
 
 
 

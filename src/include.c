@@ -502,7 +502,7 @@ int gd_include_ns(DIRFILE *D, const char *file, int fragment_index,
 
     sprintf(ns, "%s.", nsin);
   } else
-    ns = nsin;
+    ns = (char*)nsin;
 
   new_fragment = gd_include_affix(D, file, fragment_index, ns, NULL, flags);
 
@@ -512,7 +512,6 @@ int gd_include_ns(DIRFILE *D, const char *file, int fragment_index,
   dreturn("%i", new_fragment);
   return new_fragment;
 }
-  
 
 static int _GD_CollectFragments(DIRFILE* D, int** f, int fragment, int nf)
 {

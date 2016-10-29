@@ -1,6 +1,6 @@
 .\" gd_error_string.3.  The gd_error_string man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011, 2014 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2014, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_error_string 3 "16 October 2014" "Version 0.9.0" "GETDATA"
+.TH gd_error_string 3 "28 October 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_error_string \(em report a GetData library error
 .SH SYNOPSIS
@@ -45,14 +45,15 @@ If
 .I buffer
 is NULL,
 .BR gd_error_string ()
-will allocate a string of sufficient length using
-.BR malloc (3),
-and
+will allocate a string of sufficient length on the heap.  By default,
+.BR malloc (3)
+is used to allocate this buffer, but an alternate memory manager may be
+specified by calling
+.BR gd_alloc_funcs (3)
+before calling this function.  In this case,
 .I buflen
-is ignored.  In this case, the caller should deallocate the returned string
-using
-.BR free (3)
-when it is no longer needed.
+is ignored and the caller is responsible for deallocating this string when it is
+no longer needed.
 
 .SH RETURN VALUE
 If
@@ -69,5 +70,6 @@ NULL, if memory allocation failed.  In all cases, the error state of
 .I dirfile
 is unchanged.
 .SH SEE ALSO
+.BR gd_alloc_funcs (3),
 .BR gd_error (3),
 .BR gd_error_count (3)

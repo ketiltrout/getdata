@@ -510,6 +510,12 @@ int Dirfile::IncludeAffix(const char *file, int fragment_index,
   return gd_include_affix(D, file, fragment_index, prefix, suffix, flags);
 }
 
+int Dirfile::IncludeNS(const char *file, int fragment_index,
+    const char* ns, unsigned long flags) const
+{
+  return gd_include_ns(D, file, fragment_index, ns, flags);
+}
+
 int Dirfile::MAddAlias(const char* parent, const char* name, const char* target)
   const
 {
@@ -570,16 +576,16 @@ void Dirfile::MplexLookback(int lookback) const
   gd_mplex_lookback(D, lookback);
 }
 
-unsigned int Dirfile::NEntries(const char *parent, int fragment, int type,
+unsigned int Dirfile::NEntries(int fragment, const char *parent, int type,
     unsigned int flags) const
 {
-  return gd_nentries(D, parent, fragment, type, flags);
+  return gd_nentries(D, fragment, parent, type, flags);
 }
 
-const char** Dirfile::EntryList(const char *parent, int fragment, int type,
+const char** Dirfile::EntryList(int fragment, const char *parent, int type,
     unsigned int flags) const
 {
-  return gd_entry_list(D, parent, fragment, type, flags);
+  return gd_entry_list(D, fragment, parent, type, flags);
 }
 
 char* Dirfile::LinterpTableName(const char *field_code)

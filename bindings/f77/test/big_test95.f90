@@ -2510,11 +2510,11 @@ program big_test
   call check_ok(ne, 236, d)
 
 ! 237: fgd_nentries check
-  n = fgd_nentries(d, "data", GD_ALL_FRAGMENTS, GD_SCALAR_ENTRIES, &
+  n = fgd_nentries(d, GD_ALL_FRAGMENTS, "data", GD_SCALAR_ENTRIES, &
     IOR(GD_ENTRIES_HIDDEN, GD_ENTRIES_NOALIAS))
   call check_ok2(ne, 237, 1, d)
   call check_int2(ne, 237, 1, n, 6)
-  n = fgd_nentries(d, "", GD_ALL_FRAGMENTS, GD_VECTOR_ENTRIES, &
+  n = fgd_nentries(d, GD_ALL_FRAGMENTS, "", GD_VECTOR_ENTRIES, &
     IOR(GD_ENTRIES_HIDDEN, GD_ENTRIES_NOALIAS))
   call check_ok2(ne, 237, 2, d)
   call check_int2(ne, 237, 2, n, 30)
@@ -2534,7 +2534,7 @@ program big_test
   'phase      ', 'polynom    ', 'recip      ', 'sbit       ', 'sindir     ', &
   'window     ' /)
   l = flen
-  call fgd_entry_list(flist, d, "", GD_ALL_FRAGMENTS, GD_VECTOR_ENTRIES, &
+  call fgd_entry_list(flist, d, GD_ALL_FRAGMENTS, "", GD_VECTOR_ENTRIES, &
     IOR(GD_ENTRIES_HIDDEN, GD_ENTRIES_NOALIAS), l)
   call check_ok(ne, 239, d)
   call check_int(ne, 239, l, flen)
@@ -3354,6 +3354,20 @@ program big_test
   do i=1,8
   call check_str2(ne, 296, i, flist(i), 'eka')
   end do
+
+! 302: fgd_include_ns
+  call fgd_include_ns(d, 'format2', 0, 'NS', GD_CREAT + GD_EXCL)
+  call check_ok(ne, 302, d)
+
+! 303: fgd_fragment_namespace (read)
+  str = fgd_fragment_namespace(d, 2)
+  call check_ok(ne, 303, d)
+  call check_eos(ne, 303, str, 'NS')
+
+! 304: fgd_fragment_namespace (alter)
+  str = fgd_alter_namespace(d, 2, 'NS2')
+  call check_ok(ne, 304, d)
+  call check_eos(ne, 304, str, 'NS2')
 
 
 

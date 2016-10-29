@@ -139,6 +139,7 @@ void run_tests(void)
   const char* empty = "dirfile/empty";
   const char* eformat = "dirfile/empty/format";
   const char* format1 = "dirfile/format1";
+  const char* format2 = "dirfile/format2";
   const char* form2 = "dirfile/form2";
   const char* new1 = "dirfile/new1";
   const char* data = "dirfile/data";
@@ -219,6 +220,7 @@ void run_tests(void)
   unlink(new1);
   unlink(format);
   unlink(format1);
+  unlink(format2);
   unlink(form2);
   rmdir(filedir);
 
@@ -1705,11 +1707,11 @@ void run_tests(void)
   CHECK_OK(236);
 
   // 237: gd_nentries
-  n = d->NEntries("data", GD_ALL_FRAGMENTS, GD_SCALAR_ENTRIES,
+  n = d->NEntries(GD_ALL_FRAGMENTS, "data", GD_SCALAR_ENTRIES,
       GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   CHECK_OK2(237, 1);
   CHECK_INT2(237, 1, n, 5);
-  n = d->NEntries(NULL, GD_ALL_FRAGMENTS, GD_VECTOR_ENTRIES,
+  n = d->NEntries(GD_ALL_FRAGMENTS, NULL, GD_VECTOR_ENTRIES,
       GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   CHECK_OK2(237, 2);
   CHECK_INT2(237, 2, n, 28);
@@ -1743,7 +1745,7 @@ void run_tests(void)
   fields[25] = (char*)"sbit";
   fields[26] = (char*)"sindir";
   fields[27] = (char*)"window";
-  list = d->EntryList(NULL, GD_ALL_FRAGMENTS, GD_VECTOR_ENTRIES,
+  list = d->EntryList(GD_ALL_FRAGMENTS, NULL, GD_VECTOR_ENTRIES,
       GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   CHECK_OK(239);
   CHECK_STRING_ARRAY(239,n,list[i],fields[i]);
@@ -2000,6 +2002,19 @@ void run_tests(void)
   CHECK_INT(296,n,8);
   CHECK_STRING_ARRAY(296,8,list[i],"eka");
 
+  // 302: gd_include_ns
+  d->IncludeNS("format2", 0, "ns", GD_CREAT | GD_EXCL);
+  CHECK_OK(302);
+
+  // 303: Get Namespace
+  frag = d->Fragment(2);
+  CHECK_STRING(303, frag->Namespace(), "ns");
+
+  // 304: Set Namespace
+  n = frag->SetNamespace("ns2");
+  CHECK_OK(304);
+  CHECK_INT(304, n, 0);
+  CHECK_STRING(304, frag->Namespace(), "ns2");
 
 
 
@@ -2016,6 +2031,7 @@ void run_tests(void)
   unlink(new1);
   unlink(format);
   unlink(format1);
+  unlink(format2);
   unlink(form2);
   rmdir(filedir);
 }

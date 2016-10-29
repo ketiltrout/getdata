@@ -25,7 +25,7 @@
  %
  %   L = GD_ENTRY_LIST(DIRFILE[,FRAGMENT[,PARENT[,TYPE[,FLAGS]]]])
  %             returns a cell array of strings, L, listing all fields in the
- %             dirfile DIRFILE which satisfy the supplied PARENT, FRAGMENT,
+ %             dirfile DIRFILE which satisfy the supplied FRAGMENT, PARENT,
  %             TYPE, and/or FLAGS.
  %
  %   If FRAGMENT is given and not GD.ALL_FRAGMENTS, only that fragment is
@@ -56,15 +56,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
   D = gdmx_to_dirfile(prhs[0]);
   if (nrhs > 1)
-    parent = gdmx_to_string(prhs, 1, 1);
+    fragment = gdmx_to_int(prhs, 1);
   if (nrhs > 2)
-    fragment = gdmx_to_int(prhs, 2);
+    parent = gdmx_to_string(prhs, 2, 1);
   if (nrhs > 3)
     type = gdmx_to_uint(prhs, 3);
   if (nrhs > 4)
     flags = gdmx_to_uint(prhs, 4);
 
-  fl = gd_entry_list(D, parent, fragment, type, flags);
+  fl = gd_entry_list(D, fragment, parent, type, flags);
 
   mxFree(parent);
   gdmx_err(D, 0);

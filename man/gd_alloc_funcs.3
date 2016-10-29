@@ -1,0 +1,83 @@
+.\" gd_alloc_funcs.3.  The gd_alloc_funcs man page.
+.\"
+.\" Copyright (C) 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_alloc_funcs 3 "28 October 2016" "Version 0.10.0" "GETDATA"
+.SH NAME
+gd_alloc_funcs \(em specify an alternate memory manager for GetData's use
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "void gd_alloc_funcs(void *(*" malloc_func ")(size_t),
+.BI "void (*" free_func )(void*));
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_alloc_funcs ()
+allows the caller to specify an alternate memory manager for GetData to use
+when providing dynamically allocated data to the caller.  The caller should
+specify pointers to two functions which mimic the behaviour of the Standard
+Library's
+.BR malloc (3)
+and
+.BR free (3)
+functions.  Passing NULL is equivalent to passing a pointer to the
+corresponding Standard Library function, so the default memory manager can be
+restored by passing all NULLs to this function.
+
+The functions
+.BR gd_entry (3),
+.BR gd_error_string (3),
+.BR gd_fragment_affixes (3),
+.BR gd_linterp_tablename (3),
+.BR gd_raw_filename (3),
+and
+.BR gd_strtok (3)
+will use
+.I malloc_func
+to allocate the buffers they return.  The function
+.BR gd_free_entry_strings (3)
+will use the specified
+.I free_func
+to deallocate entry strings, and that same function will also be used by
+GetData to deallocate strings returned by any registered parser callback
+function (see
+.BR gd_cbopen (3)).
+
+Internally, GetData may still allocate buffers on a different, and the caller
+should not assume that any other pointer returned by the library were allocated
+with the functions specified by this function.  But nether should the caller
+assume that these functions won't be used by GetData library functions to
+allocate and deallocate temporary buffers.
+
+Changes made to the memory manager are global across GetData.  The caller should
+only call this function when it is certain that no object allocated with the
+old memory manager still exists.
+
+This function always succeeds and returns no value.
+
+.SH SEE ALSO
+.BR free (3),
+.BR gd_cbopen (3),
+.BR gd_entry (3),
+.BR gd_error_string (3),
+.BR gd_fragment_affixes (3),
+.BR gd_free_entry_strings (3)
+.BR gd_linterp_tablename (3),
+.BR gd_raw_filename (3),
+.BR gd_strtok (3),
+.BR malloc (3)

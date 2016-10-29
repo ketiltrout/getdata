@@ -1,16 +1,16 @@
 function nfields = gd_nfields(D)
 % GD_NFIELDS  Retrieve a count of fields
 %
-%   GD_NFIELDS(DIRFILE)
-%             is equivalent to calling GD_NENTRIES(DIRFILE,0, ...
-%                                                          GD.ALL_FRAGMENTS,0,0)
+%   GD_NFIELDS(DIRFILE
+%             is equivalent to calling GD_NENTRIES(DIRFILE,GD.ALL_FRAGMENTS, ...
+%                                                                         0,0,0)
 %
 %   For GD, see GETDATA_CONSTANTS.
 %
 %   See also GD_NENTRIES, GETDATA_CONSTANTS
 
   GD = getdata_constants();
-  nfields = gd_nentries(D, 0, GD.ALL_FRAGMENTS, 0, 0);
+  nfields = gd_nentries(D);
 end
 
 % Copyright (C) 2013, 2016 D. V. Wiebe

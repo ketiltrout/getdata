@@ -1790,6 +1790,19 @@ nume += check_simple2(301, 4, n.field, "new301")
 nume += check_simple2(301, 5, n.fragment, 0)
 nume += check_simple2(301, 6, n.in_fields, [ "in3", "in1" ])
 
+;  302: gd_include_ns
+gd_include, d, 'format2', namespace='ns', /CREAT, /EXCL
+nume += check_ok(302, d)
+
+;  303: gd_fragment_namespace (read)
+n = gd_fragment_namespace(d, fragment=2)
+nume += check_ok(303, d)
+nume += check_simple(303, n, 'ns')
+
+;  304: gd_fragment_namespace (alter)
+n = gd_fragment_namespace(d, fragment=2, namespace='ns2')
+nume += check_ok(304, d)
+nume += check_simple(304, n, 'ns2')
 
 
 
