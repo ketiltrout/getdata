@@ -34,8 +34,9 @@ static void _GD_FreeD(DIRFILE *D, int keep_dirfile)
 
   for (j = 0; j < D->n_fragment; ++j) {
     free(D->fragment[j].enc_data);
-    free(D->fragment[j].prefix);
-    free(D->fragment[j].suffix);
+    free(D->fragment[j].ns);
+    free(D->fragment[j].px);
+    free(D->fragment[j].sx);
     free(D->fragment[j].bname);
     free(D->fragment[j].cname);
     free(D->fragment[j].ename);
@@ -45,7 +46,6 @@ static void _GD_FreeD(DIRFILE *D, int keep_dirfile)
 
   free(D->entry);
   free(D->tok_base);
-  free(D->dot_list);
   free(D->error_prefix);
   free(D->error_string);
   free(D->error_file);

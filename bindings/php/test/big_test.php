@@ -1361,7 +1361,7 @@ check_ok(222, $D);
 check_var(222, $v, array('data', 'alias', 'data/mnew20', 'new20'));
 
 # 223: gd_include_affix
-$v = gd_include($D, 'format1', 0, GD_CREAT | GD_EXCL, 'A', 'Z');
+$v = gd_include_affix($D, 'format1', 0, 'A', 'Z', GD_CREAT | GD_EXCL);
 check_ok2(223, 0, $D);
 check_var2(223, 1, $v, 1);
 
@@ -1898,8 +1898,8 @@ check_var2(301, 3, $v, array('field' => 'new301',
   'field_type' => GD_SINDIR_ENTRY, 'fragment_index' => 0,
   'in_fields' => array('in3', 'in1')));
 
-# 302: gd_include_ns
-$v = gd_include_ns($D, 'format2', 0, 'ns', GD_CREAT | GD_EXCL);
+# 302: gd_include
+$v = gd_include($D, 'format2', 0, 'ns', GD_CREAT | GD_EXCL);
 check_ok2(302, 0, $D);
 check_var2(302, 1, $v, 2);
 

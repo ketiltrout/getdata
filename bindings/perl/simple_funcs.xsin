@@ -166,7 +166,7 @@ int madd_indir(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *in_field1, const char *in_field2)
 int madd_sindir(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *in_field1, const char *in_field2)
-int include_ns(DIRFILE *dirfile, const char *file, int fragment_index,
-    gdp_char *ns=NULL, unsigned long int flags=0);
+int include_affix(DIRFILE *dirfile, const char *file, int fragment_index,
+    gdp_char *prefix=NULL, gdp_char *suffix=NULL, unsigned long int flags=0);
 const char *fragment_namespace(DIRFILE *dirfile, int fragment,
     gdp_char *namespace=NULL);

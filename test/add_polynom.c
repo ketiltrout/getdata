@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,17 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Add a POLYNOM field */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-#include <math.h>
 
 int main(void)
 {
@@ -38,12 +28,13 @@ int main(void)
   int j, error;
   gd_entry_t e;
   DIRFILE *D;
-  const double a[4] = {1, 0.3, 0.5, 1.8};
+  const double a[6] = {1, 0.3, 0.5, 1.8, -2, 4.4};
 
   rmdirfile();
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  gd_add_polynom(D, "new", 3, "in", a, 0);
+  gd_add_polynom(D, "new", 5, "in", a, 0);
   error = gd_error(D);
+  CHECKI(error, GD_E_OK);
 
   /* check */
   gd_entry(D, "new", &e);
@@ -53,9 +44,9 @@ int main(void)
     CHECKI(e.field_type, GD_POLYNOM_ENTRY);
     CHECKS(e.in_fields[0], "in");
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.EN(polynom,poly_ord), 3);
+    CHECKI(e.EN(polynom,poly_ord), 5);
     CHECKX(e.flags, GD_EN_CALC);
-    for (j = 0; j < 4; ++j)
+    for (j = 0; j <= e.EN(polynom,poly_ord); ++j)
       CHECKFi(j,e.EN(polynom,a)[j], a[j]);
     gd_free_entry_strings(&e);
   }
@@ -65,6 +56,5 @@ int main(void)
   unlink(format);
   rmdir(filedir);
   
-  CHECKI(error, GD_E_OK);
   return r;
 }

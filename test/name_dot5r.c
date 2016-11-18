@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,14 +20,6 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -46,10 +38,9 @@ int main(void)
 
   D = gd_open(filedir, GD_RDWR);
 
-  if (gd_entry(D, "da.ta", &E1) == 0) {
-    CHECKI(E1.flags & GD_EN_DOTTED, GD_EN_DOTTED);
+  if (gd_entry(D, "da.ta", &E1) == 0)
     gd_free_entry_strings(&E1);
-  } else
+  else
     r = 1;
 
   /* This should always work */
@@ -58,10 +49,9 @@ int main(void)
   CHECKI(r1,0);
   CHECKI(e1,0);
 
-  if (gd_entry(D, "data", &E2) == 0) {
-    CHECKI(E2.flags & GD_EN_DOTTED, 0);
+  if (gd_entry(D, "data", &E2) == 0)
     gd_free_entry_strings(&E2);
-  } else
+  else
     r = 1;
 
   gd_discard(D);

@@ -48,7 +48,7 @@ void _GD_FreeFL(struct gd_flist_ *fl)
 
 void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
 {
-  int i;
+  int i, j;
   size_t n;
 
   /* If priv == 0, then we've been called via gd_free_entry_strings and
@@ -66,7 +66,12 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
 
   switch(entry->field_type) {
     case GD_LINCOM_ENTRY:
-      for (i = 0; i < entry->EN(lincom,n_fields); ++i) {
+      /* Don't trust the caller */
+      j = entry->EN(lincom,n_fields);
+      if (j > GD_MAX_LINCOM)
+        j = GD_MAX_LINCOM;
+
+      for (i = 0; i < j; ++i) {
         free_(entry->in_fields[i]);
         free_(entry->scalar[i]);
         free_(entry->scalar[i + GD_MAX_LINCOM]);
@@ -103,7 +108,13 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
       break;
     case GD_POLYNOM_ENTRY:
       free_(entry->in_fields[0]);
-      for (i = 0; i <= entry->EN(polynom,poly_ord); ++i)
+
+      /* Don't trust the caller */
+      j = entry->EN(polynom,poly_ord);
+      if (j > GD_MAX_POLYORD)
+        j = GD_MAX_POLYORD;
+
+      for (i = 0; i <= j; ++i)
         free_(entry->scalar[i]);
       break;
     case GD_STRING_ENTRY:

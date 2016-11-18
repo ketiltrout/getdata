@@ -913,22 +913,42 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_VF_NS    2
 #define GD_VF_CODE  3
 
-/* MungeCode flags */
-#define GD_MC_RQ_PARTS 0x01
-#define GD_MC_CHECK_NS 0x02
-#define GD_MC_ERROR_OK 0x04
-#define GD_MC_NO_NS    0x08
-#define GD_MC_NO_ALLOC 0x10
+/* CodeOffsets flags (also used by StripCode, SlashDot, CheckCodeAffixes) */
+#define GD_CO_NSALL  0x01
+#define GD_CO_NSROOT 0x02
+#define GD_CO_ASSERT 0x04
+#define GD_CO_CHECK  0x08
+#define GD_CO_EARLY  0x10
+#define GD_CO_NAME   0x20
+#define GD_CO_ERROR  0x40
+
+/* Number of offsets returned by CodeOffsets */
+#define GD_N_CODEOFFSETS 10
+
+/* Internal rename flags */
+#define GD_REN_META 0x10 /* Updating a metafield */
 
 /* database metadata update data for a field rename */
-struct gd_rename_data_ {
-  int n_meta, n_code, old_dot, new_dot;
-  gd_entype_t type;
-  unsigned flags, dot_ind;
-  size_t old_len, new_len;
+struct gd_rename_update_ {
+  char *new_code; /* The newly minted code */
+  char **dst; /* A pointer to the old code */
+  int index; /* The affected metadata fragment */
+};
 
-  char **meta_name, **code_list, *old_code, *new_code;
-  gd_entry_t *E, **meta_entry;
+struct gd_rename_data_ {
+  gd_entype_t type; /* the type of the renamed field */
+  unsigned flags; /* GD_REN_ flags */
+  struct gd_flist_ *fl; /* The affected field_list struct */
+
+  int src_frag; /* Source fragment */
+  int dst_frag; /* Destination fragment for moves (for renames, this is -1) */
+
+  /* Old and new names */
+  size_t old_len, new_len;
+  const char *old_name, *new_name;
+
+  struct gd_rename_update_ *up; /* The list of updates */
+  unsigned n_up, up_size;
 };
 
 /* data file book-keeping record */
@@ -1020,6 +1040,9 @@ struct gd_private_entry_ {
 
 /* the last record of the _GD_ef array is always the unknown encoding */
 #define GD_ENC_UNKNOWN (GD_N_SUBENCODINGS - 1)
+
+/* Internal gd_entry_t flags */
+#define GD_EN_EARLY 0x8000 /* field spec. contains non-namespace-related '.' */
 
 /* external module function provides flags */
 #define GD_EF_NAME    0x0001
@@ -1117,8 +1140,6 @@ struct gd_fragment_t {
   char* sname; /* Subdirectory name (path relative to dirfile or absolute) */
   char *bname; /* basename (filename) */
   char* ename; /* External name (the one that appears in the format file) */
-  char *ns; /* root namespace */
-  size_t nsl; /* strlen(ns) */
   void *enc_data;
   int modified;
   int parent;
@@ -1131,8 +1152,12 @@ struct gd_fragment_t {
   off64_t frame_offset;
   uint32_t vers;
 
-  char *prefix;
-  char *suffix;
+  char *ns; /* root namespace */
+  size_t nsl; /* strlen(ns) */
+  char *px; /* prefix */
+  size_t pxl; /* strlen(px) */
+  char *sx; /* suffix */
+  size_t sxl; /* strlen(sx) */
 };
 
 /* directory metadata */
@@ -1187,11 +1212,9 @@ struct gd_dirfile_ {
 
   /* field counts */
   unsigned int n_entries;
-  unsigned int n_dot;
 
   /* field array */
   gd_entry_t** entry;
-  gd_entry_t** dot_list;
 
   /* the reference field */
   gd_entry_t* reference_field;
@@ -1273,13 +1296,16 @@ int _GD_BadInput(DIRFILE *, const gd_entry_t *, int, gd_entype_t, int);
    (op != GD_WINDOP_SET) && (op != GD_WINDOP_CLR) \
   )
 
+int _GD_BadType(int, gd_type_t);
+char *_GD_BuildCode(DIRFILE*, int, const char*, size_t, const char*, int,
+    size_t *restrict) __attribute_malloc__;
 int _GD_CalculateEntry(DIRFILE *restrict, gd_entry_t *restrict, int);
 char *_GD_CanonicalPath(const char *restrict, const char *restrict);
 int _GD_CheckByteSex(gd_type_t, unsigned, unsigned, int, int *restrict);
 gd_entry_t *_GD_CheckParent(DIRFILE *restrict D,
     const struct parser_state *restrict, char **restrict name, int me);
-int _GD_CheckCodeAffixes(DIRFILE *D, const char *field_code, int fragment,
-    int set_error);
+int _GD_CheckCodeAffixes(DIRFILE *restrict, const char *restrict, int,
+    unsigned);
 void _GD_CInvertData(DIRFILE *restrict, void *restrict, gd_type_t,
     GD_DCOMPLEXA(dividend), size_t);
 void _GD_CleanUpRename(struct gd_rename_data_*, int);
@@ -1290,6 +1316,9 @@ void _GD_CleanUpRename(struct gd_rename_data_*, int);
 void _GD_CLincomData(DIRFILE *restrict, int, void *restrict, gd_type_t,
     const GD_DCOMPLEXP_t restrict, const GD_DCOMPLEXP_t restrict,
     GD_DCOMPLEXV(m), GD_DCOMPLEXV(b), const unsigned int *restrict, size_t);
+int _GD_CodeOffsets(DIRFILE *restrict, int, const char *restrict, unsigned,
+    size_t offset[GD_N_CODEOFFSETS]);
+int _GD_ContainsFragment(const int *, int, int);
 void _GD_ConvertType(DIRFILE *restrict, const void *restrict, gd_type_t,
     void *restrict, gd_type_t, size_t) gd_nothrow;
 gd_type_t _GD_ConstType(DIRFILE *D, gd_type_t type);
@@ -1350,13 +1379,7 @@ void *_GD_Malloc(DIRFILE *D, size_t size) __attribute_malloc__;
 int _GD_MissingFramework(int encoding, unsigned int funcs);
 int _GD_MogrifyFile(DIRFILE *restrict, gd_entry_t *restrict, unsigned long int,
     unsigned long int, off64_t, int, int, char *restrict);
-char *_GD_MungeCode(DIRFILE *restrict, const char *restrict, size_t,
-    const char *restrict, const char *restrict, const char *restrict,
-    const char *restrict, const char *restrict, char **restrict,
-    int *restrict, unsigned);
 gd_type_t _GD_NativeType(DIRFILE *restrict, gd_entry_t *restrict, int);
-DIRFILE *_GD_Open(DIRFILE*, int, const char*, unsigned long,
-    gd_parser_callback_t, void*);
 gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict,
     const struct parser_state *restrict, int, char**,
     const gd_entry_t *restrict, int, int, int, char **, const char *);
@@ -1364,10 +1387,11 @@ char *_GD_ParseFragment(FILE *restrict, DIRFILE*, struct parser_state *restrict,
     int, int);
 void _GD_PerformRename(DIRFILE *restrict, struct gd_rename_data_ *restrict);
 struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict, char *restrict,
-    gd_entry_t *restrict, int, unsigned, int, unsigned);
+    gd_entry_t *restrict, int, unsigned);
 void _GD_ReadLinterpFile(DIRFILE *restrict, gd_entry_t *restrict);
 void *_GD_Realloc(DIRFILE *restrict, void *restrict, size_t size);
 void _GD_ReleaseDir(DIRFILE *D, int dirfd);
+int _GD_SlashDot(const char*, size_t, unsigned, const char**, const char**);
 int _GD_Seek(DIRFILE *restrict, gd_entry_t *restrict, off64_t offset,
     unsigned int mode);
 void _GD_SetEncIOError(DIRFILE*, int suberror, const struct gd_raw_file_ *);
@@ -1380,13 +1404,19 @@ void _GD_SimpleParserInit(DIRFILE *restrict D, const char *restrict name,
 int _GD_ShutdownDirfile(DIRFILE*, int, int);
 int _GD_StrCmpNull(const char *restrict, const char *restrict);
 char *_GD_Strdup(DIRFILE *restrict, const char *restrict);
+char *_GD_StripCode(DIRFILE *restrict, int, const char *restrict, unsigned)
+  __attribute_malloc__;
+int _GD_SubFragmentList(DIRFILE *restrict, int, int **restrict);
 int _GD_Supports(DIRFILE *, const gd_entry_t*, unsigned int funcs);
 int _GD_Tokenise(DIRFILE *restrict, const struct parser_state *restrict,
     const char *restrict, char **, const char **, int, char **);
 int _GD_TokToNum(const char *restrict, int, int, double*, double*, uint64_t*,
     int64_t*);
 void _GD_UpdateAliases(DIRFILE*, int);
-int _GD_ValidateField(const char*, int, int, unsigned, int*);
+char *_GD_UpdateCode(DIRFILE *restrict, int, const char *restrict, int,
+    const char *restrict, size_t, const char *restrict, size_t,
+    const char *restrict, size_t) __attribute_malloc__;
+int _GD_ValidateField(const char*, size_t, int, int, unsigned);
 ssize_t _GD_WriteOut(const gd_entry_t*, const struct encoding_t*, const void*,
     gd_type_t, size_t, int);
 

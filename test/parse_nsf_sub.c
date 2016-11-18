@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -19,13 +19,6 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
 
 int main(void)
 {
@@ -49,7 +42,7 @@ int main(void)
   e1 = gd_error(D);
   CHECKI(e1,0);
 
-  gd_validate(D, "ns.ns2.data");
+  gd_validate(D, "ns2.data");
   e2 = gd_error(D);
   CHECKI(e2,0);
   gd_discard(D);

@@ -52,6 +52,21 @@ New in version 0.10.0a:
     size directly.  Previously, this assumtion could result in a segfault
     within the parser.
 
+  * BUG FIX: gd_add_polynom() and gd_add_cpolynom() no longer reject valid
+    poly_ord values.
+
+  * BUG FIX: The gd_[m]add() family of functions are now better at rejecting
+    invalid data types.
+
+  * BUG FIX: A segfault-on-error has been fixed in gd_[m]alter_spec.
+
+  * BUG FIX: The gd_madd() functions longer accept aliases as parent field
+    names.
+
+  * BUG FIX: Setting n_fields (for LINCOMs) or poly_ord (for POLYNOMs) to
+    an out-of-range value and then calling gd_free_entry_strings() no longer
+    results in a segfault.
+
   API Changes:
 
   * The new function gd_alloc_funcs() allows callers to change the memory

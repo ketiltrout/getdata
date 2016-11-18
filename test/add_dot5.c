@@ -62,7 +62,6 @@ int main(void)
     CHECKI(e.fragment_index, 0);
     CHECKI(e.EN(phase,shift), 0);
     CHECKP(e.scalar[0]);
-    CHECKI(e.flags & GD_EN_DOTTED, GD_EN_DOTTED);
     gd_free_entry_strings(&e);
   }
 

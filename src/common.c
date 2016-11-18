@@ -899,9 +899,6 @@ gd_entry_t *_GD_FindEntry(DIRFILE *restrict D, const char *restrict field_code)
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  if (D->n_dot > 0)
-    E = _GD_FindField(D, field_code, D->dot_list, D->n_dot, 1, NULL);
-
   if (E == NULL)
     E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
 
@@ -922,8 +919,7 @@ gd_entry_t *_GD_FindFieldAndRepr(DIRFILE *restrict D,
   dtrace("%p, \"%s\", %p, %p, %p, %i, %i", D, field_code_in, field_code, repr,
       index, set, err);
 
-  if (D->n_dot > 0)
-    E = _GD_FindField(D, field_code_in, D->dot_list, D->n_dot, 1, NULL);
+  E = _GD_FindField(D, field_code_in, D->entry, D->n_entries, 1, index);
 
   if (E == NULL) {
     *repr = _GD_GetRepr(D, field_code_in, field_code, err);

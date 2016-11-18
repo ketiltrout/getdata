@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_fragment_affixes 3 "28 October 2016" "Version 0.10.0" "GETDATA"
+.TH gd_fragment_affixes 3 "31 October 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_fragment_affixes \(em report the field affixes of a fragment of a dirfile database
 .SH SYNOPSIS
@@ -40,7 +40,10 @@ The
 and
 .I suffix
 parameters point to memory locations in which store the addresses of the
-returned strings.
+returned strings.  The returned
+.I prefix
+does NOT contain the root namespace of the fragment.  To retreive that, use
+.BR gd_fragment_namespace (3).
 
 The
 .I dirfile
@@ -84,9 +87,15 @@ A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR gd_error_string (3).
 
+.SH NOTES
+The function
+.BR gd_fragment_namespace (3)
+can also be used to modify the root namespace.
+
 .SH SEE ALSO
 .BR gd_alloc_funcs (3),
-.BR gd_alter_frameoffset (3),
+.BR gd_alter_affixes (3),
+.BR gd_fragment_namespace (3),
 .BR gd_include_affixes (3),
 .BR gd_open (3),
 .BR dirfile (5),

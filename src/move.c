@@ -337,20 +337,15 @@ static int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
   /* Compose the field's new name */
 
   /* remove the old affixes */
-  new_filebase = _GD_MungeCode(D, NULL, 0,
-      D->fragment[E->fragment_index].prefix,
-      D->fragment[E->fragment_index].suffix, NULL, NULL, E->field, NULL,
-      NULL, GD_MC_RQ_PARTS);
+  new_filebase = _GD_StripCode(D, E->fragment_index, E->field, GD_CO_NSALL 
+      | GD_CO_ASSERT);
   
-  if (!new_filebase) {
-    _GD_InternalError(D); /* the prefix/suffix wasn't found */
+  if (!new_filebase) /* Alloc error */
     GD_RETURN_ERROR(D);
-  }
 
   /* add the new affixes */
-  new_code = _GD_MungeCode(D, NULL, 0, NULL, NULL,
-      D->fragment[new_fragment].prefix, D->fragment[new_fragment].suffix,
-      new_filebase, NULL, NULL, GD_MC_RQ_PARTS);
+  new_code = _GD_BuildCode(D, new_fragment, NULL, 0, new_filebase,
+      E->flags & GD_EN_EARLY, NULL);
 
   if (strcmp(new_code, E->field)) {
     /* duplicate check */
@@ -361,10 +356,7 @@ static int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
       GD_RETURN_ERROR(D);
     }
 
-    /* moving a field can't add or remove a field from the dot list, so
-     * we just set both old_dot and new_dot to one to ensure that the
-     * dot_list is resorted, if necessary */
-    rdat = _GD_PrepareRename(D, new_code, E, 1, 0, 1, flags);
+    rdat = _GD_PrepareRename(D, new_code, E, new_fragment, flags);
     if (rdat == NULL) {
       free(new_filebase);
       free(new_code);
@@ -409,11 +401,9 @@ static int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
 
   _GD_PerformRename(D, rdat);
 
-  if (new_code) {
-    /* resort */
+  /* resort */
+  if (new_code)
     qsort(D->entry, D->n_entries, sizeof(gd_entry_t*), _GD_EntryCmp);
-    qsort(D->dot_list, D->n_dot, sizeof(gd_entry_t*), _GD_EntryCmp);
-  }
 
   dreturn("%i", 0);
   return 0;

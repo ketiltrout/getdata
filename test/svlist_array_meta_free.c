@@ -28,8 +28,8 @@ int main(void)
     "parent SARRAY nil\n"
     "parent/data1 SARRAY alfa bravo charlie delta echo\n"
     "parent/data2 SARRAY foxtrot golf hotel india juliet kilo\n";
-  int j, r = 0;
-  size_t i, error;
+  int j, error, r = 0;
+  size_t i;
   const char ***field_list;
   DIRFILE *D;
   const char *lists[4][8] = {

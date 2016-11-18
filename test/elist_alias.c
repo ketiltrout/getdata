@@ -40,7 +40,7 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  field_list = gd_entry_list(D, NULL, GD_ALL_FRAGMENTS, GD_ALIAS_ENTRIES, 0);
+  field_list = gd_entry_list(D, GD_ALL_FRAGMENTS, NULL, GD_ALIAS_ENTRIES, 0);
 
   error = gd_error(D);
 

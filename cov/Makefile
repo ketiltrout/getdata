@@ -1,17 +1,27 @@
 default:
 	${MAKE} clean
 	cp ../test/*.[co] .
-	mv ../test/*.gc* .
-	mv ../src/.libs/*.gc* .
+	cp ../test/*.gc* .
+	cp ../src/.libs/*.gc* .
 	cp ../src/*.[co] .
 	gcov *.o | tee gcov.log
 
+check:
+	${MAKE} -C ../src
+	${MAKE} -C ../test check
+	${MAKE} default
+
+dbuild:
+	${MAKE} -C .. clean
+	( cd .. && ./configure CFLAGS="-g --coverage" LDFLAGS=-lgcov \
+		--disable-bindings --enable-debug )
+	${MAKE} check
+
 build:
 	${MAKE} -C .. clean
-	( cd .. && ./configure CFLAGS="--coverage" LDFLAGS=-lgcov )
-	${MAKE} -C ..
-	${MAKE} -C .. check
-	${MAKE} default
+	( cd .. && ./configure CFLAGS="-g --coverage" LDFLAGS=-lgcov \
+		--disable-bindings )
+	${MAKE} check
 
 clean:
 	rm -f *.*

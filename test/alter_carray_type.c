@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,25 +18,16 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test field modifying */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <inttypes.h>
-#include <errno.h>
-#include <stdio.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "carray CARRAY FLOAT32 8.3 7.2 6.1 5.0 3.9 2.8 1.7\n";
-  int fd, i, ret, error, n, r = 0;
-  size_t z;
+  const char *format_data =
+    "carray CARRAY FLOAT32 8.3 7.2 6.1 5.0 3.9 2.8 1.7\n";
+  int fd, e1, e2, e3, n, r = 0;
+  size_t i, z;
   DIRFILE *D;
   double d[7];
 
@@ -47,23 +38,30 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  ret = gd_alter_carray(D, "carray", GD_UINT8, 0);
-  error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR);
+
+  e1 = gd_alter_carray(D, "carray", GD_STRING, 0);
+  CHECKI(e1, GD_E_BAD_TYPE);
+
+  e2 = gd_alter_carray(D, "carray", -1, 0);
+  CHECKI(e2, GD_E_BAD_TYPE);
+
+  e3 = gd_alter_carray(D, "carray", GD_UINT8, 0);
+  CHECKI(e3, 0);
+
   z = gd_array_len(D, "carray");
+  CHECKU(z, 7);
+
   n = gd_get_carray(D, "carray", GD_FLOAT64, &d);
+  CHECKI(n, 0);
+
+  for (i = 0; i < z; ++i)
+    CHECKFi(i, d[i], ((i > 3) ? 7. : 8.) - i);
 
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, 0);
-  CHECKI(n, 0);
-  CHECKI(ret, 0);
-  CHECKU(z, 7);
-  for (i = 0; i < 7; ++i)
-    CHECKFi(i, d[i], ((i > 3) ? 7. : 8.) - i);
 
   return r;
 }

@@ -310,11 +310,14 @@ WRITE_ERR:
  * written */
 #define GD_WFC_SPACE      0x1
 #define GD_WFC_SCALAR     0x2
+#define GD_WFC_EARLY      0x4
 static ssize_t _GD_WriteFieldCode(DIRFILE *D, FILE *stream, int me,
     const char *code, int index, int permissive, int standards, unsigned flags)
 {
   ssize_t len;
   char *ptr;
+  const unsigned strip_flags =
+    GD_CO_NSROOT | GD_CO_ASSERT | ((flags & GD_WFC_EARLY) ? GD_CO_EARLY : 0);
 
   const int scalar     = flags & GD_WFC_SCALAR;
   const int space      = flags & GD_WFC_SPACE;
@@ -322,8 +325,7 @@ static ssize_t _GD_WriteFieldCode(DIRFILE *D, FILE *stream, int me,
   dtrace("%p, %p, %i, \"%s\", %i, %i, %i, 0x%X", D, stream, me, code, index,
       permissive, standards, flags);
 
-  ptr = _GD_MungeCode(D, NULL, 0, D->fragment[me].prefix,
-      D->fragment[me].suffix, NULL, NULL, code, NULL, NULL, GD_MC_RQ_PARTS);
+  ptr = _GD_StripCode(D, me, code, strip_flags);
 
   len = _GD_StringEscapeise(stream, ptr, 0, permissive, standards);
 
@@ -359,14 +361,14 @@ static ssize_t _GD_WriteFieldCode(DIRFILE *D, FILE *stream, int me,
 
 /* write a field, padding to the specified length */
 static ssize_t _GD_PadField(DIRFILE *D, FILE *stream, int me, const char *in,
-    ssize_t len, int permissive, int standards)
+    ssize_t len, int early, int permissive, int standards)
 {
   ssize_t i;
 
-  dtrace("%p, %p, %i, \"%s\", %" PRIuSIZE ", %i, %i", D, stream, me, in, len,
-      permissive, standards);
+  dtrace("%p, %p, %i, \"%s\", %" PRIdSIZE ", %i, %i, %i", D, stream, me, in,
+      len, early, permissive, standards);
 
-  i = _GD_WriteFieldCode(D, stream, me, in, 0, permissive, standards, 0);
+  i = _GD_WriteFieldCode(D, stream, me, in, 0, permissive, standards, early);
 
   if (i >= 0)
     for (; i < len; ++i)
@@ -381,17 +383,17 @@ static ssize_t _GD_PadField(DIRFILE *D, FILE *stream, int me, const char *in,
 
 /* Write a litteral parameter or CONST name or CARRAY element */
 static int _GD_WriteConst(DIRFILE *D, FILE *stream, int me, int permissive,
-    int type, const void* value, const char *scalar, int index,
+    int type, const void* value, const char *scalar, int index, int early,
     const char *postamble)
 {
   int e;
 
-  dtrace("%p, %p, %i, %i, 0x%X, %p, \"%s\", %i, \"%s\"", D, stream, me,
-      permissive, type, value, scalar, index, postamble);
+  dtrace("%p, %p, %i, %i, 0x%X, %p, \"%s\", %i, %i, \"%s\"", D, stream, me,
+      permissive, type, value, scalar, index, early, postamble);
 
   if (scalar != NULL) {
     if (_GD_WriteFieldCode(D, stream, me, scalar, index, permissive,
-          D->standards, GD_WFC_SCALAR) < 0)
+          D->standards, GD_WFC_SCALAR | (early ? GD_WFC_EARLY : 0)) < 0)
     {
       dreturn("%i", -1);
       return -1;
@@ -428,6 +430,14 @@ static int _GD_WriteConst(DIRFILE *D, FILE *stream, int me, int permissive,
   return e;
 }
 
+#define GD_WRITE_INFIELD(n,f) \
+  (_GD_WriteFieldCode(D, stream, me, E->in_fields[n], 0, permissive, \
+                      D->standards, f | early) < 0)
+
+#define GD_WRITE_CONST(t,l,n,p) \
+  (_GD_WriteConst(D, stream, me, permissive, t, &(l), E->scalar[n], \
+                  E->scalar_ind[n], early, p) < 0)
+
 /* Write a field specification line */
 static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     int me, int meta, size_t max_len, int pretty, int permissive)
@@ -437,6 +447,7 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
   ssize_t len, pos;
   char buffer[1000];
   size_t z;
+  const unsigned early = (E->flags & GD_EN_EARLY) ? GD_WFC_EARLY : 0;
 
   dtrace("%p, %p, %p, %i, %i, %" PRIuSIZE ", %i, %i", D, stream, E, me, meta,
       max_len, pretty, permissive);
@@ -452,15 +463,14 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     if (fputs("/ALIAS ", stream) == EOF)
       goto WRITE_ERR;
     if (_GD_WriteFieldCode(D, stream, me, E->field, 0, permissive, D->standards,
-          GD_WFC_SPACE) < 0)
+          GD_WFC_SPACE | early) < 0)
     {
       goto WRITE_ERR;
     }
-    if (_GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
-          D->standards, 0) < 0)
-    {
+
+    if (GD_WRITE_INFIELD(0, 0))
       goto WRITE_ERR;
-    }
+
     if (fputc('\n', stream) == EOF)
       goto WRITE_ERR;
   } else {
@@ -478,16 +488,18 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     }
 
     /* field name */
-    if (_GD_PadField(D, stream, me, ptr, max_len, permissive, D->standards) < 0)
+    if (_GD_PadField(D, stream, me, ptr, max_len, early, permissive,
+          D->standards) < 0)
+    {
       goto WRITE_ERR;
+    }
 
     switch(E->field_type) {
       case GD_RAW_ENTRY:
         if (fprintf(stream, " RAW%s %s ", pretty ? "     " : "", (permissive ||
                 D->standards >= 5) ? _GD_TypeName(D, E->EN(raw,data_type)) :
               _GD_OldTypeName(D, E->EN(raw,data_type))) < 0 ||
-            _GD_WriteConst(D, stream, me, permissive, GD_UINT_TYPE,
-              &E->EN(raw,spf), E->scalar[0], E->scalar_ind[0], "") < 0)
+            GD_WRITE_CONST(GD_UINT_TYPE, E->EN(raw,spf), 0, ""))
         {
           goto WRITE_ERR;
         }
@@ -499,29 +511,20 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
           goto WRITE_ERR;
         }
         for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-          if (_GD_WriteFieldCode(D, stream, me, E->in_fields[i], 0, permissive,
-                D->standards, GD_WFC_SPACE) < 0)
-          {
+          if (GD_WRITE_INFIELD(i, GD_WFC_SPACE))
             goto WRITE_ERR;
-          }
 
           if (E->flags & GD_EN_COMPSCAL) {
-            if (_GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
-                  &E->EN(lincom,cm)[i], E->scalar[i], E->scalar_ind[i], " ") < 0
-                || _GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
-                  &E->EN(lincom,cb)[i], E->scalar[i + GD_MAX_LINCOM],
-                  E->scalar_ind[i + GD_MAX_LINCOM],
-                  i == E->EN(lincom,n_fields) - 1 ? "" : " ") < 0)
+            if (GD_WRITE_CONST(GD_COMPLEX128, E->EN(lincom,cm)[i], i, " ") ||
+                GD_WRITE_CONST(GD_COMPLEX128, E->EN(lincom,cb)[i], i +
+                  GD_MAX_LINCOM, i == E->EN(lincom,n_fields) - 1 ? "" : " "))
             {
               goto WRITE_ERR;
             }
           } else {
-            if (_GD_WriteConst(D, stream, me, permissive, GD_FLOAT64,
-                  &E->EN(lincom,m)[i], E->scalar[i], E->scalar_ind[i], " ") < 0
-                || _GD_WriteConst(D, stream, me, permissive, GD_FLOAT64,
-                  &E->EN(lincom,b)[i], E->scalar[i + GD_MAX_LINCOM],
-                  E->scalar_ind[i + GD_MAX_LINCOM],
-                  i == E->EN(lincom,n_fields) - 1 ? "" : " ") < 0)
+            if (GD_WRITE_CONST(GD_FLOAT64, E->EN(lincom,m)[i], i, " ") ||
+                GD_WRITE_CONST(GD_FLOAT64, E->EN(lincom,b)[i], i +
+                  GD_MAX_LINCOM, i == E->EN(lincom,n_fields) - 1 ? "" : " "))
             {
               goto WRITE_ERR;
             }
@@ -530,8 +533,7 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
         break;
       case GD_LINTERP_ENTRY:
         if (fprintf(stream, " LINTERP%s ", pretty ? " " : "") < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
-              D->standards, GD_WFC_SPACE) < 0 ||
+            GD_WRITE_INFIELD(0, GD_WFC_SPACE) ||
             _GD_StringEscapeise(stream, E->EN(linterp,table), 0, permissive,
               D->standards) < 0)
         {
@@ -540,75 +542,59 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
         break;
       case GD_BIT_ENTRY:
         if (fprintf(stream, " BIT%s ", pretty ? "     " : "") < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
-              D->standards, GD_WFC_SPACE) < 0 ||
-            _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
-              &E->EN(bit,bitnum), E->scalar[0], E->scalar_ind[0], " ") < 0 ||
-            _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
-              &E->EN(bit,numbits), E->scalar[1], E->scalar_ind[1], "") < 0)
+            GD_WRITE_INFIELD(0, GD_WFC_SPACE) ||
+            GD_WRITE_CONST(GD_INT_TYPE, E->EN(bit,bitnum), 0, " ") ||
+            GD_WRITE_CONST(GD_INT_TYPE, E->EN(bit,numbits), 1, ""))
         {
           goto WRITE_ERR;
         }
         break;
       case GD_DIVIDE_ENTRY:
         if (fprintf(stream, " DIVIDE%s ", pretty ? "  " : "") < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
-              D->standards, GD_WFC_SPACE) < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[1], 0, permissive,
-              D->standards, 0) < 0)
+            GD_WRITE_INFIELD(0, GD_WFC_SPACE) || GD_WRITE_INFIELD(1, 0))
         {
           goto WRITE_ERR;
         }
         break;
       case GD_RECIP_ENTRY:
         if (fprintf(stream, " RECIP%s ", pretty ? "   " : "") < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
-              D->standards, GD_WFC_SPACE) < 0 ||
-            _GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
-              &E->EN(recip,cdividend), E->scalar[0], E->scalar_ind[0], "") < 0)
+            GD_WRITE_INFIELD(0, GD_WFC_SPACE) ||
+            GD_WRITE_CONST(GD_COMPLEX128, E->EN(recip,cdividend), 0, ""))
         {
           goto WRITE_ERR;
         }
         break;
       case GD_MULTIPLY_ENTRY:
         if (fputs(" MULTIPLY ", stream) == EOF ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
-              D->standards, GD_WFC_SPACE) < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[1], 0, permissive,
-              D->standards, 0) < 0)
+            GD_WRITE_INFIELD(0, GD_WFC_SPACE) || GD_WRITE_INFIELD(1, 0))
         {
           goto WRITE_ERR;
         }
         break;
       case GD_PHASE_ENTRY:
         if (fprintf(stream, " PHASE%s ", pretty ? "   " : "") < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
-              D->standards, GD_WFC_SPACE) < 0 ||
-            _GD_WriteConst(D, stream, me, permissive, GD_INT64,
-              &E->EN(phase,shift), E->scalar[0], E->scalar_ind[0], "") < 0)
+            GD_WRITE_INFIELD(0, GD_WFC_SPACE) ||
+            GD_WRITE_CONST(GD_INT64, E->EN(phase,shift), 0, ""))
         {
           goto WRITE_ERR;
         }
         break;
       case GD_POLYNOM_ENTRY:
         if (fprintf(stream, " POLYNOM%s ", pretty ? " " : "") < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
-              D->standards, GD_WFC_SPACE) < 0)
+            GD_WRITE_INFIELD(0, GD_WFC_SPACE))
         {
           goto WRITE_ERR;
         }
         for (i = 0; i <= E->EN(polynom,poly_ord); ++i)
           if (E->flags & GD_EN_COMPSCAL) {
-            if (_GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
-                  &E->EN(polynom,ca)[i], E->scalar[i], E->scalar_ind[i],
-                  (i == E->EN(polynom,poly_ord)) ?  "" : " ") < 0)
+            if (GD_WRITE_CONST(GD_COMPLEX128, E->EN(polynom,ca)[i], i,
+                  (i == E->EN(polynom,poly_ord)) ?  "" : " "))
             {
               goto WRITE_ERR;
             }
           } else {
-            if (_GD_WriteConst(D, stream, me, permissive, GD_FLOAT64,
-                  &E->EN(polynom,a)[i], E->scalar[i], E->scalar_ind[i],
-                  (i == E->EN(polynom,poly_ord)) ?  "" : " ") < 0)
+            if (GD_WRITE_CONST(GD_FLOAT64, E->EN(polynom,a)[i], i,
+                  (i == E->EN(polynom,poly_ord)) ?  "" : " "))
             {
               goto WRITE_ERR;
             }
@@ -616,22 +602,17 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
         break;
       case GD_SBIT_ENTRY:
         if (fprintf(stream, " SBIT%s ", pretty ? "    " : "") < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
-              D->standards, GD_WFC_SPACE) < 0 ||
-            _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
-              &E->EN(bit,bitnum), E->scalar[0], E->scalar_ind[0], " ") < 0 ||
-            _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
-              &E->EN(bit,numbits), E->scalar[1], E->scalar_ind[1], "") < 0)
+            GD_WRITE_INFIELD(0, GD_WFC_SPACE) ||
+            GD_WRITE_CONST(GD_INT_TYPE, E->EN(bit,bitnum), 0, " ") ||
+            GD_WRITE_CONST(GD_INT_TYPE, E->EN(bit,numbits), 1, ""))
         {
           goto WRITE_ERR;
         }
         break;
       case GD_WINDOW_ENTRY:
         if (fprintf(stream, " WINDOW%s ", pretty ? "  " : "") < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
-              D->standards, GD_WFC_SPACE) < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[1], 0, permissive,
-              D->standards, 0) < 0 ||
+            GD_WRITE_INFIELD(0, GD_WFC_SPACE) ||
+            GD_WRITE_INFIELD(1, GD_WFC_SPACE) ||
             fprintf(stream, " %s ", _GD_WindopName(D, E->EN(window,windop)))
             < 0)
         {
@@ -640,42 +621,26 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
         switch (E->EN(window,windop)) {
           case GD_WINDOP_EQ:
           case GD_WINDOP_NE:
-            if (_GD_WriteConst(D, stream, me, permissive, GD_INT64,
-                  &E->EN(window,threshold.i), E->scalar[0], E->scalar_ind[0],
-                  "") < 0)
-            {
+            if (GD_WRITE_CONST(GD_INT64, E->EN(window,threshold.i), 0, ""))
               goto WRITE_ERR;
-            }
             break;
           case GD_WINDOP_SET:
           case GD_WINDOP_CLR:
-            if (_GD_WriteConst(D, stream, me, permissive, GD_UINT64,
-                  &E->EN(window,threshold.u), E->scalar[0], E->scalar_ind[0],
-                  "") < 0)
-            {
+            if (GD_WRITE_CONST(GD_UINT64, E->EN(window,threshold.u), 0, ""))
               goto WRITE_ERR;
-            }
             break;
           default:
-            if (_GD_WriteConst(D, stream, me, permissive, GD_FLOAT64,
-                  &E->EN(window,threshold.r), E->scalar[0], E->scalar_ind[0],
-                  "") < 0)
-            {
+            if (GD_WRITE_CONST(GD_FLOAT64, E->EN(window,threshold.r), 0, ""))
               goto WRITE_ERR;
-            }
             break;
         }
         break;
       case GD_MPLEX_ENTRY:
         if (fprintf(stream, " MPLEX%s ", pretty ? "   " : "") < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
-              D->standards, GD_WFC_SPACE) < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[1], 0, permissive,
-              D->standards, GD_WFC_SPACE) < 0 ||
-            _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
-              &E->EN(mplex,count_val), E->scalar[0], E->scalar_ind[0], " ") < 0
-            || _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
-              &E->EN(mplex,period), E->scalar[1], E->scalar_ind[1], "") < 0)
+            GD_WRITE_INFIELD(0, GD_WFC_SPACE) ||
+            GD_WRITE_INFIELD(1, GD_WFC_SPACE) ||
+            GD_WRITE_CONST(GD_INT_TYPE, E->EN(mplex,count_val), 0, " ") ||
+            GD_WRITE_CONST(GD_INT_TYPE, E->EN(mplex,period), 1, ""))
         {
           goto WRITE_ERR;
         }
@@ -774,20 +739,14 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
         break;
       case GD_INDIR_ENTRY:
         if (fprintf(stream, " INDIR%s ", pretty ? "   " : "") < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
-              D->standards, GD_WFC_SPACE) < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[1], 0, permissive,
-              D->standards, 0) < 0)
+            GD_WRITE_INFIELD(0, GD_WFC_SPACE) || GD_WRITE_INFIELD(1, 0))
         {
           goto WRITE_ERR;
         }
         break;
       case GD_SINDIR_ENTRY:
         if (fprintf(stream, " SINDIR%s ", pretty ? "  " : "") < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[0], 0, permissive,
-              D->standards, GD_WFC_SPACE) < 0 ||
-            _GD_WriteFieldCode(D, stream, me, E->in_fields[1], 0, permissive,
-              D->standards, 0) < 0)
+            GD_WRITE_INFIELD(0, GD_WFC_SPACE) || GD_WRITE_INFIELD(1, 0))
         {
           goto WRITE_ERR;
         }
@@ -810,7 +769,7 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     if (fputs("/HIDDEN ", stream) == EOF)
       goto WRITE_ERR;
     if (_GD_WriteFieldCode(D, stream, me, E->field, 0, permissive, D->standards,
-          0) < 0)
+          early) < 0)
     {
       goto WRITE_ERR;
     }
@@ -1035,13 +994,37 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   }
 
   /* The includes */
-  if (permissive || D->standards >= 3)
+  if (permissive || D->standards >= 3) {
+    size_t ns_offset = D->fragment[i].nsl;
+    if (ns_offset)
+      ns_offset++; /* for the dot */
+
     for (j = 0; j < D->n_fragment; ++j)
       if (D->fragment[j].parent == i) {
-        char *prefix = _GD_MungeCode(D, NULL, 0, D->fragment[i].prefix, NULL,
-            NULL, NULL, D->fragment[j].prefix, NULL, NULL, GD_MC_RQ_PARTS);
-        char *suffix = _GD_MungeCode(D, NULL, 0, NULL, D->fragment[i].suffix,
-            NULL, NULL, D->fragment[j].suffix, NULL, NULL, GD_MC_RQ_PARTS);
+        const char *ns = NULL, *px = NULL;
+        char *sx = NULL;
+        int free_sx = 0;
+        
+        if (D->fragment[j].nsl > D->fragment[i].nsl)
+          ns = D->fragment[j].ns + ns_offset;
+
+        if (D->fragment[j].pxl)
+          px = D->fragment[j].px + D->fragment[i].pxl;
+
+        if (D->fragment[j].sxl > 0) {
+          if (D->fragment[i].sxl == 0)
+            sx = D->fragment[j].sx;
+          else if (D->fragment[j].sxl == D->fragment[i].sxl)
+            sx = NULL;
+          else {
+            free_sx = 1;
+            sx = _GD_Strdup(D, D->fragment[j].sx);
+            if (sx)
+              sx[D->fragment[j].sxl - D->fragment[i].sxl] = 0;
+            else
+              goto WRITE_ERR;
+          }
+        }
 
         if (fprintf(stream, "%sINCLUDE ", (D->standards >= 5) ? "/" : "") < 0 ||
             _GD_StringEscapeise(stream, D->fragment[j].ename, 0, permissive,
@@ -1049,26 +1032,41 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
         {
           goto WRITE_ERR;
         }
-        if (prefix || suffix) {
-          if (fputc(' ', stream) == EOF || _GD_StringEscapeise(stream, prefix,
-                0, permissive, D->standards) < 0)
-          {
+
+        if (ns || px || sx)
+          if (fputc(' ', stream) == EOF)
             goto WRITE_ERR;
-          }
-          free(prefix);
+
+        if (ns) {
+          if (_GD_StringEscapeise(stream, ns, 0, permissive, D->standards) < 0)
+            goto WRITE_ERR;
+          if (fputc('.', stream) == EOF)
+            goto WRITE_ERR;
         }
 
-        if (suffix) {
-          if (fputc(' ', stream) == EOF || _GD_StringEscapeise(stream, suffix,
-                0, permissive, D->standards) < 0)
+        /* An empty prefix must be written if there's a suffix, but no namespace
+         */
+        if (px || (sx && !ns)) {
+          if (fputc(' ', stream) == EOF || _GD_StringEscapeise(stream, px, 0,
+                permissive, D->standards) < 0)
           {
             goto WRITE_ERR;
           }
-          free(suffix);
+        }
+
+        if (sx) {
+          if (fputc(' ', stream) == EOF || _GD_StringEscapeise(stream, sx, 0,
+                permissive, D->standards) < 0)
+          {
+            goto WRITE_ERR;
+          }
+          if (free_sx)
+            free(sx);
         }
         if (fputc('\n', stream) == EOF)
           goto WRITE_ERR;
       }
+  }
 
   /* The fields */
   for (u = 0; u < D->n_entries; ++u)
@@ -1088,7 +1086,8 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
     }
 
   /* REFERENCE is written at the end, because its effect can propagate
-   * upwards */
+   * upwards.  In the WriteFieldCode call, early is always zero because the
+   * REFERENCE directive appeared in DSV 6 */
   if (permissive || D->standards >= 6)
     if (D->fragment[i].ref_name != NULL) {
       if (fputs("/REFERENCE ", stream) == EOF ||
@@ -1279,7 +1278,7 @@ uint64_t _GD_FindVersion(DIRFILE *D)
     D->av &= GD_VERS_GE_3;
 
   for (i = 0; D->av && i < (unsigned int)D->n_fragment; ++i) {
-    if (D->fragment[i].prefix || D->fragment[i].suffix)
+    if (D->fragment[i].px || D->fragment[i].sx)
       D->av &= GD_VERS_GE_9;
     else if (D->fragment[i].byte_sex & GD_ARM_FLAG)
       /* on an arm-endian platform, the arm flag is set by /ENDIAN directives
@@ -1402,7 +1401,7 @@ uint64_t _GD_FindVersion(DIRFILE *D)
           D->av &= GD_VERS_GE_6;
           break;
         case '.':
-          if (D->entry[i]->flags & GD_EN_DOTTED)
+          if (D->entry[i]->flags & GD_EN_EARLY)
             D->av &= GD_VERS_LE_5;
           else
             D->av &= GD_VERS_GE_10;

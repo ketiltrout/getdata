@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013, 2015 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2015, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,15 +20,6 @@
  */
 #include "test.h"
 
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -41,8 +32,8 @@ int main(void)
     "parent/data3 CARRAY UINT8 3 6 9 12 15 18 21\n"
     "META parent data4 LINTERP UINT8 1\n"
     "/ALIAS parent/data5 data0\n";
-  int j, r = 0;
-  size_t i, error;
+  int j, error, r = 0;
+  size_t i;
   struct uint8_carrays {
     size_t n;
     uint8_t *d;
@@ -68,7 +59,6 @@ int main(void)
       for (i = 0; i < field_list[j].n; ++i)
         CHECKUi(j * 1000 + i,field_list[j].d[i], (j + 1) * (i + 1));
     }
-
 
   gd_discard(D);
   unlink(format);

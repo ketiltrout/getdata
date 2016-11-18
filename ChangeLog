@@ -1,3 +1,163 @@
+2016-10-01   D. V. Wiebe <getdata@ketiltrout.net> svn:1110
+	* src/open.c (gd_desync): Moved from fragment.c.
+	* src/open.c (_GD_Open): Statickify.
+
+	* src/internal.h: Renamed gd_fragment_t.prefix and gd_fragment_t.suffix to
+	px and sx, and add pxl and sxl to match namespace handling.
+	* src/flush.c (_GD_FlushFragment): Handle /INCLUDE affixes directly.
+
+	* src/getdata.h.in: GD_EN_DOTTED deleted.
+	* src/internal.h: GD_EN_EARLY internal entry flag, does basically the
+	same thing that GD_EN_DOTTED did.
+	* src/add.c (_GD_Add): Set GD_EN_EARLY when appropriate.
+	* test/add_dot10.c test/add_dot5.c test/name_dot10.c test/name_dot5.c
+	test/name_dot5r.c: Remove references to GD_EN_DOTTED.
+
+	* src/parse.c (_GD_SubfieldCode): Remove nso parameter.
+
+	* src/parse.c (_GD_ParseNamespace): Simplify /NAMESPACE: it now is always
+	relative to the fragment rootspace.  An initial . is ignored.
+	* src/include.c (_GD_SetFieldAffixes): Use memcpy instead of sprintf.
+	Handle namespace better.
+	* src/include.c (_GD_Include _GD_SetFieldAffixes): Update for /NAMESPACE
+	changes: parser_state_->ns now holds only the namespace part relative to
+	fragment rootspace.
+	* test/parse_include_ns2.c test/parse_name_dot.c test/parse_ns_dotdot.c
+	test/parse_nsf_dot.c test/parse_nsf_sub.c: Update test.
+	* test/parse_nsf_par.c test/parse_nsf_refrel.c test/parse_nsf_rpar.c:
+	Deleted.
+
+	* src/include.c (_GD_IncludeAffix): Renamed form gd_include_affix to get
+	parser_state function name correct.
+	* src/include.c (gd_include_affix): Added.
+
+	* src/include.c (_GD_CollectFragments): Deleted.  Duplicated by
+	_GD_SubFragmentList in fragment.c.
+	* src/include.c (gd_uninclude): Call _GD_SubFragmentList.
+
+	* bindings/matlab/gd_include.c: Renamed from gd_include_ns.c
+	* bindings/matlab/gd_include_affix.c: Renamed from gd_include.c
+
+	* bindings/perl/src/GetData.xs (include): Call gd_include_ns instead of
+		gd_include_affix.
+	* bindings/perl/simple_funcs.xsin: Removed include_ns. Added include_affix.
+
+	* bindings/php/getdata.c (gd_include_affix): Renamed from gd_include.
+	* bindings/php/getdata.c (gd_include): Renamed from gd_include_ns.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_include): Re-order keywords.
+
+	* man/gd_fragment_namespace.3: Added.
+
+	* src/add.c (_GD_InvalidEntype): Parameterise check.
+	
+	* src/add.c (_GD_BadType): Added.
+	* src/add.c (_GD_Add): Call _GD_BadType to check storage type.
+	* test/alter_carray_type.c test/alter_raw_type.c: Expand test.
+
+	* src/add.c (_GD_Add): Add init_scalar parameter to avoid unnecessary
+		scalar initialisations.
+
+	* src/add.c (_GD_Add _GD_AddAlias): Reject aliases as parents.  Call
+	_GD_SlashDot to find namespace.
+
+	* src/fragment.c (_GD_CheckAffixes): Deleted.  Replaced by
+	_GD_UpdateAffixes.
+	* src/fragment.c (_GD_UpdateCode _GD_UpdateAffixes) src/name.c (_GD_SlashDot
+	_GD_CodeOffsets _GD_StripCode _GD_BuildCode): Added.
+	* src/internal.h: Replace GD_MC_ flags with GD_CO_ flags.
+	* src/fragment.c (_GD_ChangeAffixes) src/name.c (_GD_MungeCode): Deleted.
+	Functionality broken up into smaller pieces: _GD_SlashDot, _GD_CodeOffsets,
+	_GD_StripCode, _GD_BuildCode in name.c plus _GD_UpdateCode in fragment.c.
+	* src/add.c (_GD_Add) src/flush.c (_GD_WriteFieldCode) src/move.c (_GD_Move)
+	src/parse.c (_GD_CodeFromFrag): Replace _GD_MungeCode calls with
+	_GD_StripCode or _GD_BuildCode calls.
+	* src/parse.c (_GD_InputCode): Just call _GD_BuildCode.
+
+	* src/name.c (_GD_RenameCode): Added.
+	* src/name.c (_GD_MatchCode _GD_MakeNewCode): Deleted.  Functionality
+	combined into _GD_RenameCode.
+	* src/name.c (_GD_UpdateScalar _GD_UpdateInField): Do little other than
+	call _GD_RenameCode and dirty caches.
+	* src/internal.h: Update gd_rename_data_ struct.  Add gd_rename_update_
+	struct.
+	* src/name.c (_GD_CleanUpRename _GD_PrepareRename): Update.  Call
+	_GD_RenameCode for subfields.
+	* src/name.c (_GD_PerformRename): Handle rename directly.
+
+	* src/name.c (_GD_Rename): Create new filebase with _GD_StripCode to
+	properly handle namespaces.
+
+	* src/flush.c (GD_WRITE_INFIELD GD_WRITE_CONST): Added.
+
+	* src/include.h src/add.c (_GD_Add) src/common.c (_GD_FindEntry
+	_GD_FindFieldAndRepr) src/move.c (_GD_Move) src/parse.c (_GD_ParseFieldSpec):
+	Remove dot_list stuff.
+
+	* src/mod.c (_GD_AlterSpec): Only undo the parser's handiwork on success.
+
+	* src/entry.c (_GD_FreeE): Don't assume the caller has set n_fields or
+	poly_ord to a valid value.
+
+	* src/errors.c: Fix GD_E_BAD_TYPE string.
+
+	* src/field_list.c (_GD_SArrays): Don't leak.
+
+	* src/add.c (gd_add_polynom gd_add_cpolynom): Fix poly_ord check.
+	* test/add_cpolynom.c test/add_polynom.c: Update.
+
+	* test/add_alias_index.c test/add_alias_name.c test/add_alias_ns.c
+	test/add_alias_prot.c test/add_alias_rdonly.c test/add_bit_inaff.c
+	test/add_carray_entry.c test/add_carray_type.c test/add_clincom_nfields.c
+	test/add_const_type.c test/add_cpolynom_order.c test/add_divide_inaff1.c
+	test/add_divide_inaff2.c test/add_lincom_nfields2.c test/add_linterp_inaff.c
+	test/add_meta_parent.c test/add_mplex_inaff.c test/add_mplex_period.c
+	test/add_phase_inaff.c test/add_polynom_inaff.c test/add_polynom_order.c
+	test/add_polynom_order2.c test/add_raw_prot.c test/add_recip_inaff.c
+	test/add_spec_index.c test/add_spec_prot.c test/add_string_entry.c
+	test/add_window_inaff.c test/alter_bit_in.c test/alter_code.c
+	test/alter_const_type.c test/alter_divide_in.c test/alter_entry_entype.c
+	test/alter_lincom_nfields.c test/alter_linterp_in.c test/alter_mplex_in.c
+	test/alter_phase_in.c test/alter_prot.c test/alter_raw_prot.c
+	test/alter_rdonly.c test/alter_sarray_nop.c test/alter_sbit.c
+	test/alter_spec_code.c test/alter_spec_format.c test/alter_spec_nil.c
+	test/alter_window_in.c test/alter_window_op.c test/cvlist_array_long.c
+	test/cvlist_array_meta_meta.c test/cvlist_array_meta_parent.c
+	test/cvlist_long.c test/cvlist_meta_meta.c test/cvlist_meta_parent.c
+	test/elist_parent.c test/elist_type.c test/fragment_affix_alter_dotpx.c
+	test/fragment_affix_alter_index.c test/fragment_affix_alter_nons.c
+	test/fragment_affix_alter_ns.c test/fragment_affix_alter_pns.c
+	test/fragment_affix_index.c test/fragment_ns_alter_nop.c
+	test/fragment_ns_alter_pdel.c test/fragment_parent_index.c
+	test/fragment_parent_root.c test/include_prot.c test/madd_alias_alias.c
+	test/madd_alias_subsub.c test/madd_aliasmeta.c test/madd_clincom_nfields.c
+	test/madd_cpolynom_order.c test/madd_lincom_nfields.c test/madd_parent_bad.c
+	test/madd_polynom_order.c test/madd_raw.c test/madd_subsub.c test/move_code.c
+	test/move_data_enc_un.c test/move_data_prot.c test/move_entype.c
+	test/move_nop.c test/move_rdonly.c test/name_code.c test/name_index.c
+	test/name_meta2.c test/name_prot.c test/name_rdonly.c test/parse_huge.c
+	test/parse_include_nodir.c test/parse_ns_include.c test/parse_ns_include_ns.c
+	test/svlist_array_long.c test/svlist_array_meta_meta.c
+	test/svlist_array_meta_parent.c test/svlist_long.c test/svlist_meta_meta.c
+	test/svlist_meta_parent.c test/unclude_index.c test/unclude_keep.c
+	test/unclude_prot.c test/unclude_rdonly.c: Added.
+	* test/add_code.c test/add_ns.c: Zero memory to avoid crashing.
+	* test/cvlist_array_meta.c test/cvlist_array_meta0.c
+	test/cvlist_array_meta_free.c test/cvlist_array_meta_hidden.c
+	test/svlist_array_meta_free.c test/svlist_array_meta_hidden.c: error is
+	signed.
+
+	* test/elist_alias.c test/elist_fragment.c test/elist_hidden.c
+	test/elist_noalias.c test/elist_scalar.c util/checkdirfile.c: Fix
+	gd_entry_list call.
+	* test/nentries_alias.c test/nentries_fragment.c test/nentries_hidden.c
+	test/nentries_noalias.c test/nentries_scalar.c util/checkdirfile.c: Fix
+	gd_nentries call.
+
+	* test/parse_alias_code.c: Specify version.
+
+	* test/include_ns_prefix.c: Check e2.
+
 2016-09-29   D. V. Wiebe <getdata@ketiltrout.net> svn:1109
 	* bindings/cxx/dirfile.cpp (Dirfile::IncludeNS) bindings/cxx/fragment.cpp
 	(Fragment::SetNamespace) bindings/cxx/getdata/fragment.h (Namespace)

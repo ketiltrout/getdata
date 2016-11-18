@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -19,14 +19,6 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
 
 int main(void)
 {
@@ -53,10 +45,9 @@ int main(void)
   e1 = gd_error(D);
   CHECKI(r1,0);
   CHECKI(e1,0);
-  if (gd_entry(D, "d.ata", &E1) == 0) {
-    CHECKI(E1.flags & GD_EN_DOTTED, 0);
+  if (gd_entry(D, "d.ata", &E1) == 0)
     gd_free_entry_strings(&E1);
-  } else
+  else
     r = 1;
 
   gd_discard(D);

@@ -50,11 +50,13 @@ static unsigned int gd_max_(unsigned int A, unsigned int B)
  *  iQ - scalar index in Q
  *  lQ - literal value in Q
  *
- *  calculated: whether E was calculated (GD_EN_CALCULATED) before _GD_Change
- *              was called.
+ *  calculated: whether E was calculated (GD_EN_CALC) before _GD_Change was
+ *                          called.
  *
  *  alter_literal: boolean; true if lN and lQ differ and lN is not a special
  *                          "keep-as-is" value
+ *
+ *  early: whether E is from DSV <= 5 (GD_EN_EARLY)
  *
  * This function performs one of five actions, indicated by 0 through 4,
  * according to the values of sN, sQ, and alter_literal as given in 
@@ -90,13 +92,13 @@ static unsigned int gd_max_(unsigned int A, unsigned int B)
  */
 static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
     void *lQ, const void *lN, char **sQ, int *iQ, const char *sN,
-    int iN, int calculated, int fragment_index)
+    int iN, int calculated, int early, int fragment_index)
 {
   int r = 0;
   int set_lQ = 0;
 
-  dtrace("%p, %i, 0x%X, %p, %p, %p, %p, %p, %i, %i, %i", D, alter_literal, type,
-      lQ, lN, sQ, iQ, sN, iN, calculated, fragment_index);
+  dtrace("%p, %i, 0x%X, %p, %p, %p, %p, %p, %i, %i, %i, %i", D, alter_literal,
+      type, lQ, lN, sQ, iQ, sN, iN, calculated, early, fragment_index);
 
   if (sN == NULL) {
     if (*sQ != NULL) {
@@ -148,9 +150,11 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
      *    been asked to move the raw file, _GD_Change is going to need to
      *    recalculate the entry; no need to change lQ: it's ignored. */
 
-    if (_GD_CheckCodeAffixes(D, sN, fragment_index, 1))
+    if (_GD_CheckCodeAffixes(D, sN, fragment_index,
+          GD_CO_ERROR | (early ? GD_CO_EARLY : 0)))
+    {
       ; /* reject codes with bad affixes */
-    else if (iN == -1 && !(D->flags & GD_NOSTANDARD) && D->standards <= 7 &&
+    } else if (iN == -1 && !(D->flags & GD_NOSTANDARD) && D->standards <= 7 &&
         _GD_TokToNum(sN, D->standards, 1, NULL, NULL, NULL, NULL) != -1)
     {
       /* when using early Standards, reject ambiguous field codes */
@@ -265,12 +269,15 @@ static void _GD_SPFConvert(DIRFILE* D, void *A, unsigned int spfA, void *B,
 
 /* returns -1 on error, 1 if modified, 0 if no change */
 static int _GD_AlterInField(DIRFILE *D, int i, char **Q, char *const *N,
-    char *const *E, int fragment_index, int force)
+    char *const *E, int early, int fragment_index, int force)
 {
-  dtrace("%p, %i, %p, %p, %p, %i, %i", D, i, Q, N, E, fragment_index, force);
+  dtrace("%p, %i, %p, %p, %p, %i, %i, %i", D, i, Q, N, E, early, fragment_index,
+      force);
 
   if (force || (N[i] != NULL && strcmp(E[i], N[i]))) {
-    if (_GD_CheckCodeAffixes(D, N[i], fragment_index, 1)) {
+    if (_GD_CheckCodeAffixes(D, N[i], fragment_index,
+          GD_CO_ERROR | (early ? GD_CO_EARLY : 0)))
+    {
       dreturn("%i", -1);
       return -1;
     } else if ((Q[i] = _GD_Strdup(D, N[i])) == NULL) {
@@ -292,7 +299,7 @@ static int _GD_AlterInField(DIRFILE *D, int i, char **Q, char *const *N,
 static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
     int flags)
 {
-  int i, j;
+  int i, j, early, calc;
   int field_free = 0;
   int scalar_free = 0;
   int modified = 0;
@@ -320,6 +327,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
   if (D->error)
     GD_RETURN_ERROR(D);
 
+  early = E->flags & GD_EN_EARLY ? 1 : 0;
+  calc = E->flags & GD_EN_CALC ? 1 : 0;
+
   memcpy(&Qe, E->e, sizeof(struct gd_private_entry_));
   memcpy(&Q, E, sizeof(gd_entry_t));
 
@@ -336,8 +346,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
     case GD_RAW_ENTRY:
       j = _GD_AlterScalar(D, N->EN(raw,spf) && N->EN(raw,spf) != E->EN(raw,spf),
           GD_UINT_TYPE, &Q.EN(raw,spf), &N->EN(raw,spf), Q.scalar, Q.scalar_ind,
-          N->scalar[0], N->scalar_ind[0], E->flags & GD_EN_CALC,
-          E->fragment_index);
+          N->scalar[0], N->scalar_ind[0], calc, early, E->fragment_index);
 
       if (j & GD_AS_ERROR)
         break;
@@ -358,12 +367,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       modified = 1;
 
-      if (Q.EN(raw,data_type) & 0x40 ||
-          (Qe.u.raw.size = GD_SIZE(Q.EN(raw,data_type))) == 0)
-      {
+      if (_GD_BadType(D->standards, Q.EN(raw,data_type)))
         GD_SET_RETURN_ERROR(D, GD_E_BAD_TYPE, 0, NULL, Q.EN(raw,data_type),
             NULL);
-      }
 
       if (flags) {
         ssize_t nread, nwrote;
@@ -376,7 +382,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           if (gd_get_constant(D, Q.scalar[0], GD_UINT_TYPE, &Q.EN(raw,spf)))
             break;
 
-        if (!(E->flags & GD_EN_CALC))
+        if (!calc)
           if (!_GD_CalculateEntry(D, E, 1))
             break;
 
@@ -514,7 +520,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       for (i = 0; i < Q.EN(lincom,n_fields); ++i) {
         if (flags & 0x1) {
           j = _GD_AlterInField(D, i, Q.in_fields, N->in_fields, E->in_fields,
-              E->fragment_index, E->EN(lincom,n_fields) <= i);
+              early, E->fragment_index, E->EN(lincom,n_fields) <= i);
           if (j < 0)
             break;
           else if (j) {
@@ -528,14 +534,13 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             j = _GD_AlterScalar(D, !gd_ccmpc_(E->EN(lincom,cm)[i],
                   N->EN(lincom,cm)[i]), GD_COMPLEX128, Q.EN(lincom,cm) + i,
                 N->EN(lincom,cm) + i, Q.scalar + i, Q.scalar_ind + i,
-                N->scalar[i], N->scalar_ind[i], E->flags & GD_EN_CALC,
-                E->fragment_index);
+                N->scalar[i], N->scalar_ind[i], calc, early, E->fragment_index);
             Q.EN(lincom,m)[i] = creal(Q.EN(lincom,cm)[i]);
           } else {
             j = _GD_AlterScalar(D, E->EN(lincom,m)[i] != N->EN(lincom,m)[i],
                 GD_FLOAT64, Q.EN(lincom,m) + i, N->EN(lincom,m) + i,
                 Q.scalar + i, Q.scalar_ind + i, N->scalar[i], N->scalar_ind[i],
-                E->flags & GD_EN_CALC, E->fragment_index);
+                calc, early, E->fragment_index);
             gd_rs2cs_(Q.EN(lincom,cm)[i], Q.EN(lincom,m)[i]);
           }
 
@@ -555,7 +560,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
                   N->EN(lincom,cb)[i]), GD_COMPLEX128, Q.EN(lincom,cb) + i,
                 N->EN(lincom,cb) + i, Q.scalar + i + GD_MAX_LINCOM,
                 Q.scalar_ind + i + GD_MAX_LINCOM, N->scalar[i +  GD_MAX_LINCOM],
-                N->scalar_ind[i + GD_MAX_LINCOM], E->flags & GD_EN_CALC,
+                N->scalar_ind[i + GD_MAX_LINCOM], calc, early,
                 E->fragment_index);
             Q.EN(lincom,b)[i] = creal(Q.EN(lincom,cb)[i]);
           } else {
@@ -563,7 +568,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
                 GD_FLOAT64, Q.EN(lincom,b) + i, N->EN(lincom,b) + i,
                 Q.scalar + i + GD_MAX_LINCOM, Q.scalar_ind + i + GD_MAX_LINCOM,
                 N->scalar[i + GD_MAX_LINCOM], N->scalar_ind[i + GD_MAX_LINCOM],
-                E->flags & GD_EN_CALC, E->fragment_index);
+                calc, early, E->fragment_index);
             gd_rs2cs_(Q.EN(lincom,cb)[i], Q.EN(lincom,b)[i]);
           }
 
@@ -586,7 +591,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       break;
     case GD_LINTERP_ENTRY:
       j = _GD_AlterInField(D, 0, Q.in_fields, N->in_fields, E->in_fields,
-          E->fragment_index, 0);
+          early, E->fragment_index, 0);
       if (j < 0)
         break;
       else if (j) {
@@ -638,7 +643,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       j = _GD_AlterScalar(D, N->EN(bit,numbits) >= 1 && E->EN(bit,numbits) !=
           N->EN(bit,numbits), GD_INT_TYPE, &Q.EN(bit,numbits),
           &N->EN(bit,numbits), Q.scalar + 1, Q.scalar_ind + 1, N->scalar[1],
-          N->scalar_ind[1], E->flags & GD_EN_CALC, E->fragment_index);
+          N->scalar_ind[1], calc, early, E->fragment_index);
 
       if (j & GD_AS_ERROR)
         break;
@@ -651,8 +656,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       j = _GD_AlterScalar(D, N->EN(bit,bitnum) >= 0 && E->EN(bit,bitnum) !=
           N->EN(bit,bitnum), GD_INT_TYPE, &Q.EN(bit,bitnum), &N->EN(bit,bitnum),
-          Q.scalar, Q.scalar_ind, N->scalar[0], N->scalar_ind[0],
-          E->flags & GD_EN_CALC, E->fragment_index);
+          Q.scalar, Q.scalar_ind, N->scalar[0], N->scalar_ind[0], calc, early,
+          E->fragment_index);
 
       if (j & GD_AS_ERROR)
         break;
@@ -664,7 +669,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         modified = 1;
 
       j = _GD_AlterInField(D, 0, Q.in_fields, N->in_fields, E->in_fields,
-          E->fragment_index, 0);
+          early, E->fragment_index, 0);
       if (j < 0)
         break;
       else if (j) {
@@ -678,7 +683,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
     case GD_INDIR_ENTRY:
     case GD_SINDIR_ENTRY:
       j = _GD_AlterInField(D, 0, Q.in_fields, N->in_fields, E->in_fields,
-          E->fragment_index, 0);
+          early, E->fragment_index, 0);
       if (j < 0)
         break;
       else if (j) {
@@ -687,7 +692,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       }
 
       j = _GD_AlterInField(D, 1, Q.in_fields, N->in_fields, E->in_fields,
-          E->fragment_index, 0);
+          early, E->fragment_index, 0);
       if (j < 0)
         break;
       else if (j) {
@@ -698,7 +703,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       break;
     case GD_RECIP_ENTRY:
       j = _GD_AlterInField(D, 0, Q.in_fields, N->in_fields, E->in_fields,
-          E->fragment_index, 0);
+          early, E->fragment_index, 0);
       if (j < 0)
         break;
       else if (j) {
@@ -711,8 +716,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         j = _GD_AlterScalar(D, cabs(N->EN(recip,cdividend)) != 0 &&
             !gd_ccmpc_(E->EN(recip,cdividend), N->EN(recip,cdividend)),
             GD_COMPLEX128, &Q.EN(recip,cdividend), &(N->EN(recip,cdividend)),
-            Q.scalar, Q.scalar_ind, N->scalar[0], N->scalar_ind[0],
-            E->flags & GD_EN_CALC, E->fragment_index);
+            Q.scalar, Q.scalar_ind, N->scalar[0], N->scalar_ind[0], calc, early,
+            E->fragment_index);
         Q.EN(recip,dividend) = creal(Q.EN(recip,cdividend));
         if (cimag(Q.EN(recip,cdividend)) != 0)
           Q.flags |= GD_EN_COMPSCAL;
@@ -720,8 +725,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         j = _GD_AlterScalar(D, N->EN(recip,dividend) != 0 &&
             E->EN(recip,dividend) != N->EN(recip,dividend), GD_FLOAT64,
             &Q.EN(recip,dividend), &(N->EN(recip,dividend)), Q.scalar,
-            Q.scalar_ind, N->scalar[0], N->scalar_ind[0],
-            E->flags & GD_EN_CALC, E->fragment_index);
+            Q.scalar_ind, N->scalar[0], N->scalar_ind[0], calc, early,
+            E->fragment_index);
         gd_rs2cs_(Q.EN(recip,cdividend), Q.EN(recip,dividend));
       }
 
@@ -741,8 +746,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
     case GD_PHASE_ENTRY:
       j = _GD_AlterScalar(D, E->EN(phase,shift) != N->EN(phase,shift), GD_INT64,
           &Q.EN(phase,shift), &N->EN(phase,shift), Q.scalar, Q.scalar_ind,
-          N->scalar[0], N->scalar_ind[0], E->flags & GD_EN_CALC,
-          E->fragment_index);
+          N->scalar[0], N->scalar_ind[0], calc, early, E->fragment_index);
 
       if (j & GD_AS_ERROR)
         break;
@@ -754,7 +758,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         modified = 1;
 
       j = _GD_AlterInField(D, 0, Q.in_fields, N->in_fields, E->in_fields,
-          E->fragment_index, 0);
+          early, E->fragment_index, 0);
       if (j < 0)
         break;
       else if (j) {
@@ -765,7 +769,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       break;
     case GD_POLYNOM_ENTRY:
       j = _GD_AlterInField(D, 0, Q.in_fields, N->in_fields, E->in_fields,
-          E->fragment_index, 0);
+          early, E->fragment_index, 0);
       if (j < 0)
         break;
       else if (j) {
@@ -786,14 +790,13 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             j = _GD_AlterScalar(D, !gd_ccmpc_(E->EN(polynom,ca)[i],
                   N->EN(polynom,ca)[i]), GD_COMPLEX128, Q.EN(polynom,ca) + i,
                 N->EN(polynom,ca) + i, Q.scalar + i, Q.scalar_ind + i,
-                N->scalar[i], N->scalar_ind[i], E->flags & GD_EN_CALC,
-                E->fragment_index);
+                N->scalar[i], N->scalar_ind[i], calc, early, E->fragment_index);
             Q.EN(polynom,a)[i] = creal(Q.EN(polynom,ca)[i]);
           } else {
             j = _GD_AlterScalar(D, E->EN(polynom,a)[i] != N->EN(polynom,a)[i],
                 GD_FLOAT64, Q.EN(polynom,a) + i, N->EN(polynom,a) + i,
                 Q.scalar + i, Q.scalar_ind + i, N->scalar[i], N->scalar_ind[i],
-                E->flags & GD_EN_CALC, E->fragment_index);
+                calc, early, E->fragment_index);
             gd_rs2cs_(Q.EN(polynom,ca)[i], Q.EN(polynom,a)[i]);
           }
 
@@ -827,20 +830,20 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           j = _GD_AlterScalar(D, E->EN(window,threshold.i) !=
               N->EN(window,threshold.i), GD_INT64, &Q.EN(window,threshold.i),
               &N->EN(window,threshold.i), Q.scalar, Q.scalar_ind, N->scalar[0],
-              N->scalar_ind[0], E->flags & GD_EN_CALC, E->fragment_index);
+              N->scalar_ind[0], calc, early, E->fragment_index);
           break;
         case GD_WINDOP_SET:
         case GD_WINDOP_CLR:
           j = _GD_AlterScalar(D, E->EN(window,threshold.u) !=
               N->EN(window,threshold.u), GD_UINT64, &Q.EN(window,threshold.u),
               &N->EN(window,threshold.u), Q.scalar, Q.scalar_ind, N->scalar[0],
-              N->scalar_ind[0], E->flags & GD_EN_CALC, E->fragment_index);
+              N->scalar_ind[0], calc, early, E->fragment_index);
           break;
         default:
           j = _GD_AlterScalar(D, E->EN(window,threshold.r) !=
               N->EN(window,threshold.r), GD_FLOAT64, &Q.EN(window,threshold.r),
               &N->EN(window,threshold.r), Q.scalar, Q.scalar_ind, N->scalar[0],
-              N->scalar_ind[0], E->flags & GD_EN_CALC, E->fragment_index);
+              N->scalar_ind[0], calc, early, E->fragment_index);
           break;
       }
 
@@ -854,7 +857,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         modified = 1;
 
       j = _GD_AlterInField(D, 0, Q.in_fields, N->in_fields, E->in_fields,
-          E->fragment_index, 0);
+          early, E->fragment_index, 0);
       if (j < 0)
         break;
       else if (j) {
@@ -863,7 +866,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       }
 
       j = _GD_AlterInField(D, 1, Q.in_fields, N->in_fields, E->in_fields,
-          E->fragment_index, 0);
+          early, E->fragment_index, 0);
       if (j < 0)
         break;
       else if (j) {
@@ -876,8 +879,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       j = _GD_AlterScalar(D, N->EN(mplex,period) != -1 &&
           E->EN(mplex,period) != N->EN(mplex,period), GD_INT_TYPE,
           &Q.EN(mplex,period), &N->EN(mplex,period), Q.scalar + 1,
-          Q.scalar_ind + 1, N->scalar[1], N->scalar_ind[1],
-          E->flags & GD_EN_CALC, E->fragment_index);
+          Q.scalar_ind + 1, N->scalar[1], N->scalar_ind[1], calc, early,
+          E->fragment_index);
 
       if (j & GD_AS_ERROR)
         break;
@@ -890,8 +893,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       j = _GD_AlterScalar(D, E->EN(mplex,count_val) != N->EN(mplex,count_val),
           GD_INT_TYPE, &Q.EN(mplex,count_val), &N->EN(mplex,count_val),
-          Q.scalar, Q.scalar_ind, N->scalar[0], N->scalar_ind[0],
-          E->flags & GD_EN_CALC, E->fragment_index);
+          Q.scalar, Q.scalar_ind, N->scalar[0], N->scalar_ind[0], calc, early,
+          E->fragment_index);
 
       if (j & GD_AS_ERROR)
         break;
@@ -903,7 +906,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         modified = 1;
 
       j = _GD_AlterInField(D, 0, Q.in_fields, N->in_fields, E->in_fields,
-          E->fragment_index, 0);
+          early, E->fragment_index, 0);
       if (j < 0)
         break;
       else if (j) {
@@ -912,7 +915,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       }
 
       j = _GD_AlterInField(D, 1, Q.in_fields, N->in_fields, E->in_fields,
-          E->fragment_index, 0);
+          early, E->fragment_index, 0);
       if (j < 0)
         break;
       else if (j) {
@@ -925,12 +928,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       Q.EN(scalar,const_type) = (N->EN(scalar,const_type) == GD_NULL) ?
         E->EN(scalar,const_type) : N->EN(scalar,const_type);
 
-      if (Q.EN(scalar,const_type) & 0x40 || GD_SIZE(Q.EN(scalar,const_type))
-          == 0)
-      {
+      if (_GD_BadType(D->standards, Q.EN(scalar,const_type)))
         GD_SET_RETURN_ERROR(D, GD_E_BAD_TYPE, 0, NULL, Q.EN(scalar,const_type),
             NULL);
-      }
 
       type = _GD_ConstType(D, Q.EN(scalar,const_type));
       if (Q.EN(scalar,const_type) != E->EN(scalar,const_type))
@@ -979,9 +979,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       {
         modified = 1;
 
-        if (Q.EN(scalar,const_type) & 0x40 ||
-            GD_SIZE(Q.EN(scalar,const_type)) == 0)
-        {
+        if (_GD_BadType(D->standards, Q.EN(scalar,const_type))) {
           _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, Q.EN(scalar,const_type),
               NULL);
           break;
@@ -1021,15 +1019,23 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         if (Q.EN(scalar,array_len) != E->EN(scalar,array_len)) {
           modified = 1;
 
+          if (Q.EN(scalar,array_len) < E->EN(scalar,array_len)) {
+            /* Free dropped elements */
+            size_t i;
+            for (i = Q.EN(scalar,array_len); i < E->EN(scalar,array_len); ++i)
+              free(((char**)E->e->u.scalar.d)[i]);
+          }
+
           Qe.u.scalar.d = _GD_Realloc(D, E->e->u.scalar.d,
               sizeof(const char *) * Q.EN(scalar,array_len));
           if (Qe.u.scalar.d == NULL)
             break;
 
           if (Q.EN(scalar,array_len) > E->EN(scalar,array_len)) {
+            /* Zero new elements */
             size_t i;
             for (i = E->EN(scalar,array_len); i < Q.EN(scalar,array_len); ++i)
-              ((const char**)Qe.u.scalar.d)[i] = _GD_Strdup(D, "");
+              ((char**)Qe.u.scalar.d)[i] = _GD_Strdup(D, "");
           }
         } else
           Qe.u.scalar.d = E->e->u.scalar.d;
@@ -1712,14 +1718,14 @@ static int _GD_AlterSpec(DIRFILE* D, const char* line, const char* parent,
   N = _GD_ParseFieldSpec(D, &p, n_cols, in_cols, parent ? N : NULL,
       N->fragment_index, 0, 0, &outstring, tok_pos);
 
-  /* The parser will have re-applied the prefix and suffix, undo that */
-  free(N->field);
-  N->field = new_code;
-
   free(outstring);
 
   if (D->error)
     GD_RETURN_ERROR(D); /* field spec parser threw an error */
+
+  /* The parser will have re-applied the prefix and suffix, undo that */
+  free(N->field);
+  N->field = new_code;
 
   if (N->field_type == GD_LINCOM_ENTRY || N->field_type == GD_POLYNOM_ENTRY)
     move = 7;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -42,9 +42,9 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDONLY);
   error = gd_error(D);
-  CHECKI(error,0);
+  CHECKI(error,GD_E_FORMAT);
   gd_discard(D);
 
   unlink(format);

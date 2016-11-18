@@ -1315,8 +1315,8 @@ static PyObject *gdpy_dirfile_raw_close(struct gdpy_dirfile_t *self,
 static PyObject *gdpy_dirfile_include(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
-  char *keywords[] = { "file", "fragment_index", "flags", "prefix", "suffix",
-    "namespace", NULL };
+  char *keywords[] = { "file", "fragment_index", "flags", "namespace", "prefix",
+    "suffix", NULL };
   char *file = NULL;
   int fragment_index = 0;
   unsigned long flags = 0;
@@ -1328,8 +1328,8 @@ static PyObject *gdpy_dirfile_include(struct gdpy_dirfile_t *self,
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
         "et|iketetet:pygetdata.dirfile.include", keywords, self->char_enc,
-        &file, &fragment_index, &flags, self->char_enc, &prefix, self->char_enc,
-        &suffix, self->char_enc, &namespace))
+        &file, &fragment_index, &flags, self->char_enc, &namespace,
+        self->char_enc, &prefix, self->char_enc, &suffix))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -3769,7 +3769,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     "nentries([fragment, parent, type, flags])\n\n"
       "Return a count of entries in the database.  If 'fragment' is given\n"
       "given and not pygetdata.ALL_FRAGMENTS, only that fragment will be\n"
-      /*--- handy ruler: closing quote as indicated (or earlier)---------\n" */
       "searched.  If 'parent' is given, metafields under 'parent' will be\n"
       "considered, otherwise top-level fields are counted.  If given,\n"
       "'type' should be either one of the the pygetdata.*_ENTRY symbols,\n"
@@ -3845,15 +3844,17 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "gd_vector_list(3)."
   },
   {"include", (PyCFunction)gdpy_dirfile_include, METH_VARARGS | METH_KEYWORDS,
-    "include(filename [, fragment_index, flags, prefix, suffix])\n\n"
+    "include(filename [, fragment_index, flags, namespace, prefix, suffix])\n\n"
       "Add (and possibly create) a new format file fragment specified by\n"
       "'filename' to the database, as an include in the existing fragment\n"
       "indexed by 'fragment_index'.  If 'fragment_index' is not given,\n"
       "zero is assumed (ie. the primary format file).  If 'flags' is given,\n"
       "it should be a bitwise or'd collection of flags listed in the\n"
-      "gd_include manual page.  If 'prefix' or 'suffix' are given, they\n"
-      "will be applied to the field codes defined in the file.  See\n"
-      "gd_include_affix(3)."
+      "gd_include manual page.  If 'namespace' is given, it will be used\n"
+      "as the fragment's root namespace.  If 'prefix' or 'suffix' are\n"
+      "given, they will be applied to the field codes defined in the\n"
+      /*--- handy ruler: closing quote as indicated (or earlier)---------\n" */
+      "file.  See gd_include(3)."
   },
   {"madd", (PyCFunction)gdpy_dirfile_madd, METH_VARARGS | METH_KEYWORDS,
     "madd(entry, parent)\n\n"

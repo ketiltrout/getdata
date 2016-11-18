@@ -2492,23 +2492,21 @@ strtok(dirfile, string)
     dreturnvoid();
 
 int
-include(dirfile, file, fragment_index, flags, prefix=NULL, suffix=NULL)
+include(dirfile, file, fragment_index, namespace=NULL, flags=0)
 	DIRFILE * dirfile
 	const char * file
 	int fragment_index
 	unsigned long int flags
-	gdp_char * prefix
-	gdp_char * suffix
+	gdp_char * namespace
 	PREINIT:
 		GDP_DIRFILE_ALIAS;
 	ALIAS:
 		GetData::Dirfile::include = 1
 	CODE:
-		dtrace("%p, \"%s\", %i, %lu, \"%s\", \"%s\", \"%s\"", dirfile, file,
-        fragment_index, flags, prefix, suffix);
+		dtrace("%p, \"%s\", %i, \"%s\", %lu", dirfile, file, fragment_index,
+        namespace, flags);
 
-		RETVAL = gd_include_affix(dirfile, file, fragment_index, prefix, suffix,
-        flags);
+		RETVAL = gd_include_ns(dirfile, file, fragment_index, namespace, flags);
 		GDP_UNDEF_ON_ERROR();
 	OUTPUT:
 		RETVAL

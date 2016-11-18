@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,14 +18,16 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Parser check */
 #include "test.h"
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "data RAW UINT8 1\n/ALIAS ra.ta data\n";
+  const char *format_data =
+    "/VERSION 9\n"
+    "data RAW UINT8 1\n"
+    "/ALIAS ra.ta data\n";
   int fd, error, r = 0;
   DIRFILE *D;
 

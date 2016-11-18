@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -31,8 +31,8 @@ int main(void)
     "/HIDDEN parent/data2\n"
     "parent/data3 CARRAY UINT8 3 6 9 12 15 18 21\n"
     "META parent data4 LINTERP UINT8 1\n";
-  int fd, r = 0;
-  size_t i, error;
+  int fd, error, r = 0;
+  size_t i;
   struct uint8_carrays {
     size_t n;
     uint8_t *d;
@@ -58,7 +58,6 @@ int main(void)
       for (i = 0; i < field_list[fd].n; ++i)
         CHECKUi(fd * 1000 + i,field_list[fd].d[i], (2 * fd + 1) * (i + 1));
     }
-
 
   gd_discard(D);
   unlink(format);

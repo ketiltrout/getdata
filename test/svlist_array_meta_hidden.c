@@ -30,8 +30,8 @@ int main(void)
     "parent/data2 SARRAY foxtrot golf hotel india juliet kilo\n"
     "/HIDDEN parent/data2\n"
     "parent/data3 SARRAY lima mike november oscar papa quebec romeo\n";
-  int j, r = 0;
-  size_t i, error;
+  int j, error, r = 0;
+  size_t i;
   const char ***field_list;
   DIRFILE *D;
   const char *lists[2][8] = {

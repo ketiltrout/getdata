@@ -3849,7 +3849,7 @@ PHP_FUNCTION(gd_hide)
   GDPHP_RETURN_BOOL(gd_hide(D, field_code));
 }
 
-PHP_FUNCTION(gd_include)
+PHP_FUNCTION(gd_include_affix)
 {
   char *path, *prefix = NULL, *suffix = NULL;
   GDPHP_SLEN path_len, prefix_len, suffix_len;
@@ -3859,8 +3859,8 @@ PHP_FUNCTION(gd_include)
 
   dtracephp();
 
-  GDPHP_PARSED("sl|lss", &path, &path_len, &parent, &flags, &prefix,
-      &prefix_len, &suffix, &suffix_len);
+  GDPHP_PARSED("sl|ssl", &path, &path_len, &parent, &prefix, &prefix_len,
+      &suffix, &suffix_len, &flags);
 
   i = gd_include_affix(D, path, parent, prefix, suffix, flags);
 
@@ -3871,7 +3871,7 @@ PHP_FUNCTION(gd_include)
   RETURN_LONG(i);
 }
 
-PHP_FUNCTION(gd_include_ns)
+PHP_FUNCTION(gd_include)
 {
   char *path, *ns = NULL;
   GDPHP_SLEN path_len, ns_len;
@@ -5416,7 +5416,7 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_hidden, NULL)
     PHP_FE(gd_hide, NULL)
     PHP_FE(gd_include, NULL)
-    PHP_FE(gd_include_ns, NULL)
+    PHP_FE(gd_include_affix, NULL)
     PHP_FE(gd_invalid_dirfile, NULL)
     PHP_FE(gd_linterp_tablename, NULL)
     PHP_FE(gd_madd, NULL)

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -28,6 +28,7 @@ int main(void)
   gd_entry_t E;
   DIRFILE *D;
 
+  memset(&E, 0, sizeof E);
   E.field =  "ne/w";
   E.field_type = GD_RAW_ENTRY;
   E.fragment_index = 0;
@@ -38,17 +39,16 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_CREAT);
   gd_add(D, &E);
   error = gd_error(D);
+  CHECKI(error, GD_E_BAD_CODE);
 
   /* check */
   n = gd_nfields(D);
+  CHECKI(n, 1);
 
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(n, 1);
-  CHECKI(error, GD_E_BAD_CODE);
 
   return r;
 }

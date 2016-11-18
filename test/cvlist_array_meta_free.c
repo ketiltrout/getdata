@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,15 +20,6 @@
  */
 #include "test.h"
 
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -38,8 +29,8 @@ int main(void)
     "parent/data1 CARRAY UINT8 1 2 3 4 5\n"
     "parent/data2 CARRAY UINT8 2 4 6 8 10 12\n"
     "META parent data4 LINTERP UINT8 1\n";
-  int fd, r = 0;
-  size_t i, error;
+  int fd, error, r = 0;
+  size_t i;
   struct uint8_carrays {
     size_t n;
     uint8_t *d;

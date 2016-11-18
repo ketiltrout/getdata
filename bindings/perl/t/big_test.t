@@ -596,7 +596,7 @@ CheckOK(65);
 CheckNum(65, $s, 1);
 
 # 66: include
-$s = $_->include("form2", 0, 0);
+$s = $_->include("form2", 0);
 CheckOK2(66, 1);
 CheckNum2(66, 2, $s, 1);
 
@@ -1615,7 +1615,8 @@ CheckOK(222);
 CheckSArray(222, \@a, "data", "alias", "data/mnew20", "new20");
 
 # 223: gd_include_affix check
-$s = $_->include('format1', 0, $GetData::CREAT | $GetData::EXCL, 'A', 'Z');
+$s = $_->include_affix('format1', 0, 'A', 'Z',
+  $GetData::CREAT | $GetData::EXCL);
 CheckOK(223);
 
 # 226: gd_fragment_affixes check
@@ -2260,7 +2261,7 @@ CheckNum2(301, 3, $h{'fragment_index'}, 0);
 CheckSArray2(301, 4, $h{'in_fields'}, qw(in3 in4));
 
 # 302: include namespace
-$s = $_->include_ns('format2', 0, 'ns', $GetData::CREAT | $GetData::EXCL);
+$s = $_->include('format2', 0, 'ns', $GetData::CREAT | $GetData::EXCL);
 CheckOK(302);
 CheckNum(302, $s, 2);
 

@@ -354,9 +354,6 @@ typedef union {
 #define GD_EN_COMPSCAL 0x1 /* entry has complex scalar parameters */
 #define GD_EN_CALC     0x2 /* scalar field codes have been resolved */
 #define GD_EN_HIDDEN   0x4 /* entry is hidden */
-#define GD_EN_DOTTED   0x8 /* the field's name contains a dot (.) which isn't
-                              part of a namespace specification (i.e. Standards
-                              Version 5 or earlier) */
 
 /* ANSI C does not permit anonymous structs/unions */
 #ifdef GD_C89_API

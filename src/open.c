@@ -410,7 +410,7 @@ DIRFILE* gd_invalid_dirfile(void) gd_nothrow
 
 /* _GD_Open: open (or, perhaps, create) and parse the specified dirfile
 */
-DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
+static DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
     unsigned long flags, gd_parser_callback_t sehandler, void *extra)
 {
   FILE *fp;
@@ -544,7 +544,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
     return D;
   }
 
-  /* Parse the file.  This will take care of any necessary inclusions */
+  /* Build the root fragment metadata */
   D->n_fragment = 1;
 
   D->fragment = _GD_Malloc(D, sizeof(*D->fragment));
@@ -568,8 +568,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
     return D;
   }
   D->fragment[0].sname = NULL;
-  /* The root format file needs no external name */
-  D->fragment[0].ename = NULL;
+  D->fragment[0].ename = NULL; /* The root format file needs no external name */
   D->fragment[0].enc_data = NULL;
   D->fragment[0].modified = 0;
   D->fragment[0].parent = -1;
@@ -588,9 +587,8 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   D->fragment[0].protection = GD_PROTECT_NONE;
   D->fragment[0].vers = (flags & GD_PEDANTIC) ? GD_DIRFILE_STANDARDS_VERSION :
     0;
-  D->fragment[0].suffix = D->fragment[0].prefix = NULL;
-  D->fragment[0].ns = NULL;
-  D->fragment[0].nsl = 0;
+  D->fragment[0].px = D->fragment[0].sx = D->fragment[0].ns = NULL;
+  D->fragment[0].pxl = D->fragment[0].sxl = D->fragment[0].nsl = 0;
 
   /* parser proto-state */
   p.line = 0;
@@ -600,8 +598,11 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   p.flags = D->flags;
   p.ns = NULL;
   p.nsl = 0;
+
+  /* Parser invocation */
   ref_name = _GD_ParseFragment(fp, D, &p, 0, 1);
   fclose(fp);
+  free(p.ns);
 
   if (D->error != GD_E_OK) {
     dreturn("%p", D);
@@ -674,6 +675,94 @@ DIRFILE* gd_open(const char* filedir, unsigned long flags)
 
   dreturn("%p", D);
   return D;
+}
+
+/* returns non-zero if the metadata has changed on disk since the dirfile was
+ * opened and, optionally, re-opens the dirfile.
+ */
+int gd_desync(DIRFILE *D, unsigned int flags)
+{
+  int changed = 0, i;
+  struct stat statbuf;
+
+  dtrace("%p, 0x%x", D, flags);
+
+  GD_RETURN_ERR_IF_INVALID(D);
+
+  /* if we can't open directories, we're stuck with the full path method */
+#ifdef GD_NO_DIR_OPEN
+  flags |= GD_DESYNC_PATHCHECK;
+#endif
+
+  for (i = 0; i < D->n_fragment; ++i) {
+    if (flags & GD_DESYNC_PATHCHECK) {
+      /* stat the file via it's path relative to the original filedir */
+      char *buffer;
+      if (D->fragment[i].sname) {
+        buffer = _GD_Malloc(D, strlen(D->name) + strlen(D->fragment[i].bname) +
+            strlen(D->fragment[i].sname) + 3);
+        if (buffer == NULL)
+          GD_RETURN_ERROR(D);
+        sprintf(buffer, "%s%c%s%c%s", D->name, GD_DIRSEP, D->fragment[i].sname,
+            GD_DIRSEP, D->fragment[i].bname);
+      } else {
+        buffer = _GD_Malloc(D, strlen(D->name) + strlen(D->fragment[i].bname) +
+            2);
+        if (buffer == NULL)
+          GD_RETURN_ERROR(D);
+        sprintf(buffer, "%s%c%s", D->name, GD_DIRSEP, D->fragment[i].bname);
+      }
+      if (stat(buffer, &statbuf)) {
+        _GD_SetError(D, GD_E_IO, 0, buffer, 0, NULL);
+        free(buffer);
+        GD_RETURN_ERROR(D);
+      }
+      free(buffer);
+    } else
+      /* stat the file based on it's name and our cached dirfd */
+      if (gd_StatAt(D, D->fragment[i].dirfd, D->fragment[i].bname, &statbuf, 0))
+        GD_SET_RETURN_ERROR(D, GD_E_IO, 0, D->fragment[i].cname, 0, NULL);
+
+    if (statbuf.st_mtime != D->fragment[i].mtime) {
+      changed = 1;
+      break;
+    }
+  }
+
+  if (changed && flags & GD_DESYNC_REOPEN) {
+    /* reopening is easy: just delete everything and start again.  In the
+     * non-PATHCHECK case, we also have to cache the dirfd to the root directory
+     */
+
+    /* remember how we were called */
+    char *name = D->name;
+    gd_parser_callback_t sehandler = D->sehandler;
+    void *extra = D->sehandler_extra;
+    unsigned long int flags = D->open_flags;
+    int dirfd = -1;
+
+    if (!(flags & GD_DESYNC_PATHCHECK)) {
+      dirfd = dup(D->fragment[0].dirfd);
+      if (dirfd == -1)
+        GD_SET_RETURN_ERROR(D, GD_E_IO, GD_E_OPEN, D->name, 0, NULL);
+    }
+
+    D->name = NULL; /* so FreeD doesn't delete it */
+    if (_GD_ShutdownDirfile(D, 0, 1)) {
+      D->name = name;
+      if (dirfd >= 0)
+        close(dirfd);
+      GD_RETURN_ERROR(D);
+    }
+    _GD_Open(D, dirfd, name, flags, sehandler, extra);
+    free(name);
+
+    if (D->error)
+      changed = D->error;
+  }
+
+  dreturn("%i", changed);
+  return changed;
 }
 /* vim: ts=2 sw=2 et tw=80
 */

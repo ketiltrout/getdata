@@ -25,46 +25,59 @@ AM_CPPFLAGS=${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
 
 EXTRA_DIST=test.h enc_put_offs.c
 
-ADD_TESTS=add_add add_affix add_alias add_alias_affix add_alias_meta \
-					add_amb_code7 add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
-					add_bit_numbits add_bit_scalars add_carray add_clincom add_code \
-					add_const add_cpolynom add_crecip add_crecip89 add_dangle_dup \
-					add_divide add_divide_invalid add_dot5 add_dot6 add_dot10 \
-					add_duplicate add_format add_indir add_invalid add_lincom \
-					add_lincom_affix add_lincom_invalid add_lincom_nfields add_linterp \
-					add_linterp_invalid add_meta add_meta_alias add_mplex \
-					add_mplex_scalars add_multiply add_multiply_invalid add_ns \
-					add_ns_frag add_ns_frag2 add_phase add_phase_invalid add_polynom \
-					add_polynom_scalar add_protect add_raw add_raw_include \
-					add_raw_invalid add_raw_spf add_raw_spf_scalar add_raw_sub \
-					add_raw_type add_rdonly add_recip add_resolv add_sarray \
-					add_sarray_nil add_sbit add_scalar add_scalar_carray \
-					add_scalar_carray_bad add_sindir add_sort add_spec \
-					add_spec_directive add_spec_invalid add_spec_meta add_spec_resolv \
-					add_string add_string_affix add_type add_window add_window_op
+ADD_TESTS=add_add add_affix add_alias add_alias_affix add_alias_index \
+					add_alias_meta add_alias_name add_alias_ns add_alias_prot \
+					add_alias_rdonly add_amb_code7 add_bit add_bit_bitnum \
+					add_bit_bitsize add_bit_inaff add_bit_invalid add_bit_numbits \
+					add_bit_scalars add_carray add_carray_entry add_carray_type \
+					add_clincom add_clincom_nfields add_code add_const add_const_type \
+					add_cpolynom add_cpolynom_order add_crecip add_crecip89 \
+					add_dangle_dup add_divide add_divide_inaff1 add_divide_inaff2 \
+					add_divide_invalid add_dot5 add_dot6 add_dot10 add_duplicate \
+					add_format add_indir add_invalid add_lincom add_lincom_affix \
+					add_lincom_invalid add_lincom_nfields add_lincom_nfields2 \
+					add_linterp add_linterp_inaff add_linterp_invalid add_meta \
+					add_meta_alias add_meta_parent add_mplex add_mplex_inaff \
+					add_mplex_period add_mplex_scalars add_multiply add_multiply_invalid \
+					add_ns add_ns_frag add_ns_frag2 add_phase add_phase_inaff \
+					add_phase_invalid add_polynom add_polynom_inaff add_polynom_order \
+					add_polynom_order2 add_polynom_scalar add_protect add_raw \
+					add_raw_include add_raw_invalid add_raw_prot add_raw_spf \
+					add_raw_spf_scalar add_raw_sub add_raw_type add_rdonly add_recip \
+					add_recip_inaff add_resolv add_sarray add_sarray_nil add_sbit \
+					add_scalar add_scalar_carray add_scalar_carray_bad add_sindir \
+					add_sort add_spec add_spec_directive add_spec_index add_spec_invalid \
+					add_spec_meta add_spec_prot add_spec_resolv add_string \
+					add_string_affix add_string_entry add_type add_window \
+					add_window_inaff add_window_op
 
 ALIAS_TESTS=alias_list alias_list_alias alias_list_missing alias_num \
 						alias_num_alias alias_num_missing alias_target alias_target_alias \
 						alias_target_missing
 
-ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
-						alter_carray_type alter_clincom alter_const alter_const_c2r \
-						alter_const_r2c alter_const_r2r alter_cpolynom alter_cpolynom_null \
-						alter_crecip alter_crecip89 alter_crecip89_null alter_crecip_zero \
-						alter_divide alter_entry alter_entry_affix alter_entry_hidden \
-						alter_entry_lincom alter_entry_recode alter_entry_recode_recalc \
-						alter_entry_sarray alter_entry_scalar1 alter_entry_scalar2a \
-						alter_entry_scalar2n alter_entry_scalar3 alter_entry_scalar3c \
-						alter_entry_scalar3i alter_entry_scalar3r alter_entry_scalar4 \
-						alter_entry_scalar_amb alter_index alter_indir \
+ALTER_TESTS=alter_bit_bitnum alter_bit_in alter_bit_numbits alter_carray_len \
+						alter_carray_type alter_clincom alter_code alter_const \
+						alter_const_c2r alter_const_r2c alter_const_r2r alter_const_type \
+						alter_cpolynom alter_cpolynom_null alter_crecip alter_crecip89 \
+						alter_crecip89_null alter_crecip_zero alter_divide alter_divide_in \
+						alter_entry alter_entry_affix alter_entry_entype \
+						alter_entry_hidden alter_entry_lincom alter_entry_recode \
+						alter_entry_recode_recalc alter_entry_sarray alter_entry_scalar1 \
+						alter_entry_scalar2a alter_entry_scalar2n alter_entry_scalar3 \
+						alter_entry_scalar3c alter_entry_scalar3i alter_entry_scalar3r \
+						alter_entry_scalar4 alter_entry_scalar_amb alter_index alter_indir \
 						alter_lincom_23 alter_lincom_32 alter_lincom_affix \
-						alter_lincom_input alter_lincom_offset alter_lincom_slope \
-						alter_linterp alter_linterp_move alter_mplex alter_mspec \
-						alter_mspec_affix alter_multiply alter_phase alter_polynom_coeff \
-						alter_polynom_input alter_polynom_ord alter_raw_spf alter_raw_type \
-						alter_recip alter_recip_zero alter_sarray alter_scalar_affix \
-						alter_sindir alter_spec alter_spec_affix alter_spec_meta \
-						alter_spec_polynom alter_window
+						alter_lincom_input alter_lincom_nfields alter_lincom_offset \
+						alter_lincom_slope alter_linterp alter_linterp_in \
+						alter_linterp_move alter_mplex alter_mplex_in alter_mspec \
+						alter_mspec_affix alter_multiply alter_phase alter_phase_in \
+						alter_polynom_coeff alter_polynom_input alter_polynom_ord \
+						alter_prot alter_raw_prot alter_raw_spf alter_raw_type \
+						alter_rdonly alter_recip alter_recip_zero alter_sarray \
+						alter_sarray_nop alter_sbit alter_scalar_affix alter_sindir \
+						alter_spec alter_spec_affix alter_spec_code alter_spec_format \
+						alter_spec_meta alter_spec_nil alter_spec_polynom alter_window \
+						alter_window_in alter_window_op
 
 ASCII_TESTS=ascii_add ascii_get ascii_get_complex ascii_get_get ascii_get_here \
 						ascii_get_sub ascii_nframes ascii_put ascii_put_here ascii_seek \
@@ -131,10 +144,13 @@ CONVERT_TESTS=convert_complex128_complex64 convert_complex128_float64 \
 CREAT_TESTS=creat creat_excl creat_rdonly creat_rdonly_exists
 
 CVLIST_TESTS=cvlist cvlist_array cvlist_array0 cvlist_array_free \
-						 cvlist_array_hidden cvlist_array_meta cvlist_array_meta0 \
-						 cvlist_array_meta_free cvlist_array_meta_hidden cvlist_array_null \
-						 cvlist_hidden cvlist_invalid cvlist_meta cvlist_meta0 \
-						 cvlist_meta_hidden cvlist_meta_invalid cvlist_null
+						 cvlist_array_hidden cvlist_array_long cvlist_array_meta \
+						 cvlist_array_meta0 cvlist_array_meta_free \
+						 cvlist_array_meta_hidden cvlist_array_meta_meta \
+						 cvlist_array_meta_parent cvlist_array_null cvlist_hidden \
+						 cvlist_invalid cvlist_long cvlist_meta cvlist_meta0 \
+						 cvlist_meta_hidden cvlist_meta_invalid cvlist_meta cvlist_null \
+						 cvlist_meta_parent
 
 DEL_TESTS=del_alias del_bad_code del_carray del_carray_deref del_const \
 					del_const_deref del_const_force del_data del_data_enoent \
@@ -146,7 +162,8 @@ DESYNC_TESTS=desync desync_flush desync_path desync_reopen desync_reopen_inv
 DFES_TESTS=dfes_bit dfes_divide dfes_lincom dfes_linterp dfes_multiply \
 					 dfes_null dfes_phase dfes_raw dfes_recip dfes_zero
 
-ELIST_TESTS=elist_alias elist_fragment elist_hidden elist_noalias elist_scalar
+ELIST_TESTS=elist_alias elist_fragment elist_hidden elist_noalias \
+						elist_parent elist_scalar elist_type
 
 ENCODE_TESTS=encode_alter encode_alter_all encode_alter_open encode_get \
 						 encode_recode encode_recode_open encode_support
@@ -187,12 +204,17 @@ FLUSH_TESTS=flush_all flush_amb_code flush_bad_code flush_flush flush_hex \
 FOFFS_TESTS=foffs_alter foffs_alter_all foffs_get foffs_move
 
 FRAGMENT_TESTS=fragment_affix fragment_affix_alter fragment_affix_alter2 \
-							 fragment_affix_alter_code fragment_affix_alter_nop \
-							 fragment_affix_dup fragment_affix_ns fragment_index \
+							 fragment_affix_alter_code fragment_affix_alter_dotpx \
+							 fragment_affix_alter_index fragment_affix_alter_nop \
+							 fragment_affix_alter_nons fragment_affix_alter_ns \
+							 fragment_affix_alter_pns fragment_affix_dup \
+							 fragment_affix_index fragment_affix_ns fragment_index \
 							 fragment_index_alias fragment_name fragment_name_oor \
 							 fragment_ndotdots fragment_ndots fragment_ns fragment_ns0 \
 							 fragment_ns_add fragment_ns_add0 fragment_ns_alter \
-							 fragment_ns_del fragment_num fragment_parent
+							 fragment_ns_alter_nop fragment_ns_alter_pdel \
+							 fragment_ns_del fragment_num fragment_parent \
+							 fragment_parent_index fragment_parent_root
 
 GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_carray_c2r get_carray_slice get_char get_clincom get_complex128 \
@@ -245,8 +267,8 @@ INCLUDE_TESTS=include_accmode include_affix include_affix_ns include_auto \
 							include_index include_invalid include_nonexistent \
 							include_ndotdots include_ndots include_ns include_ns_dot \
 							include_ns_dotns include_ns_nil include_ns_null \
-							include_ns_prefix include_pc include_ref include_sub \
-							include_syntax
+							include_ns_prefix include_pc include_prot include_ref \
+							include_sub include_syntax
 
 INDEX_TESTS=index_domain index_index index_range index_s index_subset
 
@@ -263,24 +285,30 @@ LZMA_TESTS=lzma_enoent lzma_get lzma_nframes lzma_put lzma_xz_add lzma_xz_get \
 					 lzma_xz_put_offs lzma_xz_put_pad lzma_xz_seek lzma_xz_seek_far \
 					 lzma_xz_sync
 
-MADD_TESTS=madd madd_affix madd_alias madd_alias_affix madd_bit \
-					 madd_bit_invalid madd_carray madd_clincom madd_const madd_cpolynom \
-					 madd_crecip madd_crecip89 madd_divide madd_index madd_indir \
-					 madd_lincom madd_lincom_invalid madd_linterp madd_linterp_invalid \
-					 madd_mplex madd_multiply madd_multiply_invalid madd_phase \
-					 madd_phase_invalid madd_polynom madd_recip madd_sarray madd_sbit \
-					 madd_sindir madd_spec madd_spec_directive madd_spec_invalid \
-					 madd_spec_resolv madd_string madd_window
+MADD_TESTS=madd madd_affix madd_alias madd_aliasmeta madd_alias_affix \
+					 madd_alias_alias madd_alias_subsub madd_bit madd_bit_invalid \
+					 madd_carray madd_clincom madd_clincom_nfields madd_const \
+					 madd_cpolynom madd_cpolynom_order madd_crecip madd_crecip89 \
+					 madd_divide madd_index madd_indir madd_lincom madd_lincom_invalid \
+					 madd_lincom_nfields madd_linterp madd_linterp_invalid madd_mplex \
+					 madd_multiply madd_multiply_invalid madd_parent_bad madd_phase \
+					 madd_phase_invalid madd_polynom madd_polynom_order madd_raw \
+					 madd_recip madd_sarray madd_sbit madd_sindir madd_spec \
+					 madd_spec_directive madd_spec_invalid madd_spec_resolv madd_string \
+					 madd_subsub madd_window
 
 MOVE_TESTS=move_affix move_affix_dup move_affix_meta move_affix_updb \
-					 move_alias move_data_enc_ar move_data_enc_ra move_data_endian \
-					 move_data_foffs move_data_foffs_neg move_data_nop move_index \
-					 move_meta move_move move_protect move_subdir
+					 move_alias move_code move_data_enc_ar move_data_enc_ra \
+					 move_data_enc_un move_data_endian move_data_foffs \
+					 move_data_foffs_neg move_data_nop move_data_prot move_entype \
+					 move_index move_meta move_move move_nop move_protect move_rdonly \
+					 move_subdir
 
-NAME_TESTS=name_affix name_affix_bad name_alias name_dangle name_dot5 \
-					 name_dot5r name_dot9 name_dot10 name_dup name_meta name_move \
-					 name_move_alias name_name name_ns name_ns2 name_nsdot name_updb \
-					 name_updb_affix name_updb_alias name_updb_carray name_updb_const \
+NAME_TESTS=name_affix name_affix_bad name_alias name_code name_dangle \
+					 name_dot5 name_dot5r name_dot9 name_dot10 name_dup name_index \
+					 name_meta name_meta2 name_move name_move_alias name_name name_ns \
+					 name_ns2 name_nsdot name_prot name_rdonly name_updb name_updb_affix \
+					 name_updb_alias name_updb_carray name_updb_const \
 					 name_updb_const_alias name_updb_sarray
 
 NATIVE_TESTS=native_bit native_const native_index native_lincom \
@@ -320,10 +348,10 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_endian_bad parse_endian_big parse_endian_force \
 						parse_endian_little parse_endian_slash parse_eol parse_foffs \
 						parse_foffs_include parse_foffs_slash parse_hex parse_hidden \
-						parse_hidden_field parse_hidden_meta parse_include \
+						parse_hidden_field parse_hidden_meta parse_huge parse_include \
 						parse_include_absolute parse_include_absrel \
 						parse_include_affix_bad parse_include_affix_ref parse_include_dir \
-						parse_include_loop parse_include_nonexistent \
+						parse_include_loop parse_include_nodir parse_include_nonexistent \
 						parse_include_ns parse_include_ns2 parse_include_nsabs \
 						parse_include_nsinh parse_include_nspop parse_include_nsrabs \
 						parse_include_nsrainh parse_include_nsrinh parse_include_nsroot \
@@ -345,12 +373,12 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_mplex_nomax parse_mplex_scalar parse_multiply \
 						parse_multiply_ncols parse_name parse_name_dot parse_name_ext \
 						parse_name_pedantic parse_ncols parse_ns parse_ns_dot \
-						parse_ns_dotdot parse_ns_dotdotns parse_ns_dotns parse_ns_ndotdots \
-						parse_ns_ndots parse_ns_nsdot parse_ns_nsdotdot parse_nsf \
-						parse_nsf_abs parse_nsf_alias parse_nsf_dot parse_nsf_hide \
-						parse_nsf_index parse_nsf_meta parse_nsf_meta2 parse_nsf_par \
-						parse_nsf_ref parse_nsf_refabs parse_nsf_refrel parse_nsf_root \
-						parse_nsf_rpar parse_nsf_sub parse_octal_zero parse_phase \
+						parse_ns_dotdot parse_ns_dotdotns parse_ns_dotns parse_ns_include \
+						parse_ns_include_ns parse_ns_ndotdots parse_ns_ndots \
+						parse_ns_nsdot parse_ns_nsdotdot parse_nsf parse_nsf_abs \
+						parse_nsf_alias parse_nsf_dot parse_nsf_hide parse_nsf_index \
+						parse_nsf_meta parse_nsf_meta2 parse_nsf_ref parse_nsf_refabs \
+						parse_nsf_root parse_nsf_sub parse_octal_zero parse_phase \
 						parse_phase_ncols parse_phase_scalar parse_polynom \
 						parse_polynom_ncols1 parse_polynom_ncols2 parse_polynom_scalar \
 						parse_protect_all parse_protect_bad parse_protect_data \
@@ -410,10 +438,12 @@ SIE_TESTS=sie_err_open sie_get_big sie_get_header sie_get_little sie_move_from \
 SLIM_TESTS=slim_get slim_nframes slim_seek slim_seek_far
 
 SVLIST_TESTS=svlist svlist0 svlist2 svlist_array svlist_array0 \
-						 svlist_array_hidden svlist_array_meta svlist_array_meta0 \
-						 svlist_array_meta_free svlist_array_meta_hidden svlist_hidden \
-						 svlist_invalid svlist_meta svlist_meta0 svlist_meta_hidden \
-						 svlist_meta_invalid
+						 svlist_array_hidden svlist_array_long svlist_array_meta \
+						 svlist_array_meta0 svlist_array_meta_free \
+						 svlist_array_meta_hidden svlist_array_meta_meta \
+						 svlist_array_meta_parent svlist_hidden svlist_invalid svlist_long \
+						 svlist_meta svlist_meta0 svlist_meta_hidden svlist_meta_invalid \
+						 svlist_meta_meta svlist_meta_parent
 
 SPF_TESTS=spf_alias spf_alias_missing spf_alias_meta spf_divide spf_lincom \
 					spf_multiply spf_polynom spf_raw spf_recip spf_recurse
@@ -426,7 +456,8 @@ TOK_TESTS=tok_arg tok_escape tok_quote
 
 TRUNC_TESTS=trunc trunc_dir trunc_rdonly trunc_rofs trunc_truncsub
 
-UNCLUDE_TESTS=unclude unclude_del unclude_move unclude_open
+UNCLUDE_TESTS=unclude unclude_del unclude_index unclude_keep unclude_move \
+							unclude_open unclude_prot unclude_rdonly
 
 VERSION_TESTS=version_0 version_0_write version_1 version_1_write version_2 \
 							version_2_write version_3 version_3_write version_4 \

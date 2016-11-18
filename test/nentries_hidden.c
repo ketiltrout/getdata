@@ -52,7 +52,7 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  nfields = gd_nentries(D, NULL, GD_ALL_FRAGMENTS, GD_ALL_ENTRIES,
+  nfields = gd_nentries(D, GD_ALL_FRAGMENTS, NULL, GD_ALL_ENTRIES,
       GD_ENTRIES_HIDDEN);
   error = gd_error(D);
   gd_discard(D);

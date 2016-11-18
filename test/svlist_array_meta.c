@@ -32,8 +32,8 @@ int main(void)
     "parent/data3 SARRAY lima mike november oscar papa quebec romeo\n"
     "META parent data4 LINTERP UINT8 1\n"
     "/ALIAS parent/data5 data0\n";
-  int j, r = 0;
-  size_t i, error;
+  int j, error, r = 0;
+  size_t i;
   const char ***field_list;
   DIRFILE *D;
   const char *lists[4][8] = {

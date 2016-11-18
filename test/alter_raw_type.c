@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,17 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test field modifying */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <inttypes.h>
-#include <errno.h>
-#include <stdio.h>
 
 int main(void)
 {
@@ -38,7 +28,7 @@ int main(void)
   const char *format_data = "data RAW UINT8 8\n";
   unsigned char data_data[256];
   uint16_t d;
-  int fd, i, ret, error, r = 0;
+  int fd, i, ret, e1, e2, e3, r = 0;
   off_t n;
   DIRFILE *D;
 
@@ -56,10 +46,22 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  ret = gd_alter_raw(D, "data", GD_UINT16, 0, 1);
-  error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR);
+  ret = gd_alter_raw(D, "data", GD_STRING, 0, 1);
+  CHECKI(ret, GD_E_BAD_TYPE);
+  e1 = gd_error(D);
+  CHECKI(e1, GD_E_BAD_TYPE);
+
+  gd_alter_raw(D, "data", GD_UINT16 + 1, 0, 1);
+  e2 = gd_error(D);
+  CHECKI(e2, GD_E_BAD_TYPE);
+
+  gd_alter_raw(D, "data", GD_UINT16, 0, 1);
+  e3 = gd_error(D);
+  CHECKI(e3, 0);
+
   n = gd_nframes(D);
+  CHECKI(n, 32);
 
   gd_discard(D);
 
@@ -80,10 +82,6 @@ int main(void)
   unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, 0);
-  CHECKI(n, 32);
-  CHECKI(ret, 0);
 
   return r;
 }

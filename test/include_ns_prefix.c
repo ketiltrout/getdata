@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -54,6 +54,7 @@ int main(void)
 
   gd_fragment_affixes(D, 1, &prefix, &suffix);
   e2 = gd_error(D);
+  CHECKI(e2, 0);
   CHECKS(prefix, "a");
   CHECKP(suffix);
   free(prefix);

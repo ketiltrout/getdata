@@ -249,12 +249,12 @@ int _GD_TokToNum(const char *restrict token, int standards, int pedantic,
 /* Compose a subfield code from a parent code and a subfield name -- this
  * used to be done in _GD_MungeCode */
 static char *_GD_SubfieldCode(DIRFILE *D, const gd_entry_t *P, const char *code,
-    char **nso, int *offset)
+    size_t *offset)
 {
   size_t len, len_par;
   char *new_code;
 
-  dtrace("%p, %p, \"%s\", %p, %p", D, P, code, nso, offset);
+  dtrace("%p, %p, \"%s\", %p", D, P, code, offset);
 
   if (code == NULL) {
     dreturn("%p", NULL);
@@ -276,54 +276,31 @@ static char *_GD_SubfieldCode(DIRFILE *D, const gd_entry_t *P, const char *code,
   if (offset)
     *offset = len_par;
 
-  /* find the namespace, if necessary */
-  if (nso) {
-    size_t i;
-    for (i = strlen(new_code); i > 0; --i)
-      if (new_code[i - 1] == ',')
-        break;
-
-    *nso = new_code + i;
-  }
-
-  dreturn("\"%s\" (%i, %p)", new_code, offset ? *offset : -1,
-      nso ? *nso : NULL);
+  dreturn("\"%s\" (%" PRIuSIZE ")", new_code, offset ? *offset : 0);
   return new_code;
 }
 
 /* Create a field code using the prefix and suffix of the given fragment and the
  * current namespace.
  *
- * Returns a newly malloc'd code, or NULL on error.  nso points to the portion
- * of the code immediately after the namespace prefix.  Offset is the offset
- * from the start of the code to the field name (ie. the character following
- * / for a metafield. */
+ * Returns a newly malloc'd code, or NULL on error.  For subfields, offset is
+ * the offset to the character following / for a metafield.  For non-subfields,
+ * it's the length of the namespace. */
 static char *_GD_CodeFromFrag(DIRFILE *restrict D,
-    const struct parser_state *restrict p, const gd_entry_t *restrict P, int me,
-    const char *code, char **nso, int *offset)
+    const struct parser_state *restrict p, const gd_entry_t *restrict P,
+    int me, const char *code, size_t *offset)
 {
   char *new_code;
 
   dtrace("%p, %p, %p, %i, \"%s\", %p", D, p, P, me, code, offset);
 
   if (P)
-    new_code = _GD_SubfieldCode(D, P, code, nso, offset);
-  else {
-    const char *ns = p->ns;
-    size_t nsl = p->nsl;
+    new_code = _GD_SubfieldCode(D, P, code, offset);
+  else
+    new_code = _GD_BuildCode(D, me, p->ns, p->nsl, code,
+        p->pedantic && p->standards <= 10, offset);
 
-    /* set fragment root space, if necessary */
-    if (!ns) {
-      ns = D->fragment[me].ns;
-      nsl = D->fragment[me].nsl;
-    }
-
-    new_code = _GD_MungeCode(D, ns, nsl, NULL, NULL, D->fragment[me].prefix,
-        D->fragment[me].suffix, code, nso, offset,
-        GD_MC_RQ_PARTS | GD_MC_ERROR_OK | GD_MC_NO_NS);
-  }
-
-  dreturn("\"%s\"", new_code);
+  dreturn("\"%s\" (%" PRIuSIZE ")", new_code, offset ? *offset : 0);
   return new_code;
 }
 
@@ -333,23 +310,11 @@ static char *_GD_InputCode(DIRFILE *D, const struct parser_state *restrict p,
     int me, const char *token)
 {
   char *code;
-  const char *ns = p->ns;
-  size_t nsl = p->nsl;
-  unsigned flags = GD_MC_RQ_PARTS | GD_MC_ERROR_OK;
 
   dtrace("%p, %p, %i, \"%s\"", D, p, me, token);
 
-  if (token[0] == '.') { /* absolute name */
-    token++;
-    ns = D->fragment[me].ns;
-    nsl = D->fragment[me].nsl;
-  } else if (ns == NULL) {
-    ns = D->fragment[me].ns;
-    nsl = D->fragment[me].nsl;
-  }
-
-  code = _GD_MungeCode(D, ns, nsl, NULL, NULL, D->fragment[me].prefix,
-      D->fragment[me].suffix, token, NULL, NULL, flags);
+  code = _GD_BuildCode(D, me, p->ns, p->nsl, token,
+      p->pedantic && p->standards <= 5, NULL);
 
   dreturn("\"%s\"", code);
   return code;
@@ -358,18 +323,30 @@ static char *_GD_InputCode(DIRFILE *D, const struct parser_state *restrict p,
 /* Create E->field; frees the entry and returns non-zero on error. */
 static int _GD_SetField(DIRFILE *restrict D,
     const struct parser_state *restrict p, gd_entry_t *restrict E,
-    const gd_entry_t *restrict P, int me, const char *restrict name, int no_dot)
+    const gd_entry_t *restrict P, int me, const char *restrict name)
 {
-  int offset;
-  int is_dot = 0;
+  size_t offset;
 
-  dtrace("%p, %p{%s,%i}, %p, %p, %i, \"%s\", %i", D, p, p->file, p->line, E, P, me, name, no_dot);
+  dtrace("%p, %p{%s,%i}, %p, %p, %i, \"%s\"", D, p, p->file, p->line, E, P, me,
+      name);
 
-  E->field = _GD_CodeFromFrag(D, p, P, me, name, NULL, &offset);
-  if (E->field && _GD_ValidateField(E->field + offset, p->standards,
-        p->pedantic, GD_VF_NAME, (p->ns || no_dot) ? NULL : &is_dot))
-  {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, p->file, p->line, name);
+  E->field = _GD_CodeFromFrag(D, p, P, me, name, &offset);
+
+  /* The _GD_ValidateField call differs based on whether we're dealing with
+   * a subfield or not because the meaning of offset is different
+   */
+  if (E->field) {
+    int bad_code;
+    if (P)
+      bad_code = _GD_ValidateField(E->field + offset, 0, p->standards,
+          p->pedantic, GD_VF_NAME);
+    else
+      bad_code = _GD_ValidateField(E->field, offset, p->standards, p->pedantic,
+          GD_VF_NAME);
+
+    if (bad_code)
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, p->file, p->line,
+          name);
   }
 
   if (D->error) {
@@ -377,9 +354,6 @@ static int _GD_SetField(DIRFILE *restrict D,
     dreturn("%i", 1);
     return 1;
   }
- 
-  if (is_dot)
-    E->flags |= GD_EN_DOTTED;
 
   dreturn("%i", 0);
   return 0;
@@ -588,16 +562,19 @@ static gd_entry_t *_GD_ParseRaw(DIRFILE *restrict D,
   E->e->u.raw.file[0].subenc = GD_ENC_UNKNOWN; /* don't know the encoding
                                                     subscheme yet */
 
-  if (_GD_SetField(D, p, E, NULL, me, in_cols[0], 0)) {
+  if (_GD_SetField(D, p, E, NULL, me, in_cols[0])) {
     dreturn("%p", NULL);
     return NULL;
   }
+  
+  if (p->pedantic && p->standards <= 5)
+    E->flags |= GD_EN_EARLY;
 
   E->e->u.raw.filebase = _GD_Strdup(D, in_cols[0]);
   E->EN(raw,data_type) = _GD_RawType(in_cols[2], p->standards, p->pedantic);
   E->e->u.raw.size = GD_SIZE(E->EN(raw,data_type));
 
-  if (E->e->u.raw.size == 0 || E->EN(raw,data_type) & 0x40)
+  if (E->e->u.raw.size == 0)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, p->file, p->line,
         in_cols[2]);
   else if ((E->scalar[0] = _GD_SetScalar(D, p, in_cols[3], &E->EN(raw,spf),
@@ -655,7 +632,7 @@ static gd_entry_t *_GD_ParseLincom(DIRFILE *restrict D,
 
   E->field_type = GD_LINCOM_ENTRY;
 
-  if (_GD_SetField(D, p, E, parent, me, in_cols[0], 0)) {
+  if (_GD_SetField(D, p, E, parent, me, in_cols[0])) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -749,7 +726,7 @@ static gd_entry_t *_GD_ParseLinterp(DIRFILE *restrict D,
   E->flags |= GD_EN_CALC;
   E->EN(linterp,table) = NULL;
 
-  if (_GD_SetField(D, p, E, parent, me, in_cols[0], 0)) {
+  if (_GD_SetField(D, p, E, parent, me, in_cols[0])) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -808,7 +785,7 @@ static gd_entry_t *_GD_ParseYoke(DIRFILE *restrict D, gd_entype_t type,
   E->e->entry[0] = E->e->entry[1] = NULL;
   E->flags |= GD_EN_CALC;
 
-  if (_GD_SetField(D, p, E, parent, me, in_cols[0], 0)) {
+  if (_GD_SetField(D, p, E, parent, me, in_cols[0])) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -862,7 +839,7 @@ static gd_entry_t *_GD_ParseRecip(DIRFILE *restrict D,
   E->in_fields[0] = NULL;
   E->e->entry[0] = NULL;
 
-  if (_GD_SetField(D, p, E, parent, me, in_cols[0], 0)) {
+  if (_GD_SetField(D, p, E, parent, me, in_cols[0])) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -917,7 +894,7 @@ static gd_entry_t *_GD_ParseWindow(DIRFILE *restrict D,
 
   E->field_type = GD_WINDOW_ENTRY;
 
-  if (_GD_SetField(D, p, E, parent, me, in_cols[0], 0)) {
+  if (_GD_SetField(D, p, E, parent, me, in_cols[0])) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -995,7 +972,7 @@ static gd_entry_t *_GD_ParseMplex(DIRFILE *restrict D,
 
   E->field_type = GD_MPLEX_ENTRY;
 
-  if (_GD_SetField(D, p, E, parent, me, in_cols[0], 0)) {
+  if (_GD_SetField(D, p, E, parent, me, in_cols[0])) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -1063,7 +1040,7 @@ static gd_entry_t *_GD_ParseBit(DIRFILE *restrict D, int is_signed,
   E->e->entry[0] = NULL;
   E->flags |= GD_EN_CALC;
 
-  if (_GD_SetField(D, p, E, parent, me, in_cols[0], 0)) {
+  if (_GD_SetField(D, p, E, parent, me, in_cols[0])) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -1137,7 +1114,7 @@ static gd_entry_t *_GD_ParsePhase(DIRFILE *restrict D,
   E->in_fields[0] = NULL;
   E->e->entry[0] = NULL;
 
-  if (_GD_SetField(D, p, E, parent, me, in_cols[0], 0)) {
+  if (_GD_SetField(D, p, E, parent, me, in_cols[0])) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -1194,7 +1171,7 @@ static gd_entry_t *_GD_ParsePolynom(DIRFILE *restrict D,
   memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_POLYNOM_ENTRY;
-  if (_GD_SetField(D, p, E, parent, me, in_cols[0], 0)) {
+  if (_GD_SetField(D, p, E, parent, me, in_cols[0])) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -1301,7 +1278,7 @@ static gd_entry_t *_GD_ParseConst(DIRFILE *restrict D,
   E->field_type = GD_CONST_ENTRY;
   E->flags |= GD_EN_CALC;
 
-  if (_GD_SetField(D, p, E, parent, me, in_cols[0], 0)) {
+  if (_GD_SetField(D, p, E, parent, me, in_cols[0])) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -1387,7 +1364,7 @@ static gd_entry_t *_GD_ParseArray(DIRFILE *restrict D, int string,
   E->field_type = string ? GD_SARRAY_ENTRY : GD_CARRAY_ENTRY;
   E->flags |= GD_EN_CALC;
 
-  if (_GD_SetField(D, p, E, parent, me, in_cols[0], 0)) {
+  if (_GD_SetField(D, p, E, parent, me, in_cols[0])) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -1528,7 +1505,7 @@ static gd_entry_t *_GD_ParseString(DIRFILE *restrict D,
     return NULL;
   }
 
-  if (_GD_SetField(D, p, E, parent, me, in_cols[0], 0)) {
+  if (_GD_SetField(D, p, E, parent, me, in_cols[0])) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -1572,7 +1549,7 @@ static int _GD_UTF8Encode(DIRFILE *restrict D, const char *restrict format_file,
 /* _GD_CheckParent: look for a slashed field name and, if found, see if the
  * parent exists in the current fragment.  Returns parent entry on success,
  * and points *name to the metaname part.  me == -1 implies we're not in the
- * parser, but called from _GD_Add.
+ * parser, but called from _GD_Add.  In this case, it never sets D->error.
  */
 gd_entry_t *_GD_CheckParent(DIRFILE *restrict D,
     const struct parser_state *p, char **restrict name, int me)
@@ -1588,7 +1565,7 @@ gd_entry_t *_GD_CheckParent(DIRFILE *restrict D,
       if (me == -1)
         munged_code = strdup(*name);
       else
-        munged_code = _GD_CodeFromFrag(D, p, NULL, me, *name, NULL, NULL);
+        munged_code = _GD_CodeFromFrag(D, p, NULL, me, *name, NULL);
       if (munged_code) {
         P = _GD_FindField(D, munged_code, D->entry, D->n_entries, 0, NULL);
         free(munged_code);
@@ -1793,16 +1770,6 @@ NO_MATCH:
       return NULL;
     }
 
-    if (E->flags & GD_EN_DOTTED) {
-      ptr = _GD_Realloc(D, D->dot_list, (D->n_dot + 1) * sizeof(gd_entry_t*));
-      if (ptr == NULL) {
-        _GD_FreeE(D, E, 1);
-        dreturn ("%p", NULL);
-        return NULL;
-      }
-      D->dot_list = (gd_entry_t **)ptr;
-    }
-
     /* Initialse the meta counts */
     if (P != NULL) {
       E->e->n_meta = -1;
@@ -1824,12 +1791,6 @@ NO_MATCH:
 
     /* the Format file fragment index */
     E->fragment_index = me;
-
-    /* update the dot list if necessary */
-    if (E->flags & GD_EN_DOTTED) {
-      D->dot_list[D->n_dot++] = E;
-      qsort(D->dot_list, D->n_dot, sizeof(gd_entry_t*), _GD_EntryCmp);
-    }
 
     /* sort */
     _GD_InsertSort(D, E, u);
@@ -2111,7 +2072,7 @@ static void _GD_ParseAlias(DIRFILE *restrict D,
     return;
   }
 
-  if (_GD_SetField(D, p, E, P, me, *name, 1)) {
+  if (_GD_SetField(D, p, E, P, me, *name)) {
     dreturnvoid();
     return;
   }
@@ -2156,99 +2117,48 @@ static void _GD_ParseAlias(DIRFILE *restrict D,
 }
 
 static void _GD_ParseNamespace(DIRFILE *D, struct parser_state *restrict p,
-    const char *ns, int me)
+    const char *ns)
 {
-  size_t len;
-  int i;
   char *ptr;
-  const char *parent;
 
-  dtrace("%p, %p, \"%s\", %i", D, p, ns, me);
+  dtrace("%p, %p, \"%s\"", D, p, ns);
+
+  /* Ignore a leading '.' -- namespaces given in a /NAMESPACE directive are
+   * always relative to the rootspace
+   */
+  if (ns[0] == '.')
+    ns++;
 
   if (ns[0] == '\0') {
-    /* the NULL token is not a valid argument to /NAMESPACE */
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, p->file, p->line, ns);
+    /* Revert to rootspace */
+    free(p->ns);
+    p->ns = NULL;
+    p->nsl = 0;
     dreturnvoid();
     return;
-  } else if (ns[0] == '.') {
-    if (ns[1] == '\0') {
-      /* root space */
-      free(p->ns);
-      p->ns = NULL;
-      dreturnvoid();
-      return;
-    } else if (ns[1] == '.' && ns[2] == '\0') {
-      if (p->ns) {
-        /* parent space */
-        for (i = p->nsl - 1; i >= 0; --i)
-          if (p->ns[i] == '.') {
-            p->ns[i] = 0;
-            p->nsl = i;
-            dreturn("(nil) [\"%s\", %" PRIuSIZE "]", p->ns, p->nsl);
-            return;
-          }
-        
-        /* no parent--revert to root space */
-        free(p->ns);
-        p->ns = NULL;
-        dreturnvoid();
-        return;
-      } else { 
-        /* root space's parent is root space */
-        dreturnvoid();
-        return;
-      }
-    } else if (ns[1] == '.') {
-      /* too many leading dots */
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, p->file, p->line, ns);
-      dreturnvoid();
-      return;
-    } else {
-      /* an absolute namespace.  Strip leading dot,
-       * return to root space and continue as normal */
-      ns++;
-      free(p->ns);
-      p->ns = NULL;
-    }
   }
 
   /* check new namespace name */
-  if (_GD_ValidateField(ns, p->standards, p->pedantic, GD_VF_NS, NULL))
-  {
+  if (_GD_ValidateField(ns, 0, p->standards, p->pedantic, GD_VF_NS)) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, p->file, p->line, ns);
     dreturnvoid();
     return;
   }
 
-  /* honour fragment root space */
-  if (p->ns == NULL)
-    parent = D->fragment[me].ns;
-  else
-    parent = p->ns;
-
-  if (parent == NULL) {
-    /* new namespace */
-    len = strlen(ns);
-    ptr = _GD_Strdup(D, ns);
-  } else {
-    /* append namespace */
-    len = strlen(parent) + strlen(ns) + 1;
-    ptr = _GD_Malloc(D, len + 1);
-    if (ptr)
-      sprintf(ptr, "%s.%s", parent, ns);
+  ptr = _GD_Strdup(D, ns);
+  if (ptr == NULL) { /* alloc error */
+    dreturnvoid();
+    return;
   }
 
-  if (ptr) {
-    free(p->ns);
-    p->ns = ptr;
-    p->nsl = len;
+  free(p->ns);
+  p->ns = ptr;
+  p->nsl = strlen(ptr);
 
-    /* strip trailing dot */
-    if (p->ns[len] == '.') {
-      p->ns[len] = 0;
-      p->nsl--;
-    }
-
+  /* strip trailing dot */
+  if (p->ns[p->nsl] == '.') {
+    p->ns[p->nsl] = 0;
+    p->nsl--;
   }
 
   dreturn("(nil) [\"%s\", %" PRIuSIZE "]", p->ns, p->nsl);
@@ -2363,7 +2273,7 @@ static int _GD_ParseDirective(DIRFILE *D, struct parser_state *restrict p,
     case 'H':
       if (strcmp(ptr, "HIDDEN") == 0 && GD_PVERS_GE(*p, 9)) {
         matched = 1;
-        munged_code = _GD_CodeFromFrag(D, p, NULL, me, in_cols[1], NULL, NULL);
+        munged_code = _GD_CodeFromFrag(D, p, NULL, me, in_cols[1], NULL);
         if (munged_code)
           E = _GD_FindField(D, munged_code, D->entry, D->n_entries, 0, NULL);
         free(munged_code);
@@ -2409,7 +2319,7 @@ static int _GD_ParseDirective(DIRFILE *D, struct parser_state *restrict p,
     case 'M':
       if (strcmp(ptr, "META") == 0 && GD_PVERS_GE(*p, 6)) {
         matched = 1;
-        munged_code = _GD_CodeFromFrag(D, p, NULL, me, in_cols[1], NULL, NULL);
+        munged_code = _GD_CodeFromFrag(D, p, NULL, me, in_cols[1], NULL);
         if (munged_code) {
           E = _GD_FindField(D, munged_code, D->entry, D->n_entries, 0, NULL);
           free(munged_code);
@@ -2438,7 +2348,7 @@ static int _GD_ParseDirective(DIRFILE *D, struct parser_state *restrict p,
     case 'N':
       if (strcmp(ptr, "NAMESPACE") == 0 && GD_PVERS_GE(*p, 10)) {
         matched = 1;
-        _GD_ParseNamespace(D, p, in_cols[1], me);
+        _GD_ParseNamespace(D, p, in_cols[1]);
       }
       break;
     case 'P':

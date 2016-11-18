@@ -1818,7 +1818,7 @@ try
 
   % 223: include_affix
   try
-    gd_include(D, 'format1', 0, GD.CREAT + GD.EXCL, 'A', 'Z');
+    gd_include_affix(D, 'format1', 0, 'A', 'Z', GD.CREAT + GD.EXCL);
   catch exc
     ne = ne + check_ok2(exc, 223, 1);
   end
@@ -2311,7 +2311,7 @@ try
 
   % 302: gd_include_ns
   try
-    gd_include_ns(D, 'format2', 0, 'ns', GD.CREAT + GD.EXCL);
+    gd_include(D, 'format2', 0, 'ns', GD.CREAT + GD.EXCL);
   catch exc
     ne = ne + check_ok2(exc, 302, 1);
   end

@@ -36,11 +36,10 @@ const char *gd_fragmentname(DIRFILE* D, int index) gd_nothrow
   return D->fragment[index].cname;
 }
 
-int gd_fragment_affixes(DIRFILE *D, int index, char **prefix, char **suffix)
-  gd_nothrow
+int gd_fragment_affixes(DIRFILE *D, int index, char **px, char **sx) gd_nothrow
 {
   char *p = NULL, *s = NULL;
-  dtrace("%p, %i, %p, %p", D, index, prefix, suffix);
+  dtrace("%p, %i, %p, %p", D, index, px, sx);
 
   GD_RETURN_ERR_IF_INVALID(D);
 
@@ -48,13 +47,13 @@ int gd_fragment_affixes(DIRFILE *D, int index, char **prefix, char **suffix)
     GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, index, NULL);
 
   /* Copy to caller's heap */
-  if (D->fragment[index].prefix) {
-    p = _GD_CStrdup(D->fragment[index].prefix);
+  if (D->fragment[index].px) {
+    p = _GD_CStrdup(D->fragment[index].px);
     if (p == NULL)
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
   }
-  if (D->fragment[index].suffix) {
-    s = _GD_CStrdup(D->fragment[index].suffix);
+  if (D->fragment[index].sx) {
+    s = _GD_CStrdup(D->fragment[index].sx);
     if (s == NULL)
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
   }
@@ -65,298 +64,142 @@ int gd_fragment_affixes(DIRFILE *D, int index, char **prefix, char **suffix)
     GD_RETURN_ERROR(D);
   }
 
-  *prefix = p;
-  *suffix = s;
+  *px = p;
+  *sx = s;
   dreturn("%i", 0);
   return 0;
 }
 
-static char **_GD_CheckAffixes(DIRFILE *D, int i, const char *prefix,
-    const char *suffix, char **codes, unsigned *n)
-{
-  int j;
-  unsigned u, nn = *n;
-  char **new_codes = codes, **ptr;
-
-  dtrace("%p, %i, \"%s\", \"%s\", %p, %p", D, i, prefix, suffix, new_codes, n);
-
-  ptr = _GD_Realloc(D, codes, sizeof(*ptr) * (nn + 2));
-  if (!ptr) {
-    dreturn("%p (%i)", codes, *n);
-    return codes;
-  }
-  new_codes = ptr;
-
-  /* push the new prefix and suffix onto the code stack */
-  new_codes[nn++] = prefix ? _GD_Strdup(D, prefix) : NULL;
-  new_codes[nn++] = suffix ? _GD_Strdup(D, suffix) : NULL;
-  *n = nn;
-
-  if (D->error) {
-    dreturn("%p (%i)", new_codes, *n);
-    return new_codes;
-  }
-
-  /* Propagate changes downward */
-  for (j = 0; j < D->n_fragment; ++j)
-    if (D->fragment[j].parent == i) {
-      char *subprefix = _GD_MungeCode(D, NULL, 0, D->fragment[i].prefix,
-          NULL, prefix, NULL, D->fragment[j].prefix, NULL, NULL,
-          GD_MC_RQ_PARTS | GD_MC_ERROR_OK);
-      char *subsuffix = _GD_MungeCode(D, NULL, 0, NULL,
-          D->fragment[i].suffix, NULL, suffix, D->fragment[j].suffix, NULL,
-          NULL, GD_MC_RQ_PARTS | GD_MC_ERROR_OK);
-      if (D->error) {
-        free(subprefix);
-        dreturn("%p (%i)", new_codes, *n);
-        return new_codes;
-      }
-
-      new_codes = _GD_CheckAffixes(D, j, subprefix, subsuffix, new_codes, n);
-      free(subprefix);
-      free(subsuffix);
-      nn = *n;
-
-      if (D->error) {
-        dreturn("%p (%i)", new_codes, *n);
-        return new_codes;
-      }
-    }
-
-  /* Check for namespace clashes in our files */
-  for (u = 0; u < D->n_entries; ++u)
-    if (D->entry[u]->fragment_index == i && D->entry[u]->e->n_meta != -1) {
-      ptr = _GD_Realloc(D, new_codes, sizeof(*ptr) * ++nn);
-      if (ptr) {
-        char *nso;
-        new_codes = ptr;
-        /* remunge the code */
-        new_codes[nn - 1] = _GD_MungeCode(D, NULL, 0, D->fragment[i].prefix,
-            D->fragment[i].suffix, prefix, suffix, D->entry[u]->field, &nso,
-            NULL, GD_MC_RQ_PARTS);
-
-        /* look for a duplicate and validate */
-        if (new_codes[nn - 1] && _GD_FindField(D, new_codes[nn - 1], D->entry,
-              D->n_entries, 0, NULL))
-        {
-          _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, new_codes[nn - 1]);
-        } else if (_GD_ValidateField(nso, D->standards, 1, GD_VF_NAME, NULL)) {
-          _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0,
-              new_codes[nn - 1]);
-        }
-      } else
-        nn--;
-
-      if (D->error)
-        break;
-    }
-
-  *n = nn;
-  dreturn("%p (%i)", new_codes, *n);
-  return new_codes;
-}
-
-static int _GD_ChangeAffixes(DIRFILE *D, int i, char **codes, int *resort)
-{
-  int j;
-  unsigned u, n = 2;
-
-  dtrace("%p, %i, %p, %p", D, i, codes, resort);
-
-  free(D->fragment[i].prefix);
-  free(D->fragment[i].suffix);
-  D->fragment[i].prefix = codes[0];
-  D->fragment[i].suffix = codes[1];
-
-  /* Propagate changes downward */
-  for (j = 0; j < D->n_fragment; ++j)
-    if (D->fragment[j].parent == i)
-      n += _GD_ChangeAffixes(D, j, codes + n, resort);
-
-  /* rename all the fields */
-  for (u = 0; u < D->n_entries; ++u)
-    if (D->entry[u]->fragment_index == i && D->entry[u]->e->n_meta != -1) {
-      *resort = 1;
-      free(D->entry[u]->field);
-      D->entry[u]->field = codes[n++];
-    }
-
-  dreturn("%i", n);
-  return n;
-}
-
-int gd_alter_affixes(DIRFILE *D, int index, const char *prefix,
-    const char *suffix) gd_nothrow
-{
-  unsigned u, n = 0;
-  char **new_codes;
-  int resort = 0;
-  dtrace("%p, %i, \"%s\", \"%s\"", D, index, prefix, suffix);
-
-  GD_RETURN_ERR_IF_INVALID(D);
-
-  if (index <= 0 || index >= D->n_fragment) 
-    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, index, NULL);
-  else if ((D->flags & GD_ACCMODE) == GD_RDONLY)
-    GD_SET_RETURN_ERROR(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-  else if (D->fragment[D->fragment[index].parent].protection &
-      GD_PROTECT_FORMAT)
-  {
-    GD_SET_RETURN_ERROR(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
-        D->fragment[D->fragment[index].parent].cname);
-  }
-
-  /* affixes to keep */
-  if (!prefix)
-    prefix = D->fragment[index].prefix;
-
-  if (!suffix)
-    suffix = D->fragment[index].suffix;
-
-  /* nothing to do */
-  if (strcmp(prefix, D->fragment[index].prefix) == 0 &&
-      strcmp(suffix, D->fragment[index].suffix) == 0)
-  {
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  new_codes = _GD_CheckAffixes(D, index, prefix, suffix, NULL, &n);
-
-  if (D->error) {
-    for (u = 0; u < n; ++u)
-      free(new_codes[u]);
-    free(new_codes);
-    GD_RETURN_ERROR(D);
-  }
-
-  _GD_ChangeAffixes(D, index, new_codes, &resort);
-
-  free(new_codes);
-
-  if (resort) {
-    /* resort */
-    qsort(D->entry, D->n_entries, sizeof(gd_entry_t*), _GD_EntryCmp);
-    qsort(D->dot_list, D->n_dot, sizeof(gd_entry_t*), _GD_EntryCmp);
-  }
-
-  dreturn("%i", 0);
-  return 0;
-}
-
-int gd_nfragments(DIRFILE* D) gd_nothrow
-{
-  dtrace("%p", D);
-
-  GD_RETURN_ERR_IF_INVALID(D);
-
-  dreturn("%i", D->n_fragment);
-  return D->n_fragment;
-}
-
-int gd_parent_fragment(DIRFILE* D, int fragment_index) gd_nothrow
-{
-  dtrace("%p, %i", D, fragment_index);
-
-  GD_RETURN_ERR_IF_INVALID(D);
-
-  if (fragment_index <= 0 || fragment_index >= D->n_fragment)
-    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
-
-  dreturn("%i", D->fragment[fragment_index].parent);
-  return D->fragment[fragment_index].parent;
-}
-
-/* returns non-zero if the metadata has changed on disk since the dirfile was
- * opened and, optionally, re-opens the dirfile.
+/* Replace the fragment rootspace, prefix and suffix of a field code with
+ * something else.  Name verification and duplicate checks are performed.
+ * Returns NULL on error or else a newly malloc'd string.
+ *
+ * The input code is this:
+ *
+ *     AAAA.BBBB.CCCC.DDDDEEEEGGGGHHHHIIII/KKKK.M0
+ *
+ * (See the definitions in the description of _GD_CodeOffsets in name.c).
+ *
+ * We replace BBBB. with new_ns (which is guaranteed to have the trailing '.'),
+ * EEEE with new_px and HHHH with new_sx, if they exist.  If the new codes are
+ * NULL, no change is made, but if they're the empty string, the old parts are
+ * deleted without adding new parts.
+ *
+ * For field name updates, this is the complement of _GD_RenameCode in name.c,
+ * which replaces CCCC. and GGGG, or /KKKK but leaves the rest unchanged.
+ * (AAAA., DDDD, and IIII are immutable, because they come from the parent's
+ * scope.)
  */
-int gd_desync(DIRFILE *D, unsigned int flags)
+char *_GD_UpdateCode(DIRFILE *D, int index, const char *code, int early,
+    const char *new_ns, size_t new_nsl, const char *new_px, size_t new_pxl,
+    const char *new_sx, size_t new_sxl)
 {
-  int changed = 0, i;
-  struct stat statbuf;
+  char *new_code, *ptr;
+  size_t new_len, offset[GD_N_CODEOFFSETS];
 
-  dtrace("%p, 0x%x", D, flags);
+  dtrace("%p, %i, \"%s\", %i, \"%s\", %" PRIuSIZE ", \"%s\", %" PRIuSIZE
+      ", \"%s\", %" PRIuSIZE, D, index, code, early, new_ns, new_nsl, new_px,
+      new_pxl, new_sx, new_sxl);
 
-  GD_RETURN_ERR_IF_INVALID(D);
+  /* Slice and dice */
+  _GD_CodeOffsets(D, index, code, early ? GD_CO_EARLY : 0, offset);
 
-  /* if we can't open directories, we're stuck with the full path method */
-#ifdef GD_NO_DIR_OPEN
-  flags |= GD_DESYNC_PATHCHECK;
-#endif
+  /* calculate the new code's length */
+  new_len = offset[9]; /* i.e. strlen(code) */
 
-  for (i = 0; i < D->n_fragment; ++i) {
-    if (flags & GD_DESYNC_PATHCHECK) {
-      /* stat the file via it's path relative to the original filedir */
-      char *buffer;
-      if (D->fragment[i].sname) {
-        buffer = _GD_Malloc(D, strlen(D->name) + strlen(D->fragment[i].bname) +
-            strlen(D->fragment[i].sname) + 3);
-        if (buffer == NULL)
-          GD_RETURN_ERROR(D);
-        sprintf(buffer, "%s%c%s%c%s", D->name, GD_DIRSEP, D->fragment[i].sname,
-            GD_DIRSEP, D->fragment[i].bname);
-      } else {
-        buffer = _GD_Malloc(D, strlen(D->name) + strlen(D->fragment[i].bname) +
-            2);
-        if (buffer == NULL)
-          GD_RETURN_ERROR(D);
-        sprintf(buffer, "%s%c%s", D->name, GD_DIRSEP, D->fragment[i].bname);
-      }
-      if (stat(buffer, &statbuf)) {
-        _GD_SetError(D, GD_E_IO, 0, buffer, 0, NULL);
-        free(buffer);
-        GD_RETURN_ERROR(D);
-      }
-      free(buffer);
-    } else
-      /* stat the file based on it's name and our cached dirfd */
-      if (gd_StatAt(D, D->fragment[i].dirfd, D->fragment[i].bname, &statbuf, 0))
-        GD_SET_RETURN_ERROR(D, GD_E_IO, 0, D->fragment[i].cname, 0, NULL);
+  /* Only update these parts if we're changing them. */
+  if (new_ns)
+    new_len += new_nsl - (offset[1] - offset[0]);
 
-    if (statbuf.st_mtime != D->fragment[i].mtime) {
-      changed = 1;
-      break;
-    }
+  if (new_px)
+    new_len += new_pxl - (offset[4] - offset[3]);
+
+  if (new_sx)
+    new_len += new_sxl - (offset[6] - offset[5]);
+
+  new_code = _GD_Malloc(D, new_len + 1);
+  if (new_code == NULL) {
+    dreturn("%p", NULL);
+    return NULL;
   }
 
-  if (changed && flags & GD_DESYNC_REOPEN) {
-    /* reopening is easy: just delete everything and start again.  In the
-     * non-PATHCHECK case, we also have to cache the dirfd to the root directory
-     */
+  /* Copy the stuff before the fragment local rootspace (AAAA.) */
+  if (offset[0])
+    memcpy(new_code, code, offset[0]);
+  ptr = new_code + offset[0];
 
-    /* remember how we were called */
-    char *name = D->name;
-    gd_parser_callback_t sehandler = D->sehandler;
-    void *extra = D->sehandler_extra;
-    unsigned long int flags = D->open_flags;
-    int dirfd = -1;
-
-    if (!(flags & GD_DESYNC_PATHCHECK)) {
-      dirfd = dup(D->fragment[0].dirfd);
-      if (dirfd == -1)
-        GD_SET_RETURN_ERROR(D, GD_E_IO, GD_E_OPEN, D->name, 0, NULL);
-    }
-
-    D->name = NULL; /* so FreeD doesn't delete it */
-    if (_GD_ShutdownDirfile(D, 0, 1)) {
-      D->name = name;
-      if (dirfd >= 0)
-        close(dirfd);
-      GD_RETURN_ERROR(D);
-    }
-    _GD_Open(D, dirfd, name, flags, sehandler, extra);
-    free(name);
-
-    if (D->error)
-      changed = D->error;
+  if (new_ns && new_ns[0]) {
+    /* Add the new rootspace (including trailing '.') */
+    memcpy(ptr, new_ns, new_nsl);
+    ptr += new_nsl;
+  } else if (new_ns == NULL && offset[1] > offset[0]) {
+    /* Copy the old rootspace (BBBB.) */
+    memcpy(ptr, code + offset[0], offset[1] - offset[0]);
+    ptr = new_code + offset[1];
   }
 
-  dreturn("%i", changed);
-  return changed;
+  /* Copy the subnamespace and parent prefix, if any (CCCC.DDDD) */
+  if (offset[3] > offset[1]) {
+    memcpy(ptr, code + offset[1], offset[3] - offset[1]);
+    ptr += offset[3] - offset[1];
+  }
+
+  if (new_px && new_px[0]) {
+    /* Add the new prefix */
+    memcpy(ptr, new_px, new_pxl);
+    ptr += new_pxl;
+  } else if (new_px == NULL && offset[4] > offset[3]) {
+    /* Copy the old prefix (EEEE) */
+    memcpy(ptr, code + offset[3], offset[4] - offset[3]);
+    ptr += offset[4] - offset[3];
+  }
+
+  /* Copy the field name (which may contain subaffixes).  This is guaranteed
+   * to be present. (GGGG) */
+  memcpy(ptr, code + offset[4], offset[5] - offset[4]);
+  ptr += offset[5] - offset[4];
+
+  if (new_sx && new_sx[0]) {
+    /* Add the new suffix */
+    memcpy(ptr, new_sx, new_sxl);
+    ptr += new_sxl;
+  } else if (new_sx == NULL && offset[6] > offset[5]) {
+    /* Copy the old sx (HHHH) */
+    memcpy(ptr, code + offset[5], offset[6] - offset[5]);
+    ptr += offset[6] - offset[5];
+  }
+
+  /* Copy the trailing garbage (IIII[/KKKK].M) */
+  if (offset[9] > offset[6]) {
+    memcpy(ptr, code + offset[6], offset[9] - offset[6]);
+    ptr += offset[9] - offset[6];
+  }
+  
+  /* And terminate */
+  *ptr = 0;
+
+  /* Now validate and check for duplicate -- metafields don't need to
+   * validate */
+  if (offset[7] == offset[8] && _GD_ValidateField(new_code, 0, D->standards, 1,
+        GD_VF_CODE))
+  {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, new_code);
+  } else if (_GD_FindField(D, new_code, D->entry, D->n_entries, 0, NULL))
+    _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, new_code);
+  else {
+    /* field code okay */
+    dreturn("\"%s\"", new_code);
+    return new_code;
+  }
+
+  /* Checks failed */
+  free(new_code);
+  dreturn("%p", NULL);
+  return NULL;
 }
 
 /* create a list of indices to subfragments, including this one */
-static int _GD_SubFragmentList(DIRFILE *restrict D, int i, int **restrict ilist)
+int _GD_SubFragmentList(DIRFILE *restrict D, int i, int **restrict ilist)
 {
   int *list;
   int j, n = 1;
@@ -403,86 +246,300 @@ static int _GD_SubFragmentList(DIRFILE *restrict D, int i, int **restrict ilist)
   return n;
 }
 
-/* Check a fragment namespace change.  Returns non-zero if the checks fail. */
-static int _GD_CheckChangeNamespace(DIRFILE *D, const char *newns,
-    size_t newnsl, size_t oldnsl, int i, char ***codes)
+/* Update code affixes for a fragment (including subfragments) with the new
+ * values.  nsalloc is 1 if ns has been malloc'd by the caller (in which case
+ * this function will steal it).  Returns D->error.
+ *
+ * When nsalloc is 1, the caller must ensure nsin has a trailing '.' 
+ */
+static int _GD_UpdateAffixes(DIRFILE *D, int index, const char *nsin,
+    int nsalloc, const char *pxin, const char *sxin)
 {
-  int j, ni;
-  unsigned u;
+  int ni, resort = 0;
   int *ilist;
-  char **c = *codes;
-  ssize_t dnsl;
+  size_t u, nsl = 0, pxl = 0, sxl = 0;
+  char *fullns = NULL, *fullpx = NULL;
+  char *ns = NULL, *px = NULL, *sx = NULL;
+  char **codes;
+  const struct gd_fragment_t *P;
+  struct gd_fragment_t *F;
 
-  dtrace("%p, \"%s\", %" PRIuSIZE ", %" PRIuSIZE ", %i, %p", D, newns, newnsl,
-      oldnsl, i, codes);
+  dtrace("%p, %i, \"%s\", %i, \"%s\", \"%s\"", D, index, nsin, nsalloc, pxin,
+      sxin);
 
-  dnsl = newnsl - oldnsl;
-  if (oldnsl == 0)
-    dnsl++; /* Because we need to add the missing '.' in this case */
-  else if (newnsl == 0)
-    dnsl--; /* Because we need to remove the '.' in this case */
+  F = D->fragment + index;
+  P = D->fragment + D->fragment[index].parent;
+
+  /* Forget about things that aren't changing. */
+  if (nsin && F->ns && strcmp(nsin, F->ns + P->nsl) == 0)
+    nsin = NULL;
+
+  if (pxin && F->px && strcmp(pxin, F->px + P->pxl) == 0)
+    pxin = NULL;
+
+  if (sxin) {
+    sxl = strlen(sxin);
+    if (F->sx && sxl == F->sxl && strncmp(sxin, F->sx, F->sxl) == 0)
+      sxin = NULL;
+  }
+
+  /* Nothing to do */
+  if (nsin == NULL && pxin == NULL && sxin == NULL) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* Compose the full namespace (i.e. containing the parent's space).
+   * This will eventually be used to replace the existing F->ns. */
+  if (nsin) {
+    nsl = strlen(nsin);
+
+    if (nsl == 0) {
+      /* nsin is ""; fullns will be P->ns if it exists */
+      if (P->ns)
+        fullns = _GD_Strdup(D, P->ns);
+
+      /* but ns remains the empty string */
+      ns = "";
+      if (nsalloc) {
+        free((char*)nsin); /* Don't need this anymore */
+        nsalloc = 0;
+      }
+    } else if (_GD_ValidateField(nsin, 0, D->standards, 1, GD_VF_NS)) {
+      /* invalid namespace */
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, nsin);
+    } else if (nsalloc && P->nsl == 0) {
+      /* In this case we can just use the caller's string verbatim */
+      fullns = ns = (char*)nsin;
+      nsalloc = 0;
+    } else {
+      size_t len;
+      if (!nsalloc)
+        nsl++; /* space to add the trailing '.' */
+
+      len = P->nsl + nsl;
+      if (P->nsl)
+        len++; /* space for the intervening '.' */
+
+      fullns = _GD_Malloc(D, len + 1);
+      if (fullns) {
+        if (P->ns) {
+          /* We copy from F not P because it already has the
+           * intervening '.' */
+          memcpy(fullns, F->ns, P->nsl + 1);
+          ns = fullns + P->nsl + 1;
+        } else
+          ns = fullns;
+
+        if (nsalloc) {
+          /* We copy the trailing '.' and NUL here */
+          memcpy(ns, nsin, nsl + 1);
+          free((char*)nsin); /* Don't need this anymore */
+          nsalloc = 0;
+        } else {
+          memcpy(ns, nsin, nsl - 1); /* No trailing '.' here */
+          ns[nsl - 1] = '.'; /* So, add it */
+          ns[nsl] = 0; /* And terminate */
+        }
+      }
+    }
+  }
+
+  if (!D->error && pxin) {
+    if (pxin[0] && _GD_ValidateField(pxin, 0, D->standards, 1, GD_VF_AFFIX))
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, pxin);
+    else {
+      pxl = strlen(pxin);
+      fullpx = _GD_Malloc(D, P->pxl + pxl + 1);
+      if (fullpx) {
+        if (P->px)
+          memcpy(fullpx, P->px, P->pxl);
+        px = fullpx + P->pxl;
+        memcpy(px, pxin, pxl + 1); /* includes the terminating NUL */
+      }
+    }
+  }
+
+  if (!D->error && sxin) {
+    /* Although we make the buffer big enough to hold the full suffix, we only
+     * copy the local part for now so we can use it in the _GD_UpdateCode calls.
+     * We'll add P->sx later
+     *
+     * Also note: no fullsx needed here because the local part is at the start
+     */
+    if (sxin[0] && _GD_ValidateField(sxin, 0, D->standards, 1, GD_VF_AFFIX))
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, sxin);
+    else {
+      sx = _GD_Malloc(D, P->sxl + sxl + 1);
+      if (sx)
+        memcpy(sx, sxin, sxl + 1); /* includes the terminating NUL */
+    }
+  }
+
+  /* vaildation failed or alloc errors */
+  if (D->error) {
+    if (nsalloc) /* delete nsin on error, if necessary */
+      free((char*)nsin);
+    free(fullns);
+    free(fullpx);
+    free(sx);
+    GD_RETURN_ERROR(D);
+  }
 
   /* find all affected fragments */
-  ni = _GD_SubFragmentList(D, i, &ilist);
+  ni = _GD_SubFragmentList(D, index, &ilist);
   if (ni == 0) { /* malloc error */
-    free(*codes);
-    dreturn("%i", 1);
-    return 1;
+    free(fullns);
+    free(fullpx);
+    free(sx);
+    GD_RETURN_ERROR(D);
+  }
+
+  /* array of new field codes */
+  codes = _GD_Malloc(D, sizeof(*codes) * D->n_entries);
+  if (codes == NULL) {
+    free(ilist);
+    free(fullns);
+    free(fullpx);
+    free(sx);
+    GD_RETURN_ERROR(D);
   }
 
   /* find all affected entries and generate new field codes */
   for (u = 0; u < D->n_entries; ++u) {
     /* check fragment list */
-    int found = 0;
-    size_t l;
-
-    for (j = 0; j < ni; ++j)
-      if (D->entry[u]->fragment_index == ilist[j]) {
-        found = 1;
-        break;
-      }
-
-    if (!found) {
-      c[u] = NULL;
-      continue;
+    if (!_GD_ContainsFragment(ilist, ni, D->entry[u]->fragment_index)) {
+      codes[u] = NULL; /* skip this one */
+      continue; /* and try the next one */
     }
 
-    /* compose the new name */
-    l = strlen(D->entry[u]->field);
-    c[u] = _GD_Malloc(D, l + dnsl + 1);
-    if (c[u] == NULL)
-      goto CHECKS_FAILED;
+    /* Generate the new code and check it */
+    codes[u] = _GD_UpdateCode(D, index, D->entry[u]->field,
+        D->entry[u]->flags & GD_EN_EARLY, ns, nsl, px, pxl, sx, sxl);
+    if (codes[u] == NULL)
+      break;
+  }
+  free(ilist);
 
-    if (oldnsl == 0)
-      /* Need to add a dot in this case */
-      sprintf(c[u], "%s.%s", newns, D->entry[i]->field); 
-    else if (newnsl == 0)
-      /* Need to delete a dot in this case */
-      strcpy(c[u], D->entry[i]->field + oldnsl + 1);
-    else { /* so much easier than dealing with affixes... */
-      strncpy(c[u], newns, newnsl);
-      strcpy(c[u] + newnsl, D->entry[i]->field + oldnsl);
-    }
-
-    /* Check whether it already exists */
-    if (_GD_FindField(D, c[u], D->entry, D->n_entries, 1, NULL)) {
-      _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, c[u]);
-      goto CHECKS_FAILED;
-    }
+  /* Change attempt failed */
+  if (D->error) {
+    do {
+      free(codes[u]);
+    } while (u--);
+    free(codes);
+    free(fullns);
+    free(fullpx);
+    free(sx);
+    GD_RETURN_ERROR(D);
   }
 
-  free(ilist);
-  dreturn("%i", 0);
-  return 0;
+  /* update the codes */
+  for (u = 0; u < D->n_entries; ++u)
+    if (codes[u]) {
+      free(D->entry[u]->field);
+      D->entry[u]->field = codes[u];
+      resort = 1;
+    }
+  free(codes);
 
-CHECKS_FAILED:
-  do { 
-    free(c[u]);
-  } while (u--);
-  free(c);
-  free(ilist);
-  dreturn("%i", 1);
-  return 1;
+  /* Resort */
+  if (resort)
+    qsort(D->entry, D->n_entries, sizeof(gd_entry_t*), _GD_EntryCmp);
+
+  /* Kill the trailing '.', if it's present */
+  if (nsl)
+    ns[--nsl] = 0;
+
+  /* Finish up the suffix */
+  if (P->sx)
+    memcpy(sx + sxl, P->sx, P->sxl + 1); /* including the trailing NUL */
+
+  /* update the fragment itself, at the end */
+  if (nsin) {
+    free(F->ns);
+    F->ns = fullns;
+    F->nsl = nsl;
+  }
+
+  if (pxin) {
+    free(F->px);
+    F->px = fullpx;
+    F->pxl = pxl;
+  }
+
+  if (sxin) {
+    free(F->sx);
+    F->sx = sx;
+    F->sxl = sxl;
+  }
+  F->modified = 1;
+
+  GD_RETURN_ERROR(D);
+}
+
+int gd_alter_affixes(DIRFILE *D, int index, const char *prefix,
+    const char *suffix) gd_nothrow
+{
+  const char *px;
+  char *ns = NULL;
+  int ret, nsalloc = 1;
+  dtrace("%p, %i, \"%s\", \"%s\"", D, index, prefix, suffix);
+
+  GD_RETURN_ERR_IF_INVALID(D);
+
+  if (index <= 0 || index >= D->n_fragment) 
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, index, NULL);
+
+  /* split off the namespace, if present */
+  if (D->standards >= 10 && prefix) {
+    px = strrchr(prefix, '.');
+    if (px) {
+      px++; /* Advance the prefix pointer past the '.' */
+
+      /* the ns we create includes the trailing '.', except when it's empty */
+      if (px == prefix + 1) {
+        ns = "";
+        nsalloc = 0;
+      } else {
+        ns = _GD_Malloc(D, px - prefix + 1);
+        if (ns == NULL)
+          GD_RETURN_ERROR(D);
+        memcpy(ns, prefix, px - prefix);
+        ns[px - prefix] = 0;
+      }
+    } else
+      px = prefix;
+  } else
+    px = prefix;
+
+  /* UpdateAffixes will free ns */
+  ret = _GD_UpdateAffixes(D, index, ns, nsalloc, px, suffix);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int gd_nfragments(DIRFILE* D) gd_nothrow
+{
+  dtrace("%p", D);
+
+  GD_RETURN_ERR_IF_INVALID(D);
+
+  dreturn("%i", D->n_fragment);
+  return D->n_fragment;
+}
+
+int gd_parent_fragment(DIRFILE* D, int fragment_index) gd_nothrow
+{
+  dtrace("%p, %i", D, fragment_index);
+
+  GD_RETURN_ERR_IF_INVALID(D);
+
+  if (fragment_index <= 0 || fragment_index >= D->n_fragment)
+    GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
+
+  dreturn("%i", D->fragment[fragment_index].parent);
+  return D->fragment[fragment_index].parent;
 }
 
 const char *gd_fragment_namespace(DIRFILE *D, int index, const char *ns)
@@ -493,124 +550,18 @@ const char *gd_fragment_namespace(DIRFILE *D, int index, const char *ns)
 
   GD_RETURN_IF_INVALID(D, "%p", NULL);
 
-  if (index < 0 || index >= D->n_fragment) {
+  /* Modification of the root format file's root namespace is not permitted */
+  if (index < 0 || index >= D->n_fragment || (ns && index == 0)) {
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, index, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  if (ns) {
-    unsigned u;
-    char **codes, *newns, *pns;
-    size_t newnsl, pnsl;
-
-    const char *oldns = D->fragment[index].ns;
-    size_t oldnsl = D->fragment[index].nsl;
-
-    if (index == 0)
-      _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, index, NULL);
-    else if ((D->flags & GD_ACCMODE) == GD_RDONLY)
-      _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    else if (D->fragment[D->fragment[index].parent].protection
-        & GD_PROTECT_FORMAT)
-    {
-      _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
-          D->fragment[D->fragment[index].parent].cname);
-    } else if (_GD_ValidateField(ns, D->standards, 1, GD_VF_NS, NULL))
-      /* invalid namespace */
-      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, ns);
-
-    if (D->error) {
-      dreturn("%p", NULL);
-      return NULL;
-    }
-
-    /* remove spurious leading dot */
-    if (ns[0] == '.')
-      ns++;
-
-    pns = D->fragment[D->fragment[index].parent].ns;
-    pnsl = D->fragment[D->fragment[index].parent].nsl;
-
-    newnsl = strlen(ns);
-
-    if (ns[0] == '\0') {
-      /* Duplicate parent space */
-      newnsl = pnsl;
-      if (pns == NULL) {
-        newns = NULL;
-        newnsl = 0;
-      } else {
-        newns = _GD_Strdup(D, pns);
-        if (newns == NULL) {
-          dreturn("%p", NULL);
-          return NULL;
-        }
-      }
-    } else if (pns) {
-      /* append */
-      newnsl += pnsl + 1;
-      newns = _GD_Malloc(D, newnsl + 1);
-
-      if (newns == NULL) {
-        dreturn("%p", NULL);
-        return NULL;
-      }
-      strcpy(newns, pns);
-      newns[pnsl] = '.';
-      strcpy(newns + pnsl + 1, ns);
-    } else {
-      /* new top-level space */
-      newns = _GD_Strdup(D, ns);
-      if (newns == NULL) {
-        dreturn("%p", NULL);
-        return NULL;
-      }
-    }
-
-    /* strip trailing dot */
-    if (newns && newns[newnsl - 1] == '.')
-      newns[--newnsl] = '\0';
-
-    /* check if it's the same, if so, nothing to do */
-    if ((newns == NULL && oldns == NULL) ||
-        (newns && oldns && strcmp(newns, oldns) == 0))
-    {
-      free(newns);
-      goto NS_UNCHANGED;
-    }
-    
-    /* array of new field codes */
-    codes = _GD_Malloc(D, sizeof(*codes) * D->n_entries);
-    if (codes == NULL) {
-      free(newns);
-      dreturn("%p", NULL);
-      return NULL;
-    }
-
-    /* check whether the rename can be accomplished */
-    if (_GD_CheckChangeNamespace(D, newns, newnsl, oldnsl, index, &codes)) {
-      /* on failure, codes has already been freed */
-      free(newns);
-      dreturn("%p", NULL);
-      return NULL;
-    }
-
-    /* update the codes */
-    for (u = 0; u < D->n_entries; ++u)
-      if (codes[u]) {
-        free(D->entry[u]->field);
-        D->entry[u]->field = codes[u];
-      }
-    free(codes);
-
-    /* update the fragment it self, at the end */
-    free(D->fragment[index].ns);
-    D->fragment[index].ns = newns;
-    D->fragment[index].nsl = newnsl;
+  if (ns && _GD_UpdateAffixes(D, index, ns, 0, NULL, NULL)) {
+    dreturn("%p", NULL);
+    return NULL;
   }
 
-NS_UNCHANGED:
   dreturn("\"%s\"", D->fragment[index].ns ? D->fragment[index].ns : "");
   return  D->fragment[index].ns ? (const char*)D->fragment[index].ns : "";
 }

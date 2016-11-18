@@ -628,7 +628,11 @@ static const char ***_GD_SArrays(DIRFILE* D, const char* parent) gd_nothrow
     return (const char***)zero_list;
   }
 
-  free(*list);
+  if (*list) {
+    for (i = 0; (*list)[i] != NULL; ++i)
+      free((*list)[i]);
+    free(*list);
+  }
   *list = fl;
 
   dreturn("%p", fl);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,19 +20,12 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format_data = "/NAMESPACE ns\nd.ta CONST UINT8 1\n";
-  int fd, e1, e2, r = 0;
+  int fd, e1, v, r = 0;
   DIRFILE *D;
 
   rmdirfile();
@@ -44,7 +37,10 @@ int main(void)
 
   D = gd_open(filedir, GD_RDONLY);
   e1 = gd_error(D);
-  CHECKI(e1,GD_E_FORMAT);
+  CHECKI(e1,0);
+
+  v = gd_validate(D, "ns.d.ta");
+  CHECKI(v,0);
 
   gd_discard(D);
 

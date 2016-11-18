@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -46,14 +46,16 @@ int main(void)
 
   D = gd_open(filedir, GD_RDONLY);
   spf = gd_spf(D, "data");
-  spfaff = gd_spf(D, "ns.ns2.predatapost");
+  CHECKU(spf, 0);
+
+  spfaff = gd_spf(D, "ns2.predatapost");
+  CHECKU(spfaff, 11);
+
   gd_discard(D);
 
   unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  CHECKU(spf, 0);
-  CHECKU(spfaff, 11);
   return r;
 }

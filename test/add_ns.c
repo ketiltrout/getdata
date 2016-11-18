@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2014 D. V. Wiebe
+/* Copyright (C) 2008-2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -33,6 +33,7 @@ int main(void)
   E.fragment_index = 0;
   E.EN(raw,spf) = 2;
   E.EN(raw,data_type) = GD_UINT8;
+  E.scalar[0] = NULL;
 
   rmdirfile();
   D = gd_open(filedir, GD_RDWR | GD_CREAT);

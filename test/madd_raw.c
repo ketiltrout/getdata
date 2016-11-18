@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,40 +20,33 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
-    "/NAMESPACE ns\n"
-    "/NAMESPACE ..\n"
-    "data CONST UINT8 1\n";
-  int fd, e1, e2, r = 0;
+  const char *data = "dirfile/data";
+  int error, r = 0;
   DIRFILE *D;
 
+  gd_entry_t E;
+  memset(&E, 0, sizeof(E));
+  E.field = "data";
+  E.field_type = GD_RAW_ENTRY;
+  E.fragment_index = 0;
+  E.EN(raw,spf) = 2;
+  E.EN(raw,data_type) = GD_UINT8;
+
   rmdirfile();
-  mkdir(filedir, 0777);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT);
+  gd_add(D, &E);
+  gd_madd(D, &E, "data");
+  error = gd_error(D);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  CHECKI(error, GD_E_BAD_ENTRY);
 
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  e1 = gd_error(D);
-  CHECKI(e1,0);
-
-  gd_validate(D, "data");
-  e2 = gd_error(D);
-  CHECKI(e2,0);
   gd_discard(D);
 
+  unlink(data);
   unlink(format);
   rmdir(filedir);
 
