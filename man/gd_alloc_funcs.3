@@ -58,11 +58,11 @@ GetData to deallocate strings returned by any registered parser callback
 function (see
 .BR gd_cbopen (3)).
 
-Internally, GetData may still allocate buffers on a different, and the caller
-should not assume that any other pointer returned by the library were allocated
-with the functions specified by this function.  But nether should the caller
-assume that these functions won't be used by GetData library functions to
-allocate and deallocate temporary buffers.
+Internally, GetData may still allocate buffers on a different heap, and the
+caller should not assume that any other pointer returned by the library were
+allocated with the functions specified by this function.  Nether should the
+caller assume that these functions won't be used by GetData library functions
+to allocate and deallocate temporary buffers.
 
 Changes made to the memory manager are global across GetData.  The caller should
 only call this function when it is certain that no object allocated with the

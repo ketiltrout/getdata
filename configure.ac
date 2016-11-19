@@ -677,7 +677,7 @@ echo
 echo "*** Looking for additional header files"
 echo
 AC_CHECK_HEADERS([asm/unaligned.h Availability.h byteswap.h crtdefs.h direct.h \
-                  fcntl.h float.h inttypes.h io.h libgen.h \
+                  features.h fcntl.h float.h inttypes.h io.h libgen.h \
                   libkern/OSByteOrder.h math.h stddef.h stdint.h sys/endian.h \
                   sys/file.h sys/param.h sys/resource.h sys/stat.h sys/time.h \
                   sys/types.h sys/wait.h unistd.h])

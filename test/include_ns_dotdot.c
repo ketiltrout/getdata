@@ -1,4 +1,4 @@
-/* Copyright (C) 2015, 2016 D. V. Wiebe
+/* Copyright (C) 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,19 +24,25 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int h1, e1, r = 0;
+  const char *format1 = "dirfile/format1";
+  int error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
+  mkdir(filedir, 0777);
 
-  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL);
-  h1 = gd_hide(D, "something");
-  e1 = gd_error(D);
+  MAKEFORMATFILE(format, "#\n");
+  MAKEFORMATFILE(format1, "data RAW UINT8 11\n");
 
-  CHECKI(e1, GD_E_BAD_CODE);
-  CHECKI(h1, GD_E_BAD_CODE);
+  D = gd_open(filedir, GD_RDWR);
+
+  gd_include_ns(D, "format1", 0, "..", 0);
+  error = gd_error(D);
+  CHECKI(error, GD_E_BAD_CODE);
 
   gd_discard(D);
+
+  unlink(format1);
   unlink(format);
   rmdir(filedir);
 

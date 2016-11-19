@@ -213,8 +213,9 @@ FRAGMENT_TESTS=fragment_affix fragment_affix_alter fragment_affix_alter2 \
 							 fragment_ndotdots fragment_ndots fragment_ns fragment_ns0 \
 							 fragment_ns_add fragment_ns_add0 fragment_ns_alter \
 							 fragment_ns_alter_nop fragment_ns_alter_pdel \
-							 fragment_ns_del fragment_num fragment_parent \
-							 fragment_parent_index fragment_parent_root
+							 fragment_ns_del fragment_ns_dot fragment_ns_dotdot \
+							 fragment_ns_dotns fragment_ns_nsdot fragment_num \
+							 fragment_parent fragment_parent_index fragment_parent_root
 
 GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_carray_c2r get_carray_slice get_char get_clincom get_complex128 \
@@ -266,9 +267,9 @@ INCLUDE_TESTS=include_accmode include_affix include_affix_ns include_auto \
 							include_cb include_creat include_ignore include_include \
 							include_index include_invalid include_nonexistent \
 							include_ndotdots include_ndots include_ns include_ns_dot \
-							include_ns_dotns include_ns_nil include_ns_null \
-							include_ns_prefix include_pc include_prot include_ref \
-							include_sub include_syntax
+							include_ns_dotdot include_ns_dotns include_ns_nil \
+							include_ns_null include_ns_prefix include_pc include_prot \
+							include_ref include_sub include_syntax
 
 INDEX_TESTS=index_domain index_index index_range index_s index_subset
 
@@ -301,8 +302,8 @@ MOVE_TESTS=move_affix move_affix_dup move_affix_meta move_affix_updb \
 					 move_alias move_code move_data_enc_ar move_data_enc_ra \
 					 move_data_enc_un move_data_endian move_data_foffs \
 					 move_data_foffs_neg move_data_nop move_data_prot move_entype \
-					 move_index move_meta move_move move_nop move_protect move_rdonly \
-					 move_subdir
+					 move_index move_meta move_move move_nop move_ns move_nsns \
+					 move_protect move_rdonly move_subdir
 
 NAME_TESTS=name_affix name_affix_bad name_alias name_code name_dangle \
 					 name_dot5 name_dot5r name_dot9 name_dot10 name_dup name_index \

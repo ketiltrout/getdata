@@ -48,6 +48,9 @@
 #endif
 
 /* library headers */
+#ifdef HAVE_FEATURES_H
+#include <features.h>
+#endif
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
@@ -523,6 +526,12 @@ char *basename(char *path);
 
 #ifndef offsetof
 #define offsetof(t,m) ((size_t)(((char*)&((t*)0)->m) - (char*)0))
+#endif
+
+/* glibc 2.24 deprecates readdir_r */
+#if defined(__GLIBC__) && (__GLIBC__ > 2 || (__GLIBC__ == 2 \
+      && defined(__GLIBC_MINOR__) && __GLIBC_MINOR__ >= 24))
+#undef HAVE_READDIR_R
 #endif
 
 #ifdef HAVE_READDIR_R
@@ -1380,6 +1389,8 @@ int _GD_MissingFramework(int encoding, unsigned int funcs);
 int _GD_MogrifyFile(DIRFILE *restrict, gd_entry_t *restrict, unsigned long int,
     unsigned long int, off64_t, int, int, char *restrict);
 gd_type_t _GD_NativeType(DIRFILE *restrict, gd_entry_t *restrict, int);
+char *_GD_NormaliseNamespace(DIRFILE *restrict, const char *restrict,
+    size_t *restrict) __attribute_malloc__;
 gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict,
     const struct parser_state *restrict, int, char**,
     const gd_entry_t *restrict, int, int, int, char **, const char *);

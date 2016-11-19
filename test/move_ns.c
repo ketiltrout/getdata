@@ -1,4 +1,4 @@
-/* Copyright (C) 2015, 2016 D. V. Wiebe
+/* Copyright (C) 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,19 +24,24 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int h1, e1, r = 0;
+  const char *format1 = "dirfile/format1";
+  int e1, e2, r = 0;
   DIRFILE *D;
 
   rmdirfile();
+  mkdir(filedir, 0777);
+ 
+  MAKEFORMATFILE(format, "/INCLUDE format1 ns.\ndata RAW UINT8 11\n");
+  MAKEFORMATFILE(format1, "#\n");
 
-  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL);
-  h1 = gd_hide(D, "something");
-  e1 = gd_error(D);
-
-  CHECKI(e1, GD_E_BAD_CODE);
-  CHECKI(h1, GD_E_BAD_CODE);
-
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  e1 = gd_move(D, "data", 1, 0);
+  CHECKI(e1, 0);
+  e2 = gd_validate(D, "ns.data");
+  CHECKI(e2, 0);
   gd_discard(D);
+
+  unlink(format1);
   unlink(format);
   rmdir(filedir);
 

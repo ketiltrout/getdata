@@ -1,4 +1,20 @@
-2016-10-01   D. V. Wiebe <getdata@ketiltrout.net> svn:1110
+2016-11-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1111
+	* src/fragment.c (_GD_UpdateAffixes): Always steal nsin.  Caller must pass
+	nsl and ensure ns has a dot at the end.
+	* src/fragment.c (_GD_NormaliseNamespace): Added.
+	* src/fragment.c (gd_alter_affixes): Handle leading dots correctly.
+	* src/include.c (gd_include_ns) src/fragment.c (gd_fragment_namespace): Call
+	_GD_NormaliseNamespace.
+
+	* configure.ac: Look for features.h.
+	* src/internal.h: Deal with glibc-2.24's deprecation of readdir_r, I
+	suppose.
+
+	* test/fragment_ns_dot.c test/fragment_ns_dotdot.c test/fragment_ns_dotns.c
+	test/fragment_ns_nsdot.c test/include_ns_dotdot.c test/move_ns.c
+	test/move_nsns.c: Added.
+
+2016-11-18   D. V. Wiebe <getdata@ketiltrout.net> svn:1110
 	* src/open.c (gd_desync): Moved from fragment.c.
 	* src/open.c (_GD_Open): Statickify.
 
@@ -459,7 +475,7 @@
 
 	* src/gzip.c (_GD_GzipOpen): Set errno when fdopen fails.
 	* test/bzip_enoent.c test/flac_enoent.c test/gzip_enoent.c
-	test/lzma_enoent.c test/lzma_xz_put_offs.c
+	test/lzma_enoent.c: Added.
 
 	* bindings/python/pydirfile.c (gdpy_dirfile_getentry
 	gdpy_dirfile_getfragment): Remove Py_INCREF call on new object: tp_alloc
@@ -507,7 +523,8 @@
 	data ready.
 	
 	* test/enc_put_offs.c test/bzip_put_offs.c test/flac_put_offs.c
-	test/gzip_put_offs.c test/lzma_xz_offs_clear.c test/lzma_xz_put_offs.c
+	test/gzip_put_offs.c test/lzma_xz_offs_clear.c test/lzma_xz_put_offs.c:
+	Added.
 
 2016-09-17   D. V. Wiebe <getdata@ketiltrout.net> svn:1099
 	* bindings/python/pydirfile.c (gdpy_dirfile_setverboseprefix): Report

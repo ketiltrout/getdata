@@ -247,32 +247,42 @@ int _GD_SubFragmentList(DIRFILE *restrict D, int i, int **restrict ilist)
 }
 
 /* Update code affixes for a fragment (including subfragments) with the new
- * values.  nsalloc is 1 if ns has been malloc'd by the caller (in which case
- * this function will steal it).  Returns D->error.
+ * values.
  *
- * When nsalloc is 1, the caller must ensure nsin has a trailing '.' 
+ * If non-NULL, this function steals nsin: the caller must malloc it.
+ * If it's not empty (or NULL), the caller also must ensure nsin has a
+ * trailing '.'.  Also: the string length in nsl should include this '.' in
+ * it's count, which is not typically how we store namespace lengths in, say,
+ * the gd_fragment_t struct.
+ *
+ * This function frees nsin on error.  It returns D->error.
  */
-static int _GD_UpdateAffixes(DIRFILE *D, int index, const char *nsin,
-    int nsalloc, const char *pxin, const char *sxin)
+static int _GD_UpdateAffixes(DIRFILE *D, int index, char *nsin, size_t nsl,
+    const char *pxin, const char *sxin)
 {
   int ni, resort = 0;
   int *ilist;
-  size_t u, nsl = 0, pxl = 0, sxl = 0;
+  size_t u, pxl = 0, sxl = 0;
   char *fullns = NULL, *fullpx = NULL;
   char *ns = NULL, *px = NULL, *sx = NULL;
   char **codes;
   const struct gd_fragment_t *P;
   struct gd_fragment_t *F;
 
-  dtrace("%p, %i, \"%s\", %i, \"%s\", \"%s\"", D, index, nsin, nsalloc, pxin,
-      sxin);
+  dtrace("%p, %i, \"%s\", %" PRIuSIZE ", \"%s\", \"%s\"", D, index, nsin, nsl,
+      pxin, sxin);
 
   F = D->fragment + index;
-  P = D->fragment + D->fragment[index].parent;
+  P = D->fragment + F->parent;
 
   /* Forget about things that aren't changing. */
-  if (nsin && F->ns && strcmp(nsin, F->ns + P->nsl) == 0)
+  if (nsin && ((nsl == 0 && F->nsl == 0) ||
+      (nsl - 1 == F->nsl && strncmp(nsin, F->ns + P->nsl, F->nsl) == 0)))
+  {
+    nsl = 0;
+    free(nsin);
     nsin = NULL;
+  }
 
   if (pxin && F->px && strcmp(pxin, F->px + P->pxl) == 0)
     pxin = NULL;
@@ -292,8 +302,6 @@ static int _GD_UpdateAffixes(DIRFILE *D, int index, const char *nsin,
   /* Compose the full namespace (i.e. containing the parent's space).
    * This will eventually be used to replace the existing F->ns. */
   if (nsin) {
-    nsl = strlen(nsin);
-
     if (nsl == 0) {
       /* nsin is ""; fullns will be P->ns if it exists */
       if (P->ns)
@@ -301,23 +309,20 @@ static int _GD_UpdateAffixes(DIRFILE *D, int index, const char *nsin,
 
       /* but ns remains the empty string */
       ns = "";
-      if (nsalloc) {
-        free((char*)nsin); /* Don't need this anymore */
-        nsalloc = 0;
-      }
+      free(nsin); /* Don't need this anymore */
     } else if (_GD_ValidateField(nsin, 0, D->standards, 1, GD_VF_NS)) {
       /* invalid namespace */
       _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, nsin);
-    } else if (nsalloc && P->nsl == 0) {
-      /* In this case we can just use the caller's string verbatim */
-      fullns = ns = (char*)nsin;
-      nsalloc = 0;
+      free(nsin);
+    } else if (P->nsl == 0) {
+      /* No P->ns: in this case we can just use the caller's string verbatim */
+      fullns = ns = nsin; /* steal nsin */
     } else {
+      /* Combine P->ns and nsin */
       size_t len;
-      if (!nsalloc)
-        nsl++; /* space to add the trailing '.' */
+      len = P->nsl + nsl; /* If nsl is non-zero, then it also counts the
+                             trailing '.' (i.e. nsl is never 1) */
 
-      len = P->nsl + nsl;
       if (P->nsl)
         len++; /* space for the intervening '.' */
 
@@ -331,19 +336,14 @@ static int _GD_UpdateAffixes(DIRFILE *D, int index, const char *nsin,
         } else
           ns = fullns;
 
-        if (nsalloc) {
-          /* We copy the trailing '.' and NUL here */
-          memcpy(ns, nsin, nsl + 1);
-          free((char*)nsin); /* Don't need this anymore */
-          nsalloc = 0;
-        } else {
-          memcpy(ns, nsin, nsl - 1); /* No trailing '.' here */
-          ns[nsl - 1] = '.'; /* So, add it */
-          ns[nsl] = 0; /* And terminate */
-        }
+        /* We copy the trailing '.' and NUL here */
+        memcpy(ns, nsin, nsl + 1);
+        free(nsin); /* Don't need this anymore */
       }
     }
   }
+
+  /* By this point, nsin has either been stolen or free'd */
 
   if (!D->error && pxin) {
     if (pxin[0] && _GD_ValidateField(pxin, 0, D->standards, 1, GD_VF_AFFIX))
@@ -378,8 +378,6 @@ static int _GD_UpdateAffixes(DIRFILE *D, int index, const char *nsin,
 
   /* vaildation failed or alloc errors */
   if (D->error) {
-    if (nsalloc) /* delete nsin on error, if necessary */
-      free((char*)nsin);
     free(fullns);
     free(fullpx);
     free(sx);
@@ -477,12 +475,70 @@ static int _GD_UpdateAffixes(DIRFILE *D, int index, const char *nsin,
   GD_RETURN_ERROR(D);
 }
 
+/* Removes initial '.' and adds trailing '.'.  Returns a newly malloc'd
+ * buffer and sets *nsl, or NULL on error.  nsin may not be NULL.
+ */
+char *_GD_NormaliseNamespace(DIRFILE *D, const char *nsin, size_t *nsl)
+{
+  char *ns;
+
+  dtrace("%p, \"%s\", %p", D, nsin, nsl);
+
+  if (nsin[0] == '.') {
+    /* we check this here to catch the case where nsin is ".." */
+    if (nsin[1] == '.') {
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, nsin);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+    /* Otherwise, ignore a leading dot */
+    nsin++;
+  }
+
+  if (nsin[0] == '\0') {
+    /* Empty namespace.  It still needs duplication */
+    *nsl = 0;
+    ns = _GD_Malloc(D, 1);
+    if (ns == NULL) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+    ns[0] = 0;
+  } else {
+    *nsl = strlen(nsin);
+
+    /* Add space for a trailing '.', if necessary */
+    if (nsin[*nsl - 1] != '.')
+      (*nsl)++;
+
+    ns = _GD_Malloc(D, *nsl + 1);
+    if (ns == NULL) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    memcpy(ns, nsin, *nsl);
+
+    /* If we incremented nsl before, ns[*nsl - 1] points to the trerminating
+     * NUL we just copied, and we need to replace that with '.' and a new
+     * NUL.  If we didn't increment nsl, then ns[*nsl - 1] is the '.' and we're
+     * unterminated. */
+    if (ns[*nsl - 1] == '\0')
+      ns[*nsl - 1] = '.';
+    ns[*nsl] = 0; /* terminate */
+  }
+
+  dreturn("%p (%" PRIuSIZE ")", ns, *nsl);
+  return ns;
+}
+
 int gd_alter_affixes(DIRFILE *D, int index, const char *prefix,
     const char *suffix) gd_nothrow
 {
   const char *px;
   char *ns = NULL;
-  int ret, nsalloc = 1;
+  size_t nsl = 0;
+  int ret;
   dtrace("%p, %i, \"%s\", \"%s\"", D, index, prefix, suffix);
 
   GD_RETURN_ERR_IF_INVALID(D);
@@ -496,16 +552,22 @@ int gd_alter_affixes(DIRFILE *D, int index, const char *prefix,
     if (px) {
       px++; /* Advance the prefix pointer past the '.' */
 
+      /* Length of the namespace plus trailing dot */
+      nsl = px - prefix;
+
+      /* Allocate the buffer */
+      ns = _GD_Malloc(D, nsl + 1);
+      if (ns == NULL)
+        GD_RETURN_ERROR(D);
+
       /* the ns we create includes the trailing '.', except when it's empty */
-      if (px == prefix + 1) {
-        ns = "";
-        nsalloc = 0;
+      if (nsl == 1) {
+        /* This is the case where prefix is ".prefix"; ie. ns should be "" */
+        ns[0] = 0;
+        nsl = 0;
       } else {
-        ns = _GD_Malloc(D, px - prefix + 1);
-        if (ns == NULL)
-          GD_RETURN_ERROR(D);
-        memcpy(ns, prefix, px - prefix);
-        ns[px - prefix] = 0;
+        memcpy(ns, prefix, nsl);
+        ns[nsl] = 0;
       }
     } else
       px = prefix;
@@ -513,7 +575,7 @@ int gd_alter_affixes(DIRFILE *D, int index, const char *prefix,
     px = prefix;
 
   /* UpdateAffixes will free ns */
-  ret = _GD_UpdateAffixes(D, index, ns, nsalloc, px, suffix);
+  ret = _GD_UpdateAffixes(D, index, ns, nsl, px, suffix);
 
   dreturn("%i", ret);
   return ret;
@@ -542,24 +604,36 @@ int gd_parent_fragment(DIRFILE* D, int fragment_index) gd_nothrow
   return D->fragment[fragment_index].parent;
 }
 
-const char *gd_fragment_namespace(DIRFILE *D, int index, const char *ns)
+const char *gd_fragment_namespace(DIRFILE *D, int index, const char *nsin)
 {
-  dtrace("%p, %i, \"%s\"", D, index, ns);
+  char *ns;
+  size_t nsl;
+
+  dtrace("%p, %i, \"%s\"", D, index, nsin);
 
   _GD_ClearError(D);
 
   GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   /* Modification of the root format file's root namespace is not permitted */
-  if (index < 0 || index >= D->n_fragment || (ns && index == 0)) {
+  if (index < 0 || index >= D->n_fragment || (nsin && index == 0)) {
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, index, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  if (ns && _GD_UpdateAffixes(D, index, ns, 0, NULL, NULL)) {
-    dreturn("%p", NULL);
-    return NULL;
+  if (nsin) {
+    ns = _GD_NormaliseNamespace(D, nsin, &nsl);
+    if (ns == NULL) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    /* _GD_UpdateAffixes steals ns */
+    if (_GD_UpdateAffixes(D, index, ns, nsl, NULL, NULL)) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
   }
 
   dreturn("\"%s\"", D->fragment[index].ns ? D->fragment[index].ns : "");

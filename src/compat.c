@@ -298,7 +298,7 @@ char *basename(char *path)
 }
 #endif
 
-/* emulate readdir_r(3) with non-threadsafe readdir(3) */
+/* emulate readdir_r(3) with readdir(3) */
 #ifndef HAVE_READDIR_R
 int _GD_ReadDir(DIR *dirp, struct dirent *entry, struct dirent **result)
 {

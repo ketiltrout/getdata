@@ -1,6 +1,6 @@
 .\" dirfile-format.5.  The dirfile format specification man page.
 .\"
-.\" Copyright (C) 2005, 2006, 2008, 2009, 2010, 2012, 2013 D. V. Wiebe
+.\" Copyright (C) 2005, 2006, 2008, 2009, 2010, 2012, 2013, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,8 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile\-format 5 "3 April 2013" "Standards Version 9" "DATA FORMATS"
+.hw name-space
+.TH dirfile\-format 5 "19 November 2016" "Standards Version 10" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -39,11 +40,11 @@ The explicit text encoding of these files is not specified by these Standards,
 but it must be 7\-bit ASCII compatible. Examples of acceptable character
 encodings include all the ISO\~8859 character sets
 .RI ( i.e.
-Latin-1 through Latin-10, among others), as well as the UTF-8 encoding of
+Latin\-1 through Latin\-10, among others), as well as the UTF\-8 encoding of
 Unicode and UCS.
 
 This document primarily describes the latest version of the Standards (Version
-9); differences with previous versions are noted where relevant.  A complete
+10); differences with previous versions are noted where relevant.  A complete
 list of changes between versions is given in the
 .B HISTORY
 section below.
@@ -207,8 +208,8 @@ appearing in an /ALIAS directive may itself be an alias).  In this case, the new
 alias is another name for the target's own target.  Just as there is no
 requirement that the input fields of a derived field exist,
 it is not an error for the target of an alias to not exist.  Syntax is:
-.IP
 .RS
+.IP
 .B /ALIAS
 .I <name> <target>
 .RE
@@ -225,8 +226,8 @@ metafield.
 .IP
 A metafield alias may never appear as the parent part of a metafield field code,
 even if it refers to a top-level field.  That is, given the valid format:
-.IP
 .RS
+.IP
 field1 \fBRAW UINT8\fR 1
 .br
 field1/meta \fBCONST FLOAT64\fR 0.0
@@ -393,18 +394,54 @@ binary files associated with
 fields.  Syntax is:
 .RS
 .IP
-.B /INCLUDE \fI<file> \fR[\fI<prefix> \fR[\fI<suffix>\fR]]
+\fB/INCLUDE \fI<file> \fR[\fI<namespace>\fB.\fR][\fI<prefix>\fR]
+[\fI<suffix>\fR]
 .PP
-To specify only a suffix, use the null-token
+To specify only
+.IR suffix ,
+the null-token
 .RB ( """""" )
-as
+may be used as
 .IR prefix .
+.PP
+A
+.I namespace
+may also be specified in an /INCLUDE directive by prepending it to
+.IR prefix .
+The namespace and prefix are separated by a dot
+.RB ( . ).
+The dot is required whenever a namespace is specified: if the prefix is empty,
+the third token should be just the namespace followed by a trailing dot.  If a
+namespace is specified, that namespace, relative to the including fragment's
+root namespace, becomes the root namespace of the included fragment.  If no
+namespace is specified in the /INCLUDE directive, then the current namespace
+(specified by a previous /NAMESPACE directive) is used as the root namespace
+of the included fragment.  That is, if the current namespace is
+.IR current_space ,
+then the statement:
+.IP
+.B /INCLUDE \fIfile newspace\fB.
+.PP
+is equivalent to
+.IP
+.B /NAMESPACE \fInewspace
+.br
+.B /INCLUDE \fIfile
+.br
+.B /NAMESPACE \fIcurrent_space
+.PP
+As a result, if no namespace is provided, and there
+has been no previous /NAMESPACE directive, the included fragment will have the
+same root namespace as the including fragment.
+
 The /INCLUDE directive has no scope: it is processed immediately.  It appeared
 in Standards Version 3.  The optional
 .I prefix
 and
 .I suffix
-appeared in Standards Version 9.
+appeared in Standards Version 9.  The optional
+.I namespace
+appeared in Standards Version 10.
 .RE
 .TP
 .B /META
@@ -458,6 +495,43 @@ pfield/meta
 .PP
 The /META directive has no scope: it is processed immediately.  It appeared in
 Standards Version 6.
+.RE
+.TP
+.B /NAMESPACE
+The /NAMESPACE directive changes the
+.IR "current namespace" for subsequent field specification lines.
+Syntax is:
+.RS
+.IP
+.BI /NAMESPACE\~ <subspace>
+.PP
+The
+.I subspace
+specified is relative to the current fragment's root namespace.  If
+.I subspace
+is the null-token
+.RB ( """""" )
+the current namespace will be set back to the root namespace.  Otherwise, the
+current namespace will be changed to the concatenation of the root namespace
+with subspace, with the two parts separated by a dot:
+.IP
+.IB rootspace . subspace
+.PP
+If
+.I rootspace
+is empty, the intervening dot is omitted, and the current namespace is simply
+.IR subspace .
+.PP
+By default, all field codes, both field names for newly specified fields, and
+field codes used as inputs to fields or targets for aliases, are placed in the
+current namespace, unless they start with an initial dot, in which case the
+current namespace is ignored, and they're placed instead in the
+fragment's root namespace.  See the
+.B Namespaces
+section for further details.
+.PP
+The /NAMESPACE directive has no scope: it is processed immediately.  It appeared
+in Standards Version 10.
 .RE
 .TP
 .B /PROTECT
@@ -552,8 +626,9 @@ Subsequent tokens are field parameters.  The meaning and number these parameters
 depends on the field type specified.
 
 .SS Field Names
-The first token in a field
-specification line is the field name.  The field name consists of one or more
+The first token in a field specification line is the
+.IR "field name" .
+The field name consists of one or more
 characters, excluding both ASCII control characters (the bytes 0x01 through
 0x1F), and the characters
 .IP
@@ -562,10 +637,10 @@ characters, excluding both ASCII control characters (the bytes 0x01 through
 which are reserved (but see below for the use of
 .B /
 to specify metafields).
-The full stop
+The dot
 .RB ( . )
-is allowed in Standards Version 5 and earlier.  The ampersand, semicolon, less
-than, greater than, and vertical line
+is allowed in Standards Version 5 and earlier.  The ampersand, semicolon,
+less-than sign, greater-than sign, and vertical line
 .RB ( "& ; < > |" )
 are allowed in Standards Version 4 and earlier.  Furthermore, due to the lack
 of an escape or quoting mechanism (see 
@@ -590,28 +665,141 @@ and acceptable characters of a
 field name, regardless of Standards Version. 
 
 Starting in Standards Version 7, if the field name beginning a field
-specification line contains exactly one
-.B /
-character, the line is assumed to specify a metafield.  See the
+specification line contains exactly one forward slash character
+.RB ( / ),
+the line is assumed to specify a metafield.  See the
 .B /META
 directive above for further details.  A field name may not contain more than one
-.BR / .
+forward slash.
+
+Starting in Standards Version 10, any field name may be preceded by a
+.IR "namespace tag" .
+The namespace tag and the field name are separated by a dot
+.RB ( . ).
+See the
+.B Namespaces
+section, following, for details.
+
+.SS Namespaces
+Beginning with Standards Version 10, every field in a Dirfile is contained in a
+namespace.  Every namespace is identified by a
+.I namespace tag
+which consist of the same restricted set of characters used for field names.
+Namespaces nest arbitrarily deep.  Subnamespaces are identified by concatenating
+all namespace tags, separating tags by dots
+.RB ( . ),
+with the outermost namespace leftmost:
+.RS
+.IP
+.IB topspace . subspace . subsubspace
+.RE
+.PP
+Each fragment has an immutable
+.IR "root namespace".
+The root namespace of the primary format file is the null namespace, identified
+by the null-token
+.RB ( """""" ).
+The root namespace of other fragments is specified when they are introduced
+(see the /INCLUDE directive).  Each fragment also has a
+.I current namespace
+which may be changed as often as needed using the /NAMESPACE directive, and
+defaults to the root namespace.  The current namespace is always either the root
+namespace or else a subspace under the root namespace.
+
+If a field name or field code starts with a leading dot, then that name or code
+is taken to be relative to the fragment's root space.  If it does not start with
+a dot, it is taken to be relative to the current namespace.
+
+For example, if the both the root namespace and current namespace of a fragment
+start off as
+.IR rootspace ,
+then:
+.IP
+.IB aaaa\~ "RAW UINT8 1"
+.br
+.BI . bbbb\~ "RAW UINT8 1"
+.br
+.IB cccc . dddd\~ "RAW UINT8 1"
+.br
+.BI . eeee . ffff\~ "RAW UINT8 1"
+.br
+.BI /NAMESPACE\~ newspace
+.br
+.IB gggg\~ "RAW UINT8 1"
+.br
+.BI . hhhh\~ "RAW UINT8 1"
+.br
+.IB iiii . jjjj\~ "RAW UINT8 1"
+.br
+.BI . kkkk . llll\~ "RAW UINT8 1"
+.PP
+specifies the fields:
+.IP
+.IB rootspace . aaaa\fR,
+.br
+.IB rootspace . bbbb\fR,
+.br
+.IB rootspace . cccc . dddd\fR,
+.br
+.IB rootspace . eeee . ffff\fR,
+.br
+.IB rootspace . newspace . gggg\fR,
+.br
+.IB rootspace . hhhh\fR,
+.br
+.IB rootspace . newspace . iiii . jjjj\fR,
+and
+.br
+.IB rootspace . kkkk . llll\fR.
+.PP
+Note that a field may specify deepr subspaces under either the root namespace or
+the current namespace (meaning it is never necessary to use the /NAMESPACE
+directive). Note also that there is no way for metadata in a given fragment to
+refer to fields outside the fragment's root space.
+
+There is one exception to this namespace scoping rule: the implicit
+.I INDEX
+vector is always in the null (top-level) namespace, and namespace tags specified
+with it, either explicitly or implicitly, even a fragment root namespace, are
+ignored.  So, in a fragment with root namespace
+.IR rootspace ,
+and current namespace
+.IR rootspace\fB.\fIsubspace ,
+.IP
+.IR INDEX ,
+.br
+.BI . INDEX\fR,
+.br
+.IB namespace . INDEX\fR,
+and
+.br
+.BI . namespace . INDEX\fR,
+.PP
+all refer to the same
+.I INDEX
+field.
 
 .SS Field Types
-There are fifteen field types.  Of these, twelve are of vector type
-.RB ( BIT ", " DIVIDE ", " LINCOM ", " LINTERP ", " MPLEX ", " MULTIPLY ,
-.BR PHASE ", " POLYNOM ", " RAW ", " RECIP ", " SBIT ", and " WINDOW )
-and three are of scalar type
-.RB ( CONST ", " CARRAY ", and " STRING ).
-The eleven vector field types other than
+There are eighteen field types.  Of these, fourteen are of vector type
+.RB ( BIT ", " DIVIDE ", " INDIR ", " LINCOM ", " LINTERP ", " MPLEX ,
+.BR MULTIPLY ", " PHASE ", " POLYNOM ", " RAW ", " RECIP ", " SBIT ,
+.BR SINDIR ", and " WINDOW )
+and four are of scalar type
+.RB ( CARRAY ", " CONST ", " SARRAY ", and " STRING ).
+The thirteen vector field types other than
 .B RAW
 fields are also called
 .IR "derived fields" ,
-since they derive their value from one or more input fields.
+since they derive their value from one or more input vector fields.  Any other 
+vector field may be used as an input vector, including the implicit
+.I INDEX
+field, but excluding
+.B SINDIR
+string vectors.
 .PP
 Five of these derived fields
 .RB ( DIVIDE ", " LINCOM ", " MPLEX ", " MULTIPLY ", and " WINDOW )
-may have more than one input field.  In situations where these input fields
+have more than one vector input field.  In situations where these input fields
 have differing sample rates, the sample rate of the derived field is the same
 as the sample rate of the first (left-most) input field specified.  Furthermore,
 the input fields are synchronised by aligning them on frame boundaries, assuming
@@ -657,18 +845,20 @@ field as an unsigned number.  Syntax is:
 .PP
 which specifies
 .I fieldname
-to be the value of bits
-.I first-bit
-through
-.IR first-bit + num-bits -1
-of the input vector field
-.IR input ,
-when
-.I input
-is converted from its native type to an (endianness corrected) unsigned 64-bit
-integer.  If
+to be
 .I num-bits
-is omitted, it is assumed to be 1.  The
+bits extracted from the input vector field
+.I input
+starting with bit number
+.I first-bit
+(counting from the least-significant bit, which is numbered zero), after
+.I input
+has been converted from its native type to an (endianness corrected) unsigned
+64-bit integer.  If
+.I num-bits
+is omitted, it is assumed to be one.
+
+The extracted bits are interpreted as an unsigned integer; the
 .B SBIT
 field type is a signed version of this field type.  The optional
 .I num-bits
@@ -682,7 +872,7 @@ format specification metadata.  Syntax is:
 .IP
 .I <fieldname>
 .B CARRAY
-.I <type> <value0> <value1> <value2> ...
+.I <type> <value0> <value1> <value2> \fR...
 .PP
 where
 .I type
@@ -698,7 +888,7 @@ No limit is placed on the number of elements in a
 (Note: despite being multivalued, this is not considered a vector field since
 the elements of the
 .B CARRAY
-are not indexed by frames.)  It appeared in Standards Version 8.
+are not indexed by frames.)  CARRAY appeared in Standards Version 8.
 .RE
 .TP
 .B CONST
@@ -718,7 +908,7 @@ field type below), and
 .I value
 is the numerical value of the constant interpreted as indicated by
 .IR type .
-It appeared in Standards Version 6.
+CONST appeared in Standards Version 6.
 .RE
 .TP
 .B DIVIDE
@@ -734,6 +924,39 @@ The derived field is computed as:
 fieldname = field1 / field2.
 .PP
 It was introduced in Standards Version 8.
+.RE
+.TP
+.B INDIR
+The INDIR vector field type performs an indirect translation of a CARRAY scalar
+field to a derived vector field based on a vector index field.  Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B INDIR
+.I <index> <array>
+.PP
+where
+.I index
+is the vector field, which is converted to an integer type, if necessary, and
+.I array
+is the CARRAY field.  The
+.IR n th
+sample of the INDIR field is the value of the
+.IR m th
+element of
+.IR array
+(counting from zero), where
+.I m
+is the value of the
+.IR n th
+sample of
+.IR index .
+When
+.I index
+is not a valid element number of
+.IR array ,
+the corresponding value of the INDIR is implementation dependent.  INDIR
+appeared in Standards Version 10.
 .RE
 .TP
 .B LINCOM
@@ -887,7 +1110,7 @@ The derived field is computed as:
 .IP
 fieldname = field1 * field2.
 .PP
-It appeared in Standards Version 2.
+MULTIPLY appeared in Standards Version 2.
 .RE
 .TP
 .B PHASE
@@ -953,32 +1176,32 @@ where
 .I sample-rate
 is the number of samples per dirfile frame for the time stream and
 .I type
-is a token specifying the native data format type:
+is a token specifying the native data type:
 .RS
 .TP
 .I UINT8
 unsigned 8-bit integer
 .TP
 .I INT8
-signed (two's complement) 8-bit integer
+two's complement signed 8-bit integer
 .TP
 .I UINT16
 unsigned 16-bit integer
 .TP
 .I INT16
-signed (two's complement) 16-bit integer
+two's complement signed 16-bit integer
 .TP
 .I UINT32
 unsigned 32-bit integer
 .TP
 .I INT32
-signed (two's complement) 32-bit integer
+two's complement signed 32-bit integer
 .TP
 .I UINT64
 unsigned 64-bit integer
 .TP
 .I INT64
-signed (two's complement) 64-bit integer
+two's complement signed 64-bit integer
 .TP
 .I FLOAT32
 IEEE-754 standard 32-bit single precision floating point number
@@ -1067,30 +1290,92 @@ RECIP appeared in Standards Version 8.
 .TP
 .B SBIT
 The SBIT vector field type extracts one or more bits out of an input vector
-field as a signed number.  Syntax is:
+field as a (two's-complement) signed number.  Syntax is:
 .RS
 .IP
 .I <fieldname>
 .B SBIT
-.I <input> <first-bit> \fR[\fI<bits>\fR]
+.I <input> <first-bit> \fR[\fI<num-bits>\fR]
 .PP
 which specifies
 .I fieldname
-to be the value of bits
-.I first-bit
-through
-.IR first-bit + bits -1
-of the input vector field
-.IR input ,
-when
+to be
+.I num-bits
+bits extracted from the input vector field
 .I input
-is converted from its native type to a (endianness corrected) signed 64-bit
-integer.  If
-.I bits
-is omitted, it is assumed to be 1.  The
+starting with bit number
+.I first-bit
+(counting from the least-significant bit, which is numbered zero), after
+.I input
+has been converted from its native type to an (endianness corrected) two's
+complement signed 64-bit integer.  If
+.I num-bits
+is omitted, it is assumed to be one.
+
+The extracted bits are interpreted as a two's complement signed integer of the
+specified width. (So,
+if
+.I num-bits
+is, for example, one, then the field can take on the value zero or negative
+one.)  The
 .B BIT
 field type is an unsigned version of this field type.  SBIT appeared in
 Standards Version 7.
+.RE
+.TP
+.B SARRAY
+The SARRAY scalar field type is a list of strings fully specified in the format
+file metadata.  Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B SARRAY
+.I <string0> <string1> <string2> \fR...
+.PP
+Each
+.I string
+is a single token.  To include whitespace in a string, enclose it in quotation
+marks
+.RB ( """" ),
+or else escape the whitespace with the backslash character
+.RB ( \e ).
+No limit is placed on the number of elements in a 
+.BR SARRAY .
+SARRAY appeared in Standards Version 10.
+.RE
+.TP
+.B SINDIR
+The SINDIR vector field type performs an indirect translation of a SARRAY
+scalar field to a derived vector field of strings based on a vector index field.
+Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B SINDIR
+.I <index> <array>
+.PP
+where
+.I index
+is the vector field, which is converted to an integer type, if necessary, and
+.I array
+is the SARRAY field.  The
+.IR n th
+sample of the SINDIR field is the string value of the
+.IR m th
+element of
+.IR array
+(counting from zero), where
+.I m
+is the value of the
+.IR n th
+sample of
+.IR index .
+When
+.I index
+is not a valid element number of
+.IR array ,
+the corresponding value of the SINDIR is implementation dependent.  SINDIR
+appeared in Standards Version 10.
 .RE
 .TP
 .B STRING
@@ -1100,14 +1385,14 @@ file metadata.  Syntax is:
 .IP
 .I <fieldname>
 .B STRING
-.I <value>
+.I <string>
 .PP
 where
-.I value
+.I string
 is the string value of the field.  Note that
-.I value
+.I string
 is a single token.  To include whitespace in the string, enclose
-.I value
+.I string
 in quotation marks
 .RB ( """" ),
 or else escape the whitespace with the backslash character
@@ -1357,16 +1642,38 @@ vector field,
 .I field codes
 are used.  A
 .I field code
-is one of:
+consists of, in order:
+.IP \(bu 4
+(since Standards Version 10:) optonally, a leading dot
+.RB ( . ),
+indicating this field code is relative to the fragment's root namespace.
+Without the leading dot, the field code is taken to be relative to the current
+namespace.  (See the discussion in the 
+.B Namespaces
+section above for details.)
+.IP \(bu 4
+(since Standards Version 10:) optionally, a non-null
+.I subnamespace
+followed by a dot
+.RB ( . )
+indicating a subspace under the current or root namespace.  The subnamespace may
+be made up of any number of namespace tags separated by dots, to nest deeper in
+the namespace tree.
+.IP \(bu 4
+(since Standards Version 6:) if the field in question is a metafield
+(see the
+.B /META
+directive above), the field name of the metafield's parent (which may be an
+alias) followed by a forward slash
+.RB ( / );
+supported since Standards Version 6,
+
 .IP \(bu 4
 a simple field name, possibly an alias, indicating a vector or scalar field
 .IP \(bu 4
-a parent field name, followed by a forward slash, followed by a metafield name,
-indicating a metafield.  See the description of the
-.B /META
-directive above for further details. 
-.IP \(bu 4
-either of the above, followed by a period, followed by a
+(since Standards Version 7:) optionally, a dot
+.RB ( . )
+followed by a
 .IR "representation suffix" ,
 but only if the field or metafield specified is not a
 .B STRING
@@ -1375,53 +1682,77 @@ type field.
 A 
 .IR "representation suffix"
 may be used used to extract a real number from a complex value.  The available
-suffixes and their meanings are:
+suffixes (listed here with their preceding dot) and their meanings are:
 .TP
 .B .a
-This representation indicates the angle (in radians) between the positive real
-axis and the value (ie. the complex argument).  The argument is in the range
-[-pi, pi], and a branch cut exists along the negative real axis.  At the branch
-cut, -pi is returned if the imaginary part is -0, and pi is returned if the
-imaginary part is +0.  If
-.IR z =0,
-zero is returned.
+the argument of the input, that is, the angle (in radians) between the positive
+real axis and the input.  The argument is in the range [-pi, pi], and a branch
+cut exists along the negative real axis.  At the branch cut, -pi is returned if
+the imaginary part is -0, and pi is returned if the imaginary part is +0.  If
+the input is zero, zero is returned.
 .TP
 .B .i
-This representation indicates the projection of the value onto the imaginary
-axis (ie. the imaginary part of the number).
+the projection of the input onto the imaginary axis (ie. the imaginary part of
+the input).
 .TP
 .B .m
-This representation indicates the modulus of the value (ie. its absolute
-value).
+the modulus of the input (ie. its absolute value).
 .TP 
 .B .r
-This representation indicates the projection of the value onto the real axis
-(ie.  the real part of the number).
-.PP
-If the specified field is purely real, the representations are calculated as
-if the imaginary part was equal to +0.  For example, given a complex valued
-vector,
-.IR z ,
-a vector containing the real part of
-.IR z ", "  re_z ,
-could be produced with:
+the projection of the input onto the real axis (ie. the real part of the input).
+.TP
+.B .z
+(since Standards Version 10:) the identity representation: it returns the full
+complex value, equivalent to simply omitting the suffix completely.  It is only
+needed in certain cases to force the correct interpretation of a field code in
+the presence of a namespace tag.  To wit, the field code
+.RS
 .IP
-.I re_z
-.B PHASE
-.I z.r
-0
+name.r
 .PP
-and similarly for the complex field's imaginary part, argument, and absolute
-value.  (Although it should be pointed out this simplistic an example isn't
-strictly necessary, since
-.I z.r
-could be used wherever
-.I re_z
-would be.)
+is always interpreted as the real-part (via the
+.B .r
+representation suffix)
+of the field called
+.IR name .
+To refer to a field called
+.I r
+in the
+.I name
+namespace, the field code must be written:
+.IP
+name.r.z
+.PP
+NB: The first interpretation only occurs with valid representation suffixes; the
+field code:
+.IP
+name.q
+.PP
+is interpreted as the field
+.I q
+in the
+.I name
+namespace because
+.B .q
+is not a valid representation suffix.
+.RE
+.PP
+If the specified field is purely real, representations are calculated as
+if the imaginary part were equal to +0.
 
 .SH HISTORY
 
-This document describes Versions 9 and earlier of the Dirfile Standards.
+This document describes Versions 10 and earlier of the Dirfile Standards.
+
+Version 10 of the Standards (November 2016) added the
+.BR INDIR ", " SARRAY ,
+and
+.B SINDIR
+field types, namespaces, the
+.B /NAMESPACE
+directive, and the
+.I .z
+representation suffix.
 
 Version 9 of the Standards (April 2012) added the
 .B MPLEX

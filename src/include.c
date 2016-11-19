@@ -529,25 +529,20 @@ int gd_include_ns(DIRFILE *D, const char *file, int fragment_index,
 {
   int new_fragment;
   size_t len = 0;
-  char *ns;
+  char *ns = NULL;
 
   dtrace("%p, \"%s\", %i, \"%s\", 0x%lX", D, file, fragment_index, nsin, flags);
 
-  if (nsin && nsin[0] && nsin[(len = strlen(nsin)) - 1] != '.') {
-    ns = _GD_Malloc(D, len + 2);
-    if (D->error)
+  if (nsin) {
+    ns = _GD_NormaliseNamespace(D, nsin, &len);
+    if (ns == NULL)
       GD_RETURN_ERROR(D);
-
-    memcpy(ns, nsin, len);
-    ns[len] = '.';
-    ns[len + 1] = 0;
-  } else
-    ns = (char*)nsin;
+  } 
 
   new_fragment = _GD_IncludeAffix(D, "gd_include_ns()", file, fragment_index,
       ns, NULL, flags);
 
-  if (ns != nsin)
+  if (ns)
     free(ns);
 
   dreturn("%i", new_fragment);

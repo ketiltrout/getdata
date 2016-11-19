@@ -113,6 +113,15 @@ int gd_system(const char* command)
 
 #define strcmpn(n,v) (((n) == NULL) ? 1 : strcmp((n),(v)))
 
+/* Write string literal t to format file f. */
+#define MAKEFORMATFILE(f,t) \
+  do { \
+    int fd = open(f, O_CREAT | O_EXCL | O_WRONLY, 0666); \
+    if (fd < 0) { perror("open"); exit(1); } \
+    if (write(fd, t, -1 + sizeof t) < 0) { perror("write"); exit(1); } \
+    if (close(fd)) { perror("close"); exit(1); } \
+  } while (0)
+
 #ifdef GD_NO_C99_API
 #define CHECKC(n,v)    CHECK(sqrt(((n)[0]-(v)[0])*((n)[0]-(v)[0]) + \
       (((n)[1]-(v)[1])*((n)[1]-(v)[1])))>1e-10,n,"%.15g;%.15g","%.15g;%.15g",\
