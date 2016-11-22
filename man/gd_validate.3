@@ -39,14 +39,13 @@ argument must point to a valid DIRFILE object previously created by a call to
 .BR gd_open (3).
 
 This function checks whether the field and its input fields (if any) are found,
-whether the representation suffix (if any) is valid, and also that all
-non-literal parameters specify valid scalar fields.
+and also that all non-literal parameters specify valid scalar fields.
 
 .SH RETURN VALUE
 If all checks pass,
 .BR gd_validate ()
-returns zero.  On error, it returns -1 and sets the dirfile error to a non-zero
-error value.  Possible error values are:
+returns zero.  On error, it returns a negative-valued error code.  Possible
+error codes are:
 .TP 8
 .B GD_E_BAD_CODE
 The field specified by
@@ -67,10 +66,11 @@ field.
 .B GD_E_DIMENSION
 A scalar field was found where a vector field was expected.
 .PP
-The dirfile error may be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH NOTES
 It is not necessary to call this function before passing a field code to another

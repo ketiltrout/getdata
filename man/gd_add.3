@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add 3 "21 November 2016" "Version 0.10.0" "GETDATA"
+.TH gd_add 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_add, gd_madd \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -108,8 +108,8 @@ On success,
 .BR gd_add ()
 and
 .BR gd_madd ()
-return zero.   On error, a negative-valued error value is returned.  Possible
-error values are:
+return zero.   On error, a negative-valued error code is returned.  Possible
+error codes are:
 .TP 8
 .B GD_E_ACCMODE
 The specified dirfile was opened read-only.
@@ -187,10 +187,11 @@ support creating an empty binary file to be associated with a newly added
 .B RAW
 field.
 .PP
-The dirfile error may also be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 
 .SH SEE ALSO

@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_bof 3 "21 November 2016" "0.10.0" "GETDATA"
+.TH gd_bof 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_bof \(em report the start of data in a field
 .SH SYNOPSIS
@@ -63,12 +63,10 @@ argument must point to a valid DIRFILE object previously created by a call to
 .SH RETURN VALUE
 Upon successful completion,
 .BR gd_bof ()
-returns the sample number of the end-of-field marker for the indicated field.
-On error, it returns a negative-valued error value.  Possible error values are:
+returns a non-negative integer indicating the sample number of the end-of-field
+marker for the indicated field.  On error, it returns a negative-valued error
+code.  Possible error codes are:
 .TP 8
-.B GD_E_ALLOC
-The library was unable to allocate memory.
-.TP
 .B GD_E_BAD_CODE
 The field specified by
 .I field_code
@@ -96,10 +94,11 @@ Too many levels of recursion were encountered while trying to resolve
 This usually indicates a circular dependency in field specification in the
 dirfile.
 .PP
-The dirfile error may also be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),

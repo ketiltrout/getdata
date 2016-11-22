@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_fragment_index 3 "21 November 2016" "0.10.0" "GETDATA"
+.TH gd_fragment_index 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_fragment_index \(em retrieve the fragment containing a dirfile field
 .SH SYNOPSIS
@@ -46,9 +46,6 @@ returns the requested fragment index, which is never negative.  On error,
 .BR gd_fragment_index ()
 returns a negative-valued error code.  Possible error codes are:
 .TP 8
-.B GD_E_ALLOC
-The library was unable to allocate memory.
-.TP
 .B GD_E_BAD_CODE
 The entry specified by
 .I entry_name

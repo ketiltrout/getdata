@@ -1,3 +1,14 @@
+2016-11-22   D. V. Wiebe <getdata@ketiltrout.net> svn:1115
+	* src/common.c (_GD_GetRepr): Add len parameter.  Don't malloc, just
+	decrement *len twice if matched.  Don't set errors.  Remove D and field_code
+	parameters.
+	* src/common.c (_GD_FindFieldAndRepr): Remove field_code and set parameters.
+
+	* src/constant.c (gd_array_len): Call _GD_FindEntry instead of
+	_GD_FindFieldAndRepr.
+
+	* src/entry.c (gd_aliases): Don't call gd_naliases.  Resize as necessary.
+
 2016-11-22   D. V. Wiebe <getdata@ketiltrout.net> svn:1112
 	* bindings/perl/src/GetData.xs: Fix a few EXTEND() calls.
 

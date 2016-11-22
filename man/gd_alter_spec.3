@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_spec 3 "21 November 2016" "0.10.0" "GETDATA"
+.TH gd_alter_spec 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_alter_spec, gd_malter_spec \(em modify a field in a dirfile
 .SH SYNOPSIS
@@ -88,8 +88,8 @@ On success,
 .BR gd_alter_spec ()
 and
 .BR gd_malter_spec ()
-return zero.   On error, a negative-valued error value is returned.  Possible
-error values are:
+return zero.  On error, it returns a negative-valued error code.  Possible error
+codes are:
 .TP 8
 .B GD_E_ACCMODE
 The specified dirfile was opened read-only.
@@ -148,10 +148,11 @@ support translating the empty binary file associated with a modified
 .B RAW
 field.
 .PP
-The dirfile error may also be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR gd_alter_bit (3),

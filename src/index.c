@@ -204,22 +204,20 @@ static double _GD_GetIndex(DIRFILE* D, gd_entry_t *E, int repr, double value,
   return sample;
 }
 
-double gd_framenum_subset64(DIRFILE* D, const char* field_code_in,
-    double value, off64_t field_start, off64_t field_end)
+double gd_framenum_subset64(DIRFILE* D, const char* field_code, double value,
+    off64_t field_start, off64_t field_end)
 {
   double frame = NAN;
   gd_entry_t* entry;
-  char* field_code;
   int repr = GD_REPR_NONE;
   unsigned int spf;
 
-  dtrace("%p, \"%s\", %g, %" PRId64 ", %" PRId64, D, field_code_in, value,
+  dtrace("%p, \"%s\", %g, %" PRId64 ", %" PRId64, D, field_code, value,
       (int64_t)field_start, (int64_t)field_end);
 
   GD_RETURN_IF_INVALID(D, "%.15g", frame);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
-      1);
+  entry = _GD_FindFieldAndRepr(D, field_code, &repr, NULL, 1);
 
   if (D->error) {
     dreturn("%.15g", frame);
@@ -230,9 +228,6 @@ double gd_framenum_subset64(DIRFILE* D, const char* field_code_in,
     _GD_SetError(D, GD_E_DOMAIN, GD_E_DOMAIN_COMPLEX, NULL, 0, NULL);
   else if (entry->field_type & GD_SCALAR_ENTRY_BIT)
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   if (D->error) {
     dreturn("%.15g", frame);

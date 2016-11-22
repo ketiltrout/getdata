@@ -1350,7 +1350,7 @@ gd_entry_t *_GD_FindEntry(DIRFILE *restrict, const char *restrict);
 gd_entry_t *_GD_FindField(const DIRFILE *restrict, const char *restrict,
     size_t, gd_entry_t *const *, unsigned int, int, unsigned int *restrict);
 gd_entry_t *_GD_FindFieldAndRepr(DIRFILE *restrict, const char *restrict,
-    char **restrict, int *restrict, unsigned int *restrict, int, int);
+    int *restrict, unsigned int *restrict, int);
 uint64_t _GD_FindVersion(DIRFILE *D);
 void _GD_FixEndianness(void*, size_t, gd_type_t, unsigned, unsigned);
 int _GD_FileSwapBytes(const DIRFILE *restrict, const gd_entry_t *restrict);
@@ -1363,8 +1363,7 @@ off64_t _GD_GetEOF(DIRFILE *restrict, const gd_entry_t *restrict,
     const char *restrict, int *restrict);
 off64_t _GD_GetIOPos(DIRFILE *restrict, gd_entry_t *restrict, off64_t);
 char *_GD_GetLine(FILE *restrict, size_t *restrict, int *restrict);
-int _GD_GetRepr(DIRFILE *restrict, const char *restrict,
-    char **restrict, int);
+int _GD_GetRepr(const char *restrict, size_t *restrict);
 int _GD_GetScalar(DIRFILE *restrict, const char *restrict, int*, gd_type_t,
    void *restrict, gd_entry_t*);
 unsigned int _GD_GetSPF(DIRFILE*, gd_entry_t*);

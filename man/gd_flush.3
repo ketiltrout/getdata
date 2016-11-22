@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_flush 3 "21 November 2016" "0.10.0" "GETDATA"
+.TH gd_flush 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_flush gd_raw_close gd_sync \(em write all pending dirfile changes to disk or
 close open raw fields
@@ -73,7 +73,7 @@ calls.
 
 .SH RETURN VALUE
 On success, these functions return zero.   On error, a negative-valued error
-value is returned.  Possible error values are:
+code is returned.  Possible error codes are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.
@@ -101,10 +101,11 @@ Too many levels of recursion were encountered while trying to resolve
 This usually indicates a circular dependency in field specification in the
 dirfile.
 .PP
-The dirfile error may also be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR gd_open (3),

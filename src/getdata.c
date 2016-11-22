@@ -2120,24 +2120,22 @@ static size_t _GD_DoSindir(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
 }
 
 /* this function is little more than a public boilerplate for _GD_DoField */
-size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
+size_t gd_getdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
     off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out)
 {
   size_t n_read = 0;
   gd_entry_t* entry;
-  char* field_code;
   int repr;
   unsigned int spf;
 
   dtrace("%p, \"%s\", %" PRId64 ", %" PRId64 ", %" PRIuSIZE ", %" PRIuSIZE
-      ", 0x%X, %p", D, field_code_in, (int64_t)first_frame, (int64_t)first_samp,
+      ", 0x%X, %p", D, field_code, (int64_t)first_frame, (int64_t)first_samp,
       num_frames, num_samp, return_type, data_out);
 
   GD_RETURN_IF_INVALID(D, "%i", 0);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
-      1);
+  entry = _GD_FindFieldAndRepr(D, field_code, &repr, NULL, 1);
 
   if (D->error) {
     dreturn("%i", 0);
@@ -2146,9 +2144,6 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
 
   if (entry->field_type & GD_SCALAR_ENTRY_BIT)
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   if (D->error) {
     dreturn("%i", 0);

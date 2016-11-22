@@ -195,21 +195,17 @@ int _GD_GetScalar(DIRFILE *restrict D, const char *restrict scalar,
 {
   gd_entry_t* C = NULL;
   int repr, e = 0;
-  char* field_code;
   int index = *index_in;
 
   dtrace("%p, \"%s\", %p(%i), 0x%02X, %p, %p", D, scalar, index_in, *index_in,
       type, data, E);
 
-  C = _GD_FindFieldAndRepr(D, scalar, &field_code, &repr, NULL, 0, 1);
+  C = _GD_FindFieldAndRepr(D, scalar, &repr, NULL, 1);
 
   if (D->error) {
     dreturn("%i", 1);
     return 1;
   }
-
-  if (field_code != scalar)
-    free(field_code);
 
   if (C == NULL)
     e = GD_E_SCALAR_CODE;
@@ -572,19 +568,11 @@ const char *gd_alias_target(DIRFILE *D, const char *field_code) gd_nothrow
 const char **gd_aliases(DIRFILE *D, const char *field_code) gd_nothrow
 {
   gd_entry_t *E;
-  int j = 1;
-  unsigned u, n;
+  unsigned u, n = 1, len = 10;
 
   dtrace("%p, \"%s\"", D, field_code);
 
   GD_RETURN_IF_INVALID(D, "%p", NULL);
-
-  n = gd_naliases(D, field_code) + 1;
-
-  if (D->error) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
 
   E = _GD_FindEntry(D, field_code);
 
@@ -593,8 +581,8 @@ const char **gd_aliases(DIRFILE *D, const char *field_code) gd_nothrow
     return NULL;
   }
 
-  E->e->alias_list = (const char**)_GD_Realloc(D, E->e->alias_list,
-      sizeof(const char *) * n);
+  free(E->e->alias_list);
+  E->e->alias_list = _GD_Malloc(D, sizeof(const char *) * len);
 
   if (D->error) {
     dreturn("%p", NULL);
@@ -607,11 +595,22 @@ const char **gd_aliases(DIRFILE *D, const char *field_code) gd_nothrow
     if (D->entry[u]->field_type == GD_ALIAS_ENTRY &&
         D->entry[u]->e->entry[0] == E)
     {
-      E->e->alias_list[j++] = D->entry[u]->field;
+      if (n == len - 1) {
+        const char **ptr = _GD_Realloc(D, E->e->alias_list,
+            sizeof(const char*) * (len *= 2));
+        if (ptr == NULL) {
+          free(E->e->alias_list);
+          E->e->alias_list = NULL;
+          dreturn("%p", NULL);
+          return NULL;
+        }
+        E->e->alias_list = ptr;
+      }
+      E->e->alias_list[n++] = D->entry[u]->field;
     }
 
   /* terminate */
-  E->e->alias_list[j] = NULL;
+  E->e->alias_list[n] = NULL;
 
   dreturn("%p", E->e->alias_list);
   return E->e->alias_list;
@@ -757,23 +756,20 @@ int gd_unhide(DIRFILE *D, const char *field_code) gd_nothrow
   GD_RETURN_ERROR(D);
 }
 
-int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
+/* This function silently drops a representation suffix from field_code. */
+int gd_validate(DIRFILE *D, const char *field_code) gd_nothrow
 {
   int i, repr;
   gd_entry_t* E;
-  char *field_code;
 
-  dtrace("%p, \"%s\"", D, field_code_in);
+  dtrace("%p, \"%s\"", D, field_code);
 
   GD_RETURN_ERR_IF_INVALID(D);
 
-  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1, 1);
+  E = _GD_FindFieldAndRepr(D, field_code, &repr, NULL, 1);
 
   if (D->error)
     GD_RETURN_ERROR(D);
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   /* calculate scalars */
   if (!(E->flags & GD_EN_CALC))

@@ -1,6 +1,6 @@
 .\" gd_hidden.3.  The gd_hidden man page.
 .\"
-.\" Copyright (C) 2012, 2013, 2015 D. V. Wiebe
+.\" Copyright (C) 2012, 2013, 2015, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_hidden 3 "5 November 2015" "Version 0.9.1" "GETDATA"
+.TH gd_hidden 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_hidden \(em check whether a dirfile entry is hidden or not
 .SH SYNOPSIS
@@ -51,9 +51,9 @@ field counting functions
 Upon successful completion,
 .BR gd_hidden ()
 returns one if the field or alias is hidden, or zero if the entry is not hidden.
-On error it returns -1 and sets the dirfile error a non-zero error value.  (As a
-result, the caller checking simply whether the return value of this function is
-non-zero is usually an error.)  Possible error values are:
+On error, it returns a negative-valued error code.  (As a result, the caller
+checking simply whether the return value of this function is non-zero is usually
+an error.)  Possible error values are:
 .TP 8
 .B GD_E_BAD_CODE
 The field specified by
@@ -63,10 +63,11 @@ was not found in the database.
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .PP
-The dirfile error may be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 
 .SH SEE ALSO

@@ -1,6 +1,6 @@
 .\" gd_spf.3.  The gd_spf man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011, 2012 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_spf 3 "1 April 2012" "Version 0.8.0" "GETDATA"
+.TH gd_spf 3 "22 November 2016" "0.10.0" "GETDATA"
 .SH NAME
 gd_spf \(em returns the samples per frame for a field in a
 dirfile
@@ -30,11 +30,10 @@ The
 .BR gd_spf ()
 function queries a dirfile(5) database specified by
 .I dirfile
-and returns the number of samples per frame for the field
+and determines the number of samples per frame for the field
 .IR field_code .
-If
-.I field_code
-contains a valid representation suffix, it will be ignored.
+This information is also available from
+.BR gd_entry (3).
 
 The 
 .I dirfile
@@ -44,13 +43,14 @@ argument must point to a valid DIRFILE object previously created by a call to
 .SH RETURN VALUE
 Upon successful completion,
 .BR gd_spf ()
-returns the number of samples per frame for the field specified.  On error, it
-returns zero and sets the dirfile error
-to a non-zero error value.  Possible error values are:
+returns a positive integer indicating the number of samples per frame for the
+field specified.  On error, it returns zero and stores a negative-valued error
+code in the
+.B DIRFILE
+object which may be retrieved by a subsequent call to
+.BR gd_error (3).
+Possible error codes are:
 .TP 8
-.B GD_E_ALLOC
-The library was unable to allocate memory.
-.TP
 .B GD_E_BAD_CODE
 The field specified by
 .I field_code
@@ -73,13 +73,11 @@ Too many levels of recursion were encountered while trying to resolve
 This usually indicates a circular dependency in field specification in the
 dirfile.
 .PP
-The dirfile error may be retrieved by calling
-.BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),
-.BR gd_open (3),
+.BR gd_entry (3),
 .BR gd_error (3),
-.BR gd_error_string (3)
+.BR gd_error_string (3),
+.BR gd_open (3)

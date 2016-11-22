@@ -896,17 +896,18 @@ void _GD_CInvertData(DIRFILE *restrict D, void *restrict data,
   dreturnvoid();
 }
 
-int _GD_GetRepr(DIRFILE *restrict D, const char *restrict field_code_in,
-    char **restrict field_code, int err)
+/* Look for a representation suffix in field_code.  If one is found, decrement
+ * (*len) by two.  Returns the representation found.
+ */
+int _GD_GetRepr(const char *restrict field_code, size_t *restrict len)
 {
-  int repr = GD_REPR_NONE;
-  const int field_code_len = strlen(field_code_in);
+  int repr = -1;
 
-  dtrace("%p, \"%s\", %p, %i", D, field_code_in, field_code, err);
+  dtrace("\"%s\", %p", field_code, len);
 
   /* find the representation, if any */
-  if (field_code_len > 2 && field_code_in[field_code_len - 2] == '.') {
-    switch (field_code_in[field_code_len - 1]) {
+  if (*len > 2 && field_code[*len - 2] == '.') {
+    switch (field_code[*len - 1]) {
       case 'r':
         repr = GD_REPR_REAL;
         break;
@@ -922,43 +923,31 @@ int _GD_GetRepr(DIRFILE *restrict D, const char *restrict field_code_in,
       case 'z':
         repr = GD_REPR_NONE;
         break;
-      default:
-        if (err)
-          _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_REPR, NULL, 0,
-              field_code_in);
-        dreturn("%i", 0);
-        return 0;
     }
+  }
 
-    /* make a copy of the field code without the representation */
-    *field_code = _GD_Strdup(D, field_code_in);
-    if (*field_code)
-      (*field_code)[field_code_len - 2] = '\0';
-  } else
-    *field_code = (char *)field_code_in;
+  if (repr == -1) /* no match */
+    repr = GD_REPR_NONE;
+  else
+    *len -= 2;
 
-  dreturn("%i", repr);
+  dreturn("%i (%" PRIuSIZE ")", repr, *len);
   return repr;
 }
 
 /* Ensure that an input field has been identified (with error checking) */
 int _GD_BadInput(DIRFILE *D, const gd_entry_t *E, int i, gd_entype_t t, int err)
 {
-  char *code;
-
   dtrace("%p, %p, %i, 0x%X, %i", D, E, i, t, err);
 
   if (E->e->entry[i] == NULL) {
-    E->e->entry[i] = _GD_FindFieldAndRepr(D, E->in_fields[i], &code,
-        &E->e->repr[i], NULL, 1, err);
+    E->e->entry[i] = _GD_FindFieldAndRepr(D, E->in_fields[i], &E->e->repr[i],
+        NULL, err);
 
     if (E->e->entry[i] == NULL) {
       dreturn("%i", 1);
       return 1;
     }
-
-    if (code != E->in_fields[i])
-      free(code);
   }
 
   /* check field type */
@@ -1001,44 +990,34 @@ gd_entry_t *_GD_FindEntry(DIRFILE *restrict D, const char *restrict field_code)
 
 /* Find the entry and the representation */
 gd_entry_t *_GD_FindFieldAndRepr(DIRFILE *restrict D,
-    const char *restrict field_code_in, char **restrict field_code,
-    int *restrict repr, unsigned int *restrict index, int set, int err)
+    const char *restrict field_code, int *restrict repr,
+    unsigned int *restrict index, int err)
 {
-  size_t len = strlen(field_code_in);
+  size_t old_len, len;
   gd_entry_t *E = NULL;
 
-  dtrace("%p, \"%s\", %p, %p, %p, %i, %i", D, field_code_in, field_code, repr,
-      index, set, err);
+  dtrace("%p, \"%s\", %p, %p, %i", D, field_code, repr, index, err);
 
-  E = _GD_FindField(D, field_code_in, len, D->entry, D->n_entries, 1, index);
+  old_len = len = strlen(field_code);
+
+  E = _GD_FindField(D, field_code, len, D->entry, D->n_entries, 1, index);
 
   if (E) {
     *repr = GD_REPR_NONE;
-    *field_code = (char *)field_code_in;
 
     dreturn("%p", E);
     return E;
   }
 
   /* No match -- find a representaiton suffix */
-  *repr = _GD_GetRepr(D, field_code_in, field_code, err);
+  *repr = _GD_GetRepr(field_code, &len);
 
-  if (D->error) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-    
   /* Repr found */
-  if (*field_code != field_code_in)
-    E = _GD_FindField(D, *field_code, len - 2, D->entry, D->n_entries, 1,
-        index);
+  if (len != old_len)
+    E = _GD_FindField(D, field_code, len, D->entry, D->n_entries, 1, index);
 
-  if (E == NULL && set) {
-    if (err)
-      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code_in);
-    if (field_code_in != *field_code)
-      free(*field_code);
-  }
+  if (E == NULL && err)
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
 
   dreturn("%p %i", E, *repr);
   return E;

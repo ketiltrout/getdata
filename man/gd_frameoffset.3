@@ -1,6 +1,6 @@
 .\" gd_frameoffset.3.  The gd_frameoffset man page.
 .\"
-.\" Copyright (C) 2008, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_frameoffset 3 "15 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_frameoffset 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_frameoffset \(em report the starting frame of fields in a dirfile
 .SH SYNOPSIS
@@ -47,9 +47,9 @@ argument must point to a valid DIRFILE object previously created by a call to
 .SH RETURN VALUE
 Upon successful completion,
 .BR gd_frameoffset ()
-returns the frame offset of the specified fragment.  On error, it
-returns -1 and sets the dirfile error to a non-zero error value.  Possible error
-values are:
+returns a non-negative integer containing the frame offset of the specified
+fragment.  On error, it returns a negative-valued error code.  Possible error
+codes are:
 .TP 8
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
@@ -57,10 +57,11 @@ The supplied dirfile was invalid.
 .B GD_E_BAD_INDEX
 The supplied index was out of range.
 .PP
-The dirfile error may be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR gd_alter_frameoffset (3),

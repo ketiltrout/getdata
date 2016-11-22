@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_uninclude 3 "21 November 2016" "0.10.0" "GETDATA"
+.TH gd_uninclude 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_uninclude \(em remove a format specification fragment from a dirfile
 .SH SYNOPSIS
@@ -55,8 +55,8 @@ removed from the dirfile.
 .SH RETURN VALUE
 On success,
 .BR gd_uninclude ()
-returns zero.  On error, a negative-valued error value is returned.  Possible
-error values are:
+returns zero.  On error, a negative-valued error code is returned.  Possible
+error codes are:
 .TP 8
 .B GD_E_ACCMODE
 The supplied dirfile was opened in read-only mode.
@@ -78,14 +78,12 @@ An I/O error occurred while trying to write modified data or metadata to disk.
 The metadata of the fragment which included the removed fragment was protected
 from change.
 .PP
-The dirfile error may also be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
-When finished with it, the DIRFILE object may be de-allocated with a call to
-.BR gd_close (3),
-even if the open failed.
 .SH NOTES
 This function re-arranges the remaining format specification fragments in some
 unspecified way, except for the primary fragment, which is guaranteed to remain

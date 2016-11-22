@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_dirfile_standards 3 "21 November 2016" "0.10.0" "GETDATA"
+.TH gd_dirfile_standards 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_dirfile_standards \(em change or report the current Dirfile Standards Version
 for a DirFile
@@ -87,10 +87,11 @@ and
 On success,
 .BR gd_dirfile_standards ()
 returns the current Standards Version of the loaded dirfile, after possibly
-having been updated by the call.  This will be a number between zero and
+having been updated by the call.  This will be a non-negative integer between
+zero and
 .BR GD_DIRFILE_STANDARDS_VERSION
-inclusive.  On error, a negative-valued error value is returned, and the current
-Standards Version is not changed.  Possible error values are:
+inclusive.  On error, a negative-valued error code is returned, and the current
+Standards Version is not changed.  Possible error codes are:
 .TP 8
 .B GD_E_ARGUMENT
 The loaded dirfile did not conform to the specified version.  Or the dirfile
@@ -99,10 +100,11 @@ conforms to no known Standards Version.
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .PP
-The dirfile error may be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 
 .SH NOTES

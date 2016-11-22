@@ -1,6 +1,6 @@
 .\" gd_parent_fragment.3.  The gd_parent_fragment man page.
 .\"
-.\" Copyright (C) 2008, 2010, 2012 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2012, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_parent_fragment 3 "21 April 2012" "Version 0.8.0" "GETDATA"
+.TH gd_parent_fragment 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_parent_fragment \(em retrieve the parent fragment of a fragment in a dirfile
 .SH SYNOPSIS
@@ -44,8 +44,7 @@ On success,
 .BR gd_parent_fragment ()
 returns the index of the specified fragment's parent.  On error,
 .BR gd_parent_fragment ()
-returns -1 and sets the dirfile error to a non-zero value.  Possible error
-values are:
+returns a negative-valued error code.  Possible error codes are:
 .TP 8
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
@@ -53,10 +52,11 @@ The supplied dirfile was invalid.
 .B GD_E_BAD_INDEX
 The supplied index was out of range, or was equal to zero.
 .PP
-The dirfile error may be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),

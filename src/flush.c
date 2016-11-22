@@ -72,7 +72,7 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->EN(lincom,n_fields); ++i) {
         if (!_GD_BadInput(D, E, i, GD_NO_ENTRY, 0))
-            _GD_Flush(D, E->e->entry[i], syn, clo);
+          _GD_Flush(D, E->e->entry[i], syn, clo);
       }
       break;
     case GD_MULTIPLY_ENTRY:

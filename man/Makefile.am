@@ -31,8 +31,8 @@ dist_man_MANS = checkdirfile.1 dirfile2ascii.1 gd_add.3 gd_add_alias.3 \
 								gd_dirfile_standards.3 gd_dirfilename.3 gd_encoding.3 \
 								gd_encoding_support.3 gd_endianness.3 gd_entry.3 \
 								gd_entry_list.3 gd_entry_type.3 gd_eof.3 gd_eof64.3 gd_error.3 \
-								gd_error_count.3 gd_error_string.3 gd_flags.3 gd_flush.3 \
-								gd_fragment_affixes.3 gd_fragment_index.3 gd_fragmentname.3 \
+								gd_error_count.3 gd_flags.3 gd_flush.3 gd_fragment_affixes.3 \
+								gd_fragment_index.3 gd_fragment_namespace.3 gd_fragmentname.3 \
 								gd_framenum_subset.3 gd_framenum_subset64.3 gd_frameoffset.3 \
 								gd_frameoffset64.3 gd_free_entry_strings.3 \
 								gd_get_carray_slice.3 gd_get_string.3 gd_getdata.3 \
@@ -98,7 +98,8 @@ MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
 	gd_entry_list.3:gd_mfield_list.3 gd_entry_list.3:gd_mfield_list_by_type.3 \
 	gd_entry_list.3:gd_nmvectore.3 gd_entry_list.3:gd_vector_list.3 \
 	gd_frameoffset64.3:gd_alter_frameoffset64.3 \
-	gd_array_len.3:gd_carray_len.3
+	gd_array_len.3:gd_carray_len.3 \
+	gd_error.3:gd_error_string.3
 
 #man conversion
 HTMLMANS=$(addsuffix .html,${nodist_man_MANS}) \

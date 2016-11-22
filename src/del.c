@@ -92,22 +92,15 @@ static int _GD_DeReferenceOne(DIRFILE *restrict D, gd_entry_t *restrict E,
     void *restrict data)
 {
   int repr;
-  char *field_code;
+  size_t len;
 
   dtrace("%p, %p, %p, %i, %i, 0x%03x, %p", D, E, C, check, i, type, data);
 
   if (E->scalar[i] != NULL) {
-    repr = _GD_GetRepr(D, E->scalar[i], &field_code, 1);
+    len = strlen(E->scalar[i]);
+    repr = _GD_GetRepr(E->scalar[i], &len);
 
-    if (D->error) {
-      dreturn("%i", 1);
-      return 1;
-    }
-
-    if (strcmp(C->field, field_code) == 0) {
-      if (field_code != E->scalar[i])
-        free(field_code);
-
+    if (len == C->e->len && memcmp(C->field, E->scalar[i], len) == 0) {
       if (check) {
         _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
 
@@ -119,9 +112,7 @@ static int _GD_DeReferenceOne(DIRFILE *restrict D, gd_entry_t *restrict E,
         free(E->scalar[i]);
         E->scalar[i] = NULL;
       }
-    } else if (field_code != E->scalar[i])
-      free(field_code);
-
+    }
   }
 
   dreturn("%i", 0);

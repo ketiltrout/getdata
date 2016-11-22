@@ -1,6 +1,6 @@
 .\" gd_error.3.  The gd_error man page.
 .\"
-.\" Copyright (C) 2008, 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2014, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,32 +13,92 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_error 3 "20 April 2011" "Version 0.8.0" "GETDATA"
+.TH gd_error 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
-gd_error \(em report a GetData library error
+gd_error, gd_error_string \(em report a GetData library error
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
 .BI "int gd_error(const DIRFILE *" dirfile );
+.HP
+.BI "char *gd_error_string(const DIRFILE *" dirfile ", char *" buffer ", size_t
+.IB buflen );
 .hy
 .ad n
 .SH DESCRIPTION
 The
 .BR gd_error ()
-function returns the numeric dirfile error associated with the dirfile
-.I dirfile
-which is set by many GetData library functions.
+function determines the success or failure of the most recent GetData library
+function call that operated on
+.IR dirfile .
+If the last call succeeded,
+.BR gd_error ()
+will return
+.B GD_E_OK
+(which equals zero).  If the last call failed,
+.BR gd_error ()
+returns a negative-valued error code indicating the cause of the failure.
+Possible codes vary from function to function.  See corresponding manual page of
+the function that failed for a list of possible codes.
 
-A textual description of the error may be obtained by calling
-.BR gd_error_string (3).
+The
+.BR gd_error_string ()
+function behaves similarly, but composes a string describing the error.  If 
+.I buffer
+is not NULL, the string is written to this memory location.  At most
+.I buflen
+characters will be written including the terminating NUL byte.  If
+.I buffer
+is not large enough to hold the entire string, the string will be truncated, but
+the truncated string will still be NUL-terminated.
+
+If
+.I buffer
+is NULL,
+.BR gd_error_string ()
+will allocate a string of sufficient length on the heap.  By default,
+.BR malloc (3)
+is used to allocate this buffer, but an alternate memory manager may be
+specified by calling
+.BR gd_alloc_funcs (3)
+before calling this function.  In this case,
+.I buflen
+is ignored and the caller is responsible for deallocating this string when it is
+no longer needed.
+
+The functions
+.BR gd_alloc_funcs (3),
+.BR gd_error_count (3),
+.BR gd_flags (3),
+.BR gd_free_entry_strings (3),
+.BR gd_mplex_lookback (3),
+and
+.BR gd_parser_callback (3)
+are ignored by these functions, since they always succeed.  Previous
+.BR gd_error()
+and
+.BR gd_error_string()
+calls are also ignored.
 
 .SH RETURN VALUE
 The
 .BR gd_error ()
-function always returns the dirfile error corresponding to the error state of
-the last library call on the supplied DIRFILE object.
+function always returns the integer error code of the last library call on the
+supplied DIRFILE object.
+
+If
+.I buffer
+is non-NULL,
+.BR gd_error_string ()
+returns 
+.IR buffer ,
+unless
+.I buflen
+is less than one, in which case it returns NULL.  If
+.I buffer
+is NULL, this function returns a newly allocated string of sufficient length
+which should be deallocated by the caller, or NULL, if memory allocation failed.
 .SH SEE ALSO
-.BR gd_error_count (3),
-.BR gd_error_string (3)
+.BR gd_error_count (3)

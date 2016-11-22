@@ -20,21 +20,18 @@
  */
 #include "internal.h"
 
-int gd_get_carray_slice(DIRFILE *D, const char *field_code_in,
-    unsigned long start, size_t n, gd_type_t return_type, void *data_out)
-  gd_nothrow
+int gd_get_carray_slice(DIRFILE *D, const char *field_code, unsigned long start,
+    size_t n, gd_type_t return_type, void *data_out) gd_nothrow
 {
   gd_entry_t *entry;
-  char* field_code;
   int repr;
 
-  dtrace("%p, \"%s\", %lu, %" PRIuSIZE ", 0x%x, %p", D, field_code_in, start,
-      n, return_type, data_out);
+  dtrace("%p, \"%s\", %lu, %" PRIuSIZE ", 0x%x, %p", D, field_code, start, n,
+      return_type, data_out);
 
   GD_RETURN_ERR_IF_INVALID(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
-      1);
+  entry = _GD_FindFieldAndRepr(D, field_code, &repr, NULL, 1);
 
   if (D->error)
     GD_RETURN_ERROR(D);
@@ -50,25 +47,20 @@ int gd_get_carray_slice(DIRFILE *D, const char *field_code_in,
   } else if (!D->error)
     _GD_DoField(D, entry, repr, start, n, return_type, data_out);
 
-  if (field_code != field_code_in)
-    free(field_code);
-
   GD_RETURN_ERROR(D);
 }
 
-int gd_get_carray(DIRFILE *D, const char *field_code_in, gd_type_t return_type,
+int gd_get_carray(DIRFILE *D, const char *field_code, gd_type_t return_type,
     void *data_out) gd_nothrow
 {
   gd_entry_t *entry;
-  char* field_code;
   int repr;
 
-  dtrace("%p, \"%s\", 0x%x, %p", D, field_code_in, return_type, data_out);
+  dtrace("%p, \"%s\", 0x%x, %p", D, field_code, return_type, data_out);
 
   GD_RETURN_ERR_IF_INVALID(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
-      1);
+  entry = _GD_FindFieldAndRepr(D, field_code, &repr, NULL, 1);
 
   if (D->error)
     GD_RETURN_ERROR(D);
@@ -81,31 +73,25 @@ int gd_get_carray(DIRFILE *D, const char *field_code_in, gd_type_t return_type,
     _GD_DoField(D, entry, repr, 0, (entry->field_type == GD_CONST_ENTRY) ? 1 :
         entry->EN(scalar,array_len), return_type, data_out);
 
-  if (field_code != field_code_in)
-    free(field_code);
-
   GD_RETURN_ERROR(D);
 }
 
-int gd_get_constant(DIRFILE* D, const char *field_code_in,
-    gd_type_t return_type, void *data_out) gd_nothrow
+int gd_get_constant(DIRFILE* D, const char *field_code, gd_type_t return_type,
+    void *data_out) gd_nothrow
 {
-  return gd_get_carray_slice(D, field_code_in, 0, 1, return_type, data_out);
+  return gd_get_carray_slice(D, field_code, 0, 1, return_type, data_out);
 }
 
-size_t gd_array_len(DIRFILE *D, const char *field_code_in) gd_nothrow
+size_t gd_array_len(DIRFILE *D, const char *field_code) gd_nothrow
 {
   gd_entry_t *entry;
-  char* field_code;
-  int repr;
   size_t len = 0;
 
-  dtrace("%p, \"%s\"", D, field_code_in);
+  dtrace("%p, \"%s\"", D, field_code);
 
   GD_RETURN_IF_INVALID(D, "%i", 0);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
-      1);
+  entry = _GD_FindEntry(D, field_code);
 
   if (D->error)
     GD_RETURN_ERROR(D);
@@ -120,9 +106,6 @@ size_t gd_array_len(DIRFILE *D, const char *field_code_in) gd_nothrow
     len = 1;
   } else 
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   dreturn("%" PRIuSIZE, len);
   return len;

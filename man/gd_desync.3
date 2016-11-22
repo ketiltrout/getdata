@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_desync 3 "21 November 2016" "0.10.0" "GETDATA"
+.TH gd_desync 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_desync \(em check for a change of metadata on disk
 .SH SYNOPSIS
@@ -78,8 +78,8 @@ and
 .BR gd_parser_callback (3)).
 .SH RETURN VALUE
 On successful deletion, zero is returned if the loaded dirfile has not
-desynchronised, or 1 if it has.  On error, a negative-valued error value is
-returned, regardless of desynchronisation.  Possible error values are:
+desynchronised, or 1 if it has.  On error, a negative-valued error code is
+returned, regardless of desynchronisation.  Possible error codes are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.
@@ -98,10 +98,11 @@ and
 .BR gd_cbopen (3)
 manual pages.
 .PP
-The dirfile error may also be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH LIMITATIONS
 The current implementation uses file modification times as reported by

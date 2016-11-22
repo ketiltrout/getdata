@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_entry 3 "21 November 2016" "0.10.0" "GETDATA"
+.TH gd_entry 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -88,7 +88,7 @@ Upon successful completion,
 returns zero and writes the field metadata in the supplied gd_entry_t buffer.
 On error, the supplied gd_entry_t buffer is not modified.  In this case,
 .BR gd_entry ()
-returns a negative-valued error value.  Possible error values are:
+returns a negative-valued error code.  Possible error codes are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.
@@ -101,10 +101,11 @@ was not found in the database.
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .PP
-The dirfile error may also be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH THE ENTRY TYPE
 Members available in the gd_entry_t structure depend on the field type
@@ -881,7 +882,7 @@ is not set in the check field.
 .PP
 The
 .I threshold
-is the value against the check field is compared.  The
+is the value against which the check field is compared.  The
 .B gd_triplet_t
 type is defined as:
 .PP
@@ -905,7 +906,7 @@ For
 and
 .BR GD_WINDOP_NE ,
 the signed integer element,
-.IB threshold . i
+.IB threshold . i\fR,
 is set;
 .IP \(bu
 For
@@ -913,13 +914,13 @@ For
 and
 .BR GD_WINDOP_CLR ,
 the unsigned integer element,
-.IB threshold . u
+.IB threshold . u\fR,
 is set;
 .IP \(bu
 For all other values of
 .IR windop ,
 the floating point element,
-.IB threshold . r
+.IB threshold . r\fR,
 is set.
 
 .SH NOTES
@@ -937,17 +938,17 @@ C99 API|C89 API
 int|bitnum|int|u.bit.bitnum
 int|numbits|int|u.bit.numbits
 int|n_fields|int|u.lincom.n_fields
-double complex|cm[3]|double|u.lincom.cm[3][2]
-double|m[3]|double|u.lincom.m[3]
-double complex|cb[3]|double|u.lincom.cb[3][2]
-double|b[3]|double|u.lincom.b[3]
+double complex|cm[]|double|u.lincom.cm[][2]
+double|m[]|double|u.lincom.m[]
+double complex|cb[]|double|u.lincom.cb[][2]
+double|b[]|double|u.lincom.b[]
 const char*|table|const char*|u.linterp.table
 int|count_val|int|u.mplex.count_val
 int|period|int|u.mplex.period
 gd_shift_t|shift|gd_shift_t|u.phase.shift
 int|poly_ord|int|u.polynom.poly_ord
-double complex|ca[3]|double|u.polynom.ca[3][2]
-double|a[3]|double|u.polynom.a[3]
+double complex|ca[]|double|u.polynom.ca[][2]
+double|a[]|double|u.polynom.a[]
 unsigned int|spf|unsigned int|u.raw.spf
 gd_type_t|data_type|gd_type_t|u.raw.data_type
 double complex|cdividend|double|u.recip.cdividend[2]

@@ -160,19 +160,17 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
   return type;
 }
 
-gd_type_t gd_native_type(DIRFILE* D, const char* field_code_in) gd_nothrow
+gd_type_t gd_native_type(DIRFILE* D, const char* field_code) gd_nothrow
 {
   gd_type_t type = GD_UNKNOWN;
   gd_entry_t* entry;
   int repr;
-  char* field_code;
 
-  dtrace("%p, \"%s\"", D, field_code_in);
+  dtrace("%p, \"%s\"", D, field_code);
 
   GD_RETURN_IF_INVALID(D, "0x%X", GD_UNKNOWN);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
-      1);
+  entry = _GD_FindFieldAndRepr(D, field_code, &repr, NULL, 1);
 
   if (D->error) {
     dreturn("0x%x", GD_UNKNOWN);
@@ -180,9 +178,6 @@ gd_type_t gd_native_type(DIRFILE* D, const char* field_code_in) gd_nothrow
   }
 
   type = _GD_NativeType(D, entry, repr);
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   dreturn("0x%x", type);
   return type;
