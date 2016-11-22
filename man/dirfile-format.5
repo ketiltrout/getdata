@@ -14,7 +14,7 @@
 .\" as part of this distribution.
 .\"
 .hw name-space
-.TH dirfile\-format 5 "19 November 2016" "Standards Version 10" "DATA FORMATS"
+.TH dirfile\-format 5 "22 November 2016" "Standards Version 10" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -228,23 +228,35 @@ A metafield alias may never appear as the parent part of a metafield field code,
 even if it refers to a top-level field.  That is, given the valid format:
 .RS
 .IP
-field1 \fBRAW UINT8\fR 1
+aaaa \fBRAW UINT8\fR 1
 .br
-field1/meta \fBCONST FLOAT64\fR 0.0
+aaaa/bbbb \fBCONST FLOAT64\fR 0.0
 .br
-field2 \fBRAW UINT8\fR 1
+cccc \fBRAW UINT8\fR 1
 .br
-\fB/ALIAS\fR field2/alias field1
+\fB/ALIAS\fR cccc/dddd aaaa
 .RE
 .IP
 the metafield
-.I field1/meta
+.I aaaa/bbbb
 may not be referred to as
-.IR field2/alias/meta ,
+.IR cccc/dddd/bbbb ,
 even though
-.I field2/alias
+.I cccc/dddd
 is a valid field code referring to
-.IR field1 .
+.IR aaaa .
+.IP
+This is not true of top-level aliases: if 
+.I eeee
+is an alias of
+.IR ffff ,
+then 
+.IR ffff/gggg ,
+a metafield of
+.IR ffff ,
+may be referred to as
+.I eeee/gggg
+as well.
 .IP
 The /ALIAS directive has no scope: it is processed immediately.  It appeared in
 Standards Version 9.
@@ -262,6 +274,9 @@ The dirfile is unencoded.
 .TP
 .B bzip2
 The dirfile is compressed using the bzip2 compression scheme.
+.TP
+.B flac
+The dirfile is compressed using the flac compression scheme.
 .TP
 .B gzip
 The dirfile is compressed using the gzip compression scheme.
@@ -530,8 +545,10 @@ fragment's root namespace.  See the
 .B Namespaces
 section for further details.
 .PP
-The /NAMESPACE directive has no scope: it is processed immediately.  It appeared
-in Standards Version 10.
+The /NAMESPACE directive has no scope: it is processed immediately.  For the
+effects of changing the current namespace on included fragments, see the
+/INCLUDE directive above.  The effects of a /NAMESPACE directive never propagate
+upwards to parent fragments.  It appeared in Standards Version 10.
 .RE
 .TP
 .B /PROTECT
@@ -733,7 +750,7 @@ then:
 .br
 .BI . kkkk . llll\~ "RAW UINT8 1"
 .PP
-specifies the fields:
+specifies, respectively, the fields:
 .IP
 .IB rootspace . aaaa\fR,
 .br
@@ -752,8 +769,8 @@ and
 .br
 .IB rootspace . kkkk . llll\fR.
 .PP
-Note that a field may specify deepr subspaces under either the root namespace or
-the current namespace (meaning it is never necessary to use the /NAMESPACE
+Note that a field may specify deeper subspaces under either the root namespace
+or the current namespace (meaning it is never necessary to use the /NAMESPACE
 directive). Note also that there is no way for metadata in a given fragment to
 refer to fields outside the fragment's root space.
 
@@ -1665,8 +1682,7 @@ the namespace tree.
 .B /META
 directive above), the field name of the metafield's parent (which may be an
 alias) followed by a forward slash
-.RB ( / );
-supported since Standards Version 6,
+.RB ( / ).
 
 .IP \(bu 4
 a simple field name, possibly an alias, indicating a vector or scalar field
@@ -1676,7 +1692,9 @@ a simple field name, possibly an alias, indicating a vector or scalar field
 followed by a
 .IR "representation suffix" ,
 but only if the field or metafield specified is not a
-.B STRING
+.BR SARRAY ", " STRING ,
+or
+.B SINDIR
 type field.
 .PP
 A 
@@ -1692,14 +1710,19 @@ the imaginary part is -0, and pi is returned if the imaginary part is +0.  If
 the input is zero, zero is returned.
 .TP
 .B .i
-the projection of the input onto the imaginary axis (ie. the imaginary part of
-the input).
+the imaginary part of the input
+.RI ( i.e. \~the
+projection of the input onto the imaginary axis)
 .TP
 .B .m
-the modulus of the input (ie. its absolute value).
+the modulus of the input
+.RI ( i.e. \~its
+absolue value).
 .TP 
 .B .r
-the projection of the input onto the real axis (ie. the real part of the input).
+the real part of the input
+.RI ( i.e. \~the
+projection of the input onto the real axis)
 .TP
 .B .z
 (since Standards Version 10:) the identity representation: it returns the full
@@ -1750,7 +1773,9 @@ and
 .B SINDIR
 field types, namespaces, the
 .B /NAMESPACE
-directive, and the
+directive, the
+.B flac
+encoding scheme, and the
 .I .z
 representation suffix.
 
