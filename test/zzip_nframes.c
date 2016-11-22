@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,16 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Retreiving the number of frames should succeed cleanly */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <stdio.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <inttypes.h>
 
 int main(void)
 {
@@ -38,26 +29,16 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *rawzip = "dirfile/raw.zip";
-  const char *format_data = "data RAW UINT16 1\n";
   char command[4096];
-  uint16_t data_data[256];
-  int i, error, r = 0;
-  size_t n;
+  int error, r = 0;
+  off_t n;
   DIRFILE *D;
 
   rmdirfile();
   mkdir(filedir, 0777);
 
-  for (i = 0; i < 256; ++i)
-    data_data[i] = (uint16_t)i;
-
-  i = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(i, format_data, strlen(format_data));
-  close(i);
-
-  i = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(i, data_data, 256 * sizeof(uint16_t));
-  close(i);
+  MAKEFORMATFILE(format, "data RAW UINT16 1\n");
+  MAKEDATAFILE(data, uint16_t, i, 256);
 
   /* compress */
   chdir(filedir);
@@ -85,7 +66,7 @@ int main(void)
   CHECKI(n, 256);
 #else
   CHECKI(error, GD_E_UNKNOWN_ENCODING);
-  CHECKI(n, 0);
+  CHECKI(n, GD_E_UNKNOWN_ENCODING);
 #endif
 
   return r;

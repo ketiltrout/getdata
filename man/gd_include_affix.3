@@ -1,6 +1,6 @@
 .\" gd_include_affix.3.  The gd_include_affix man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2014 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2014, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_include_affix 3 "16 October 2014" "Version 0.9.0" "GETDATA"
+.TH gd_include_affix 3 "21 November 2016" "0.10.0" "GETDATA"
 .SH NAME
 gd_include_affix, gd_include \(em add a format specification fragment to a
 dirfile
@@ -273,8 +273,8 @@ scheme.
 
 .SH RETURN VALUE
 On success, these functions return the format specification index of the newly
-added fragment.  On error, -1 is returned and the dirfile error is set to a
-non-zero error value.  Possible error values are:
+added fragment.  On error, a negative-valued error value is returned.  Possible
+error values are:
 .TP 8
 .B GD_E_ACCMODE
 The supplied dirfile was opened in read-only mode.
@@ -321,7 +321,7 @@ An I/O error occured while trying to read or create the fragment.
 .B GD_E_PROTECTED
 The metadata of the parent fragment was protected from change.
 .PP
-The dirfile error may be retrieved by calling
+The dirfile error may also be retrieved by calling
 .BR gd_error (3).
 A descriptive error string for the last error encountered can be obtained from
 a call to

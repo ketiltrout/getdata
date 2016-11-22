@@ -178,10 +178,10 @@ int gd_put_carray_slice(DIRFILE* D, const char *field_code, unsigned long first,
 
   GD_RETURN_ERR_IF_INVALID(D);
 
-  entry = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+  entry = _GD_FindEntry(D, field_code);
 
   if (entry == NULL)
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    ; /* error already set */
   else if (entry->field_type != GD_CARRAY_ENTRY &&
       entry->field_type != GD_CONST_ENTRY)
   {
@@ -201,10 +201,10 @@ int gd_put_carray(DIRFILE* D, const char *field_code, gd_type_t data_type,
 
   GD_RETURN_ERR_IF_INVALID(D);
 
-  entry = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+  entry = _GD_FindEntry(D, field_code);
 
   if (entry == NULL)
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    ; /* error already set */
   else if (entry->field_type != GD_CARRAY_ENTRY &&
       entry->field_type != GD_CONST_ENTRY)
   {

@@ -333,8 +333,7 @@ static int _GD_SetField(DIRFILE *restrict D,
   E->field = _GD_CodeFromFrag(D, p, P, me, name, &offset);
 
   /* The _GD_ValidateField call differs based on whether we're dealing with
-   * a subfield or not because the meaning of offset is different
-   */
+   * a subfield or not because the meaning of offset is different */
   if (E->field) {
     int bad_code;
     if (P)
@@ -355,6 +354,7 @@ static int _GD_SetField(DIRFILE *restrict D,
     return 1;
   }
 
+  E->e->len = strlen(E->field);
   dreturn("%i", 0);
   return 0;
 }
@@ -1552,24 +1552,34 @@ static int _GD_UTF8Encode(DIRFILE *restrict D, const char *restrict format_file,
  * parser, but called from _GD_Add.  In this case, it never sets D->error.
  */
 gd_entry_t *_GD_CheckParent(DIRFILE *restrict D,
-    const struct parser_state *p, char **restrict name, int me)
+    const struct parser_state *p, char **restrict name, size_t *len, int me)
 {
+  size_t plen = 0;
   char *cptr, *munged_code;
   gd_entry_t *P = NULL;
 
-  dtrace("%p, %p, \"%s\", %i", D, p, *name, me);
+  dtrace("%p, %p, \"%s\", %p, %i", D, p, *name, len, me);
 
   for (cptr = *name + 1; *cptr != '\0'; ++cptr)
     if (*cptr == '/') {
       *cptr = '\0';
-      if (me == -1)
-        munged_code = strdup(*name);
-      else
+      if (me == -1) {
+        plen = (cptr - *name);
+        munged_code = malloc(plen + 1);
+        if (munged_code)
+          memcpy(munged_code, *name, plen + 1);
+      } else {
         munged_code = _GD_CodeFromFrag(D, p, NULL, me, *name, NULL);
+        if (munged_code)
+          plen = strlen(munged_code);
+      }
+
       if (munged_code) {
-        P = _GD_FindField(D, munged_code, D->entry, D->n_entries, 0, NULL);
+        P = _GD_FindField(D, munged_code, plen, D->entry, D->n_entries, 0,
+            NULL);
         free(munged_code);
       }
+
       if (P == NULL) {
         if (me == -1) {
           *cptr = '/'; /* undo field munging; _GD_Add will conclude this is
@@ -1595,11 +1605,12 @@ gd_entry_t *_GD_CheckParent(DIRFILE *restrict D,
       }
 
       /* point name to the metafield name */
+      *len -= (cptr - *name) + 1;
       *name = cptr + 1;
       break;
     }
 
-  dreturn("%p", P);
+  dreturn("%p (\"%s\", %" PRIuSIZE ")", P, *name, *len);
   return P;
 }
 
@@ -1607,24 +1618,24 @@ gd_entry_t *_GD_CheckParent(DIRFILE *restrict D,
  * specification */
 gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D,
     const struct parser_state *restrict p, int n_cols, char **in_cols,
-    const gd_entry_t *restrict P, int me, int creat, int insert,
+    size_t len0, const gd_entry_t *restrict P, int me, int creat, int insert,
     char **outstring, const char *tok_pos)
 {
   gd_entry_t* E = NULL;
   void *ptr;
 
-  dtrace("%p, %p, %i, %p, %p, %i, %i, %i, %p, %p", D, p, n_cols, in_cols, P, me,
-      creat, insert, outstring, tok_pos);
+  dtrace("%p, %p, %i, %p, %" PRIuSIZE ", %p, %i, %i, %i, %p, %p", D, p, n_cols,
+      in_cols, len0, P, me, creat, insert, outstring, tok_pos);
 
   /* Check for barth-style metafield definition */
   if (P == NULL && GD_PVERS_GE(*p, 7)) {
-    P = _GD_CheckParent(D, p, in_cols + 0, me);
+    P = _GD_CheckParent(D, p, in_cols + 0, &len0, me);
     if (P) {
       if (n_cols < 2)
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, p->file, p->line, NULL);
       else
-        E = _GD_ParseFieldSpec(D, p, n_cols, in_cols, P, me, creat, insert,
-            outstring, tok_pos);
+        E = _GD_ParseFieldSpec(D, p, n_cols, in_cols, len0, P, me, creat,
+            insert, outstring, tok_pos);
       dreturn("%p", (!insert) ? E : NULL);
       return (!insert) ? E : NULL;
     }
@@ -1761,7 +1772,7 @@ NO_MATCH:
     unsigned int u;
 
     /* Check for duplicate */
-    if (_GD_FindField(D, E->field, D->entry, D->n_entries, 0, &u)) {
+    if (_GD_FindField(D, E->field, E->e->len, D->entry, D->n_entries, 0, &u)) {
       if (~p->flags & GD_IGNORE_DUPS)
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_DUPLICATE, p->file, p->line,
             E->field);
@@ -2026,6 +2037,7 @@ static void _GD_ParseAlias(DIRFILE *restrict D,
     const struct parser_state *restrict p, char **restrict name,
     const char *restrict target, int me)
 {
+  size_t len = strlen(*name);
   gd_entry_t **new_meta_list = NULL;
   gd_entry_t *E, *P = NULL;
   unsigned int u;
@@ -2033,7 +2045,7 @@ static void _GD_ParseAlias(DIRFILE *restrict D,
 
   dtrace("%p, %p, \"%s\", \"%s\", %i", D, p, *name, target, me);
 
-  P = _GD_CheckParent(D, p, name, me);
+  P = _GD_CheckParent(D, p, name, &len, me);
   if (D->error) {
     dreturnvoid();
     return;
@@ -2078,7 +2090,7 @@ static void _GD_ParseAlias(DIRFILE *restrict D,
   }
 
   /* Check for duplicate */
-  if (_GD_FindField(D, E->field, D->entry, D->n_entries, 0, &u)) {
+  if (_GD_FindField(D, E->field, E->e->len, D->entry, D->n_entries, 0, &u)) {
     if (!(p->flags & GD_IGNORE_DUPS))
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_DUPLICATE, p->file, p->line,
           E->field);
@@ -2274,9 +2286,11 @@ static int _GD_ParseDirective(DIRFILE *D, struct parser_state *restrict p,
       if (strcmp(ptr, "HIDDEN") == 0 && GD_PVERS_GE(*p, 9)) {
         matched = 1;
         munged_code = _GD_CodeFromFrag(D, p, NULL, me, in_cols[1], NULL);
-        if (munged_code)
-          E = _GD_FindField(D, munged_code, D->entry, D->n_entries, 0, NULL);
-        free(munged_code);
+        if (munged_code) {
+          E = _GD_FindField(D, munged_code, strlen(munged_code), D->entry,
+              D->n_entries, 0, NULL);
+          free(munged_code);
+        }
 
         if (E == NULL)
           _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_FIELD, p->file, p->line,
@@ -2321,7 +2335,8 @@ static int _GD_ParseDirective(DIRFILE *D, struct parser_state *restrict p,
         matched = 1;
         munged_code = _GD_CodeFromFrag(D, p, NULL, me, in_cols[1], NULL);
         if (munged_code) {
-          E = _GD_FindField(D, munged_code, D->entry, D->n_entries, 0, NULL);
+          E = _GD_FindField(D, munged_code, strlen(munged_code), D->entry,
+              D->n_entries, 0, NULL);
           free(munged_code);
         }
 
@@ -2341,8 +2356,8 @@ static int _GD_ParseDirective(DIRFILE *D, struct parser_state *restrict p,
           _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, p->file, p->line,
               NULL);
         else
-          _GD_ParseFieldSpec(D, p, n_cols - 2, in_cols + 2, E, me, 0, 1,
-              outstring, tok_pos);
+          _GD_ParseFieldSpec(D, p, n_cols - 2, in_cols + 2, strlen(in_cols[2]),
+              E, me, 0, 1, outstring, tok_pos);
       }
       break;
     case 'N':
@@ -2405,7 +2420,8 @@ static gd_entry_t *_GD_ResolveAlias(DIRFILE *restrict D, gd_entry_t *restrict E)
   }
 
   /* Find the target */
-  T = _GD_FindField(D, E->in_fields[0], D->entry, D->n_entries, 0, NULL);
+  T = _GD_FindField(D, E->in_fields[0], strlen(E->in_fields[0]), D->entry,
+      D->n_entries, 0, NULL);
 
   /* Aliases store the ulitmate target in entry[0] and the direct link
    * in entry[1].
@@ -2496,8 +2512,8 @@ char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *D, struct parser_state *p,
           &outstring, tok_pos);
 
     if (D->error == GD_E_OK && !match)
-      first_raw = _GD_ParseFieldSpec(D, p, n_cols, in_cols, NULL, me, 0, 1,
-          &outstring, tok_pos);
+      first_raw = _GD_ParseFieldSpec(D, p, n_cols, in_cols, strlen(in_cols[0]),
+          NULL, me, 0, 1, &outstring, tok_pos);
 
     if (D->error == GD_E_FORMAT) {
       /* call the callback for this error */

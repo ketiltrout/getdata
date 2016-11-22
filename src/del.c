@@ -229,8 +229,7 @@ static void _GD_DeReference(DIRFILE *restrict D, gd_entry_t *restrict E,
 static void _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
     unsigned int index, unsigned int flags)
 {
-  unsigned int first, last = 0;
-  int n_del, i, len;
+  int n_del, i;
   unsigned int j;
   char **new_ref = NULL;
   gd_entry_t *reference = NULL;
@@ -253,41 +252,7 @@ static void _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
     return;
   }
 
-  if (E->e->n_meta > 0) {
-    len = strlen(E->field);
-
-    /* find one of the meta fields -- it's not true that metafields are
-     * necessarily sorted directly after their parent */
-    if (_GD_FindField(D, E->e->p.meta_entry[0]->field, D->entry, D->n_entries,
-          0, &first) == NULL)
-    {
-      _GD_InternalError(D);
-      dreturnvoid();
-      return;
-    }
-    last = first;
-
-    /* The remaining meta fields will be contiguous with this one, so just
-     * search linearly in both directions until we find something that isn't a
-     * meta field of our parent */
-    while (first > 0)
-      if (strncmp(D->entry[first - 1]->field, E->field, len) == 0 &&
-          D->entry[first - 1]->field[len] == '/')
-      {
-        first--;
-      } else
-        break;
-
-    while (last < D->n_entries - 1)
-      if (strncmp(D->entry[last + 1]->field, E->field, len) == 0 &&
-          D->entry[last + 1]->field[len] == '/')
-      {
-        last++;
-      } else
-        break;
-  }
-
-  /* gather a list of fields */
+  /* gather a list of fields to delete (the target, plus all its metafields */
   del_list = _GD_Malloc(D, sizeof(*del_list) * (((E->e->n_meta == -1) ? 0 :
           E->e->n_meta) + 1));
 
@@ -442,18 +407,21 @@ static void _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
       else if (del_list[i]->field_type != GD_STRING_ENTRY)
         _GD_ClearDerived(D, D->entry[j], del_list[i], 0);
 
-  free(del_list);
-
-  /* Remove meta fields, if present */
   if (E->e->n_meta >= 0) {
-    if (E->e->n_meta > 0) {
-      /* Remove all meta fields -- there are no RAW fields here */
-      for (j = first; j <= last; ++j)
-        _GD_FreeE(D, D->entry[j], 1);
+    if (n_del > 1) {
+      /* Sort the del list for easier searching */
+      qsort(del_list + 1, n_del - 1, sizeof del_list[0], _GD_EntryCmp);
 
-      memmove(D->entry + first, D->entry + last + 1,
-          sizeof(gd_entry_t*) * (D->n_entries - last - 1));
-      D->n_entries -= last - first + 1;
+      /* Remove all meta fields -- there are no RAW fields here */
+      for (i = 1, j = 0; i < n_del && j < D->n_entries; ++j) {
+        if (D->entry[j] == del_list[i]) {
+          _GD_FreeE(D, D->entry[j], 1);
+          memmove(D->entry + j, D->entry + j + 1,
+              sizeof(gd_entry_t *) * (D->n_entries - j - 1));
+          D->n_entries--;
+          i++;
+        }
+      }
     }
 
     /* Invalidate the field lists */
@@ -478,6 +446,8 @@ static void _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
     Pe->fl.value_list_validity = 0;
   }
 
+  free(del_list);
+
   /* Remove the entry from the list -- we need not worry about the way we've
    * already modified D->entry, since E is guaranteed to be before the stuff
    * we've already removed */
@@ -500,7 +470,8 @@ int gd_delete(DIRFILE *D, const char *field_code, unsigned int flags)
 
   GD_RETURN_ERR_IF_INVALID(D);
 
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, &index);
+  E = _GD_FindField(D, field_code, strlen(field_code), D->entry, D->n_entries,
+      0, &index);
 
   if (E == NULL) 
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);

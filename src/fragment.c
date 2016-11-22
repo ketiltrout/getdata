@@ -184,9 +184,11 @@ char *_GD_UpdateCode(DIRFILE *D, int index, const char *code, int early,
         GD_VF_CODE))
   {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, new_code);
-  } else if (_GD_FindField(D, new_code, D->entry, D->n_entries, 0, NULL))
+  } else if (_GD_FindField(D, new_code, new_len, D->entry, D->n_entries, 0,
+        NULL))
+  {
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, new_code);
-  else {
+  } else {
     /* field code okay */
     dreturn("\"%s\"", new_code);
     return new_code;
@@ -436,6 +438,7 @@ static int _GD_UpdateAffixes(DIRFILE *D, int index, char *nsin, size_t nsl,
     if (codes[u]) {
       free(D->entry[u]->field);
       D->entry[u]->field = codes[u];
+      D->entry[u]->e->len = strlen(codes[u]);
       resort = 1;
     }
   free(codes);

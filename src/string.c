@@ -30,10 +30,10 @@ int gd_get_sarray_slice(DIRFILE *D, const char *field_code, unsigned long start,
 
   GD_RETURN_ERR_IF_INVALID(D);
 
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+  E = _GD_FindEntry(D, field_code);
 
   if (E == NULL)
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    ; /* Error already set */
   else if (E->field_type != GD_STRING_ENTRY && E->field_type != GD_SARRAY_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else if (start + n > ((E->field_type == GD_STRING_ENTRY) ? 1 :
@@ -60,11 +60,10 @@ gd_nothrow
 
   GD_RETURN_ERR_IF_INVALID(D);
 
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+  E = _GD_FindEntry(D, field_code);
 
   if (E == NULL)
-    GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0,
-        field_code);
+    GD_RETURN_ERROR(D);
 
   if (E->field_type == GD_STRING_ENTRY)
     data_out[0] = E->e->u.string;
@@ -192,10 +191,10 @@ int gd_put_sarray_slice(DIRFILE *D, const char *field_code, unsigned long first,
 
   GD_RETURN_ERR_IF_INVALID(D);
 
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+  E = _GD_FindEntry(D, field_code);
 
   if (E == NULL)
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    ; /* Error already set */
   else if (E->field_type != GD_SARRAY_ENTRY && E->field_type != GD_STRING_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else
@@ -213,10 +212,10 @@ int gd_put_sarray(DIRFILE *D, const char *field_code, const char **data_in)
 
   GD_RETURN_ERR_IF_INVALID(D);
 
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+  E = _GD_FindEntry(D, field_code);
 
   if (E == NULL) 
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    ; /* Error already set */
   else if (E->field_type != GD_SARRAY_ENTRY && E->field_type != GD_STRING_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else
@@ -236,10 +235,10 @@ size_t gd_put_string(DIRFILE *D, const char *field_code, const char *data_in)
 
   GD_RETURN_IF_INVALID(D, "%i", 0);
 
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+  E = _GD_FindEntry(D, field_code);
 
   if (E == NULL)
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    ; /* Error already set */
   else if (E->field_type != GD_STRING_ENTRY && E->field_type != GD_SARRAY_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else 

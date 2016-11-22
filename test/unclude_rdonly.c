@@ -53,6 +53,8 @@ int main(void)
   CHECKI(ret,GD_E_ACCMODE);
   CHECKI(e1,GD_E_ACCMODE);
 
+  gd_discard(D);
+
   unlink_format2 = unlink(format2);
   unlink_format1 = unlink(format1);
   unlink(format);

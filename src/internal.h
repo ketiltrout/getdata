@@ -940,7 +940,9 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 /* database metadata update data for a field rename */
 struct gd_rename_update_ {
   char *new_code; /* The newly minted code */
+  size_t new_len; /* The new code's length */
   char **dst; /* A pointer to the old code */
+  size_t *dst_len; /* Non-NULL if we need to store new_len here */
   int index; /* The affected metadata fragment */
 };
 
@@ -996,6 +998,10 @@ struct gd_flist_ {
 
 /* Unified entry struct */
 struct gd_private_entry_ {
+  size_t len; /* strlen(E->field) */
+
+  /* Input entries.  Aliases use entry[0] for the proximal target and
+   * entry[1] for the distal target */
   gd_entry_t* entry[GD_MAX_LINCOM];
   int repr[GD_MAX_LINCOM];
 
@@ -1311,8 +1317,9 @@ char *_GD_BuildCode(DIRFILE*, int, const char*, size_t, const char*, int,
 int _GD_CalculateEntry(DIRFILE *restrict, gd_entry_t *restrict, int);
 char *_GD_CanonicalPath(const char *restrict, const char *restrict);
 int _GD_CheckByteSex(gd_type_t, unsigned, unsigned, int, int *restrict);
-gd_entry_t *_GD_CheckParent(DIRFILE *restrict D,
-    const struct parser_state *restrict, char **restrict name, int me);
+gd_entry_t *_GD_CheckParent(DIRFILE *restrict,
+    const struct parser_state *restrict, char **restrict, size_t *restrict,
+    int);
 int _GD_CheckCodeAffixes(DIRFILE *restrict, const char *restrict, int,
     unsigned);
 void _GD_CInvertData(DIRFILE *restrict, void *restrict, gd_type_t,
@@ -1341,7 +1348,7 @@ off64_t _GD_DoSeek(DIRFILE *restrict, gd_entry_t *restrict,
 int _GD_EntryCmp(const void*, const void*);
 gd_entry_t *_GD_FindEntry(DIRFILE *restrict, const char *restrict);
 gd_entry_t *_GD_FindField(const DIRFILE *restrict, const char *restrict,
-    gd_entry_t *const *, unsigned int, int, unsigned int *restrict);
+    size_t, gd_entry_t *const *, unsigned int, int, unsigned int *restrict);
 gd_entry_t *_GD_FindFieldAndRepr(DIRFILE *restrict, const char *restrict,
     char **restrict, int *restrict, unsigned int *restrict, int, int);
 uint64_t _GD_FindVersion(DIRFILE *D);
@@ -1392,13 +1399,13 @@ gd_type_t _GD_NativeType(DIRFILE *restrict, gd_entry_t *restrict, int);
 char *_GD_NormaliseNamespace(DIRFILE *restrict, const char *restrict,
     size_t *restrict) __attribute_malloc__;
 gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict,
-    const struct parser_state *restrict, int, char**,
+    const struct parser_state *restrict, int, char**, size_t,
     const gd_entry_t *restrict, int, int, int, char **, const char *);
 char *_GD_ParseFragment(FILE *restrict, DIRFILE*, struct parser_state *restrict,
     int, int);
 void _GD_PerformRename(DIRFILE *restrict, struct gd_rename_data_ *restrict);
 struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict, char *restrict,
-    gd_entry_t *restrict, int, unsigned);
+    size_t, gd_entry_t *restrict, int, unsigned);
 void _GD_ReadLinterpFile(DIRFILE *restrict, gd_entry_t *restrict);
 void *_GD_Realloc(DIRFILE *restrict, void *restrict, size_t size);
 void _GD_ReleaseDir(DIRFILE *D, int dirfd);

@@ -795,10 +795,9 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
     return 0;
   }
 
-  entry = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+  entry = _GD_FindEntry(D, field_code);
 
   if (entry == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%i", 0);
     return 0;
   }

@@ -275,11 +275,12 @@ const char **gd_entry_list(DIRFILE* D, int fragment, const char *parent,
   GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   if (parent) {
-    gd_entry_t *P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+    gd_entry_t *P = _GD_FindEntry(D, parent);
 
-    if (P == NULL || P->e->n_meta == -1) {
-      _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
-          NULL, 0, parent);
+    if (P && P->e->n_meta == -1)
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, parent);
+
+    if (D->error) {
       dreturn("%u", 0);
       return 0;
     }
@@ -315,11 +316,12 @@ static void *_GD_Constants(DIRFILE* D, const char* parent,
   }
 
   if (parent) {
-    P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+    P = _GD_FindEntry(D, parent);
 
-    if (P == NULL || P->e->n_meta == -1) {
-      _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
-          NULL, 0, parent);
+    if (P && P->e->n_meta == -1)
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, parent);
+
+    if (D->error) {
       dreturn("%p", NULL);
       return NULL;
     }
@@ -399,11 +401,12 @@ static gd_carray_t *_GD_Carrays(DIRFILE* D, const char* parent,
   GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   if (parent) {
-    P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+    P = _GD_FindEntry(D, parent);
 
-    if (P == NULL || P->e->n_meta == -1) {
-      _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
-          NULL, 0, parent);
+    if (P && P->e->n_meta == -1)
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, parent);
+
+    if (D->error) {
       dreturn("%p", NULL);
       return NULL;
     }
@@ -428,7 +431,7 @@ static gd_carray_t *_GD_Carrays(DIRFILE* D, const char* parent,
   /* DoField will implicitly choose GD_REPR_AUTO for complex data being returned
    * as purely real */
   for (i = n = 0; i < nentries; ++i) {
-    if (n == len) {
+    if (n == len - 1) {
       void *ptr = _GD_Realloc(D, fl, sizeof(*fl) * (len *= 2));
       if (ptr == NULL) {
         free(fl);
@@ -493,11 +496,12 @@ static const char **_GD_Strings(DIRFILE* D, const char* parent) gd_nothrow
   GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   if (parent) {
-    P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+    P = _GD_FindEntry(D, parent);
 
-    if (P == NULL || P->e->n_meta == -1) {
-      _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
-          NULL, 0, parent);
+    if (P && P->e->n_meta == -1)
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, parent);
+    
+    if (D->error) {
       dreturn("%p", NULL);
       return NULL;
     }
@@ -520,7 +524,7 @@ static const char **_GD_Strings(DIRFILE* D, const char* parent) gd_nothrow
   }
 
   for (i = n = 0; i < nentries; ++i) {
-    if (n == len) {
+    if (n == len - 1) {
       void *ptr = _GD_Realloc(D, fl, sizeof(*fl) * (len *= 2));
       if (ptr == NULL) {
         free(fl);
@@ -570,11 +574,12 @@ static const char ***_GD_SArrays(DIRFILE* D, const char* parent) gd_nothrow
   GD_RETURN_IF_INVALID(D, "%p", NULL);
 
   if (parent) {
-    P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+    P = _GD_FindEntry(D, parent);
 
-    if (P == NULL || P->e->n_meta == -1) {
-      _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
-          NULL, 0, parent);
+    if (P && P->e->n_meta == -1)
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, parent);
+
+    if (D->error) {
       dreturn("%p", NULL);
       return NULL;
     }
@@ -597,7 +602,7 @@ static const char ***_GD_SArrays(DIRFILE* D, const char* parent) gd_nothrow
   }
 
   for (i = n = 0; i < nentries; ++i) {
-    if (n == len) {
+    if (n == len - 1) {
       void *ptr = _GD_Realloc(D, fl, sizeof(*fl) * (len *= 2));
       if (ptr == NULL)
         goto SARRAYS_ERROR;

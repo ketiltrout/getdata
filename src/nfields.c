@@ -71,11 +71,12 @@ unsigned int gd_nentries(DIRFILE *D, int fragment, const char *parent,
   GD_RETURN_IF_INVALID(D, "%u", 0);
 
   if (parent) {
-    gd_entry_t *P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+    gd_entry_t *P = _GD_FindEntry(D, parent);
 
-    if (P == NULL || P->e->n_meta == -1) {
-      _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
-          NULL, 0, parent);
+    if (P && P->e->n_meta == -1)
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, parent);
+
+    if (D->error) {
       dreturn("%u", 0);
       return 0;
     }

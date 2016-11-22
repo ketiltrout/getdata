@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. V. Wiebe
+/* Copyright (C) 2012-2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,37 +20,18 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *zata = "dirfile/zata";
-  const char *format_data =
-    "early PHASE cata 0\n"
-    "earlya PHASE data 0\n"
-    "/ALIAS aata cata\n"
-    "/ALIAS bata data\n"
-    "late PHASE cata 0\n"
-    "latea PHASE data 0\n"
-    "cata RAW UINT8 8\n"
-    "/ALIAS data cata\n"
-    "eata RAW UINT8 8\n";
-  unsigned char data_data[256];
-  int fd, ret, e0, e1, e2, e3, e4, e5, e6, e7, unlink_data, unlink_zata, r = 0;
+  int ret, e0, e1, e2, e3, e4, e5, e6, e7, unlink_data, unlink_zata, r = 0;
   const char **fl;
 #define NFIELDS 10
   const char *field_list[NFIELDS] = {
-    "INDEX", "aata", "bata", "cata", "early", "earlya", "eata", "late", "latea",
-    "zata"
+    "aata", "bata", "cata", "eata", "late", "zata", "INDEX", "early", "latea",
+    "earlya"
   };
   char *s1, *s2, *s3, *s4;
   const char *s5, *s6;
@@ -61,16 +42,17 @@ int main(void)
   rmdirfile();
   mkdir(filedir, 0777);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEFORMATFILE(format,
+    "early PHASE cata 0\n"
+    "earlya PHASE data 0\n"
+    "/ALIAS aata cata\n"
+    "/ALIAS bata data\n"
+    "late PHASE cata 0\n"
+    "latea PHASE data 0\n"
+    "cata RAW UINT8 8\n"
+    "/ALIAS data cata\n"
+    "eata RAW UINT8 8\n");
+  MAKEDATAFILE(data, uint8_t, i, 256);
 
   D = gd_open(filedir, GD_RDWR);
   gd_validate(D, "early");

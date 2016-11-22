@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -22,32 +22,56 @@
 
 int main(void)
 {
+#ifdef ENC_SKIP_TEST
+  return 77;
+#else
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int ret, error, r = 0;
-  DIRFILE *D;
+  const char *data = "dirfile/data" ENC_SUFFIX;
   gd_entry_t e;
+  int e1, e2, e3, unlink_data, r = 0;
+  DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+#ifdef USE_ENC
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE | ENC_ENCODED);
+#else
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | ENC_ENCODED);
+#endif
+  gd_add_raw(D, "data", GD_UINT8, 2, 0);
+  e1 = gd_error(D);
 
-  MAKEFORMATFILE(format, "mplex MPLEX data count 1 3\n");
+  /* check */
+  e2 = gd_entry(D, "data", &e);
+#ifdef USE_ENC
+  CHECKI(e1, GD_E_OK);
+  CHECKI(e2, 0);
+  if (e2 == 0) {
+    CHECKI(e.field_type, GD_RAW_ENTRY);
+    CHECKI(e.fragment_index, 0);
+    CHECKI(e.EN(raw,spf), 2);
+    CHECKI(e.EN(raw,data_type), GD_UINT8);
+    gd_free_entry_strings(&e);
+  }
+#else
+  CHECKI(e1, GD_E_UNSUPPORTED);
+  CHECKI(e2, GD_E_BAD_CODE);
+#endif
 
-  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  ret = gd_alter_mplex(D, "mplex", "in1", "in2", 2, -1);
-  CHECKI(ret, 0);
-  error = gd_error(D);
-  CHECKI(error, 0);
+  e3 = gd_close(D);
+  CHECKI(e3, 0);
 
-  gd_entry(D, "mplex", &e);
-  CHECKS(e.in_fields[0], "in1");
-  CHECKS(e.in_fields[1], "in2");
-  gd_free_entry_strings(&e);
+  unlink_data = unlink(data);
 
-  gd_discard(D);
+#ifdef USE_ENC
+  CHECKI(unlink_data, 0);
+#else
+  CHECKI(unlink_data, -1);
+#endif
 
   unlink(format);
   rmdir(filedir);
 
   return r;
+#endif
 }

@@ -58,7 +58,7 @@ int _GD_BadType(int standards, gd_type_t type)
 }
 
 static gd_entry_t *_GD_FixName(DIRFILE *restrict D, char **restrict buffer,
-    const char *name, int frag, int *restrict offset)
+    size_t *restrict len, const char *name, int frag, size_t *restrict offset)
 {
   gd_entry_t *P;
   char *ptr;
@@ -66,7 +66,7 @@ static gd_entry_t *_GD_FixName(DIRFILE *restrict D, char **restrict buffer,
   const unsigned flags =
     GD_CO_NAME | GD_CO_ERROR | ((D->standards <= 5) ? GD_CO_EARLY : 0);
 
-  dtrace("%p, %p, \"%s\", %i, %p", D, buffer, name, frag, offset);
+  dtrace("%p, %p, %p, \"%s\", %i, %p", D, buffer, len, name, frag, offset);
 
   /* Check prefix and suffix */
   if (_GD_CheckCodeAffixes(D, name, frag, flags)) {
@@ -74,39 +74,40 @@ static gd_entry_t *_GD_FixName(DIRFILE *restrict D, char **restrict buffer,
     return NULL;
   }
     
-  *buffer = ptr = _GD_Strdup(D, name);
+  *buffer = ptr = _GD_Malloc(D, *len + 1);
 
   if (ptr == NULL) {
     dreturn("%p", NULL);
     return NULL;
   }
 
+  memcpy(ptr, name, *len + 1);
   _GD_SimpleParserInit(D, NULL, &p);
-  P = _GD_CheckParent(D, &p, &ptr, -1);
+  P = _GD_CheckParent(D, &p, &ptr, len, -1);
 
   if (P) {
-    size_t len = strlen(ptr);
-    char *temp2;
+    char *name_out;
+
     /* make the new name -- this may be different because P may have been
      * dealiased */
-
-    *offset = strlen(P->field) + 1;
-    temp2 = (char*)_GD_Malloc(D, *offset + len + 1);
-    if (temp2 == NULL) {
+    *offset = P->e->len + 1;
+    name_out = _GD_Malloc(D, *offset + *len + 1);
+    if (name_out == NULL) {
       free(*buffer);
       dreturn("%p", NULL);
       return NULL;
     }
 
-    memcpy(temp2, P->field, *offset - 1);
-    temp2[*offset - 1] = '/';
-    memcpy(temp2 + *offset, ptr, len + 1); /* including trailing NUL */
+    memcpy(name_out, P->field, *offset - 1);
+    name_out[*offset - 1] = '/';
+    memcpy(name_out + *offset, ptr, *len + 1); /* including trailing NUL */
+    *len += P->e->len + 1;
     free(*buffer);
-    *buffer = temp2;
+    *buffer = name_out;
   } else
     *offset = 0;
 
-  dreturn("%p (\"%s\", %i)", P, *buffer, *offset);
+  dreturn("%p (\"%s\", %" PRIuSIZE ")", P, *buffer, *offset);
   return P;
 }
 
@@ -165,11 +166,11 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     const gd_entry_t *restrict entry, const char *restrict parent,
     int init_scalar)
 {
-  char *temp_buffer;
-  int i, subfield_offs;
+  char *name;
+  int i;
   void *new_list;
   void *new_ref = NULL;
-  size_t z;
+  size_t z, subfield_offs, len =  strlen(entry->field);
   unsigned int u;
   unsigned mask;
   gd_entry_t *E;
@@ -197,9 +198,18 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     return NULL;
   }
 
+  /* check for bad field type */
+  if (_GD_InvalidEntype(entry->field_type)) {
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_TYPE, NULL, entry->field_type,
+        NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
   /* check parent */
   if (parent != NULL) {
-    P = _GD_FindField(D, parent, D->entry, D->n_entries, 0, NULL);
+    P = _GD_FindField(D, parent, strlen(parent), D->entry, D->n_entries, 0,
+        NULL);
     if (P == NULL) {
       _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
       dreturn("%p", NULL);
@@ -214,22 +224,22 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     }
 
     /* make name */
-    subfield_offs = strlen(parent) + 1;
-    temp_buffer = (char *)_GD_Malloc(D, subfield_offs + strlen(entry->field)
-        + 1);
+    subfield_offs = P->e->len + 1;
+    name = (char *)_GD_Malloc(D, subfield_offs + len + 1);
 
-    if (temp_buffer == NULL) {
+    if (name == NULL) {
       dreturn("%p", NULL);
       return NULL;
     }
 
-    strcpy(temp_buffer, parent);
-    temp_buffer[subfield_offs - 1] = '/';
-    strcpy(temp_buffer + subfield_offs, entry->field);
+    memcpy(name, parent, P->e->len);
+    name[subfield_offs - 1] = '/';
+    memcpy(name + subfield_offs, entry->field, len + 1);
+    len += subfield_offs;
   } else {
     /* this will check for affixes and take care of detecting Barth-style
      * metafield definitions */
-    P = _GD_FixName(D, &temp_buffer, entry->field, entry->fragment_index,
+    P = _GD_FixName(D, &name, &len, entry->field, entry->fragment_index,
         &subfield_offs);
 
     if (D->error) {
@@ -239,18 +249,9 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   }
 
   /* check for duplicate field */
-  if (_GD_FindField(D, temp_buffer, D->entry, D->n_entries, 0, &u)) {
-    _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, temp_buffer);
-    free(temp_buffer);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  /* check for bad field type */
-  if (_GD_InvalidEntype(entry->field_type)) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_TYPE, NULL, entry->field_type,
-        NULL);
-    free(temp_buffer);
+  if (_GD_FindField(D, name, len, D->entry, D->n_entries, 0, &u)) {
+    _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, name);
+    free(name);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -258,7 +259,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   /* New entry */
   E = (gd_entry_t *)_GD_Malloc(D, sizeof(gd_entry_t));
   if (E == NULL) {
-    free(temp_buffer);
+    free(name);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -273,7 +274,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[E->fragment_index].cname);
     free(E);
-    free(temp_buffer);
+    free(name);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -282,22 +283,23 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
-    free(temp_buffer);
+    free(name);
     dreturn("%p", NULL);
     return NULL;
   }
   memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = entry->field_type;
-  E->field = temp_buffer;
+  E->field = name;
+  E->e->len = len;
 
   /* GD_EN_HIDDEN is the only flag we honour in the input entry */
   E->flags = entry->flags & GD_EN_HIDDEN;
 
   /* Figure out the length of the attached namespace in the supplied field
-   * name.  If subfield_offs > 0, then there can't be a namespace because
+   * name.  If P is non-NULL, then there can't be a namespace because
    * we're only checking the subfield name */
-  if (D->standards >= 10 && subfield_offs == 0) {
+  if (D->standards >= 10 && P == NULL) {
     const char *dot, *slash;
     _GD_SlashDot(E->field, strlen(E->field), GD_CO_NAME, &dot, &slash);
     if (dot)
@@ -710,10 +712,12 @@ static int _GD_AddSpec(DIRFILE* D, const char* line, const char* parent,
   if (parent) {
     /* Find parent -- we don't do code mungeing here because we don't know
      * which fragment this is yet.  */
-    E = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+    E = _GD_FindField(D, parent, strlen(parent), D->entry, D->n_entries, 0,
+        NULL);
     if (E == NULL)
       GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
-    me = E->fragment_index;
+    else
+      me = E->fragment_index;
   } else if (me < 0 || me >= D->n_fragment) /* fragment index out of range */
     GD_SET_RETURN_ERROR(D, GD_E_BAD_INDEX, 0, NULL, me, NULL);
 
@@ -727,10 +731,13 @@ static int _GD_AddSpec(DIRFILE* D, const char* line, const char* parent,
   n_cols = _GD_Tokenise(D, &p, line, &outstring, &tok_pos, MAX_IN_COLS,
       in_cols);
 
-  /* Directive parsing is skipped -- The Field Spec parser will add the field */
-  if (!D->error)
-    _GD_ParseFieldSpec(D, &p, n_cols, in_cols, E, me, 1, 1, &outstring,
-        tok_pos);
+  if (!D->error) {
+    if (n_cols == 0) /* Sanity check */
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, name, 0, NULL);
+    else /* The Field Spec parser will add the field */
+      _GD_ParseFieldSpec(D, &p, n_cols, in_cols, strlen(in_cols[0]), E, me, 1,
+          1, &outstring, tok_pos);
+  }
 
   free(outstring);
 
@@ -1883,9 +1890,8 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
     int fragment_index)
 {
   unsigned u;
-  int subfield_offs;
-  size_t nsl;
-  char *code = NULL;
+  size_t nsl, subfield_offs, len = strlen(field_code);
+  char *name = NULL;
   void *ptr;
   gd_entry_t *E = NULL, *P = NULL;
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, parent, field_code, target,
@@ -1904,7 +1910,8 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
 
   if (parent != NULL) {
     /* look for parent */
-    P = _GD_FindField(D, parent, D->entry, D->n_entries, 0, NULL);
+    P = _GD_FindField(D, parent, strlen(parent), D->entry, D->n_entries, 0,
+        NULL);
     if (P == NULL) {
       _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
       goto add_alias_error;
@@ -1917,18 +1924,19 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
       goto add_alias_error;
     }
 
-    subfield_offs = strlen(parent) + 1;
-    code = (char *)_GD_Malloc(D, subfield_offs + strlen(field_code) + 1);
-    if (code == NULL)
+    subfield_offs = P->e->len + 1;
+    name = (char *)_GD_Malloc(D, subfield_offs + strlen(field_code) + 1);
+    if (name == NULL)
       goto add_alias_error;
 
-    strcpy(code, parent);
-    code[subfield_offs - 1] = '/';
-    strcpy(code + subfield_offs, field_code);
+    memcpy(name, parent, P->e->len);
+    name[subfield_offs - 1] = '/';
+    memcpy(name + subfield_offs, field_code, len + 1);
+    len += subfield_offs;
   } else {
     /* this will check for affixes and take care of detecting Barth-style
      * metafield definitions */
-    P = _GD_FixName(D, &code, field_code, fragment_index, &subfield_offs);
+    P = _GD_FixName(D, &name, &len, field_code, fragment_index, &subfield_offs);
 
     if (D->error)
       goto add_alias_error;
@@ -1939,20 +1947,19 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
    * we're only checking the subfield name */
   if (D->standards >= 10 && subfield_offs == 0) {
     const char *dot, *slash;
-    _GD_SlashDot(code, strlen(code), GD_CO_NAME, &dot, &slash);
+    _GD_SlashDot(name, len, GD_CO_NAME, &dot, &slash);
     if (dot)
-      nsl = dot - code + 1;
+      nsl = dot - name + 1;
     else
       nsl = 0;
   } else
     nsl = 0;
 
   /* check alias name. */
-  if (_GD_ValidateField(code + subfield_offs, nsl, D->standards, 1, GD_VF_NAME))
-  {
+  if (_GD_ValidateField(name + subfield_offs, nsl, D->standards, 1, GD_VF_NAME))
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, field_code);
-  } else if (_GD_FindField(D, code, D->entry, D->n_entries, 0, &u))
-    _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, code);
+  else if (_GD_FindField(D, name, len, D->entry, D->n_entries, 0, &u))
+    _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, name);
   else
     /* check target */
     _GD_CheckCodeAffixes(D, target, fragment_index,
@@ -1979,7 +1986,8 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
 
   memset(E->e, 0, sizeof(struct gd_private_entry_));
 
-  E->field = code;
+  E->field = name;
+  E->e->len = len;
   E->fragment_index = fragment_index;
   E->in_fields[0] = _GD_Strdup(D, target);
   E->field_type = GD_ALIAS_ENTRY;
@@ -2013,7 +2021,7 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
 
 add_alias_error:
   free(E);
-  free(code);
+  free(name);
   GD_RETURN_ERROR(D);
 }
 

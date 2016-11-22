@@ -36,6 +36,8 @@ int main(void)
   CHECKI(ret,GD_E_BAD_INDEX);
   CHECKI(e1,GD_E_BAD_INDEX);
 
+  gd_discard(D);
+
   unlink(format);
   rmdir(filedir);
 

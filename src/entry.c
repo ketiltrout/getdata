@@ -550,7 +550,8 @@ const char *gd_alias_target(DIRFILE *D, const char *field_code) gd_nothrow
 
   GD_RETURN_IF_INVALID(D, "%p", NULL);
 
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
+  E = _GD_FindField(D, field_code, strlen(field_code), D->entry, D->n_entries,
+      0, NULL);
 
   if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
@@ -585,10 +586,9 @@ const char **gd_aliases(DIRFILE *D, const char *field_code) gd_nothrow
     return NULL;
   }
 
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+  E = _GD_FindEntry(D, field_code);
 
   if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -626,10 +626,9 @@ unsigned int gd_naliases(DIRFILE *D, const char *field_code) gd_nothrow
 
   GD_RETURN_IF_INVALID(D, "%u", 0);
 
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+  E = _GD_FindEntry(D, field_code);
 
   if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%u", 0);
     return 0;
   }
@@ -672,7 +671,8 @@ int gd_fragment_index(DIRFILE *D, const char *field_code) gd_nothrow
 
   GD_RETURN_ERR_IF_INVALID(D);
 
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
+  E = _GD_FindField(D, field_code, strlen(field_code), D->entry, D->n_entries,
+      0, NULL);
 
   if (E == NULL)
     GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0,
@@ -693,7 +693,8 @@ int gd_hide(DIRFILE *D, const char *field_code) gd_nothrow
   if ((D->flags & GD_ACCMODE) != GD_RDWR)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
   else {
-    E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
+    E = _GD_FindField(D, field_code, strlen(field_code), D->entry, D->n_entries,
+        0, NULL);
 
     if (E == NULL)
       _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
@@ -717,7 +718,8 @@ int gd_hidden(DIRFILE *D, const char *field_code) gd_nothrow
 
   GD_RETURN_ERR_IF_INVALID(D);
 
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
+  E = _GD_FindField(D, field_code, strlen(field_code), D->entry, D->n_entries,
+      0, NULL);
 
   if (E == NULL)
     GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0,
@@ -738,7 +740,8 @@ int gd_unhide(DIRFILE *D, const char *field_code) gd_nothrow
   if ((D->flags & GD_ACCMODE) != GD_RDWR)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
   else {
-    E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
+    E = _GD_FindField(D, field_code, strlen(field_code), D->entry, D->n_entries,
+        0, NULL);
 
     if (E == NULL)
       _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);

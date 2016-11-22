@@ -18,44 +18,16 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read UINT8 */
 #include "test.h"
 
-int main(void)
-{
 #ifndef TEST_GZIP
-  return 77;
-#else
-  const char *filedir = "dirfile";
-  const char *format = "dirfile/format";
-  const char *format_data = "data RAW UINT16 8\n/ENCODING gzip\n";
-  char *estr;
-  int fd, error, r = 0;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  D = gd_open(filedir, GD_RDONLY);
-
-  gd_getdata(D, "data", 0, 0, 0, 1, GD_NULL, NULL);
-  error = gd_error(D);
-  estr = gd_error_string(D, NULL, 0);
-
-  CHECKI(error, GD_E_IO);
-  CHECKPN(estr);
-
-  free(estr);
-
-  gd_discard(D);
-
-  unlink(format);
-  rmdir(filedir);
-
-  return r;
+#define ENC_SKIP_TEST 1
 #endif
-}
+
+#ifdef USE_GZIP
+#define USE_ENC 1
+#endif
+
+#define ENC_NAME "gzip"
+
+#include "enc_enoent.c"

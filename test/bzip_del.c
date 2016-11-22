@@ -31,4 +31,4 @@
 #define ENC_SUFFIX ".bz2"
 #define ENC_ENCODED GD_BZIP2_ENCODED
 
-#include "enc_add.c"
+#include "enc_del.c"

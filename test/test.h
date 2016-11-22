@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2015 D. V. Wiebe
+/* Copyright (C) 2010-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -121,6 +121,18 @@ int gd_system(const char* command)
     if (write(fd, t, -1 + sizeof t) < 0) { perror("write"); exit(1); } \
     if (close(fd)) { perror("close"); exit(1); } \
   } while (0)
+
+/* Write n data of type t initialialised with expression expr to file f. */
+#define MAKEDATAFILE(f,t,expr,n) \
+  do { \
+    int i; \
+    t data_data[n]; \
+    for (i = 0; i < n; ++i) data_data[i] = (t)(expr); \
+    i = open(f, O_CREAT | O_EXCL | O_WRONLY, 0666); \
+    if (i < 0) { perror("open"); exit(1); } \
+    if (write(i, data_data, sizeof(t) * n) < 0) { perror("write"); exit(1); } \
+    if (close(i)) { perror("close"); exit(1); } \
+  } while(0)
 
 #ifdef GD_NO_C99_API
 #define CHECKC(n,v)    CHECK(sqrt(((n)[0]-(v)[0])*((n)[0]-(v)[0]) + \

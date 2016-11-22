@@ -24,18 +24,15 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "w WINDOW in1 in2 EQ 0\n";
   gd_triplet_t threshold;
-  int fd, e1, r = 0;
+  int e1, r = 0;
   DIRFILE *D;
   gd_entry_t e;
 
   rmdirfile();
   mkdir(filedir, 0777);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "w WINDOW in1 in2 EQ 0\n");
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
 
@@ -46,6 +43,7 @@ int main(void)
   gd_entry(D, "w", &e);
   CHECKS(e.in_fields[0], "in3");
   CHECKS(e.in_fields[1], "in4");
+  gd_free_entry_strings(&e);
 
   gd_discard(D);
 

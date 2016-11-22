@@ -24,28 +24,26 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "div DIVIDE data data\n";
-  int fd, ret, error, r = 0;
+  int ret, error, r = 0;
   DIRFILE *D;
   gd_entry_t e;
 
   rmdirfile();
   mkdir(filedir, 0777);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "div DIVIDE data data\n");
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   ret = gd_alter_divide(D, "div", "in0", "in1");
   CHECKI(ret,0);
 
+  error = gd_error(D);
+  CHECKI(error,0);
+
   gd_entry(D, "div", &e);
   CHECKS(e.in_fields[0], "in0");
   CHECKS(e.in_fields[1], "in1");
-
-  error = gd_error(D);
-  CHECKI(error,0);
+  gd_free_entry_strings(&e);
 
   gd_discard(D);
 

@@ -1,6 +1,6 @@
 .\" gd_add_bit.3.  The gd_add_bit man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2012, 2013, 2014 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013, 2014, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add_bit 3 "16 October 2014" "Version 0.9.0" "GETDATA"
+.TH gd_add_bit 3 "21 November 2016" "0.10.0" "GETDATA"
 .SH NAME
 gd_add_bit, gd_add_carray gd_add_clincom, gd_add_const, gd_add_cpolynom,
 gd_add_crecip, gd_add_divide, gd_add_lincom, gd_add_linterp, gd_add_multiply,
@@ -221,8 +221,8 @@ and
 in the C89 GetData API.
 
 .SH RETURN VALUE
-On success, any of these functions returns zero.   On error, -1 is returned and
-the dirfile error is set to a non-zero error value.  Possible error values are:
+On success, any of these functions returns zero.   On error, a negative-valued
+error value is returned.  Possible error values are:
 .TP 8
 .B GD_E_ACCMODE
 The specified dirfile was opened read-only.
@@ -291,7 +291,7 @@ not support creating an empty binary file to be associated with a newly added
 .B RAW
 field.
 .PP
-The dirfile error may be retrieved by calling
+The dirfile error may also be retrieved by calling
 .BR gd_error (3).
 A descriptive error string for the last error encountered can be obtained from
 a call to

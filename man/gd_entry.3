@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_entry 3 "28 October 2016" "Version 0.10.0" "GETDATA"
+.TH gd_entry 3 "21 November 2016" "0.10.0" "GETDATA"
 .SH NAME
 gd_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -85,11 +85,10 @@ caller.
 .SH RETURN VALUE
 Upon successful completion,
 .BR gd_entry ()
-returns zero, and writes the field metadata in the supplied gd_entry_t buffer.
+returns zero and writes the field metadata in the supplied gd_entry_t buffer.
 On error, the supplied gd_entry_t buffer is not modified.  In this case,
 .BR gd_entry ()
-returns -1 and sets the dirfile error to a non-zero error value.  Possible
-error values are:
+returns a negative-valued error value.  Possible error values are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.
@@ -102,7 +101,7 @@ was not found in the database.
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .PP
-The dirfile error may be retrieved by calling
+The dirfile error may also be retrieved by calling
 .BR gd_error (3).
 A descriptive error string for the last error encountered can be obtained from
 a call to

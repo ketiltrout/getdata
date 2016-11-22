@@ -314,11 +314,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-  else if ((E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL))
-      == NULL)
-  {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-  } else if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT)
+  else if ((E = _GD_FindEntry(D, field_code)) == NULL)
+    ; /* Error already set */
+  else if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT)
     _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[E->fragment_index].cname);
   else if (E->field_type != N->field_type)
@@ -1146,12 +1144,10 @@ int gd_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
   else if (n_fields != 0)
     N.EN(lincom,n_fields) = n_fields;
   else {
-    gd_entry_t *E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1,
-        NULL);
+    gd_entry_t *E = _GD_FindEntry(D, field_code);
 
     if (E == NULL)
-      GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0,
-          field_code);
+      GD_RETURN_ERROR(D);
 
     N.EN(lincom,n_fields) = E->EN(lincom,n_fields);
   }
@@ -1205,12 +1201,10 @@ int gd_alter_clincom(DIRFILE* D, const char* field_code, int n_fields,
   else if (n_fields != 0)
     N.EN(lincom,n_fields) = n_fields;
   else {
-    gd_entry_t *E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1,
-        NULL);
+    gd_entry_t *E = _GD_FindEntry(D, field_code);
 
     if (E == NULL)
-      GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0,
-          field_code);
+      GD_RETURN_ERROR(D);
 
     N.EN(lincom,n_fields) = E->EN(lincom,n_fields);
   }
@@ -1530,12 +1524,10 @@ int gd_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   else if (poly_ord != 0)
     N.EN(polynom,poly_ord) = poly_ord;
   else {
-    gd_entry_t *E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1,
-        NULL);
+    gd_entry_t *E = _GD_FindEntry(D, field_code);
 
     if (E == NULL)
-      GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0,
-          field_code);
+      GD_RETURN_ERROR(D);
 
     N.EN(polynom,poly_ord) = E->EN(polynom,poly_ord);
   }
@@ -1577,12 +1569,10 @@ int gd_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
   else if (poly_ord != 0)
     N.EN(polynom,poly_ord) = poly_ord;
   else {
-    gd_entry_t *E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1,
-        NULL);
+    gd_entry_t *E = _GD_FindEntry(D, field_code);
 
     if (E == NULL)
-      GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0,
-          field_code);
+      GD_RETURN_ERROR(D);
 
     N.EN(polynom,poly_ord) = E->EN(polynom,poly_ord);
   }
@@ -1661,6 +1651,7 @@ static int _GD_AlterSpec(DIRFILE* D, const char* line, const char* parent,
 {
   char *outstring = NULL, *new_code;
   const char *tok_pos;
+  size_t len0;
   char *in_cols[MAX_IN_COLS];
   int n_cols, ret;
   gd_entry_t *N = NULL;
@@ -1687,15 +1678,10 @@ static int _GD_AlterSpec(DIRFILE* D, const char* line, const char* parent,
     GD_RETURN_ERROR(D); /* tokeniser threw an error */
   }
 
-  if (parent) {
-    N = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
-    if (N == NULL)
-      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
-  } else {
-    N = _GD_FindField(D, in_cols[0], D->entry, D->n_entries, 1, NULL);
-    if (N == NULL)
-      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, in_cols[0]);
-  }
+  if (parent)
+    N = _GD_FindEntry(D, parent);
+  else
+    N = _GD_FindEntry(D, in_cols[0]);
 
   if (D->error) {
     free(outstring);
@@ -1703,11 +1689,21 @@ static int _GD_AlterSpec(DIRFILE* D, const char* line, const char* parent,
   }
 
   /* the parser will modifiy in_cols[0] if it contains a metafield code */
+  len0 = strlen(in_cols[0]);
   if (parent) {
-    if ((new_code = _GD_Malloc(D, strlen(parent) + strlen(in_cols[0]) + 2)))
-      sprintf(new_code, "%s/%s", parent, in_cols[0]);
-  } else
-    new_code = _GD_Strdup(D, in_cols[0]);
+    new_code = _GD_Malloc(D, N->e->len + len0 + 2);
+
+    if (new_code) {
+      memcpy(new_code, N->field, N->e->len);
+      new_code[N->e->len] = '/';
+      memcpy(new_code + N->e->len + 1, in_cols[0], len0 + 1);
+    }
+    len0 += N->e->len + 1;
+  } else {
+    new_code = _GD_Malloc(D, len0 + 1);
+    if (new_code)
+      memcpy(new_code, in_cols[0], len0 + 1);
+  }
 
   if (D->error) { /* malloc error */
     free(outstring);
@@ -1715,17 +1711,20 @@ static int _GD_AlterSpec(DIRFILE* D, const char* line, const char* parent,
   }
 
   /* Let the parser compose the entry */
-  N = _GD_ParseFieldSpec(D, &p, n_cols, in_cols, parent ? N : NULL,
+  N = _GD_ParseFieldSpec(D, &p, n_cols, in_cols, len0, parent ? N : NULL,
       N->fragment_index, 0, 0, &outstring, tok_pos);
 
   free(outstring);
 
-  if (D->error)
+  if (D->error) {
+    free(new_code);
     GD_RETURN_ERROR(D); /* field spec parser threw an error */
+  }
 
   /* The parser will have re-applied the prefix and suffix, undo that */
   free(N->field);
   N->field = new_code;
+  N->e->len = len0;
 
   if (N->field_type == GD_LINCOM_ENTRY || N->field_type == GD_POLYNOM_ENTRY)
     move = 7;

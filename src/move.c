@@ -318,6 +318,7 @@ int _GD_StrCmpNull(const char *s1, const char *s2)
 static int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
 {
   char *new_filebase, *new_code;
+  size_t new_len;
   struct gd_rename_data_ *rdat = NULL;
   int i;
 
@@ -346,17 +347,18 @@ static int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
   /* add the new affixes */
   new_code = _GD_BuildCode(D, new_fragment, NULL, 0, new_filebase,
       E->flags & GD_EN_EARLY, NULL);
+  new_len = strlen(new_code);
 
-  if (strcmp(new_code, E->field)) {
+  if (new_len != E->e->len || memcmp(new_code, E->field, new_len)) {
     /* duplicate check */
-    if (_GD_FindField(D, new_code, D->entry, D->n_entries, 1, NULL)) {
+    if (_GD_FindField(D, new_code, new_len, D->entry, D->n_entries, 1, NULL)) {
       _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, new_code);
       free(new_filebase);
       free(new_code);
       GD_RETURN_ERROR(D);
     }
 
-    rdat = _GD_PrepareRename(D, new_code, E, new_fragment, flags);
+    rdat = _GD_PrepareRename(D, new_code, new_len, E, new_fragment, flags);
     if (rdat == NULL) {
       free(new_filebase);
       free(new_code);
@@ -393,13 +395,14 @@ static int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
   D->fragment[E->fragment_index].modified = 1;
   D->fragment[new_fragment].modified = 1;
   D->flags &= ~GD_HAVE_VERSION;
-  E->fragment_index = new_fragment;
 
   /* update metadata */
+  E->fragment_index = new_fragment;
   for (i = 0; i < E->e->n_meta; ++i)
     E->e->p.meta_entry[i]->fragment_index = new_fragment;
 
-  _GD_PerformRename(D, rdat);
+  if (rdat)
+    _GD_PerformRename(D, rdat);
 
   /* resort */
   if (new_code)
@@ -419,7 +422,8 @@ int gd_move(DIRFILE *D, const char *field_code, int new_fragment,
 
   GD_RETURN_ERR_IF_INVALID(D);
 
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
+  E = _GD_FindField(D, field_code, strlen(field_code), D->entry, D->n_entries,
+      0, NULL);
 
   if (E == NULL)
     GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0,

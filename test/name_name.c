@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2013 D. V. Wiebe
+/* Copyright (C) 2008-2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -47,7 +47,7 @@ int main(void)
   const char **fl;
 #define NFIELDS 8
   const char *field_list[NFIELDS] = {
-    "INDEX", "cata", "early", "earlya", "eata", "late", "latea", "zata"
+    "cata", "eata", "late", "zata", "INDEX", "early", "latea", "earlya"
   };
   char *s1, *s2, *s5;
   const char *s3, *s4, *s6;

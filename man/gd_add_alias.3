@@ -1,6 +1,6 @@
 .\" gd_add_alias.3.  The gd_add_alias man page.
 .\"
-.\" Copyright (C) 2012 D. V. Wiebe
+.\" Copyright (C) 2012, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add_alias 3 "26 July 2012" "Version 0.8.1" "GETDATA"
+.TH gd_add_alias 3 "21 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_add_alias, gd_madd_alias \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -50,8 +50,8 @@ On success,
 .BR gd_add_alias ()
 and
 .BR gd_madd_alias ()
-return zero.   On error, -1 is returned and the dirfile error is set to a
-non-zero error value.  Possible error values are:
+return zero.   On error, a negative-valued error value is returned.  Possible
+error values are:
 .TP 8
 .B GD_E_ACCMODE
 The specified dirfile was opened read-only.
@@ -85,7 +85,7 @@ The metadata of the fragment was protected from change.  Or, the creation of a
 .B RAW
 field was attempted and the data of the fragment was protected.
 .PP
-The dirfile error may be retrieved by calling
+The dirfile error may also be retrieved by calling
 .BR gd_error (3).
 A descriptive error string for the last error encountered can be obtained from
 a call to

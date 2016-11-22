@@ -23,7 +23,10 @@ AUTOMAKE_OPTIONS = foreign serial-tests
 LDADD=../src/libgetdata.la
 AM_CPPFLAGS=${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
 
-EXTRA_DIST=test.h enc_put_offs.c
+# The enc_*.c files aren't directly used as tests.  They're included by
+# the corresponding bzip, gzip, lzma(_xz), or flac tests.
+EXTRA_DIST=test.h enc_add.c enc_del.c enc_enoent.ca enc_move_from.c \
+					 enc_nframes.c enc_put_offs.c enc_seek.c
 
 ADD_TESTS=add_add add_affix add_alias add_alias_affix add_alias_index \
 					add_alias_meta add_alias_name add_alias_ns add_alias_prot \
@@ -85,7 +88,7 @@ ASCII_TESTS=ascii_add ascii_get ascii_get_complex ascii_get_get ascii_get_here \
 
 BOF_TESTS=bof bof_bit bof_index bof_lincom bof_phase bof_phase_neg
 
-BZIP_TESTS=bzip_add bzip_enoent bzip_get bzip_get_far bzip_get_get \
+BZIP_TESTS=bzip_add bzip_del bzip_enoent bzip_get bzip_get_far bzip_get_get \
 					 bzip_get_get2 bzip_get_put bzip_move_from bzip_move_to bzip_nframes \
 					 bzip_put bzip_put_back bzip_put_endian bzip_put_get bzip_put_offs \
 					 bzip_put_pad bzip_put_sub bzip_seek bzip_seek_far bzip_sync
@@ -186,11 +189,11 @@ ERROR_TESTS=error error_error error_num error_short error_verbose \
 
 FILE_TESTS=file file_code file_type
 
-FLAC_TESTS=flac_add flac_enoent flac_get_big flac_get_far flac_get_get \
-					 flac_get_get2 flac_get_int8 flac_get_int64 flac_get_little \
-					 flac_get_long flac_nframes flac_put_big flac_put_complex128 \
-					 flac_put_float64 flac_put_int32 flac_put_little flac_put_offs \
-					 flac_seek flac_seek_far flac_sync
+FLAC_TESTS=flac_add flac_del flac_enoent flac_get_big flac_get_far \
+					 flac_get_get flac_get_get2 flac_get_int8 flac_get_int64 \
+					 flac_get_little flac_get_long flac_move_from flac_nframes \
+					 flac_put_big flac_put_complex128 flac_put_float64 flac_put_int32 \
+					 flac_put_little flac_put_offs flac_seek flac_seek_far flac_sync
 
 FLIST_TESTS=flist flist0 flist2 flist_hidden flist_invalid flist_meta \
 						flist_meta2 flist_meta_hidden flist_meta_invalid flist_type \
@@ -279,12 +282,12 @@ LEGACY_TESTS=legacy_error legacy_estring legacy_format legacy_get \
 						 legacy_put legacy_spf
 endif
 
-LZMA_TESTS=lzma_enoent lzma_get lzma_nframes lzma_put lzma_xz_add lzma_xz_get \
-					 lzma_xz_get_far lzma_xz_get_get lzma_xz_get_get2 lzma_xz_get_put \
-					 lzma_xz_move_to lzma_xz_nframes lzma_xz_offs_clear lzma_xz_put \
-					 lzma_xz_put_back lzma_xz_put_endian lzma_xz_put_get \
-					 lzma_xz_put_offs lzma_xz_put_pad lzma_xz_seek lzma_xz_seek_far \
-					 lzma_xz_sync
+LZMA_TESTS=lzma_enoent lzma_get lzma_nframes lzma_put lzma_xz_add lzma_xz_del \
+					 lzma_xz_get lzma_xz_get_far lzma_xz_get_get lzma_xz_get_get2 \
+					 lzma_xz_get_put lzma_xz_move_from lzma_xz_move_to lzma_xz_nframes \
+					 lzma_xz_offs_clear lzma_xz_put lzma_xz_put_back lzma_xz_put_endian \
+					 lzma_xz_put_get lzma_xz_put_offs lzma_xz_put_pad lzma_xz_seek \
+					 lzma_xz_seek_far lzma_xz_sync
 
 MADD_TESTS=madd madd_affix madd_alias madd_aliasmeta madd_alias_affix \
 					 madd_alias_alias madd_alias_subsub madd_bit madd_bit_invalid \

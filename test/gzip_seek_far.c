@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2015, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -77,7 +77,7 @@ int main(void)
     CHECKI(n, 4000);
 #else
   CHECKI(error, GD_E_UNSUPPORTED);
-  CHECKI(n, -1);
+  CHECKI(n, GD_E_UNSUPPORTED);
 #endif
 
   return r;

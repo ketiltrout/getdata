@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_fragment_affixes 3 "31 October 2016" "Version 0.10.0" "GETDATA"
+.TH gd_fragment_affixes 3 "21 November 2016" "0.10.0" "GETDATA"
 .SH NAME
 gd_fragment_affixes \(em report the field affixes of a fragment of a dirfile database
 .SH SYNOPSIS
@@ -67,30 +67,28 @@ before calling this function.  The caller is responsible for deallocating the
 buffers.  If the fragment prefix or suffix is the empty string, NULL is
 returned in the corresponding pointer.
 
-On error, -1 is returned and sets the dirfile error to a non-zero error value.
-In this case, the values of
+On error, a negative-valued error code is returned.  In this case, the values of
 .BI * prefix
 and
 .BI * suffix
 are unspecified, but will NOT be pointers to valid allocated memory.  Possible
-dirfile error values are:
+returned error codes are:
 .TP 8
+.B GD_E_ALLOC
+A memory allocation error occurred.
+.TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .TP
 .B GD_E_BAD_INDEX
 The supplied index was out of range.
 .PP
-The dirfile error may be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
-
-.SH NOTES
-The function
-.BR gd_fragment_namespace (3)
-can also be used to modify the root namespace.
 
 .SH SEE ALSO
 .BR gd_alloc_funcs (3),

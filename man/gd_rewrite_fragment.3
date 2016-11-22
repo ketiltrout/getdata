@@ -1,6 +1,6 @@
 .\" gd_rewrite_fragment.3.  The gd_rewrite_fragment man page.
 .\"
-.\" Copyright (C) 2010, 2011, 2014 D. V. Wiebe
+.\" Copyright (C) 2010, 2011, 2014, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_rewrite_fragment 3 "16 October 2014" "Version 0.9.0" "GETDATA"
+.TH gd_rewrite_fragment 3 "21 November 2016" "0.10.0" "GETDATA"
 .SH NAME
 gd_rewrite_fragment \(em re-write a dirfile format specification fragment
 .SH SYNOPSIS
@@ -46,8 +46,8 @@ to change or report the current Standards Version.  If the dirfile metadata
 conforms to no known Standards Version, a Standards non-compliant fragment will
 be written.
 .SH RETURN VALUE
-On success, zero is returned.  On error, -1 is returned and the dirfile error is
-set to a non-zero error value.  Possible error values are:
+On success, zero is returned.  On error, a negative-valued error value is
+returned.  Possible error values are:
 .TP 8
 .B GD_E_ACCMODE
 The supplied dirfile was opened in read-only mode.
@@ -70,7 +70,7 @@ exceeded the maximum allowed length.  On most platforms, the maximum length is
 at least 2**31 bytes, so this typically indicates something pathological
 happening.
 .PP
-The dirfile error may be retrieved by calling
+The dirfile error may also be retrieved by calling
 .BR gd_error (3).
 A descriptive error string for the last error encountered can be obtained from
 a call to

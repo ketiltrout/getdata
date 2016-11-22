@@ -644,13 +644,13 @@ int _GD_ValidateField(const char* field_code, size_t nsl, int standards,
  * part after the '/') never contains namespaces or affixes.
  */
 static int _GD_RenameCode(DIRFILE *D, gd_entry_t *E, char **code,
-    int updb, int force, struct gd_rename_data_ *rdat)
+    size_t *len, int updb, int force, struct gd_rename_data_ *rdat)
 {
   size_t end, offset[GD_N_CODEOFFSETS];
   char *new_code;
   const unsigned early = (E->flags & GD_EN_EARLY) ? GD_CO_EARLY : 0;
 
-  dtrace("%p, %p, %p, %i, %i, %p", D, E, code, updb, force, rdat);
+  dtrace("%p, %p, %p, %p, %i, %i, %p", D, E, code, len, updb, force, rdat);
 
   /* Cut up the old code */
   _GD_CodeOffsets(D, E->fragment_index, *code, early, offset);
@@ -730,6 +730,9 @@ static int _GD_RenameCode(DIRFILE *D, gd_entry_t *E, char **code,
   }
   rdat->up[rdat->n_up].index = E->fragment_index;
   rdat->up[rdat->n_up].dst = code;
+  rdat->up[rdat->n_up].dst_len = len;
+  if (len)
+    rdat->up[rdat->n_up].new_len = strlen(new_code);
   rdat->up[rdat->n_up++].new_code = new_code;
 
   dreturn("%i", 0);
@@ -748,7 +751,7 @@ static int _GD_UpdateScalar(DIRFILE *D, gd_entry_t *E, int n, int updb,
     return 0;
   }
 
-  if (_GD_RenameCode(D, E, E->scalar + n, updb, force, rdat)) {
+  if (_GD_RenameCode(D, E, E->scalar + n, NULL, updb, force, rdat)) {
     dreturn("%i", -1);
     return -1;
   }
@@ -766,7 +769,7 @@ static int _GD_UpdateInField(DIRFILE *D, gd_entry_t *E, int n, int updb,
 {
   dtrace("%p, %p, %i, %i, %i, %p", D, E, n, updb, force, rdat);
 
-  if (_GD_RenameCode(D, E, E->in_fields + n, updb, force, rdat)) {
+  if (_GD_RenameCode(D, E, E->in_fields + n, NULL, updb, force, rdat)) {
     dreturn("%i", -1);
     return -1;
   }
@@ -912,8 +915,8 @@ static int _GD_UpdateInputs(DIRFILE *D, struct gd_rename_data_ *rdat)
      * be re-hashed later, so there's no reason to manually flag them if
      * we're not updating alias targets) */
     if (update_aliases && D->entry[u]->field_type == GD_ALIAS_ENTRY)
-      if (_GD_RenameCode(D, D->entry[u], D->entry[u]->in_fields + 0, 1, force,
-            rdat))
+      if (_GD_RenameCode(D, D->entry[u], D->entry[u]->in_fields + 0, NULL, 1,
+            force, rdat))
       {
         dreturn("%i", -1);
         return -1;
@@ -952,15 +955,12 @@ void _GD_PerformRename(DIRFILE *restrict D,
 
   dtrace("%p, %p", D, rdat);
 
-  if (rdat == NULL) {
-    dreturnvoid();
-    return;
-  }
-
   /* update all the codes in one go */
   for (i = 0; i < rdat->n_up; ++i) {
     free(*rdat->up[i].dst);
     *(rdat->up[i].dst) = rdat->up[i].new_code;
+    if (rdat->up[i].dst_len)
+      *(rdat->up[i].dst_len) = rdat->up[i].new_len;
 
     /* Mark fragment dirty */
     D->fragment[rdat->up[i].index].modified = 1;
@@ -987,13 +987,14 @@ void _GD_PerformRename(DIRFILE *restrict D,
  *
  * Returns NULL on error otherwise a pointer to the gd_rename_data_ struct. */
 struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict D,
-    char *restrict new_name, gd_entry_t *restrict E, int new_fragment,
-    unsigned flags)
+    char *restrict new_name, size_t new_len, gd_entry_t *restrict E,
+    int new_fragment, unsigned flags)
 {
   int i;
   struct gd_rename_data_ *rdat;
 
-  dtrace("%p, \"%s\", %p, %i, 0x%X", D, new_name, E, new_fragment, flags);
+  dtrace("%p, \"%s\", %" PRIuSIZE ", %p, %i, 0x%X", D, new_name, new_len, E,
+      new_fragment, flags);
 
   rdat = _GD_Malloc(D, sizeof *rdat);
   if (rdat == NULL) {
@@ -1016,9 +1017,9 @@ struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict D,
   rdat->src_frag = E->fragment_index;
   rdat->dst_frag = new_fragment;
   rdat->old_name = E->field;
-  rdat->old_len = strlen(E->field);
+  rdat->old_len = E->e->len;
   rdat->new_name = new_name;
-  rdat->new_len = strlen(new_name);
+  rdat->new_len = new_len;
 
   rdat->up_size = 10;
   rdat->up = _GD_Malloc(D, rdat->up_size * sizeof rdat->up[0]);
@@ -1031,9 +1032,7 @@ struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict D,
   /* Add the new field name update, for a non-meta field, this is just new_name
    */
   rdat->n_up = 1;
-  rdat->up[0].index = E->fragment_index;
-  rdat->up[0].dst = &E->field;
-  rdat->up[0].new_code = _GD_Strdup(D, new_name);
+  rdat->up[0].new_code = _GD_Malloc(D, new_len + 1);
 
   if (D->error) {
     _GD_CleanUpRename(rdat, 1);
@@ -1041,10 +1040,16 @@ struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict D,
     return NULL;
   }
 
+  memcpy(rdat->up[0].new_code, new_name, new_len + 1);
+  rdat->up[0].new_len = new_len;
+  rdat->up[0].index = E->fragment_index;
+  rdat->up[0].dst = &E->field;
+  rdat->up[0].dst_len = &E->e->len;
+
   /* Add subfield name updates, too */
   for (i = 0; i < E->e->n_meta; ++i)
     if (_GD_RenameCode(D, E->e->p.meta_entry[i], &E->e->p.meta_entry[i]->field,
-          1, 0, rdat))
+          &E->e->p.meta_entry[i]->e->len, 1, 0, rdat))
     {
       _GD_CleanUpRename(rdat, 1);
       dreturn("%p", NULL);
@@ -1067,6 +1072,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
 {
   gd_entry_t *Q;
   char *name;
+  size_t len = strlen(new_name);
   struct gd_rename_data_ *rdat = NULL;
 
   dtrace("%p, %p, \"%s\", 0x%X", D, E, new_name, flags);
@@ -1076,13 +1082,13 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
 
   if (E->e->n_meta == -1) {
     size_t plen = strlen(E->e->p.parent->field);
-    size_t len = strlen(new_name);
     name = _GD_Malloc(D, plen + len + 2);
     if (name == NULL)
       GD_RETURN_ERROR(D);
     memcpy(name, E->e->p.parent->field, plen);
     name[plen] = '/';
     memcpy(name + plen + 1, new_name, len + 1); /* including NUL */
+    len += plen + 1;
   } else {
     /* Verify prefix and suffix */
     if (_GD_CheckCodeAffixes(D, new_name, E->fragment_index,
@@ -1091,13 +1097,15 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
       GD_RETURN_ERROR(D);
     }
 
-    name = _GD_Strdup(D, new_name);
+    name = _GD_Malloc(D, len + 1);
     if (name == NULL)
       GD_RETURN_ERROR(D);
+
+    memcpy(name, new_name, len + 1);
   }
 
   /* Duplicate check */
-  Q = _GD_FindField(D, name, D->entry, D->n_entries, 1, NULL);
+  Q = _GD_FindField(D, name, len, D->entry, D->n_entries, 1, NULL);
 
   if (Q == E) {
     free(name);
@@ -1112,7 +1120,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
   }
 
   /* prep for metadata update */
-  rdat = _GD_PrepareRename(D, name, E, -1, flags);
+  rdat = _GD_PrepareRename(D, name, len, E, -1, flags);
 
   if (rdat == NULL) {
     free(name);
@@ -1218,7 +1226,8 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
   if ((D->flags & GD_ACCMODE) == GD_RDONLY)
     GD_SET_RETURN_ERROR(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
 
-  E = _GD_FindField(D, old_code, D->entry, D->n_entries, 0, NULL);
+  E = _GD_FindField(D, old_code, strlen(old_code), D->entry, D->n_entries, 0,
+      NULL);
 
   if (E == NULL)
     GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, old_code);

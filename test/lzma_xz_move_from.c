@@ -20,15 +20,17 @@
  */
 #include "test.h"
 
-#ifndef TEST_BZIP2
+#ifndef TEST_LZMA
 #define ENC_SKIP_TEST 1
 #endif
 
-#ifdef USE_BZIP2
+#ifdef USE_LZMA
 #define USE_ENC 1
 #endif
 
-#define ENC_SUFFIX ".bz2"
-#define ENC_ENCODED GD_BZIP2_ENCODED
+#define ENC_SUFFIX ".xz"
+#define ENC_NAME "lzma"
+#define ENC_COMPRESS \
+  snprintf(command, 4096, "%s -f %s > /dev/null", XZ, data)
 
-#include "enc_add.c"
+#include "enc_move_from.c"

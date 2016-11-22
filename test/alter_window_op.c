@@ -24,18 +24,15 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "w WINDOW in1 in2 EQ 0\n";
   gd_triplet_t threshold;
-  int fd, e1, e2, e3, r = 0;
+  int e1, e2, e3, r = 0;
   DIRFILE *D;
   gd_entry_t e;
 
   rmdirfile();
   mkdir(filedir, 0777);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "w WINDOW in1 in2 EQ 0\n");
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
 
@@ -45,6 +42,7 @@ int main(void)
 
   gd_entry(D, "w", &e);
   CHECKF(e.EN(window,threshold.r), 4.3);
+  gd_free_entry_strings(&e);
 
   threshold.u = 0x1010;
   e2 = gd_alter_window(D, "w", NULL, NULL, GD_WINDOP_SET, threshold);
@@ -52,6 +50,7 @@ int main(void)
 
   gd_entry(D, "w", &e);
   CHECKF(e.EN(window,threshold.u), 0x1010);
+  gd_free_entry_strings(&e);
 
   threshold.i = 333;
   e3 = gd_alter_window(D, "w", NULL, NULL, GD_WINDOP_NE, threshold);
@@ -59,6 +58,7 @@ int main(void)
 
   gd_entry(D, "w", &e);
   CHECKF(e.EN(window,threshold.u), 333);
+  gd_free_entry_strings(&e);
 
   gd_discard(D);
 

@@ -31,9 +31,63 @@ int gd_col_count = 0;
 char gd_debug_col[GD_COL_SIZE + 1] = "";
 #endif
 
+/* compare two strings parent/namea and nameb of length total and lenb */
+static int _GD_pstrlencmp(const char *parent, size_t plen,
+    const char *namea, size_t total, const char *nameb, size_t lenb)
+{
+  int c;
+  dtrace("\"%s\", %" PRIuSIZE ", \"%s\", %" PRIuSIZE ", \"%s\", %" PRIuSIZE,
+      parent, plen, namea, total, nameb, lenb);
+
+  if (total < lenb)  {
+    dreturn("%i <", -1);
+    return -1;
+  }
+
+  if (lenb < total) {
+    dreturn("%i <", 1);
+    return 1;
+  }
+
+  /* Compare in two parts */
+  c = memcmp(parent, nameb, plen);
+  if (c == 0)
+    c = nameb[plen] - '/';
+  if (c == 0)
+    c = memcmp(namea, nameb + plen + 1, total - plen - 1);
+
+  dreturn("%i", c);
+  return c;
+}
+
+/* compare two strings namea and nameb of length lena and lenb */
+static int _GD_strlencmp(const char *namea, size_t lena,
+    const char *nameb, size_t lenb)
+{
+  int c;
+  dtrace("\"%s\", %" PRIuSIZE ", \"%s\", %" PRIuSIZE, namea, lena, nameb, lenb);
+
+  if (lena < lenb) {
+    dreturn("%i <", -1);
+    return -1;
+  }
+
+  if (lenb < lena) {
+    dreturn("%i <", 1);
+    return 1;
+  }
+
+  c = memcmp(namea, nameb, lena);
+
+  dreturn("%i", c);
+  return c;
+}
+
 int _GD_EntryCmp(const void *a, const void *b)
 {
-  return strcmp((*(gd_entry_t**)a)->field, (*(gd_entry_t**)b)->field);
+  const gd_entry_t *A = *((gd_entry_t**)a);
+  const gd_entry_t *B = *((gd_entry_t**)b);
+  return _GD_strlencmp(A->field, A->e->len, B->field, B->e->len);
 }
 
 /* _GD_GetLine: read non-comment line from format file.  The line is newly
@@ -95,27 +149,75 @@ gd_type_t _GD_LegacyType(char c)
   return GD_UNKNOWN;
 }
 
-/* Binary search to find the field */
+/* Like _GD_FindField, but look for a subfield code with the parent and
+ * subfield names separated.  This is only used when looking for a field code
+ * which specified a subfield by alias name.  The plen count includes the / */
+static gd_entry_t *_GD_FindFieldWithParent(const DIRFILE *restrict D,
+    const char *restrict parent, size_t plen, const char *restrict name,
+    size_t len, gd_entry_t *const *list, unsigned int u, int dealias,
+    unsigned int *restrict index)
+{
+  const size_t total = plen + len + 1;
+  int c;
+  unsigned int i, l = 0;
+
+  dtrace("%p, \"%s\", %" PRIuSIZE ", \"%s\", %" PRIuSIZE ", %p, %u, %i, %p",
+      D, parent, plen, name, len, list, u, dealias, index);
+
+  /* Binary search */
+  while (l < u) {
+    i = (l + u) / 2;
+    c = _GD_pstrlencmp(parent, plen, name, total, list[i]->field,
+        list[i]->e->len);
+    if (c < 0)
+      u = i;
+    else if (c > 0)
+      l = i + 1;
+    else {
+      gd_entry_t *E = list[i];
+      if (dealias && E && E->field_type == GD_ALIAS_ENTRY)
+        E = E->e->entry[0];
+
+      if (index != NULL)
+        *index = i;
+
+      dreturn("%p", E);
+      return E;
+    }
+  }
+
+  /* Not found */
+  dreturn("%p", NULL);
+  return NULL;
+}
+
+/* Binary search list of length u to find field_code.  len = strlen(field_code).
+ * If the field found is an alias, the target will be returned if dealias is
+ * non-zero */
 gd_entry_t *_GD_FindField(const DIRFILE *restrict D,
-    const char *restrict field_code, gd_entry_t *const *list, unsigned int u,
-    int dealias, unsigned int *restrict index)
+    const char *restrict field_code, size_t len, gd_entry_t *const *list,
+    unsigned int u, int dealias, unsigned int *restrict index)
 {
   int c;
-  char *ptr;
+  const char *ptr;
   gd_entry_t *E = NULL;
   unsigned int i, l = 0;
   const unsigned int ou = u;
 
-  dtrace("%p, \"%s\", %p, %u, %i, %p", D, field_code, list, u, dealias, index);
+  dtrace("%p, \"%s\", %" PRIuSIZE ", %p, %u, %i, %p", D, field_code, len, list,
+      u, dealias, index);
 
   /* handle FILEFRAM */
-  if (D->standards < 6 && (D->flags & GD_PEDANTIC) &&
-      strcmp(field_code, "FILEFRAM") == 0)
+  if (D->standards < 6 && (D->flags & GD_PEDANTIC) && len == 8 &&
+      memcmp(field_code, "FILEFRAM", 8) == 0)
+  {
     field_code = "INDEX";
+    len = 5;
+  }
 
   while (l < u) {
     i = (l + u) / 2;
-    c = strcmp(field_code, list[i]->field);
+    c = _GD_strlencmp(field_code, len, list[i]->field, list[i]->e->len);
     if (c < 0)
       u = i;
     else if (c > 0)
@@ -137,28 +239,15 @@ gd_entry_t *_GD_FindField(const DIRFILE *restrict D,
     *index = u;
 
   /* not found perhaps it's an subfield of an aliased field? */
-  if ((ptr = (char*)strchr(field_code, '/'))) {
-    char *new_code = strdup(field_code);
-    if (new_code) {
-      new_code[ptr - field_code] = '\0';
-      E = _GD_FindField(D, new_code, list, ou, 0, NULL);
-      free(new_code);
+  if (dealias && (ptr = memchr(field_code, '/', len)) != NULL) {
+    E = _GD_FindField(D, field_code, ptr - field_code, list, ou, 0, NULL);
 
-      if (E && E->field_type == GD_ALIAS_ENTRY && E->e->entry[0]) {
-        size_t plen = strlen(E->e->entry[0]->field);
-        new_code = malloc(plen + strlen(ptr) + 2);
-        if (new_code) {
-          strcpy(new_code, E->e->entry[0]->field);
-          new_code[plen] = '/';
-          strcpy(new_code + plen + 1, ptr + 1);
-
-          E = _GD_FindField(D, new_code, list, ou, 1, NULL);
-
-          free(new_code);
-        }
-      } else
-        E = NULL;
-    }
+    if (E && E->field_type == GD_ALIAS_ENTRY && E->e->entry[0])
+      E = _GD_FindFieldWithParent(D, E->e->entry[0]->field,
+          E->e->entry[0]->e->len, ptr + 1, len - (ptr - field_code) - 1, list,
+          ou, 1, NULL);
+    else
+      E = NULL;
   }
 
   dreturn("%p", E);
@@ -900,7 +989,8 @@ gd_entry_t *_GD_FindEntry(DIRFILE *restrict D, const char *restrict field_code)
   dtrace("%p, \"%s\"", D, field_code);
 
   if (E == NULL)
-    E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+    E = _GD_FindField(D, field_code, strlen(field_code), D->entry, D->n_entries,
+        1, NULL);
 
   if (E == NULL)
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
@@ -914,27 +1004,34 @@ gd_entry_t *_GD_FindFieldAndRepr(DIRFILE *restrict D,
     const char *restrict field_code_in, char **restrict field_code,
     int *restrict repr, unsigned int *restrict index, int set, int err)
 {
+  size_t len = strlen(field_code_in);
   gd_entry_t *E = NULL;
 
   dtrace("%p, \"%s\", %p, %p, %p, %i, %i", D, field_code_in, field_code, repr,
       index, set, err);
 
-  E = _GD_FindField(D, field_code_in, D->entry, D->n_entries, 1, index);
+  E = _GD_FindField(D, field_code_in, len, D->entry, D->n_entries, 1, index);
 
-  if (E == NULL) {
-    *repr = _GD_GetRepr(D, field_code_in, field_code, err);
-
-    if (D->error) {
-      dreturn("%p", NULL);
-      return NULL;
-    }
-  } else {
+  if (E) {
     *repr = GD_REPR_NONE;
     *field_code = (char *)field_code_in;
+
+    dreturn("%p", E);
+    return E;
   }
 
-  if (E == NULL || index != NULL)
-    E = _GD_FindField(D, *field_code, D->entry, D->n_entries, 1, index);
+  /* No match -- find a representaiton suffix */
+  *repr = _GD_GetRepr(D, field_code_in, field_code, err);
+
+  if (D->error) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+    
+  /* Repr found */
+  if (*field_code != field_code_in)
+    E = _GD_FindField(D, *field_code, len - 2, D->entry, D->n_entries, 1,
+        index);
 
   if (E == NULL && set) {
     if (err)

@@ -471,7 +471,8 @@ static int _GD_IncludeAffix(DIRFILE* D, const char *funcname, const char* file,
 
   /* Honour the reference directive, if not prohibited by the caller */
   if (ref_name != NULL && ~flags & GD_IGNORE_REFS) {
-    gd_entry_t *E = _GD_FindField(D, ref_name, D->entry, D->n_entries, 1, NULL);
+    gd_entry_t *E = _GD_FindField(D, ref_name, strlen(ref_name), D->entry,
+        D->n_entries, 1, NULL);
 
     /* FIXME: These errors are problematic, since they'll cause the call to
      * fail, even though the new fragment has been integrated into the DIRFILE.

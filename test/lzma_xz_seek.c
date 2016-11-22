@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,52 +20,17 @@
  */
 #include "test.h"
 
-int main(void)
-{
-#if !defined TEST_LZMA || !defined USE_LZMA
-  return 77;
-#else
-  const char *filedir = "dirfile";
-  const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  const char *xzdata = "dirfile/data.xz";
-  const char *format_data = "data RAW UINT16 8\n";
-  char command[4096];
-  uint16_t data_data[256];
-  int fd, n, error, r = 0;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256 * sizeof(uint16_t));
-  close(fd);
-
-  snprintf(command, 4096, "%s -f %s > /dev/null", XZ, data);
-  if (gd_system(command))
-    return 1;
-
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  n = gd_seek(D, "data", 5, 0, GD_SEEK_SET);
-  CHECKI(n,40);
-
-  error = gd_error(D);
-  CHECKI(error,0);
-
-  gd_discard(D);
-
-  unlink(xzdata);
-  unlink(format);
-  rmdir(filedir);
-
-  return r;
+#ifndef TEST_LZMA
+#define ENC_SKIP_TEST 1
 #endif
-}
+
+#ifdef USE_LZMA
+#define USE_ENC 1
+#endif
+
+#define ENC_SUFFIX ".xz"
+#define ENC_NAME "lzma"
+#define ENC_COMPRESS \
+  snprintf(command, 4096, "%s -f %s > /dev/null", XZ, data)
+
+#include "enc_seek.c"

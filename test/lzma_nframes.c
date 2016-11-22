@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,73 +18,18 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Retreiving the number of frames should succeed cleanly */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <stdio.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <inttypes.h>
-
-int main(void)
-{
 #ifndef TEST_LZMA
-  return 77;
-#else
-  const char *filedir = "dirfile";
-  const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  const char *xzdata = "dirfile/data.lzma";
-  const char *format_data = "data RAW UINT16 1\n";
-  char command[4096];
-  uint16_t data_data[256];
-  int i, error, r = 0;
-  DIRFILE *D;
-  size_t n;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  for (i = 0; i < 256; ++i)
-    data_data[i] = (uint16_t)i;
-
-  i = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(i, format_data, strlen(format_data));
-  close(i);
-
-  i = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(i, data_data, 256 * sizeof(uint16_t));
-  close(i);
-
-  /* compress */
-  snprintf(command, 4096, "%s -F lzma -f %s > /dev/null", XZ, data);
-  if (gd_system(command))
-    return 1;
+#define ENC_SKIP_TEST 1
+#endif
 
 #ifdef USE_LZMA
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-#else
-  D = gd_open(filedir, GD_RDONLY);
-#endif
-  n = gd_nframes(D);
-  error = gd_error(D);
-  gd_discard(D);
-
-  unlink(xzdata);
-  unlink(format);
-  rmdir(filedir);
-
-#ifdef USE_LZMA
-  CHECKI(error, 0);
-  CHECKI(n, 256);
-#else
-  CHECKI(error, GD_E_UNSUPPORTED);
-  CHECKI(n, 0);
+#define USE_ENC 1
 #endif
 
-  return r;
-#endif
-}
+#define ENC_SUFFIX ".lzma"
+#define ENC_COMPRESS \
+  snprintf(command, 4096, "%s -F lzma -f %s > /dev/null", XZ, data)
+
+#include "enc_nframes.c"

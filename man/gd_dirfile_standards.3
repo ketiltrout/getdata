@@ -1,6 +1,6 @@
 .\" gd_dirfile_standards.3.  The gd_dirfile_standards man page.
 .\"
-.\" Copyright (C) 2010, 2012 D. V. Wiebe
+.\" Copyright (C) 2010, 2012, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_dirfile_standards 3 "29 June 2012" "Version 0.8.0" "GETDATA"
+.TH gd_dirfile_standards 3 "21 November 2016" "0.10.0" "GETDATA"
 .SH NAME
 gd_dirfile_standards \(em change or report the current Dirfile Standards Version
 for a DirFile
@@ -89,9 +89,8 @@ On success,
 returns the current Standards Version of the loaded dirfile, after possibly
 having been updated by the call.  This will be a number between zero and
 .BR GD_DIRFILE_STANDARDS_VERSION
-inclusive.  On error, -1 is returned and the dirfile error is set to a non-zero
-error value, and the current Standards Version is not changed.  Possible error
-values are:
+inclusive.  On error, a negative-valued error value is returned, and the current
+Standards Version is not changed.  Possible error values are:
 .TP 8
 .B GD_E_ARGUMENT
 The loaded dirfile did not conform to the specified version.  Or the dirfile

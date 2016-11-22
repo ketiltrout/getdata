@@ -20,15 +20,15 @@
  */
 #include "test.h"
 
-#ifndef TEST_BZIP2
+#ifndef TEST_LZMA
 #define ENC_SKIP_TEST 1
 #endif
 
-#ifdef USE_BZIP2
+#ifdef USE_LZMA
 #define USE_ENC 1
 #endif
 
-#define ENC_SUFFIX ".bz2"
-#define ENC_ENCODED GD_BZIP2_ENCODED
+#define ENC_SUFFIX ".xz"
+#define ENC_ENCODED GD_LZMA_ENCODED
 
-#include "enc_add.c"
+#include "enc_del.c"

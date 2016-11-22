@@ -67,6 +67,8 @@ New in version 0.10.0a:
     an out-of-range value and then calling gd_free_entry_strings() no longer
     results in a segfault.
 
+  * BUG FIX: A rare segfault has been fixed in gd_carrays() and gd_strings().
+
   API Changes:
 
   * The new function gd_alloc_funcs() allows callers to change the memory

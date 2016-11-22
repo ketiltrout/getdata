@@ -20,15 +20,41 @@
  */
 #include "test.h"
 
-#ifndef TEST_BZIP2
-#define ENC_SKIP_TEST 1
+int main(void)
+{
+#ifdef ENC_SKIP_TEST
+  return 77;
+#else
+  const char *filedir = "dirfile";
+  const char *format = "dirfile/format";
+  int error, r = 0;
+  DIRFILE *D;
+  char *estr;
+
+  rmdirfile();
+  mkdir(filedir, 0777);
+
+  MAKEFORMATFILE(format, "data RAW UINT16 8\n/ENCODING " ENC_NAME "\n");
+
+  D = gd_open(filedir, GD_RDONLY);
+  gd_getdata(D, "data", 0, 0, 0, 1, GD_NULL, NULL);
+  error = gd_error(D);
+  estr = gd_error_string(D, NULL, 0);
+  
+#ifdef USE_ENC
+  CHECKI(error, GD_E_IO);
+#else
+  CHECKI(error, GD_E_UNSUPPORTED);
 #endif
 
-#ifdef USE_BZIP2
-#define USE_ENC 1
+  CHECKPN(estr);
+  free(estr);
+
+  gd_discard(D);
+
+  unlink(format);
+  rmdir(filedir);
+
+  return r;
 #endif
-
-#define ENC_SUFFIX ".bz2"
-#define ENC_ENCODED GD_BZIP2_ENCODED
-
-#include "enc_add.c"
+}

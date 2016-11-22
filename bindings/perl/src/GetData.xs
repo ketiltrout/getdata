@@ -704,6 +704,7 @@ static void gdp_convert_from_perl(void *dest, SV *src, gd_type_t type,
       break;
     case GD_NULL:
     case GD_UNKNOWN:
+    case GD_STRING:
       ;
   }
 
@@ -1167,6 +1168,7 @@ static void * gdp_unpack(SV **sp, const void *data, size_t n, gd_type_t type)
       break;
     case GD_UNKNOWN:
     case GD_NULL:
+    case GD_STRING:
       break;
   }
 
@@ -1880,9 +1882,10 @@ field_list(dirfile)
 
       GDP_UNDEF_ON_ERROR();
 
-      EXTEND(sp, fl[i]);
-      for (i = 0; fl[i]; ++i)
+      for (i = 0; fl[i]; ++i) {
+        EXTEND(sp, 1);
         GDP_PUSHpvz(fl[i]);
+      }
     } else {
       unsigned int nf = gd_nfields(dirfile);
 
@@ -1912,9 +1915,10 @@ field_list_by_type(dirfile, type)
 
       GDP_UNDEF_ON_ERROR();
 
-      EXTEND(sp, fl[i]);
-      for (i = 0; fl[i]; ++i)
+      for (i = 0; fl[i]; ++i) {
+        EXTEND(sp, 1);
         GDP_PUSHpvz(fl[i]);
+      }
     } else {
       unsigned int nf = gd_nfields_by_type(dirfile, type);
 
@@ -1948,9 +1952,10 @@ entry_list(dirfile, fragment, parent, type, flags)
 
       GDP_UNDEF_ON_ERROR();
 
-      EXTEND(sp, el[i]);
-      for (i = 0; el[i]; ++i)
+      for (i = 0; el[i]; ++i) {
+        EXTEND(sp, 1);
         GDP_PUSHpvz(el[i]);
+      }
     } else {
       unsigned int ne = gd_nentries(dirfile, fragment, parent, type, flags);
 
@@ -1979,9 +1984,10 @@ vector_list(dirfile)
 
       GDP_UNDEF_ON_ERROR();
 
-      EXTEND(sp, fl[i]);
-      for (i = 0; fl[i]; ++i)
+      for (i = 0; fl[i]; ++i) {
+        EXTEND(sp, 1);
         GDP_PUSHpvz(fl[i]);
+      }
     } else {
       unsigned int nf = gd_nvectors(dirfile);
 
@@ -2010,9 +2016,10 @@ strings(dirfile)
 
       GDP_UNDEF_ON_ERROR();
 
-      EXTEND(sp, fl[i]);
-      for (i = 0; fl[i]; ++i)
+      for (i = 0; fl[i]; ++i) {
+        EXTEND(sp, 1);
         GDP_PUSHpvz(fl[i]);
+      }
     } else {
       unsigned int nf = gd_nfields_by_type(dirfile, GD_STRING_ENTRY);
 
@@ -2042,9 +2049,10 @@ mfield_list(dirfile, field_code)
 
       GDP_UNDEF_ON_ERROR();
 
-      EXTEND(sp, fl[i]);
-      for (i = 0; fl[i]; ++i)
+      for (i = 0; fl[i]; ++i) {
+        EXTEND(sp, 1);
         GDP_PUSHpvz(fl[i]);
+      }
     } else {
       unsigned int nf = gd_nmfields(dirfile, field_code);
 
@@ -2075,9 +2083,10 @@ mfield_list_by_type(dirfile, parent, type)
 
       GDP_UNDEF_ON_ERROR();
 
-      EXTEND(sp, fl[i]);
-      for (i = 0; fl[i]; ++i)
+      for (i = 0; fl[i]; ++i) {
+        EXTEND(sp, 1);
         GDP_PUSHpvz(fl[i]);
+      }
     } else {
       unsigned int nf = gd_nmfields_by_type(dirfile, parent, type);
 
@@ -2107,9 +2116,10 @@ mvector_list(dirfile, parent)
 
       GDP_UNDEF_ON_ERROR();
 
-      EXTEND(sp, fl[i]);
-      for (i = 0; fl[i]; ++i)
+      for (i = 0; fl[i]; ++i) {
+        EXTEND(sp, 1);
         GDP_PUSHpvz(fl[i]);
+      }
     } else {
       unsigned int nf = gd_nmvectors(dirfile, parent);
 
@@ -2139,9 +2149,10 @@ mstrings(dirfile, field_code)
 
       GDP_UNDEF_ON_ERROR();
 
-      EXTEND(sp, fl[i]);
-      for (i = 0; fl[i]; ++i)
+      for (i = 0; fl[i]; ++i) {
+        EXTEND(sp, 1);
         GDP_PUSHpvz(fl[i]);
+      }
     } else {
       unsigned int nf = gd_nmfields_by_type(dirfile, field_code,
           GD_STRING_ENTRY);
@@ -2428,9 +2439,10 @@ aliases(dirfile, field_code)
 
       GDP_UNDEF_ON_ERROR();
 
-      EXTEND(sp, fl[i]);
-      for (i = 0; fl[i]; ++i)
+      for (i = 0; fl[i]; ++i) {
+        EXTEND(sp, 1);
         GDP_PUSHpvz(fl[i]);
+      }
     } else {
       unsigned int nf = gd_naliases(dirfile, field_code);
 

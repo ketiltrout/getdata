@@ -24,17 +24,14 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "phase PHASE data 1\n";
-  int fd, ret, error, r = 0;
+  int ret, error, r = 0;
   DIRFILE *D;
   gd_entry_t e;
 
   rmdirfile();
   mkdir(filedir, 0777);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "phase PHASE data 1\n");
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   ret = gd_alter_phase(D, "phase", "in", 2);
@@ -45,6 +42,7 @@ int main(void)
 
   gd_entry(D, "phase", &e);
   CHECKS(e.in_fields[0], "in");
+  gd_free_entry_strings(&e);
 
   gd_discard(D);
 

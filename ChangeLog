@@ -1,3 +1,68 @@
+2016-11-22   D. V. Wiebe <getdata@ketiltrout.net> svn:1112
+	* bindings/perl/src/GetData.xs: Fix a few EXTEND() calls.
+
+	* src/add.c (_GD_Add): subfield_offs is size_t.  Move _GD_InvalidEntype call
+	earlier.
+
+	* src/internal.h (gd_private_entry_): Add len.
+	* src/internal.h (gd_rename_update_): Add new_len and dst_len.
+	* src/add.c (_GD_Add _GD_AddAlias) src/fragment.c (_GD_UpdateAffixes)
+	src/open.c (_GD_Open) src/parse.c (_GD_SetField): Set E->e->len.
+	* src/move.c (_GD_Move): Update E->e->len.
+	* src/add.c (_GD_FixName) src/common.c (_GD_FindField): Add len parameter.
+	* src/name.c (_GD_RenameCode): Add len parameter.  Record E->e->len update.
+	* src/name.c (_GD_PerformRename): Do all the len updates.
+	* src/name.c (_GD_PrepareRename): Add new_len parameter.
+	* src/parse.c (_GD_CheckParent): Add len parameter.  Update *len.
+	* src/parse.c (_GD_ParseFieldSpec): Add len0 parameter.
+
+	* src/common.c (_GD_pstrlencmp _GD_strlencmp _GD_FindFieldWithParent): Added.
+	* src/common.c (_GD_EntryCmp): Use _GD_strlencmp for comparison.  This
+	changes the sorted entry order!
+	* src/common.c (_GD_FindField): Don't malloc. Use _GD_FindFieldWithParent to
+	find subfields of aliased fields.
+	* test/name_alias.c test/name_dangle.c test/name_move.c
+	test/name_move_alias.c test/name_name.c test/parse_sort.c: Update for
+	changes in entry sort.
+
+	* src/del.c (_GD_Delete): Delete meta fields the expensive way (by searching
+	for each one) because they aren't necessarily sorted together anymore.
+
+	* src/constant.c (gd_put_carray_slice gd_put_carray) src/entry.c (gd_aliases
+	gd_naliases) src/field_list.c (gd_entry_list _GD_Constants _GD_Carrays
+	_GD_Strings _GD_SArrays) src/globals.c (gd_reference) src/mod.c (_GD_Change
+	gd_alter_lincom gd_alter_clincom gd_alter_polynom gd_alter_cpolynom
+	_GD_AlterSpec) src/nfields.c (gd_nentries) src/putdata.c (gd_putdata64)
+	src/string.c (gd_get_sarray_slice gd_put_sarray_slice gd_put_sarray
+	gd_put_string): Call _GD_FindEntry instead of _GD_FindField.
+
+	* src/field_list.c (_GD_Carrays _GD_Strings _GD_SArrays): Add space for the
+	terminating record.
+
+	* src/name.c (_GD_PerformRename): Don't allow rdat==NULL.
+	* src/move.c (_GD_Move): Only call _GD_PerformRename if rdat is non-NULL.
+
+	* test/alter_bit_in.c test/alter_divide_in.c test/alter_mplex_in.c
+	test/alter_phase_in.c test/alter_window_in.c test/alter_window_op.c: Free
+	entry strings.
+
+	* test/cvlist_array_long.c: Check number returned.
+
+	* test/enc_add.c test/enc_del.c test/enc_enoent.c test/enc_move_from.c
+	test/enc_nframes.c test/enc_seek.c: Added.
+	* test/bzip_add.c test/bzip_enoent.c test/bzip_move_from.c
+	test/bzip_nframes.c test/bzip_seek.c test/flac_add.c test/flac_enoent.c
+	test/flac_nframes.c test/flac_seek.c test/gzip_add.c test/gzip_del.c
+	test/gzip_enoent.c test/gzip_move_from.c test/gzip_nframes.c
+	test/gzip_seek.c test/lzma_enoent.c test/lzma_nframes.c test/lzma_xz_add.c
+	test/lzma_xz_nframes.c test/lzma_xz_seek.c: Use enc_*.c version.
+	* test/bzip_del.c test/flac_del.c test/flac_move_from.c: Added.
+	* test/flac_seek_far.c test/gzip_seek_far.c test/lzma_xz_del.c
+	test/lzma_xz_move_from.c test/zzip_nframes.c: Update.
+
+	* test/unclude_index.c test/unclude_prot.c test/unclude_rdonly.c: Call
+	gd_discard.
+
 2016-11-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1111
 	* src/fragment.c (_GD_UpdateAffixes): Always steal nsin.  Caller must pass
 	nsl and ensure ns has a dot at the end.

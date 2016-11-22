@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,66 +20,19 @@
  */
 #include "test.h"
 
-int main(void)
-{
 #ifndef TEST_FLAC
-  return 77;
-#else
-  const char *filedir = "dirfile";
-  const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  const char *flacdata = "dirfile/data.flac";
-  const char *format_data = "data RAW UINT16 8\n";
-  char command[4096];
-  uint16_t data_data[256];
-  int fd, error, r = 0;
-  off_t n;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256 * sizeof(uint16_t));
-  close(fd);
-
-  /* encode */
-  snprintf(command, 4096,
-      "%s --endian=little --silent --sample-rate=1 --channels=1 --bps=16 "
-      "--sign=signed --delete-input-file %s >/dev/null 2>/dev/null", FLAC,
-      data);
-  if (gd_system(command))
-    return 1;
+#define ENC_SKIP_TEST 1
+#endif
 
 #ifdef USE_FLAC
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE | GD_LITTLE_ENDIAN);
-#else
-  D = gd_open(filedir, GD_RDONLY | GD_LITTLE_ENDIAN);
-#endif
-  n = gd_seek(D, "data", 5, 0, GD_SEEK_SET);
-  error = gd_error(D);
-
-#ifdef USE_FLAC
-  CHECKI(error, 0);
-  CHECKI(n, 40);
-#else
-  CHECKI(error, GD_E_UNSUPPORTED);
-  CHECKI(n, -1);
+#define USE_ENC 1
 #endif
 
-  gd_discard(D);
+#define ENC_SUFFIX ".flac"
+#define ENC_NAME "flac"
+#define ENC_COMPRESS snprintf(command, 4096, \
+    "%s --endian=little --silent --sample-rate=1 --channels=1 --bps=16 " \
+    "--sign=signed --delete-input-file %s >/dev/null 2>/dev/null", FLAC, \
+    data)
 
-  unlink(flacdata);
-  unlink(format);
-  rmdir(filedir);
-
-  return r;
-#endif
-}
+#include "enc_seek.c"

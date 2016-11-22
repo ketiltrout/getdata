@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2013, 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,34 +20,61 @@
  */
 #include "test.h"
 
+/* this tests discarding OOP-writable (also temporary) RAW files */
 int main(void)
 {
+#ifdef ENC_SKIP_TEST
+  return 77;
+#else
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int ret, error, r = 0;
+  const char *data = "dirfile/data" ENC_SUFFIX;
+  uint8_t c[8];
+  int i, n, e1, e2, e3, unlink_data, ret, r = 0;
+  int rmdir_filedir;
   DIRFILE *D;
-  gd_entry_t e;
 
+  memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0777);
 
-  MAKEFORMATFILE(format, "mplex MPLEX data count 1 3\n");
+  MAKEFORMATFILE(format, "data RAW UINT8 8\n");
 
-  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  ret = gd_alter_mplex(D, "mplex", "in1", "in2", 2, -1);
+  for (i = 0; i < 8; ++i)
+    c[i] = (uint8_t)(40 + i);
+
+#if defined USE_GZIP
+  D = gd_open(filedir, GD_RDWR | ENC_ENCODED | GD_VERBOSE);
+#else
+  D = gd_open(filedir, GD_RDWR | ENC_ENCODED);
+#endif
+
+  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
+  e1 = gd_error(D);
+#ifdef USE_ENC
+  CHECKI(n, 8);
+  CHECKI(e1, GD_E_OK);
+#else
+  CHECKI(n, 0);
+  CHECKI(e1, GD_E_UNSUPPORTED);
+#endif
+
+  ret = gd_delete(D, "data", GD_DEL_DATA);
+  e2 = gd_error(D);
+
   CHECKI(ret, 0);
-  error = gd_error(D);
-  CHECKI(error, 0);
+  CHECKI(e2, GD_E_OK);
 
-  gd_entry(D, "mplex", &e);
-  CHECKS(e.in_fields[0], "in1");
-  CHECKS(e.in_fields[1], "in2");
-  gd_free_entry_strings(&e);
+  e3 = gd_close(D);
+  CHECKI(e3, 0);
 
-  gd_discard(D);
-
+  unlink_data = unlink(data);
   unlink(format);
-  rmdir(filedir);
+  rmdir_filedir = rmdir(filedir);
+
+  CHECKI(unlink_data, -1);
+  CHECKI(rmdir_filedir, 0);
 
   return r;
+#endif
 }

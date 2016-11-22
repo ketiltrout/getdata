@@ -24,17 +24,14 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "bit BIT data 1 1\n";
-  int fd, ret, e1, r = 0;
+  int ret, e1, r = 0;
   gd_entry_t e;
   DIRFILE *D;
 
   rmdirfile();
   mkdir(filedir, 0777);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "bit BIT data 1 1\n");
 
   D = gd_open(filedir, GD_RDWR);
   ret = gd_alter_bit(D, "bit", "in1", 2, 0);
@@ -44,12 +41,12 @@ int main(void)
 
   gd_entry(D, "bit", &e);
   CHECKS(e.in_fields[0], "in1");
+  gd_free_entry_strings(&e);
 
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
 
   return r;
 }

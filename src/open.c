@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2015 D. V. Wiebe
+ * Copyright (C) 2005-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -520,6 +520,7 @@ static DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   }
   memset(D->entry[0]->e, 0, sizeof(struct gd_private_entry_));
   D->entry[0]->flags = GD_EN_CALC;
+  D->entry[0]->e->len = 5;
 
   /* open the format file (or create it) */
   if ((fp = _GD_CreateDirfile(D, dirfd, dirfd_error, dirfile, &mtime)) == NULL)
@@ -618,7 +619,8 @@ static DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
 
   /* Find the reference field */
   if (ref_name != NULL) {
-    E = _GD_FindField(D, ref_name, D->entry, D->n_entries, 1, NULL);
+    E = _GD_FindField(D, ref_name, strlen(ref_name), D->entry, D->n_entries, 1,
+        NULL);
     if (E == NULL)
       _GD_SetError(D, GD_E_BAD_REFERENCE, GD_E_REFERENCE_CODE, NULL, 0,
           ref_name);

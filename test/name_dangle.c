@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2013 D. V. Wiebe
+/* Copyright (C) 2008-2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,34 +20,17 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *zata = "dirfile/zata";
-  const char *format_data =
-    "early MULTIPLY data data\n"
-    "/ALIAS earlya data\n"
-    "late PHASE data 0\n"
-    "/ALIAS latea data\n"
-    "cata RAW UINT8 8\n"
-    "data RAW UINT8 8\n"
-    "eata RAW UINT8 8\n";
-  unsigned char data_data[256];
-  int fd, ret, e1, e2, e3, e4, e5, e6, unlink_data, unlink_zata, r = 0;
+  int ret, e1, e2, e3, e4, e5, e6, unlink_data, unlink_zata, r = 0;
   const char **fl;
 #define NFIELDS 6
   const char *field_list[NFIELDS] = {
-    "INDEX", "cata", "early", "eata", "late", "zata"
+    "cata", "eata", "late", "zata", "INDEX", "early"
   };
   char *s1, *s4;
   const char *s3, *s6;
@@ -58,16 +41,16 @@ int main(void)
   rmdirfile();
   mkdir(filedir, 0777);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEFORMATFILE(format,
+    "early MULTIPLY data data\n"
+    "/ALIAS earlya data\n"
+    "late PHASE data 0\n"
+    "/ALIAS latea data\n"
+    "cata RAW UINT8 8\n"
+    "data RAW UINT8 8\n"
+    "eata RAW UINT8 8\n"
+    );
+  MAKEDATAFILE(data, uint8_t, i, 256);
 
   D = gd_open(filedir, GD_RDWR);
 

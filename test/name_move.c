@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -26,14 +26,11 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *zata = "dirfile/zata";
-  const char *format_data = "cata RAW UINT8 8\ndata RAW UINT8 8\n"
-    "eata RAW UINT8 8\n";
-  unsigned char data_data[256];
-  int fd, ret, e1, e2, unlink_data, unlink_zata, r = 0;
+  int ret, e1, e2, unlink_data, unlink_zata, r = 0;
   const char **fl;
 #define NFIELDS 4
   const char *field_list[NFIELDS] = {
-    "INDEX", "cata", "eata", "zata"
+    "cata", "eata", "zata", "INDEX"
   };
   unsigned i, nf;
   DIRFILE *D;
@@ -41,16 +38,9 @@ int main(void)
   rmdirfile();
   mkdir(filedir, 0777);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEFORMATFILE(format,
+      "cata RAW UINT8 8\ndata RAW UINT8 8\neata RAW UINT8 8\n");
+  MAKEDATAFILE(data, uint8_t, i, 256);
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   ret = gd_rename(D, "data", "zata", GD_REN_DATA);
