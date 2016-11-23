@@ -1,3 +1,6 @@
+2016-11-23   D. V. Wiebe <getdata@ketiltrout.net> svn:1117
+	* src/common.c (_GD_FindFieldWithParent): Remove unused DIRFILE* parameter.
+
 2016-11-23   D. V. Wiebe <getdata@ketiltrout.net> svn:1116
 	* src/common.c (_GD_FindFieldWithParent _GD_FindField): Ignore an initial
 	dot in the field code.

@@ -152,17 +152,16 @@ gd_type_t _GD_LegacyType(char c)
 /* Like _GD_FindField, but look for a subfield code with the parent and
  * subfield names separated.  This is only used when looking for a field code
  * which specified a subfield by alias name.  The plen count includes the / */
-static gd_entry_t *_GD_FindFieldWithParent(const DIRFILE *restrict D,
-    const char *restrict parent, size_t plen, const char *restrict name,
-    size_t len, gd_entry_t *const *list, unsigned int u, int dealias,
-    unsigned int *restrict index)
+static gd_entry_t *_GD_FindFieldWithParent(const char *restrict parent,
+    size_t plen, const char *restrict name, size_t len, gd_entry_t *const *list,
+    unsigned int u, int dealias, unsigned int *restrict index)
 {
   size_t total;
   int c;
   unsigned int i, l = 0;
 
-  dtrace("%p, \"%s\", %" PRIuSIZE ", \"%s\", %" PRIuSIZE ", %p, %u, %i, %p",
-      D, parent, plen, name, len, list, u, dealias, index);
+  dtrace("\"%s\", %" PRIuSIZE ", \"%s\", %" PRIuSIZE ", %p, %u, %i, %p",
+      parent, plen, name, len, list, u, dealias, index);
 
   /* Drop an initial dot */
   if (parent[0] == '.' && len > 1) {
@@ -257,7 +256,7 @@ gd_entry_t *_GD_FindField(const DIRFILE *restrict D,
     E = _GD_FindField(D, field_code, ptr - field_code, list, ou, 0, NULL);
 
     if (E && E->field_type == GD_ALIAS_ENTRY && E->e->entry[0])
-      E = _GD_FindFieldWithParent(D, E->e->entry[0]->field,
+      E = _GD_FindFieldWithParent(E->e->entry[0]->field,
           E->e->entry[0]->e->len, ptr + 1, len - (ptr - field_code) - 1, list,
           ou, 1, NULL);
     else
