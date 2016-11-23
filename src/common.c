@@ -157,12 +157,20 @@ static gd_entry_t *_GD_FindFieldWithParent(const DIRFILE *restrict D,
     size_t len, gd_entry_t *const *list, unsigned int u, int dealias,
     unsigned int *restrict index)
 {
-  const size_t total = plen + len + 1;
+  size_t total;
   int c;
   unsigned int i, l = 0;
 
   dtrace("%p, \"%s\", %" PRIuSIZE ", \"%s\", %" PRIuSIZE ", %p, %u, %i, %p",
       D, parent, plen, name, len, list, u, dealias, index);
+
+  /* Drop an initial dot */
+  if (parent[0] == '.' && len > 1) {
+    parent++;
+    plen--;
+  }
+
+  total = plen + len + 1;
 
   /* Binary search */
   while (l < u) {
@@ -213,6 +221,12 @@ gd_entry_t *_GD_FindField(const DIRFILE *restrict D,
   {
     field_code = "INDEX";
     len = 5;
+  }
+
+  /* Drop an initial dot */
+  if (field_code[0] == '.' && len > 1) {
+    field_code++;
+    len--;
   }
 
   while (l < u) {
@@ -931,7 +945,7 @@ int _GD_GetRepr(const char *restrict field_code, size_t *restrict len)
   else
     *len -= 2;
 
-  dreturn("%i (%" PRIuSIZE ")", repr, *len);
+  dreturn("0x%X (%" PRIuSIZE ")", repr, *len);
   return repr;
 }
 
@@ -1000,26 +1014,36 @@ gd_entry_t *_GD_FindFieldAndRepr(DIRFILE *restrict D,
 
   old_len = len = strlen(field_code);
 
-  E = _GD_FindField(D, field_code, len, D->entry, D->n_entries, 1, index);
-
-  if (E) {
-    *repr = GD_REPR_NONE;
-
-    dreturn("%p", E);
-    return E;
-  }
-
-  /* No match -- find a representaiton suffix */
+  /* Find a representaiton suffix.  We check this first in order to give
+   * the caller a chance to distinguish ambiguous codes by appending a .z */
   *repr = _GD_GetRepr(field_code, &len);
 
-  /* Repr found */
-  if (len != old_len)
+  /* repr found? -- it's not enough to check that repr != GD_REPR_NONE, since
+   * _GD_GetRepr returns GD_REPR_NONE in that case
+   */
+  if (old_len != len) {
     E = _GD_FindField(D, field_code, len, D->entry, D->n_entries, 1, index);
+  
+    /* SARRAY, SINDIR, STRING only permit the .z suffix */
+    if (E && *repr != GD_REPR_NONE && (E->field_type == GD_SARRAY_ENTRY
+          || E->field_type == GD_SINDIR_ENTRY
+          || E->field_type == GD_STRING_ENTRY))
+    {
+      E = NULL; /* Force match failed */
+    }
+  }
 
+  /* No repr, or match failed. Try the whole code. */
+  if (E == NULL)  {
+    *repr = GD_REPR_NONE;
+    E = _GD_FindField(D, field_code, old_len, D->entry, D->n_entries, 1, index);
+  }
+
+  /* Set error, if requested */
   if (E == NULL && err)
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
 
-  dreturn("%p %i", E, *repr);
+  dreturn("%p 0x%X", E, *repr);
   return E;
 }
 

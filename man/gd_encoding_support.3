@@ -1,6 +1,6 @@
 .\" gd_encoding_support.3.  The gd_encoding_support man page.
 .\"
-.\" Copyright (C) 2014 D. V. Wiebe
+.\" Copyright (C) 2014, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_encoding_support 3 "5 May 2014" "Version 0.9.0" "GETDATA"
+.TH gd_encoding_support 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_encoding_support \(em determine GetData library support for data encodings
 .SH SYNOPSIS
@@ -35,9 +35,16 @@ argument should be one of the following symbols, indicating the encoding type:
 .IP
 .nh
 .ad l
-.BR GD_UNENCODED ", " GD_BZIP2_ENCODED ", " GD_GZIP_ENCODED ,
-.BR GD_LZMA_ENCODED ", " GD_SIE_ENCODED ", " GD_SLIM_ENCODED ,
-.BR GD_TEXT_ENCODED ", " GD_ZZIP_ENCODED ", " GD_ZZSLIM_ENCODED .
+.BR GD_UNENCODED ,
+.BR GD_BZIP2_ENCODED ,
+.BR GD_FLAC_ENCODED ,
+.BR GD_GZIP_ENCODED ,
+.BR GD_LZMA_ENCODED ,
+.BR GD_SIE_ENCODED ,
+.BR GD_SLIM_ENCODED ,
+.BR GD_TEXT_ENCODED ,
+.BR GD_ZZIP_ENCODED ,
+.BR GD_ZZSLIM_ENCODED .
 .ad n
 .hy
 .PP

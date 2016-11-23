@@ -13,12 +13,12 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add_bit 3 "21 November 2016" "Version 0.10.0" "GETDATA"
+.TH gd_add_bit 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_add_bit, gd_add_carray gd_add_clincom, gd_add_const, gd_add_cpolynom,
-gd_add_crecip, gd_add_divide, gd_add_lincom, gd_add_linterp, gd_add_multiply,
-gd_add_phase, gd_add_polynom, gd_add_raw, gd_add_recip, gd_add_sbit,
-gd_add_string
+gd_add_crecip, gd_add_divide, gd_add_indir, gd_add_lincom, gd_add_linterp,
+gd_add_multiply, gd_add_phase, gd_add_polynom, gd_add_raw, gd_add_recip,
+gd_add_sarray, gd_add_sbit, gd_add_sindir, gd_add_string
 \(em add a field to a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
@@ -53,6 +53,10 @@ gd_add_string
 .BI "const char *" in_field1 ", const char *" in_field2 ,
 .BI "int " fragment_index );
 .HP
+.BI "int gd_add_indir(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" index_field ", const char *" carray_field ,
+.BI "int " fragment_index );
+.HP
 .BI "int gd_add_lincom(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "int " n_fields ", const char **" in_fields ", const double *" m ,
 .BI "const double *" b ", int " fragment_index );
@@ -80,6 +84,13 @@ gd_add_string
 .HP
 .BI "int gd_add_recip(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", double " dividend ", int " fragment_index );
+.HP
+.BI "int gd_add_sarray(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "size_t " array_len ", const char **" values ",int " fragment_index );
+.HP
+.BI "int gd_add_sindir(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" index_field ", const char *" sarray_field ,
+.BI "int " fragment_index );
 .HP
 .BI "int gd_add_sbit(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", int " bitnum ", int " numbits ,
@@ -147,10 +158,11 @@ containing the polynomial co-efficients
 .RI ( a " or " ca ).
 
 The
-.BR gd_add_string (),
-.BR gd_add_carry (),
+.BR gd_add_carray (),
+.BR gd_add_const (),
+.BR gd_add_sarray (),
 and
-.BR gd_add_const ()
+.BR gd_add_string ()
 functions add the field and set the value of the field to
 .IR value .
 For
@@ -163,6 +175,12 @@ argument specifies the storage type for the const, while
 .I data_type
 specifies the data type of the value pointed to by
 .IR value .
+For
+.BR gd_add_sarray (),
+.I value
+should be an array of
+.I array_len
+string pointers.
 
 The
 .B gd_shift_t

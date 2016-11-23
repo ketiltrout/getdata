@@ -1,6 +1,6 @@
 .\" gd_put_string.3.  The gd_put_string man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,9 +13,9 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_put_string 3 "19 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_put_string 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
-gd_put_string \(em retrieve a string from a dirfile database
+gd_put_string \(em write a STRING or SARRAY element to a Dirfile database
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -30,11 +30,19 @@ The
 .BR gd_put_string ()
 function queries a dirfile(5) database specified by
 .I dirfile
-and sets the
+and stores the character string
+.I data_in
+in the
 .B STRING
-.I field_code ,
-which should not contain a representation suffix, to the value specified in
-.IR data_in .
+or
+.B SARRAY
+scalar field, specified by
+.IR field_code .
+If
+.I field_code
+specifies a
+.B SARRAY
+field, the supplied string is stored as the first element.
 
 The 
 .I dirfile
@@ -45,13 +53,26 @@ Because string values are stored in the dirfile metadata, the new value of
 .I field_code
 won't be written to disk until the dirfile metadata is flushed with
 .BR gd_metaflush (3),
-or until the dirfile is closed.
+or until the dirfile is closed with
+.BR gd_close (3).
+
+The
+.BR gd_put_sarray (3)
+function provides another way of storing
+.B STRING
+and
+.B SARRAY
+data to a Dirfile.
+
 .SH RETURN VALUE
 On success,
 .BR gd_put_string ()
 returns the length of the string stored, including the trailing NUL character.
-On error, it returns 0 and sets the dirfile error to a non-zero value.  Possible
-error values are:
+On error, this function returns 0 and stores a negative-valued error code in the
+.B DIRFILE
+object which may be retrieved by a subsequent call to
+.BR gd_error (3).
+Possible error codes are:
 .TP 8
 .B GD_E_ACCMODE
 The specified
@@ -72,18 +93,9 @@ was supplied.
 The supplied
 .I field_code
 referred to a field of type other than
-.BR STRING .
-The caller should use
-.BR gd_putdata (3),
-.BR gd_put_carray (3),
+.BR SARRAY
 or
-.BR gd_put_constant (3)
-instead.
-.TP
-.B GD_E_BAD_TYPE
-An invalid
-.I data_type
-was specified.
+.BR STRING .
 .TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.
@@ -93,16 +105,14 @@ maintainer.
 .B GD_E_PROTECTED
 The fragment containing the string was protected from change.
 .PP
-The dirfile error may be retrieved by calling
-.BR gd_error (3).
-A descriptive error string for the last error encountered may be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),
-.BR gd_metaflush (3),
-.BR gd_open (3),
+.BR gd_close (3),
 .BR gd_get_string (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
-.BR gd_putdata (3)
+.BR gd_metaflush (3),
+.BR gd_open (3),
+.BR gd_put_sarray (3).

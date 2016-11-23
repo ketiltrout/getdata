@@ -10,20 +10,94 @@ New in version 0.10.0a:
     which can be specified with the new /NAMESPACE directive, or else as
     part of an /INCLUDE directive.
 
-    - A note on namespaces: Namespaces were created to provide an
-      alternative to the prefix and suffix added to the /INCLUDE driective
-      in Standards Version 9, which have some unfortunate side-effects due
-      to their modifying field names directly.  Because namespaces nest and
-      are syntactically separate from field names, they do a better job of
-      encapsulation.  Especially important is the implicit INDEX vector,
-      which appears automatically in all namespaces, which contrasts with
-      the behaviour in the presence of affixes where it appears or
-      disappears based on the effects of the affixes creating or modifying
-      the specific field name "INDEX".
+  * Some notes about namespaces:
 
-    - A note on the SINDIR field: Unlike every other vector field, this
-      field produces character string data at the sample rate of it's input
-      vector, which may be surprising, in certain instances.
+    - Namespaces are separated from field names by a dot (.):
+  
+          namespace.name
+        
+      and can be nested arbitrarily deep, separating namespaces with
+      intermediate dots:
+
+          namespace.subspace.subsubspace.name
+
+      Namespaces were created to provide an alternative to the prefix and
+      suffix added to the /INCLUDE driective in Standards Version 9, which
+      have some unfortunate side-effects due to their modifying field names
+      directly.  Because namespaces nest and are syntactically separate
+      from field names, they do a better job of encapsulation.
+
+    - If the namespace of a field is null (""), which is the default, then
+      the dot separing the namespace from the field name may be omitted.
+
+    - An /INCLUDE statement can specify a namespace which becomes the
+      included fragment's "root namespace".  The root namespace of the base
+      (top-level) format file is always the nullspace (""), and cannot be
+      changed.
+
+    - In additon to root namespaces, there is also a "current namespace".
+      At the top of a fragment, the current namespace is set to the root
+      namespace.  A /NAMESPACE directive can be used to change the current
+      namespace to a subspace under the root namespace.  That is, if the
+      root namespace is "root", then the directive:
+
+          /NAMESPACE subspace
+
+       changes the current namespace to "root.subspace" regardless of what
+       the current namespace was before.  To change the current namespace
+       back to the root namespace, use the null token ("") with the
+       /NAMESPACE directive:
+
+          /NAMESPACE ""
+
+    - If no namespace is specified in an /INCLUDE line, then the current
+      namespace becomes the root namespace of the included fragment.
+
+    - Subnamespaces under the root namespace may also be specified directly
+      in the name part of a field specification.  As a result, it is never
+      necessary to use the /NAMESPACE directive.
+
+    - Every field code and name in a fragment implicitly gains either the
+      fragment's root namespace or the current namespace.  If the field
+      code starts with an initial dot, then the root namespace is prepended
+      to it, otherwise the current namespace is prepended to it.  Because
+      the current namespace is always a subspace of the root namespace,
+      this means that metadata in a given fragment is never able to access
+      other fields outside its own root namespace.
+
+    - The exception to the above is the implicit INDEX vector, which
+      ignores all namespaces attached to it, either implicitly, through the
+      current namespace, or explicitly when specified in the metadata.
+      This contrasts with the behaviour of the INDEX field in the presence
+      of affixes, where it can appears or disappears based on the effects
+      of the affixes creating or modifying the specific field name "INDEX".
+
+  * Because syntactially the dot (.) now performs two functions, namely
+    both separating namespaces from each other and field names, but also
+    separating a field code from a representation suffix, there exists
+    ambiguity in the syntax.  To resolve the ambiguity, a new representa-
+    tion suffix, .z has been added which does nothing.  As an example, the
+    field code:
+
+      name.r
+
+    is interpreted as the real part of the field named "name", asuming such
+    a field exists.  To indicate the field named "r" in the namespace
+    "name", the field code:
+
+      name.r.z
+
+    must be used.  Note that this ambiguity only exists in a Dirfile where
+    both "name" and "name.r" are valid field names.  If the field named
+    "name" doesn't exist, then the first field code, "name.r" is unambig-
+    uously interpreted as the field "r" in the namespace "name".
+
+  * A note on the SINDIR field: Unlike every other vector field, this
+    field produces character string data at the sample rate of it's input
+    vector, which may be surprising, in certain instances.
+
+  * GetData has supported FLAC compression since 0.9.0.  Standards Version
+    10 now adds "flac" to the list of pre-defined encodings.
 
   Library Changes:
 
@@ -85,6 +159,28 @@ New in version 0.10.0a:
   * The new function gd_alloc_funcs() allows callers to change the memory
     manager used by GetData to allocate and de-allocate heap buffers that
     it returns.
+
+  * A number of functions which used to return -1 on error now instead
+    return an appropriate error code, previously only availably through
+    gd_error().  These error codes are all negatively-valued.  Functions
+    whose error returns have changed and now do this are:
+
+      gd_add(), gd_add_alias(), all the gd_add_<entry_type>() functions,
+      gd_add_spec(), gd_alter_affixes(), all the gd_alter_<entry_type>(),
+      functions, gd_alter_encoding(), gd_alter_endianness(),
+      gd_alter_entry(), gd_alter_frameoffset(), gd_alter_protection(),
+      gd_alter_spec(), gd_array_len(), gd_bof(), gd_delete(), gd_desync(),
+      gd_dirfile_standards(), gd_discard(), gd_entry(), gd_entry_type(),
+      gd_eof(), gd_flush(), gd_fragment_affixes(), gd_fragment_index(),
+      gd_frameoffset(), gd_get_carray(), gd_get_carray_slice(),
+      gd_get_constant(), gd_hidden(), gd_hide(), gd_include(),
+      gd_include_affix(), gd_include_ns(), gd_madd(), gd_madd_alias(),
+      all the gd_madd_<entry_type>() functions, gd_madd_spec(),
+      gd_metaflush(), gd_move(), gd_open(), gd_parent_fragment(),
+      gd_protection(), gd_put_carray(), gd_put_carray_slice(),
+      gd_put_const(), gd_raw_close(), gd_rename(), gd_rewrite_fragment(),
+      gd_seek(), gd_spf(), gd_sync(), gd_tell(),
+      gd_unhide(), gd_uninclude(), gd_validate(), gd_verbose_prefix()
 
   * gd_entry_list() and gd_nentries() now take an additional paremter,
     fragment, which optionally allows searching only one metadata fragment.

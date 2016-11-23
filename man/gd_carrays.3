@@ -13,9 +13,9 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_carrays 3 "19 April 2016" "Version 0.9.3" "GETDATA"
+.TH gd_carrays 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
-gd_carrays \(em retrieve a list of CARRAY values from a dirfile
+gd_carrays, gd_mcarrays \(em retrieve a list of CARRAY values from a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -23,6 +23,9 @@ gd_carrays \(em retrieve a list of CARRAY values from a dirfile
 .ad l
 .BI "const gd_carray_t *gd_carrays(DIRFILE *" dirfile ", gd_type_t
 .IB return_type );
+.HP
+.BI "const gd_carray_t *gd_mcarrays(DIRFILE *" dirfile ", const char"
+.BI * parent ", gd_type_t " return_type );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -30,17 +33,23 @@ The
 .BR gd_carrays ()
 function queries a dirfile(5) database specified by
 .I dirfile
-and returns a read-only list of values of the all
+and generates a read-only list of values of the all top-level
 .B CARRAY
 fields defined in the database, after type conversion to the data type
 specified by
 .IR return_type .
-Notably, this list does not include /META subfields.  For a list of valid
-symbols to use for
+For a list of valid symbols to use for
 .IR return_type ,
 see the
 .BR gd_get_carray (3)
-man page.
+manual page.  
+
+The
+.BR gd_mcarrays ()
+function behaves similarly, but creates a list of values of
+.B CARRAY
+subfields under the parent field
+.IR parent .
 
 The 
 .I dirfile
@@ -54,26 +63,34 @@ assumed to be in any particular order, except that it is guaranteed to be in the
 same order as the list of
 .B CARRAY
 fields returned by
-.BR gd_field_list_by_type (3).
+.BR gd_field_list_by_type (3)
+or
+.BR gd_mfield_list_by_type (3).
 The number of values in the array can be obtained from a call to
-.BR gd_nfields_by_type (3).
+.BR gd_nfields_by_type (3)
+or
+.BR gd_nmfields_by_type (3).
 
 The caller may not modify any values in the array, nor the array itself.  Doing
 so may cause database corruption.  The pointer returned is guaranteed to be
-valid only until
-.BR gd_carrays ()
-is called again with the same arguments, or until the dirfile's metadata is
-modified (by adding, modifying or deleting an entry), or until the array is
-de-allocated by a call to
-.BR gd_close (3).
+valid only until the function is called again with the same arguments, or until
+the dirfile's metadata is modified (by adding, modifying or deleting an entry),
+or until the array is de-allocated by a call to
+.BR gd_close (3)
+or
+.BR gd_discard (3).
 
 A corresponding list of names for these fields may be obtained by calling
-.BR gd_field_list_by_type (3).
+.BR gd_field_list_by_type (3)
+or
+.BR gd_mfield_list_by_type (3).
 
 .SH RETURN VALUE
 Upon successful completion,
 .BR gd_carrays ()
-returns a pointer to an array of
+and
+.BR gd_mcarrays (3)
+return a pointer to an array of
 .B gd_carray_t
 objects containing the values of all the CARRAYs defined in the dirfile
 database.  The
@@ -113,10 +130,15 @@ item with
 set to zero.
 
 If no CARRAYs are defined in the database, a list containing only the
-end-of-list marker is returned.  On error,
+end-of-list marker is returned.
+
+On error,
 .BR gd_carrays ()
-returns NULL and sets the dirfile error to a non-zero error value.  Possible
-error values are:
+returns NULL and stores a negative-valued error code in the
+.B DIRFILE
+object which may be retrieved by a subsequent call to
+.BR gd_error (3).
+Possible error codes are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.
@@ -134,16 +156,15 @@ An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 GetData developers.
 .PP
-The dirfile error may be retrieved by calling
-.BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),
-.BR gd_open (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
 .BR gd_field_list_by_type (3),
 .BR gd_get_carray (3),
+.BR gd_mfield_list_by_type (3),
 .BR gd_nfields_by_type (3)
+.BR gd_nmfields_by_type (3)
+.BR gd_open (3)

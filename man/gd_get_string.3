@@ -1,6 +1,6 @@
 .\" gd_get_string.3.  The gd_get_string man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,9 +13,9 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_get_string 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_get_string 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
-gd_get_string \(em retrieve a string from a dirfile database
+gd_get_string \(em retrieve STRING or SARRAY data from a dirfile database
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -36,6 +36,11 @@ which should not contain a representation suffix.  The first
 .I len
 characters of the string scalar are stored in the user-supplied buffer
 .IR data_out .
+If
+.I field_code
+refers to a
+.B SARRAY
+field, the first element is returned.
 
 The 
 .I dirfile
@@ -56,17 +61,55 @@ must point to a valid memory location of sufficient size to hold at least
 .I len
 characters.  If the length of the string scalar is greater than
 .IR len ", " data_out
-will not be NULL-terminated.
+will not be NUL-terminated.
+
+The
+.BR gd_get_sarray (3)
+function provides another way of retrieving
+.B STRING
+data, but without having to know the length of the returned string in advance.
+The code:
+
+.RS
+.nh
+.ad l
+.BI "size_t " len " = gd_get_string(" dirfile ", " field_code ", 0, NULL);"
+.br
+.BI "char *" string " = malloc(" len );
+.br
+.BI gd_get_string( dirfile ", " field_code ", " len ", " string );
+.hy
+.ad n
+.RE
+
+which ensures the whole string, including the terminating NUL, is returned, can
+be replaced with, simply:
+
+.RS
+.nh
+.ad l
+.BI "const char *" string;
+.br
+.BI gd_get_sarray( dirfile ", " field_code ", &" string );
+.hy
+.ad n
+.RE
+
+with the added benefit of not having manage the memory for the string.
+
 .SH RETURN VALUE
 On success,
 .BR gd_get_string ()
-returns the actual length of the specified string scalar, including the trailing
-NULL character.  A return value greater than
+returns the actual length of the specified string scalar, including space for
+the trailing NUL-character.  A return value greater than
 .I len
-indicates that the output string is not null terminated.
+indicates that the output string is not NUL-terminated.
 
-On error, it returns 0 and sets the dirfile error to a non-zero
-value.  Possible error values are:
+On error, this function returns 0 and stores a negative-valued error code in the
+.B DIRFILE
+object which may be retrieved by a subsequent call to
+.BR gd_error (3).
+Possible error codes are:
 .TP 8
 .B GD_E_BAD_CODE
 The field specified by
@@ -82,31 +125,21 @@ was supplied.
 The supplied
 .I field_code
 referred to a field of type other than
-.BR STRING .
-The caller should use
-.BR gd_getdata (3),
+.B STRING
 or
-.BR gd_get_constant (3)
-instead.
-.TP
-.B GD_E_BAD_TYPE
-An invalid
-.I return_type
-was specified.
+.BR SARRAY .
 .TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
 .PP
-The dirfile error may be retrieved by calling
-.BR gd_error (3).
-A descriptive error string for the last error encountered may be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),
-.BR gd_open (3),
+.BR gd_get_sarray (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
+.BR gd_open (3),
 .BR gd_put_string (3)

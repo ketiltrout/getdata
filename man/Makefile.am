@@ -35,30 +35,31 @@ dist_man_MANS = checkdirfile.1 dirfile2ascii.1 gd_add.3 gd_add_alias.3 \
 								gd_fragment_index.3 gd_fragment_namespace.3 gd_fragmentname.3 \
 								gd_framenum_subset.3 gd_framenum_subset64.3 gd_frameoffset.3 \
 								gd_frameoffset64.3 gd_free_entry_strings.3 \
-								gd_get_carray_slice.3 gd_get_string.3 gd_getdata.3 \
-								gd_getdata64.3 gd_hidden.3 gd_hide.3 gd_include_affix.3 \
-								gd_invalid_dirfile.3 gd_linterp_tablename.3 gd_madd_bit.3 \
-								gd_mcarrays.3 gd_metaflush.3 gd_move.3 gd_mplex_lookback.3 \
+								gd_get_carray_slice.3 gd_get_sarray_slice.3 gd_get_string.3 \
+								gd_getdata.3 gd_getdata64.3 gd_hidden.3 gd_hide.3 \
+								gd_include.3 gd_invalid_dirfile.3 gd_linterp_tablename.3 \
+								gd_madd_bit.3 gd_metaflush.3 gd_move.3 gd_mplex_lookback.3 \
 								gd_mstrings.3 gd_naliases.3 gd_native_type.3 gd_nentries.3 \
 								gd_nfragments.3 gd_nframes.3 gd_nframes64.3 \
 								gd_parent_fragment.3 gd_parser_callback.3 gd_protection.3 \
-								gd_put_carray_slice.3 gd_put_string.3 gd_putdata.3 \
-								gd_putdata64.3 gd_raw_filename.3 gd_reference.3 gd_rename.3 \
-								gd_rewrite_fragment.3 gd_seek.3 gd_seek64.3 gd_spf.3 \
-								gd_strings.3 gd_strtok.3 gd_tell.3 gd_tell64.3 gd_uninclude.3 \
-								gd_validate.3 gd_verbose_prefix.3 GD_SIZE.3 dirfile.5 \
-								dirfile-encoding.5 dirfile-format.5
+								gd_put_carray_slice.3 gd_put_sarray_slice.3 gd_put_string.3 \
+								gd_putdata.3 gd_putdata64.3 gd_raw_filename.3 gd_reference.3 \
+								gd_rename.3 gd_rewrite_fragment.3 gd_sarrays.3 gd_seek.3 \
+								gd_seek64.3 gd_spf.3 gd_strings.3 gd_strtok.3 gd_tell.3 \
+								gd_tell64.3 gd_uninclude.3 gd_validate.3 gd_verbose_prefix.3 \
+								GD_SIZE.3 dirfile.5 dirfile-encoding.5 dirfile-format.5
 
 # these are real_file:alias
 MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
 	gd_add_bit.3:gd_add_const.3 gd_add_bit.3:gd_add_cpolynom.3 \
 	gd_add_bit.3:gd_add_crecip.3 gd_add_bit.3:gd_add_divide.3 \
-	gd_add_bit.3:gd_add_lincom.3 gd_add_bit.3:gd_add_linterp.3 \
-	gd_add_bit.3:gd_add_mplex.3 gd_add_bit.3:gd_add_multiply.3 \
-	gd_add_bit.3:gd_add_polynom.3 gd_add_bit.3:gd_add_phase.3 \
-	gd_add_bit.3:gd_add_raw.3 gd_add_bit.3:gd_add_recip.3 \
-	gd_add_bit.3:gd_add_sbit.3 gd_add_bit.3:gd_add_string.3 \
-	gd_add_bit.3:gd_add_window.3 \
+	gd_add_bit.3:gd_add_indir.3 gd_add_bit.3:gd_add_lincom.3 \
+	gd_add_bit.3:gd_add_linterp.3 gd_add_bit.3:gd_add_mplex.3 \
+	gd_add_bit.3:gd_add_multiply.3 gd_add_bit.3:gd_add_polynom.3 \
+	gd_add_bit.3:gd_add_phase.3 gd_add_bit.3:gd_add_raw.3 \
+	gd_add_bit.3:gd_add_recip.3 gd_add_bit.3:gd_add_sarray.3 \
+	gd_add_bit.3:gd_add_sbit.3 gd_add_bit.3:gd_add_sindir.3 \
+	gd_add_bit.3:gd_add_string.3 gd_add_bit.3:gd_add_window.3 \
 	gd_madd_bit.3:gd_madd_carray.3 gd_madd_bit.3:gd_madd_clincom.3 \
 	gd_madd_bit.3:gd_madd_const.3 gd_madd_bit.3:gd_madd_cpolynom.3 \
 	gd_madd_bit.3:gd_madd_crecip.3 gd_madd_bit.3:gd_madd_divide.3 \
@@ -72,7 +73,7 @@ MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
 	gd_cbopen.3:gd_open.3 \
 	gd_close.3:gd_discard.3 \
 	gd_constants.3:gd_mconstants.3 \
-	gd_include_affix.3:gd_include.3 \
+	gd_include.3:gd_include_affix.3 gd_include.3:gd_include_ns.3 \
 	gd_alter_bit.3:gd_alter_carray.3 gd_alter_bit.3:gd_alter_clincom.3 \
 	gd_alter_bit.3:gd_alter_const.3 gd_alter_bit.3:gd_alter_cpolynom.3 \
 	gd_alter_bit.3:gd_alter_crecip.3 gd_alter_bit.3:gd_alter_divide.3 \
@@ -87,7 +88,8 @@ MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
 	gd_get_carray_slice.3:gd_get_constant.3 \
 	gd_put_carray_slice.3:gd_put_carray.3 \
 	gd_put_carray_slice.3:gd_put_constant.3 \
-	gd_delete.3:gd_delete_alias.3 \
+	gd_get_sarray_slice.3:gd_get_sarray.3 \
+	gd_put_sarray_slice.3:gd_put_sarray.3 \
 	gd_hide.3:gd_unhide.3 \
 	gd_add_alias.3:gd_madd_alias.3 \
 	gd_flush.3:gd_sync.3 gd_flush.3:gd_raw_close.3 \
@@ -99,7 +101,9 @@ MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
 	gd_entry_list.3:gd_nmvectore.3 gd_entry_list.3:gd_vector_list.3 \
 	gd_frameoffset64.3:gd_alter_frameoffset64.3 \
 	gd_array_len.3:gd_carray_len.3 \
-	gd_error.3:gd_error_string.3
+	gd_error.3:gd_error_string.3 \
+	gd_carrays.3:gd_mcarrays.3 \
+	gd_sarrays.3:gd_scarrays.3
 
 #man conversion
 HTMLMANS=$(addsuffix .html,${nodist_man_MANS}) \

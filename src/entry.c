@@ -200,12 +200,7 @@ int _GD_GetScalar(DIRFILE *restrict D, const char *restrict scalar,
   dtrace("%p, \"%s\", %p(%i), 0x%02X, %p, %p", D, scalar, index_in, *index_in,
       type, data, E);
 
-  C = _GD_FindFieldAndRepr(D, scalar, &repr, NULL, 1);
-
-  if (D->error) {
-    dreturn("%i", 1);
-    return 1;
-  }
+  C = _GD_FindFieldAndRepr(D, scalar, &repr, NULL, 0);
 
   if (C == NULL)
     e = GD_E_SCALAR_CODE;
@@ -241,6 +236,8 @@ int _GD_GetScalar(DIRFILE *restrict D, const char *restrict scalar,
   return e;
 }
 
+/* Like _GD_GetScalar, but with more error checking.  And a different calling
+ * convention */
 static int _GD_GetScalar2(DIRFILE *restrict D, gd_entry_t *restrict E, int i,
     gd_type_t type, void *restrict data, int err)
 {
@@ -331,7 +328,8 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
       switch (E->EN(window,windop)) {
         case GD_WINDOP_EQ:
         case GD_WINDOP_NE:
-          e = _GD_GetScalar2(D, E, 0, GD_INT64, &E->EN(window,threshold.i), err);
+          e = _GD_GetScalar2(D, E, 0, GD_INT64, &E->EN(window,threshold.i),
+              err);
           break;
         case GD_WINDOP_SET:
         case GD_WINDOP_CLR:
@@ -774,6 +772,9 @@ int gd_validate(DIRFILE *D, const char *field_code) gd_nothrow
   /* calculate scalars */
   if (!(E->flags & GD_EN_CALC))
     _GD_CalculateEntry(D, E, 1);
+
+  if (D->error)
+    GD_RETURN_ERROR(D);
 
   /* check input fields */
   switch (E->field_type) {

@@ -1,3 +1,18 @@
+2016-11-23   D. V. Wiebe <getdata@ketiltrout.net> svn:1116
+	* src/common.c (_GD_FindFieldWithParent _GD_FindField): Ignore an initial
+	dot in the field code.
+
+	* src/common.c (_GD_FindFieldAndRepr): Look for field code with repr first
+	to resolve the .z ambiguity.
+
+	* src/entry.c (_GD_GetScalar): Don't set an error (for gd_entry() use).
+
+	* src/entry.c (gd_validate): If _GD_CalculateEntry() fails, return early.
+
+	* test/get_const_bad.c test/get_const_reprz.c test/get_dot.c
+	test/get_reprz.c test/index_reprz.c test/native_reprz.c test/valid_reprz.c:
+	Added.
+	
 2016-11-22   D. V. Wiebe <getdata@ketiltrout.net> svn:1115
 	* src/common.c (_GD_GetRepr): Add len parameter.  Don't malloc, just
 	decrement *len twice if matched.  Don't set errors.  Remove D and field_code

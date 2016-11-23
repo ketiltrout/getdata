@@ -1,6 +1,6 @@
 .\" gd_get_carray_slice.3.  The gd_get_carray_slice man page.
 .\"
-.\" Copyright (C) 2010-2013 D. V. Wiebe
+.\" Copyright (C) 2010-2013, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_get_carray_slice 3 "1 October 2013" "Version 0.9.0" "GETDATA"
+.TH gd_get_carray_slice 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_get_carray, gd_get_carray_slice, gd_get_constant \(em retrieve CONST or CARRAY data from a dirfile database
 .SH SYNOPSIS
@@ -41,7 +41,7 @@ for the
 .B CONST
 or
 .B CARRAY
-scalar array
+scalar
 .IR field_code ,
 which may contain a representation suffix.
 The data in the field is converted to the data type specified by
@@ -62,7 +62,7 @@ were called with
 equal to zero and
 .I len
 equal to the value returned by
-.BR gd_carray_len (3).
+.BR gd_array_len (3).
 The
 .BR gd_get_constant ()
 function is equivalent to calling
@@ -84,7 +84,7 @@ requested data of the return type specified.  The number of elements returned
 by
 .BR gd_get_carray ()
 may be obtained by calling
-.BR gd_carray_len (3).
+.BR gd_array_len (3).
 Unlike
 .BR gd_getdata (3),
 calling
@@ -154,8 +154,8 @@ On success,
 .BR gd_get_carray_slice (),
 and
 .BR gd_get_constant ()
-return zero.  On error, they return -1 and set the dirfile error to a non-zero
-value.  Possible error values are:
+return zero.  On error, they return a negative-valued error code.  Possible
+error codes are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.
@@ -177,11 +177,6 @@ was not a
 .BR CONST
 nor
 .BR CARRAY .
-The caller should use
-.BR gd_getdata (3)
-or
-.BR gd_get_string (3)
-instead.
 .TP
 .B GD_E_BAD_TYPE
 An invalid
@@ -196,17 +191,17 @@ An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
 .PP
-The dirfile error may be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered may be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),
-.BR gd_carray_len (3),
+.BR gd_array_len (3),
 .BR gd_carrays (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
-.BR gd_get_constant (3),
 .BR gd_open (3),
 .BR gd_put_carray_slice (3)

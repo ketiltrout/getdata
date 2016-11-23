@@ -1690,12 +1690,7 @@ a simple field name, possibly an alias, indicating a vector or scalar field
 (since Standards Version 7:) optionally, a dot
 .RB ( . )
 followed by a
-.IR "representation suffix" ,
-but only if the field or metafield specified is not a
-.BR SARRAY ", " STRING ,
-or
-.B SINDIR
-type field.
+.IR "representation suffix" .
 .PP
 A 
 .IR "representation suffix"
@@ -1733,12 +1728,12 @@ the presence of a namespace tag.  To wit, the field code
 .IP
 name.r
 .PP
-is always interpreted as the real-part (via the
+may be interpreted as the real-part (via the
 .B .r
 representation suffix)
 of the field called
 .IR name .
-To refer to a field called
+(if such a field exists).  To refer to a field called
 .I r
 in the
 .I name
@@ -1757,7 +1752,15 @@ in the
 .I name
 namespace because
 .B .q
-is not a valid representation suffix.
+is not a valid representation suffix.  Furthermore, ambiguity arises only if
+both fields "name" and "name.r" are defined.  if the field "name" does
+not exist, but the field "name.r" does, then the original field code is not
+ambiguous.  This is the only representation suffix allowed on
+.BR SARRAY ,
+.BR SINDIR ,
+and
+.BR STRING
+field codes.
 .RE
 .PP
 If the specified field is purely real, representations are calculated as

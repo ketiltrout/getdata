@@ -1,6 +1,6 @@
 .\" gd_put_carray_slice.3.  The gd_put_carray_slice man page.
 .\"
-.\" Copyright (C) 2010, 2011, 2012 D. V. Wiebe
+.\" Copyright (C) 2010, 2011, 2012, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_put_carray_slice 3 "4 July 2012" "Version 0.8.0" "GETDATA"
+.TH gd_put_carray_slice 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_put_carray, gd_put_carray_slice, gd_put_constant \(em write CONST or CARRAY
 data to a dirfile database
@@ -61,7 +61,7 @@ were called with
 equal zero and
 .I len
 equal to the value returned by
-.BR gd_carray_len (3).
+.BR gd_array_len (3).
 The
 .BR gd_put_constant ()
 function is equivalent to calling
@@ -78,7 +78,7 @@ must point to a valid memory location containing all the data to be written.
 The number of elements which will be stored by
 .BR gd_put_carray ()
 may be obtained by calling
-.BR gd_carray_len (3).
+.BR gd_array_len (3).
 Unlike
 .BR gd_putdata (3),
 writing data past the end of the field is not permitted.  To add data to a
@@ -143,8 +143,8 @@ On success,
 .BR gd_put_carray_slice ()
 and
 .BR gd_put_constant ()
-return zero.  On error, they return -1 and set the dirfile error to a non-zero
-value.  Possible error values are:
+return zero.  On error, they return a negative-valued error code.  Possible
+error codes are:
 .TP 8
 .B GD_E_ACCMODE
 The specified
@@ -194,14 +194,15 @@ maintainer.
 .B GD_E_PROTECTED
 The fragment containing the constant was protected from change.
 .PP
-The dirfile error may be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered may be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),
-.BR gd_carray_len (3),
+.BR gd_array_len (3),
 .BR gd_carrays (3),
 .BR gd_error (3),
 .BR gd_error_string (3),

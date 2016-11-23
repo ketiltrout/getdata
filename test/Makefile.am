@@ -222,11 +222,12 @@ FRAGMENT_TESTS=fragment_affix fragment_affix_alter fragment_affix_alter2 \
 
 GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_carray_c2r get_carray_slice get_char get_clincom get_complex128 \
-					get_complex64 get_const get_const_carray get_const_complex \
-					get_const_repr get_cpolynom get_cpolynom1 get_cpolynom_int get_dim \
-					get_divide get_divide_ccin get_divide_crin get_divide_crinr \
-					get_divide_rcin get_divide_s get_endian8 get_endian16 get_endian32 \
-					get_endian64 get_endian_complex128_arm get_endian_complex128_big \
+					get_complex64 get_const get_const_bad get_const_carray \
+					get_const_complex get_const_repr get_const_reprz get_cpolynom \
+					get_cpolynom1 get_cpolynom_int get_dim get_divide get_divide_ccin \
+					get_divide_crin get_divide_crinr get_divide_rcin get_divide_s \
+					get_dot get_endian8 get_endian16 get_endian32 get_endian64 \
+					get_endian_complex128_arm get_endian_complex128_big \
 					get_endian_complex128_little get_endian_complex64_arm \
 					get_endian_complex64_big get_endian_complex64_little \
 					get_endian_float32_arm get_endian_float32_big \
@@ -246,12 +247,13 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_multiply_s get_neg get_none get_nonexistent get_null get_off64 \
 					get_phase get_phase_affix get_polynom get_polynom_cmpin \
 					get_polynom_noin get_range get_recip get_recip_const get_recurse \
-					get_rofs get_sarray get_sarray_len get_sarray_slice get_sbit get_sf \
-					get_sindir get_sindir_none get_sindir_null get_sindir_type get_ss \
-					get_string get_type get_uint16 get_uint32 get_uint64 get_window \
-					get_window_clr get_window_complex get_window_ge get_window_gt \
-					get_window_le get_window_lt get_window_ne get_window_s \
-					get_window_set get_zero get_zero_complex get_zero_float
+					get_reprz get_rofs get_sarray get_sarray_len get_sarray_slice \
+					get_sbit get_sf get_sindir get_sindir_none get_sindir_null \
+					get_sindir_type get_ss get_string get_type get_uint16 get_uint32 \
+					get_uint64 get_window get_window_clr get_window_complex \
+					get_window_ge get_window_gt get_window_le get_window_lt \
+					get_window_ne get_window_s get_window_set get_zero get_zero_complex \
+					get_zero_float
 
 GLOBAL_TESTS=global_flags global_name global_ref global_ref_empty global_ref_set
 
@@ -274,7 +276,8 @@ INCLUDE_TESTS=include_accmode include_affix include_affix_ns include_auto \
 							include_ns_null include_ns_prefix include_pc include_prot \
 							include_ref include_sub include_syntax
 
-INDEX_TESTS=index_domain index_index index_range index_s index_subset
+INDEX_TESTS=index_domain index_index index_range index_reprz index_s \
+						index_subset
 
 if INCLUDE_LEGACY_API
 LEGACY_TESTS=legacy_error legacy_estring legacy_format legacy_get \
@@ -320,7 +323,7 @@ NATIVE_TESTS=native_bit native_const native_index native_lincom \
 						 native_linterp_cmp native_mult native_mult1 native_mult2 \
 						 native_polynom native_polynom_cmpin native_polynom_cmpscal \
 						 native_raw native_phase native_recip native_recip_cmpin \
-						 native_recip_cmpscal native_sbit native_string
+						 native_recip_cmpscal native_reprz native_sbit native_string
 
 NENTRIES_TESTS=nentries_alias nentries_fragment nentries_hidden \
 							 nentries_noalias nentries_scalar
@@ -460,6 +463,8 @@ TOK_TESTS=tok_arg tok_escape tok_quote
 
 TRUNC_TESTS=trunc trunc_dir trunc_rdonly trunc_rofs trunc_truncsub
 
+VALID_TESTS=valid_reprz
+
 UNCLUDE_TESTS=unclude unclude_del unclude_index unclude_keep unclude_move \
 							unclude_open unclude_prot unclude_rdonly
 
@@ -491,8 +496,8 @@ TESTS=$(ADD_TESTS)      $(ALIAS_TESTS)    $(ALTER_TESTS)    $(ASCII_TESTS)    \
 			$(PROTECT_TESTS)  $(PUT_TESTS)      $(REF_TESTS)      $(REPR_TESTS)     \
 			$(SEEK_TESTS)     $(SIE_TESTS)      $(SLIM_TESTS)     $(SPF_TESTS)      \
 			$(SVLIST_TESTS)   $(TABLE_TESTS)    $(TELL_TESTS)     $(TOK_TESTS)      \
-			$(TRUNC_TESTS)    $(UNCLUDE_TESTS)  $(VERSION_TESTS)  $(VLIST_TESTS)    \
-			$(ZZIP_TESTS)     $(ZZSLIM_TESTS)
+			$(TRUNC_TESTS)    $(UNCLUDE_TESTS)  $(VALID_TESTS)    $(VERSION_TESTS)  \
+			$(VLIST_TESTS)    $(ZZIP_TESTS)     $(ZZSLIM_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

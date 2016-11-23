@@ -16,9 +16,10 @@
 .TH gd_alter_bit 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_alter_bit, gd_alter_carray, gd_alter_clincom, gd_alter_const,
-gd_alter_cpolynom, gd_alter_crecip, gd_alter_divide, gd_alter_lincom,
-gd_alter_linterp, gd_alter_multiply, gd_alter_phase, gd_alter_polynom,
-gd_alter_raw, gd_alter_recip, gd_alter_sbit
+gd_alter_cpolynom, gd_alter_crecip, gd_alter_divide, gd_alter_indir,
+gd_alter_lincom, gd_alter_linterp, gd_alter_multiply, gd_alter_phase,
+gd_alter_polynom, gd_alter_raw, gd_alter_recip, gd_alter_sarray, gd_alter_sbit,
+gd_alter_sindir
 \(em modify a field in a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
@@ -47,6 +48,9 @@ gd_alter_raw, gd_alter_recip, gd_alter_sbit
 .BI "int gd_alter_divide(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "const char *" in_field1 ", const char *" in_field2 );
 .HP
+.BI "int gd_alter_indir(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" index_field ", const char *" carray_field );
+.HP
 .BI "int gd_alter_lincom(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "int " n_fields ", const char **" in_fields ", const double *" m ,
 .BI "const double *" b );
@@ -73,8 +77,14 @@ gd_alter_raw, gd_alter_recip, gd_alter_sbit
 .BI "int gd_alter_recip(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "const char *" in_field ", double " dividend );
 .HP
+.BI "int gd_alter_sarray(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "size_t " array_len );
+.HP
 .BI "int gd_alter_sbit(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "const char *" in_field ", int " bitnum ", int " numbits );
+.HP
+.BI "int gd_alter_sindir(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" index_field ", const char *" sarray_field );
 .HP
 .BI "int gd_alter_window(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "const char *" in_field ", const char *" check_field ,
@@ -206,7 +216,13 @@ is used to increase the length of a
 .B CARRAY
 field, the added elements will be uninitialised.  Use
 .BR gd_put_carray_slice (3)
-or equivalent to initialise them.
+or equivalent to initialise them.  Similarly, increasing the length of a
+.B SARRAY
+with
+.BR gd_alter_sarray ()
+will set the added elements to the empty string ("").  Use
+.BR gd_put_sarray_slice (3)
+or equivalent to modify them.
 
 See
 .B NOTES
@@ -353,4 +369,5 @@ dividend parameter.
 .BR gd_metaflush (3),
 .BR gd_open (3),
 .BR gd_put_carray_slice (3),
+.BR gd_put_sarray_slice (3),
 .BR dirfile-format (5)

@@ -15,19 +15,23 @@
 .\"
 .TH gd_include_affix 3 "22 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
-gd_include_affix, gd_include \(em add a format specification fragment to a
-dirfile
+gd_include, gd_include_affix, gd_include_ns \(em add a format specification
+fragment to a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
+.BI "int gd_include(DIRFILE *" dirfile ", const char *" include_file ,
+.BI "int " parent_fragment ", unsigned long " flags );
+.HP
 .BI "int gd_include_affix(DIRFILE *" dirfile ", const char *" include_file ,
 .BI "int " parent_fragment ", const char *" prefix ", const char *" suffix ,
 .BI "unsigned long " flags );
 .HP
-.BI "int gd_include(DIRFILE *" dirfile ", const char *" include_file ,
-.BI "int " parent_fragment ", unsigned long " flags );
+.BI "int gd_include_ns(DIRFILE *" dirfile ", const char *" include_file ,
+.BI "int " parent_fragment ", const char *" namespace , 
+.BI "unsigned long " flags );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -46,6 +50,11 @@ the following directive were present:
 .PP
 (see
 .BR dirfile-format (5)).
+The
+.I prefix
+may include a namespace, separated from the rest of the prefix, which may be
+the empty string, by a dot
+.IR ( . ).
 If a parser callback function had been specified when the dirfile was opened
 using
 .BR gd_cbopen (3),
@@ -59,6 +68,7 @@ Passing NULL as
 or
 .I suffix
 is the same as using the empty string (ie. the corresponding affix is empty).
+
 The function
 .BR gd_include ()
 is equivalent to calling
@@ -68,6 +78,18 @@ with both
 and
 .I suffix
 equal to NULL.
+
+The function
+.BR gd_include_ns ()
+is equivalent to calling
+.BR gd_include_affix ()
+with
+.I suffix
+equal to NULL and
+.I prefix
+equal to
+.I namespace
+concatenated with a trailing dot.
 
 The 
 .I flags
@@ -234,6 +256,10 @@ encoding scheme for the first time, it remembers it for subsequent calls.
 Specifies that raw data files are compressed using the Burrows-Wheeler block
 sorting text compression algorithm and Huffman coding, as implemented in the
 bzip2 format.
+.TP
+.B GD_FLAC_ENCODED
+Specifies that raw data files are compressed using the Free Lossless Audio
+Coded (FLAC).
 .TP
 .B GD_GZIP_ENCODED
 Specifies that raw data files are compressed using Lempel-Ziv coding (LZ77)
