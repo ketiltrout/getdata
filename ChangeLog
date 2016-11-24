@@ -1,4 +1,4 @@
-2016-11-24   D. V. Wiebe <getdata@ketiltrout.net> svn:1117, 1118
+2016-11-24   D. V. Wiebe <getdata@ketiltrout.net> svn:1118, 1119
 	* src/internal.h: Add GD_CO_REPR and GD_CO_REPRZ flags.
 	* src/name.c (_GD_SlashDot): Don't match '.z' unless GD_CO_REPRZ is set.
 	* src/name.c (_GD_StripCode): Keep a representation suffix if GD_CO_REPR is
@@ -13,10 +13,11 @@
 
 	* src/name.c (_GD_CodeOffsets): Fix offset[8] calculation for repr.
 
-	* src/common.c (_GD_FindFieldWithParent): Remove unused DIRFILE* parameter.
-
 	* test/flush_affix.c test/flush_repr.c test/flush_repr9.c
 	test/flush_reprz.c: Added.
+
+2016-11-23   D. V. Wiebe <getdata@ketiltrout.net> svn:1117
+	* src/common.c (_GD_FindFieldWithParent): Remove unused DIRFILE* parameter.
 
 2016-11-23   D. V. Wiebe <getdata@ketiltrout.net> svn:1116
 	* src/common.c (_GD_FindFieldWithParent _GD_FindField): Ignore an initial
@@ -29,9 +30,8 @@
 
 	* src/entry.c (gd_validate): If _GD_CalculateEntry() fails, return early.
 
-	* test/get_const_bad.c test/get_const_reprz.c test/get_dot.c
-	test/get_reprz.c test/index_reprz.c test/native_reprz.c test/valid_reprz.c:
-	Added.
+	* test/get_const_bad.c test/get_const_reprz.c test/get_dot.c test/get_reprz.c
+	test/index_reprz.c test/native_reprz.c test/valid_reprz.c: Added.
 	
 2016-11-22   D. V. Wiebe <getdata@ketiltrout.net> svn:1115
 	* src/common.c (_GD_GetRepr): Add len parameter.  Don't malloc, just

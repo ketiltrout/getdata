@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2014, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -30,11 +30,19 @@ int main(void)
     "dirfile/format3",
     "dirfile/format4"
   };
-  const char *data = "dirfile/ar";
-  const char *format_data[] = {
-    "/VERSION 8\n"
-      "/INCLUDE format1\n",
-    "\n\n\n\n\n"
+  uint16_t c[8];
+  int i, e1, e2, e3, n, v, h1, h2, r = 0;
+  DIRFILE *D;
+
+  memset(c, 0, 16);
+  rmdirfile();
+  mkdir(filedir, 0777);
+
+  MAKEFORMATFILE(format[0],
+      "/VERSION 8\n"
+      "/INCLUDE format1\n");
+
+  MAKEFORMATFILE(format[1],
       "/VERSION 9\n"
       "Xr RAW COMPLEX128 0xA\n"
       "Xy POLYNOM INDEX 8 055 0xAE 2\n"
@@ -46,58 +54,41 @@ int main(void)
       "/INCLUDE format4\n"
       "/ALIAS z n\n"
       "/ALIAS d z\n"
-      "/HIDDEN Xy\n",
-    "/INCLUDE format3 \"\" Y\n",
-    "/ALIAS d INDEX\n/HIDDEN d\n",
-    "/ALIAS n m\n"
-  };
-  uint16_t c[8];
-  unsigned char data_data[256];
-  int fd, i, e1, e2, n, v, h1, h2, r = 0;
-  DIRFILE *D;
+      "/HIDDEN Xy\n"
+      );
 
-  memset(c, 0, 16);
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  for (i = 0; i < 5; ++i) {
-    fd = open(format[i], O_CREAT | O_EXCL | O_WRONLY, 0666);
-    write(fd, format_data[i], strlen(format_data[i]));
-    close(fd);
-  }
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEFORMATFILE(format[2], "/INCLUDE format3 \"\" Y\n");
+  MAKEFORMATFILE(format[3], "/ALIAS d INDEX\n/HIDDEN d\n");
+  MAKEFORMATFILE(format[4], "/ALIAS n m\n");
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   h1 = gd_hidden(D, "AdYZ");
   CHECKI(h1,1);
 
-  gd_rewrite_fragment(D, GD_ALL_FRAGMENTS);
-  e1 = gd_error(D);
-  CHECKI(e1,0);
+  e1 = gd_dirfile_standards(D, 9);
+  CHECKI(e1, 9);
 
-  e2 = gd_close(D);
+  e2 = gd_rewrite_fragment(D, GD_ALL_FRAGMENTS);
   CHECKI(e2, 0);
+
+  e3 = gd_close(D);
+  CHECKI(e3, 0);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   v = gd_dirfile_standards(D, GD_VERSION_CURRENT);
+  CHECKI(v,9);
+
   n = gd_getdata(D, "ar", 4, 0, 8, 0, GD_UINT16, c);
+  CHECKI(n,8);
+
   h2 = gd_hidden(D, "AdYZ");
   CHECKI(h2,1);
-  CHECKI(n,8);
-  CHECKI(v,GD_DIRFILE_STANDARDS_VERSION);
 
   for (i = 0; i < n; ++i)
     CHECKUi(i,c[i], (i & 1) ? 4 + i : 0);
 
   gd_discard(D);
 
-  unlink(data);
   for (i = 0; i < 5; ++i)
     unlink(format[i]);
   rmdir(filedir);

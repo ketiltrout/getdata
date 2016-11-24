@@ -2410,7 +2410,7 @@ static gd_entry_t *_GD_ResolveAlias(DIRFILE *restrict D, gd_entry_t *restrict E)
 {
   gd_entry_t *T = NULL;
 
-  dtrace("%p, %p", D, E);
+  dtrace("%p, %p(%s)", D, E, E->field);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
@@ -2439,8 +2439,16 @@ static gd_entry_t *_GD_ResolveAlias(DIRFILE *restrict D, gd_entry_t *restrict E)
   }
 
   D->recurse_level--;
-  dreturn("%p", D->error ? NULL : E->e->entry[0]);
-  return D->error ? NULL : E->e->entry[0];
+
+  if (D->error) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+    
+  dreturn("%p (\"%s\" > \"%s\" > \"%s\")", E->e->entry[0], E->field,
+      E->e->entry[1] ? E->e->entry[1]->field : "",
+      E->e->entry[0] ? E->e->entry[0]->field : "");
+  return E->e->entry[0];
 }
 
 void _GD_UpdateAliases(DIRFILE *D, int reset)
