@@ -24,32 +24,45 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  unsigned char c[8];
-  int i, n, error, r = 0;
+  int e1, e2, e3, e4, e5, r = 0;
+  gd_type_t t1;
   DIRFILE *D;
+  gd_entry_t E;
 
-  memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  MAKEFORMATFILE(format, "data RAW UINT8 8\n");
-  MAKEDATAFILE(data, uint8_t, i, 256);
+  MAKEFORMATFILE(format, "data RAW COMPLEX128 1\n");
+
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  e1 = gd_add_spec(D, "real LINCOM data.r 1 0", 0);
+  CHECKI(e1, 0);
+  e2 = gd_add_spec(D, "complex LINCOM data.z 1 0", 0);
+  CHECKI(e2, 0);
+
+  e3 = gd_close(D);
+  CHECKI(e3, 0);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  n = gd_getdata(D, ".data", 5, 0, 1, 0, GD_UINT8, c);
-  error = gd_error(D);
+  t1 = gd_native_type(D, "real");
+  CHECKI(t1, GD_FLOAT64);
+  t1 = gd_native_type(D, "complex");
+  CHECKI(t1, GD_COMPLEX128);
+
+  e4 = gd_entry(D, "real", &E);
+  CHECKI(e4, 0);
+  CHECKS(E.in_fields[0], "data.r");
+  gd_free_entry_strings(&E);
+
+  e5 = gd_entry(D, "complex", &E);
+  CHECKI(e5, 0);
+  CHECKS(E.in_fields[0], "data");
+  gd_free_entry_strings(&E);
 
   gd_discard(D);
 
-  unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, 0);
-  CHECKI(n, 8);
-  for (i = 0; i < 8; ++i)
-    CHECKUi(i, c[i], 40 + i);
 
   return r;
 }

@@ -24,32 +24,47 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  unsigned char c[8];
-  int i, n, error, r = 0;
+  int e1, e2, e3, e4, e5, r = 0;
   DIRFILE *D;
+  gd_entry_t E1, E2;
 
-  memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
 
-  MAKEFORMATFILE(format, "data RAW UINT8 8\n");
-  MAKEDATAFILE(data, uint8_t, i, 256);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL | GD_VERBOSE);
+  e1 = gd_add_spec(D, "i LINCOM r 1 0 q/r 1 0 r/q 1 0", 0);
+  CHECKI(e1, 0);
+  e2 = gd_add_spec(D, "z LINCOM m.z 1 0 q/m.z 1 0 m/q.z 1 0", 0);
+  CHECKI(e2, 0);
+
+  e3 = gd_close(D);
+  CHECKI(e3, 0);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  n = gd_getdata(D, ".data", 5, 0, 1, 0, GD_UINT8, c);
-  error = gd_error(D);
+
+  e4 = gd_entry(D, "i", &E1);
+  if (e4)
+    CHECKI(e4, 0);
+  else {
+    CHECKS(E1.in_fields[0], "r.z");
+    CHECKS(E1.in_fields[1], "q/r.z");
+    CHECKS(E1.in_fields[2], "r/q");
+    gd_free_entry_strings(&E1);
+  }
+
+  e5 = gd_entry(D, "z", &E2);
+  if (e5)
+    CHECKI(e5, 0);
+  else {
+    CHECKS(E2.in_fields[0], "m.z");
+    CHECKS(E2.in_fields[1], "q/m.z");
+    CHECKS(E2.in_fields[2], "m/q");
+    gd_free_entry_strings(&E2);
+  }
 
   gd_discard(D);
 
-  unlink(data);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, 0);
-  CHECKI(n, 8);
-  for (i = 0; i < 8; ++i)
-    CHECKUi(i, c[i], 40 + i);
 
   return r;
 }

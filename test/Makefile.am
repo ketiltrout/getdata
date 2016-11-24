@@ -200,9 +200,10 @@ FLIST_TESTS=flist flist0 flist2 flist_hidden flist_invalid flist_meta \
 						flist_type_hidden flist_type_invalid flist_type_meta \
 						flist_type_meta_hidden flist_type_meta_invalid
 
-FLUSH_TESTS=flush_all flush_amb_code flush_bad_code flush_flush flush_hex \
-						flush_invalid flush_lincom flush_lincom1 flush_meta flush_mult \
-						flush_raw_close flush_ref flush_spec flush_string flush_sync
+FLUSH_TESTS=flush_affix flush_all flush_amb_code flush_bad_code flush_flush \
+						flush_hex flush_invalid flush_lincom flush_lincom1 flush_meta \
+						flush_mult flush_raw_close flush_ref flush_repr flush_repr9 \
+						flush_reprz flush_spec flush_string flush_sync
 
 FOFFS_TESTS=foffs_alter foffs_alter_all foffs_get foffs_move
 

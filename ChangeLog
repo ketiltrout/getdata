@@ -1,5 +1,22 @@
-2016-11-23   D. V. Wiebe <getdata@ketiltrout.net> svn:1117
+2016-11-24   D. V. Wiebe <getdata@ketiltrout.net> svn:1117, 1118
+	* src/internal.h: Add GD_CO_REPR and GD_CO_REPRZ flags.
+	* src/name.c (_GD_SlashDot): Don't match '.z' unless GD_CO_REPRZ is set.
+	* src/name.c (_GD_StripCode): Keep a representation suffix if GD_CO_REPR is
+	set.  If GD_CO_REPR and GD_CO_REPRZ set, add a disambiguating .z if needed.
+
+	* src/flush.c (_GD_WriteFieldCode): Add GD_WFC_NAME flag.  Set GD_CO_REPR
+	and/or GD_CO_REPRZ in strip_flags when appropriate.
+	* src/flush.c (_GD_PadField): Call _GD_WriteFieldCode with GD_WFC_NAME set.
+	* src/flush.c (_GD_FieldSpec) src/flush.c (_GD_FlushFragment): For
+	/ALIAS, /HIDDEN, and /REFERENCE directives, add GD_WFC_NAME to
+	_GD_WriteFieldCode call.
+
+	* src/name.c (_GD_CodeOffsets): Fix offset[8] calculation for repr.
+
 	* src/common.c (_GD_FindFieldWithParent): Remove unused DIRFILE* parameter.
+
+	* test/flush_affix.c test/flush_repr.c test/flush_repr9.c
+	test/flush_reprz.c: Added.
 
 2016-11-23   D. V. Wiebe <getdata@ketiltrout.net> svn:1116
 	* src/common.c (_GD_FindFieldWithParent _GD_FindField): Ignore an initial
