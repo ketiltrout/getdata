@@ -308,19 +308,19 @@ WRITE_ERR:
 
 /* write a field code, taking care of stripping off affixes; returns the length
  * written */
-#define GD_WFC_SPACE      0x1
-#define GD_WFC_SCALAR     0x2
-#define GD_WFC_EARLY      0x4
+#define GD_WFC_SPACE     0x01 /* Write a trailing space */
+#define GD_WFC_SCALAR    0x02 /* This is a scalar field code */
+#define GD_WFC_EARLY     0x04 /* This is an early field (no namespaces!) */
+#define GD_WFC_NAME      0x08 /* This is a field name (no repr) */
 static ssize_t _GD_WriteFieldCode(DIRFILE *D, FILE *stream, int me,
     const char *code, int index, int permissive, int standards, unsigned flags)
 {
   ssize_t len;
   char *ptr;
-  const unsigned strip_flags =
-    GD_CO_NSROOT | GD_CO_ASSERT | ((flags & GD_WFC_EARLY) ? GD_CO_EARLY : 0);
-
-  const int scalar     = flags & GD_WFC_SCALAR;
-  const int space      = flags & GD_WFC_SPACE;
+  const unsigned strip_flags = GD_CO_NSROOT | GD_CO_ASSERT
+    | ((flags & GD_WFC_EARLY) ? GD_CO_EARLY : 0)
+    | ((flags & GD_WFC_NAME) ? 0 : GD_CO_REPR)
+    | ((permissive || D->standards >= 10) ? GD_CO_REPRZ : 0);
 
   dtrace("%p, %p, %i, \"%s\", %i, %i, %i, 0x%X", D, stream, me, code, index,
       permissive, standards, flags);
@@ -331,9 +331,8 @@ static ssize_t _GD_WriteFieldCode(DIRFILE *D, FILE *stream, int me,
 
   /* If a scalar field code could be interpreted as a number, we must force
    * interpretation as a field code by appending a <0> scalar index, which is
-   * valid for both CARRAY and CONST fields.
-   */
-  if (len > 0 && scalar && index == -1)
+   * valid for both CARRAY and CONST fields.  */
+  if (len > 0 && (flags & GD_WFC_SCALAR) && index == -1)
     if (_GD_TokToNum(ptr, standards, !permissive, NULL, NULL, NULL, NULL) != -1)
     {
       if (permissive || standards >= 8) {
@@ -346,7 +345,7 @@ static ssize_t _GD_WriteFieldCode(DIRFILE *D, FILE *stream, int me,
     }
 
   /* append a space */
-  if (space && len > 0) {
+  if ((flags & GD_WFC_SPACE) && len > 0) {
     if (fputc(' ', stream) == EOF)
       len = -1;
     else
@@ -359,7 +358,7 @@ static ssize_t _GD_WriteFieldCode(DIRFILE *D, FILE *stream, int me,
   return len;
 }
 
-/* write a field, padding to the specified length */
+/* write a field name, padding to the specified length */
 static ssize_t _GD_PadField(DIRFILE *D, FILE *stream, int me, const char *in,
     ssize_t len, int early, int permissive, int standards)
 {
@@ -368,7 +367,8 @@ static ssize_t _GD_PadField(DIRFILE *D, FILE *stream, int me, const char *in,
   dtrace("%p, %p, %i, \"%s\", %" PRIdSIZE ", %i, %i, %i", D, stream, me, in,
       len, early, permissive, standards);
 
-  i = _GD_WriteFieldCode(D, stream, me, in, 0, permissive, standards, early);
+  i = _GD_WriteFieldCode(D, stream, me, in, 0, permissive, standards,
+      GD_WFC_NAME | early);
 
   if (i >= 0)
     for (; i < len; ++i)
@@ -463,7 +463,7 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     if (fputs("/ALIAS ", stream) == EOF)
       goto WRITE_ERR;
     if (_GD_WriteFieldCode(D, stream, me, E->field, 0, permissive, D->standards,
-          GD_WFC_SPACE | early) < 0)
+          GD_WFC_SPACE | GD_WFC_NAME | early) < 0)
     {
       goto WRITE_ERR;
     }
@@ -474,20 +474,32 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     if (fputc('\n', stream) == EOF)
       goto WRITE_ERR;
   } else {
-    ptr = E->field;
-
-    /* From Standards Version 7 and on, just use Barth-style */
+    /* For DSV 6, use the "META" directive.  Later verisons can just use
+     * the "parent/subfield" style of metafield definition (AKA "Barth-style")
+     */
     if (meta && D->standards < 7) {
+      /* Write "META <parent> " for DSV == 6 */
       if (fputs("META ", stream) == EOF)
         goto WRITE_ERR;
-      if (_GD_StringEscapeise(stream, ptr, 1, permissive, D->standards) < 0)
+
+      /* There's no need to use WriteFieldCode here because DSV < 7 doesn't
+       * support affixes */
+      if (_GD_StringEscapeise(stream, E->field, 1, permissive,
+            D->standards) < 0)
+      {
         goto WRITE_ERR;
+      }
+
       if (fputc(' ', stream) == EOF)
         goto WRITE_ERR;
-      ptr = strchr(E->field, '/') + 1;
-    }
 
-    /* field name */
+      /* Advance field name pointer */
+      ptr = strchr(E->field, '/') + 1;
+    } else
+      ptr = E->field;
+
+    /* field name -- with DSV >=7, for metafields, this will be parent/subfield
+     */
     if (_GD_PadField(D, stream, me, ptr, max_len, early, permissive,
           D->standards) < 0)
     {
@@ -769,7 +781,7 @@ static int _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     if (fputs("/HIDDEN ", stream) == EOF)
       goto WRITE_ERR;
     if (_GD_WriteFieldCode(D, stream, me, E->field, 0, permissive, D->standards,
-          early) < 0)
+          GD_WFC_NAME | early) < 0)
     {
       goto WRITE_ERR;
     }
@@ -1092,7 +1104,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
     if (D->fragment[i].ref_name != NULL) {
       if (fputs("/REFERENCE ", stream) == EOF ||
           _GD_WriteFieldCode(D, stream, i, D->fragment[i].ref_name, 0,
-            permissive, D->standards, 0) < 0 ||
+            permissive, D->standards, GD_WFC_NAME) < 0 ||
           fputc('\n', stream) == EOF)
       {
         goto WRITE_ERR;

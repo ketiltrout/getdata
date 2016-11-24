@@ -27,9 +27,10 @@
  *
  * flags are _GD_CodeOffset flags.  Specifically:
  *
- * GD_CO_EARLY: (indicating DSV 5 or earlier) dots is always NULL and
- *              no representation suffix (return value always zero)
- * GD_CO_NAME:  no representation suffix (return value always zero)
+ * GD_CO_EARLY:  (indicating DSV 5 or earlier) dots is always NULL and
+ *               no representation suffix (return value always zero)
+ * GD_CO_NAME:   no representation suffix (return value always zero)
+ * GD_CO_REPRZ:  '.z' is a valid representation suffix (ie. DSV 10 or later)
  */
 int _GD_SlashDot(const char *str, size_t len, unsigned flags, const char **dot,
     const char **slash)
@@ -48,7 +49,7 @@ int _GD_SlashDot(const char *str, size_t len, unsigned flags, const char **dot,
         str[len - 1] == 'i' ||
         str[len - 1] == 'm' ||
         str[len - 1] == 'a' ||
-        str[len - 1] == 'z')
+        (flags & GD_CO_REPRZ && str[len - 1] == 'z'))
     {
       repr = str[len - 1];
       len -= 2;
@@ -133,11 +134,9 @@ int _GD_SlashDot(const char *str, size_t len, unsigned flags, const char **dot,
  *
  * Flags used are:
  *
- * GD_CO_NAME: passed on to _GD_SlashDot (q.v.)
- *
- * GD_CO_EARLY: the code came from DSV <= 5: no namespaces
- *
- * GD_CO_CHECK: check that the fragment affixes are present
+ * GD_CO_NAME, GD_CO_RERPZ: passed on to _GD_SlashDot (q.v.)
+ * GD_CO_EARLY:             the code came from DSV <= 5: no namespaces
+ * GD_CO_CHECK:             check that the fragment affixes are present
  *
  * This function returns 0 if the checks all pass (or weren't run); 1 otherwise
  */
@@ -175,7 +174,7 @@ int _GD_CodeOffsets(DIRFILE *D, int index, const char *code, unsigned flags,
       &slash);
 
   if (repr)
-    offset[8] = offset[9] - 1;
+    offset[8] = offset[9] - 2;
   else
     offset[8] = offset[9];
 
@@ -219,8 +218,8 @@ int _GD_CodeOffsets(DIRFILE *D, int index, const char *code, unsigned flags,
 }
 
 /* Strips affixes (and, optionally, namespaces) from a code.  Returns a
- * newly malloc'd string, or NULL on error.  The code is guaranteed not to have
- * a representation suffix.
+ * newly malloc'd string, or NULL on error.  Also usually strips the
+ * representation suffix.
  *
  * Flags are:
  *
@@ -231,10 +230,14 @@ int _GD_CodeOffsets(DIRFILE *D, int index, const char *code, unsigned flags,
  * GD_CO_CHECK:  if the code doesn't have the right parts, raise
  *                  GD_E_BAD_CODE
  * GD_CO_EARLY:  field code comes from DSV <= 5: '.' doesn't denote namespace
+ * GD_CO_REPR:   don't strip the representation suffix.  Also, if the code is
+ *               ambiguous (name.r), add a disambiguating ".z" to it.
+ * GD_CO_REPRZ:  '.z' is a valid representation suffix (ie. DSV 10 or later)
  */
 char *_GD_StripCode(DIRFILE *D, int index, const char *code, unsigned flags)
 {
   size_t ns_start, len, offset[GD_N_CODEOFFSETS];
+  char add_repr = 0;
   char *stripped = NULL, *ptr;
 
   dtrace("%p, %i, \"%s\", 0x%X", D, index, code, flags);
@@ -264,6 +267,37 @@ char *_GD_StripCode(DIRFILE *D, int index, const char *code, unsigned flags)
   len = offset[2] - ns_start + offset[5] - offset[4] /* NS part + BBBB */
     + offset[8] - offset[7]; /* subfield name (including '/') */
 
+  /* Figure out if this code needs a representation suffix */
+  if (flags & GD_CO_REPR) {
+    if (offset[8] != offset[9] && code[offset[9] - 1] != 'z') {
+      /* we have a "do something" repr, remember it */
+      add_repr = code[offset[9] - 1];
+    } else if (flags & GD_CO_REPRZ) {
+      size_t namelen;
+      char name0;
+      /* repr is currently none (either absent or .z).  Is this code
+       * ambiguous?  Look for a single-character name that is 'r' or 'i'
+       * or 'a' or 'm' */
+
+      if (offset[8] > offset[7]) { /* check subfield name */
+        name0 = code[offset[7] + 1];
+        namelen = offset[8] - offset[7] - 1;
+      } else { /* top-level name */
+        name0 = code[offset[4]];
+        namelen = offset[5] - offset[4];
+      }
+
+      if (namelen == 1 && (name0 == 'r' || name0 == 'i' || name0 == 'a'
+            || name0 == 'm'))
+      {
+        add_repr = 'z';
+      }
+    }
+  }
+
+  if (add_repr)
+    len += 2;
+
   stripped = _GD_Malloc(D, len + 1); /* including trailing nul */
   if (stripped == NULL) {
     dreturn("%p", NULL);
@@ -284,6 +318,12 @@ char *_GD_StripCode(DIRFILE *D, int index, const char *code, unsigned flags)
   /* subfield name and '/' */
   if (offset[7] != offset[8])
     memcpy(ptr, code + offset[7], offset[8] - offset[7]);
+
+  /* representation suffix if any.  We only add a '.z' if it's necessary */
+  if (add_repr) {
+    stripped[len - 1] = add_repr;
+    stripped[len - 2] = '.';
+  }
 
   /* Terminate */
   stripped[len] = 0;

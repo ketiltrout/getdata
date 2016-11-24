@@ -923,13 +923,15 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_VF_CODE  3
 
 /* CodeOffsets flags (also used by StripCode, SlashDot, CheckCodeAffixes) */
-#define GD_CO_NSALL  0x01
-#define GD_CO_NSROOT 0x02
-#define GD_CO_ASSERT 0x04
-#define GD_CO_CHECK  0x08
-#define GD_CO_EARLY  0x10
-#define GD_CO_NAME   0x20
-#define GD_CO_ERROR  0x40
+#define GD_CO_NSALL  0x001
+#define GD_CO_NSROOT 0x002
+#define GD_CO_ASSERT 0x004
+#define GD_CO_CHECK  0x008
+#define GD_CO_EARLY  0x010
+#define GD_CO_NAME   0x020
+#define GD_CO_ERROR  0x040
+#define GD_CO_REPR   0x080
+#define GD_CO_REPRZ  0x100
 
 /* Number of offsets returned by CodeOffsets */
 #define GD_N_CODEOFFSETS 10
