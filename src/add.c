@@ -225,7 +225,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
 
     /* make name */
     subfield_offs = P->e->len + 1;
-    name = (char *)_GD_Malloc(D, subfield_offs + len + 1);
+    name = _GD_Malloc(D, subfield_offs + len + 1);
 
     if (name == NULL) {
       dreturn("%p", NULL);
@@ -257,7 +257,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   }
 
   /* New entry */
-  E = (gd_entry_t *)_GD_Malloc(D, sizeof(gd_entry_t));
+  E = _GD_Malloc(D, sizeof(gd_entry_t));
   if (E == NULL) {
     free(name);
     dreturn("%p", NULL);
@@ -279,8 +279,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     return NULL;
   }
 
-  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
-      sizeof(struct gd_private_entry_));
+  E->e = _GD_Malloc(D, sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     free(name);
@@ -1310,15 +1309,15 @@ int gd_add_sarray(DIRFILE* D, const char* field_code, size_t array_len,
   if (data == NULL)
     GD_RETURN_ERROR(D);
 
-  memset(data, 0, array_len * sizeof(char*));
-  for (i = 0; i < array_len; ++i)
+  for (i = 0; i < array_len; ++i) {
     data[i] = _GD_Strdup(D, values[i]);
 
-  if (D->error) {
-    for (i = 0; i < array_len; ++i)
-      free(data[i]);
-    free(data);
-    GD_RETURN_ERROR(D);
+    if (D->error) {
+      while (i-- > 0)
+        free(data[i]);
+      free(data);
+      GD_RETURN_ERROR(D);
+    }
   }
 
   entry = _GD_Add(D, &E, NULL, 0);
@@ -1858,15 +1857,15 @@ int gd_madd_sarray(DIRFILE* D, const char *parent, const char *field_code,
   if (data == NULL)
     GD_RETURN_ERROR(D);
 
-  memset(data, 0, array_len * sizeof(char*));
-  for (i = 0; i < array_len; ++i)
+  for (i = 0; i < array_len; ++i) {
     data[i] = _GD_Strdup(D, values[i]);
 
-  if (D->error) {
-    for (i = 0; i < array_len; ++i)
-      free(data[i]);
-    free(data);
-    GD_RETURN_ERROR(D);
+    if (D->error) {
+      while (i-- > 0)
+        free(data[i]);
+      free(data);
+      GD_RETURN_ERROR(D);
+    }
   }
 
   entry = _GD_Add(D, &E, parent, 0);
@@ -1925,7 +1924,7 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
     }
 
     subfield_offs = P->e->len + 1;
-    name = (char *)_GD_Malloc(D, subfield_offs + strlen(field_code) + 1);
+    name = _GD_Malloc(D, subfield_offs + strlen(field_code) + 1);
     if (name == NULL)
       goto add_alias_error;
 
@@ -1974,13 +1973,12 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
   D->entry = (gd_entry_t **)ptr;
 
   /* create and store */
-  E = (gd_entry_t *)_GD_Malloc(D, sizeof(gd_entry_t));
+  E = _GD_Malloc(D, sizeof(gd_entry_t));
   if (E == NULL)
     goto add_alias_error;
 
   memset(E, 0, sizeof(gd_entry_t));
-  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
-      sizeof(struct gd_private_entry_));
+  E->e = _GD_Malloc(D, sizeof(struct gd_private_entry_));
   if (E->e == NULL)
     goto add_alias_error;
 

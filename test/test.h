@@ -29,6 +29,10 @@
 #define isnan _isnan
 #endif
 
+#ifndef INFINITY
+#define INFINITY gd_strtod("INF", NULL)
+#endif
+
 #if defined HAVE__FINITE && \
   (! defined HAVE_DECL_ISFINITE || HAVE_DECL_ISFINITE == 0)
 #define isfinite _finite

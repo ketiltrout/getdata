@@ -56,9 +56,9 @@ try
   ];
   form2_data = 'const2 CONST INT8 -19\n';
 
-  fields = {'INDEX'; 'alias'; 'bit'; 'carray'; 'const'; 'data'; 'div'; ...
-  'indir'; 'lincom'; 'linterp'; 'mplex'; 'mult'; 'phase'; 'polynom'; 'recip';...
-  'sarray'; 'sbit'; 'sindir'; 'string'; 'window'};
+  fields = { 'bit'; 'div'; 'data'; 'mult'; 'sbit'; 'INDEX'; 'alias'; ...
+  'const'; 'indir'; 'mplex'; 'phase'; 'recip'; 'carray'; 'lincom'; 'sarray'; ...
+  'sindir'; 'string'; 'window'; 'linterp'; 'polynom'; };
   nfields = 20;
 
   % Create the dirfile
@@ -569,7 +569,7 @@ try
   % 68: field_list_by_type
   try
     d = gd_field_list_by_type(D, GD.LINCOM_ENTRY);
-    ne = ne + check_sarray(68, d, { 'lincom', 'new2' });
+    ne = ne + check_sarray(68, d, { 'new2', 'lincom' });
   catch exc
     ne = ne + check_ok(exc, 68);
   end
@@ -585,10 +585,10 @@ try
   % 70: vector_list check
   try
     d = gd_vector_list(D);
-    ne = ne + check_sarray(70, d, ...
-    {'INDEX'; 'alias'; 'bit'; 'data'; 'div'; 'indir'; 'lincom'; 'linterp'; ...
-    'mplex'; 'mult'; 'new1'; 'new10'; 'new2'; 'new5'; 'new6'; 'new7'; ...
-    'new8'; 'new9'; 'phase'; 'polynom'; 'recip'; 'sbit'; 'sindir'; 'window'});
+    ne = ne + check_sarray(70, d, { 'bit'; 'div'; 'data'; 'mult'; 'new1'; ...
+    'new2'; 'new5'; 'new6'; 'new7'; 'new8'; 'new9'; 'sbit'; 'INDEX'; ...
+    'alias'; 'indir'; 'mplex'; 'new10'; 'phase'; 'recip'; 'lincom'; ...
+    'sindir'; 'window'; 'linterp'; 'polynom' });
   catch exc
     ne = ne + check_ok(exc, 70);
   end
@@ -1811,7 +1811,7 @@ try
   % 222: aliases
   try
     d = gd_aliases(D, 'data');
-    ne = ne + check_sarray(222, d, {'data'; 'alias'; 'data/mnew20'; 'new20'});
+    ne = ne + check_sarray(222, d, { 'data'; 'alias'; 'new20'; 'data/mnew20' });
   catch exc
     ne = ne + check_ok(exc, 222);
   end

@@ -153,8 +153,8 @@ off64_t _GD_DoSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
     off64_t offset, unsigned int mode)
 {
   off64_t pos;
-  const int oop_write = ((enc->flags & GD_EF_OOP) && (mode & GD_FILE_WRITE))
-    ? 1 : 0;
+  const int oop_write = ((enc->flags & GD_EF_OOP) &&
+      (E->e->u.raw.file[1].idata >= 0)) ? 1 : 0;
   const int temp = (mode & GD_FILE_TEMP) ? 1 : 0;
   const int which = (oop_write || temp) ? 1 : 0;
 

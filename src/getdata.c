@@ -235,8 +235,6 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
   if (s0 < E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset)
     zero_pad = E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset -
       s0;
-  else
-    s0 -= E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset;
 
   databuffer = _GD_Malloc(D, ns * E->e->u.raw.size);
   if (databuffer == NULL) {
@@ -244,45 +242,25 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
     return 0;
   }
 
+  /* Generate padding before frameoffset */
   if (zero_pad > 0) {
-    /* frame offset in samples */
-    const off64_t foffs = E->EN(raw,spf) *
-      D->fragment[E->fragment_index].frame_offset;
-
     zeroed_samples = _GD_FillZero(databuffer, E->EN(raw,data_type),
         (zero_pad > ns) ? ns : zero_pad);
     ns -= zeroed_samples;
-
-     /* Padding up to the end of the frameoffset, results in a "real" file
-      * position.  In this case we need to make sure the underlying file is
-      * actually at the BOF, for consistency.
-      */
-    if (s0 + (off64_t)zeroed_samples == foffs) /* ie. file->pos is zero */
-      _GD_Seek(D, E, foffs, GD_SEEK_SET);
-    else 
-      E->e->u.raw.file[0].pos = s0 + zeroed_samples - foffs;
-    s0 = 0;
+    s0 += zeroed_samples;
   }
 
+  /* We need to seek if we zero padded to get the file->pos in the right place
+   */
+  if (ns > 0 || zero_pad)
+    /* This will open the file if it's not open already */
+    if (_GD_Seek(D, E, s0, GD_FILE_READ)) {
+      free(databuffer);
+      dreturn("%i", 0);
+      return 0;
+    }
+
   if (ns > 0) {
-    /* open the file (and cache the fp) if it hasn't been opened yet. */
-    if (_GD_InitRawIO(D, E, NULL, -1, NULL, GD_EF_SEEK | GD_EF_READ,
-          GD_FILE_READ, _GD_FileSwapBytes(D, E)))
-    {
-      free(databuffer);
-      dreturn("%i", 0);
-      return 0;
-    }
-
-    if ((*_GD_ef[E->e->u.raw.file[0].subenc].seek)(E->e->u.raw.file, s0,
-          E->EN(raw,data_type), GD_FILE_READ) == -1)
-    {
-      _GD_SetEncIOError(D, GD_E_IO_READ, E->e->u.raw.file + 0);
-      free(databuffer);
-      dreturn("%i", 0);
-      return 0;
-    }
-
     samples_read = (*_GD_ef[E->e->u.raw.file[0].subenc].read)(E->e->u.raw.file,
           databuffer + zeroed_samples * E->e->u.raw.size, E->EN(raw,data_type),
           ns);

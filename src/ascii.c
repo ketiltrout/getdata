@@ -27,17 +27,10 @@ int _GD_AsciiOpen(int fd, struct gd_raw_file_* file, gd_type_t type gd_unused_,
 {
   dtrace("%i, %p, <unused>, <unused>, %u", fd, file, mode);
 
-  if (!(mode & GD_FILE_TEMP)) {
-    if (file->mode & mode) {
-      dreturn("%i", 0);
-      return 0;
-    } else if (file->edata != NULL)
-      fclose((FILE*)file->edata);
-
+  if (!(mode & GD_FILE_TEMP))
     file->idata = gd_OpenAt(file->D, fd, file->name, ((mode & GD_FILE_WRITE)
           ? (O_RDWR | O_CREAT) : O_RDONLY) | O_BINARY, 0666);
-
-  } else
+  else
     file->idata = _GD_MakeTempFile(file->D, fd, file->name);
 
   if (file->idata < 0) {
@@ -237,8 +230,10 @@ ssize_t _GD_AsciiWrite(struct gd_raw_file_ *restrict file,
     case GD_FLOAT64:     WRITE_ASCII(".16g",   double); break;
     case GD_COMPLEX64:  WRITE_CASCII(".7g",     float); break;
     case GD_COMPLEX128: WRITE_CASCII(".16g",   double); break;
-    default:                            errno = EINVAL; break; /* internal error */
+    default:                            errno = EINVAL; break;
   }
+  
+  file->pos += nmemb;
 
   dreturn("%" PRIdSIZE, n);
   return n;

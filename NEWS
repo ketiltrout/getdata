@@ -102,8 +102,9 @@ New in version 0.10.0a:
   Library Changes:
 
   * The function gd_array_len() no longer silently ignores a representation
-    suffix in the field_code provided.  In most cases, a representation
-    suffix will now cause this function to fail with a GD_E_BAD_CODE error.
+    suffix in the field_code provided.  In most cases, passing a
+    representation suffix will now cause this function to fail with a
+    GD_E_BAD_CODE error.
 
   * A couple of unnecessary malloc's have been removed from the field
     code search, reducing the chance of encountering a GD_E_ALLOC error.
@@ -111,9 +112,13 @@ New in version 0.10.0a:
     gd_fragment_index(), and gd_spf() will no longer produce this error at
     all.
 
-  * BUG FIX: A bug in the I/O positioning performed before a write to
-    FLAC-encoded data has been fixed.  Previously, written data could
-    end up in the wrong place in the data stream.  Reported by
+  * BUG FIX: Writes to ASCII (text) encoded files weren't properly updating
+    the file's I/O position, leading to subsequent reads and writes
+    occurring in the wrong place.
+
+  * BUG FIX: Several bugs in the I/O positioning performed before reads and
+    writes to compressed data have been fixed.  Previously, reads and
+    writes could occur in the wrong place in the data stream.  Reported by
     S. J. Benton.
 
   * BUG FIX: Trying to open a non-existent, gzip-encoded data file now
@@ -130,11 +135,16 @@ New in version 0.10.0a:
   * BUG FIX: Attempting to open a SIE-encoded data file a second time
     after a first attempt failed no longer results in a segfault.
 
+  * BUG FIX: The metadata update performed by gd_delete() now successfuly
+    updates all fields which used the deleted field as an input.
+    Previously some fields could be skipped, leading to segfaults later
+    when these fields were accessed.
+
   * BUG FIX: The parser no longer assumes a new string buffer returned by
-    the parser callback has the size given by pdata->buflen, which the
-    callback is not required to update, but instead determines the buffer
-    size directly.  Previously, this assumtion could result in a segfault
-    within the parser.
+    the parser callback (by assigning it to pdata->line) has the size given
+    by pdata->buflen, which the callback is not required to update, but
+    instead determines the buffer size directly.  Previously, this
+    assumtion could result in a segfault within the parser.
 
   * BUG FIX: gd_add_polynom() and gd_add_cpolynom() no longer reject valid
     poly_ord values.
@@ -192,6 +202,10 @@ New in version 0.10.0a:
     the GetData-0.6 API should modernise to avoid known problems with that
     API.
 
+  * BUG FIX: gd_getdata() and gd_putdata() now properly report GD_E_IO when
+    an I/O error occurs while reading a LINTERP table.  Previously GD_E_LUT
+    would be erroneously returned, as if the table file were empty.
+
   Bindings Changes:
 
   * MATLAB: The FLAGS argument to GD_INCLUDE is now optional and defaults
@@ -217,8 +231,8 @@ New in version 0.10.0a:
     libraries for compression (gzip, bzip2, flac, lzma, slim, zzip, zzslim)
     are now by default built as dynamically loaded modules.  To recover the
     old build behaviour, which put everything into the core GetData library
-    binary, pass --disable-modules to ./configure.  Using modules
-    introduces a runtime dependency on GNU libltdl.  The CMake-based build
+    binary, pass --disable-modules to ./configure.  Using modules intro-
+    duces a runtime dependency on GNU libltdl.  The CMake-based build
     system used in the native Microsoft Windows source release retains the
     old (monolithic) behaviour.
 

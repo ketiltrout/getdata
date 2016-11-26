@@ -93,8 +93,10 @@ size_t gd_array_len(DIRFILE *D, const char *field_code) gd_nothrow
 
   entry = _GD_FindEntry(D, field_code);
 
-  if (D->error)
-    GD_RETURN_ERROR(D);
+  if (D->error) {
+    dreturn("%i", 0);
+    return 0;
+  }
 
   if (entry->field_type == GD_CARRAY_ENTRY ||
       entry->field_type == GD_SARRAY_ENTRY)

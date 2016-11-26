@@ -77,7 +77,7 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct gd_raw_file_* file,
     return NULL;
   }
 
-  if ((ptr = (struct gd_bzdata *)malloc(sizeof(struct gd_bzdata))) == NULL) {
+  if ((ptr = malloc(sizeof(struct gd_bzdata))) == NULL) {
     fclose(stream);
     dreturn("%p", NULL);
     return NULL;
@@ -248,31 +248,6 @@ off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t offset,
       remaining -= n;
     }
   } else {
-    if (ptr->base > offset) {
-      /* a backwards seek: reopen the file */
-      ptr->bzerror = 0;
-      BZ2_bzReadClose(&ptr->bzerror, ptr->bzfile);
-      if (ptr->bzerror != BZ_OK) {
-        file->error = ptr->bzerror;
-        fclose(ptr->stream);
-        dreturn("%i", -1);
-        return -1;
-      }
-
-      rewind(ptr->stream);
-      ptr->bzfile = BZ2_bzReadOpen(&ptr->bzerror, ptr->stream, 0, 0, NULL, 0);
-
-      if (ptr->bzerror != BZ_OK) {
-        file->error = ptr->bzerror;
-        BZ2_bzReadClose(&ptr->bzerror, ptr->bzfile);
-        fclose(ptr->stream);
-        dreturn("%i", -1);
-        return -1;
-      }
-      ptr->pos = ptr->end = 0;
-      ptr->base = ptr->stream_end = 0;
-    }
-
     /* seek forward the slow way */
     while (ptr->base + ptr->end < offset) {
       int n;

@@ -1,3 +1,97 @@
+2016-11-26   D. V. Wiebe <getdata@ketiltrout.net> svn:1121
+	* src/ascii.c (_GD_AsciiOpen): Remove the ancient existing file code.
+
+	* src/ascii.c (_GD_AsciiWrite): Update file->pos.
+
+	* src/bzip.c (_GD_Bzip2Seek): Unfortunately, remove the dead backwards
+	seek code: the current bookkeping layer means this can never happen. (For
+	OOP encodings, seeks calls to the framework are always forward.)
+
+	* src/common.c (_GD_ReadLinterpFile): Return GD_E_IO for I/O errors instead
+	of GD_E_LUT.
+
+	* src/common.c (_GD_CInvertData): Remove dead, non-complex return_type code:
+	_GD_DoField ensures that return_type is always complex valued in this case.
+
+	* src/constat.c (gd_array_len): Return 0 on error.
+
+	* src/del.c (_GD_ClearInput): Added.
+	* src/del.c (_GD_ClearDerived): Call _GD_ClearInput for each in_fields
+	element.  strcmp is not adequate for field matching; _GD_ClearInput uses
+	_GD_FindFieldAndRepr.
+
+	* src/del.c (_GD_Delete): Remove incorrect check for _GD_ClearDerived call.
+
+	* src/getdata.c (_GD_DoRaw): Update s0 based on zero padding.  Instead of
+	calling the encoding's seek function directly, use _GD_Seek, which also will
+	handle calling _GD_InitRawIO when necessary.  Always call _GD_Seek if zero
+	padding.
+
+	* src/iopos.c (_GD_DoSeek): Fix oop_write calculation.
+
+	* test/get_carray.c: Remove GD_VERBOSE.
+
+	* test/legacy_format.c bindings/cxx/test/big_test.cpp
+	bindings/f77/test/big_test.f bindings/f77/test/big_test95.f90
+	bindings/idl/test/big_test.pro bindings/matlab/test/big_test.m
+	bindings/perl/t/big_test.t bindings/php/test/big_test.php
+	bindings/python/test/big_test.py: Update checks for sortation change.
+
+	* test/test.h: Define INFINITY if necessary.
+
+	* test/len_carray.c test/len_sarray.c: Renamed from get_carray_len.c and
+	get_sarray_len.c.
+
+	* test/calist.c test/calist0.c test/calist_free.c test/calist_hidden.c
+	test/calist_long.c test/calist_meta.c test/calist_meta0.c
+	test/calist_meta_free.c test/calist_meta_hidden.c test/calist_meta_meta.c
+	test/calist_meta_parent.c test/calist_null.c test/salist.c test/salist0.c
+	test/salist_hidden.c test/salist_long.c test/salist_meta.c test/salist_meta0.c
+	test/salist_meta_free.c test/salist_meta_hidden.c test/salist_meta_meta.c
+	test/salist_meta_parent.c: Renamed from [cs]vlist_array*.c.
+
+	* test/add_sarray_dup.c test/add_spec_nil.c test/add_string_dup.c
+	test/ascii_complex128.c test/ascii_complex64.c test/ascii_float32.c
+	test/ascii_float64.c test/ascii_int16.c test/ascii_int32.c test/ascii_int64.c
+	test/ascii_int8.c test/ascii_uint16.c test/ascii_uint32.c test/ascii_uint64.c
+	test/ascii_uint8.c test/bof_bit_code.c test/bof_code.c test/bof_const.c
+	test/bof_lincom_code.c test/bof_phase_code.c test/bof_recurse.c
+	test/bzip_complex128.c test/bzip_complex64.c test/bzip_float32.c
+	test/bzip_float64.c test/bzip_int16.c test/bzip_int32.c test/bzip_int64.c
+	test/bzip_int8.c test/bzip_uint16.c test/bzip_uint32.c test/bzip_uint64.c
+	test/bzip_uint8.c test/cvlist_meta_code.c test/del_alias_dangle.c
+	test/del_alias_target.c test/del_data_prot.c test/del_divide.c test/del_prot.c
+	test/del_rdonly.c test/elist_parent2.c test/enc_complex128.c
+	test/enc_complex64.c test/enc_float32.c test/enc_float64.c test/enc_int16.c
+	test/enc_int32.c test/enc_int64.c test/enc_int8.c test/enc_uint16.c
+	test/enc_uint32.c test/enc_uint64.c test/enc_uint8.c test/endian_alter_arg.c
+	test/endian_alter_dprot.c test/endian_alter_fprot.c test/endian_alter_index.c
+	test/endian_alter_rdonly.c test/endian_index.c test/eof_bit_code.c
+	test/eof_const.c test/eof_lincom_code.c test/eof_phase_code.c
+	test/eof_recurse.c test/flac_complex128.c test/flac_complex64.c
+	test/flac_float32.c test/flac_float64.c test/flac_int16.c test/flac_int32.c
+	test/flac_int64.c test/flac_int8.c test/flac_uint16.c test/flac_uint32.c
+	test/flac_uint64.c test/flac_uint8.c test/foffs_alter_dprot.c
+	test/foffs_alter_fprot.c test/foffs_alter_index.c test/foffs_alter_range.c
+	test/foffs_alter_rdonly.c test/foffs_index.c test/get_carray_bad.c
+	test/get_carray_slice_bounds.c test/get_carray_slice_type.c
+	test/get_carray_type.c test/get_dimin.c test/get_indir_typein.c
+	test/get_recip_cmpin.c test/get_sarray_bad.c test/get_sarray_slice_bounds.c
+	test/get_sarray_slice_type.c test/get_sarray_type.c test/get_sindir_reprz.c
+	test/get_sindir_typein.c test/gzip_complex128.c test/gzip_complex64.c
+	test/gzip_float32.c test/gzip_float64.c test/gzip_int16.c test/gzip_int32.c
+	test/gzip_int64.c test/gzip_int8.c test/gzip_uint16.c test/gzip_uint32.c
+	test/gzip_uint64.c test/gzip_uint8.c test/len_bad.c test/len_const.c
+	test/len_string.c test/len_type.c test/lzma_xz_complex128.c
+	test/lzma_xz_complex64.c test/lzma_xz_float32.c test/lzma_xz_float64.c
+	test/lzma_xz_int16.c test/lzma_xz_int32.c test/lzma_xz_int64.c
+	test/lzma_xz_int8.c test/lzma_xz_uint16.c test/lzma_xz_uint32.c
+	test/lzma_xz_uint64.c test/lzma_xz_uint8.c test/madd_sarray_dup.c
+	test/madd_spec_parent.c test/madd_string_dup.c test/put_carray_bad.c
+	test/put_carray_bounds.c test/put_carray_rdonly.c test/put_carray_type.c
+	test/put_sarray_bad.c test/put_sarray_bounds.c test/put_sarray_rdonly.c
+	test/put_sarray_type.c: Added.
+
 2016-11-24   D. V. Wiebe <getdata@ketiltrout.net> svn:1118, 1119
 	* src/internal.h: Add GD_CO_REPR and GD_CO_REPRZ flags.
 	* src/name.c (_GD_SlashDot): Don't match '.z' unless GD_CO_REPRZ is set.

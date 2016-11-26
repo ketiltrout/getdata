@@ -52,7 +52,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     nsin = gdmx_to_string(prhs, 2, 1);
 
   nsout = gd_fragment_namespace(D, fragment, nsin);
-  fprintf(stderr, "nsin = %p\n", nsin);
   mxFree(nsin);
 
   gdmx_err(D, 0);

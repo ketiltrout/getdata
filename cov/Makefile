@@ -1,3 +1,6 @@
+CONFIGURE_FLAGS=CFLAGS="-g --coverage" LDFLAGS=-lgcov --disable-bindings \
+								--enable-legacy-api
+
 default:
 	${MAKE} clean
 	cp ../test/*.[co] .
@@ -13,14 +16,12 @@ check:
 
 dbuild:
 	${MAKE} -C .. clean
-	( cd .. && ./configure CFLAGS="-g --coverage" LDFLAGS=-lgcov \
-		--disable-bindings --enable-debug )
+	( cd .. && ./configure ${CONFIGURE_FLAGS} --enable-debug )
 	${MAKE} check
 
 build:
 	${MAKE} -C .. clean
-	( cd .. && ./configure CFLAGS="-g --coverage" LDFLAGS=-lgcov \
-		--disable-bindings )
+	( cd .. && ./configure ${CONFIGURE_FLAGS} )
 	${MAKE} check
 
 clean:

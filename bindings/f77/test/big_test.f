@@ -224,26 +224,26 @@ C     doesn't.
       datdat(k) = k
    10 CONTINUE
  
-      fields( 1) = 'INDEX  '
-      fields( 2) = 'alias  '
-      fields( 3) = 'bit    '
-      fields( 4) = 'carray '
-      fields( 5) = 'const  '
-      fields( 6) = 'data   '
-      fields( 7) = 'div    '
-      fields( 8) = 'indir  '
-      fields( 9) = 'lincom '
-      fields(10) = 'linterp'
-      fields(11) = 'mplex  '
-      fields(12) = 'mult   '
-      fields(13) = 'phase  '
-      fields(14) = 'polynom'
-      fields(15) = 'recip  '
-      fields(16) = 'sarray '
-      fields(17) = 'sbit   '
-      fields(18) = 'sindir '
-      fields(19) = 'string '
-      fields(20) = 'window '
+      fields( 1) = 'bit    '
+      fields( 2) = 'div    '
+      fields( 3) = 'data   '
+      fields( 4) = 'mult   '
+      fields( 5) = 'sbit   '
+      fields( 6) = 'INDEX  '
+      fields( 7) = 'alias  '
+      fields( 8) = 'const  '
+      fields( 9) = 'indir  '
+      fields(10) = 'mplex  '
+      fields(11) = 'phase  '
+      fields(12) = 'recip  '
+      fields(13) = 'carray '
+      fields(14) = 'lincom '
+      fields(15) = 'sarray '
+      fields(16) = 'sindir '
+      fields(17) = 'string '
+      fields(18) = 'window '
+      fields(19) = 'linterp'
+      fields(20) = 'polynom'
 
 C     Write the test dirfile
       OPEN(1, FILE=frmat, STATUS='NEW')
@@ -326,7 +326,7 @@ C     24: This is a check of (one of many instances of) _GDF_FString
       l = 2
       CALL GDFLDN(fn, l, d, 1)
       CALL CHKEOK(ne, 24, d)
-      CALL CHKINT(ne, 24, l, 5)
+      CALL CHKINT(ne, 24, l, 3)
 
 C     25: GDFLDN check
       DO 250 i = 1, n
@@ -763,9 +763,9 @@ C     67: GDNFDT check
       CALL CHKINT(ne, 67, n, 3)
 
 C     68: GDFDNT check
-      fields(1) = 'lincom'
-      fields(2) = 'new2'
-      fields(3) = 'new3'
+      fields(1) = 'new2'
+      fields(2) = 'new3'
+      fields(3) = 'lincom'
       DO 680 i = 1, n
       l = flen
       CALL GDFDNT(fn, l, d, GD_LCE, i)
@@ -780,32 +780,33 @@ C     69: GDNVEC check
       CALL CHKINT(ne, 69, n, 26)
 
 C     70: GDVECN check
-      fields( 1) = 'INDEX  '
-      fields( 2) = 'alias  '
-      fields( 3) = 'bit    '
-      fields( 4) = 'data   '
-      fields( 5) = 'div    '
-      fields( 6) = 'indir  '
-      fields( 7) = 'lincom '
-      fields( 8) = 'linterp'
-      fields( 9) = 'mplex  '
-      fields(10) = 'mult   '
-      fields(11) = 'new1   '
-      fields(12) = 'new10  '
-      fields(13) = 'new2   '
-      fields(14) = 'new3   '
-      fields(15) = 'new4   '
-      fields(16) = 'new5   '
-      fields(17) = 'new6   '
-      fields(18) = 'new7   '
-      fields(19) = 'new8   '
-      fields(20) = 'new9   '
-      fields(21) = 'phase  '
-      fields(22) = 'polynom'
-      fields(23) = 'recip  '
-      fields(24) = 'sbit   '
-      fields(25) = 'sindir '
-      fields(26) = 'window '
+      fields( 1) = 'bit    '
+      fields( 2) = 'div    '
+      fields( 3) = 'data   '
+      fields( 4) = 'mult   '
+      fields( 5) = 'new1   '
+      fields( 6) = 'new2   '
+      fields( 7) = 'new3   '
+      fields( 8) = 'new4   '
+      fields( 9) = 'new5   '
+      fields(10) = 'new6   '
+      fields(11) = 'new7   '
+      fields(12) = 'new8   '
+      fields(13) = 'new9   '
+      fields(14) = 'sbit   '
+      fields(15) = 'INDEX  '
+      fields(16) = 'alias  '
+      fields(17) = 'indir  '
+      fields(18) = 'mplex  '
+      fields(19) = 'new10  '
+      fields(20) = 'phase  '
+      fields(21) = 'recip  '
+      fields(22) = 'lincom '
+      fields(23) = 'sindir '
+      fields(24) = 'window '
+      fields(25) = 'linterp'
+      fields(26) = 'polynom'
+
       DO 700 i = 1, n
       l = flen
       CALL GDVECN(fn, l, d, i)
@@ -1993,8 +1994,8 @@ C     221: GDNALS check
 C     222: GDALSS check
       fields(1) = 'data'
       fields(2) = 'alias'
-      fields(3) = 'data/mnew20'
-      fields(4) = 'new20'
+      fields(3) = 'new20'
+      fields(4) = 'data/mnew20'
       DO 2220 i = 1, n
       l = flen
       CALL GDALSS(fn, l, d, 'data', 4, i)
@@ -2138,35 +2139,35 @@ C     238: GDENTX check
       CALL CHKINT(ne, 238, l, 7)
 
 C     239: GDENTN check
-      fields( 1) = "INDEX"
-      fields( 2) = "bit"
+      fields( 1) = "bit"
+      fields( 2) = "div"
       fields( 3) = "data"
-      fields( 4) = "div"
-      fields( 5) = "indir"
-      fields( 6) = "lincom"
-      fields( 7) = "linterp"
-      fields( 8) = "mplex"
-      fields( 9) = "mult"
-      fields(10) = "new1"
-      fields(11) = "new135"
-      fields(12) = "new14"
-      fields(13) = "new15"
-      fields(14) = "new16"
-      fields(15) = "new18"
-      fields(16) = "new2"
-      fields(17) = "new21"
-      fields(18) = "new3"
-      fields(19) = "new4"
-      fields(20) = "new5"
-      fields(21) = "new6"
-      fields(22) = "new7"
-      fields(23) = "new8"
-      fields(24) = "phase"
-      fields(25) = "polynom"
-      fields(26) = "recip"
-      fields(27) = "sbit"
-      fields(28) = "sindir"
-      fields(29) = "window"
+      fields( 4) = "mult"
+      fields( 5) = "new1"
+      fields( 6) = "new2"
+      fields( 7) = "new3"
+      fields( 8) = "new4"
+      fields( 9) = "new5"
+      fields(10) = "new6"
+      fields(11) = "new7"
+      fields(12) = "new8"
+      fields(13) = "sbit"
+      fields(14) = "INDEX"
+      fields(15) = "indir"
+      fields(16) = "mplex"
+      fields(17) = "new14"
+      fields(18) = "new15"
+      fields(19) = "new16"
+      fields(20) = "new18"
+      fields(21) = "new21"
+      fields(22) = "phase"
+      fields(23) = "recip"
+      fields(24) = "lincom"
+      fields(25) = "new135"
+      fields(26) = "sindir"
+      fields(27) = "window"
+      fields(28) = "linterp"
+      fields(29) = "polynom"
       DO 2390 i = 1, n
       l = flen
       CALL GDENTN(fn, l, d, GD_ALL, "", -1, GDEN_V, GDEN_H + GDEN_N, i)

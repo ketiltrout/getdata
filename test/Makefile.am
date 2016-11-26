@@ -24,9 +24,12 @@ LDADD=../src/libgetdata.la
 AM_CPPFLAGS=${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
 
 # The enc_*.c files aren't directly used as tests.  They're included by
-# the corresponding bzip, gzip, lzma(_xz), or flac tests.
-EXTRA_DIST=test.h enc_add.c enc_del.c enc_enoent.ca enc_move_from.c \
-					 enc_nframes.c enc_put_offs.c enc_seek.c
+# corresponding encoding tests.
+EXTRA_DIST=test.h enc_add.c enc_complex64.c enc_complex128.c enc_del.c \
+					 enc_enoent.ca enc_float32.c enc_float64.c enc_int8.c enc_int16.c \
+					 enc_int32.c enc_int64.c enc_move_from.c enc_nframes.c \
+					 enc_put_offs.c enc_seek.c enc_uint8.c enc_uint16.c enc_uint32.c \
+					 enc_uint64.c
 
 ADD_TESTS=add_add add_affix add_alias add_alias_affix add_alias_index \
 					add_alias_meta add_alias_name add_alias_ns add_alias_prot \
@@ -47,12 +50,12 @@ ADD_TESTS=add_add add_affix add_alias add_alias_affix add_alias_index \
 					add_polynom_order2 add_polynom_scalar add_protect add_raw \
 					add_raw_include add_raw_invalid add_raw_prot add_raw_spf \
 					add_raw_spf_scalar add_raw_sub add_raw_type add_rdonly add_recip \
-					add_recip_inaff add_resolv add_sarray add_sarray_nil add_sbit \
-					add_scalar add_scalar_carray add_scalar_carray_bad add_sindir \
-					add_sort add_spec add_spec_directive add_spec_index add_spec_invalid \
-					add_spec_meta add_spec_prot add_spec_resolv add_string \
-					add_string_affix add_string_entry add_type add_window \
-					add_window_inaff add_window_op
+					add_recip_inaff add_resolv add_sarray add_sarray_dup add_sarray_nil \
+					add_sbit add_scalar add_scalar_carray add_scalar_carray_bad \
+					add_sindir add_sort add_spec add_spec_directive add_spec_index \
+					add_spec_invalid add_spec_meta add_spec_nil add_spec_prot \
+					add_spec_resolv add_string add_string_affix add_string_dup \
+					add_string_entry add_type add_window add_window_inaff add_window_op
 
 ALIAS_TESTS=alias_list alias_list_alias alias_list_missing alias_num \
 						alias_num_alias alias_num_missing alias_target alias_target_alias \
@@ -82,17 +85,29 @@ ALTER_TESTS=alter_bit_bitnum alter_bit_in alter_bit_numbits alter_carray_len \
 						alter_spec_meta alter_spec_nil alter_spec_polynom alter_window \
 						alter_window_in alter_window_op
 
-ASCII_TESTS=ascii_add ascii_get ascii_get_complex ascii_get_get ascii_get_here \
-						ascii_get_sub ascii_nframes ascii_put ascii_put_here ascii_seek \
-						ascii_seek_far ascii_sync
+ASCII_TESTS=ascii_add ascii_complex64 ascii_complex128 ascii_get \
+						ascii_get_complex ascii_float32 ascii_float64 ascii_get_get \
+						ascii_get_here ascii_get_sub ascii_int8 ascii_int16 ascii_int32 \
+						ascii_int64 ascii_nframes ascii_put ascii_put_here ascii_seek \
+						ascii_seek_far ascii_sync ascii_uint8 ascii_uint16 ascii_uint32 \
+						ascii_uint64
 
-BOF_TESTS=bof bof_bit bof_index bof_lincom bof_phase bof_phase_neg
+BOF_TESTS=bof bof_bit bof_bit_code bof_code bof_const bof_index bof_lincom \
+					bof_lincom_code bof_phase bof_phase_code bof_phase_neg bof_recurse
 
-BZIP_TESTS=bzip_add bzip_del bzip_enoent bzip_get bzip_get_far bzip_get_get \
-					 bzip_get_get2 bzip_get_put bzip_move_from bzip_move_to bzip_nframes \
+BZIP_TESTS=bzip_add bzip_complex64 bzip_complex128 bzip_del bzip_enoent \
+					 bzip_float32 bzip_float64 bzip_get bzip_get_far bzip_get_get \
+					 bzip_get_get2 bzip_get_put bzip_int8 bzip_int16 bzip_int32 \
+					 bzip_int64 bzip_move_from bzip_move_to bzip_nframes \
 					 bzip_put bzip_put_back bzip_put_endian bzip_put_get bzip_put_offs \
-					 bzip_put_pad bzip_put_sub bzip_seek bzip_seek_far bzip_sync
+					 bzip_put_pad bzip_put_sub bzip_seek bzip_seek_far bzip_sync \
+					 bzip_uint8 bzip_uint16 bzip_uint32 bzip_uint64
 
+CALIST_TESTS=calist calist0 calist_free \
+						 calist_hidden calist_long calist_meta \
+						 calist_meta0 calist_meta_free \
+						 calist_meta_hidden calist_meta_meta \
+						 calist_meta_parent calist_null
 CLOSE_TESTS=close_bad close_close close_discard close_null
 
 CONVERT_TESTS=convert_complex128_complex64 convert_complex128_float64 \
@@ -146,19 +161,15 @@ CONVERT_TESTS=convert_complex128_complex64 convert_complex128_float64 \
 
 CREAT_TESTS=creat creat_excl creat_rdonly creat_rdonly_exists
 
-CVLIST_TESTS=cvlist cvlist_array cvlist_array0 cvlist_array_free \
-						 cvlist_array_hidden cvlist_array_long cvlist_array_meta \
-						 cvlist_array_meta0 cvlist_array_meta_free \
-						 cvlist_array_meta_hidden cvlist_array_meta_meta \
-						 cvlist_array_meta_parent cvlist_array_null cvlist_hidden \
-						 cvlist_invalid cvlist_long cvlist_meta cvlist_meta0 \
-						 cvlist_meta_hidden cvlist_meta_invalid cvlist_meta cvlist_null \
-						 cvlist_meta_parent
+CVLIST_TESTS=cvlist cvlist_hidden cvlist_invalid cvlist_long cvlist_meta \
+						 cvlist_meta0 cvlist_meta_code cvlist_meta_hidden \
+						 cvlist_meta_invalid cvlist_meta cvlist_null cvlist_meta_parent
 
-DEL_TESTS=del_alias del_bad_code del_carray del_carray_deref del_const \
-					del_const_deref del_const_force del_data del_data_enoent \
-					del_data_open del_del del_derived del_derived_after \
-					del_derived_force del_meta del_meta_force del_ref
+DEL_TESTS=del_alias del_alias_dangle del_alias_target del_bad_code del_carray \
+					del_carray_deref del_const del_const_deref del_const_force del_data \
+					del_data_enoent del_data_open del_data_prot del_del del_derived \
+					del_derived_after del_derived_force del_divide del_meta \
+					del_meta_force del_prot del_rdonly del_ref
 
 DESYNC_TESTS=desync desync_flush desync_path desync_reopen desync_reopen_inv
 
@@ -166,13 +177,14 @@ DFES_TESTS=dfes_bit dfes_divide dfes_lincom dfes_linterp dfes_multiply \
 					 dfes_null dfes_phase dfes_raw dfes_recip dfes_zero
 
 ELIST_TESTS=elist_alias elist_fragment elist_hidden elist_noalias \
-						elist_parent elist_scalar elist_type
+						elist_parent elist_parent2 elist_scalar elist_type
 
 ENCODE_TESTS=encode_alter encode_alter_all encode_alter_open encode_get \
 						 encode_recode encode_recode_open encode_support
 
-ENDIAN_TESTS=endian_alter endian_alter_all endian_alter_sie endian_get \
-						 endian_move
+ENDIAN_TESTS=endian_alter endian_alter_all endian_alter_arg endian_alter_dprot \
+						 endian_alter_fprot endian_alter_index endian_alter_rdonly \
+						 endian_alter_sie endian_get endian_index endian_move
 
 ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_divide \
 						entry_invalid entry_lincom entry_lincom_scalar entry_linterp \
@@ -182,18 +194,22 @@ ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_divide \
 						entry_scalar_repr entry_recip entry_type entry_type_alias \
 						entry_window entry_window_scalar
 
-EOF_TESTS=eof eof_bit eof_index eof_lincom eof_phase eof_phase_neg
+EOF_TESTS=eof eof_bit eof_bit_code eof_const eof_index eof_lincom \
+					eof_lincom_code eof_phase eof_phase_code eof_phase_neg eof_recurse
 
 ERROR_TESTS=error error_error error_num error_short error_verbose \
 						error_verbose_prefix
 
 FILE_TESTS=file file_code file_type
 
-FLAC_TESTS=flac_add flac_del flac_enoent flac_get_big flac_get_far \
-					 flac_get_get flac_get_get2 flac_get_int8 flac_get_int64 \
-					 flac_get_little flac_get_long flac_move_from flac_nframes \
-					 flac_put_big flac_put_complex128 flac_put_float64 flac_put_int32 \
-					 flac_put_little flac_put_offs flac_seek flac_seek_far flac_sync
+FLAC_TESTS=flac_add flac_complex64 flac_complex128 flac_del flac_enoent \
+					 flac_float32 flac_float64 flac_get_big flac_get_far flac_get_get \
+					 flac_get_get2 flac_get_int8 flac_get_int64 flac_get_little \
+					 flac_get_long flac_int8 flac_int16 flac_int32 flac_int64 \
+					 flac_move_from flac_nframes flac_put_big flac_put_complex128 \
+					 flac_put_float64 flac_put_int32 flac_put_little flac_put_offs \
+					 flac_seek flac_seek_far flac_sync flac_uint8 flac_uint16 \
+					 flac_uint32 flac_uint64
 
 FLIST_TESTS=flist flist0 flist2 flist_hidden flist_invalid flist_meta \
 						flist_meta2 flist_meta_hidden flist_meta_invalid flist_type \
@@ -205,7 +221,9 @@ FLUSH_TESTS=flush_affix flush_all flush_amb_code flush_bad_code flush_flush \
 						flush_mult flush_raw_close flush_ref flush_repr flush_repr9 \
 						flush_reprz flush_spec flush_string flush_sync
 
-FOFFS_TESTS=foffs_alter foffs_alter_all foffs_get foffs_move
+FOFFS_TESTS=foffs_alter foffs_alter_all foffs_alter_dprot foffs_alter_fprot \
+						foffs_alter_index foffs_alter_range foffs_alter_rdonly foffs_get \
+						foffs_index foffs_move
 
 FRAGMENT_TESTS=fragment_affix fragment_affix_alter fragment_affix_alter2 \
 							 fragment_affix_alter_code fragment_affix_alter_dotpx \
@@ -221,22 +239,24 @@ FRAGMENT_TESTS=fragment_affix fragment_affix_alter fragment_affix_alter2 \
 							 fragment_ns_dotns fragment_ns_nsdot fragment_num \
 							 fragment_parent fragment_parent_index fragment_parent_root
 
-GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
-					get_carray_c2r get_carray_slice get_char get_clincom get_complex128 \
-					get_complex64 get_const get_const_bad get_const_carray \
-					get_const_complex get_const_repr get_const_reprz get_cpolynom \
-					get_cpolynom1 get_cpolynom_int get_dim get_divide get_divide_ccin \
-					get_divide_crin get_divide_crinr get_divide_rcin get_divide_s \
-					get_dot get_endian8 get_endian16 get_endian32 get_endian64 \
-					get_endian_complex128_arm get_endian_complex128_big \
-					get_endian_complex128_little get_endian_complex64_arm \
-					get_endian_complex64_big get_endian_complex64_little \
-					get_endian_float32_arm get_endian_float32_big \
-					get_endian_float32_little get_endian_float64_arm \
-					get_endian_float64_big get_endian_float64_little get_ff get_float32 \
-					get_float64 get_foffs get_foffs2 get_fs get_here get_here_foffs \
-					get_heres get_index_complex get_indir get_int8 get_int16 get_int32 \
-					get_int64 get_invalid get_lincom1 get_lincom2 get_lincom2s \
+GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_bad \
+					get_carray_c2r get_carray_slice get_carray_slice_bounds \
+					get_carray_slice_type get_carray_type get_char get_clincom \
+					get_complex128 get_complex64 get_const get_const_bad \
+					get_const_carray get_const_complex get_const_repr get_const_reprz \
+					get_cpolynom get_cpolynom1 get_cpolynom_int get_dim get_dimin \
+					get_divide get_divide_ccin get_divide_crin get_divide_crinr \
+					get_divide_rcin get_divide_s get_dot get_endian8 get_endian16 \
+					get_endian32 get_endian64 get_endian_complex128_arm \
+					get_endian_complex128_big get_endian_complex128_little \
+					get_endian_complex64_arm get_endian_complex64_big \
+					get_endian_complex64_little get_endian_float32_arm \
+					get_endian_float32_big get_endian_float32_little \
+					get_endian_float64_arm get_endian_float64_big \
+					get_endian_float64_little get_ff get_float32 get_float64 get_foffs \
+					get_foffs2 get_fs get_here get_here_foffs get_heres \
+					get_index_complex get_indir get_indir_typein get_int8 get_int16 \
+					get_int32 get_int64 get_invalid get_lincom1 get_lincom2 get_lincom2s \
 					get_lincom3 get_lincom3s get_lincom_mdt get_lincom_noin \
 					get_lincom_non get_lincom_null get_lincom_spf get_linterp \
 					get_linterp1 get_linterp_abs get_linterp_complex get_linterp_empty \
@@ -247,22 +267,26 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_multiply_crinr get_multiply_noin get_multiply_rcin \
 					get_multiply_s get_neg get_none get_nonexistent get_null get_off64 \
 					get_phase get_phase_affix get_polynom get_polynom_cmpin \
-					get_polynom_noin get_range get_recip get_recip_const get_recurse \
-					get_reprz get_rofs get_sarray get_sarray_len get_sarray_slice \
-					get_sbit get_sf get_sindir get_sindir_none get_sindir_null \
-					get_sindir_type get_ss get_string get_type get_uint16 get_uint32 \
-					get_uint64 get_window get_window_clr get_window_complex \
-					get_window_ge get_window_gt get_window_le get_window_lt \
-					get_window_ne get_window_s get_window_set get_zero get_zero_complex \
-					get_zero_float
+					get_polynom_noin get_range get_recip get_recip_cmpin get_recip_const \
+					get_recurse get_reprz get_rofs get_sarray get_sarray_bad \
+					get_sarray_slice get_sarray_slice_bounds get_sarray_slice_type \
+					get_sarray_type get_sbit get_sf get_sindir get_sindir_none \
+					get_sindir_null get_sindir_reprz get_sindir_type get_sindir_typein \
+					get_ss get_string get_type get_uint16 get_uint32 get_uint64 \
+					get_window get_window_clr get_window_complex get_window_ge \
+					get_window_gt get_window_le get_window_lt get_window_ne get_window_s \
+					get_window_set get_zero get_zero_complex get_zero_float
 
 GLOBAL_TESTS=global_flags global_name global_ref global_ref_empty global_ref_set
 
-GZIP_TESTS=gzip_add gzip_del gzip_enoent gzip_get gzip_get_far gzip_get_get \
-					 gzip_get_get2 gzip_get_put gzip_move_from gzip_move_to gzip_nframes \
-					 gzip_put gzip_put_back gzip_put_endian gzip_put_get \
-					 gzip_put_nframes gzip_put_off gzip_put_offs gzip_put_pad \
-					 gzip_put_sub gzip_seek gzip_seek_far gzip_seek_put gzip_sync
+GZIP_TESTS=gzip_add gzip_complex64 gzip_complex128 gzip_del gzip_enoent \
+					 gzip_float32 gzip_float64 gzip_get gzip_get_far gzip_get_get \
+					 gzip_get_get2 gzip_get_put gzip_int8 gzip_int16 gzip_int32 \
+					 gzip_int64 gzip_move_from gzip_move_to gzip_nframes gzip_put \
+					 gzip_put_back gzip_put_endian gzip_put_get gzip_put_nframes \
+					 gzip_put_off gzip_put_offs gzip_put_pad gzip_put_sub gzip_seek \
+					 gzip_seek_far gzip_seek_put gzip_sync gzip_uint8 gzip_uint16 \
+					 gzip_uint32 gzip_uint64
 
 HEADER_TESTS=header_complex header_off64t
 
@@ -286,12 +310,17 @@ LEGACY_TESTS=legacy_error legacy_estring legacy_format legacy_get \
 						 legacy_put legacy_spf
 endif
 
-LZMA_TESTS=lzma_enoent lzma_get lzma_nframes lzma_put lzma_xz_add lzma_xz_del \
-					 lzma_xz_get lzma_xz_get_far lzma_xz_get_get lzma_xz_get_get2 \
-					 lzma_xz_get_put lzma_xz_move_from lzma_xz_move_to lzma_xz_nframes \
-					 lzma_xz_offs_clear lzma_xz_put lzma_xz_put_back lzma_xz_put_endian \
-					 lzma_xz_put_get lzma_xz_put_offs lzma_xz_put_pad lzma_xz_seek \
-					 lzma_xz_seek_far lzma_xz_sync
+LEN_TESTS=len_bad len_carray len_const len_sarray len_string len_type
+
+LZMA_TESTS=lzma_enoent lzma_get lzma_nframes lzma_put lzma_xz_add \
+					 lzma_xz_complex64 lzma_xz_complex128 lzma_xz_del lzma_xz_float32 \
+					 lzma_xz_float64 lzma_xz_get lzma_xz_get_far lzma_xz_get_get \
+					 lzma_xz_get_get2 lzma_xz_get_put lzma_xz_int8 lzma_xz_int16 \
+					 lzma_xz_int32 lzma_xz_int64 lzma_xz_move_from lzma_xz_move_to \
+					 lzma_xz_nframes lzma_xz_offs_clear lzma_xz_put lzma_xz_put_back \
+					 lzma_xz_put_endian lzma_xz_put_get lzma_xz_put_offs lzma_xz_put_pad \
+					 lzma_xz_seek lzma_xz_seek_far lzma_xz_sync lzma_xz_uint8 \
+					 lzma_xz_uint16 lzma_xz_uint32 lzma_xz_uint64
 
 MADD_TESTS=madd madd_affix madd_alias madd_aliasmeta madd_alias_affix \
 					 madd_alias_alias madd_alias_subsub madd_bit madd_bit_invalid \
@@ -301,9 +330,9 @@ MADD_TESTS=madd madd_affix madd_alias madd_aliasmeta madd_alias_affix \
 					 madd_lincom_nfields madd_linterp madd_linterp_invalid madd_mplex \
 					 madd_multiply madd_multiply_invalid madd_parent_bad madd_phase \
 					 madd_phase_invalid madd_polynom madd_polynom_order madd_raw \
-					 madd_recip madd_sarray madd_sbit madd_sindir madd_spec \
-					 madd_spec_directive madd_spec_invalid madd_spec_resolv madd_string \
-					 madd_subsub madd_window
+					 madd_recip madd_sarray madd_sarray_dup madd_sbit madd_sindir \
+					 madd_spec madd_spec_directive madd_spec_invalid madd_spec_parent \
+					 madd_spec_resolv madd_string madd_string_dup madd_subsub madd_window
 
 MOVE_TESTS=move_affix move_affix_dup move_affix_meta move_affix_updb \
 					 move_alias move_code move_data_enc_ar move_data_enc_ra \
@@ -405,7 +434,8 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 PROTECT_TESTS=protect_alter protect_alter_all protect_get
 
 PUT_TESTS=put64 put_bad_code put_bit put_bof put_carray put_carray_client \
-					put_carray_slice put_char put_clincom1 put_complex128 put_complex64 \
+					put_carray_bad put_carray_bounds put_carray_rdonly put_carray_slice \
+					put_carray_type put_char put_clincom1 put_complex128 put_complex64 \
 					put_const put_const_protect put_cpolynom put_crecip put_divide \
 					put_endian8 put_endian16 put_endian32 put_endian64 \
 					put_endian_complex128_arm put_endian_complex128_big \
@@ -421,7 +451,8 @@ PUT_TESTS=put64 put_bad_code put_bit put_bof put_carray put_carray_client \
 					put_multiply put_nofile put_null put_off64 put_phase put_phase_noin \
 					put_polynom1 put_polynom2 put_polynom_noin put_protect put_range \
 					put_rdonly put_recip put_recurse put_repr put_rofs put_sarray \
-					put_sarray_slice put_sbit put_sf put_sindir put_ss put_string \
+					put_sarray_bad put_sarray_bounds put_sarray_rdonly put_sarray_slice \
+					put_sarray_type put_sbit put_sf put_sindir put_ss put_string \
 					put_string_protect put_sub put_type put_uint16 put_uint32 put_uint64 \
 					put_window put_zero
 
@@ -431,6 +462,10 @@ REPR_TESTS=repr_a repr_bad repr_float32 repr_float64 repr_i repr_int16 \
 					 repr_int32 repr_int64 repr_int8 repr_m repr_r repr_real_a \
 					 repr_real_i repr_real_m repr_real_r repr_uint16 repr_uint32 \
 					 repr_uint64 repr_uint8
+
+SALIST_TESTS=salist salist0 salist_hidden salist_long salist_meta salist_meta0 \
+						 salist_meta_free salist_meta_hidden salist_meta_meta \
+						 salist_meta_parent
 
 SEEK_TESTS=seek64 seek_cur seek_end seek_far seek_foffs seek_foffs2 seek_index \
 					 seek_lincom seek_mult seek_neg seek_phase seek_range seek_range2 \
@@ -445,11 +480,7 @@ SIE_TESTS=sie_err_open sie_get_big sie_get_header sie_get_little sie_move_from \
 
 SLIM_TESTS=slim_get slim_nframes slim_seek slim_seek_far
 
-SVLIST_TESTS=svlist svlist0 svlist2 svlist_array svlist_array0 \
-						 svlist_array_hidden svlist_array_long svlist_array_meta \
-						 svlist_array_meta0 svlist_array_meta_free \
-						 svlist_array_meta_hidden svlist_array_meta_meta \
-						 svlist_array_meta_parent svlist_hidden svlist_invalid svlist_long \
+SVLIST_TESTS=svlist svlist0 svlist2 svlist_hidden svlist_invalid svlist_long \
 						 svlist_meta svlist_meta0 svlist_meta_hidden svlist_meta_invalid \
 						 svlist_meta_meta svlist_meta_parent
 
@@ -484,21 +515,22 @@ ZZIP_TESTS=zzip_data zzip_get zzip_get_get zzip_nframes zzip_seek zzip_seek_far
 ZZSLIM_TESTS=zzslim_get zzslim_nframes zzslim_seek zzslim_seek_far
 
 TESTS=$(ADD_TESTS)      $(ALIAS_TESTS)    $(ALTER_TESTS)    $(ASCII_TESTS)    \
-			$(BOF_TESTS)      $(BZIP_TESTS)     $(CLOSE_TESTS)    $(CONVERT_TESTS)  \
-			$(CREAT_TESTS)    $(CVLIST_TESTS)   $(DEL_TESTS)      $(DFES_TESTS)     \
-			$(DESYNC_TESTS)   $(ELIST_TESTS)    $(ENCODE_TESTS)   $(ENDIAN_TESTS)   \
-			$(ENTRY_TESTS)    $(EOF_TESTS)      $(ERROR_TESTS)    $(FILE_TESTS)     \
-			$(FLAC_TESTS)     $(FLIST_TESTS)    $(FLUSH_TESTS)    $(FOFFS_TESTS)    \
-			$(FRAGMENT_TESTS) $(GET_TESTS)      $(GLOBAL_TESTS)   $(GZIP_TESTS)     \
-			$(HEADER_TESTS)   $(HIDE_TESTS)     $(INCLUDE_TESTS)  $(INDEX_TESTS)    \
-			$(LEGACY_TESTS)   $(LZMA_TESTS)     $(MADD_TESTS)     $(MOVE_TESTS)     \
-			$(NAME_TESTS)     $(NATIVE_TESTS)   $(NENTRIES_TESTS) $(NFIELDS_TESTS)  \
-			$(NFRAMES_TESTS)  $(NMETA_TESTS)    $(OPEN_TESTS)     $(PARSE_TESTS)    \
-			$(PROTECT_TESTS)  $(PUT_TESTS)      $(REF_TESTS)      $(REPR_TESTS)     \
-			$(SEEK_TESTS)     $(SIE_TESTS)      $(SLIM_TESTS)     $(SPF_TESTS)      \
-			$(SVLIST_TESTS)   $(TABLE_TESTS)    $(TELL_TESTS)     $(TOK_TESTS)      \
-			$(TRUNC_TESTS)    $(UNCLUDE_TESTS)  $(VALID_TESTS)    $(VERSION_TESTS)  \
-			$(VLIST_TESTS)    $(ZZIP_TESTS)     $(ZZSLIM_TESTS)
+			$(BOF_TESTS)      $(BZIP_TESTS)     $(CALIST_TESTS)   $(CLOSE_TESTS)    \
+			$(CONVERT_TESTS)  $(CREAT_TESTS)    $(CVLIST_TESTS)   $(DEL_TESTS)      \
+			$(DFES_TESTS)     $(DESYNC_TESTS)   $(ELIST_TESTS)    $(ENCODE_TESTS)   \
+			$(ENDIAN_TESTS)   $(ENTRY_TESTS)    $(EOF_TESTS)      $(ERROR_TESTS)    \
+			$(FILE_TESTS)     $(FLAC_TESTS)     $(FLIST_TESTS)    $(FLUSH_TESTS)    \
+			$(FOFFS_TESTS)    $(FRAGMENT_TESTS) $(GET_TESTS)      $(GLOBAL_TESTS)   \
+			$(GZIP_TESTS)     $(HEADER_TESTS)   $(HIDE_TESTS)     $(INCLUDE_TESTS)  \
+			$(INDEX_TESTS)    $(LEGACY_TESTS)   $(LEN_TESTS)      $(LZMA_TESTS)     \
+			$(MADD_TESTS)     $(MOVE_TESTS)     $(NAME_TESTS)     $(NATIVE_TESTS)   \
+			$(NENTRIES_TESTS) $(NFIELDS_TESTS)  $(NFRAMES_TESTS)  $(NMETA_TESTS)    \
+			$(OPEN_TESTS)     $(PARSE_TESTS)    $(PROTECT_TESTS)  $(PUT_TESTS)      \
+			$(REF_TESTS)      $(REPR_TESTS)     $(SALIST_TESTS)   $(SEEK_TESTS)     \
+			$(SIE_TESTS)      $(SLIM_TESTS)     $(SPF_TESTS)      $(SVLIST_TESTS)   \
+			$(TABLE_TESTS)    $(TELL_TESTS)     $(TOK_TESTS)      $(TRUNC_TESTS)    \
+			$(UNCLUDE_TESTS)  $(VALID_TESTS)    $(VERSION_TESTS)  $(VLIST_TESTS)    \
+			$(ZZIP_TESTS)     $(ZZSLIM_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

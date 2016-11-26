@@ -43,9 +43,9 @@ file_mkdir, filedir
 
 datadata = bindgen(80) + 1
 
-fields = [ 'INDEX', 'alias', 'bit', 'carray', 'const', 'data', 'div', 'indir', $
-  'lincom', 'linterp', 'mplex', 'mult', 'phase', 'polynom', 'recip', 'sarray', $
-  'sbit', 'sindir', 'string', 'window' ]
+fields = [ 'bit', 'div', 'data', 'mult', 'sbit', 'INDEX', 'alias', 'const', $
+  'indir', 'mplex', 'phase', 'recip', 'carray', 'lincom', 'sarray', 'sindir', $
+  'string', 'window', 'linterp', 'polynom' ]
 
 ; Write the test dirfile
 openw,1,format
@@ -433,7 +433,7 @@ nume += check_simple(67, n, 2)
 ;  68: gd_field_list_by_type check
 n = gd_field_list(d, type=!GD.LINCOM_ENTRY)
 nume += check_ok(68, d)
-nume += check_simple(68, n, [ "lincom", "new2"  ])
+nume += check_simple(68, n, [ 'new2', 'lincom' ])
 
 ;  69: gd_nvectors check
 n = gd_nvectors(d)
@@ -443,10 +443,10 @@ nume += check_simple(69, n, 24)
 ;  70: gd_vector_list check
 n = gd_vector_list(d)
 nume += check_ok(70, d)
-nume += check_simple(70, n, [ 'INDEX', 'alias', 'bit', 'data', 'div', 'indir', $
-  'lincom', 'linterp', 'mplex', 'mult', 'new1', 'new10', 'new2', 'new4', $
-  'new6', 'new7', 'new8', 'new9', 'phase', 'polynom', 'recip', 'sbit', $
-  'sindir', 'window' ])
+nume += check_simple(70, n, [ 'bit', 'div', 'data', 'mult', 'new1', 'new2', $
+  'new4', 'new6', 'new7', 'new8', 'new9', 'sbit', 'INDEX', 'alias', 'indir', $
+  'mplex', 'new10', 'phase', 'recip', 'lincom', 'sindir', 'window', 'linterp', $
+  'polynom' ])
 
 ;  71: gd_madd_lincom
 gd_add_lincom, d, "mnew2", "in1", 9.9D, 8.8D, "in2", 7.7D, 6.6D, $
@@ -1268,7 +1268,7 @@ nume += check_simple(221, n, 4)
 ; 222: gd_alias check
 n = gd_aliases(d, 'data')
 nume += check_ok(222, d)
-nume += check_simple(222, n, [ 'data', 'alias', 'data/mnew20', 'new20' ])
+nume += check_simple(222, n, [ 'data', 'alias', 'new20', 'data/mnew20' ])
 
 ; 223: gd_include_affix check
 gd_include, d, 'format1', prefix='A', suffix='Z', /CREAT, /EXCL
@@ -1371,10 +1371,10 @@ nume += check_simple2(237, 2, n, 26)
 ; 239: gd_entry_list check
 n = gd_entry_list(d, /VECTORS, /HIDDEN, /NOALIAS)
 nume += check_ok(239, d)
-nume += check_simple(239, n, ["INDEX", "bit", "data", "div", "indir", "lincom",$
-  "linterp", "mplex", "mult", "new1", "new135", "new14", "new16", "new18", $
-  "new2", "new21", "new4", "new6", "new7", "new8", "phase", "polynom", $
-  "recip", "sbit", "sindir", "window"])
+nume += check_simple(239, n, [ 'bit', 'div', 'data', 'mult', 'new1', 'new2', $
+  'new4', 'new6', 'new7', 'new8', 'sbit', 'INDEX', 'indir', 'mplex', 'new14', $
+  'new16', 'new18', 'new21', 'phase', 'recip', 'lincom', 'new135', 'sindir', $
+  'window', 'linterp', 'polynom' ])
 
 ; 240: gd_mplex_lookback check
 gd_mplex_lookback, d, /ALL

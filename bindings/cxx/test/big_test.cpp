@@ -208,12 +208,12 @@ void run_tests(void)
   const gd_carray_t *carrays;
   const char*** sarrays;
 
-  char* fields[nfields + 9] = {(char*)"INDEX", (char*)"alias", (char*)"bit",
-    (char*)"carray", (char*)"const", (char*)"data", (char*)"div",
-    (char*)"indir", (char*)"lincom", (char*)"linterp", (char*)"mplex",
-    (char*)"mult", (char*)"phase", (char*)"polynom", (char*)"recip",
-    (char*)"sarray", (char*)"sbit", (char*)"sindir", (char*)"string",
-    (char*)"window", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+  char* fields[nfields + 9] = { (char*)"bit", (char*)"div", (char*)"data",
+    (char*)"mult", (char*)"sbit", (char*)"INDEX", (char*)"alias",
+    (char*)"const", (char*)"indir", (char*)"mplex", (char*)"phase",
+    (char*)"recip", (char*)"carray", (char*)"lincom", (char*)"sarray",
+    (char*)"sindir", (char*)"string", (char*)"window", (char*)"linterp",
+    (char*)"polynom", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
   char *strings[3];
 
   unlink(data);
@@ -676,9 +676,9 @@ void run_tests(void)
   CHECK_INT(67,n,3);
 
   // 68: Dirfile::FieldListByType check
-  fields[0] = (char*)"lincom";
-  fields[1] = (char*)"new2";
-  fields[2] = (char*)"new3";
+  fields[0] = (char*)"new2";
+  fields[1] = (char*)"new3";
+  fields[2] = (char*)"lincom";
   list = d->FieldListByType(LincomEntryType);
   CHECK_OK(68);
   CHECK_STRING_ARRAY(68,n,list[i],fields[i]);
@@ -689,32 +689,32 @@ void run_tests(void)
   CHECK_INT(69,n,26);
 
   // 70: Dirfile::VectorList check
-  fields[0] = (char*)"INDEX";
-  fields[1] = (char*)"alias";
-  fields[2] = (char*)"bit";
-  fields[3] = (char*)"data";
-  fields[4] = (char*)"div";
-  fields[5] = (char*)"indir";
-  fields[6] = (char*)"lincom";
-  fields[7] = (char*)"linterp";
-  fields[8] = (char*)"mplex";
-  fields[9] = (char*)"mult";
-  fields[10] = (char*)"new1";
-  fields[11] = (char*)"new10";
-  fields[12] = (char*)"new2";
-  fields[13] = (char*)"new3";
-  fields[14] = (char*)"new4";
-  fields[15] = (char*)"new5";
-  fields[16] = (char*)"new6";
-  fields[17] = (char*)"new7";
-  fields[18] = (char*)"new8";
-  fields[19] = (char*)"new9";
-  fields[20] = (char*)"phase";
-  fields[21] = (char*)"polynom";
-  fields[22] = (char*)"recip";
-  fields[23] = (char*)"sbit";
-  fields[24] = (char*)"sindir";
-  fields[25] = (char*)"window";
+  fields[ 0] = (char*)"bit";
+  fields[ 1] = (char*)"div";
+  fields[ 2] = (char*)"data";
+  fields[ 3] = (char*)"mult";
+  fields[ 4] = (char*)"new1";
+  fields[ 5] = (char*)"new2";
+  fields[ 6] = (char*)"new3";
+  fields[ 7] = (char*)"new4";
+  fields[ 8] = (char*)"new5";
+  fields[ 9] = (char*)"new6";
+  fields[10] = (char*)"new7";
+  fields[11] = (char*)"new8";
+  fields[12] = (char*)"new9";
+  fields[13] = (char*)"sbit";
+  fields[14] = (char*)"INDEX";
+  fields[15] = (char*)"alias";
+  fields[16] = (char*)"indir";
+  fields[17] = (char*)"mplex";
+  fields[18] = (char*)"new10";
+  fields[19] = (char*)"phase";
+  fields[20] = (char*)"recip";
+  fields[21] = (char*)"lincom";
+  fields[22] = (char*)"sindir";
+  fields[23] = (char*)"window";
+  fields[24] = (char*)"linterp";
+  fields[25] = (char*)"polynom";
   list = d->VectorList();
   CHECK_OK(70);
   CHECK_STRING_ARRAY(70,n,list[i],fields[i]);
@@ -1717,34 +1717,34 @@ void run_tests(void)
   CHECK_INT2(237, 2, n, 28);
 
   // 239: gd_entry_list
-  fields[0] = (char*)"INDEX";
-  fields[1] = (char*)"bit";
-  fields[2] = (char*)"data";
-  fields[3] = (char*)"div";
-  fields[4] = (char*)"indir";
-  fields[5] = (char*)"lincom";
-  fields[6] = (char*)"linterp";
-  fields[7] = (char*)"mplex";
-  fields[8] = (char*)"mult";
-  fields[9] = (char*)"new1";
-  fields[10] = (char*)"new14";
-  fields[11] = (char*)"new15";
-  fields[12] = (char*)"new16";
-  fields[13] = (char*)"new18";
-  fields[14] = (char*)"new2";
-  fields[15] = (char*)"new21";
-  fields[16] = (char*)"new3";
-  fields[17] = (char*)"new4";
-  fields[18] = (char*)"new5";
-  fields[19] = (char*)"new6";
-  fields[20] = (char*)"new7";
-  fields[21] = (char*)"new8";
-  fields[22] = (char*)"phase";
-  fields[23] = (char*)"polynom";
-  fields[24] = (char*)"recip";
-  fields[25] = (char*)"sbit";
-  fields[26] = (char*)"sindir";
-  fields[27] = (char*)"window";
+  fields[ 0] = (char*)"bit";
+  fields[ 1] = (char*)"div";
+  fields[ 2] = (char*)"data";
+  fields[ 3] = (char*)"mult";
+  fields[ 4] = (char*)"new1";
+  fields[ 5] = (char*)"new2";
+  fields[ 6] = (char*)"new3";
+  fields[ 7] = (char*)"new4";
+  fields[ 8] = (char*)"new5";
+  fields[ 9] = (char*)"new6";
+  fields[10] = (char*)"new7";
+  fields[11] = (char*)"new8";
+  fields[12] = (char*)"sbit";
+  fields[13] = (char*)"INDEX";
+  fields[14] = (char*)"indir";
+  fields[15] = (char*)"mplex";
+  fields[16] = (char*)"new14";
+  fields[17] = (char*)"new15";
+  fields[18] = (char*)"new16";
+  fields[19] = (char*)"new18";
+  fields[20] = (char*)"new21";
+  fields[21] = (char*)"phase";
+  fields[22] = (char*)"recip";
+  fields[23] = (char*)"lincom";
+  fields[24] = (char*)"sindir";
+  fields[25] = (char*)"window";
+  fields[26] = (char*)"linterp";
+  fields[27] = (char*)"polynom";
   list = d->EntryList(GD_ALL_FRAGMENTS, NULL, GD_VECTOR_ENTRIES,
       GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   CHECK_OK(239);

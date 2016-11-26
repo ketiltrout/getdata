@@ -132,9 +132,9 @@ function check_ok($t, $D)
 }
 
 $nfields = 20;
-$fields = array('INDEX', 'alias', 'bit', 'carray', 'const', 'data', 'div',
-  'indir', 'lincom', 'linterp', 'mplex', 'mult', 'phase', 'polynom', 'recip',
-  'sarray', 'sbit', 'sindir', 'string', 'window');
+$fields = array( 'bit', 'div', 'data', 'mult', 'sbit', 'INDEX', 'alias',
+  'const', 'indir', 'mplex', 'phase', 'recip', 'carray', 'lincom', 'sarray',
+  'sindir', 'string', 'window', 'linterp', 'polynom');
 
 # make the dirfile
 mkdir('dirfile', 0700);
@@ -494,7 +494,7 @@ check_var(67, $v, 2);
 # 68: field list by type
 $v = gd_field_list_by_type($D, GD_LINCOM_ENTRY);
 check_ok(68, $D);
-check_var(68, $v, array('lincom', 'new3'));
+check_var(68, $v, array('new3', 'lincom'));
 
 # 69: nfields by type
 $v = gd_nvectors($D);
@@ -504,10 +504,10 @@ check_var(69, $v, 24);
 # 70: field list by type
 $v = gd_vector_list($D);
 check_ok(70, $D);
-check_var(70, $v, array('INDEX', 'alias', 'bit', 'data', 'div', 'indir',
-  'lincom', 'linterp', 'mplex', 'mult', 'new1', 'new10', 'new3', 'new4', 'new6',
-  'new7', 'new8', 'new9', 'phase', 'polynom', 'recip', 'sbit', 'sindir',
-  'window'));
+check_var(70, $v, array( 'bit', 'div', 'data', 'mult', 'new1', 'new3', 'new4',
+  'new6', 'new7', 'new8', 'new9', 'sbit', 'INDEX', 'alias', 'indir', 'mplex',
+  'new10', 'phase', 'recip', 'lincom', 'sindir', 'window', 'linterp', 'polynom'
+));
 
 # 72: madd lincom
 $v = gd_madd_lincom($D, 'data', 'mnew3', array('in1', 'in2'),
@@ -1358,7 +1358,7 @@ check_var(221, $v, 4);
 # 222: aliases
 $v = gd_aliases($D, 'data');
 check_ok(222, $D);
-check_var(222, $v, array('data', 'alias', 'data/mnew20', 'new20'));
+check_var(222, $v, array( 'data', 'alias', 'new20', 'data/mnew20' ));
 
 # 223: gd_include_affix
 $v = gd_include_affix($D, 'format1', 0, 'A', 'Z', GD_CREAT | GD_EXCL);
@@ -1455,10 +1455,10 @@ check_var(237, $v, 7);
 $v = gd_entry_list($D, GD_ALL_FRAGMENTS, null, GD_VECTOR_ENTRIES,
   GD_ENTRIES_NOALIAS);
 check_ok(239, $D);
-check_var(239, $v, array('INDEX', 'bit', 'data', 'div', 'indir', 'lincom',
-  'linterp', 'mplex', 'mult', 'new1', 'new135', 'new14', 'new16', 'new18',
-  'new21', 'new3', 'new4', 'new6', 'new7', 'new8', 'phase', 'polynom', 'recip',
-  'sbit', 'sindir', 'window'));
+check_var(239, $v, array( 'bit', 'div', 'data', 'mult', 'new1', 'new3', 'new4',
+  'new6', 'new7', 'new8', 'sbit', 'INDEX', 'indir', 'mplex', 'new14', 'new16',
+  'new18', 'new21', 'phase', 'recip', 'lincom', 'new135', 'sindir', 'window',
+  'linterp', 'polynom' ));
 
 # 240: mplex lookback
 $v = gd_mplex_lookback($D, GD_LOOKBACK_ALL);

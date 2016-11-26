@@ -20,6 +20,29 @@
  */
 #include "internal.h"
 
+static int _GD_ClearInput(DIRFILE *restrict D, gd_entry_t *restrict E,
+    const gd_entry_t *restrict C, int i, int check)
+{
+  dtrace("%p, %p, %p, %i, %i", D, E, C, i, check);
+
+  /* If we're not checking and entry[i] is NULL, job's already done.
+   * Otherwise, find this entry, if it doesn't exist. */
+  if (check && E->e->entry[i] == NULL)
+    E->e->entry[i] = _GD_FindFieldAndRepr(D, E->in_fields[i], &E->e->repr[i],
+        NULL, 0);
+
+  if (E->e->entry[i] == C) {
+    if (check)
+      GD_SET_RETURN_ERROR(D, GD_E_DELETE, GD_E_DEL_DERIVED, E->field, 0,
+          C->field);
+    else
+      E->e->entry[i] = NULL;
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
 static void _GD_ClearDerived(DIRFILE *restrict D, gd_entry_t *restrict E,
     const gd_entry_t *restrict C, int check)
 {
@@ -30,13 +53,8 @@ static void _GD_ClearDerived(DIRFILE *restrict D, gd_entry_t *restrict E,
   switch(E->field_type) {
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->EN(lincom,n_fields); ++i)
-        if (strcmp(E->in_fields[i], C->field) == 0) {
-          if (check)
-            _GD_SetError(D, GD_E_DELETE, GD_E_DEL_DERIVED, E->field, 0,
-                C->field);
-          else
-            E->e->entry[i] = NULL;
-        }
+        if (_GD_ClearInput(D, E, C, i, check))
+          break;
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
@@ -44,14 +62,8 @@ static void _GD_ClearDerived(DIRFILE *restrict D, gd_entry_t *restrict E,
     case GD_MPLEX_ENTRY:
     case GD_INDIR_ENTRY:
     case GD_SINDIR_ENTRY:
-      if (strcmp(E->in_fields[1], C->field) == 0) {
-        if (check)
-          _GD_SetError(D, GD_E_DELETE, GD_E_DEL_DERIVED, E->field, 0,
-              C->field);
-        else
-          E->e->entry[1] = NULL;
-      }
-      break;
+      if (_GD_ClearInput(D, E, C, 1, check))
+        break;
       /* Fallthrough */
     case GD_RECIP_ENTRY:
     case GD_LINTERP_ENTRY:
@@ -59,13 +71,7 @@ static void _GD_ClearDerived(DIRFILE *restrict D, gd_entry_t *restrict E,
     case GD_PHASE_ENTRY:
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
-      if (strcmp(E->in_fields[0], C->field) == 0) {
-        if (check)
-          _GD_SetError(D, GD_E_DELETE, GD_E_DEL_DERIVED, E->field, 0,
-              C->field);
-        else
-          E->e->entry[0] = NULL;
-      }
+      _GD_ClearInput(D, E, C, 0, check);
       break;
     case GD_NO_ENTRY:
     case GD_RAW_ENTRY:
@@ -168,7 +174,9 @@ static void _GD_DeReference(DIRFILE *restrict D, gd_entry_t *restrict E,
     case GD_SBIT_ENTRY:
       if (_GD_DeReferenceOne(D, E, C, check, 0, GD_INT_TYPE,
             &E->EN(bit,bitnum)))
+      {
         break;
+      }
 
       _GD_DeReferenceOne(D, E, C, check, 1, GD_INT_TYPE, &E->EN(bit,numbits));
       break;
@@ -395,7 +403,7 @@ static void _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
       if ((del_list[i]->field_type == GD_CONST_ENTRY ||
             del_list[i]->field_type == GD_CARRAY_ENTRY) && flags & GD_DEL_DEREF)
         _GD_DeReference(D, D->entry[j], del_list[i], 0);
-      else if (del_list[i]->field_type != GD_STRING_ENTRY)
+      else
         _GD_ClearDerived(D, D->entry[j], del_list[i], 0);
 
   if (E->e->n_meta >= 0) {

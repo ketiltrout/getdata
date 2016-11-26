@@ -145,8 +145,8 @@ sub CheckOK { &CheckError($_[0], 0) }
 sub CheckOK2 { &CheckError2(@_, 0) }
 
 my $nfields = 20;
-my @fields = (qw(INDEX alias bit carray const data div indir lincom linterp
-  mplex mult phase polynom recip sarray sbit sindir string window));
+my @fields = (qw(bit div data mult sbit INDEX alias const indir mplex phase
+  recip carray lincom sarray sindir string window linterp polynom));
 
 #create the dirfile
 system "rm -rf dirfile" if (-e "dirfile");
@@ -612,7 +612,7 @@ CheckNum(67, $s, 2);
 # 68: field_list_by_type
 @a = $_->field_list_by_type($GetData::LINCOM_ENTRY);
 CheckOK(68);
-CheckSArray(68, \@a, qw(lincom new3));
+CheckSArray(68, \@a, qw(new3 lincom));
 
 # 69: nvectors
 $s = $_->vector_list;
@@ -622,9 +622,9 @@ CheckNum(69, $s, 24);
 # 70: vector_list
 @a = $_->vector_list;
 CheckOK(70);
-CheckSArray(70, \@a, qw(INDEX alias bit data div indir lincom linterp mplex
-  mult new1 new10 new3 new4 new6 new7 new8 new9 phase polynom recip sbit
-  sindir window));
+CheckSArray(70, \@a, qw(bit div data mult new1 new3 new4 new6 new7 new8 new9
+  sbit INDEX alias indir mplex new10 phase recip lincom sindir window linterp
+  polynom));
 
 #72: madd_lincom check
 $s = $_->madd_lincom("data", "mnew2", 2, [ qw(in1 in2) ], [ 9.9+8.8*i, 7.7 ],
@@ -1612,7 +1612,7 @@ CheckNum(221, $s, 4);
 # 222: gd_aliases check
 @a = $_->aliases('data');
 CheckOK(222);
-CheckSArray(222, \@a, "data", "alias", "data/mnew20", "new20");
+CheckSArray(222, \@a, "data", "alias", "new20", "data/mnew20");
 
 # 223: gd_include_affix check
 $s = $_->include_affix('format1', 0, 'A', 'Z',
@@ -1715,9 +1715,9 @@ CheckNum2(237, 2, $s, 26);
 @a = $_->entry_list($GetData::ALL_FRAGMENTS, undef, $GetData::VECTOR_ENTRIES,
   $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
 CheckOK(239);
-CheckSArray(239, \@a, qw(INDEX bit data div indir lincom linterp mplex mult new1
-  new135 new14 new16 new18 new21 new3 new4 new6 new7 new8 phase polynom recip
-  sbit sindir window));
+CheckSArray(239, \@a, qw(bit div data mult new1 new3 new4 new6 new7 new8 sbit
+  INDEX indir mplex new14 new16 new18 new21 phase recip lincom new135 sindir
+  window linterp polynom));
 
 # 240: gd_mplex_lookback
 $_->mplex_lookback($GetData::LOOKBACK_ALL);

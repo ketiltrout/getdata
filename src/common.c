@@ -401,7 +401,9 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
       /* line too long */
       _GD_SetError(D, GD_E_LINE_TOO_LONG, 0, E->EN(linterp,table), linenum,
           NULL);
-    else 
+    else if (errno)
+      _GD_SetError(D, GD_E_IO, GD_E_IO_READ, E->EN(linterp,table), 0, NULL);
+    else
       /* no data in file! */
       _GD_SetError(D, GD_E_LUT, GD_E_LUT_LENGTH, E->EN(linterp,table), 0, NULL);
     goto LUT_ERROR;
@@ -854,7 +856,6 @@ void _GD_InvertData(DIRFILE *restrict D, void *restrict data,
 
 #ifdef GD_NO_C99_API
 #undef INVERTC
-#undef INVERT
 
 #define INVERTC(t) \
   do { \
@@ -868,19 +869,12 @@ void _GD_InvertData(DIRFILE *restrict D, void *restrict data,
     } \
   } while (0)
 
-#define INVERT(t) \
-  do { \
-    for (i = 0; i < n_read; i++) { \
-      const t d = ((t *)data)[2 * i] * ((t *)data)[2 * i] + \
-      ((t *)data)[2 * i + 1] * ((t *)data)[2 * i + 1]; \
-      ((t *)data)[2 * i] = (t)((dividend[0] * ((t *)data)[2 * i] - \
-          dividend[1] * ((t *)data)[2 * i + 1]) / d); \
-    } \
-  } while (0)
-
 #endif
 
-/* Invert a vector */
+/* Invert a vector using a complex valued dividend.  When this is
+ * called, return_type is always complex valued, too (because DoField
+ * decides to compute the full complex value first, and then convert
+ * to the real type afterwards. */
 void _GD_CInvertData(DIRFILE *restrict D, void *restrict data,
     gd_type_t return_type, GD_DCOMPLEXA(dividend), size_t n_read)
 {
@@ -891,19 +885,9 @@ void _GD_CInvertData(DIRFILE *restrict D, void *restrict data,
 
   switch(return_type) {
     case GD_NULL:                         break;
-    case GD_UINT8:      INVERT(uint8_t);  break;
-    case GD_INT8:       INVERT(int8_t);   break;
-    case GD_UINT16:     INVERT(uint16_t); break;
-    case GD_INT16:      INVERT(int16_t);  break;
-    case GD_UINT32:     INVERT(uint32_t); break;
-    case GD_INT32:      INVERT(int32_t);  break;
-    case GD_UINT64:     INVERT(uint64_t); break;
-    case GD_INT64:      INVERT(int64_t);  break;
-    case GD_FLOAT32:    INVERT(float);    break;
-    case GD_FLOAT64:    INVERT(double);   break;
     case GD_COMPLEX64:  INVERTC(float);   break;
     case GD_COMPLEX128: INVERTC(double);  break;
-    default:            _GD_InternalError(D);
+    default:            _GD_InternalError(D); /* Other types not allowed */
   }
 
   dreturnvoid();

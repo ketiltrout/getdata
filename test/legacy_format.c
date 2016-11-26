@@ -83,27 +83,27 @@ int main(void)
   CHECKI(f->rawEntries[0].samples_per_frame, 8);
 
   CHECKI(f->n_lincom, 3);
-  CHECKS(f->lincomEntries[0].field, "lincom");
-  CHECKI(f->lincomEntries[0].n_fields, 3);
-  CHECKS(f->lincomEntries[0].in_fields[0], "raw");
-  CHECKS(f->lincomEntries[0].in_fields[1], "phase");
-  CHECKS(f->lincomEntries[0].in_fields[2], "div");
+  CHECKS(f->lincomEntries[0].field, "recip");
+  CHECKI(f->lincomEntries[0].n_fields, 1);
+  CHECKS(f->lincomEntries[0].in_fields[0], "sbit");
+  CHECKF(f->lincomEntries[0].m[0], 3);
+  CHECKF(f->lincomEntries[0].b[0], 0);
+
+  CHECKS(f->lincomEntries[1].field, "lincom");
+  CHECKI(f->lincomEntries[1].n_fields, 3);
+  CHECKS(f->lincomEntries[1].in_fields[0], "raw");
+  CHECKS(f->lincomEntries[1].in_fields[1], "phase");
+  CHECKS(f->lincomEntries[1].in_fields[2], "div");
   for (i = 0; i < 3; ++i) {
-    CHECKFi(i, f->lincomEntries[0].m[i], i * 2. + 1);
-    CHECKFi(i, f->lincomEntries[0].b[i], i * 2. + 2);
+    CHECKFi(i, f->lincomEntries[1].m[i], i * 2. + 1);
+    CHECKFi(i, f->lincomEntries[1].b[i], i * 2. + 2);
   }
 
-  CHECKS(f->lincomEntries[1].field, "polynom");
-  CHECKI(f->lincomEntries[1].n_fields, 1);
-  CHECKS(f->lincomEntries[1].in_fields[0], "raw");
-  CHECKF(f->lincomEntries[1].m[0], 9);
-  CHECKF(f->lincomEntries[1].b[0], 8);
-
-  CHECKS(f->lincomEntries[2].field, "recip");
+  CHECKS(f->lincomEntries[2].field, "polynom");
   CHECKI(f->lincomEntries[2].n_fields, 1);
-  CHECKS(f->lincomEntries[2].in_fields[0], "sbit");
-  CHECKF(f->lincomEntries[2].m[0], 3);
-  CHECKF(f->lincomEntries[2].b[0], 0);
+  CHECKS(f->lincomEntries[2].in_fields[0], "raw");
+  CHECKF(f->lincomEntries[2].m[0], 9);
+  CHECKF(f->lincomEntries[2].b[0], 8);
 
   CHECKI(f->n_linterp, 1);
   CHECKS(f->linterpEntries[0].field, "linterp");

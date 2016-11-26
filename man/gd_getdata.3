@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_getdata 3 "24 February 2016" "Version 0.9.2" "GETDATA"
+.TH gd_getdata 3 "24 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_getdata \(em retrieve data from a dirfile database
 .SH SYNOPSIS
@@ -97,7 +97,13 @@ below for a discussion of field I/O pointers).  In this case, the value of
 .I first_sample
 is ignored.
 
-The 
+When reading a
+.B SINDIR
+field,
+.I return_type
+must be
+.BR GD_STRING .
+For all other field types, the
 .I return_type
 argument should be one of the following symbols, which indicates the desired
 return type of the data:
@@ -161,6 +167,59 @@ position of the I/O pointer is not specified, and may not even be well defined.
 .SS Behaviour While Reading Specific Field Types
 
 .TP
+.BR MPLEX :
+Reading an
+.B MPLEX
+field typically requires GetData to read data before the range returned in order
+to determine the value of the first sample returned.  This can become expensive
+if the encoding of the underlying RAW data does not support seeking backwards
+(which is true of most compression encodings).  How much preceding data GetData
+searches for the initial value of the returned data can be adjusted, or the
+lookback disabled completely, using
+.BR gd_mplex_lookback (3).
+If the initial value of the field is not found in the data searched, GetData
+will fill the returned vector, up to the next available sample of the
+mulitplexed field, with zero for integer return types, or IEEE-754-conforming
+NaN (not-a-number) for floating point return types, as it does when providing
+data before the beginning-of-field.
+
+GetData caches the value of the last sample from every
+.B MPLEX
+it reads so that a subsequent read of the field starting from the following
+sample (either through an explicit starting sample given by the caller or else
+implicitly using
+.BR GD_HERE )
+will not need to scan the field backwards.  This cache is invalidated if a
+different return type is used, or if an intervening operation moves the field's
+I/O pointer.
+
+.TP
+.BR SINDIR :
+The only allowed
+.I return_type
+when reading
+.B SINDIR
+data is
+.BR GD_STRING .
+The
+.I data
+argument should be of type
+.BR "const char **" ,
+and be large enough to hold one pointer for each sample requested.  It will be
+filled with pointers to read-only string data.  The caller should not free the
+returned string pointers.  For convenience when allocating buffers, the
+.B GD_STRING
+constant has the property:
+.nh
+.BI "GD_SIZE(GD_STRING) == sizeof(" "const char *" )\fR.
+.hy
+On samples where the index vector is out of range of the
+.BR SARRAY ,
+and also on samples before the index vector's frame offset, the value stored in
+.I data
+will be the NULL pointer.
+
+.TP
 .BR PHASE :
 A forward-shifted
 .B PHASE
@@ -205,33 +264,6 @@ resulting in these applications effectively ignoring all frames past the frame
 containing the maximally forward-shifted
 .B PHASE
 field's end-of-field marker.
-
-.TP
-.BR MPLEX :
-Reading an
-.B MPLEX
-field typically requires GetData to read data before the range returned in order
-to determine the value of the first sample returned.  This can become expensive
-if the encoding of the underlying RAW data does not support seeking backwards
-(which is true of most compression encodings).  How much preceding data GetData
-searches for the initial value of the returned data can be adjusted, or the
-lookback disabled completely, using
-.BR gd_mplex_lookback (3).
-If the initial value of the field is not found in the data searched, GetData
-will fill the returned vector, up to the next available sample of the
-mulitplexed field, with zero for integer return types, or IEEE-754-conforming
-NaN (not-a-number) for floating point return types, as it does when providing
-data before the beginning-of-field.
-
-GetData caches the value of the last sample from every
-.B MPLEX
-it reads so that a subsequent read of the field starting from the following
-sample (either through an explicit starting sample given by the caller or else
-implicitly using
-.BR GD_HERE )
-will not need to scan the field backwards.  This cache is invalidated if a
-different return type is used, or if an intervening operation moves the field's
-I/O pointer.
 
 .TP
 .BR WINDOW :

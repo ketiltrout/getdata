@@ -45,7 +45,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDONLY);
   n = gd_get_carray(D, "carray", GD_FLOAT64, c);
   error = gd_error(D);
 

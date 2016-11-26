@@ -101,10 +101,10 @@ file.close()
 
 ne = 0
 
-fields = [B("INDEX"), B("alias"), B("bit"), B("carray"), B("const"), B("data"),
-    B("div"), B("indir"), B("lincom"), B("linterp"), B("mplex"), B("mult"),
-    B("phase"), B("polynom"), B("recip"), B("sarray"), B("sbit"), B("sindir"),
-    B("string"), B("window")]
+fields = [ B("bit"), B("div"), B("data"), B("mult"), B("sbit"), B("INDEX"),
+        B("alias"), B("const"), B("indir"), B("mplex"), B("phase"), B("recip"),
+        B("carray"), B("lincom"), B("sarray"), B("sindir"), B("string"),
+        B("window"), B("linterp"), B("polynom"), ]
 
 nfields = 20
 file=open("dirfile/format", 'w')
@@ -674,7 +674,7 @@ try:
   n = d.field_list(pygetdata.LINCOM_ENTRY)
 except:
   CheckOK(68)
-CheckSimple(68,n,[B("lincom"), B("new2")])
+CheckSimple(68,n,[B("new2"), B("lincom")])
 
 # 69: nvectors check
 try:
@@ -688,11 +688,11 @@ try:
   n = d.vector_list()
 except:
   CheckOK(70)
-CheckSimple(70,n,[B('INDEX'), B('alias'), B('bit'), B('data'), B('div'),
-    B('indir'), B('lincom'), B('linterp'), B('mplex'), B('mult'), B('new1'),
-    B('new10'), B('new2'), B('new4'), B('new6'), B('new7'), B('new8'),
-    B('new9'), B('phase'), B('polynom'), B('recip'), B('sbit'), B('sindir'),
-    B('window')])
+CheckSimple(70,n,[ B('bit'), B('div'), B('data'), B('mult'), B('new1'),
+    B('new2'), B('new4'), B('new6'), B('new7'), B('new8'), B('new9'), B('sbit'),
+    B('INDEX'), B('alias'), B('indir'), B('mplex'), B('new10'), B('phase'),
+    B('recip'), B('lincom'), B('sindir'), B('window'), B('linterp'),
+    B('polynom') ])
 
 # 71: add / entry (lincom) check
 ent = pygetdata.entry(pygetdata.LINCOM_ENTRY, "mnew1", 0,
@@ -1785,7 +1785,7 @@ try:
   n = d.aliases('data')
 except:
   CheckOK(222)
-CheckSimple(222, n, [ B('data'), B('alias'), B('data/mnew20'), B('new20') ])
+CheckSimple(222, n, [ B('data'), B('alias'), B('new20'), B('data/mnew20') ])
 
 # 223: gd_include_affix check
 try:
@@ -1951,11 +1951,11 @@ try:
       flags = pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
 except:
   CheckOK(239)
-CheckSimple(239,n, [B('INDEX'), B('bit'), B('data'), B('div'), B('indir'),
-    B('lincom'), B('linterp'), B('mplex'), B('mult'), B('new1'), B('new14'),
-    B('new16'), B('new18'), B('new2'), B('new21'), B('new4'), B('new6'),
-    B('new7'), B('new8'), B('phase'), B('polynom'), B('recip'), B('sbit'),
-    B('sindir'), B('window')])
+CheckSimple(239,n, [ B('bit'), B('div'), B('data'), B('mult'), B('new1'),
+    B('new2'), B('new4'), B('new6'), B('new7'), B('new8'), B('sbit'),
+    B('INDEX'), B('indir'), B('mplex'), B('new14'), B('new16'), B('new18'),
+    B('new21'), B('phase'), B('recip'), B('lincom'), B('sindir'), B('window'),
+    B('linterp'), B('polynom') ])
 
 # 240: gd_mplex_lookback check
 try:

@@ -201,13 +201,13 @@ program big_test
   call system ( 'rm -rf ' // fildir )
   call system ( 'mkdir ' // fildir )
 
-  fields = (/    'INDEX      ', 'alias      ', 'bit        ', 'carray     ', &
-  'const      ', 'data       ', 'div        ', 'indir      ', 'lincom     ', &
-  'linterp    ', 'mplex      ', 'mult       ', 'phase      ', 'polynom    ', &
-  'recip      ', 'sarray     ', 'sbit       ', 'sindir     ', 'string     ', &
-  'window     ', '           ', '           ', '           ', '           ', &
-  '           ', '           ', '           ', '           ', '           ', &
-  '           ' /)
+  fields = (/      'bit        ', 'div        ', 'data       ', 'mult       ', &
+    'sbit       ', 'INDEX      ', 'alias      ', 'const      ', 'indir      ', &
+    'mplex      ', 'phase      ', 'recip      ', 'carray     ', 'lincom     ', &
+    'sarray     ', 'sindir     ', 'string     ', 'window     ', 'linterp    ', &
+    'polynom    ', '           ', '           ', '           ', '           ', &
+    '           ', '           ', '           ', '           ', '           ', &
+    '           ' /)
 
   open(1, file=frmat, status='new')
   write(1, *) '/ENDIAN little'
@@ -888,9 +888,9 @@ program big_test
   call check_int(ne, 67, n, 3)
 
 ! 68: fgd_field_list_by_type check
-  fields(1) = 'lincom'
-  fields(2) = 'new2'
-  fields(3) = 'new3'
+  fields(1) = 'new2'
+  fields(2) = 'new3'
+  fields(3) = 'lincom'
   l = flen
   call fgd_field_list_by_type(flist, d, GD_LINCOM_ENTRY, l)
   call check_ok(ne, 68, d)
@@ -906,13 +906,13 @@ program big_test
   call check_int(ne, 69, n, 26)
 
 ! 70: fgd_vector_list check
-  fields = (/    'INDEX      ', 'alias      ', 'bit        ', 'data       ', &
-  'div        ', 'indir      ', 'lincom     ', 'linterp    ', 'mplex      ', &
-  'mult       ', 'new1       ', 'new10      ', 'new2       ', 'new3       ', &
-  'new4       ', 'new5       ', 'new6       ', 'new7       ', 'new8       ', &
-  'new9       ', 'phase      ', 'polynom    ', 'recip      ', 'sbit       ', &
-  'sindir     ', 'window     ', '           ', '           ', '           ', &
-  '           ' /)
+  fields = (/      'bit        ', 'div        ', 'data       ', 'mult       ', &
+    'new1       ', 'new2       ', 'new3       ', 'new4       ', 'new5       ', &
+    'new6       ', 'new7       ', 'new8       ', 'new9       ', 'sbit       ', &
+    'INDEX      ', 'alias      ', 'indir      ', 'mplex      ', 'new10      ', &
+    'phase      ', 'recip      ', 'lincom     ', 'sindir     ', 'window     ', &
+    'linterp    ', 'polynom    ', '           ', '           ', '           ', &
+    '           ' /)
   l = flen
   call fgd_vector_list(flist, d, l)
   call check_ok(ne, 70, d)
@@ -2391,8 +2391,8 @@ program big_test
 ! 222: GDALSS check
   fields(1) = 'data'
   fields(2) = 'alias'
-  fields(3) = 'data/mnew20'
-  fields(4) = 'new20'
+  fields(3) = 'new20'
+  fields(4) = 'data/mnew20'
   l = flen
   call fgd_aliases(flist, d, 'data', l)
   call check_ok(ne, 222, d)
@@ -2526,13 +2526,13 @@ program big_test
   call check_int(ne, 238, i, 7)
 
 ! 239: fgd_field_list check
-  fields = (/    'INDEX      ', 'bit        ', 'data       ', 'div        ', &
-  'indir      ', 'lincom     ', 'linterp    ', 'mplex      ', 'mult       ', &
-  'new1       ', 'new135     ', 'new14      ', 'new15      ', 'new16      ', &
-  'new18      ', 'new19      ', 'new2       ', 'new21      ', 'new3       ', &
-  'new4       ', 'new5       ', 'new6       ', 'new7       ', 'new8       ', &
-  'phase      ', 'polynom    ', 'recip      ', 'sbit       ', 'sindir     ', &
-  'window     ' /)
+  fields = (/      'bit        ', 'div        ', 'data       ', 'mult       ', &
+    'new1       ', 'new2       ', 'new3       ', 'new4       ', 'new5       ', &
+    'new6       ', 'new7       ', 'new8       ', 'sbit       ', 'INDEX      ', &
+    'indir      ', 'mplex      ', 'new14      ', 'new15      ', 'new16      ', &
+    'new18      ', 'new19      ', 'new21      ', 'phase      ', 'recip      ', &
+    'lincom     ', 'new135     ', 'sindir     ', 'window     ', 'linterp    ', &
+    'polynom    ' /)
   l = flen
   call fgd_entry_list(flist, d, GD_ALL_FRAGMENTS, "", GD_VECTOR_ENTRIES, &
     IOR(GD_ENTRIES_HIDDEN, GD_ENTRIES_NOALIAS), l)
@@ -3172,7 +3172,7 @@ program big_test
   call fgd_get_sarray(flist, l, d, 'sarray')
   call check_ok(ne, 278, d)
   call check_int(ne, 278, l, flen)
-  do i=1,n
+  do i=1,7
   call check_str2(ne, 278, i, flist(i), fields(i))
   end do 
 
@@ -3200,7 +3200,7 @@ program big_test
   call fgd_get_sarray(flist, l, d, 'sarray')
   call check_ok2(ne, 281, 2, d)
   call check_int(ne, 281, l, flen)
-  do i=1,n
+  do i=1,7
   call check_str2(ne, 281, i, flist(i), fields(i))
   end do 
 
@@ -3214,7 +3214,7 @@ program big_test
   call fgd_get_sarray(flist, l, d, 'sarray')
   call check_ok2(ne, 282, 2, d)
   call check_int(ne, 282, l, flen)
-  do i=1,n
+  do i=1,7
   call check_str2(ne, 282, i, flist(i), fields(i))
   end do 
 
