@@ -1304,7 +1304,6 @@ int _GD_MakeTempFile(const DIRFILE*, int, char*);
 
 /* forward declarations */
 void *_GD_Alloc(DIRFILE*, gd_type_t, size_t) __attribute_malloc__;
-int _GD_BadInput(DIRFILE *, const gd_entry_t *, int, gd_entype_t, int);
 
 #define _GD_BadWindop(op) \
   ( \
@@ -1353,6 +1352,7 @@ gd_entry_t *_GD_FindField(const DIRFILE *restrict, const char *restrict,
     size_t, gd_entry_t *const *, unsigned int, int, unsigned int *restrict);
 gd_entry_t *_GD_FindFieldAndRepr(DIRFILE *restrict, const char *restrict,
     int *restrict, unsigned int *restrict, int);
+int _GD_FindInputs(DIRFILE *restrict, gd_entry_t *restrict, int) gd_nothrow;
 uint64_t _GD_FindVersion(DIRFILE *D);
 void _GD_FixEndianness(void*, size_t, gd_type_t, unsigned, unsigned);
 int _GD_FileSwapBytes(const DIRFILE *restrict, const gd_entry_t *restrict);
@@ -1360,8 +1360,9 @@ int _GD_FiniRawIO(DIRFILE*, const gd_entry_t*, int, int);
 void _GD_Flush(DIRFILE *restrict, gd_entry_t *restrict, int, int);
 void _GD_FlushMeta(DIRFILE* D, int fragment, int force);
 void _GD_FreeE(DIRFILE *restrict, gd_entry_t *restrict, int);
+void _GD_FreeF(DIRFILE *restrict, int, int);
 void _GD_FreeFL(struct gd_flist_ *);
-off64_t _GD_GetEOF(DIRFILE *restrict, const gd_entry_t *restrict,
+off64_t _GD_GetEOF(DIRFILE *restrict, gd_entry_t *restrict,
     const char *restrict, int *restrict);
 off64_t _GD_GetIOPos(DIRFILE *restrict, gd_entry_t *restrict, off64_t);
 char *_GD_GetLine(FILE *restrict, size_t *restrict, int *restrict);
@@ -1407,7 +1408,7 @@ char *_GD_ParseFragment(FILE *restrict, DIRFILE*, struct parser_state *restrict,
 void _GD_PerformRename(DIRFILE *restrict, struct gd_rename_data_ *restrict);
 struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict, char *restrict,
     size_t, gd_entry_t *restrict, int, unsigned);
-void _GD_ReadLinterpFile(DIRFILE *restrict, gd_entry_t *restrict);
+int _GD_ReadLinterpFile(DIRFILE *restrict, gd_entry_t *restrict);
 void *_GD_Realloc(DIRFILE *restrict, void *restrict, size_t size);
 void _GD_ReleaseDir(DIRFILE *D, int dirfd);
 int _GD_SlashDot(const char*, size_t, unsigned, const char**, const char**);

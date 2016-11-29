@@ -322,21 +322,15 @@ static int _GD_UpdateAffixes(DIRFILE *D, int index, char *nsin, size_t nsl,
     } else {
       /* Combine P->ns and nsin */
       size_t len;
-      len = P->nsl + nsl; /* If nsl is non-zero, then it also counts the
-                             trailing '.' (i.e. nsl is never 1) */
-
-      if (P->nsl)
-        len++; /* space for the intervening '.' */
+      /* If nsl is non-zero, then it also counts the trailing '.' (i.e. nsl is
+       * never 1).  Also add one for the intervening '.' */
+      len = P->nsl + nsl + 1;
 
       fullns = _GD_Malloc(D, len + 1);
       if (fullns) {
-        if (P->ns) {
-          /* We copy from F not P because it already has the
-           * intervening '.' */
-          memcpy(fullns, F->ns, P->nsl + 1);
-          ns = fullns + P->nsl + 1;
-        } else
-          ns = fullns;
+        /* We copy from F not P because it already has the intervening '.' */
+        memcpy(fullns, F->ns, P->nsl + 1);
+        ns = fullns + P->nsl + 1;
 
         /* We copy the trailing '.' and NUL here */
         memcpy(ns, nsin, nsl + 1);

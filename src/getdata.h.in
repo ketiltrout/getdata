@@ -975,7 +975,7 @@ gd_nonnull ((1, 2));
 extern size_t gd_get_string(DIRFILE *dirfile, const char *field_code,
     size_t len, char *data) gd_nothrow gd_nonnull ((1, 2));
 
-extern size_t gd_put_string(DIRFILE *dirfile, const char *field_code,
+extern int gd_put_string(DIRFILE *dirfile, const char *field_code,
     const char *data) gd_nothrow gd_nonnull ((1, 2, 3));
 
 const char ***gd_sarrays(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));

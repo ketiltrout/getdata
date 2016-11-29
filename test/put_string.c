@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,30 +18,21 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Add a RAW field */
 #include "test.h"
-
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   char string[1024] = "";
-  int e1, e2, r = 0;
+  int ret, e1, e2, r = 0;
   DIRFILE *D;
 
   rmdirfile();
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_string(D, "data", "some string", 0);
-  gd_put_string(D, "data", "some other string");
+  ret = gd_put_string(D, "data", "some other string");
+  CHECKI(ret, 0);
   e1 = gd_error(D);
   CHECKI(e1, GD_E_OK);
 
@@ -51,11 +42,12 @@ int main(void)
   /* check */
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   gd_get_string(D, "data", 1023, string);
+  CHECKS(string,"some other string");
+
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
 
-  CHECKS(string,"some other string");
   return r;
 }

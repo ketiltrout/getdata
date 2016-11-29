@@ -115,30 +115,23 @@ static size_t _GD_DoLinterpOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, data_type, data_in);
 
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-  
   if (E->e->repr[0] != GD_REPR_NONE) { /* can't write to representaions */
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_REPR, NULL, 0, E->in_fields[0]);
     dreturn("%i", 0);
     return 0;
   }
 
+  if (E->e->u.linterp.table_len < 0)
+    if (_GD_ReadLinterpFile(D, E)) {
+      dreturn("%i", 0);
+      return 0;
+    }
+
   /* if the table is complex valued, we can't invert it */
   if (E->e->u.linterp.complex_table) {
     _GD_SetError(D, GD_E_DOMAIN, GD_E_DOMAIN_COMPLEX, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
-  }
-
-  if (E->e->u.linterp.table_len < 0) {
-    _GD_ReadLinterpFile(D, E);
-    if (D->error != GD_E_OK) {
-      dreturn("%i", 0);
-      return 0;
-    }
   }
 
   /* Check whether the LUT is monotonic */
@@ -230,11 +223,6 @@ static size_t _GD_DoLincomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
   if (E->e->repr[0] != GD_REPR_NONE) { /* can't write to representaions */
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_REPR, NULL, 0, E->in_fields[0]);
     dreturn("%i", 0);
@@ -306,11 +294,6 @@ static size_t _GD_DoBitOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, data_type, data_in);
 
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
   if (E->e->repr[0] != GD_REPR_NONE) { /* can't write to representaions */
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_REPR, NULL, 0, E->in_fields[0]);
     dreturn("%i", 0);
@@ -367,11 +350,6 @@ static size_t _GD_DoPhaseOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, data_type, data_in);
 
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
   if (E->e->repr[0] != GD_REPR_NONE) { /* can't write to representaions */
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_REPR, NULL, 0, E->in_fields[0]);
     dreturn("%i", 0);
@@ -395,11 +373,6 @@ static size_t _GD_DoRecipOut(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, data_type, data_in);
-
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
 
   if (E->e->repr[0] != GD_REPR_NONE) { /* can't write to representaions */
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_REPR, NULL, 0, E->in_fields[0]);
@@ -452,11 +425,6 @@ static size_t _GD_DoPolynomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   if (E->EN(polynom,poly_ord) > 1) {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, E->field);
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -562,8 +530,7 @@ static void _GD_MplexOutData(DIRFILE *restrict D, void *restrict A,
     case GD_FLOAT64:    MPLEX(  double); break;
     case GD_COMPLEX64:  MPLEXC(  float); break;
     case GD_COMPLEX128: MPLEXC( double); break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
-                        break;
+    default:       _GD_InternalError(D); break;
   }
 
   dreturnvoid();
@@ -582,18 +549,8 @@ static size_t _GD_DoMplexOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, data_type, data_in);
 
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
   if (E->e->repr[0] != GD_REPR_NONE) { /* can't write to representaions */
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_REPR, NULL, 0, E->in_fields[0]);
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  if (_GD_BadInput(D, E, 1, GD_NO_ENTRY, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -695,14 +652,15 @@ size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  if (!(E->flags & GD_EN_CALC)) {
+  if (!(E->flags & GD_EN_CALC))
     _GD_CalculateEntry(D, E, 1);
 
-    if (D->error) {
-      D->recurse_level--;
-      dreturn("%i", 0);
-      return 0;
-    }
+  _GD_FindInputs(D, E, 1);
+
+  if (D->error) {
+    D->recurse_level--;
+    dreturn("%i", 0);
+    return 0;
   }
 
   /* Avoid craziness */
@@ -804,6 +762,8 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
 
   if (entry->field_type & GD_SCALAR_ENTRY_BIT)
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
+  else if (_GD_BadType(GD_DIRFILE_STANDARDS_VERSION, data_type))
+    _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, data_type, NULL);
 
   if (D->error) {
     dreturn("%i", 0);
@@ -815,7 +775,7 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
     first_frame = 0;
   }
 
-  if (num_frames > 0 || first_frame > 0) {
+  if (num_frames || first_frame) {
     /* get the samples per frame */
     spf = _GD_GetSPF(D, entry);
 

@@ -25,19 +25,25 @@ static unsigned int _GD_NEntries(DIRFILE *D, struct gd_private_entry_ *p,
 {
   int i;
   unsigned int u, n = 0;
-  const int special = (type & GD_SPECIAL_ENTRY_BIT) ? type : 0;
-  const gd_entype_t ctype = (type & GD_SPECIAL_ENTRY_BIT) ? GD_NO_ENTRY :
-    (gd_entype_t)type;
+  int special;
+  gd_entype_t ctype;
   const int hidden = (flags & GD_ENTRIES_HIDDEN);
   const int noalias = (flags & GD_ENTRIES_NOALIAS);
 
   dtrace("%p, %p, %i, 0x%X, 0x%X", D, p, fragment, type, flags);
 
-  /* check for invalid type */
-  if (ctype && _GD_InvalidEntype(ctype)) {
+  if (type == GD_VECTOR_ENTRIES || type == GD_SCALAR_ENTRIES ||
+      type == GD_ALIAS_ENTRIES)
+  {
+    special = type;
+    ctype = GD_NO_ENTRY;
+  } else if (type != GD_NO_ENTRY && _GD_InvalidEntype(type)) {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_TYPE, NULL, type, NULL);
     dreturn("%u", 0);
     return 0;
+  } else {
+    special = 0;
+    ctype = (gd_entype_t)type;
   }
 
   if (p) {

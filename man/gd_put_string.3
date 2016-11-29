@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_put_string 3 "22 November 2016" "Version 0.10.0" "GETDATA"
+.TH gd_put_string 3 "29 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_put_string \(em write a STRING or SARRAY element to a Dirfile database
 .SH SYNOPSIS
@@ -67,12 +67,8 @@ data to a Dirfile.
 .SH RETURN VALUE
 On success,
 .BR gd_put_string ()
-returns the length of the string stored, including the trailing NUL character.
-On error, this function returns 0 and stores a negative-valued error code in the
-.B DIRFILE
-object which may be retrieved by a subsequent call to
-.BR gd_error (3).
-Possible error codes are:
+returns zero.  On error, this a negative-valued error code.  Possible error
+codes are:
 .TP 8
 .B GD_E_ACCMODE
 The specified
@@ -105,6 +101,10 @@ maintainer.
 .B GD_E_PROTECTED
 The fragment containing the string was protected from change.
 .PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.BR gd_error (3).
 A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH SEE ALSO

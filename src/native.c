@@ -30,8 +30,18 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
     D->recurse_level--;
-    dreturn("%u", type);
-    return type;
+    dreturn("%u", GD_UNKNOWN);
+    return GD_UNKNOWN;
+  }
+
+  if (!(E->flags & GD_EN_CALC))
+    _GD_CalculateEntry(D, E, 1);
+
+  _GD_FindInputs(D, E, 1);
+
+  if (D->error) {
+    dreturn("%u", GD_UNKNOWN);
+    return GD_UNKNOWN;
   }
 
   switch(E->field_type) {
@@ -48,21 +58,16 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
       }
 
       type = GD_FLOAT64;
-      for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-        if (_GD_BadInput(D, E, i, GD_NO_ENTRY, 1))
-          break;
-
+      for (i = 0; i < E->EN(lincom,n_fields); ++i)
         if (_GD_NativeType(D, E->e->entry[i], E->e->repr[i]) & GD_COMPLEX) {
           type = GD_COMPLEX128;
           break;
         }
-      }
       break;
     case GD_LINTERP_ENTRY:
       /* initialise the table, if necessary */
       if (E->e->u.linterp.table_len < 0) {
-        _GD_ReadLinterpFile(D, E);
-        if (D->error != GD_E_OK)
+        if (_GD_ReadLinterpFile(D, E))
           break;
       }
 
@@ -70,23 +75,11 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
-      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1) ||
-          _GD_BadInput(D, E, 1, GD_NO_ENTRY, 1))
-      {
-        break;
-      }
-
       type = (_GD_NativeType(D, E->e->entry[0], E->e->repr[0]) & GD_COMPLEX
           || _GD_NativeType(D, E->e->entry[1], E->e->repr[1]) & GD_COMPLEX)
         ? GD_COMPLEX128 : GD_FLOAT64;
       break;
     case GD_RECIP_ENTRY:
-      if (!(E->flags & GD_EN_CALC))
-        _GD_CalculateEntry(D, E, 1);
-
-      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
-        break;
-
       type = ((_GD_NativeType(D, E->e->entry[0], E->e->repr[0]) & GD_COMPLEX)
           || (E->flags & GD_EN_COMPSCAL)) ? GD_COMPLEX128 : GD_FLOAT64;
       break;
@@ -97,26 +90,16 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
     case GD_PHASE_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
-      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
-        break;
-
       type = _GD_NativeType(D, E->e->entry[0], E->e->repr[0]);
       break;
     case GD_POLYNOM_ENTRY:
-      if (!(E->flags & GD_EN_CALC))
-        _GD_CalculateEntry(D, E, 1);
-
       if (E->flags & GD_EN_COMPSCAL) {
         type = GD_COMPLEX128;
         break;
       }
 
-      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
-        break;
-
       type = (_GD_NativeType(D, E->e->entry[0], E->e->repr[0]) & GD_COMPLEX) ?
         GD_COMPLEX128 : GD_FLOAT64;
-
       break;
     case GD_SBIT_ENTRY:
       type = GD_INT64;
@@ -126,11 +109,7 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
       type = _GD_ConstType(D, E->EN(scalar,const_type));
       break;
     case GD_INDIR_ENTRY:
-      if (_GD_BadInput(D, E, 1, GD_CARRAY_ENTRY, 1))
-        break;
-
       type = _GD_NativeType(D, E->e->entry[1], E->e->repr[1]);
-
       break;
     case GD_STRING_ENTRY:
     case GD_SARRAY_ENTRY:

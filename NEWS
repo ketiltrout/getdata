@@ -108,18 +108,56 @@ New in version 0.10.0a:
 
   * A couple of unnecessary malloc's have been removed from the field
     code search, reducing the chance of encountering a GD_E_ALLOC error.
-    Notably the functions gd_array_len(), gd_bof(), gd_entry_type(),
+    Notably, the functions gd_array_len(), gd_bof(), gd_entry_type(),
     gd_fragment_index(), and gd_spf() will no longer produce this error at
     all.
 
-  * BUG FIX: Writes to ASCII (text) encoded files weren't properly updating
-    the file's I/O position, leading to subsequent reads and writes
-    occurring in the wrong place.
+  * BUG FIX: The gd_include() family of functions now correcrtly clean up
+    after encountering an error.  Previously, encountering a syntax error
+    would result in these functions erroneously adding fields specified
+    before the syntax error to the DIRFILE, with a bogus fragment index.
+    Similarly, when these functions return GD_E_REFERENCE, they no longer
+    add the included fragment (excluding the bad /REFERENCE directive) to
+    the DIRFILE without telling the caller about it.
+
+  * BUG FIX: gd_alter_protection() wasn't marking affected fragments as
+    modified, meaning the change in protection level would be lost upon
+    close unless other metadata changes were made to the fragment as well.
+
+  * BUG FIX: The metadata update performed by gd_delete() now successfuly
+    updates all fields which used the deleted field as an input.
+    Previously some fields could be skipped, leading to segfaults later
+    when these fields were accessed.
+
+  * BUG FIX: gd_add_spec() no longer creates an empty data file while
+    failing with GD_E_PROTECT when operating in a fragment with data
+    protection turned on.
+
+  * BUG FIX: gd_putdata() now refuses to write to complex-valued LINTERP
+    fields.  Previously, the write would succeed as if the imaginary
+    part of the field were zero.
+
+  * BUG FIX: gd_nentries() now correctly rejects invalid values for the
+    type parameter.
+
+  * BUG FIX GetData now properly deals wth circular series of aliases,
+    turning them all into dangling aliases.  Previously, the alias
+    resolution would terminate at some arbitrary point around the loop,
+    resulting in internal errors arrising from attempts to use an alias as
+    a field.
 
   * BUG FIX: Several bugs in the I/O positioning performed before reads and
     writes to compressed data have been fixed.  Previously, reads and
     writes could occur in the wrong place in the data stream.  Reported by
     S. J. Benton.
+
+  * BUG FIX: Similarly, a number of bugs associated with random-access
+    writes to compressed data files which were causing data corruption have
+    been fixed.
+
+  * BUG FIX: Writes to ASCII (text) encoded files weren't properly updating
+    the file's I/O position, leading to subsequent reads and writes
+    occurring in the wrong place.
 
   * BUG FIX: Trying to open a non-existent, gzip-encoded data file now
     reports the correct error (GD_E_IO; "No such file or directory"),
@@ -128,17 +166,8 @@ New in version 0.10.0a:
   * BUG FIX: A segfault encountered when closing very large compressed
     files after writing to them has been fixed.
 
-  * BUG FIX: A number of bugs associated with random-access writes to
-    compressed data files which were causing data corruption have been
-    fixed.
-
   * BUG FIX: Attempting to open a SIE-encoded data file a second time
     after a first attempt failed no longer results in a segfault.
-
-  * BUG FIX: The metadata update performed by gd_delete() now successfuly
-    updates all fields which used the deleted field as an input.
-    Previously some fields could be skipped, leading to segfaults later
-    when these fields were accessed.
 
   * BUG FIX: The parser no longer assumes a new string buffer returned by
     the parser callback (by assigning it to pdata->line) has the size given
@@ -168,11 +197,17 @@ New in version 0.10.0a:
 
   * The new function gd_alloc_funcs() allows callers to change the memory
     manager used by GetData to allocate and de-allocate heap buffers that
-    it returns.
+    it returns.  The functions gd_entry(), gd_error_string(),
+    gd_fragment_affixes(), gd_linterp_tablename(), and gd_raw_filename()
+    will use this memory manager to allocate the buffers they return.  The
+    function gd_free_entry_strings() will use this memory manager to free
+    strings.  Even if an alternate memory manager is specified,GetData will
+    still use the Standard Library's malloc() and free() for much of it's
+    internal storage.
 
   * A number of functions which used to return -1 on error now instead
     return an appropriate error code, previously only availably through
-    gd_error().  These error codes are all negatively-valued.  Functions
+    gd_error().  These error codes are all negative-valued.  Functions
     whose error returns have changed and now do this are:
 
       gd_add(), gd_add_alias(), all the gd_add_<entry_type>() functions,
@@ -196,6 +231,12 @@ New in version 0.10.0a:
     fragment, which optionally allows searching only one metadata fragment.
     Setting this to GD_ALL_FRAGMENTS restores the previous behaviour
     (search all fragments).
+
+  * gd_put_string() now returns zero on success and a negative-valued error
+    code on error, following the lead of gd_put_constant() and
+    gd_put_sarray().  Also note that the return type is now int, where
+    previously it was size_t, despite the documentation having always
+    claimed it returned int.
 
   * The GD_FUNCTION_ALIASES block, and hence the long-deprecated
     GetData-0.6 API, has been removed from getdata.h.  Anyone still using

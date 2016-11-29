@@ -1,3 +1,125 @@
+2016-11-29   D. V. Wiebe <getdata@ketiltrout.net> svn:1122
+	* src/protect.c (gd_alter_protection): If the protection level changes,
+	mark the fragment dirty (modified).
+
+	* src/parse.c (_GD_CodeFromFrag): Fix version check.
+
+	* src/add.c (_GD_BadType): Deal with DSV <= 4 correctly.
+
+	* src/common.c (_GD_Alloc _GD_LinterpData) src/getdata.c (_GD_ExtractRepr
+	_GD_PolynomData _GD_CPolynomData _GD_MultiplyData _GD_CMultiplyData
+	_GD_DivideData _GD_CDivideData _GD_WindowData _GD_MplexData) src/types.c
+	(_GD_ConvertType): Return internal error on bad data type.
+	* src/constant.c (gd_get_carray_slice gd_get_carray _GD_PutCarraySlice)
+	src/field_list.c (_GD_Constants _GD_Carrays) src/getdata.c (gd_getdata64)
+	src/putdata.c (gd_putdata64):
+	Call _GD_BadType.
+
+	* src/getdata.c (_GD_DoLincom _GD_DoMultiply _GD_DoRecip _GD_DoDivide
+	_GD_DoBit _GD_DoPhase _GD_DoLinterp _GD_DoPolynom _GD_DoWindow _GD_DoMplex
+	_GD_DoIndir) src/putdata.c (_GD_DoLinterpOut _GD_DoBitOut _GD_DoPhaseOut
+	_GD_DoRecipOut _GD_DoPolynomOut _GD_MplexOutData): Remove _GD_BadInput call.
+	* src/entry.c (_GD_BadInput): Moved from common.c and statickified.
+	* src/entry.c (_GD_FindInputs): Added.
+	* src/entry.c (gd_validate) src/flimits.c (_GD_GetEOF _GD_GetBOF)
+	src/flush.c (_GD_Flush) src/getdata.c (_GD_DoSindir) src/iopos.c
+	(_GD_GetIOPos _GD_Seek) src/native.c (_GD_NativeType) src/putdata.c
+	(_GD_DoFieldOut) src/spf.c (_GD_GetSPF): Call _GD_FindInputs.
+	* src/flush.c (_GD_Flush): Permit E == NULL (in which case do nothing).
+
+	* src/fragment.c (_GD_UpdateAffixes): Remove dead code.
+
+	* src/close.c (_GD_FreeF): Added.
+	* src/close.c (_GD_FreeD) src/include (gd_uninclude): Call _GD_FreeF.
+	* src/include.c (_GD_IncludeAffix): Properly clean up after errors.
+
+	* src/close.c (_GD_FreeD _GD_ShutdownDirfile): Move directory closing from
+	_GD_ShutdownDirfile to _GD_FreeD.
+
+	* src/parse.c (_GD_CodeFromFrag): Fix early calculation in _GD_BuildCode
+	call.
+
+	* src/protect.c (gd_alter_protection): Dirty fragment if protection changed.
+
+	* src/nfields.c (_GD_NEntries): Correct invalid type check.
+
+	* src/parse.c (_GD_ParseFieldSpec): Remove n_cols < 2 check.
+	* src/add.c (_GD_AddSpec): Add n_cols < 2 check.
+
+	* src/parse.c (_GD_ParseFieldSpec): Remove encoding checks; _GD_InitRawIO
+	already does them.
+
+	* src/common.c (_GD_ReadLinterpFile): Return non-zero on error.
+
+	* src/getdata.c (gd_getdata64) src/putdata.c (gd_putdata64): Always convert
+	from frames to samples.
+
+	* src/parse.c (_GD_WindOp): Also check for the trailing NUL.
+
+	* src/parse.c (_GD_ParseNamespace): Fix trailing . removal.
+
+	* src/parse.c (_GD_ResolveAlias): Add base parameter and delete the recursion
+	counter, which want' being used.  Alias loops are valid syntax, so don't
+	return an error when encountering them, just make them all dangle (set
+	entry[0] to NULL).
+
+	* src/putdata.c (_GD_DoLinterpOut): Load the LUT *before* checking if it's
+	complex valued, instead of after.
+
+	* src/string.c (_GD_PutSarraySlice): Return void.
+	* src/string.c (gd_put_string): Return int D->error.
+
+	* test/alter_entry_lincom_nfields.c: Renamed from alter_lincom_nfields.c
+	* test/mflush.c: Renamed from flush_meta.c
+	* test/mflush_amb_code.c test/mflush_hex.c test/mflush_ref.c
+	test/mflush_repr.c test/mflush_repr9.c test/mflush_reprz.c
+	test/mflush_spec.c test/mflush_string.c: Renamed from flush_*.c
+	* test/ref_empty.c test/ref_get.c test/ref_set.c: Renamed from
+	global_ref_*.c
+	* test/tell_multi_div.c: Renamed from tell_multidiv.c
+	* test/parse_name_pedantic.c: Deleted.
+	* test/add_name_len.c test/add_spec_raw_autoenc.c test/add_spec_raw_prot.c
+	test/add_spec_raw_unkenc.c test/alloc_affix.c test/alloc_callback.c
+	test/alloc_clear.c test/alloc_entry.c test/alloc_tok.c
+	test/alter_bit_scalar.c test/alter_clincom_32.c test/alter_clincom_nfields.c
+	test/alter_clincom_nfields_code.c test/alter_clincom_null.c
+	test/alter_cpolynom_ord.c test/alter_cpolynom_ord_code.c
+	test/alter_lincom_nfields.c test/alter_lincom_nfields_code.c
+	test/alter_lincom_scalar.c test/alter_mplex_scalar.c test/alter_phase_scalar.c
+	test/alter_polynom_ord2.c test/alter_polynom_ord_code.c
+	test/alter_polynom_scalar.c test/alter_raw_spf_type.c
+	test/alter_recip_scalar.c test/alter_spec_prot.c test/alter_spec_rdonly.c
+	test/alter_window_scalar.c test/flush_recurse.c test/get_divide_code.c
+	test/get_index_type.c test/get_lincom_code.c test/get_multiply_code.c
+	test/get_sindir_code.c test/get_sindir_neg.c test/include_format.c
+	test/include_ref_code.c test/include_ref_type.c test/index_empty.c
+	test/index_one.c test/index_scalar.c test/mflush_carray.c test/mflush_indir.c
+	test/mflush_mplex.c test/mflush_ns.c test/mflush_pretty.c test/mflush_prot.c
+	test/mflush_sindir.c test/mflush_type.c test/mflush_type4.c
+	test/mflush_windop.c test/move_unkenc.c test/native_code.c
+	test/native_recurse.c test/nentries_entype.c test/nmeta_parent_meta.c
+	test/parse_alias_loop.c test/parse_alias_ncols.c test/parse_carray_ncols.c
+	test/parse_carray_type.c test/parse_const_type.c test/parse_endian_bad2.c
+	test/parse_esc.c test/parse_hidden_frag.c test/parse_meta_ncols.c
+	test/parse_mplex_neg.c test/parse_recip_ncols.c test/parse_ref_type.c
+	test/parse_sarray_ncols.c test/protect_alter_arg.c test/protect_alter_index.c
+	test/protect_alter_rdonly.c test/protect_index.c test/put_bit_repr.c
+	test/put_lincom_repr.c test/put_linterp_cmp.c test/put_linterp_repr.c
+	test/put_mplex_repr.c test/put_neg.c test/put_phase_repr.c
+	test/put_polynom_repr.c test/put_recip_repr.c test/put_scalar.c
+	test/put_string_type.c test/ref_set_code.c test/ref_set_prot.c
+	test/ref_set_rdonly.c test/ref_set_type.c test/seek_arg.c test/seek_code.c
+	test/seek_dim.c test/seek_index_end.c test/seek_mplex.c test/seek_range_end.c
+	test/seek_recurse.c test/spf_const.c test/tell_code.c test/tell_dim.c
+	test/tell_multi_lincom.c test/tell_recurse.c: Added.
+
+  * test/convert_float64_int64.c test/parse_const_ncols.c
+	test/put_lincom_noin.c test/put_recurse.c: Fixed.
+
+	* test/fragment_affix_alter_code.c test/name_updb_carray.c
+	test/name_updb_const.c test/parse_window_op.c test/put_string.c
+	test/put_string_protect.c: Updated.
+
 2016-11-26   D. V. Wiebe <getdata@ketiltrout.net> svn:1121
 	* src/ascii.c (_GD_AsciiOpen): Remove the ancient existing file code.
 

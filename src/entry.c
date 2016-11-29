@@ -757,7 +757,7 @@ int gd_unhide(DIRFILE *D, const char *field_code) gd_nothrow
 /* This function silently drops a representation suffix from field_code. */
 int gd_validate(DIRFILE *D, const char *field_code) gd_nothrow
 {
-  int i, repr;
+  int repr;
   gd_entry_t* E;
 
   dtrace("%p, \"%s\"", D, field_code);
@@ -777,24 +777,78 @@ int gd_validate(DIRFILE *D, const char *field_code) gd_nothrow
     GD_RETURN_ERROR(D);
 
   /* check input fields */
+  _GD_FindInputs(D, E, 1);
+
+  GD_RETURN_ERROR(D);
+}
+
+/* Ensure that an input field has been identified (with error checking) */
+static int _GD_BadInput(DIRFILE *D, const gd_entry_t *E, int i, gd_entype_t t,
+    int err)
+{
+  dtrace("%p, %p, %i, 0x%X, %i", D, E, i, t, err);
+
+  if (E->e->entry[i]) { /* Job done */
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (E->e->entry[i] == NULL) {
+    E->e->entry[i] = _GD_FindFieldAndRepr(D, E->in_fields[i], &E->e->repr[i],
+        NULL, err);
+
+    if (E->e->entry[i] == NULL) {
+      dreturn("%i", 1);
+      return 1;
+    }
+  }
+
+  /* check field type */
+  if (t == GD_NO_ENTRY) {
+    /* scalar entries not allowed */
+    if (E->e->entry[i]->field_type & GD_SCALAR_ENTRY_BIT) {
+      _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_FORMAT, E->field, 0,
+          E->e->entry[i]->field);
+      E->e->entry[i] = NULL;
+      dreturn("%i", 1);
+      return 1;
+    }
+  } else if (E->e->entry[i]->field_type != t) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_FORMAT, E->field, 0,
+        E->e->entry[i]->field);
+    E->e->entry[i] = NULL;
+    dreturn("%i", 1);
+    return 1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+int _GD_FindInputs(DIRFILE *D, gd_entry_t *E, int err) gd_nothrow
+{
+  int i;
+
+  dtrace("%p, %p, %i", D, E, err);
+
   switch (E->field_type) {
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->EN(lincom,n_fields); ++i)
-        _GD_BadInput(D, E, i, GD_NO_ENTRY, 1);
+        _GD_BadInput(D, E, i, GD_NO_ENTRY, err);
       break;
     case GD_INDIR_ENTRY:
-      _GD_BadInput(D, E, 0, GD_NO_ENTRY, 1);
-      _GD_BadInput(D, E, 0, GD_CARRAY_ENTRY, 1);
+      _GD_BadInput(D, E, 0, GD_NO_ENTRY, err);
+      _GD_BadInput(D, E, 1, GD_CARRAY_ENTRY, err);
       break;
     case GD_SINDIR_ENTRY:
-      _GD_BadInput(D, E, 0, GD_NO_ENTRY, 1);
-      _GD_BadInput(D, E, 0, GD_SARRAY_ENTRY, 1);
+      _GD_BadInput(D, E, 0, GD_NO_ENTRY, err);
+      _GD_BadInput(D, E, 1, GD_SARRAY_ENTRY, err);
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
-      _GD_BadInput(D, E, 1, GD_NO_ENTRY, 1);
+      _GD_BadInput(D, E, 1, GD_NO_ENTRY, err);
       /* fallthrough */
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
@@ -802,7 +856,7 @@ int gd_validate(DIRFILE *D, const char *field_code) gd_nothrow
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
-      _GD_BadInput(D, E, 0, GD_NO_ENTRY, 1);
+      _GD_BadInput(D, E, 0, GD_NO_ENTRY, err);
       /* Fallthrough */
     case GD_RAW_ENTRY:
     case GD_CONST_ENTRY:

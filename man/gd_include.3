@@ -354,18 +354,6 @@ object and may be retrieved after this function returns by calling
 A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 
-.SH BUGS
-If this function fails with the error
-.BR GD_E_BAD_REFERENCE ,
-it typically results in no reference field being defined for the dirfile, even
-if the dirfile contains
-.B RAW
-fields.  As a result, functions which rely on the reference field, such as
-.BR gd_nframes (3),
-will operate incorrectly.  Callers should explicitly set the reference field
-with
-.BR gd_reference (3)
-in this case.
 .SH SEE ALSO
 .BR gd_open (3),
 .BR gd_alter_affixes (3),

@@ -288,12 +288,10 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n)
   void* ptr = NULL;
 
   dtrace("%p, 0x%x, %" PRIuSIZE, D, type, n);
-  if (n == 0)
-    _GD_InternalError(D);
-  else if (type == GD_NULL)
+  if (type == GD_NULL)
     ; /* just return the NULL */
-  else if (GD_SIZE(type) == 0)
-    _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
+  else if (n * GD_SIZE(type) == 0)
+    _GD_InternalError(D);
   else
     ptr = _GD_Malloc(D, n * GD_SIZE(type));
 
@@ -346,7 +344,7 @@ static int lutcmp(const void* a, const void* b)
 
 /* _GD_ReadLinterpFile: Read in the linterp data for this field
 */
-void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
+int _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
 {
   FILE *fp;
   struct gd_lut_ *ptr;
@@ -362,23 +360,23 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
 
   if (E->e->u.linterp.table_file == NULL)
     if (_GD_SetTablePath(D, E, E->e)) {
-      dreturnvoid();
-      return;
+      dreturn("%i", 1);
+      return 1;
     }
 
   fd = gd_OpenAt(D, E->e->u.linterp.table_dirfd, E->e->u.linterp.table_file,
       O_RDONLY, 0666);
   if (fd == -1) {
     _GD_SetError(D, GD_E_IO, GD_E_IO_OPEN, E->EN(linterp,table), 0, NULL);
-    dreturnvoid();
-    return;
+    dreturn("%i", 1);
+    return 1;
   }
 
   fp = fdopen(fd, "rb");
   if (fp == NULL) {
     _GD_SetError(D, GD_E_IO, GD_E_IO_OPEN, E->EN(linterp,table), 0, NULL);
-    dreturnvoid();
-    return;
+    dreturn("%i", 1);
+    return 1;
   }
 
   E->e->u.linterp.lut = _GD_Malloc(D, buf_len * sizeof(*E->e->u.linterp.lut));
@@ -473,15 +471,16 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
     qsort(E->e->u.linterp.lut, i, sizeof(struct gd_lut_), lutcmp);
 
   fclose(fp);
-  dreturnvoid();
-  return;
+  dreturn("%i", 0);
+  return 0;
 
 LUT_ERROR:
   free(E->e->u.linterp.lut);
   E->e->u.linterp.lut = NULL;
   free(line);
   fclose(fp);
-  dreturnvoid();
+  dreturn("%i", 1);
+  return 1;
 }
 
 /* _GD_GetIndex: get LUT index.
@@ -599,7 +598,7 @@ void _GD_LinterpData(DIRFILE *restrict D, void *restrict data, gd_type_t type,
     case GD_FLOAT64:    LINTERP(double  ); break;
     case GD_COMPLEX64:  LINTERPC(float  ); break;
     case GD_COMPLEX128: LINTERPC(double ); break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
+    default:         _GD_InternalError(D); break;
   }
 
   dreturnvoid();
@@ -930,41 +929,6 @@ int _GD_GetRepr(const char *restrict field_code, size_t *restrict len)
 
   dreturn("0x%X (%" PRIuSIZE ")", repr, *len);
   return repr;
-}
-
-/* Ensure that an input field has been identified (with error checking) */
-int _GD_BadInput(DIRFILE *D, const gd_entry_t *E, int i, gd_entype_t t, int err)
-{
-  dtrace("%p, %p, %i, 0x%X, %i", D, E, i, t, err);
-
-  if (E->e->entry[i] == NULL) {
-    E->e->entry[i] = _GD_FindFieldAndRepr(D, E->in_fields[i], &E->e->repr[i],
-        NULL, err);
-
-    if (E->e->entry[i] == NULL) {
-      dreturn("%i", 1);
-      return 1;
-    }
-  }
-
-  /* check field type */
-  if (t == GD_NO_ENTRY) {
-    /* scalar entries not allowed */
-    if (E->e->entry[i]->field_type & GD_SCALAR_ENTRY_BIT) {
-      _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_FORMAT, E->field, 0,
-          E->e->entry[i]->field);
-      dreturn("%i", 1);
-      return 1;
-    }
-  } else if (E->e->entry[i]->field_type != t) {
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_FORMAT, E->field, 0,
-        E->e->entry[i]->field);
-    dreturn("%i", 1);
-    return 1;
-  }
-
-  dreturn("%i", 0);
-  return 0;
 }
 
 /* Find an entry without a representation; this function will de-alias */

@@ -49,10 +49,8 @@
     case GD_FLOAT64:    EXTRACT_REPRR2(        double, ot,fabs,fargs); break; \
     case GD_COMPLEX64:  EXTRACT_REPRC2(         float, ot); break; \
     case GD_COMPLEX128: EXTRACT_REPRC2(        double, ot); break; \
-    case GD_NULL: \
-      break; \
-    default: \
-      _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, in_type, NULL); \
+    case GD_NULL:                                           break; \
+    default: _GD_InternalError(D); \
   }
 
 #define EXTRACT_REPRC2(it,ot) \
@@ -108,16 +106,14 @@ static void _GD_ExtractRepr(DIRFILE *restrict D, const void *restrict cdata,
     } \
   } while(0)
 
-    case GD_COMPLEX64:  EXTRACT_REPRS(         float); break;
-    case GD_COMPLEX128: EXTRACT_REPRS(        double); break;
+    case GD_COMPLEX64:  EXTRACT_REPRS(         float);  break;
+    case GD_COMPLEX128: EXTRACT_REPRS(        double);  break;
 #else
-    case GD_COMPLEX64:  EXTRACT_REPRS( float complex); break;
-    case GD_COMPLEX128: EXTRACT_REPRS(double complex); break;
+    case GD_COMPLEX64:  EXTRACT_REPRS( float _Complex); break;
+    case GD_COMPLEX128: EXTRACT_REPRS(double _Complex); break;
 #endif
-    case GD_NULL:                                      break;
-    default:
-      _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
-      break;
+    case GD_NULL:                                       break;
+    default:            _GD_InternalError(D);           break;
   }
 
   dreturnvoid();
@@ -410,7 +406,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
     } \
   } while (0)
 #else
-#define POLYNOMC(t) POLYNOM(complex t)
+#define POLYNOMC(t) POLYNOM(_Complex t)
 #endif
 
 #define POLYNOM(t) \
@@ -450,8 +446,7 @@ static void _GD_PolynomData(DIRFILE *restrict D, void *restrict data,
       case GD_FLOAT64:    POLYNOM(  double); break;
       case GD_COMPLEX64:  POLYNOMC(  float); break;
       case GD_COMPLEX128: POLYNOMC( double); break;
-      default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
-                          break;
+      default:         _GD_InternalError(D); break;
     }
   }
 
@@ -585,20 +580,9 @@ static void _GD_CPolynomData(DIRFILE *restrict D, void *restrict data,
   } else {
     switch (type) {
       case GD_NULL:                          break;
-      case GD_INT8:
-      case GD_UINT8:
-      case GD_INT16:
-      case GD_UINT16:
-      case GD_INT32:
-      case GD_UINT32:
-      case GD_INT64:
-      case GD_UINT64:
-      case GD_FLOAT32:
-      case GD_FLOAT64: _GD_InternalError(D); break;
       case GD_COMPLEX64:  POLYNOMC(  float); break;
       case GD_COMPLEX128: POLYNOMC( double); break;
-      default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
-                          break;
+      default:         _GD_InternalError(D); break;
     }
   }
 
@@ -614,7 +598,7 @@ static void _GD_CPolynomData(DIRFILE *restrict D, void *restrict data,
     } \
   } while (0)
 #else
-#define MULTIPLYC(t) MULTIPLY(complex t)
+#define MULTIPLYC(t) MULTIPLY(_Complex t)
 #endif
 
 #define MULTIPLY(t) \
@@ -644,8 +628,7 @@ static void _GD_MultiplyData(DIRFILE *restrict D, void *restrict A,
     case GD_FLOAT64:    MULTIPLY(  double); break;
     case GD_COMPLEX64:  MULTIPLYC(  float); break;
     case GD_COMPLEX128: MULTIPLYC( double); break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
-                        break;
+    default:          _GD_InternalError(D); break;
   }
 
   dreturnvoid();
@@ -680,20 +663,9 @@ static void _GD_CMultiplyData(DIRFILE *restrict D, void *restrict A,
 
   switch (type) {
     case GD_NULL:                           break;
-    case GD_UINT8:
-    case GD_INT8:
-    case GD_UINT16:
-    case GD_INT16:
-    case GD_UINT32:
-    case GD_INT32:
-    case GD_UINT64:
-    case GD_INT64:
-    case GD_FLOAT32:
-    case GD_FLOAT64: _GD_InternalError(D);  break;
     case GD_COMPLEX64:  MULTIPLYC(  float); break;
     case GD_COMPLEX128: MULTIPLYC( double); break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
-                        break;
+    default:          _GD_InternalError(D); break;
   }
 
   dreturnvoid();
@@ -708,7 +680,7 @@ static void _GD_CMultiplyData(DIRFILE *restrict D, void *restrict A,
     } \
   } while(0)
 #else
-#define DIVIDEC(t) DIVIDE(complex t)
+#define DIVIDEC(t) DIVIDE(_Complex t)
 #endif
 
 #define DIVIDE(t) \
@@ -739,8 +711,7 @@ static void _GD_DivideData(DIRFILE *restrict D, void *restrict A,
     case GD_FLOAT64:    DIVIDE(  double); break;
     case GD_COMPLEX64:  DIVIDEC(  float); break;
     case GD_COMPLEX128: DIVIDEC( double); break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
-                        break;
+    default:        _GD_InternalError(D); break;
   }
 
   dreturnvoid();
@@ -776,20 +747,9 @@ static void _GD_CDivideData(DIRFILE *restrict D, void *restrict A,
 
   switch (type) {
     case GD_NULL:                         break;
-    case GD_UINT8:
-    case GD_INT8:
-    case GD_UINT16:
-    case GD_INT16:
-    case GD_UINT32:
-    case GD_INT32:
-    case GD_UINT64:
-    case GD_INT64:
-    case GD_FLOAT32:
-    case GD_FLOAT64: _GD_InternalError(D); break;
     case GD_COMPLEX64:  DIVIDEC(  float); break;
     case GD_COMPLEX128: DIVIDEC( double); break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
-                        break;
+    default:        _GD_InternalError(D); break;
   }
 
   dreturnvoid();
@@ -860,8 +820,7 @@ static void _GD_WindowData(DIRFILE *restrict D, void *restrict A,
     case GD_FLOAT64:    WINDOW(  double,NaN) break;
     case GD_COMPLEX64:  WINDOWC(  float,NaN) break;
     case GD_COMPLEX128: WINDOWC( double,NaN) break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
-                        break;
+    default:           _GD_InternalError(D); break;
   }
 
   dreturnvoid();
@@ -917,8 +876,7 @@ static void _GD_MplexData(DIRFILE *restrict D, void *restrict A,
     case GD_FLOAT64:    MPLEX(  double); break;
     case GD_COMPLEX64:  MPLEXC(  float); break;
     case GD_COMPLEX128: MPLEXC( double); break;
-    default:            _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, type, NULL);
-                        break;
+    default:       _GD_InternalError(D); break;
   }
 
   dreturnvoid();
@@ -941,13 +899,8 @@ static size_t _GD_DoLincom(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, return_type, data_out);
 
-  /* input field checks */
+  /* Get SPF for all inputs */
   for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-    if (_GD_BadInput(D, E, i, GD_NO_ENTRY, 1)) {
-      dreturn("%i", 0);
-      return 0;
-    }
-
     spf[i] = _GD_GetSPF(D, E->e->entry[i]);
     if (D->error != GD_E_OK) {
       dreturn("%i", 0);
@@ -1075,17 +1028,6 @@ static size_t _GD_DoMultiply(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, return_type, data_out);
 
-  /* Check input fields */
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  if (_GD_BadInput(D, E, 1, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
   /* find the samples per frame of the first field */
   spf1 = _GD_GetSPF(D, E->e->entry[0]);
   if (D->error != GD_E_OK) {
@@ -1168,12 +1110,6 @@ static size_t _GD_DoRecip(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, return_type, data_out);
 
-  /* Check input fields */
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
   /* read the first field and record the number of samples returned */
   n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp,
       return_type, data_out);
@@ -1213,14 +1149,6 @@ static size_t _GD_DoDivide(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, return_type, data_out);
-
-  /* Check input fields */
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1) ||
-      _GD_BadInput(D, E, 1, GD_NO_ENTRY, 1))
-  {
-    dreturn("%i", 0);
-    return 0;
-  }
 
   /* read the first field and record the number of samples returned */
   n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp,
@@ -1312,11 +1240,6 @@ static size_t _GD_DoBit(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %i, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E, is_signed,
       (int64_t)first_samp, num_samp, return_type, data_out);
 
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
   if (is_signed)
     tmpbuf = _GD_Malloc(D, num_samp * sizeof(int64_t));
   else
@@ -1365,11 +1288,6 @@ static size_t _GD_DoPhase(DIRFILE *restrict D, gd_entry_t *restrict E,
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, return_type, data_out);
 
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
   n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp +
       E->EN(phase,shift), num_samp, return_type, data_out);
 
@@ -1388,11 +1306,6 @@ static size_t _GD_DoLinterp(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, return_type, data_out);
-
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
 
   /* allocate a temporary buffer */
   data_in = _GD_Alloc(D, GD_FLOAT64, num_samp);
@@ -1430,11 +1343,6 @@ static size_t _GD_DoPolynom(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, return_type, data_out);
-
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
 
   /* read the input field */
   n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp,
@@ -1476,17 +1384,6 @@ static size_t _GD_DoWindow(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, return_type, data_out);
-
-  /* Check input fields */
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  if (_GD_BadInput(D, E, 1, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
 
   /* find the samples per frame of the input field */
   spf1 = _GD_GetSPF(D, E->e->entry[0]);
@@ -1582,17 +1479,6 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, return_type, data_out);
-
-  /* Check input fields */
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  if (_GD_BadInput(D, E, 1, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
 
   /* find the samples per frame of the input field */
   spf1 = _GD_GetSPF(D, E->e->entry[0]);
@@ -1812,17 +1698,6 @@ static size_t _GD_DoIndir(DIRFILE *restrict D, const gd_entry_t *restrict E,
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, return_type, data_out);
 
-  /* Check input fields */
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-  
-  if (_GD_BadInput(D, E, 1, GD_CARRAY_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-  
   /* index buffer */
   ibuf = _GD_Alloc(D, GD_INT64, num_samp);
   if (D->error) {
@@ -2037,13 +1912,7 @@ static size_t _GD_DoSindir(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p", D, E,
       (int64_t)first_samp, num_samp, return_type, data_out);
 
-  /* Check input fields */
-  if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  if (_GD_BadInput(D, E, 1, GD_SARRAY_ENTRY, 1)) {
+  if (_GD_FindInputs(D, E, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -2120,10 +1989,8 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
     return 0;
   }
 
-  if (entry->field_type & GD_SCALAR_ENTRY_BIT)
+  if (entry->field_type & GD_SCALAR_ENTRY_BIT) {
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
-
-  if (D->error) {
     dreturn("%i", 0);
     return 0;
   }
@@ -2133,7 +2000,7 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
     first_frame = 0;
   }
 
-  if (first_frame > 0 || num_frames > 0) {
+  if (first_frame || num_frames) {
     /* get the samples per frame */
     spf = _GD_GetSPF(D, entry);
 
@@ -2165,9 +2032,15 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
   if (entry->field_type == GD_SINDIR_ENTRY)
     n_read = _GD_DoSindir(D, entry, first_samp, num_samp, return_type,
         data_out);
-  else
-    n_read = _GD_DoField(D, entry, repr, first_samp, num_samp, return_type,
-        data_out);
+  else {
+    if (return_type != GD_NULL &&
+        _GD_BadType(GD_DIRFILE_STANDARDS_VERSION, return_type))
+    {
+      _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, return_type, NULL);
+    } else
+      n_read = _GD_DoField(D, entry, repr, first_samp, num_samp, return_type,
+          data_out);
+  }
 
   dreturn("%" PRIuSIZE, n_read);
   return n_read;

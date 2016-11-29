@@ -43,12 +43,19 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
 
   dtrace("%p, %p, %i, %i", D, E, syn, clo);
 
+  if (E == NULL) {
+    dreturnvoid();
+    return;
+  }
+
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
     D->recurse_level--;
     dreturnvoid();
     return;
   }
+
+  _GD_FindInputs(D, E, 0);
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
@@ -70,17 +77,14 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
       }
       break;
     case GD_LINCOM_ENTRY:
-      for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-        if (!_GD_BadInput(D, E, i, GD_NO_ENTRY, 0))
-          _GD_Flush(D, E->e->entry[i], syn, clo);
-      }
+      for (i = 0; i < E->EN(lincom,n_fields); ++i)
+        _GD_Flush(D, E->e->entry[i], syn, clo);
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
-      if (!_GD_BadInput(D, E, 1, GD_NO_ENTRY, 0))
-        _GD_Flush(D, E->e->entry[1], syn, clo);
+      _GD_Flush(D, E->e->entry[1], syn, clo);
       /* fallthrough */
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
@@ -90,8 +94,8 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
     case GD_RECIP_ENTRY:
     case GD_INDIR_ENTRY:
     case GD_SINDIR_ENTRY:
-      if (!_GD_BadInput(D, E, 0, GD_NO_ENTRY, 0))
-        _GD_Flush(D, E->e->entry[0], syn, clo);
+      _GD_Flush(D, E->e->entry[0], syn, clo);
+      break;
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
     case GD_SARRAY_ENTRY:

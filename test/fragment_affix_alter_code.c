@@ -27,7 +27,7 @@ int main(void)
   const char *format1 = "dirfile/format1";
   const char *format_data = "INCLUDE format1 A Z\n";
   const char *format1_data = "data RAW INT16 11\n";
-  int fd, ret, e1, r = 0;
+  int fd, ret, e1, e2, r = 0;
   DIRFILE *D;
 
   rmdirfile();
@@ -47,6 +47,9 @@ int main(void)
 
   CHECKI(ret,GD_E_BAD_CODE);
   CHECKI(e1,GD_E_BAD_CODE);
+
+  e2 = gd_alter_affixes(D, 1, "<", NULL);
+  CHECKI(e2, GD_E_BAD_CODE);
 
   gd_discard(D);
 

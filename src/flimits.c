@@ -141,7 +141,7 @@ off_t gd_frameoffset(DIRFILE* D, int fragment) gd_nothrow
   return gd_frameoffset64(D, fragment);
 }
 
-off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
+off64_t _GD_GetEOF(DIRFILE *restrict D, gd_entry_t *restrict E,
     const char *restrict parent, int *restrict is_index)
 {
   off64_t ns = -1, ns1;
@@ -154,6 +154,12 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
     D->recurse_level--;
     GD_SET_RETURN_ERROR(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0,
         E->field);
+  }
+
+  if (_GD_FindInputs(D, E, 1)) {
+    D->recurse_level--;
+    dreturn("%i", D->error);
+    return D->error;
   }
 
   *is_index = 0;
@@ -188,21 +194,12 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
     case GD_RECIP_ENTRY:
     case GD_INDIR_ENTRY:
     case GD_SINDIR_ENTRY:
-      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
-        break;
-
       ns = _GD_GetEOF(D, E->e->entry[0], E->field, is_index);
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
-      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1) ||
-          _GD_BadInput(D, E, 1, GD_NO_ENTRY, 1))
-      {
-        break;
-      }
-
       ns = _GD_GetEOF(D, E->e->entry[0], E->field, is_index);
 
       if (D->error)
@@ -238,9 +235,6 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
       }
       break;
     case GD_LINCOM_ENTRY:
-      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
-        break;
-
       ns = _GD_GetEOF(D, E->e->entry[0], E->field, is_index);
 
       if (D->error) {
@@ -259,11 +253,6 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
       }
 
       for (i = 1; i < E->EN(lincom,n_fields); ++i) {
-        if (_GD_BadInput(D, E, i, GD_NO_ENTRY, 1)) {
-          ns = -1;
-          break;
-        }
-
         ns1 = _GD_GetEOF(D, E->e->entry[i], E->field, &is_index1);
 
         if (D->error) {
@@ -288,9 +277,6 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
       }
       break;
     case GD_PHASE_ENTRY:
-      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
-        break;
-
       ns = _GD_GetEOF(D, E->e->entry[0], E->field, is_index);
       if (!*is_index && !D->error)
         ns -= E->EN(phase,shift);
@@ -360,7 +346,7 @@ off_t gd_eof(DIRFILE* D, const char *field_code)
   return (off_t)gd_eof64(D, field_code);
 }
 
-static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
+static off64_t _GD_GetBOF(DIRFILE *restrict D, gd_entry_t *restrict E,
     const char *restrict parent, unsigned int *restrict spf,
     int64_t *restrict ds)
 {
@@ -377,6 +363,12 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
         E->field);
   }
 
+  if (_GD_FindInputs(D, E, 1)) {
+    D->recurse_level--;
+    dreturn("%i", D->error);
+    return D->error;
+  }
+
   switch (E->field_type) {
     case GD_RAW_ENTRY:
       bof = D->fragment[E->fragment_index].frame_offset;
@@ -390,15 +382,9 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
     case GD_RECIP_ENTRY:
     case GD_INDIR_ENTRY:
     case GD_SINDIR_ENTRY:
-      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
-        break;
-
       bof = _GD_GetBOF(D, E->e->entry[0], E->field, spf, ds);
       break;
     case GD_PHASE_ENTRY:
-      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
-        break;
-
       bof = _GD_GetBOF(D, E->e->entry[0], E->field, spf, ds);
 
       if (!D->error) {
@@ -425,12 +411,6 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
-      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1) ||
-          _GD_BadInput(D, E, 1, GD_NO_ENTRY, 1))
-      {
-        break;
-      }
-
       bof = _GD_GetBOF(D, E->e->entry[0], E->field, spf, ds);
 
       if (D->error) {
@@ -453,9 +433,6 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
       }
       break;
     case GD_LINCOM_ENTRY:
-      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
-        break;
-
       bof = _GD_GetBOF(D, E->e->entry[0], E->field, spf, ds);
 
       if (D->error) {
@@ -464,11 +441,6 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
       }
 
       for (i = 1; i < E->EN(lincom,n_fields); ++i) {
-        if (_GD_BadInput(D, E, i, GD_NO_ENTRY, 1)) {
-          bof = -1;
-          break;
-        }
-
         bof1 = _GD_GetBOF(D, E->e->entry[i], E->field, &spf1, &ds1);
 
         if (D->error) {

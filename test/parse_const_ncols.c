@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,38 +18,27 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Parser check */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "const RAW UINT8\n";
-  int fd, error, r = 0;
+  int e1, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "const CONST UINT8");
 
   D = gd_open(filedir, GD_RDONLY);
-  error = gd_error(D);
+  e1 = gd_error(D);
+  CHECKI(e1, GD_E_FORMAT);
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error,GD_E_FORMAT);
   return r;
 }

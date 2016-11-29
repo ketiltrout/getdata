@@ -57,10 +57,16 @@ int gd_alter_protection(DIRFILE *D, int protection_level, int fragment_index)
   }
 
   if (fragment_index == GD_ALL_FRAGMENTS)
-    for (i = 0; i < D->n_fragment; ++i)
-      D->fragment[i].protection = protection_level;
-  else
+    for (i = 0; i < D->n_fragment; ++i) {
+      if (protection_level != D->fragment[i].protection) {
+        D->fragment[i].protection = protection_level;
+        D->fragment[i].modified = 1;
+      }
+    }
+  else if (protection_level != D->fragment[fragment_index].protection) {
     D->fragment[fragment_index].protection = protection_level;
+    D->fragment[fragment_index].modified = 1;
+  }
 
   dreturn("%i", 0);
   return 0;

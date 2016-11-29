@@ -17,12 +17,10 @@ check:
 dbuild:
 	${MAKE} -C .. clean
 	( cd .. && ./configure ${CONFIGURE_FLAGS} --enable-debug )
-	${MAKE} check
 
 build:
 	${MAKE} -C .. clean
 	( cd .. && ./configure ${CONFIGURE_FLAGS} )
-	${MAKE} check
 
 clean:
 	rm -f *.*

@@ -94,7 +94,8 @@ off64_t _GD_GzipSeek(struct gd_raw_file_* file, off64_t offset,
   n = gd_gzseek((gzFile)file->edata, offset, SEEK_SET);
 
   if (n == -1) {
-    /* gzseek returns error on attempts to seek past the EOF in read mode */
+    /* some implementations of gzseek return error on attempts to seek past the
+     * EOF in read mode, and set the position to the EOF. */
     if (mode != GD_FILE_WRITE && gzeof((gzFile)file->edata))
       n = gd_gztell((gzFile)file->edata);
     else {

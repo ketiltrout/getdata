@@ -20,19 +20,15 @@
  */
 #include "internal.h"
 
-/* _GD_FreeD: free the DIRFILE and its subordinates
-*/
-static void _GD_FreeD(DIRFILE *D, int keep_dirfile)
+/* Delete the run of fragments [start,stop) from the fragment list */
+void _GD_FreeF(DIRFILE *D, int start, int stop)
 {
-  unsigned int i;
   int j;
 
-  dtrace("%p, %i", D, keep_dirfile);
+  dtrace("%p, %i", D, start);
 
-  for (i = 0; i < D->n_entries; ++i)
-    _GD_FreeE(D, D->entry[i], 1);
-
-  for (j = 0; j < D->n_fragment; ++j) {
+  for (j = start; j < stop; ++j) {
+    _GD_ReleaseDir(D, D->fragment[j].dirfd);
     free(D->fragment[j].enc_data);
     free(D->fragment[j].ns);
     free(D->fragment[j].px);
@@ -44,6 +40,20 @@ static void _GD_FreeD(DIRFILE *D, int keep_dirfile)
     free(D->fragment[j].ref_name);
   }
 
+  dreturnvoid();
+}
+
+/* _GD_FreeD: free the DIRFILE and its subordinates
+*/
+static void _GD_FreeD(DIRFILE *D, int keep_dirfile)
+{
+  unsigned int i;
+
+  dtrace("%p, %i", D, keep_dirfile);
+
+  for (i = 0; i < D->n_entries; ++i)
+    _GD_FreeE(D, D->entry[i], 1);
+
   free(D->entry);
   free(D->tok_base);
   free(D->error_prefix);
@@ -51,10 +61,16 @@ static void _GD_FreeD(DIRFILE *D, int keep_dirfile)
   free(D->error_file);
   _GD_FreeFL(&D->fl);
   
+  _GD_FreeF(D, 0, D->n_fragment);
   free(D->fragment);
+
   free(D->name);
-  for (i = 0; i < D->ndir; ++i)
+  for (i = 0; i < D->ndir; ++i) {
     free(D->dir[i].path);
+#ifndef GD_NO_DIR_OPEN
+    close(D->dir[i].fd);
+#endif
+  }
   free(D->dir);
 
   if (!keep_dirfile)
@@ -86,12 +102,6 @@ int _GD_ShutdownDirfile(DIRFILE* D, int flush_meta, int keep_dirfile)
 
   if (D->error)
     GD_RETURN_ERROR(D);
-
-#ifndef GD_NO_DIR_OPEN
-  /* close the directory */
-  for (i = 0; i < (unsigned int)D->ndir; ++i)
-    close(D->dir[i].fd);
-#endif
 
   _GD_FreeD(D, keep_dirfile);
 

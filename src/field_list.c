@@ -343,6 +343,14 @@ static void *_GD_Constants(DIRFILE* D, const char* parent,
     return NULL;
   }
 
+  if (return_type != GD_NULL &&
+      _GD_BadType(GD_DIRFILE_STANDARDS_VERSION, return_type))
+  {
+    _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, return_type, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
   /* DoField will implicitly choose GD_REPR_AUTO for complex data being returned
    * as purely real */
   for (i = n = 0; i < nentries; ++i) {
@@ -424,6 +432,14 @@ static gd_carray_t *_GD_Carrays(DIRFILE* D, const char* parent,
   fl = _GD_Malloc(D, sizeof(*fl) * len);
 
   if (fl == NULL) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  if (return_type != GD_NULL &&
+      _GD_BadType(GD_DIRFILE_STANDARDS_VERSION, return_type))
+  {
+    _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, return_type, NULL);
     dreturn("%p", NULL);
     return NULL;
   }

@@ -24,31 +24,24 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "lincom LINCOM a 1 2\n";
-  int fd, ret, error, r = 0;
-  gd_entry_t E;
+  const char *data = "dirfile/data";
+  int e1, e2, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "lincom LINCOM 1 data 1 0");
 
   D = gd_open(filedir, GD_RDWR);
-
-  gd_entry(D, "lincom", &E);
-  E.EN(lincom,n_fields) = 4000;
-  ret = gd_alter_entry(D, "lincom", &E, 0);
-  CHECKI(ret, GD_E_BAD_ENTRY);
-  error = gd_error(D);
-  CHECKI(error, GD_E_BAD_ENTRY);
-
-  gd_free_entry_strings(&E);
+  e1 = gd_alter_lincom(D, "lincom", -1, NULL, NULL, NULL);
+  CHECKI(e1, GD_E_BAD_ENTRY);
+  e2 = gd_alter_lincom(D, "lincom", GD_MAX_LINCOM + 1, NULL, NULL, NULL);
+  CHECKI(e2, GD_E_BAD_ENTRY);
 
   gd_discard(D);
 
+  unlink(data);
   unlink(format);
   rmdir(filedir);
 

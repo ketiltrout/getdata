@@ -44,8 +44,12 @@ int _GD_BadType(int standards, gd_type_t type)
 
   dtrace("%i, 0x%X", standards, type);
 
-  if ((bits == 0 || bits == GD_SIGNED) &&
-      (size == 1 || size == 2 || size == 4 || size == 8))
+  if (bits == 0 && (size == 1 || size == 2 || size == 4 ||
+        (standards >= 5 && size == 8)))
+  {
+    bad = 0;
+  } else if (bits == GD_SIGNED && (size == 2 || size == 4 ||
+        (standards >= 5 && (size == 1 || size == 8))))
   {
     bad = 0;
   } else if (bits == GD_IEEE754 && (size == 4 || size == 8))
@@ -731,7 +735,7 @@ static int _GD_AddSpec(DIRFILE* D, const char* line, const char* parent,
       in_cols);
 
   if (!D->error) {
-    if (n_cols == 0) /* Sanity check */
+    if (n_cols < 2) /* Sanity check */
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, name, 0, NULL);
     else /* The Field Spec parser will add the field */
       _GD_ParseFieldSpec(D, &p, n_cols, in_cols, strlen(in_cols[0]), E, me, 1,

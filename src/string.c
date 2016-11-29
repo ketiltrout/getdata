@@ -102,38 +102,36 @@ size_t gd_get_string(DIRFILE *D, const char *field_code, size_t len,
   return n_read;
 }
 
-static size_t _GD_PutSarraySlice(DIRFILE *restrict D, gd_entry_t *restrict E,
+static void _GD_PutSarraySlice(DIRFILE *restrict D, gd_entry_t *restrict E,
     unsigned long first, size_t n, const char **data_in)
 {
-  size_t len;
-
   dtrace("%p, %p, %lu, %" PRIuSIZE ", %p", D, E, first, n, data_in);
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", 0);
-    return 0;
+    dreturnvoid();
+    return;
   }
 
   if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
     _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[E->fragment_index].cname);
-    dreturn("%i", 0);
-    return 0;
+    dreturnvoid();
+    return;
   }
 
   if (first + n > ((E->field_type == GD_STRING_ENTRY) ? 1 :
         E->EN(scalar,array_len)))
   {
     _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
-    dreturn("%i", 0);
-    return 0;
+    dreturnvoid();
+    return;
   }
 
   if (n == 0) {
     /* succesfully did nothing. */
-    dreturn("%i", 1);
-    return 1;
+    dreturnvoid();
+    return;
   }
 
   if (E->field_type == GD_STRING_ENTRY) {
@@ -141,8 +139,8 @@ static size_t _GD_PutSarraySlice(DIRFILE *restrict D, gd_entry_t *restrict E,
     E->e->u.string = _GD_Strdup(D, *data_in);
     if (E->e->u.string == NULL) {
       E->e->u.string = ptr;
-      dreturn("%i", 0);
-      return 0;
+      dreturnvoid();
+      return;
     }
     free(ptr);
   } else {
@@ -150,8 +148,8 @@ static size_t _GD_PutSarraySlice(DIRFILE *restrict D, gd_entry_t *restrict E,
     size_t i;
     char **new_data = _GD_Malloc(D, n * sizeof(char*));
     if (new_data == NULL) {
-      dreturn("%i", 0);
-      return 0;
+      dreturnvoid();
+      return;
     }
 
     memset(new_data, 0, n * sizeof(char*));
@@ -162,8 +160,8 @@ static size_t _GD_PutSarraySlice(DIRFILE *restrict D, gd_entry_t *restrict E,
       for (i = 0; i < n; ++i)
         free(new_data[i]);
       free(new_data);
-      dreturn("%i", 0);
-      return 0;
+      dreturnvoid();
+      return;
     }
 
     /* replace elements */
@@ -176,9 +174,8 @@ static size_t _GD_PutSarraySlice(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   D->fragment[E->fragment_index].modified = 1;
 
-  len = strlen(data_in[0]) + 1;
-  dreturn("%" PRIuSIZE, len);
-  return len;
+  dreturnvoid();
+  return;
 }
 
 int gd_put_sarray_slice(DIRFILE *D, const char *field_code, unsigned long first,
@@ -225,15 +222,14 @@ int gd_put_sarray(DIRFILE *D, const char *field_code, const char **data_in)
   GD_RETURN_ERROR(D);
 }
 
-size_t gd_put_string(DIRFILE *D, const char *field_code, const char *data_in)
+int gd_put_string(DIRFILE *D, const char *field_code, const char *data_in)
   gd_nothrow
 {
-  size_t n_wrote = 0;
   gd_entry_t *E;
 
   dtrace("%p, \"%s\", \"%s\"", D, field_code, data_in);
 
-  GD_RETURN_IF_INVALID(D, "%i", 0);
+  GD_RETURN_ERR_IF_INVALID(D);
 
   E = _GD_FindEntry(D, field_code);
 
@@ -242,10 +238,9 @@ size_t gd_put_string(DIRFILE *D, const char *field_code, const char *data_in)
   else if (E->field_type != GD_STRING_ENTRY && E->field_type != GD_SARRAY_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else 
-    n_wrote = _GD_PutSarraySlice(D, E, 0, 1, &data_in);
+    _GD_PutSarraySlice(D, E, 0, 1, &data_in);
 
-  dreturn("%" PRIuSIZE, n_wrote);
-  return n_wrote;
+  GD_RETURN_ERROR(D);
 }
 /* vim: ts=2 sw=2 et tw=80
 */

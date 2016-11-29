@@ -416,6 +416,8 @@ static int _GD_IncludeAffix(DIRFILE* D, const char *funcname, const char* file,
 {
   char* ref_name = NULL;
   int i, new_fragment;
+  /* Remember the last fragment, in case we have to undo everything */
+  int old_nfrag = D->n_fragment;
 
   struct parser_state p = {
     funcname, 0, GD_DIRFILE_STANDARDS_VERSION, flags & GD_PEDANTIC,
@@ -425,6 +427,7 @@ static int _GD_IncludeAffix(DIRFILE* D, const char *funcname, const char* file,
   dtrace("%p, \"%s\", \"%s\", %i, \"%s\", \"%s\", 0x%lX", D, funcname, file,
       fragment_index, px, sx, flags); 
 
+  /* Early checks */
   GD_RETURN_ERR_IF_INVALID(D);
 
   if ((D->flags & GD_ACCMODE) == GD_RDONLY) 
@@ -447,30 +450,11 @@ static int _GD_IncludeAffix(DIRFILE* D, const char *funcname, const char* file,
   if ((p.flags & (GD_ENCODING | GD_CREAT)) == GD_CREAT)
     p.flags |= D->fragment[fragment_index].encoding;
 
+  /* Perform the include */
   new_fragment = _GD_Include(D, &p, file, &ref_name, fragment_index, px, sx, 1);
 
-  if (!D->error) {
-    D->fragment[fragment_index].modified = 1;
-    D->flags &= ~GD_HAVE_VERSION;
-  }
-
-  /* If ref_name is non-NULL, the included fragment contained a REFERENCE
-   * directive.  If ref_name is NULL but D->fragment[new_fragment].ref_name is
-   * non-NULL, no REFERENCE directive was present, but the parser found a RAW
-   * field to serve as a reference field.
-   */
-  if (new_fragment >= 0 && D->fragment[new_fragment].ref_name != NULL)
-    /* If the parser chose a reference field, propagate it upward if requried */
-    for (i = fragment_index; i != -1; i = D->fragment[i].parent) {
-      if (D->fragment[i].ref_name == NULL) {
-        D->fragment[i].ref_name = strdup(D->fragment[new_fragment].ref_name);
-        D->fragment[i].modified = 1;
-      } else
-        break;
-    }
-
   /* Honour the reference directive, if not prohibited by the caller */
-  if (ref_name != NULL && ~flags & GD_IGNORE_REFS) {
+  if (!D->error && ref_name != NULL && ~flags & GD_IGNORE_REFS) {
     gd_entry_t *E = _GD_FindField(D, ref_name, strlen(ref_name), D->entry,
         D->n_entries, 1, NULL);
 
@@ -489,8 +473,82 @@ static int _GD_IncludeAffix(DIRFILE* D, const char *funcname, const char* file,
   }
   free(ref_name);
 
-  if (D->error)
+  /* If there was an error, we now have to:
+   *
+   * - delete all the entries that were added
+   * - delete all the fragemnts that were added
+   *
+   * This is the same thing that gd_uninclude() does, but it's easier here
+   * because we know none of the fields we delete are open, have been reference
+   * by the old fields, and all the fragment numbers are contiguous. */
+  if (D->error) {
+    unsigned int i, first = 0;
+    unsigned int next = 0;
+    int found_good = 0;
+
+    /* First delete all the new fields */
+    for (i = 0; i < D->n_entries; ++i) {
+      if (D->entry[i]->fragment_index >= old_nfrag) {
+        /* found an entry to delete */
+
+        if (found_good) { /* The last entry was good */
+          /* There is a run of entries spanning [first,i-1] that need to be
+           * moved to [next,next+i-first] */
+          memmove(D->entry + next, D->entry + first,
+              sizeof(D->entry[0]) * (i - first));
+
+          /* advance next to here */
+          next += i - first;
+
+          /* and change modes */
+          found_good = 0;
+        }
+      } else {
+        /* found a good entry */
+
+        if (!found_good) { /* The last entry was bad */
+          first = i; /* This is the start of the next good run */
+          found_good = 1; /* Change modes */
+        }
+      }
+    }
+
+    /* Handle the last bunch of good entries, if necessary */
+    if (found_good) {
+      memmove(D->entry + next, D->entry + first,
+          sizeof(D->entry[0]) * (i - first));
+      next += i - first;
+    }
+    
+    D->n_entries = next; /* Done.  Reset entry count. */
+
+    /* Now delete all the new fragments.  This is easier because we don't
+     * have to search for them.
+     */
+    _GD_FreeF(D, old_nfrag, D->n_fragment);
+    D->n_fragment = old_nfrag;
+
     GD_RETURN_ERROR(D);
+  }
+
+  /* Successful include.  Mark the parent as dirty */
+  D->fragment[fragment_index].modified = 1;
+  D->flags &= ~GD_HAVE_VERSION;
+
+  /* If ref_name is non-NULL, the included fragment contained a REFERENCE
+   * directive.  If ref_name is NULL but D->fragment[new_fragment].ref_name is
+   * non-NULL, no REFERENCE directive was present, but the parser found a RAW
+   * field to serve as a reference field.
+   */
+  if (new_fragment >= 0 && D->fragment[new_fragment].ref_name != NULL)
+    /* If the parser chose a reference field, propagate it upward if requried */
+    for (i = fragment_index; i != -1; i = D->fragment[i].parent) {
+      if (D->fragment[i].ref_name == NULL) {
+        D->fragment[i].ref_name = strdup(D->fragment[new_fragment].ref_name);
+        D->fragment[i].modified = 1;
+      } else
+        break;
+    }
 
   dreturn("%i", new_fragment);
   return new_fragment;
@@ -638,11 +696,7 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
 
   /* delete the fragments -- again, don't bother resizing D->fragment */
   for (j = 0; j < nf; ++j) {
-    _GD_ReleaseDir(D, D->fragment[f[j]].dirfd);
-    free(D->fragment[f[j]].cname);
-    free(D->fragment[f[j]].ename);
-    free(D->fragment[f[j]].bname);
-    free(D->fragment[f[j]].ref_name);
+    _GD_FreeF(D, f[j], f[j] + 1);
 
     memcpy(D->fragment + f[j], D->fragment + D->n_fragment - 1,
         sizeof(struct gd_fragment_t));
@@ -655,7 +709,6 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
   }
 
   /* Clear the cache of all fields */
-  /* FIXME: Should probably just clear affected fields */
   for (i = 0; i < D->n_entries; ++i) {
     D->entry[i]->flags &= ~GD_EN_CALC;
     for (j = 0; j < GD_MAX_LINCOM; ++j)

@@ -44,6 +44,10 @@ int gd_get_carray_slice(DIRFILE *D, const char *field_code, unsigned long start,
       entry->EN(scalar,array_len)))
   {
     _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
+  } else if (return_type != GD_NULL &&
+      _GD_BadType(GD_DIRFILE_STANDARDS_VERSION, return_type))
+  {
+    _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, return_type, NULL);
   } else if (!D->error)
     _GD_DoField(D, entry, repr, start, n, return_type, data_out);
 
@@ -69,6 +73,10 @@ int gd_get_carray(DIRFILE *D, const char *field_code, gd_type_t return_type,
       entry->field_type != GD_CONST_ENTRY)
   {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+  } else if (return_type != GD_NULL &&
+      _GD_BadType(GD_DIRFILE_STANDARDS_VERSION, return_type))
+  {
+    _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, return_type, NULL);
   } else
     _GD_DoField(D, entry, repr, 0, (entry->field_type == GD_CONST_ENTRY) ? 1 :
         entry->EN(scalar,array_len), return_type, data_out);
@@ -133,7 +141,9 @@ static void _GD_PutCarraySlice(DIRFILE* D, gd_entry_t *E, unsigned long first,
         E->EN(scalar,array_len)))
   {
     _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
-  } else
+  } else if (_GD_BadType(GD_DIRFILE_STANDARDS_VERSION, data_type))
+    _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, data_type, NULL);
+  else
     _GD_DoFieldOut(D, E, first, n, data_type, data_in);
 
   if (D->error) {

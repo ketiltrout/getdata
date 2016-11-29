@@ -31,8 +31,14 @@ unsigned int _GD_GetSPF(DIRFILE *D, gd_entry_t *E)
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
-    dreturn("%u", 0);
     D->recurse_level--;
+    dreturn("%u", 0);
+    return 0;
+  }
+
+  if (_GD_FindInputs(D, E, 1)) {
+    D->recurse_level--;
+    dreturn("%u", 0);
     return 0;
   }
 
@@ -56,9 +62,6 @@ unsigned int _GD_GetSPF(DIRFILE *D, gd_entry_t *E)
     case GD_MPLEX_ENTRY:
     case GD_INDIR_ENTRY:
     case GD_SINDIR_ENTRY:
-      if (_GD_BadInput(D, E, 0, GD_NO_ENTRY, 1))
-        break;
-
       spf = _GD_GetSPF(D, E->e->entry[0]);
       break;
     case GD_INDEX_ENTRY:

@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,38 +18,49 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Parser check */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
+int nerror = 0;
+
+int callback(gd_parser_data_t *pdata, void *extra)
+{
+  pdata = extra; /* avoid compiler warnings */
+  extra = pdata;
+
+  nerror++;
+  return GD_SYNTAX_CONTINUE;
+}
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "data WINDOW in1 in2 = 1\n";
-  int fd, error, r = 0;
+  int e1, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+      "w1 WINDOW a b = 1\n"
+      "w2 WINDOW a b EQUALS 2\n"
+      "w3 WINDOW a b LTDL 3\n"
+      "w4 WINDOW a b LET 4\n"
+      "w5 WINDOW a b GTO 5\n"
+      "w6 WINDOW a b GET 6\n"
+      "w7 WINDOW a b NET 7\n"
+      "w8 WINDOW a b SETTER 8\n"
+      "w9 WINDOW a b CLRV 9\n"
+      );
 
-  D = gd_open(filedir, GD_RDONLY);
-  error = gd_error(D);
+  D = gd_cbopen(filedir, GD_RDONLY, callback, NULL);
+  e1 = gd_error(D);
+  CHECKI(e1, GD_E_FORMAT);
+  CHECKI(nerror, 9);
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error,GD_E_FORMAT);
   return r;
 }

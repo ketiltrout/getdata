@@ -166,6 +166,8 @@ int gd_system(const char* command)
 #define CHECKPi(i,n)   CHECKi(i,(n) != NULL,n,"%p","%s",n,"NULL")
 #define CHECKPN(n)     CHECK((n) == NULL,n,"%p","%s",n,"non-NULL")
 #define CHECKPNi(i,n)  CHECKi(i,(n) == NULL,n,"%p","%s",n,"non-NULL")
+#define CHECKPP(n,v)   CHECK((n) != (v),n,"%p","%p",n,v)
+#define CHECKPPi(i,n,v) CHECKi(i,(n) != (v),n,"%p","%p",n,v)
 #define CHECKS(n,v)    CHECK((n == NULL) || strcmpn((n),(v)),n,"\"%s\"",\
     "\"%s\"",(n),(v));
 #define CHECKSi(i,n,v) CHECKi(i,(n == NULL) || strcmpn((n),(v)),n,"\"%s\"",\

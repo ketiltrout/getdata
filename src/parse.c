@@ -50,21 +50,21 @@ static gd_type_t _GD_RawType(const char* type, int standards, int pedantic)
     else if (strcmp(type, "UINT64") == 0)
       t = GD_UINT64;
   } else if (type[0] == 'F') {
-    if (strcmp(type, "FLOAT32") == 0)
+    if (strcmp(type, "FLOAT64") == 0)
+      t = GD_FLOAT64;
+    else if (strcmp(type, "FLOAT32") == 0)
       t = GD_FLOAT32;
     else if (strcmp(type, "FLOAT") == 0)
       t = GD_FLOAT32;
-    else if (strcmp(type, "FLOAT64") == 0)
-      t = GD_FLOAT64;
   } else if (strcmp(type, "DOUBLE") == 0)
     t = GD_FLOAT64;
   else if (pedantic && standards < 7)
     t = GD_UNKNOWN;
 
-  else if (strcmp(type, "COMPLEX64") == 0)
-    t = GD_COMPLEX64;
   else if (strcmp(type, "COMPLEX128") == 0)
     t = GD_COMPLEX128;
+  else if (strcmp(type, "COMPLEX64") == 0)
+    t = GD_COMPLEX64;
 
   dreturn("0x%X", t);
   return t;
@@ -77,31 +77,31 @@ static gd_windop_t _GD_WindOp(const char *op)
 
   switch (op[0]) {
     case 'E':
-      if (op[1] == 'Q')
+      if (op[1] == 'Q' && op[2] == 0)
         o = GD_WINDOP_EQ;
       break;
     case 'L':
-      if (op[1] == 'T')
+      if (op[1] == 'T' && op[2] == 0)
         o = GD_WINDOP_LT;
-      else if (op[1] == 'E')
+      else if (op[1] == 'E' && op[2] == 0)
         o = GD_WINDOP_LE;
       break;
     case 'G':
-      if (op[1] == 'T')
+      if (op[1] == 'T' && op[2] == 0)
         o = GD_WINDOP_GT;
-      else if (op[1] == 'E')
+      else if (op[1] == 'E' && op[2] == 0)
         o = GD_WINDOP_GE;
       break;
     case 'N':
-      if (op[1] == 'E')
+      if (op[1] == 'E' && op[2] == 0)
         o = GD_WINDOP_NE;
       break;
     case 'S':
-      if (op[1] == 'E' && op[2] == 'T')
+      if (op[1] == 'E' && op[2] == 'T' && op[3] == 0)
         o = GD_WINDOP_SET;
       break;
     case 'C':
-      if (op[1] == 'L' && op[2] == 'R')
+      if (op[1] == 'L' && op[2] == 'R' && op[3] == 0)
         o = GD_WINDOP_CLR;
       break;
   }
@@ -216,7 +216,7 @@ int _GD_TokToNum(const char *restrict token, int standards, int pedantic,
         *im = ui;
     }
   } else if (u) { /* unsigned int -- reject negative values */
-    if (rt == GD_UINT64) 
+    if (rt == GD_UINT64)
       *u = ur;
     else if (rt == GD_INT64) {
       if (ir < 0) {
@@ -298,7 +298,7 @@ static char *_GD_CodeFromFrag(DIRFILE *restrict D,
     new_code = _GD_SubfieldCode(D, P, code, offset);
   else
     new_code = _GD_BuildCode(D, me, p->ns, p->nsl, code,
-        p->pedantic && p->standards <= 10, offset);
+        p->pedantic && p->standards < 10, offset);
 
   dreturn("\"%s\" (%" PRIuSIZE ")", new_code, offset ? *offset : 0);
   return new_code;
@@ -319,7 +319,7 @@ static char *_GD_InputCode(DIRFILE *D, const struct parser_state *restrict p,
   dreturn("\"%s\"", code);
   return code;
 }
-  
+
 /* Create E->field; frees the entry and returns non-zero on error. */
 static int _GD_SetField(DIRFILE *restrict D,
     const struct parser_state *restrict p, gd_entry_t *restrict E,
@@ -378,12 +378,8 @@ static char *_GD_SetScalar(DIRFILE *restrict D,
 
     i = _GD_TokToNum(token, p->standards, p->pedantic, &re, &im, NULL, NULL);
 
-    if (i == -2) { /* malformed number */
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, p->file, p->line,
-          token);
-      dreturn("%p", NULL);
-      return NULL;
-    } else if (i == -1) { /* assume it's a field name */
+    /* _GD_TokToNum can't return -2 for complex return type */
+    if (i == -1) { /* assume it's a field name */
       ptr = _GD_InputCode(D, p, me, token);
       if (D->error) {
         dreturn("%p", NULL);
@@ -512,7 +508,7 @@ carray_check:
         break;
     }
   }
-  
+
   dreturn("\"%s\" (%i)", ptr, *index);
   return ptr;
 }
@@ -566,7 +562,7 @@ static gd_entry_t *_GD_ParseRaw(DIRFILE *restrict D,
     dreturn("%p", NULL);
     return NULL;
   }
-  
+
   if (p->pedantic && p->standards <= 5)
     E->flags |= GD_EN_EARLY;
 
@@ -1631,11 +1627,8 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D,
   if (P == NULL && GD_PVERS_GE(*p, 7)) {
     P = _GD_CheckParent(D, p, in_cols + 0, &len0, me);
     if (P) {
-      if (n_cols < 2)
-        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, p->file, p->line, NULL);
-      else
-        E = _GD_ParseFieldSpec(D, p, n_cols, in_cols, len0, P, me, creat,
-            insert, outstring, tok_pos);
+      E = _GD_ParseFieldSpec(D, p, n_cols, in_cols, len0, P, me, creat, insert,
+          outstring, tok_pos);
       dreturn("%p", (!insert) ? E : NULL);
       return (!insert) ? E : NULL;
     }
@@ -1648,10 +1641,7 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D,
   }
   D->entry = (gd_entry_t **)ptr;
 
-  if (n_cols < 2)
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, p->file, p->line,
-        NULL);
-  else if (P == NULL && (strcmp(in_cols[0], "INDEX") == 0 || (p->pedantic &&
+  if (P == NULL && (strcmp(in_cols[0], "INDEX") == 0 || (p->pedantic &&
           p->standards < 6 && strcmp(in_cols[0], "FILEFRAM") == 0)))
     /* reserved field name */
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_RES_NAME, p->file, p->line,
@@ -1719,13 +1709,6 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D,
             if (D->fragment[me].protection != GD_PROTECT_NONE)
               _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
                   D->fragment[me].cname);
-            /* If the encoding scheme is unknown, we can't add the field */
-            if (D->fragment[me].encoding == GD_AUTO_ENCODED)
-              _GD_SetError(D, GD_E_UNKNOWN_ENCODING, GD_E_UNENC_UNDET, NULL, 0,
-                  NULL);
-            else if (D->fragment[me].encoding == GD_ENC_UNSUPPORTED)
-              /* If the encoding scheme is unsupported, can't add the field */
-              _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
             else
               _GD_InitRawIO(D, E, NULL, -1, NULL, 0,
                   GD_FILE_WRITE | GD_FILE_TOUCH, _GD_FileSwapBytes(D, E));
@@ -2168,8 +2151,8 @@ static void _GD_ParseNamespace(DIRFILE *D, struct parser_state *restrict p,
   p->nsl = strlen(ptr);
 
   /* strip trailing dot */
-  if (p->ns[p->nsl] == '.') {
-    p->ns[p->nsl] = 0;
+  if (p->ns[p->nsl - 1] == '.') {
+    p->ns[p->nsl - 1] = 0;
     p->nsl--;
   }
 
@@ -2406,45 +2389,39 @@ static int _GD_ParseDirective(DIRFILE *D, struct parser_state *restrict p,
 }
 
 /* Resolve and record an alias, taking care of loops */
-static gd_entry_t *_GD_ResolveAlias(DIRFILE *restrict D, gd_entry_t *restrict E)
+static gd_entry_t *_GD_ResolveAlias(DIRFILE *restrict D, const gd_entry_t *base,
+    gd_entry_t *E)
 {
   gd_entry_t *T = NULL;
 
-  dtrace("%p, %p(%s)", D, E, E->field);
-
-  if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
-    _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
-    D->recurse_level--;
-    dreturn("%p", NULL);
-    return NULL;
-  }
+  dtrace("%p, %p, %p(%s)", D, base, E, E->field);
 
   /* Find the target */
   T = _GD_FindField(D, E->in_fields[0], strlen(E->in_fields[0]), D->entry,
       D->n_entries, 0, NULL);
 
-  /* Aliases store the ulitmate target in entry[0] and the direct link
-   * in entry[1].
-   */
-  E->e->entry[0] = E->e->entry[1] = T;
+  /* Aliases store the ulitmate target in entry[0] and the direct link in
+   * entry[1] */
+  E->e->entry[1] = T;
   if (T) {
     if (T->field_type == GD_ALIAS_ENTRY) {
       if (T->e->entry[0])
         T = T->e->entry[0];
+      else if (base == T) /* loop */
+        T = NULL;
       else
-        T = _GD_ResolveAlias(D, T);
+        T = _GD_ResolveAlias(D, base, T);
     }
 
-    E->e->entry[0] = T;
   }
 
-  D->recurse_level--;
+  E->e->entry[0] = T;
 
   if (D->error) {
     dreturn("%p", NULL);
     return NULL;
   }
-    
+
   dreturn("%p (\"%s\" > \"%s\" > \"%s\")", E->e->entry[0], E->field,
       E->e->entry[1] ? E->e->entry[1]->field : "",
       E->e->entry[0] ? E->e->entry[0]->field : "");
@@ -2466,7 +2443,7 @@ void _GD_UpdateAliases(DIRFILE *D, int reset)
     if (D->entry[u]->field_type == GD_ALIAS_ENTRY &&
         D->entry[u]->e->entry[1] == NULL)
     {
-      _GD_ResolveAlias(D, D->entry[u]);
+      _GD_ResolveAlias(D, D->entry[u], D->entry[u]);
     }
 
   dreturnvoid();
