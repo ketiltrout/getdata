@@ -283,9 +283,8 @@ void F77_FUNC(gdptco, GDPTCO) (const int32_t *dirfile, const char *field_code,
 void F77_FUNC(gdptca, GDPTCA) (const int32_t *dirfile, const char *field_code,
     const int32_t *field_code_l, const int32_t *data_type, const void *data_in);
 
-void F77_FUNC(gdptst, GDPTST) (int32_t *n_read, const int32_t *dirfile,
-    const char *field_code, const int32_t *field_code_l, const int32_t *len,
-    const char *data_out);
+void F77_FUNC(gdptst, GDPTST) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *len, const char *data_out);
 
 void F77_FUNC(gdnmfd, GDNMFD) (int32_t *nfields, const int32_t *dirfile,
     const char *parent, const int32_t *parent_l);

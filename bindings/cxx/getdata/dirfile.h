@@ -251,7 +251,7 @@ namespace GetData {
 			int PutSarray(const char *field_code, const char **data_in,
           unsigned int start = 0, size_t len = 0) const;
 
-      size_t PutString(const char *field_code, const char *data_in) const;
+      int PutString(const char *field_code, const char *data_in) const;
 
       int RawClose(const char *field_code = NULL) const;
 

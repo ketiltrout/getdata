@@ -1,3 +1,14 @@
+2016-11-30   D. V. Wiebe <getdata@ketiltrout.net> svn:1126
+	* bindings/cxx/dirfile.cpp: Update Dirfile::PutString return type.
+	* bindings/perl/simple_funcs.xsin: Update put_string return type.
+
+	* bindings/f77/fgetdata.c (GDPTST): Don't return n_wrote.
+	* bindings/f77/getdata.f90.in (fgd_put_string): Change to subroutine.
+
+	* bindings/cxx/test/big_test.cpp bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/perl/t/big_test.t: Update
+	test 94.	
+
 2016-11-30   D. V. Wiebe <getdata@ketiltrout.net> svn:1125
 	* m4/perl.m4: Better default install path.
 

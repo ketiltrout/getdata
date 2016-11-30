@@ -77,7 +77,7 @@ int protection(DIRFILE *dirfile, int fragment_index)
 const char *raw_filename(DIRFILE *dirfile, const char *field_code)
 const char *reference(DIRFILE *dirfile, gdp_char *field_code=NULL)
 unsigned int spf(DIRFILE *dirfile, const char *field_code)
-size_t put_string(DIRFILE *dirfile, const char *field_code, const char *data)
+int put_string(DIRFILE *dirfile, const char *field_code, const char *data)
 int validate(DIRFILE *dirfile, const char *field_code)
 int add(DIRFILE *dirfile, gd_entry_t &entry)
 int add_raw(DIRFILE *dirfile, const char *field_code, gd_type_t data_type,

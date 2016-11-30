@@ -253,6 +253,12 @@ New in version 0.10.0a:
   * MATLAB: The FLAGS argument to GD_INCLUDE is now optional and defaults
     to zero.
 
+  * C++, F77, F95, PERL: The bindings for gd_put_string() have changed to
+    reflect changes in the C library.  Fortran 77 no longer returns a
+    n_wrote integer; Fortran 95 implements fgd_put_string a subroutine;
+    C++ and Perl bindings now return integer zero on error, and negative
+    on error.
+
   * IDL, MATLAB, PHP BUG FIX: Bindings for the C functions gd_raw_filename
     and gd_linterp_tablename now no longer leak the string returned by the
     C API.

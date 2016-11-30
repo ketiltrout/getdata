@@ -825,7 +825,7 @@ CheckNum2(86, 4, $s, 86.);
 # 94: put_string
 $s = $_->put_string("string", "Arthur Dent");
 CheckOK2(94, 1);
-CheckNum2(94, 2, $s, 12);
+CheckNum2(94, 2, $s, 0);
 
 $s = $_->get_string("string");
 CheckOK2(94, 3);

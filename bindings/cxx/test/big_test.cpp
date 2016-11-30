@@ -774,7 +774,7 @@ void run_tests(void)
   // 94: Dirfile::PutString check
   n = d->PutString("string", "Arthur Dent");
   CHECK_OK2(94,1);
-  CHECK_INT2(94,1,n,12);
+  CHECK_INT2(94,1,n,0);
 
   n = d->GetString("string", GD_MAX_LINE_LENGTH, buf);
   CHECK_OK2(94,2);

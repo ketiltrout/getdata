@@ -1192,9 +1192,8 @@ program big_test
   call check_dbl(ne, 93, 1d0 * fl, 93d0)
 
 ! 94: fgd_put_string check
-  n = fgd_put_string(d, 'string', "Arthur Dent")
+  call fgd_put_string(d, 'string', "Arthur Dent")
   call check_ok2(ne, 94, 1, d)
-  call check_int(ne, 94, n, 11)
 
   n = fgd_get_string(d, 'string', GD_FIELD_LEN, str)
   call check_ok2(ne, 94, 2, d)

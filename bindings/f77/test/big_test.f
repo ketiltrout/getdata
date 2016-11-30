@@ -1040,9 +1040,8 @@ C     86: GDPTCO check
       CALL CHKDBL(ne, 86, 1d0 * fl, 10.0d0)
 
 C     94: GDPTST check
-      CALL GDPTST(n, d, 'string', 6, 11, "Arthur Dent")
+      CALL GDPTST(d, 'string', 6, 11, "Arthur Dent")
       CALL CHKOK2(ne, 94, 1, d)
-      CALL CHKINT(ne, 94, n, 11)
 
       CALL GDGTST(n, d, 'string', 6, slen, str)
       CALL CHKOK2(ne, 94, 2, d)

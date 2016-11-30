@@ -351,7 +351,7 @@ size_t Dirfile::PutData(const char* field_code, gd_off64_t first_frame,
       num_samples, (gd_type_t)type, data_in);
 }
 
-size_t Dirfile::PutString(const char *field_code, const char* data_in) const
+int Dirfile::PutString(const char *field_code, const char* data_in) const
 {
   return gd_put_string(D, field_code, data_in);
 }

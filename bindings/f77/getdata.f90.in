@@ -753,14 +753,13 @@ subroutine fgd_put_constant_c16 (dirfile, field_code, data_in)
   data_in)
 end subroutine
 
-function fgd_put_string (dirfile, field_code, data_in)
-  integer :: fgd_put_string
+subroutine fgd_put_string (dirfile, field_code, data_in)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code, data_in
 
-  call gdptst(fgd_put_string, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdptst(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   LEN_TRIM(data_in), TRIM(data_in))
-end function
+end subroutine
 
 function fgd_error (dirfile)
   integer :: fgd_error

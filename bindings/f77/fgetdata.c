@@ -2455,19 +2455,18 @@ void F77_FUNC(gdpcas, GDPCAS) (const int32_t *dirfile, const char *field_code,
 }
 
 /* gd_put_string wrapper */
-void F77_FUNC(gdptst, GDPTST) (int32_t *n_wrote, const int32_t *dirfile,
-    const char *field_code, const int32_t *field_code_l, const int32_t *len,
-    const char *data_in)
+void F77_FUNC(gdptst, GDPTST) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *len, const char *data_in)
 {
   char *fc, *in;
-  dtrace("%p, %i, %p, %i, %i, %p", n_wrote, *dirfile, field_code, *field_code_l,
-      *len, data_in);
+  dtrace("%i, %p, %i, %i, %p", *dirfile, field_code, *field_code_l, *len,
+      data_in);
 
-  *n_wrote = gd_put_string(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc,
-        field_code, *field_code_l), _GDF_CString(&in, data_in, *len)) - 1;
+  gd_put_string(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
+        *field_code_l), _GDF_CString(&in, data_in, *len));
   free(fc);
   free(in);
-  dreturn("%i", *n_wrote);
+  dreturnvoid();
 }
 
 /* gd_nmfields wrapper */
