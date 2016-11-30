@@ -25,7 +25,6 @@ dnl supplied local variable
 AC_DEFUN([GD_PERL_CONFIG],
 [
 ifelse(`$#', `2', [perl_int=$PERL], [perl_int=$3])
-# 3=$3
 $1=`$perl_int -V::$2: | sed -e "s/'//g" | sed -e "s/[ \t]*$//"`
 ])
 
@@ -130,21 +129,21 @@ if test "x${have_perl}" != "xno"; then
   AC_MSG_CHECKING([$PERL version])
   GD_PERL_CONFIG([PERL_VERSION], [version])
   AC_MSG_RESULT([$PERL_VERSION])
-
 fi
 
 AC_ARG_WITH([perl-dir], AS_HELP_STRING([--with-perl-dir=PATH],
 [ Install Perl bindings in PATH.  If PATH is the special word `vendor', install
 Perl bindings into the default vendor-specific module directory (if present).
 If PATH is the special word `site', install Perl bindings into the default
-site-specific module directory.  [default: site] ]),
+site-specific module directory.  [default: if a --prefix is specified:
+PREFIX/lib/perl/<perl_version>, otherwise: `site'] ]),
     [
     case "${withval}" in
     vendor|site) perl_inst_type="${withval}" ;;
     no) perl_inst_type="site" ;;
     *) perl_inst_type="local"; local_perl_path="${withval}" ;;
     esac
-    ], [ perl_inst_type="site" ])
+    ], [ perl_inst_type="auto" ])
 
 if test "x${have_perl}" != "xno"; then
   GD_PERL_CHECK_MODULE([ExtUtils::MakeMaker])
@@ -157,9 +156,22 @@ if test "$HAVE_Math__Complex$HAVE_ExtUtils__MakeMaker" != "yesyes"; then
 fi
 
 if test "x${have_perl}" != "xno"; then
-
   dnl calculate the extension module directory
   AC_MSG_CHECKING([Perl module directory])
+
+  dnl sensible defaults
+  if test $perl_inst_type = "auto"; then
+    if test $prefix = "NONE" -a $exec_prefix = "NONE"; then
+      perl_inst_type=site
+    elif test $prefix = "NONE"; then
+      perl_inst_type=local
+      local_perl_path="\${exec_prefix}/lib/perl/$PERL_VERSION"
+    else
+      perl_inst_type=local
+      local_perl_path="\${prefix}/lib/perl/$PERL_VERSION"
+    fi
+  fi
+
   if test $perl_inst_type = "vendor"; then
     GD_PERL_CONFIG([perlprefix], [vendorprefix])
     GD_PERL_CONFIG([prefixed_perldir], [vendorarchexp])

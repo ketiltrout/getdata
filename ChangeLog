@@ -1,3 +1,6 @@
+2016-11-30   D. V. Wiebe <getdata@ketiltrout.net> svn:1125
+	* m4/perl.m4: Better default install path.
+
 2016-11-29   D. V. Wiebe <getdata@ketiltrout.net> svn:1122
 	* src/protect.c (gd_alter_protection): If the protection level changes,
 	mark the fragment dirty (modified).
