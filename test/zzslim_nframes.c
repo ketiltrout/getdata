@@ -90,7 +90,7 @@ int main(void)
   CHECKI(n, 256);
 #else
   CHECKI(error, GD_E_UNSUPPORTED);
-  CHECKI(n, 0);
+  CHECKI(n, GD_E_UNSUPPORTED);
 #endif
 
   return r;

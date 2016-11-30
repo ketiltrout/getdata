@@ -221,11 +221,12 @@ New in version 0.10.0a:
       gd_get_constant(), gd_hidden(), gd_hide(), gd_include(),
       gd_include_affix(), gd_include_ns(), gd_madd(), gd_madd_alias(),
       all the gd_madd_<entry_type>() functions, gd_madd_spec(),
-      gd_metaflush(), gd_move(), gd_open(), gd_parent_fragment(),
-      gd_protection(), gd_put_carray(), gd_put_carray_slice(),
-      gd_put_const(), gd_raw_close(), gd_rename(), gd_rewrite_fragment(),
-      gd_seek(), gd_spf(), gd_sync(), gd_tell(),
-      gd_unhide(), gd_uninclude(), gd_validate(), gd_verbose_prefix()
+      gd_metaflush(), gd_move(), gd_nframes(), gd_open(),
+      gd_parent_fragment(), gd_protection(), gd_put_carray(),
+      gd_put_carray_slice(), gd_put_const(), gd_raw_close(),
+      gd_rename(), gd_rewrite_fragment(), gd_seek(), gd_spf(), gd_sync(),
+      gd_tell(), gd_unhide(), gd_uninclude(), gd_validate(),
+      gd_verbose_prefix()
 
   * gd_entry_list() and gd_nentries() now take an additional paremter,
     fragment, which optionally allows searching only one metadata fragment.

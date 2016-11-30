@@ -1,6 +1,6 @@
 .\" gd_nframes.3.  The gd_nframes man page.
 .\"
-.\" Copyright (C) 2008, 2010, 2011, 2014 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2011, 2014, 2016 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_nframes 3 "16 October 2014" "Version 0.9.0" "GETDATA"
+.TH gd_nframes 3 "29 November 2016" "Version 0.10.0" "GETDATA"
 .SH NAME
 gd_nframes \(em report the size of a dirfile
 .SH SYNOPSIS
@@ -52,8 +52,8 @@ argument must point to a valid DIRFILE object previously created by a call to
 .SH RETURN VALUE
 Upon successful completion,
 .BR gd_nframes ()
-returns the number of frames in the dirfile.  On error, it returns zero and sets
-the dirfile error to a non-zero error value.  Possible error values are:
+returns the number of frames in the dirfile, which is never negative.  On error,
+it returns a negative-valued error code.  Possible error codes are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.
@@ -62,21 +62,23 @@ The library was unable to allocate memory.
 The supplied dirfile was invalid.
 .TP
 .B GD_E_IO
-An attempt to determine the (unencoded) size of the data file associated with
-the reference field failed.
+An I/O error occurred while determining the number of samples in the data file
+associated with the reference field.
 .TP
 .B GD_E_UNKNOWN_ENCODING
-The size of the decoded data file associated with the reference field could not
-be not be determined because its encoding was not understood.
+The number of samples available for the reference field could not be determined
+because the encoding used to store the reference field's data file was not
+understood.
 .TP
 .B GD_E_UNSUPPORTED
-The size of the decoded data file associated with the reference field could not
-be not be determined because its encoding was not supported.
+GetData does not support determining the number of samples for the encoding of
+of the data file associated with the reference field.
 .PP
-The dirfile error may be retrieved by calling
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
 .BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A descriptive error string for the error may be obtained by calling
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),
