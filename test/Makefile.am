@@ -26,8 +26,8 @@ AM_CPPFLAGS=${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
 # The enc_*.c files aren't directly used as tests.  They're included by
 # corresponding encoding tests.
 EXTRA_DIST=test.h enc_add.c enc_complex64.c enc_complex128.c enc_del.c \
-					 enc_enoent.ca enc_float32.c enc_float64.c enc_int8.c enc_int16.c \
-					 enc_int32.c enc_int64.c enc_move_from.c enc_nframes.c \
+					 enc_enoent.ca enc_float32.c enc_float64.c enc_get_cont enc_int8.c \
+					 enc_int16.c enc_int32.c enc_int64.c enc_move_from.c enc_nframes.c \
 					 enc_put_offs.c enc_seek.c enc_uint8.c enc_uint16.c enc_uint32.c \
 					 enc_uint64.c
 
@@ -105,8 +105,8 @@ BOF_TESTS=bof bof_bit bof_bit_code bof_code bof_const bof_index bof_lincom \
 					bof_lincom_code bof_phase bof_phase_code bof_phase_neg bof_recurse
 
 BZIP_TESTS=bzip_add bzip_complex64 bzip_complex128 bzip_del bzip_enoent \
-					 bzip_float32 bzip_float64 bzip_get bzip_get_far bzip_get_get \
-					 bzip_get_get2 bzip_get_put bzip_int8 bzip_int16 bzip_int32 \
+					 bzip_float32 bzip_float64 bzip_get bzip_get_cont bzip_get_far \
+					 bzip_get_get bzip_get_get2 bzip_get_put bzip_int8 bzip_int16 bzip_int32 \
 					 bzip_int64 bzip_move_from bzip_move_to bzip_nframes \
 					 bzip_put bzip_put_back bzip_put_endian bzip_put_get bzip_put_offs \
 					 bzip_put_pad bzip_put_sub bzip_seek bzip_seek_far bzip_sync \
@@ -211,13 +211,14 @@ ERROR_TESTS=error error_error error_num error_short error_verbose \
 FILE_TESTS=file file_code file_type
 
 FLAC_TESTS=flac_add flac_complex64 flac_complex128 flac_del flac_enoent \
-					 flac_float32 flac_float64 flac_get_big flac_get_far flac_get_get \
-					 flac_get_get2 flac_get_int8 flac_get_int64 flac_get_little \
-					 flac_get_long flac_int8 flac_int16 flac_int32 flac_int64 \
-					 flac_move_from flac_nframes flac_put_big flac_put_complex128 \
-					 flac_put_float64 flac_put_int32 flac_put_little flac_put_offs \
-					 flac_seek flac_seek_far flac_sync flac_uint8 flac_uint16 \
-					 flac_uint32 flac_uint64
+					 flac_float32 flac_float64 flac_get_big flac_get_cont \
+					 flac_get_far flac_get_get flac_get_get2 flac_get_int8 \
+					 flac_get_int64 flac_get_little flac_get_long flac_int8 \
+					 flac_int16 flac_int32 flac_int64 flac_move_from flac_nframes \
+					 flac_put_big flac_put_complex128 flac_put_float64 \
+					 flac_put_int32 flac_put_little flac_put_offs flac_seek \
+					 flac_seek_far flac_sync flac_uint8 flac_uint16 flac_uint32 \
+					 flac_uint64
 
 FLIST_TESTS=flist flist0 flist2 flist_hidden flist_invalid flist_meta \
 						flist_meta2 flist_meta_hidden flist_meta_invalid flist_type \
@@ -287,8 +288,8 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_bad \
 GLOBAL_TESTS=global_flags global_name
 
 GZIP_TESTS=gzip_add gzip_complex64 gzip_complex128 gzip_del gzip_enoent \
-					 gzip_float32 gzip_float64 gzip_get gzip_get_far gzip_get_get \
-					 gzip_get_get2 gzip_get_put gzip_int8 gzip_int16 gzip_int32 \
+					 gzip_float32 gzip_float64 gzip_get gzip_get_cont gzip_get_far \
+					 gzip_get_get gzip_get_get2 gzip_get_put gzip_int8 gzip_int16 gzip_int32 \
 					 gzip_int64 gzip_move_from gzip_move_to gzip_nframes gzip_put \
 					 gzip_put_back gzip_put_endian gzip_put_get gzip_put_nframes \
 					 gzip_put_off gzip_put_offs gzip_put_pad gzip_put_sub gzip_seek \
@@ -322,12 +323,12 @@ LEN_TESTS=len_bad len_carray len_const len_sarray len_string len_type
 
 LZMA_TESTS=lzma_enoent lzma_get lzma_nframes lzma_put lzma_xz_add \
 					 lzma_xz_complex64 lzma_xz_complex128 lzma_xz_del lzma_xz_float32 \
-					 lzma_xz_float64 lzma_xz_get lzma_xz_get_far lzma_xz_get_get \
-					 lzma_xz_get_get2 lzma_xz_get_put lzma_xz_int8 lzma_xz_int16 \
-					 lzma_xz_int32 lzma_xz_int64 lzma_xz_move_from lzma_xz_move_to \
-					 lzma_xz_nframes lzma_xz_offs_clear lzma_xz_put lzma_xz_put_back \
-					 lzma_xz_put_endian lzma_xz_put_get lzma_xz_put_offs lzma_xz_put_pad \
-					 lzma_xz_seek lzma_xz_seek_far lzma_xz_sync lzma_xz_uint8 \
+					 lzma_xz_float64 lzma_xz_get lzma_xz_get_cont lzma_xz_get_far \
+					 lzma_xz_get_get lzma_xz_get_get2 lzma_xz_get_put lzma_xz_int8 \
+					 lzma_xz_int16 lzma_xz_int32 lzma_xz_int64 lzma_xz_move_from \
+					 lzma_xz_move_to lzma_xz_nframes lzma_xz_offs_clear lzma_xz_put \
+					 lzma_xz_put_back lzma_xz_put_endian lzma_xz_put_get lzma_xz_put_offs \
+					 lzma_xz_put_pad lzma_xz_seek lzma_xz_seek_far lzma_xz_sync lzma_xz_uint8 \
 					 lzma_xz_uint16 lzma_xz_uint32 lzma_xz_uint64
 
 MADD_TESTS=madd madd_affix madd_alias madd_aliasmeta madd_alias_affix \

@@ -52,7 +52,7 @@ struct gd_flacdata {
   /* Decoder (reader) only */
   char *data; /* Dechannelised frame of data */
   unsigned dlen; /* Length in samples of data */
-  unsigned pos; /* offset into the frame data */
+  unsigned pos; /* offset in samples into the frame data */
   off64_t base; /* sample number of the start of the frame */
 };
 
@@ -80,14 +80,14 @@ static FLAC__StreamDecoderWriteStatus _GD_FlacDecodeCallback(
   if (gdfl->cps != FLAC__stream_decoder_get_channels(gdfl->codec.d)) {
     gdfl->error = 1;
     *gdfl->errnum = GD_FLAC_E_CPS;
-    dreturn("%s", "FLAC__STREAM_DECODER_WRITE_STATUS_ABORT");
+    dreturn("%s (cps)", "FLAC__STREAM_DECODER_WRITE_STATUS_ABORT");
     return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
   }
 
   if (gdfl->bps != FLAC__stream_decoder_get_bits_per_sample(gdfl->codec.d)) {
     gdfl->error = 1;
     *gdfl->errnum = GD_FLAC_E_BPS;
-    dreturn("%s", "FLAC__STREAM_DECODER_WRITE_STATUS_ABORT");
+    dreturn("%s (bps)", "FLAC__STREAM_DECODER_WRITE_STATUS_ABORT");
     return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
   }
 
@@ -98,7 +98,7 @@ static FLAC__StreamDecoderWriteStatus _GD_FlacDecodeCallback(
     if (gdfl->data == NULL) {
       gdfl->error = 1;
       *gdfl->errnum = GD_FLAC_E_MEM;
-      dreturn("%s", "FLAC__STREAM_DECODER_WRITE_STATUS_ABORT");
+      dreturn("%s (alloc)", "FLAC__STREAM_DECODER_WRITE_STATUS_ABORT");
       return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
     }
     gdfl->dlen = frame->header.blocksize;
@@ -269,7 +269,8 @@ static size_t _GD_FlacOutput(struct gd_flacdata *gdfl, gd_type_t data_type,
     ns = gdfl->dlen - gdfl->pos;
 
   if (ns > 0) {
-    memcpy(output, gdfl->data + gdfl->pos, ns * GD_SIZE(data_type));
+    memcpy(output, gdfl->data + gdfl->pos * GD_SIZE(data_type),
+        ns * GD_SIZE(data_type));
     gdfl->pos += ns;
   }
 

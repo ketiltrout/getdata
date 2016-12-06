@@ -130,12 +130,14 @@ int gd_system(const char* command)
 #define MAKEDATAFILE(f,t,expr,n) \
   do { \
     int i; \
-    t data_data[n]; \
+    t *data_data = malloc(sizeof(*data_data) * n); \
+    if (data_data == NULL) { perror("malloc"); exit(1); } \
     for (i = 0; i < n; ++i) data_data[i] = (t)(expr); \
     i = open(f, O_CREAT | O_EXCL | O_WRONLY, 0666); \
     if (i < 0) { perror("open"); exit(1); } \
     if (write(i, data_data, sizeof(t) * n) < 0) { perror("write"); exit(1); } \
     if (close(i)) { perror("close"); exit(1); } \
+    free(data_data); \
   } while(0)
 
 #ifdef GD_NO_C99_API

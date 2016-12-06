@@ -1,3 +1,8 @@
+2016-12-06   D. V. Wiebe <getdata@ketiltrout.net> svn:1127
+	* src/flac.c (_GD_FlacOutput): Fix memcpy src calculation.
+	* test/bzip_get_cont.c test/enc_get_cont.c test/flac_get_cont.c
+	test/gzip_get_cont.c test/lzma_xz_get_cont.c: Added.
+
 2016-11-30   D. V. Wiebe <getdata@ketiltrout.net> svn:1126
 	* bindings/cxx/dirfile.cpp: Update Dirfile::PutString return type.
 	* bindings/perl/simple_funcs.xsin: Update put_string return type.
