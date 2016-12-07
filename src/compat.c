@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2015 D. V. Wiebe
+/* Copyright (C) 2010-2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -298,29 +298,22 @@ char *basename(char *path)
 }
 #endif
 
-/* emulate readdir_r(3) with readdir(3) */
+/* emulate readdir_r(3) with readdir(3).  This implementation ignores
+ * 'entry' completely */
 #ifndef HAVE_READDIR_R
-int _GD_ReadDir(DIR *dirp, struct dirent *entry, struct dirent **result)
+int _GD_ReadDir(DIR *dirp, struct dirent *entry gd_unused_,
+    struct dirent **result)
 {
-  struct dirent *local_entry;
-
-  dtrace("%p, %p, %p", dirp, entry, result);
+  dtrace("%p, <unused>, %p", dirp, result);
 
   errno = 0;
-  local_entry = readdir(dirp);
-  if (local_entry == NULL) {
-    *result = NULL;
-    if (errno) {
-      dreturn("%i", errno);
-      return errno;
-    }
-    dreturn("%i", 0);
-    return 0;
+  *result = readdir(dirp);
+  if (*result == NULL && errno) {
+    dreturn("%i", errno);
+    return errno;
   }
 
-  *result = entry;
-  memcpy(entry, local_entry, sizeof(struct dirent));
-  dreturn("%i", 0);
+  dreturn("%i (%p)", 0, *result);
   return 0;
 }
 #endif

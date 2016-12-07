@@ -37,9 +37,10 @@ int main(void)
   e1 = gd_put_sarray_slice(D, "sarray", 10, 1, ptr);
   CHECKI(e1, GD_E_BOUNDS);
 
-  D = gd_open(filedir, GD_RDWR);
   e2 = gd_put_sarray_slice(D, "sarray", 1, 10, ptr);
   CHECKI(e2, GD_E_BOUNDS);
+
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

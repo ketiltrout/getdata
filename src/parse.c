@@ -1712,6 +1712,11 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D,
             else
               _GD_InitRawIO(D, E, NULL, -1, NULL, 0,
                   GD_FILE_WRITE | GD_FILE_TOUCH, _GD_FileSwapBytes(D, E));
+
+            if (D->error) {
+              _GD_FreeE(D, E, 1);
+              E = NULL;
+            }
           }
 
           /* Is this the first raw field ever defined? */

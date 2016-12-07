@@ -742,16 +742,16 @@ static int _GD_RenameCode(DIRFILE *D, gd_entry_t *E, char **code,
     if (_GD_CodeOffsets(D, E->fragment_index, new_code, early | GD_CO_CHECK,
           offset))
     {
-      free(new_code);
       if (force) {
         /* skip this code */
+        free(new_code);
         dreturn("%i", 0);
         return 0;
       }
 
       /* otherwise, fail */
-      GD_SET_RETURN_ERROR(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0,
-          new_code);
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, new_code);
+      free(new_code);
       dreturn("%i", -1);
       return -1;
     }
@@ -1025,6 +1025,9 @@ void _GD_PerformRename(DIRFILE *restrict D,
 /* Prepare for a database update due to a renamed field.  If this is a move
  * request, new_fragment is the destination.  For a rename, new_fragment is -1.
  *
+ * new_name must be malloc'd.  This function will steal it, even if it fails
+ * (returns NULL).
+ *
  * Returns NULL on error otherwise a pointer to the gd_rename_data_ struct. */
 struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict D,
     char *restrict new_name, size_t new_len, gd_entry_t *restrict E,
@@ -1038,6 +1041,7 @@ struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict D,
 
   rdat = _GD_Malloc(D, sizeof *rdat);
   if (rdat == NULL) {
+    free(new_name);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -1064,6 +1068,7 @@ struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict D,
   rdat->up_size = 10;
   rdat->up = _GD_Malloc(D, rdat->up_size * sizeof rdat->up[0]);
   if (rdat->up == NULL) {
+    free(new_name);
     free(rdat);
     dreturn("%p", NULL);
     return NULL;
@@ -1072,15 +1077,7 @@ struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict D,
   /* Add the new field name update, for a non-meta field, this is just new_name
    */
   rdat->n_up = 1;
-  rdat->up[0].new_code = _GD_Malloc(D, new_len + 1);
-
-  if (D->error) {
-    _GD_CleanUpRename(rdat, 1);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  memcpy(rdat->up[0].new_code, new_name, new_len + 1);
+  rdat->up[0].new_code = new_name;
   rdat->up[0].new_len = new_len;
   rdat->up[0].index = E->fragment_index;
   rdat->up[0].dst = &E->field;
@@ -1162,10 +1159,8 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
   /* prep for metadata update */
   rdat = _GD_PrepareRename(D, name, len, E, -1, flags);
 
-  if (rdat == NULL) {
-    free(name);
+  if (rdat == NULL)
     GD_RETURN_ERROR(D);
-  }
 
   if (E->field_type == GD_RAW_ENTRY) {
     /* Compose the new filename */
@@ -1173,13 +1168,13 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
         | ((E->flags & GD_EN_EARLY) ? GD_CO_EARLY : 0));
 
     if (filebase == NULL) {
-      free(name);
+      _GD_CleanUpRename(rdat, 1);
       GD_RETURN_ERROR(D);
     }
 
     /* Close the old file */
     if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP)) {
-      free(name);
+      _GD_CleanUpRename(rdat, 1);
       free(filebase);
       GD_RETURN_ERROR(D);
     }
@@ -1189,14 +1184,14 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
 
       /* check data protection */
       if (D->fragment[E->fragment_index].protection & GD_PROTECT_DATA) {
-        free(name);
+        _GD_CleanUpRename(rdat, 1);
         free(filebase);
         GD_SET_RETURN_ERROR(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
             D->fragment[E->fragment_index].cname);
       }
 
       if (!_GD_Supports(D, E, GD_EF_NAME | GD_EF_MOVE)) {
-        free(name);
+        _GD_CleanUpRename(rdat, 1);
         free(filebase);
         GD_RETURN_ERROR(D);
       }
@@ -1207,7 +1202,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
             (const char*)D->fragment[E->fragment_index].enc_data, &temp,
             filebase, 0, 0))
       {
-        free(name);
+        _GD_CleanUpRename(rdat, 1);
         free(filebase);
         GD_RETURN_ERROR(D);
       }
@@ -1216,7 +1211,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
             (const char*)D->fragment[E->fragment_index].enc_data,
             E->e->u.raw.file, E->e->u.raw.filebase, 0, 0))
       {
-        free(name);
+        _GD_CleanUpRename(rdat, 1);
         free(filebase);
         GD_RETURN_ERROR(D);
       }
@@ -1226,6 +1221,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
             D->fragment[E->fragment_index].dirfd, temp.name))
       {
         _GD_SetEncIOError(D, GD_E_IO_RENAME, E->e->u.raw.file + 0);
+        _GD_CleanUpRename(rdat, 1);
         free(filebase);
         GD_RETURN_ERROR(D);
       }

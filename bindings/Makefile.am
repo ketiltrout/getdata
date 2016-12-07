@@ -55,8 +55,8 @@ noinst_PROGRAMS=make_parameters
 make_parameters_SOURCES = make_parameters.c
 nodist_make_parameters_SOURCES = ../src/getdata.h ../src/gd_config.h
 
-SUBDIRS = . ${F77_SUBDIR} ${CXX_SUBDIR} ${IDL_SUBDIR} ${PY_SUBDIR} \
-					${PERL_SUBDIR} ${MATLAB_SUBDIR} ${PHP_SUBDIR}
+SUBDIRS = . ${CXX_SUBDIR} ${F77_SUBDIR} ${IDL_SUBDIR} ${MATLAB_SUBDIR} \
+					${PERL_SUBDIR} ${PHP_SUBDIR} ${PY_SUBDIR} 
 
 make_parameters$(EXEEXT): $(make_parameters_SOURCES) \
 				    $(nodist_make_parameters_SOURCES)

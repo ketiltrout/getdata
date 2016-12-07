@@ -490,6 +490,7 @@ static int _GD_IncludeAffix(DIRFILE* D, const char *funcname, const char* file,
     for (i = 0; i < D->n_entries; ++i) {
       if (D->entry[i]->fragment_index >= old_nfrag) {
         /* found an entry to delete */
+        _GD_FreeE(D, D->entry[i], 1);
 
         if (found_good) { /* The last entry was good */
           /* There is a run of entries spanning [first,i-1] that need to be

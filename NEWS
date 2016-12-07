@@ -112,6 +112,11 @@ New in version 0.10.0a:
     gd_fragment_index(), and gd_spf() will no longer produce this error at
     all.
 
+  * NOTE: The GD_VECTOR_ENTRIES symbol in gd_entry_list() and gd_nentries()
+    calls does not match SINDIR entries, only numeric-valued vectors.
+    This also affects the corresponding special case functions
+    (gd_nvectors(), gd_vector_list() &c.)
+
   * BUG FIX: The gd_include() family of functions now correcrtly clean up
     after encountering an error.  Previously, encountering a syntax error
     would result in these functions erroneously adding fields specified
@@ -201,9 +206,9 @@ New in version 0.10.0a:
     gd_fragment_affixes(), gd_linterp_tablename(), and gd_raw_filename()
     will use this memory manager to allocate the buffers they return.  The
     function gd_free_entry_strings() will use this memory manager to free
-    strings.  Even if an alternate memory manager is specified,GetData will
-    still use the Standard Library's malloc() and free() for much of it's
-    internal storage.
+    strings.  Even if an alternate memory manager is specified, GetData
+    will still use the Standard Library's malloc() and free() for much of
+    it's internal storage.
 
   * A number of functions which used to return -1 on error now instead
     return an appropriate error code, previously only availably through
@@ -228,16 +233,16 @@ New in version 0.10.0a:
       gd_tell(), gd_unhide(), gd_uninclude(), gd_validate(),
       gd_verbose_prefix()
 
+  * gd_put_string() now returns zero on success and a negative-valued error
+    code on error, as well, following the lead of gd_put_constant() and
+    gd_put_sarray().  Also note that the return type is now int, where
+    previously it was size_t, despite the documentation having always
+    claimed it returned int.
+
   * gd_entry_list() and gd_nentries() now take an additional paremter,
     fragment, which optionally allows searching only one metadata fragment.
     Setting this to GD_ALL_FRAGMENTS restores the previous behaviour
     (search all fragments).
-
-  * gd_put_string() now returns zero on success and a negative-valued error
-    code on error, following the lead of gd_put_constant() and
-    gd_put_sarray().  Also note that the return type is now int, where
-    previously it was size_t, despite the documentation having always
-    claimed it returned int.
 
   * The GD_FUNCTION_ALIASES block, and hence the long-deprecated
     GetData-0.6 API, has been removed from getdata.h.  Anyone still using

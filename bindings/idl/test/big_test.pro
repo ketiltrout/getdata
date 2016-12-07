@@ -438,14 +438,14 @@ nume += check_simple(68, n, [ 'new2', 'lincom' ])
 ;  69: gd_nvectors check
 n = gd_nvectors(d)
 nume += check_ok(69, d)
-nume += check_simple(69, n, 24)
+nume += check_simple(69, n, 23)
 
 ;  70: gd_vector_list check
 n = gd_vector_list(d)
 nume += check_ok(70, d)
 nume += check_simple(70, n, [ 'bit', 'div', 'data', 'mult', 'new1', 'new2', $
   'new4', 'new6', 'new7', 'new8', 'new9', 'sbit', 'INDEX', 'alias', 'indir', $
-  'mplex', 'new10', 'phase', 'recip', 'lincom', 'sindir', 'window', 'linterp', $
+  'mplex', 'new10', 'phase', 'recip', 'lincom', 'window', 'linterp', $
   'polynom' ])
 
 ;  71: gd_madd_lincom
@@ -1366,15 +1366,15 @@ nume += check_ok2(237, 1, d)
 nume += check_simple2(237, 1, n, 6)
 n = gd_nentries(d, /VECTORS, /HIDDEN, /NOALIAS)
 nume += check_ok2(237, 2, d)
-nume += check_simple2(237, 2, n, 26)
+nume += check_simple2(237, 2, n, 25)
  
 ; 239: gd_entry_list check
 n = gd_entry_list(d, /VECTORS, /HIDDEN, /NOALIAS)
 nume += check_ok(239, d)
 nume += check_simple(239, n, [ 'bit', 'div', 'data', 'mult', 'new1', 'new2', $
   'new4', 'new6', 'new7', 'new8', 'sbit', 'INDEX', 'indir', 'mplex', 'new14', $
-  'new16', 'new18', 'new21', 'phase', 'recip', 'lincom', 'new135', 'sindir', $
-  'window', 'linterp', 'polynom' ])
+  'new16', 'new18', 'new21', 'phase', 'recip', 'lincom', 'new135', 'window', $
+  'linterp', 'polynom' ])
 
 ; 240: gd_mplex_lookback check
 gd_mplex_lookback, d, /ALL

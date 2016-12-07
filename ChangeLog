@@ -1,3 +1,36 @@
+2016-12-06   D. V. Wiebe <getdata@ketiltrout.net> svn:1128
+	* src/include.c (_GD_IncludeAffix): Actually delete the deleted entries,
+	why not.
+
+	* src/name.c (_GD_PerformRename): Steal 'new_name' instead of strdup'ing a
+	copy.
+	* src/move.c (_GD_Move): Delete unnecessary free()s.
+	* src/name.c (_GD_Rename): Properly clean up on error.
+
+	* src/name.c (_GD_RenameCode): Fix error handling when _GD_CodeOffsets
+	checks fail.
+
+	* src/parse.c (_GD_ParseFieldSpec): Clean up after I/O errors.
+
+	* src/compat.c (_GD_ReadDir): We don't know how big struct dirent actually
+	is, so don't pretend we do.  Ignore the second parameter (entry), just set
+	*result to the returned pointer.
+	* src/open.c (_GD_TruncDir): Ignore the second parameter to _GD_ReadDir
+	(which may be readdir_r(3)).
+	
+	* src/field_list.c (_GD_ListEntry): Don't match SINDIR entries with
+	GD_VECTOR_ENTRIES.
+	* cxx/test/big_test.cpp f77/test/big_test.f f77/test/big_test95.f90
+	idl/test/big_test.pro matlab/test/big_test.m perl/t/big_test.t
+	php/test/big_test.php python/test/big_test.py: Update tests 69, 70, 237, 239
+	* test/vlist.c: Update.
+
+	* test/mflush_affix.c test/mflush_pretty.c test/put_carray_bad.c
+	test/put_carray_bounds.c test/put_carray_bounds.c test/put_carray_type.c
+	test/put_sarray_bad.c test/put_sarray_bounds.c test/put_sarray_type.c: Call
+	gd_discard().
+	* test/put_carray_bounds.c: Don't double-open the dirfile.
+
 2016-12-06   D. V. Wiebe <getdata@ketiltrout.net> svn:1127
 	* src/flac.c (_GD_FlacOutput): Fix memcpy src calculation.
 	* test/bzip_get_cont.c test/enc_get_cont.c test/flac_get_cont.c

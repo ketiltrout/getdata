@@ -681,7 +681,7 @@ try:
   n = d.nvectors()
 except:
   CheckOK(69)
-CheckSimple(69,n,24)
+CheckSimple(69,n,23)
 
 # 70: vector_list check
 try:
@@ -691,8 +691,7 @@ except:
 CheckSimple(70,n,[ B('bit'), B('div'), B('data'), B('mult'), B('new1'),
     B('new2'), B('new4'), B('new6'), B('new7'), B('new8'), B('new9'), B('sbit'),
     B('INDEX'), B('alias'), B('indir'), B('mplex'), B('new10'), B('phase'),
-    B('recip'), B('lincom'), B('sindir'), B('window'), B('linterp'),
-    B('polynom') ])
+    B('recip'), B('lincom'), B('window'), B('linterp'), B('polynom') ])
 
 # 71: add / entry (lincom) check
 ent = pygetdata.entry(pygetdata.LINCOM_ENTRY, "mnew1", 0,
@@ -1943,7 +1942,7 @@ try:
       flags = pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
 except:
   CheckOK2(237, 2)
-CheckSimple2(237, 2, n, 25)
+CheckSimple2(237, 2, n, 24)
 
 # 239: gd_entry_list check
 try:
@@ -1954,8 +1953,8 @@ except:
 CheckSimple(239,n, [ B('bit'), B('div'), B('data'), B('mult'), B('new1'),
     B('new2'), B('new4'), B('new6'), B('new7'), B('new8'), B('sbit'),
     B('INDEX'), B('indir'), B('mplex'), B('new14'), B('new16'), B('new18'),
-    B('new21'), B('phase'), B('recip'), B('lincom'), B('sindir'), B('window'),
-    B('linterp'), B('polynom') ])
+    B('new21'), B('phase'), B('recip'), B('lincom'), B('window'), B('linterp'),
+    B('polynom') ])
 
 # 240: gd_mplex_lookback check
 try:

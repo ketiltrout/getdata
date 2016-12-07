@@ -85,6 +85,8 @@ int main(void)
     gd_free_entry_strings(&E);
   }
 
+  gd_discard(D);
+
   unlink(format1);
   unlink(format);
   rmdir(filedir);

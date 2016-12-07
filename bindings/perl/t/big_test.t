@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1750;
+use Test::More tests => 1748;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -617,13 +617,13 @@ CheckSArray(68, \@a, qw(new3 lincom));
 # 69: nvectors
 $s = $_->vector_list;
 CheckOK(69);
-CheckNum(69, $s, 24);
+CheckNum(69, $s, 23);
 
 # 70: vector_list
 @a = $_->vector_list;
 CheckOK(70);
 CheckSArray(70, \@a, qw(bit div data mult new1 new3 new4 new6 new7 new8 new9
-  sbit INDEX alias indir mplex new10 phase recip lincom sindir window linterp
+  sbit INDEX alias indir mplex new10 phase recip lincom window linterp
   polynom));
 
 #72: madd_lincom check
@@ -1709,15 +1709,15 @@ CheckNum2(237, 1, $s, 7);
 $s = $_->entry_list($GetData::ALL_FRAGMENTS, undef, $GetData::VECTOR_ENTRIES,
   $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
 CheckOK2(237, 2);
-CheckNum2(237, 2, $s, 26);
+CheckNum2(237, 2, $s, 25);
 
 # 239: gd_entry_list
 @a = $_->entry_list($GetData::ALL_FRAGMENTS, undef, $GetData::VECTOR_ENTRIES,
   $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
 CheckOK(239);
 CheckSArray(239, \@a, qw(bit div data mult new1 new3 new4 new6 new7 new8 sbit
-  INDEX indir mplex new14 new16 new18 new21 phase recip lincom new135 sindir
-  window linterp polynom));
+  INDEX indir mplex new14 new16 new18 new21 phase recip lincom new135 window
+  linterp polynom));
 
 # 240: gd_mplex_lookback
 $_->mplex_lookback($GetData::LOOKBACK_ALL);

@@ -26,7 +26,8 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
 {
   int ret, format_trunc = 0;
   DIR* dir;
-  struct dirent *lamb, *result;
+  struct dirent *result;
+  struct dirent unused;
   struct stat statbuf;
   size_t dirent_len = offsetof(struct dirent, d_name);
   size_t dirfile_len = strlen(dirfile);
@@ -71,34 +72,27 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
     return -1;
   }
 
-  if ((lamb = _GD_Malloc(D, dirent_len)) == NULL) {
-    closedir(dir);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  ret = _GD_ReadDir(dir, lamb, &result);
-  for (; result; ret = _GD_ReadDir(dir, lamb, &result)) {
+  ret = _GD_ReadDir(dir, &unused, &result);
+  for (; result; ret = _GD_ReadDir(dir, &unused, &result)) {
     char *name;
-    if (lamb->d_name[0] == '.' && lamb->d_name[1] == '\0')
+    if (result->d_name[0] == '.' && result->d_name[1] == '\0')
       continue; /* skip current dir */
-    else if (lamb->d_name[0] == '.' && lamb->d_name[1] == '.' &&
-        lamb->d_name[2] == '\0')
+    else if (result->d_name[0] == '.' && result->d_name[1] == '.' &&
+        result->d_name[2] == '\0')
     {
       continue; /* skip parent dir */
     }
 
-    name = _GD_Malloc(D, dirfile_len + strlen(lamb->d_name) + 2);
+    name = _GD_Malloc(D, dirfile_len + strlen(result->d_name) + 2);
     if (name == NULL) {
-      free(lamb);
       closedir(dir);
       dreturn("%i", -1);
       return -1;
     }
-    sprintf(name, "%s%c%s", dirfile, GD_DIRSEP, lamb->d_name);
+    sprintf(name, "%s%c%s", dirfile, GD_DIRSEP, result->d_name);
     if (
 #if defined(HAVE_FSTATAT) && !defined(GD_NO_DIR_OPEN)
-        fstatat(dirfd, lamb->d_name, &statbuf, AT_SYMLINK_NOFOLLOW)
+        fstatat(dirfd, result->d_name, &statbuf, AT_SYMLINK_NOFOLLOW)
 #elif HAVE_LSTAT
         lstat(name, &statbuf)
 #else
@@ -128,19 +122,18 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
 #ifdef S_IFLNK
       case S_IFLNK:
 #endif
-        if (root && strcmp(lamb->d_name, "format") == 0) {
+        if (root && strcmp(result->d_name, "format") == 0) {
           /* don't delete the format file; we'll truncate it later */
           format_trunc = 1;
         } else if (
 #ifdef HAVE_UNLINKAT
-            unlinkat(dirfd, lamb->d_name, 0)
+            unlinkat(dirfd, result->d_name, 0)
 #else
             unlink(name)
 #endif
             )
         {
           _GD_SetError(D, GD_E_IO, GD_E_IO_UNLINK, name, 0, NULL);
-          free(lamb);
           free(name);
           closedir(dir);
           dreturn("%i", -1);
@@ -156,14 +149,13 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
 #else
           if ((
 #ifdef HAVE_OPENAT
-                subdirfd = openat(dirfd, lamb->d_name, O_RDONLY)
+                subdirfd = openat(dirfd, result->d_name, O_RDONLY)
 #else
                 subdirfd = open(name, O_RDONLY)
 #endif
               ) < 0)
           {
             _GD_SetError(D, GD_E_IO, 0, name, 0, NULL);
-            free(lamb);
             closedir(dir);
             free(name);
             dreturn("%i", -1);
@@ -176,13 +168,12 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
           /* delete */
           if (
 #ifdef HAVE_UNLINKAT
-              unlinkat(dirfd, lamb->d_name, AT_REMOVEDIR)
+              unlinkat(dirfd, result->d_name, AT_REMOVEDIR)
 #else
               rmdir(name)
 #endif
              ) {
             _GD_SetError(D, GD_E_IO, GD_E_IO_UNLINK, name, 0, NULL);
-            free(lamb);
             free(name);
             closedir(dir);
             dreturn("%i", -1);
@@ -192,7 +183,6 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
     }
     free(name);
   }
-  free(lamb);
 
   closedir(dir);
 

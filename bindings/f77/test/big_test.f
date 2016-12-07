@@ -197,7 +197,7 @@ C     doesn't.
       PARAMETER (backslash = '\\')
 
       CHARACTER*26 strings(3)
-      CHARACTER*11 fields(nfields + 10)
+      CHARACTER*11 fields(nfields + 9)
       CHARACTER*11 fn
       CHARACTER*26 str
       CHARACTER*4096 path
@@ -777,7 +777,7 @@ C     68: GDFDNT check
 C     69: GDNVEC check
       CALL GDNVEC(n, d)
       CALL CHKEOK(ne, 69, d)
-      CALL CHKINT(ne, 69, n, 26)
+      CALL CHKINT(ne, 69, n, 25)
 
 C     70: GDVECN check
       fields( 1) = 'bit    '
@@ -802,10 +802,9 @@ C     70: GDVECN check
       fields(20) = 'phase  '
       fields(21) = 'recip  '
       fields(22) = 'lincom '
-      fields(23) = 'sindir '
-      fields(24) = 'window '
-      fields(25) = 'linterp'
-      fields(26) = 'polynom'
+      fields(23) = 'window '
+      fields(24) = 'linterp'
+      fields(25) = 'polynom'
 
       DO 700 i = 1, n
       l = flen
@@ -2130,7 +2129,7 @@ C     237: GDNENT check
       CALL CHKIN2(ne, 237, 1, n, 6)
       CALL GDNENT(n, d, GD_ALL, "", -1, GDEN_V, GDEN_H + GDEN_N)
       CALL CHKOK2(ne, 237, 2, d)
-      CALL CHKIN2(ne, 237, 2, n, 29)
+      CALL CHKIN2(ne, 237, 2, n, 28)
 
 C     238: GDENTX check
       CALL GDENTX(l, d, GD_ALL, "", -1, GDEN_V, GDEN_H + GDEN_N)
@@ -2163,10 +2162,9 @@ C     239: GDENTN check
       fields(23) = "recip"
       fields(24) = "lincom"
       fields(25) = "new135"
-      fields(26) = "sindir"
-      fields(27) = "window"
-      fields(28) = "linterp"
-      fields(29) = "polynom"
+      fields(26) = "window"
+      fields(27) = "linterp"
+      fields(28) = "polynom"
       DO 2390 i = 1, n
       l = flen
       CALL GDENTN(fn, l, d, GD_ALL, "", -1, GDEN_V, GDEN_H + GDEN_N, i)

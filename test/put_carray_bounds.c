@@ -37,9 +37,10 @@ int main(void)
   e1 = gd_put_carray_slice(D, "carray", 10, 1, GD_UINT8, ptr);
   CHECKI(e1, GD_E_BOUNDS);
 
-  D = gd_open(filedir, GD_RDWR);
   e2 = gd_put_carray_slice(D, "carray", 1, 10, GD_UINT8, ptr);
   CHECKI(e2, GD_E_BOUNDS);
+
+  gd_discard(D);
 
   unlink(format);
   rmdir(filedir);

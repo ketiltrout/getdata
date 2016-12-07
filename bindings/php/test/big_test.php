@@ -499,15 +499,14 @@ check_var(68, $v, array('new3', 'lincom'));
 # 69: nfields by type
 $v = gd_nvectors($D);
 check_ok(69, $D);
-check_var(69, $v, 24);
+check_var(69, $v, 23);
 
 # 70: field list by type
 $v = gd_vector_list($D);
 check_ok(70, $D);
 check_var(70, $v, array( 'bit', 'div', 'data', 'mult', 'new1', 'new3', 'new4',
   'new6', 'new7', 'new8', 'new9', 'sbit', 'INDEX', 'alias', 'indir', 'mplex',
-  'new10', 'phase', 'recip', 'lincom', 'sindir', 'window', 'linterp', 'polynom'
-));
+  'new10', 'phase', 'recip', 'lincom', 'window', 'linterp', 'polynom'));
 
 # 72: madd lincom
 $v = gd_madd_lincom($D, 'data', 'mnew3', array('in1', 'in2'),
@@ -1457,8 +1456,8 @@ $v = gd_entry_list($D, GD_ALL_FRAGMENTS, null, GD_VECTOR_ENTRIES,
 check_ok(239, $D);
 check_var(239, $v, array( 'bit', 'div', 'data', 'mult', 'new1', 'new3', 'new4',
   'new6', 'new7', 'new8', 'sbit', 'INDEX', 'indir', 'mplex', 'new14', 'new16',
-  'new18', 'new21', 'phase', 'recip', 'lincom', 'new135', 'sindir', 'window',
-  'linterp', 'polynom' ));
+  'new18', 'new21', 'phase', 'recip', 'lincom', 'new135', 'window', 'linterp',
+  'polynom' ));
 
 # 240: mplex lookback
 $v = gd_mplex_lookback($D, GD_LOOKBACK_ALL);

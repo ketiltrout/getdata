@@ -40,6 +40,8 @@ int main(void)
   e2 = gd_put_sarray(D, "sarray", ptr);
   CHECKI(e2, GD_E_BAD_FIELD_TYPE);
 
+  gd_discard(D);
+
   unlink(format);
   rmdir(filedir);
 

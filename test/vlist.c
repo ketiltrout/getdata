@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013, 2015 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2015, 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -35,7 +35,15 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format,
+      "data1 RAW UINT8 1\n"
+      "data2 RAW UINT8 1\n"
+      "data3 RAW UINT8 1\n"
+      "data4 CONST UINT8 1\n"
+      "data4/sub LINCOM data1 1 0 data2 1 0\n"
+      "data5 SINDIR in in\n");
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));

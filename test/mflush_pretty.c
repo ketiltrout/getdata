@@ -47,6 +47,8 @@ int main(void)
   e3 = gd_validate(D, "loooooooooooooooooooooooooooooooooooooooooooong");
   CHECKI(e3, 0);
 
+  gd_discard(D);
+
   unlink(format);
   rmdir(filedir);
 

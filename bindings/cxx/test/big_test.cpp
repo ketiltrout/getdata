@@ -208,12 +208,12 @@ void run_tests(void)
   const gd_carray_t *carrays;
   const char*** sarrays;
 
-  char* fields[nfields + 9] = { (char*)"bit", (char*)"div", (char*)"data",
+  char* fields[nfields + 8] = { (char*)"bit", (char*)"div", (char*)"data",
     (char*)"mult", (char*)"sbit", (char*)"INDEX", (char*)"alias",
     (char*)"const", (char*)"indir", (char*)"mplex", (char*)"phase",
     (char*)"recip", (char*)"carray", (char*)"lincom", (char*)"sarray",
     (char*)"sindir", (char*)"string", (char*)"window", (char*)"linterp",
-    (char*)"polynom", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+    (char*)"polynom", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
   char *strings[3];
 
   unlink(data);
@@ -686,7 +686,7 @@ void run_tests(void)
   // 69: Dirfile::NVectors check
   n = d->NVectors();
   CHECK_OK(69);
-  CHECK_INT(69,n,26);
+  CHECK_INT(69,n,25);
 
   // 70: Dirfile::VectorList check
   fields[ 0] = (char*)"bit";
@@ -711,10 +711,9 @@ void run_tests(void)
   fields[19] = (char*)"phase";
   fields[20] = (char*)"recip";
   fields[21] = (char*)"lincom";
-  fields[22] = (char*)"sindir";
-  fields[23] = (char*)"window";
-  fields[24] = (char*)"linterp";
-  fields[25] = (char*)"polynom";
+  fields[22] = (char*)"window";
+  fields[23] = (char*)"linterp";
+  fields[24] = (char*)"polynom";
   list = d->VectorList();
   CHECK_OK(70);
   CHECK_STRING_ARRAY(70,n,list[i],fields[i]);
@@ -1714,7 +1713,7 @@ void run_tests(void)
   n = d->NEntries(GD_ALL_FRAGMENTS, NULL, GD_VECTOR_ENTRIES,
       GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   CHECK_OK2(237, 2);
-  CHECK_INT2(237, 2, n, 28);
+  CHECK_INT2(237, 2, n, 27);
 
   // 239: gd_entry_list
   fields[ 0] = (char*)"bit";
@@ -1741,10 +1740,9 @@ void run_tests(void)
   fields[21] = (char*)"phase";
   fields[22] = (char*)"recip";
   fields[23] = (char*)"lincom";
-  fields[24] = (char*)"sindir";
-  fields[25] = (char*)"window";
-  fields[26] = (char*)"linterp";
-  fields[27] = (char*)"polynom";
+  fields[24] = (char*)"window";
+  fields[25] = (char*)"linterp";
+  fields[26] = (char*)"polynom";
   list = d->EntryList(GD_ALL_FRAGMENTS, NULL, GD_VECTOR_ENTRIES,
       GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   CHECK_OK(239);

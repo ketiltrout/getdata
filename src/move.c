@@ -361,7 +361,6 @@ static int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
     rdat = _GD_PrepareRename(D, new_code, new_len, E, new_fragment, flags);
     if (rdat == NULL) {
       free(new_filebase);
-      free(new_code);
       GD_RETURN_ERROR(D);
     }
   } else {
@@ -385,7 +384,6 @@ static int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, unsigned flags)
           new_filebase))
     {
       _GD_CleanUpRename(rdat, 1);
-      free(new_code);
       GD_RETURN_ERROR(D);
     }
   } else

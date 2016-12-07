@@ -577,7 +577,7 @@ try
   % 69: nfields_by_type
   try
     d = gd_nvectors(D);
-    ne = ne + check_num(69, d, 24);
+    ne = ne + check_num(69, d, 23);
   catch exc
     ne = ne + check_ok(exc, 69);
   end
@@ -588,7 +588,7 @@ try
     ne = ne + check_sarray(70, d, { 'bit'; 'div'; 'data'; 'mult'; 'new1'; ...
     'new2'; 'new5'; 'new6'; 'new7'; 'new8'; 'new9'; 'sbit'; 'INDEX'; ...
     'alias'; 'indir'; 'mplex'; 'new10'; 'phase'; 'recip'; 'lincom'; ...
-    'sindir'; 'window'; 'linterp'; 'polynom' });
+    'window'; 'linterp'; 'polynom' });
   catch exc
     ne = ne + check_ok(exc, 70);
   end

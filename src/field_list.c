@@ -157,7 +157,9 @@ int _GD_ListEntry(const gd_entry_t *E, int meta_ok, int hidden_ok, int noalias,
   }
 
   /* type check */
-  if (special == GD_VECTOR_ENTRIES && (E->field_type & GD_SCALAR_ENTRY_BIT)) {
+  if (special == GD_VECTOR_ENTRIES && ((E->field_type & GD_SCALAR_ENTRY_BIT) ||
+        (E->field_type == GD_SINDIR_ENTRY)))
+  {
     dreturn("%i (vector)", 0);
     return 0;
   } else if (special == GD_SCALAR_ENTRIES &&
