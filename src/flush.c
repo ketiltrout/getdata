@@ -803,6 +803,88 @@ WRITE_ERR:
   return -1;
 }
 
+static int WriteInclude(DIRFILE *D, int i, int j, size_t ns_offset,
+    int permissive, FILE *stream)
+{
+  const char *ns = NULL, *px = NULL;
+  char *sx = NULL;
+  int free_sx = 0;
+
+  dtrace("%p, %i, %i, %" PRIuSIZE ", %i, %p", D, i, j, ns_offset,
+      permissive, stream);
+
+  if (D->fragment[j].nsl > D->fragment[i].nsl)
+    ns = D->fragment[j].ns + ns_offset;
+
+  if (D->fragment[j].pxl)
+    px = D->fragment[j].px + D->fragment[i].pxl;
+
+  if (D->fragment[j].sxl > 0) {
+    if (D->fragment[i].sxl == 0)
+      sx = D->fragment[j].sx;
+    else if (D->fragment[j].sxl == D->fragment[i].sxl)
+      sx = NULL;
+    else {
+      free_sx = 1;
+      sx = _GD_Strdup(D, D->fragment[j].sx);
+      if (sx)
+        sx[D->fragment[j].sxl - D->fragment[i].sxl] = 0;
+      else
+        goto WRITE_ERR;
+    }
+  }
+
+  if (fprintf(stream, "%sINCLUDE ", (D->standards >= 5) ? "/" : "") < 0 ||
+      _GD_StringEscapeise(stream, D->fragment[j].ename, 0, permissive,
+        D->standards) < 0)
+  {
+    goto WRITE_ERR;
+  }
+
+  if (ns || px || sx)
+    if (fputc(' ', stream) == EOF)
+      goto WRITE_ERR;
+
+  if (ns) {
+    if (_GD_StringEscapeise(stream, ns, 0, permissive, D->standards) < 0)
+      goto WRITE_ERR;
+    if (fputc('.', stream) == EOF)
+      goto WRITE_ERR;
+  }
+
+  /* An empty prefix must be written if there's a suffix, but no namespace */
+  if (px || (sx && !ns)) {
+    if (fputc(' ', stream) == EOF || _GD_StringEscapeise(stream, px, 0,
+          permissive, D->standards) < 0)
+    {
+      goto WRITE_ERR;
+    }
+  }
+
+  if (sx) {
+    if (fputc(' ', stream) == EOF || _GD_StringEscapeise(stream, sx, 0,
+          permissive, D->standards) < 0)
+    {
+      goto WRITE_ERR;
+    }
+  }
+
+  if (fputc('\n', stream) == EOF)
+    goto WRITE_ERR;
+
+  if (free_sx)
+    free(sx);
+
+  dreturn("%i", 0);
+  return 0;
+
+WRITE_ERR:
+  if (free_sx)
+    free(sx);
+  dreturn("%i", 1);
+  return 1;
+}
+
 static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
 {
   int j;
@@ -1016,72 +1098,9 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
       ns_offset++; /* for the dot */
 
     for (j = 0; j < D->n_fragment; ++j)
-      if (D->fragment[j].parent == i) {
-        const char *ns = NULL, *px = NULL;
-        char *sx = NULL;
-        int free_sx = 0;
-        
-        if (D->fragment[j].nsl > D->fragment[i].nsl)
-          ns = D->fragment[j].ns + ns_offset;
-
-        if (D->fragment[j].pxl)
-          px = D->fragment[j].px + D->fragment[i].pxl;
-
-        if (D->fragment[j].sxl > 0) {
-          if (D->fragment[i].sxl == 0)
-            sx = D->fragment[j].sx;
-          else if (D->fragment[j].sxl == D->fragment[i].sxl)
-            sx = NULL;
-          else {
-            free_sx = 1;
-            sx = _GD_Strdup(D, D->fragment[j].sx);
-            if (sx)
-              sx[D->fragment[j].sxl - D->fragment[i].sxl] = 0;
-            else
-              goto WRITE_ERR;
-          }
-        }
-
-        if (fprintf(stream, "%sINCLUDE ", (D->standards >= 5) ? "/" : "") < 0 ||
-            _GD_StringEscapeise(stream, D->fragment[j].ename, 0, permissive,
-              D->standards) < 0)
-        {
+      if (D->fragment[j].parent == i)
+        if (WriteInclude(D, i, j, ns_offset, permissive, stream))
           goto WRITE_ERR;
-        }
-
-        if (ns || px || sx)
-          if (fputc(' ', stream) == EOF)
-            goto WRITE_ERR;
-
-        if (ns) {
-          if (_GD_StringEscapeise(stream, ns, 0, permissive, D->standards) < 0)
-            goto WRITE_ERR;
-          if (fputc('.', stream) == EOF)
-            goto WRITE_ERR;
-        }
-
-        /* An empty prefix must be written if there's a suffix, but no namespace
-         */
-        if (px || (sx && !ns)) {
-          if (fputc(' ', stream) == EOF || _GD_StringEscapeise(stream, px, 0,
-                permissive, D->standards) < 0)
-          {
-            goto WRITE_ERR;
-          }
-        }
-
-        if (sx) {
-          if (fputc(' ', stream) == EOF || _GD_StringEscapeise(stream, sx, 0,
-                permissive, D->standards) < 0)
-          {
-            goto WRITE_ERR;
-          }
-          if (free_sx)
-            free(sx);
-        }
-        if (fputc('\n', stream) == EOF)
-          goto WRITE_ERR;
-      }
   }
 
   /* The fields */

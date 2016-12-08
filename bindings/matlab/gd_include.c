@@ -43,7 +43,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   DIRFILE *D;
   void *data;
   char *filename;
-  char *ns;
+  char *ns = NULL;
   int parent, n;
   unsigned long flags = 0;
 

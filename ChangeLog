@@ -1,3 +1,15 @@
+2016-12-08   D. V. Wiebe <getdata@ketiltrout.net> svn:1129
+	* bindings/matlab/gd_include.c: Initialise ns to NULL.
+
+	* bindings/php/getdata.c (gdphp_convert_sarray): Fix empty list check.
+	* bindings/php/getdata.c (gdphp_convert_cmparray gdphp_convert_sarray
+	gdphp_convert_nsarray gdphp_convert_array): Make index unsigned.
+
+	* src/flush.c (WriteInclude): Added to simplify cleaning up sx on error.
+	* src/flush.c (_GD_FlushFragment): Call WriteInclude.
+
+	* test/alloc_callback.c test/parse_ref_type.c: Remove unused variables.
+
 2016-12-06   D. V. Wiebe <getdata@ketiltrout.net> svn:1128
 	* src/include.c (_GD_IncludeAffix): Actually delete the deleted entries,
 	why not.

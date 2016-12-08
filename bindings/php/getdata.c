@@ -888,7 +888,7 @@ static int gdphp_convert_cmparray(double *out, zval *z, int min, int max,
   GDPHP_ZVALP d = NULL;
   int n = -1;
   GDPHP_HASH_KEY_DECL(key);
-  long index;
+  unsigned long index;
 
   int *have;
 
@@ -910,8 +910,8 @@ static int gdphp_convert_cmparray(double *out, zval *z, int min, int max,
     /* check key */
     if (GDPHP_HASH_GET_CURRENT_KEY(a, key, index, i) == HASH_KEY_IS_STRING) {
       GDPHP_DIE(ctx, "cannot use associative array");
-    } else if (index < 0 || index >= max)
-      GDPHP_DIE2(ctx, "bad array index (%li)", index);
+    } else if (index >= max)
+      GDPHP_DIE2(ctx, "bad array index (%lu/%lu)", index, max);
 
     if (!have[index]) {
       gdphp_to_datum(out + index * 2, GD_COMPLEX128, ZP(d), 1, ctx);
@@ -920,7 +920,8 @@ static int gdphp_convert_cmparray(double *out, zval *z, int min, int max,
   }
 
   /* check for holes and calculate n */
-  for (index = max - 1; index >= 0; --index) {
+  index = max;
+  while (index-- > 0) {
     if (have[index] == 0 && n != -1)
       GDPHP_DIE(ctx, "uninitialised data in numeric array");
     else if (have[index] && n == -1)
@@ -944,7 +945,7 @@ static size_t gdphp_convert_sarray(const char ***out, const zval *z, int p)
   GDPHP_ZVALP d = NULL;
   size_t j, n = 0;
   GDPHP_HASH_KEY_DECL(key);
-  long index;
+  unsigned long index;
 
   GDPHP_CONTEXTp(ctx,p);
 
@@ -958,16 +959,13 @@ static size_t gdphp_convert_sarray(const char ***out, const zval *z, int p)
     /* check key */
     if (GDPHP_HASH_GET_CURRENT_KEY(a, key, index, i) == HASH_KEY_IS_STRING)
       GDPHP_DIE(&ctx, "cannot use associative array");
-    else if (index < 0)
-      GDPHP_DIE2(&ctx, "bad array index (%li)", index);
 
     if (Z_TYPE_P(ZP(d)) != IS_STRING)
       GDPHP_DIE(&ctx, "string array required");
 
-    if (n < index)
-      n = index;
+    if (n < index + 1)
+      n = index + 1;
   }
-  n++;
 
   if (n == 0) {
     *out = NULL;
@@ -1009,7 +1007,7 @@ static int gdphp_convert_nsarray(char **out, zval *z, int min, int max,
   GDPHP_ZVALP d = NULL;
   int n = -1;
   GDPHP_HASH_KEY_DECL(key);
-  long index;
+  unsigned long index;
 
   dtracectx("%p, %p, %i, %i", out, z, min, max);
 
@@ -1023,10 +1021,9 @@ static int gdphp_convert_nsarray(char **out, zval *z, int min, int max,
   {
     /* check key */
     if (GDPHP_HASH_GET_CURRENT_KEY(a, key, index, i) == HASH_KEY_IS_STRING)
-    {
       GDPHP_DIE(ctx, "cannot use associative array");
-    } else if (index < 0 || index >= max)
-      GDPHP_DIE2(ctx, "bad array index (%li)", index);
+    else if (index >= max)
+      GDPHP_DIE2(ctx, "bad array index (%lu/%lu)", index, max);
 
     if (Z_TYPE_P(ZP(d)) != IS_STRING)
       GDPHP_DIE(ctx, "string array required");
@@ -1035,7 +1032,8 @@ static int gdphp_convert_nsarray(char **out, zval *z, int min, int max,
   }
 
   /* check for holes and calculate n */
-  for (index = max - 1; index >= 0; --index) {
+  index = max;
+  while (index-- > 0) {
     if (out[index] == NULL && n != -1)
       GDPHP_DIE(ctx, "uninitialised data in string array");
     else if (out[index] && n == -1)
@@ -1057,7 +1055,7 @@ static void gdphp_convert_array(struct gdphp_din *din, zval *zdata,
   HashPosition i;
   GDPHP_ZVALP d = NULL;
   GDPHP_HASH_KEY_DECL(key);
-  long index;
+  unsigned long index;
 
   dtracectx("%p, %p", din, zdata);
 
@@ -1069,13 +1067,10 @@ static void gdphp_convert_array(struct gdphp_din *din, zval *zdata,
       zend_hash_move_forward_ex(a, &i))
   {
     /* make sure this isn't an associative array */
-    if (GDPHP_HASH_GET_CURRENT_KEY(a, key, index, i) == HASH_KEY_IS_STRING) {
+    if (GDPHP_HASH_GET_CURRENT_KEY(a, key, index, i) == HASH_KEY_IS_STRING)
       GDPHP_DIE(ctx, "cannot use associative arrays");
-    } else if (index < 0) /* does zend_hash_get_current_key_ex return ulong
-                             or a long? */
-      GDPHP_DIE(ctx, "bad array index");
 
-    if ((unsigned long)index + 1 > din->ns)
+    if (index + 1 > din->ns)
       din->ns = index + 1;
 
     if (din->type == GD_UNKNOWN) {

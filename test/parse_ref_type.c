@@ -24,7 +24,7 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int fd, e1, r = 0;
+  int e1, r = 0;
   DIRFILE *D;
 
   rmdirfile();
