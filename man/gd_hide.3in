@@ -1,0 +1,106 @@
+.\" gd_hide.3.  The gd_hidden man page.
+.\"
+.\" Copyright (C) 2012, 2013, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_hide 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_hide, gd_unhide \(em hide or unhide a Dirfile database entry
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_hide(const DIRFILE *" dirfile ", const char"
+.BI * entry_name );
+.HP
+.BI "int gd_unhide(const DIRFILE *" dirfile ", const char"
+.BI * entry_name );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_hide
+function hides the field or alias called
+.ARG entry_name
+in the dirfile(5) database specified by
+.ARG dirfile
+and indicates whether the field or alias called is hidden or not.  Similarly,
+the
+.FN gd_unhide
+function unhides the specified entry.  An entry can also be hidden or unhidden
+using
+.F3 gd_alter_entry .
+
+By default, a hidden entry does not appear in the lists returned by the
+functions
+.F3 gd_match_entries ,
+.F3 gd_entry_list
+.F3 gd_constants ,
+or
+.F3 gd_strings ,
+including the special-case versions of
+.F3 gd_entry_list
+such as
+.F3 gd_field_list .
+These omissions are also reflected in the counts returned by the corresponding
+field counting function
+.F3 gd_nentries
+and it's special-case versions
+.RB ( gd_nfields (3),
+&c.).
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_hide
+and
+.FN gd_unhide
+return zero.  On error, they return a negative-valued error code.  Possible
+error codes are:
+.DD GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.DD GD_E_BAD_CODE
+The field specified by
+.ARG field_code
+was not found in the database.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_PROTECTED
+The metadata of the affected format specification fragments was protected from
+change.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN gd_hide
+and
+.FN gd_unhide
+functions appeared in GetData-0.8.0.
+
+In GetData-0.10.0, the error return from these functions changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+.F3 gd_alter_entry ,
+.F3 gd_field_list ,
+.F3 gd_hidden ,
+.F3 gd_nfields ,
+.F3 gd_open ,
+dirfile(5)

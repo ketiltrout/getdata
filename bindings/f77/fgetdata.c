@@ -4225,17 +4225,16 @@ void F77_FUNC(gdmxlb, GDMXLB) (const int32_t *dirfile, const int32_t *lookback)
 
 /* gd_nentries wrapper */
 void F77_FUNC(gdnent, GDNENT) (int32_t *nentries, const int32_t *dirfile,
-    const int32_t *fragment, const char *parent, const int32_t *parent_l,
-    const int32_t *type, const int32_t *flags)
+    const char *parent, const int32_t *parent_l, const int32_t *type,
+    const int32_t *flags)
 {
   char *pa;
 
-  dtrace("%p, %i, %i, %p, %i, 0x%X, 0x%X", nentries, *dirfile, *fragment,
-      parent, *parent_l, *type, *flags);
+  dtrace("%p, %i, %p, %i, 0x%X, 0x%X", nentries, *dirfile, parent, *parent_l,
+      *type, *flags);
 
-  *nentries = gd_nentries(_GDF_GetDirfile(*dirfile), *fragment,
-      _GDF_CString(&pa, parent, *parent_l), (unsigned int)*type,
-      (unsigned int)*flags);
+  *nentries = gd_nentries(_GDF_GetDirfile(*dirfile), _GDF_CString(&pa, parent,
+        *parent_l), (unsigned int)*type, (unsigned int)*flags);
 
   free(pa);
   dreturn("%i", *nentries);
@@ -4243,8 +4242,8 @@ void F77_FUNC(gdnent, GDNENT) (int32_t *nentries, const int32_t *dirfile,
 
 /* Return the maximum field name length */
 void F77_FUNC(gdentx, GDENTX) (int32_t *max, const int32_t *dirfile,
-    const int32_t *fragment, const char *parent, const int32_t *parent_l,
-    const int32_t *type, const int32_t *flags)
+    const char *parent, const int32_t *parent_l, const int32_t *type,
+    const int32_t *flags)
 {
   const char **el;
   char *pa;
@@ -4254,15 +4253,15 @@ void F77_FUNC(gdentx, GDENTX) (int32_t *max, const int32_t *dirfile,
   const unsigned int utype = (unsigned int)*type;
   const unsigned int uflags = (unsigned int)*flags;
 
-  dtrace("%p, %i, %i, %p, %i, 0x%X, 0x%X", max, *dirfile, *fragment, parent,
-      *parent_l, utype, uflags);
+  dtrace("%p, %i, %p, %i, 0x%X, 0x%X", max, *dirfile, parent, *parent_l, utype,
+      uflags);
 
   D = _GDF_GetDirfile(*dirfile);
   _GDF_CString(&pa, parent, *parent_l);
-  nentries = gd_nentries(D, *fragment, pa, utype, uflags);
+  nentries = gd_nentries(D, pa, utype, uflags);
 
   if (!gd_error(D)) {
-    el = gd_entry_list(D, *fragment, pa, utype, uflags);
+    el = gd_entry_list(D, pa, utype, uflags);
 
     for (i = 0; i < nentries; ++i)
       if (strlen(el[i]) > len)
@@ -4276,9 +4275,8 @@ void F77_FUNC(gdentx, GDENTX) (int32_t *max, const int32_t *dirfile,
 
 /* gd_entry_list wrapper -- this only returns one entry name */
 void F77_FUNC(gdentn, GDENTN) (char *name, int32_t *name_l,
-    const int32_t *dirfile, const int32_t *fragment, const char *parent,
-    const int32_t *parent_l, const int32_t *type, const int32_t *flags,
-    const int32_t *field_num)
+    const int32_t *dirfile, const char *parent, const int32_t *parent_l,
+    const int32_t *type, const int32_t *flags, const int32_t *field_num)
 {
   const char** el;
   char *pa;
@@ -4287,15 +4285,15 @@ void F77_FUNC(gdentn, GDENTN) (char *name, int32_t *name_l,
   const unsigned int utype = (unsigned int)*type;
   const unsigned int uflags = (unsigned int)*flags;
 
-  dtrace("%p, %p, %i, %i, %p, %i, 0x%X, 0x%X, %i", name, name_l, *dirfile,
-      *fragment, parent, *parent_l, utype, uflags, *field_num);
+  dtrace("%p, %p, %i, %p, %i, 0x%X, 0x%X, %i", name, name_l, *dirfile,
+      parent, *parent_l, utype, uflags, *field_num);
 
   D = _GDF_GetDirfile(*dirfile);
   _GDF_CString(&pa, parent, *parent_l);
-  nentries = gd_nentries(D, *fragment, pa, utype, uflags);
+  nentries = gd_nentries(D, pa, utype, uflags);
 
   if (!gd_error(D) && *field_num > 0 && *field_num <= (int)nentries) {
-    el = gd_entry_list(D, *fragment, pa, utype, uflags);
+    el = gd_entry_list(D, pa, utype, uflags);
     _GDF_FString(name, name_l, el[*field_num - 1]);
   } else
     *name_l = 0;
@@ -5759,4 +5757,82 @@ void F77_FUNC(gddstp, GDDSTP) (char *data)
   *((void**)data) = NULL;
   
   dreturnvoid();
+}
+
+/* Return the maximum field name length of a gd_match_entries call */
+void F77_FUNC(gdmatx, GDMATX) (int32_t *max, const int32_t *dirfile,
+    const char *regex, const int32_t *regex_l, const int32_t *fragment,
+    const int32_t *type, const int32_t *flags)
+{
+  const char **el;
+  char *rx;
+  size_t len = 0;
+  DIRFILE* D;
+  unsigned int i, nentries;
+  const unsigned int utype = (unsigned int)*type;
+  const unsigned int uflags = (unsigned int)*flags;
+
+  dtrace("%p, %i, %p, %i, %i, 0x%X, 0x%X", max, *dirfile, regex, *regex_l,
+      *fragment, utype, uflags);
+
+  D = _GDF_GetDirfile(*dirfile);
+  _GDF_CString(&rx, regex, *regex_l);
+  nentries = gd_match_entries(D, rx, *fragment, utype, uflags, &el);
+
+  if (!gd_error(D)) {
+    for (i = 0; i < nentries; ++i)
+      if (strlen(el[i]) > len)
+        len = strlen(el[i]);
+  }
+
+  *max = len;
+  free(rx);
+  dreturn("%i", *max);
+}
+
+/* gd_match_entries wrapper */
+void F77_FUNC(gdmatn, GDMATN) (char *name, int32_t *name_l,
+    const int32_t *dirfile, const char *regex, const int32_t *regex_l,
+    const int32_t *fragment, const int32_t *type, const int32_t *flags,
+    const int32_t *field_num)
+{
+  const char **el;
+  char *rx;
+  DIRFILE* D;
+  unsigned int nentries;
+  const unsigned int utype = (unsigned int)*type;
+  const unsigned int uflags = (unsigned int)*flags;
+
+  dtrace("%p, %i, %i, %p, %i, %i, 0x%X, 0x%X, %i", name, *name_l, *dirfile,
+      regex, *regex_l, *fragment, utype, uflags, *field_num);
+
+  D = _GDF_GetDirfile(*dirfile);
+  _GDF_CString(&rx, regex, *regex_l);
+  nentries = gd_match_entries(D, rx, *fragment, utype, uflags, &el);
+
+  if (!gd_error(D) && *field_num > 0 && *field_num <= (int)nentries) 
+    _GDF_FString(name, name_l, el[*field_num - 1]);
+  else
+    *name_l = 0;
+
+  free(rx);
+  dreturn("%i", *name_l);
+}
+
+/* gd_match_entries wrapper */
+void F77_FUNC(gdnmat, GDNMAT) (int32_t *nentries, const int32_t *dirfile,
+    const char *regex, const int32_t *regex_l, const int32_t *fragment,
+    const int32_t *type, const int32_t *flags)
+{
+  char *rx;
+
+  dtrace("%p, %i, %p, %i, %i, 0x%X, 0x%X", nentries, *dirfile, regex, *regex_l,
+      *fragment, *type, *flags);
+
+  *nentries = gd_match_entries(_GDF_GetDirfile(*dirfile), _GDF_CString(&rx,
+        regex, *regex_l), *fragment, (unsigned int)*type, (unsigned int)*flags,
+      NULL);
+
+  free(rx);
+  dreturn("%i", *nentries);
 }

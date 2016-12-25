@@ -1,0 +1,162 @@
+.\" gd_alter_encoding.3.in.  The gd_alter_encoding man page.
+.\"
+.\" @configure_input@
+.\"
+.\" Copyright (C) 2008, 2009, 2010, 2014, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_alter_encoding 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_alter_encoding \(em modify the binary encoding of data in a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_alter_encoding(DIRFILE *" dirfile ", unsigned int " encoding ,
+.BI "int " fragment_index ", int " recode );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_alter_encoding
+function sets the binary encoding of the format specification fragment given by
+.ARG fragment_index
+to the encoding specified by
+.ARG encoding
+in the dirfile(5) database specified by
+.ARG dirfile .
+The binary encoding of a fragment indicate the encoding of data stored in binary
+files associated with
+.B RAW
+fields defined in the specified fragment.  The binary encoding of a fragment containing
+no
+.B RAW
+fields is ignored.
+
+The
+.ARG encoding
+argument should be one of the following symbols:
+.IP
+.SC
+.BR GD_UNENCODED ,
+.BR GD_BZIP2_ENCODED ,
+.BR GD_FLAC_ENCODED ,
+.BR GD_GZIP_ENCODED ,
+.BR GD_LZMA_ENCODED ,
+.BR GD_SLIM_ENCODED ,
+.BR GD_SIE_ENCODED ,
+.BR GD_TEXT_ENCODED .
+.EC
+.PP
+See
+.F3 gd_open
+and dirfile-encoding(5) for the meanings of these symbols and details on the
+supported encoding schemes.
+.PP
+In addition to being simply a valid fragment index,
+.ARG fragment_index
+may also be the special value
+.BR GD_ALL_FRAGMENTS ,
+which indicates that the encoding of all fragments in the database should
+be changed.
+
+If the
+.ARG recode
+argument is non-zero, this call will recode the binary data of affected
+.B RAW
+fields to account for the change in binary encoding.  If the encoding of the
+fragment is encoding insensitive, or if the data type is only one byte in
+size, no change is made.  The I/O pointer of all affected
+.B RAW
+fields is reset to the beginning-of-frame.
+
+If
+.ARG recode
+is zero, affected binary files are left untouched.
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_alter_encoding
+returns zero.  On error, it returns a negative-valued error code.  Possible
+error codes are:
+.DD GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_INDEX
+The supplied index was out of range.
+.DD GD_E_IO
+An I/O error occurred while attempting to recode a binary file.
+.DD GD_E_PROTECTED
+The metadata of the given format specification fragment was protected from
+change, or the binary data of the fragment was protected from change and binary
+file recoding was requested.
+.DD GD_E_UNCLEAN_DB
+An error occurred while moving the recoded file into place.  As a result, the
+database may be in an unclean state.  See the
+.B NOTES
+section below for recovery instructions.  In this case, the dirfile will be
+flagged as invalid, to prevent further database corruption.  It should be
+immediately closed.
+.DD GD_E_UNKNOWN_ENCODING
+The encoding scheme of the fragment is unknown.
+.DD GD_E_UNSUPPORTED
+The encoding scheme of the fragment does not support binary file recoding.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH NOTES
+A binary file recoding occurs out-of-place.  As a result, sufficient space
+must be present on the filesystem for the binary files of all
+.B RAW
+fields in the fragment both before and after translation.  If all fragments
+are updated by specifying
+.BR GD_ALL_FRAGMENTS ,
+the recoding occurs one fragment at a time.
+
+An error code of
+.B GD_E_UNCLEAN_DB
+indicates a system error occurred while moving the re-encoded binary data into
+place or when deleting the old data.  If this happens, the database may be left
+in an unclean state.  The caller should check the filesystem directly to
+ascertain the state of the dirfile data before continuing.  For recovery
+instructions, see the file
+@absolute_docdir@/unclean_database_recovery.txt.
+
+.SH HISTORY
+The function
+.FN dirfile_alter_encoding
+appeared in GetData-0.5.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_alter_encoding .
+
+in GetData-0.10.0, the error return from this function changed from -1 to
+a negative-valued error code.
+
+.SH SEE ALSO
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_encoding ,
+.F3 gd_open ,
+dirfile(5),
+dirfile-format(5)

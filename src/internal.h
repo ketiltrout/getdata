@@ -109,6 +109,12 @@
 #ifdef HAVE_IO_H
 #include <io.h>
 #endif
+#ifdef HAVE_PCRE_H
+#include <pcre.h>
+#endif
+#ifdef HAVE_REGEX_H
+#include <regex.h>
+#endif
 
 #ifndef SIZEOF_SIZE_T
 #define SIZEOF_SIZE_T (sizeof size_t)
@@ -162,7 +168,7 @@ typedef gd_off64_t off64_t;
 /* the open() in the MSVCRT doesn't permit open()ing directories */
 #ifdef __MSVCRT__
 #define GD_NO_DIR_OPEN
-/* rename open() flags */
+/* rename open() 0 */
 #define O_RDWR _O_RDWR
 #define O_RDONLY _O_RDONLY
 #define O_CREAT _O_CREAT
@@ -847,6 +853,8 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_FIELD_FORMAT      4
 #define GD_E_FIELD_STR         5
 
+#define GD_E_SUPPORT_REGEX     1
+
 #define GD_E_ENTRY_TYPE      1
 #define GD_E_ENTRY_METARAW   2
 #define GD_E_ENTRY_SPF       3
@@ -897,6 +905,8 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_ARG_NODATA         4
 #define GD_E_ARG_NO_VERS        5
 #define GD_E_ARG_BAD_VERS       6
+#define GD_E_ARG_REGEX          7
+#define GD_E_ARG_PCRE           8
 
 #define GD_E_LONG_FLUSH         1
 
@@ -987,7 +997,6 @@ struct gd_lut_ {
 
 /* field lists */
 struct gd_flist_ {
-  const char **alias_list;
   const char **entry_list[GD_N_ENTRY_LISTS];
   unsigned int entry_list_flags[GD_N_ENTRY_LISTS];
   const char **string_value_list;
@@ -1251,6 +1260,7 @@ struct gd_dirfile_ {
   int n_fragment;
 
   /* field lists */
+  const char **regex_list;
   struct gd_flist_ fl;
 
   /* syntax error callback */

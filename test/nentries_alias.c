@@ -24,31 +24,30 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
-    "data1 RAW UINT8 1\n"
-    "/ALIAS data2 data1\n"
-    "/ALIAS data3 data4\n";
-  int fd, error, r = 0;
+  int error, r = 0;
   unsigned int nfields;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+      "data1 RAW UINT8 1\n"
+      "/ALIAS data2 data1\n"
+      "/ALIAS data3 data4\n");
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  nfields = gd_nentries(D, GD_ALL_FRAGMENTS, NULL, GD_ALIAS_ENTRIES, 0);
+
+  nfields = gd_nentries(D, NULL, GD_ALIAS_ENTRIES, 0);
+  CHECKI(nfields, 2);
+
   error = gd_error(D);
+  CHECKI(error, 0);
+
   gd_discard(D);
 
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, 0);
-  CHECKI(nfields, 2);
 
   return r;
 }

@@ -2,15 +2,15 @@ function field_list = gd_vector_list(D)
 % GD_VECTOR_LIST  Retrieve a list of field names
 %
 %   GD_VECTOR_LIST(DIRFILE)
-%             is equivalent to calling GD_ENTRY_LIST(DIRFILE, ...
-%                                        GD.ALL_FRAGMENTS,0,GD.VECTOR_ENTRIES,0)
+%             is equivalent to calling GD_ENTRY_LIST(DIRFILE,0, ...
+%                                                           GD.VECTOR_ENTRIES,0)
 %
 %   For GD, see GETDATA_CONSTANTS.
 %
 %   See also GD_ENTRY_LIST, GETDATA_CONSTANTS
 
   GD = getdata_constants();
-  field_list = gd_entry_list(D, GD.ALL_FRAGMENTS, 0, GD.VECTOR_ENTRIES);
+  field_list = gd_entry_list(D, 0, GD.VECTOR_ENTRIES);
 end
 
 % Copyright (C) 2013, 2016 D. V. Wiebe

@@ -1,0 +1,142 @@
+.\" gd_eof.3.  The gd_eof man page.
+.\"
+.\" Copyright (C) 2010, 2011, 2014, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_eof 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_eof \(em find the end of a Dirfile field
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "off_t gd_eof(DIRFILE *" dirfile ", const char *" field_code );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_eof
+function queries a dirfile(5) database specified by
+.ARG dirfile
+and determines the sample number of the end-of-field marker for the vector field
+given by
+.ARG field_code .
+This is effectively the total number of samples available for the field,
+including any frame offset.
+
+The caller should not assume that this is equivalent (when accounting for the samples-per-frame of the indicated field) to the number of frames in the database
+returned by
+.F3 gd_nframes ,
+nor even that the end-of-field marker falls on a frame boundary.
+
+For a
+.B RAW
+field, the end-of-field marker occurs immediately after the last datum in the
+data file associated with the field.  The special field
+.I INDEX
+has no end-of-field marker.
+
+The end-of-field of a
+.B PHASE
+field is the end-of-field of its input adjusted by the
+.B PHASE
+field's shift.  For other vector field types, the end-of-field marker is the
+smallest end-of-field marker of any of its inputs.
+
+If the end-of-field marker for a field is less than or equal to its
+beginning-of-field marker (see
+.F3 gd_bof ),
+then that field has no data.  For a
+.B RAW
+field, the difference between the beginning- and end-of-field markers indicates
+the number of samples of data actually stored on disk.
+
+The 
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_eof
+returns the sample number of the end-of-field marker for the indicated field,
+which is never negative.  On error, it returns a negative-valued error code.
+Possible error codes are:
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_CODE
+The field specified by
+.ARG field_code
+or one of the fields it uses as input was not found in the database.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_FIELD_TYPE
+The location of the non-existent end-of-field marker for the special field
+.I INDEX
+was requested, possibly as a result of the field specified by
+.ARG field_code
+using
+.I INDEX
+as one of its inputs.
+.DD GD_E_DIMENSION
+A scalar field was found where a vector field was expected in the definition
+of
+.ARG field_code 
+or one of its inputs, or else
+.ARG field_code
+itself specified a scalar field.
+.DD GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+GetData developers.
+.DD GD_E_IO
+An I/O error occurred while deterimining the size of the raw data file
+associated with the field, or one of its input fields.
+.DD GD_E_RECURSE_LEVEL
+Too many levels of recursion were encountered while trying to resolve
+.ARG field_code .
+This usually indicates a circular dependency in field specification in the
+dirfile.
+.DD GD_E_UNKNOWN_ENCODING
+The size of the decoded data file associated with the specified field or one of
+its inputs could not be determined, because its encoding scheme was not
+understood.
+.DD GD_E_UNSUPPORTED
+The size of the decoded data file associated with the specified field or one of
+its inputs could not be determined, because its encoding scheme was not
+supported.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN gd_eof
+function appeared in GetData-0.7.0.
+
+In GetData-0.10.0, the error return from this function changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+.F3 gd_bof ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_nframes ,
+.F3 gd_open ,
+dirfile(5), dirfile-encoding(5)

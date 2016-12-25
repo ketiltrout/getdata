@@ -1,0 +1,86 @@
+.\" gd_alias_target.3.  The gd_alias_target man page.
+.\"
+.\" Copyright (C) 2012, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_alias_target 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_alias_target \(em determine the target of an alias defined in a Dirfile
+database
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "const char *gd_alias_target(DIRFILE *" dirfile ,
+.BI "const char *" alias_name );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_alias_target
+function queries a dirfile(5) database specified by
+.ARG dirfile
+and determines the target field code of the alias specified by
+.ARG alias_name .
+
+The
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+
+Note: the target may itself be the an alias, which will have its own target.  To
+obtain the canonical name of the field ultimately referenced by
+.ARG alias_name ,
+pass it to
+.F3 gd_entry
+and inspect the
+.ARG field
+member of the gd_entry_t structure returned.
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_alias_target
+returns a pointer to a read-only character string containing the name of the
+target of the specified alias.  On error,
+.FN gd_alias_target
+returns NULL and sets the dirfile error a non-zero error value.  Possible error
+values are:
+.DD GD_E_BAD_CODE
+The name
+.ARG alias_name
+was not found in the dirfile.
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_FIELD_TYPE
+The entry specified by
+.ARG alias_name
+was not an alias.
+.PP
+The dirfile error may be retrieved by calling
+.F3 gd_error .
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.F3 gd_error_string .
+
+.SH HISTORY
+The function
+.FN gd_alias_target
+appeared in GetData-0.8.0.
+
+.SH SEE ALSO
+.F3 gd_aliases ,
+.F3 gd_entry ,
+.F3 gd_open ,
+dirfile(5)

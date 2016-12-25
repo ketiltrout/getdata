@@ -118,8 +118,7 @@ namespace GetData {
 
       GetData::Entry* Entry(const char *field_code) const;
 
-      const char **EntryList(int fragment = GD_ALL_FRAGMENTS,
-          const char *parent = NULL, int type = 0,
+      const char **EntryList(const char *parent = NULL, int type = 0,
           unsigned int flags = 0) const;
 
       gd_off64_t EoF(const char *field_code) const;
@@ -192,6 +191,10 @@ namespace GetData {
       int MAlterSpec(const char *line, const char *parent, int recode = 0)
         const;
 
+      unsigned int MatchEntries(const char *regex = NULL,
+          int fragment = GD_ALL_FRAGMENTS, int type = 0, unsigned int flags = 0,
+          const char ***entries = NULL);
+
       const gd_carray_t *MCarrays(const char *parent, DataType type = Float64)
         const;
 
@@ -213,8 +216,7 @@ namespace GetData {
 
       int NAliases(const char* field_code) const;
 
-      unsigned int NEntries(int fragment = GD_ALL_FRAGMENTS,
-          const char *parent = NULL, int type = 0,
+      unsigned int NEntries(const char *parent = NULL, int type = 0,
           unsigned int flags = 0) const;
 
       unsigned int NFields() const;

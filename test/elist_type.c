@@ -29,10 +29,9 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
 
   D = gd_open(filedir, GD_RDONLY | GD_CREAT);
-  field_list = gd_entry_list(D, GD_ALL_FRAGMENTS, NULL, 999999, 0);
+  field_list = gd_entry_list(D, NULL, 999999, 0);
   error = gd_error(D);
   CHECKI(error, GD_E_BAD_ENTRY);
   CHECKP(field_list);

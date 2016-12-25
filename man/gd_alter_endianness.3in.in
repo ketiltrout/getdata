@@ -1,0 +1,174 @@
+.\" gd_alter_endianness.3.  The gd_alter_endianness man page.
+.\"
+.\" @configure_input@
+.\"
+.\" Copyright (C) 2008, 2010, 2012, 2014, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_alter_endianness 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_alter_endianness \(em modify the byte sex of fields in a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_alter_endianness(DIRFILE *" dirfile ", unsigned long"
+.IB byte_sex ", int " fragment_index ", int " recode );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_alter_endianness
+function sets the byte sex of the format specification fragment given by
+.ARG fragment_index
+to
+.ARG byte_sex
+in the dirfile(5) database specified by
+.ARG dirfile .
+The byte sex of a fragment indicate the endianness of data stored in binary
+files associated with
+.B RAW
+fields defined in the specified fragment.  The byte sex of a fragment containing
+no
+.B RAW
+fields is ignored.
+
+The
+.ARG byte_sex
+argument should be one of the following:
+.DD "0\fR (zero)"
+Indicating that the byte sex should be the native endianness of the host,
+whichever that may be.
+.DD GD_BIG_ENDIAN
+Indicating that the byte sex should be big endian.
+.DD GD_LITTLE_ENDIAN
+Indicating that the byte sex should be little endian.
+.TP
+.RB ( GD_BIG_ENDIAN " | " GD_LITTLE_ENDIAN )
+Indicating that the byte sex should be the opposite of the native endianness of
+the host, whichever that may be.
+.PP
+Furthermore, any of these may be bitwise or'd
+with
+.B GD_ARM_ENDIAN
+or
+.B GD_NOT_ARM_ENDIAN
+indicating that the floating point data are stored in the ARM middle-endian
+format.
+.PP
+In addition to being simply a valid fragment index,
+.ARG fragment_index
+may also be the special value
+.BR GD_ALL_FRAGMENTS ,
+which indicates that the byte sex of all fragments in the database should
+be changed.
+
+If the
+.ARG recode
+argument is non-zero, this call will byte swap the binary data of affected
+.B RAW
+fields to account for the change in byte sex.  If the encoding of the
+fragment is endianness insensitive, or if the data type is only one byte in
+size, no change is made.  The I/O pointer of all affected
+.B RAW
+fields is reset to the beginning-of-frame.
+
+If
+.ARG recode
+is zero, affected binary files are left untouched.
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_alter_endianness
+returns zero.  On error, it returns a negative-valued error code.  Possible
+error codes are:
+.DD GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_ARGUMENT
+The supplied
+.ARG byte_sex
+was invalid.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_INDEX
+The supplied index was out of range.
+.DD GD_E_IO
+An I/O error occurred while attempting to byte swap a binary file.
+.DD GD_E_PROTECTED
+The metadata of the indicated format specification fragment was protected from
+change, or the binary data of the fragment was protected from change and binary
+file byte swapping was requested.
+.DD GD_E_UNCLEAN_DB
+An error occurred while moving the byte-swapped file into place.  As a result,
+the database may be in an unclean state.  See the
+.B NOTES
+section below for recovery instructions.  In this case, the dirfile will be
+flagged as invalid, to prevent further database corruption.  It should be
+immediately closed.
+.DD GD_E_UNKNOWN_ENCODING
+The encoding scheme of the fragment is unknown.
+.DD GD_E_UNSUPPORTED
+The encoding scheme of the fragment does not support binary file byte swapping.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH NOTES
+A binary file byte swap occurs out-of-place.  As a result, sufficient space
+must be present on the filesystem for the binary files of all
+.B RAW
+fields in the fragment both before and after translation.  If all fragments
+are updated by specifying
+.BR GD_ALL_FRAGMENTS ,
+the byte swapping occurs one fragment at a time.
+
+An error code of
+.B GD_E_UNCLEAN_DB
+indicates a system error occurred while moving the byte-swapped binary data into
+place or when deleting the old data.  If this happens, the database may be left
+in an unclean state.  The caller should check the filesystem directly to
+ascertain the state of the dirfile data before continuing.  For recovery
+instructions, see the file
+@absolute_docdir@/unclean_database_recovery.txt.
+
+.SH HISTORY
+The function
+.FN dirfile_alter_endianness
+appeared in GetData-0.5.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_alter_endianness .
+The
+.B GD_E_ARM_ENDIAN
+and
+.B GD_NOT_ARM_ENDIAN
+flags also appeared in this version.
+
+in GetData-0.10.0, the error return from this function changed from -1 to
+a negative-valued error code.
+
+.SH SEE ALSO
+.F3 gd_open ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_endianness ,
+dirfile(5),
+dirfile-format(5)

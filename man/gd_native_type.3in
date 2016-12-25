@@ -1,0 +1,156 @@
+.\" gd_native_type.3.  The gd_native_type man page.
+.\"
+.\" Copyright (C) 2009, 2010, 2011, 2012, 2014, 2016 D.V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_native_type 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_native_type \(em returns the native data type of a field in a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "gd_type_t gd_native_type(DIRFILE *" dirfile ", const char *" field_code );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_native_type
+function queries a dirfile(5) database specified by
+.ARG dirfile
+and determines the native type of data specified by
+.ARG field_code ,
+which may contain a representation suffix.
+
+The 
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+
+The native data type of a field of a given entry type is calculated as:
+.DD BIT INDEX
+.BR GD_UINT64 ;
+.DD CONST CARRAY
+the data type of the field;
+.DD DIVIDE MULTIPLY
+if either input field is complex valued:
+.BR GD_COMPLEX128 ,
+otherwise:
+.BR GD_FLOAT64 ;
+.DD INDIR
+the data type of the input
+.BR CARRAY ;
+.DD LINCOM POLYNOM
+if any of the scalar parameters is complex valued, or if the native data type of
+any of the input fields is complex valued:
+.BR GD_COMPLEX128 ,
+otherwise:
+.BR GD_FLOAT64 ;
+.DD LINTERP
+if the look-up table is complex valued:
+.BR GD_COMPLEX128 ,
+otherwise:
+.BR GD_FLOAT64 ;
+.DD MPLEX WINDOW
+the native data type of the data field;
+.DD PHASE
+the native data type of the input field;
+.DD RAW
+the data type of the raw data on disk;
+.DD RECIP
+if the dividend or the native data type of the input field is complex valued:
+.BR GD_COMPLEX128 ,
+otherwise:
+.BR GD_FLOAT64 ;
+.DD SARRAY SINDIR STRING
+.BR GD_STRING ;
+.TP
+.DD SBIT
+.BR GD_INT64 .
+.PP
+Furthermore, if the supplied
+.ARG field_code
+contains a representation suffix, and the native data type of the field is
+complex valued, the native type returned will be the corresponding real valued
+type.
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_native_type
+returns the native data type of the field code specified.  This will equal one
+of the symbols:
+.IP
+.SC
+.BR GD_UINT8 ", " GD_INT8 ", " GD_UINT16 ", " GD_INT16 ", " GD_UINT32 ,
+.BR GD_INT32 ", " GD_FLOAT32 ", " GD_FLOAT64 ", " GD_COMPLEX64 ,
+.BR GD_COMPLEX128 ", " GD_STRING .
+.EC
+.PP
+The meanings of these symbols are explained in the
+.F3 gd_getdata
+manual page.
+
+On error, this function returns
+.B GD_UNKNOWN
+and stores a negative-valued error code in the
+.B DIRFILE
+object which may be retrieved by a subsequent call to
+.F3 gd_error .
+Possible error codes are:
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_CODE
+The field specified by
+.ARG field_code
+or one of the fields it uses as input was not found in the database.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_DIMENSION
+A scalar field was found where a vector field was expected.
+.DD GD_E_IO
+An error occurred while trying to read a LINTERP table from disk.
+.DD GD_E_LUT
+A LINTERP table was malformed.
+.DD GD_E_RECURSE_LEVEL
+Too many levels of recursion were encountered while trying to resolve
+.ARG field_code .
+This usually indicates a circular dependency in field specification in the
+dirfile.
+.PP
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN get_native_type
+function appeared in GetData-0.6.0.  The return type for
+.B STRING
+fields was
+.BR GD_NULL .
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_native_type .
+
+In GetData-0.10.0, the return type for
+.B STRING
+fields changed to
+.BR GD_STRING .
+
+.SH SEE ALSO
+.F3 gd_error ,
+.F3 gd_error_string
+.F3 gd_getdata ,
+.F3 gd_open ,
+dirfile(5)

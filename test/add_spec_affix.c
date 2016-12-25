@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. V. Wiebe
+/* Copyright (C) 2016 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,48 +20,32 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  int error, r = 0;
-  gd_entry_t e;
+  const char *format1 = "dirfile/format1";
+  int e1, e2, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  gd_add_spec(D, "data RAW UINT8 2", 0);
-  error = gd_error(D);
+  mkdir(filedir, 0700);
 
-  /* check */
-  gd_entry(D, "data", &e);
-  if (gd_error(D))
-    r = 1;
-  else {
-    CHECKI(e.field_type, GD_RAW_ENTRY);
-    CHECKI(e.fragment_index, 0);
-    CHECKI(e.EN(raw,spf), 2);
-    CHECKI(e.EN(raw,data_type), GD_UINT8);
-    gd_free_entry_strings(&e);
-  }
+  MAKEFORMATFILE(format, "/INCLUDE format1 [ ]");
+  MAKEFORMATFILE(format1, "#");
+  
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  gd_add_spec(D, "data CONST UINT8 2", 1);
+  e1 = gd_error(D);
+
+  e2 = gd_validate(D, "[data]");
+  CHECKI(e2, 0);
 
   gd_discard(D);
 
-  if (unlink(data))
-    r = 1;
+  unlink(format1);
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(error, GD_E_OK);
 
   return r;
 }

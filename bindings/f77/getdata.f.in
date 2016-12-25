@@ -326,6 +326,10 @@ C     Corresponding to gd_alter_entry(3) for WINDOW fields
       EXTERNAL GDLSWD
 C     Corresponding to gd_linterp_tablename(3)
       EXTERNAL GDLTTN
+C     Corresponding to gd_match_entries(3)
+      EXTERNAL GDMATN
+C     Returns the maximum entry name length
+      EXTERNAL GDMATX
 C     Corresponding to gd_mconstants(3) (sort of)
       EXTERNAL GDMCOS
 C     Corresponding to gd_madd_alias(3)
@@ -409,6 +413,8 @@ C     Corresponding to gd_nfragments(3)
       EXTERNAL GDNFRG
 C     Corresponding to gd_nframes(3)
       EXTERNAL GDNFRM
+C     Corresponding to gd_match_entries(3)
+      EXTERNAL GDNMAT
 C     Corresponding to gd_nmfields(3)
       EXTERNAL GDNMFD
 C     Corresponding to gd_nmfields_by_type(3)

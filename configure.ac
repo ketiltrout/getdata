@@ -80,8 +80,23 @@ dnl Build/Host triplets
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 
+dnl Utils
+AC_MSG_CHECKING([whether to build the utilities])
+AC_ARG_ENABLE([util], AS_HELP_STRING([--disable-util],
+              [don't build or install the utilities in the util/ ] dnl'
+              [subdirectory (checkdirfile and dirfile2ascii)]),
+              [
+               if test "x${enableval}" = "xno"; then
+                 make_util=no
+               else
+                 make_util=yes
+               fi
+               ], [ make_util=yes ])
+AC_MSG_RESULT([$make_util])
+
 dnl Legacy API
-AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--enable-legacy-api],
+AC_MSG_CHECKING([whether to include the legacy API])
+AC_ARG_ENABLE([legacy-api], AS_HELP_STRING([--enable-legacy-api],
               [include the legacy API wrapper in the library]), dnl'
               [
                case "${enableval}" in
@@ -89,7 +104,6 @@ AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--enable-legacy-api],
                  *) include_legacy_api="yes" ;;
                esac
               ], [ include_legacy_api="no" ])
-AC_MSG_CHECKING([whether to include the legacy API])
 AC_MSG_RESULT([$include_legacy_api])
 
 if test "x$include_legacy_api" != "xno"; then
@@ -100,15 +114,7 @@ fi
 AC_SUBST([DEFINE_GD_LEGACY_API])
 
 dnl debugging
-AC_ARG_ENABLE(assert, AS_HELP_STRING([--enable-assert],
-              [enable assertions]),
-              [
-               case "${enableval}" in
-                 yes) enable_assert="yes" ;;
-                 *) enable_assert="no" ;;
-               esac
-              ], [ enable_assert="no" ])
-AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug],
+AC_ARG_ENABLE([debug], AS_HELP_STRING([--enable-debug],
               [enable debugging messages]),
               [
                case "${enableval}" in
@@ -122,21 +128,14 @@ AC_MSG_RESULT([$enable_debug])
 if test "x$enable_debug" = "xyes"; then
   AC_DEFINE([GETDATA_DEBUG], [],
             [ Define to enable debugging messages ])
-  enable_assert="yes"
   GETDATA_DEBUG=1
 else
   GETDATA_DEBUG=0
 fi
 AC_SUBST([GETDATA_DEBUG])
 
-AC_MSG_CHECKING([whether to enable assertions])
-AC_MSG_RESULT([$enable_assert])
-if test "x$enable_assert" = "xno"; then
-  AC_DEFINE(NDEBUG, 1, [ Define to disable assertions ])
-fi
-
 dnl C99 stuff
-AC_ARG_ENABLE(ansi-c, AS_HELP_STRING([--enable-ansi-c],
+AC_ARG_ENABLE([ansi-c], AS_HELP_STRING([--enable-ansi-c],
               [use ANSI C (C89) work-arounds for C99 code]),
               [
                if test "x${enableval}" != "xno"; then
@@ -174,8 +173,8 @@ make_idlbindings="yes"
 make_perlbindings="yes"
 make_matlabbindings="yes"
 make_phpbindings="yes"
-AC_ARG_ENABLE(bindings, AS_HELP_STRING([--disable-bindings],
-              [don't build any bindings; just build the C library]),
+AC_ARG_ENABLE([bindings], AS_HELP_STRING([--disable-bindings],
+              [don't build any bindings; just build the C library]), dnl'
               [
                if test "x${enableval}" = "xno"; then
                  make_cxxbindings="no"
@@ -189,8 +188,8 @@ AC_ARG_ENABLE(bindings, AS_HELP_STRING([--disable-bindings],
               ])
 
 dnl C++ bindings
-AC_ARG_ENABLE(cplusplus, AS_HELP_STRING([--disable-cplusplus],
-              [don't build the C++ bindings (libgetdata++)]),
+AC_ARG_ENABLE([cplusplus], AS_HELP_STRING([--disable-cplusplus],
+              [don't build the C++ bindings (libgetdata++)]), dnl'
               [
                case "${enableval}" in
                  no) make_cxxbindings="no" ;;
@@ -201,7 +200,7 @@ AC_MSG_CHECKING([whether to include the C++ bindings])
 AC_MSG_RESULT([$make_cxxbindings])
 
 dnl Fortran 77 bindings
-AC_ARG_ENABLE(fortran, AS_HELP_STRING([--disable-fortran],
+AC_ARG_ENABLE([fortran], AS_HELP_STRING([--disable-fortran],
               [don't build the Fortran 77 bindings (libfgetdata) nor ]dnl'
               [the Fortran 95 bindings (libf95getdata)]),
               [
@@ -212,7 +211,7 @@ AC_ARG_ENABLE(fortran, AS_HELP_STRING([--disable-fortran],
               ])
 
 dnl Fortran 95 bindings
-AC_ARG_ENABLE(fortran95, AS_HELP_STRING([--disable-fortran95],
+AC_ARG_ENABLE([fortran95], AS_HELP_STRING([--disable-fortran95],
               [don't build the Fortran 95 bindings (libf95getdata)]),dnl'
               [
                case "${enableval}" in
@@ -232,7 +231,7 @@ AC_MSG_CHECKING([whether to include the Fortran 77 bindings])
 AC_MSG_RESULT([$make_f77bindings])
 
 dnl IDL bindings
-AC_ARG_ENABLE(idl, AS_HELP_STRING([--disable-idl],
+AC_ARG_ENABLE([idl], AS_HELP_STRING([--disable-idl],
               [don't build the Interactive Data Language (IDL) bindings ]dnl'
               [(IDL_GetData)]),
               [
@@ -246,7 +245,7 @@ AC_MSG_CHECKING([whether to include the IDL bindings])
 AC_MSG_RESULT([$make_idlbindings])
 
 dnl MATLAB bindings
-AC_ARG_ENABLE(matlab, AS_HELP_STRING([--disable-matlab],
+AC_ARG_ENABLE([matlab], AS_HELP_STRING([--disable-matlab],
               [don't build the MATLAB bindings]),dnl'
               [
                case "${enableval}" in
@@ -259,7 +258,7 @@ AC_MSG_CHECKING([whether to include the MATLAB bindings])
 AC_MSG_RESULT([$make_matlabbindings])
 
 dnl Perl bindings
-AC_ARG_ENABLE(perl, AS_HELP_STRING([--disable-perl],
+AC_ARG_ENABLE([perl], AS_HELP_STRING([--disable-perl],
               [don't build the Perl bindings (GetData)]),dnl'
               [
                case "${enableval}" in
@@ -272,7 +271,7 @@ AC_MSG_CHECKING([whether to include the Perl bindings])
 AC_MSG_RESULT([$make_perlbindings])
 
 dnl Python bindings
-AC_ARG_ENABLE(python, AS_HELP_STRING([--disable-python],
+AC_ARG_ENABLE([python], AS_HELP_STRING([--disable-python],
               [don't build the Python bindings (pygetdata)]),dnl'
               [
                case "${enableval}" in
@@ -285,7 +284,7 @@ AC_MSG_CHECKING([whether to include the Python bindings])
 AC_MSG_RESULT([$make_pybindings])
 
 dnl PHP bindings
-AC_ARG_ENABLE(php, AS_HELP_STRING([--disable-php],
+AC_ARG_ENABLE([php], AS_HELP_STRING([--disable-php],
               [don't build the PHP bindings]),dnl'
               [
                case "${enableval}" in
@@ -298,7 +297,7 @@ AC_MSG_CHECKING([whether to include the PHP bindings])
 AC_MSG_RESULT([$make_phpbindings])
 
 dnl Modules
-AC_ARG_ENABLE(modules, AS_HELP_STRING([--disable-modules],
+AC_ARG_ENABLE([modules], AS_HELP_STRING([--disable-modules],
               [put support for external encodings directly in the core GetData
                library, instead of in dynamically loaded modules]),
                [
@@ -671,6 +670,8 @@ echo
 echo "*** Looking for additional libraries"
 echo
 AC_SEARCH_LIBS([ceil],[m])
+AC_SEARCH_LIBS([regcomp],[regex])
+AC_SEARCH_LIBS([pcre_compile],[pcre])
 
 dnl headers
 echo
@@ -678,9 +679,9 @@ echo "*** Looking for additional header files"
 echo
 AC_CHECK_HEADERS([asm/unaligned.h Availability.h byteswap.h crtdefs.h direct.h \
                   features.h fcntl.h float.h inttypes.h io.h libgen.h \
-                  libkern/OSByteOrder.h math.h stddef.h stdint.h sys/endian.h \
-                  sys/file.h sys/param.h sys/resource.h sys/stat.h sys/time.h \
-                  sys/types.h sys/wait.h unistd.h])
+                  libkern/OSByteOrder.h math.h pcre.h regex.h stddef.h \
+                  stdint.h sys/endian.h sys/file.h sys/param.h sys/resource.h \
+                  sys/stat.h sys/time.h sys/types.h sys/wait.h unistd.h])
 if test "x$disable_c99" = "xno"; then
 AC_CHECK_HEADERS([complex.h])
 fi
@@ -802,9 +803,10 @@ AC_CHECK_FUNCS([basename _chsize _chsize_s _commit fchmod _fdopen fdopendir \
                 fstatat fstatat64 fsync ftello ftello64 ftruncate ftruncate64 \
                 getcwd _getcwd getdelim gmtime_r isnan _isnan lseek64 \
                 _lseeki64 lstat lstat64 _mkdir mkfifo nan _open openat \
-                pathconf _read readdir_r readlink renameat _rmdir setrlimit \
-                snprintf _snprintf stat64 _stat64 _strtoi64 strtoll strtoq \
-                _strtoui64 strtoull strtouq symlink _unlink unlinkat _write])
+                pathconf pcre_compile _read readdir_r readlink regcomp \
+                renameat _rmdir setrlimit snprintf _snprintf stat64 _stat64 \
+                _strtoi64 strtoll strtoq _strtoui64 strtoull strtouq symlink \
+                _unlink unlinkat _write])
 if test "x$disable_c99" = "xno"; then
   AC_CHECK_FUNCS([cabs])
 fi
@@ -1008,7 +1010,7 @@ GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h], [slimdata slim],
 GD_CHECK_ENCODING([zzip],[zzip],[zzip_open],[zzip/lib.h],[zip],[unzip],[])
 
 dnl zzslim hackery -- there's no easy way to check whether slim supports zzip
-AC_ARG_ENABLE(zzslim, AS_HELP_STRING([--enable-zzslim],
+AC_ARG_ENABLE([zzslim], AS_HELP_STRING([--enable-zzslim],
               [skip probing for zzslim required features and enable the zzslim
                encoding.  Note: zzslim encoding support requires both slim and
                zzip encoding support.  [default: autodetect]]),
@@ -1108,6 +1110,27 @@ EOF
 absolute_docdir=`$SHELL conftest.sh`
 AC_SUBST([absolute_docdir])
 
+dnl Figure out regex support
+if test "x$ac_cv_func_regcomp$ac_cv_header_regex_h" = "xyesyes"; then
+  regices=" posix"
+  DEFINE_GD_NO_REGEX="/* #undef GD_NO_REGEX */"
+else
+  DEFINE_GD_NO_REGEX="#define GD_NO_REGEX"
+fi
+AC_SUBST([DEFINE_GD_NO_REGEX])
+
+if test "x$ac_cv_func_pcre_compile$ac_cv_header_pcre_h" = "xyesyes"; then
+  regices="${regices} pcre"
+  DEFINE_GD_NO_PCRE="/* #undef GD_NO_PCRE */"
+else
+  DEFINE_GD_NO_PCRE="#define GD_NO_PCRE"
+fi
+AC_SUBST([DEFINE_GD_NO_PCRE])
+
+if test "x$regices" = "x"; then
+  regices = " none"
+fi
+
 dnl output
 echo
 echo "*** Writing configure output"
@@ -1134,9 +1157,9 @@ AC_CONFIG_FILES([bindings/python/setup.py])
 AC_CONFIG_FILES([bindings/python/test/Makefile])
 AC_CONFIG_FILES([doc/Makefile])
 AC_CONFIG_FILES([man/Makefile])
-AC_CONFIG_FILES([man/gd_alter_encoding.3])
-AC_CONFIG_FILES([man/gd_alter_endianness.3])
-AC_CONFIG_FILES([man/gd_alter_frameoffset.3])
+AC_CONFIG_FILES([man/gd_alter_encoding.3in])
+AC_CONFIG_FILES([man/gd_alter_endianness.3in])
+AC_CONFIG_FILES([man/gd_alter_frameoffset.3in])
 AC_CONFIG_FILES([src/Makefile])
 dnl This doubling allows us to build getdata.h as a normal AC_CONFIG_FILE, but
 dnl use AC_CONFIG_HEADERS to check whether it has changed.
@@ -1163,6 +1186,7 @@ AM_CONDITIONAL(MAKE_IDLBINDINGS, [test "x$make_idlbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_PERLBINDINGS, [test "x$make_perlbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_MATLABBINDINGS, [test "x$make_matlabbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_PHPBINDINGS, [test "x$make_phpbindings" = "xyes"])
+AM_CONDITIONAL(MAKE_UTIL, [test "x$make_util" = "xyes"])
 AM_CONDITIONAL(USE_MODULES, [test "x$use_modules" != "xno"])
 AM_CONDITIONAL(TEST_PYTHON, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(TEST_IDL, [test "x$NO_DLOPEN_TESTS" = "x0"])
@@ -1245,10 +1269,6 @@ if test "x$ENCODINGS_LEFT" = "x"; then
   ENCODINGS_LEFT=" none"
 fi
 
-if test "x$enable_debug$enable_assert" = "xnoyes"; then
-  enable_debug="assert only"
-fi
-
 echo
 echo "Configuration summary: "
 echo "  Build platform:                ${build}"
@@ -1259,6 +1279,8 @@ echo "  ANSI C compatibility mode:     ${disable_c99}"
 echo "  Legacy API:                    ${include_legacy_api}"
 echo "  Verbose debugging:             ${enable_debug}"
 echo "  Fast unaligned memory access:  ${gd_unaligned_ok}"
+dnl ${regices} contains a leading space
+echo "  Regular expression support:   ${regices}"
 echo "  Use modules:                   ${use_modules}"
 if test "x${use_modules}" != "xno"; then
   echo "  Thread-safe dynamic loading:   ${use_pthread}"

@@ -1,0 +1,137 @@
+.\" gd_desync.3.  The gd_desync man page.
+.\"
+.\" Copyright (C) 2012, 2014, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_desync 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_desync \(em check for a change of metadata on disk
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_desync(DIRFILE *" dirfile ", unsigned int " flags );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_desync
+function determines whether the metadata of the loaded
+.ARG dirfile
+has become desynchronised from the format specification fragments on disk, due
+to a third party modifying the Dirfile metadata on disk after GetData opened
+it.  If
+.ARG dirfile
+has become desynchronised, this function can, optionally, reload the dirfile.
+
+The
+.ARG flags
+argument influences how the function works.  It should be zero or more of the
+following flags, bitwise or'd together:
+.DD GD_DESYNC_PATHCHECK
+Ignore GetData's internal directory cache, and use the format fragments' full
+path when checking for modifications.  This flag is of particular importance
+when the
+.ARG dirfilename
+passed to
+.F3 gd_cbopen ,
+or directory paths used in included fragments, contain symbolic links: with this
+flag, these symbolic links will be re-evaluated.  Without it, the target of
+the symbolic links in effect when the dirfile was first opened will be
+considered instead.
+.DD GD_DESYNC_REOPEN
+If this flag is specified, and
+.FN gd_desync
+detects desynchronisation, the Dirfile will be re-opened in place using the
+exiting
+.ARG dirfile
+pointer.  In this case, upon a positive result from this function, the caller
+must discard all cached information about the dirfile, even the assumption that
+.ARG dirfile
+has been successfully opened.
+
+Re-opening the dirfile is equivalent to calling
+.F3 gd_discard ,
+and then
+.F3 gd_cbopen
+with the same arguments used when originally creating
+.ARG dirfile ,
+except that the
+.ARG dirfile
+pointer doesn't change its value.  As a result, this function may invoke the
+registered parser callback function (see
+.F3 gd_cbopen
+and
+.F3 gd_parser_callback ).
+
+.SH RETURN VALUE
+When successful, this function returns zero if the loaded dirfile has not
+desynchronised, or one if it has.  On error, a negative-valued error code is
+returned, regardless of desynchronisation.  Possible error codes are:
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_IO
+An error occurred while trying to obtain the modification time of a fragment.
+.PP
+Additionally, if
+.B GD_DESYNC_REOPEN
+is used, this function may fail for any of the reasons listed in the
+.F3 gd_discard
+and
+.F3 gd_cbopen
+manual pages.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH LIMITATIONS
+The current implementation uses file modification times as reported by
+.BR stat (2)
+to detect changes.  These times have a granularity of, at best, one second.  As
+a result, desynchronisation will not be detected in the case when a fragment is
+modified, then GetData reads it, then the fragment is modified again, all within
+one second.  The caller may wish to perform its own monitoring using the
+pathnames returned by
+.F3 gd_fragmentname .
+.PP
+On systems lacking a POSIX.1-2008 conformant
+.BR fstatat (2)
+(q.v.), this function may always operate as if
+.B GD_DESYNC_PATHCHECK
+had been specified, regardless of the actual
+.ARG flags .
+
+.SH HISTORY
+The function
+.FN gd_desync
+appeared in GetData-0.8.0.
+
+In GetData-0.10.0, the error return from this function changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+.BR fstatat (2),
+.BR stat (2),
+.F3 gd_cbopen ,
+.F3 gd_discard ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_parser_callback

@@ -1,0 +1,148 @@
+.\" gd_get_string.3.  The gd_get_string man page.
+.\"
+.\" Copyright (C) 2008, 2009, 2010, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_get_string 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_get_string \(em retrieve STRING or SARRAY data from a Dirfile database
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "size_t gd_get_string(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "size_t " len ", char *" data_out );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_get_string
+function queries a dirfile(5) database specified by
+.ARG dirfile
+for the string scalar
+.ARG field_code ,
+which should not contain a representation suffix.  The first
+.ARG len
+characters of the string scalar are stored in the user-supplied buffer
+.ARG data_out .
+If
+.ARG field_code
+refers to a
+.B SARRAY
+field, the first element is returned.
+
+The 
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+
+If
+.ARG len
+equals zero, or if
+.ARG data_out
+equals NULL, no data will be copied to
+.ARG data_out ,
+but the length of the string scalar will still be returned by
+.FN gd_get_string .
+Otherwise, the argument
+.ARG data_out
+must point to a valid memory location of sufficient size to hold at least
+.ARG len
+characters.  If the length of the string scalar is greater than
+.ARG len ,
+.ARG data_out
+will not be NUL-terminated.
+
+The
+.F3 gd_get_sarray
+function provides another way of retrieving
+.B STRING
+data, but without having to know the length of the returned string in advance.
+The code:
+
+.RS
+.SC
+.BI "size_t " len " = gd_get_string(" dirfile ", " field_code ", 0, NULL);"
+.br
+.BI "char *" string " = malloc(" len );
+.br
+.BI gd_get_string( dirfile ", " field_code ", " len ", " string );
+.EC
+.RE
+
+which ensures the whole string, including the terminating NUL, is returned, can
+be replaced with, simply:
+
+.RS
+.SC
+.BI "const char *" string;
+.br
+.BI gd_get_sarray( dirfile ", " field_code ", &" string );
+.EC
+.RE
+
+with the added benefit of not having manage the memory for the string.
+
+.SH RETURN VALUE
+On success,
+.FN gd_get_string
+returns the actual length of the specified string scalar, including space for
+the trailing NUL-character.  A return value greater than
+.ARG len
+indicates that the output string is not NUL-terminated.
+
+On error, this function returns 0 and stores a negative-valued error code in the
+.B DIRFILE
+object which may be retrieved by a subsequent call to
+.F3 gd_error .
+Possible error codes are:
+.DD GD_E_BAD_CODE
+The field specified by
+.ARG field_code
+was not found in the database.
+.DD GD_E_BAD_DIRFILE
+An invalid
+.ARG dirfile
+was supplied.
+.DD GD_E_BAD_FIELD_TYPE
+The supplied
+.ARG field_code
+referred to a field of type other than
+.B STRING
+or
+.BR SARRAY .
+.DD GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+maintainer.
+.PP
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN get_string
+function appeared in GetData-0.4.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_get_string .
+
+.SH SEE ALSO
+.F3 gd_get_sarray ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_open ,
+.F3 gd_put_string ,
+dirfile(5)

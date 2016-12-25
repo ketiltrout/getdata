@@ -1706,11 +1706,11 @@ void run_tests(void)
   CHECK_OK(236);
 
   // 237: gd_nentries
-  n = d->NEntries(GD_ALL_FRAGMENTS, "data", GD_SCALAR_ENTRIES,
+  n = d->NEntries("data", GD_SCALAR_ENTRIES,
       GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   CHECK_OK2(237, 1);
   CHECK_INT2(237, 1, n, 5);
-  n = d->NEntries(GD_ALL_FRAGMENTS, NULL, GD_VECTOR_ENTRIES,
+  n = d->NEntries(NULL, GD_VECTOR_ENTRIES,
       GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   CHECK_OK2(237, 2);
   CHECK_INT2(237, 2, n, 27);
@@ -1743,7 +1743,7 @@ void run_tests(void)
   fields[24] = (char*)"window";
   fields[25] = (char*)"linterp";
   fields[26] = (char*)"polynom";
-  list = d->EntryList(GD_ALL_FRAGMENTS, NULL, GD_VECTOR_ENTRIES,
+  list = d->EntryList(NULL, GD_VECTOR_ENTRIES,
       GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   CHECK_OK(239);
   CHECK_STRING_ARRAY(239,n,list[i],fields[i]);
@@ -2013,6 +2013,15 @@ void run_tests(void)
   CHECK_OK(304);
   CHECK_INT(304, n, 0);
   CHECK_STRING(304, frag->Namespace(), "ns2");
+
+  // 305: gd_match_entries
+#ifndef GD_NO_REGEX
+  n = d->MatchEntries("^lin", 0, 0, 0, &list);
+  CHECK_OK(305);
+  CHECK_INT(305, n, 2);
+  CHECK_STRINGi(287, 0, list[0], "lincom");
+  CHECK_STRINGi(287, 1, list[1],  "linterp");
+#endif
 
 
 

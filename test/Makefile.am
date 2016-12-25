@@ -52,7 +52,8 @@ ADD_TESTS=add_add add_affix add_alias add_alias_affix add_alias_index \
 					add_raw_spf_scalar add_raw_sub add_raw_type add_rdonly add_recip \
 					add_recip_inaff add_resolv add_sarray add_sarray_dup add_sarray_nil \
 					add_sbit add_scalar add_scalar_carray add_scalar_carray_bad \
-					add_sindir add_sort add_spec add_spec_directive add_spec_index \
+					add_sindir add_sort add_spec add_spec_affix add_spec_directive \
+					add_spec_index \
 					add_spec_invalid add_spec_meta add_spec_nil add_spec_prot \
 					add_spec_raw_autoenc add_spec_raw_prot add_spec_raw_unkenc \
 					add_spec_resolv add_string add_string_affix add_string_dup \
@@ -106,8 +107,8 @@ BOF_TESTS=bof bof_bit bof_bit_code bof_code bof_const bof_index bof_lincom \
 
 BZIP_TESTS=bzip_add bzip_complex64 bzip_complex128 bzip_del bzip_enoent \
 					 bzip_float32 bzip_float64 bzip_get bzip_get_cont bzip_get_far \
-					 bzip_get_get bzip_get_get2 bzip_get_put bzip_int8 bzip_int16 bzip_int32 \
-					 bzip_int64 bzip_move_from bzip_move_to bzip_nframes \
+					 bzip_get_get bzip_get_get2 bzip_get_put bzip_int8 bzip_int16 \
+					 bzip_int32 bzip_int64 bzip_move_from bzip_move_to bzip_nframes \
 					 bzip_put bzip_put_back bzip_put_endian bzip_put_get bzip_put_offs \
 					 bzip_put_pad bzip_put_sub bzip_seek bzip_seek_far bzip_sync \
 					 bzip_uint8 bzip_uint16 bzip_uint32 bzip_uint64
@@ -184,8 +185,8 @@ DESYNC_TESTS=desync desync_flush desync_path desync_reopen desync_reopen_inv
 DFES_TESTS=dfes_bit dfes_divide dfes_lincom dfes_linterp dfes_multiply \
 					 dfes_null dfes_phase dfes_raw dfes_recip dfes_zero
 
-ELIST_TESTS=elist_alias elist_fragment elist_hidden elist_noalias \
-						elist_parent elist_parent2 elist_scalar elist_type
+ELIST_TESTS=elist_alias elist_hidden elist_noalias elist_parent elist_parent2 \
+						elist_scalar elist_type
 
 ENCODE_TESTS=encode_alter encode_alter_all encode_alter_open encode_get \
 						 encode_recode encode_recode_open encode_support
@@ -289,12 +290,12 @@ GLOBAL_TESTS=global_flags global_name
 
 GZIP_TESTS=gzip_add gzip_complex64 gzip_complex128 gzip_del gzip_enoent \
 					 gzip_float32 gzip_float64 gzip_get gzip_get_cont gzip_get_far \
-					 gzip_get_get gzip_get_get2 gzip_get_put gzip_int8 gzip_int16 gzip_int32 \
-					 gzip_int64 gzip_move_from gzip_move_to gzip_nframes gzip_put \
-					 gzip_put_back gzip_put_endian gzip_put_get gzip_put_nframes \
-					 gzip_put_off gzip_put_offs gzip_put_pad gzip_put_sub gzip_seek \
-					 gzip_seek_far gzip_seek_put gzip_sync gzip_uint8 gzip_uint16 \
-					 gzip_uint32 gzip_uint64
+					 gzip_get_get gzip_get_get2 gzip_get_put gzip_int8 gzip_int16 \
+					 gzip_int32 gzip_int64 gzip_move_from gzip_move_to gzip_nframes \
+					 gzip_put gzip_put_back gzip_put_endian gzip_put_get \
+					 gzip_put_nframes gzip_put_off gzip_put_offs gzip_put_pad \
+					 gzip_put_sub gzip_seek gzip_seek_far gzip_seek_put gzip_sync \
+					 gzip_uint8 gzip_uint16 gzip_uint32 gzip_uint64
 
 HEADER_TESTS=header_complex header_off64t
 
@@ -327,9 +328,10 @@ LZMA_TESTS=lzma_enoent lzma_get lzma_nframes lzma_put lzma_xz_add \
 					 lzma_xz_get_get lzma_xz_get_get2 lzma_xz_get_put lzma_xz_int8 \
 					 lzma_xz_int16 lzma_xz_int32 lzma_xz_int64 lzma_xz_move_from \
 					 lzma_xz_move_to lzma_xz_nframes lzma_xz_offs_clear lzma_xz_put \
-					 lzma_xz_put_back lzma_xz_put_endian lzma_xz_put_get lzma_xz_put_offs \
-					 lzma_xz_put_pad lzma_xz_seek lzma_xz_seek_far lzma_xz_sync lzma_xz_uint8 \
-					 lzma_xz_uint16 lzma_xz_uint32 lzma_xz_uint64
+					 lzma_xz_put_back lzma_xz_put_endian lzma_xz_put_get \
+					 lzma_xz_put_offs lzma_xz_put_pad lzma_xz_seek lzma_xz_seek_far \
+					 lzma_xz_sync lzma_xz_uint8 lzma_xz_uint16 lzma_xz_uint32 \
+					 lzma_xz_uint64
 
 MADD_TESTS=madd madd_affix madd_alias madd_aliasmeta madd_alias_affix \
 					 madd_alias_alias madd_alias_subsub madd_bit madd_bit_invalid \
@@ -342,6 +344,10 @@ MADD_TESTS=madd madd_affix madd_alias madd_aliasmeta madd_alias_affix \
 					 madd_recip madd_sarray madd_sarray_dup madd_sbit madd_sindir \
 					 madd_spec madd_spec_directive madd_spec_invalid madd_spec_parent \
 					 madd_spec_resolv madd_string madd_string_dup madd_subsub madd_window
+
+MATCH_TESTS=match_fragment match_pcre match_pcre_bad match_pcre_caseless \
+						match_pcre_ext match_pcre_js match_pcre_utf8 match_regex \
+						match_regex_bad match_regex_ext match_regex_icase
 
 MFLUSH_TESTS=mflush mflush_affix mflush_amb_code mflush_carray mflush_hex \
 						 mflush_indir mflush_mplex mflush_ns mflush_pretty mflush_prot \
@@ -370,8 +376,8 @@ NATIVE_TESTS=native_bit native_code native_const native_index native_lincom \
 						 native_recip_cmpscal native_recurse native_reprz native_sbit \
 						 native_string
 
-NENTRIES_TESTS=nentries_alias nentries_entype nentries_fragment \
-							 nentries_hidden nentries_noalias nentries_scalar
+NENTRIES_TESTS=nentries_alias nentries_entype nentries_hidden nentries_noalias \
+							 nentries_scalar
 
 NFIELDS_TESTS=nfields_hidden nfields_invalid nfields_nfields nfields_type \
 							nfields_type_hidden nfields_type_invalid nfields_vector \
@@ -549,14 +555,15 @@ TESTS=$(ADD_TESTS)      $(ALIAS_TESTS)    $(ALLOC_TESTS)    $(ALTER_TESTS)    \
 			$(FLUSH_TESTS)    $(FOFFS_TESTS)    $(FRAGMENT_TESTS) $(GET_TESTS)      \
 			$(GLOBAL_TESTS)   $(GZIP_TESTS)     $(HEADER_TESTS)   $(HIDE_TESTS)     \
 			$(INCLUDE_TESTS)  $(INDEX_TESTS)    $(LEGACY_TESTS)   $(LEN_TESTS)      \
-			$(LZMA_TESTS)     $(MADD_TESTS)     $(MFLUSH_TESTS)   $(MOVE_TESTS)     \
-			$(NAME_TESTS)     $(NATIVE_TESTS)   $(NENTRIES_TESTS) $(NFIELDS_TESTS)  \
-			$(NFRAMES_TESTS)  $(NMETA_TESTS)    $(OPEN_TESTS)     $(PARSE_TESTS)    \
-			$(PROTECT_TESTS)  $(PUT_TESTS)      $(REF_TESTS)      $(REPR_TESTS)     \
-			$(SALIST_TESTS)   $(SEEK_TESTS)     $(SIE_TESTS)      $(SLIM_TESTS)     \
-			$(SPF_TESTS)      $(SVLIST_TESTS)   $(TABLE_TESTS)    $(TELL_TESTS)     \
-			$(TOK_TESTS)      $(TRUNC_TESTS)    $(UNCLUDE_TESTS)  $(VALID_TESTS)    \
-			$(VERSION_TESTS)  $(VLIST_TESTS)    $(ZZIP_TESTS)     $(ZZSLIM_TESTS)
+			$(LZMA_TESTS)     $(MADD_TESTS)     $(MATCH_TESTS)    $(MFLUSH_TESTS)   \
+			$(MOVE_TESTS)     $(NAME_TESTS)     $(NATIVE_TESTS)   $(NENTRIES_TESTS) \
+			$(NFIELDS_TESTS)  $(NFRAMES_TESTS)  $(NMETA_TESTS)    $(OPEN_TESTS)     \
+			$(PARSE_TESTS)    $(PROTECT_TESTS)  $(PUT_TESTS)      $(REF_TESTS)      \
+			$(REPR_TESTS)     $(SALIST_TESTS)   $(SEEK_TESTS)     $(SIE_TESTS)      \
+			$(SLIM_TESTS)     $(SPF_TESTS)      $(SVLIST_TESTS)   $(TABLE_TESTS)    \
+			$(TELL_TESTS)     $(TOK_TESTS)      $(TRUNC_TESTS)    $(UNCLUDE_TESTS)  \
+			$(VALID_TESTS)    $(VERSION_TESTS)  $(VLIST_TESTS)    $(ZZIP_TESTS)     \
+			$(ZZSLIM_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

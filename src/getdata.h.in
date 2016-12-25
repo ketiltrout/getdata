@@ -262,9 +262,18 @@ typedef enum {
 #define GD_SCALAR_ENTRIES (GD_SPECIAL_ENTRY_BIT | 0x02)
 #define GD_ALIAS_ENTRIES  GD_ALIAS_ENTRY
 
-/* gd_nentries(3) and gd_entry_list(3) flags */
-#define GD_ENTRIES_HIDDEN  0x1
-#define GD_ENTRIES_NOALIAS 0x2
+/* gd_nentries(3), gd_entry_list(3) and gd_match_entries(3) flags */
+#define GD_ENTRIES_HIDDEN  0x01
+#define GD_ENTRIES_NOALIAS 0x02
+
+/* additional gd_match_entries(3) flags */
+#define GD_REGEX_PCRE       0x04
+#define GD_REGEX_EXTENDED   0x08
+#define GD_REGEX_ICASE      0x10
+#define GD_REGEX_CASELESS   GD_REGEX_ICASE /* synonym */
+/* The rest of these are ignored if GD_REGEX_PCRE is not also set */
+#define GD_REGEX_JAVASCRIPT 0x20
+#define GD_REGEX_UNICODE    0x40
 
 /* the current location of the I/O pointer */
 #define GD_HERE  (-1)
@@ -280,14 +289,14 @@ typedef enum {
 # define gd_uint64_t uint64_t
 # define GD_DCOMPLEXM(v) double _Complex v
 # define GD_DCOMPLEXP(v) double _Complex *v
-typedef int64_t gd_shift_t;
 #else
 @DEFINE_gd_int64_t@
 @DEFINE_gd_uint64_t@
 # define GD_DCOMPLEXM(v) double v[2]
 # define GD_DCOMPLEXP(v) double *v
-typedef gd_int64_t gd_shift_t;
 #endif
+
+typedef gd_int64_t gd_shift_t; /* This type is deprecated */
 
 /* Types deprecated in GetData-0.8 */
 typedef int gd_bit_t;
@@ -399,7 +408,7 @@ struct gd_unified_entry_ {
       char *table;
     } GD_ANON(linterp);
     struct { /* PHASE */
-      gd_shift_t shift;
+      gd_int64_t shift;
     } GD_ANON(phase);
     struct { /* WINDOW */
       gd_windop_t windop;
@@ -733,9 +742,8 @@ extern unsigned long int gd_endianness(DIRFILE *dirfile,
 extern int gd_entry(DIRFILE *dirfile, const char *field_code,
     gd_entry_t *entry) gd_nothrow gd_nonnull ((1, 2));
 
-extern const char **gd_entry_list(DIRFILE *dirfile, int fragment,
-    const char *parent, int type, unsigned int flags) gd_nothrow
-gd_nonnull ((1));
+extern const char **gd_entry_list(DIRFILE *dirfile, const char *parent,
+    int type, unsigned int flags) gd_nothrow gd_nonnull ((1));
 
 extern gd_entype_t gd_entry_type(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1));
@@ -881,6 +889,10 @@ extern int gd_madd_window(DIRFILE *dirfile, const char *parent,
     gd_windop_t windop, gd_triplet_t threshold) gd_nothrow
 gd_nonnull ((1,2,3,4,5));
 
+extern unsigned int gd_match_entries(DIRFILE *D, const char *regex,
+    int fragment, int type, unsigned int flags, const char ***list) gd_nothrow
+gd_nonnull ((1));
+
 extern int gd_dirfile_standards(DIRFILE *dirfile, int vers) gd_nothrow
 gd_nonnull ((1));
 
@@ -916,8 +928,8 @@ extern unsigned int gd_naliases(DIRFILE *dirfile,
 extern gd_type_t gd_native_type(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1,2));
 
-extern unsigned int gd_nentries(DIRFILE *D, int fragment, const char *parent,
-    int type, unsigned int flags) gd_nothrow gd_nonnull ((1));
+extern unsigned int gd_nentries(DIRFILE *D, const char *parent, int type,
+    unsigned int flags) gd_nothrow gd_nonnull ((1));
 
 extern unsigned int gd_nfields(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
@@ -1206,5 +1218,11 @@ gd_nonnull ((1,2));
 
 /* This is (major * 10000) + (minor * 100) + revision */
 @DEFINE_GD_GETDATA_INT_VERSION@
+
+/* If this symbol is defined here, the library lacks POSIX regex support */
+@DEFINE_GD_NO_REGEX@
+
+/* If this symbol is defined here, the library lacks PCRE regex support */
+@DEFINE_GD_NO_PCRE@
 
 #endif

@@ -1,0 +1,206 @@
+.\" gd_get_carray_slice.3.  The gd_get_carray_slice man page.
+.\"
+.\" Copyright (C) 2010-2013, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_get_carray_slice 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_get_carray, gd_get_carray_slice, gd_get_constant \(em retrieve CONST or CARRAY data from a Dirfile database
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_get_carray_slice(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "unsigned int " start ", size_t " len ", gd_type_t " return_type ,
+.BI "void *" data_out );
+.HP
+.BI "int gd_get_carray(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_type_t " return_type ", void *" data_out );
+.HP
+.BI "int gd_get_constant(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_type_t " return_type ", void *" data_out );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_get_carray_slice
+function queries a dirfile(5) database specified by
+.ARG dirfile
+for the
+.B CONST
+or
+.B CARRAY
+scalar
+.ARG field_code ,
+which may contain a representation suffix.
+The data in the field is converted to the data type specified by
+.ARG return_type ,
+and stored in the user-supplied buffer
+.ARG data_out .
+The first element of the field stored is given by
+.ARG start ,
+and the number of elements stored is given by
+.ARG len .
+
+The
+.FN gd_get_carray
+function behaves similarly, except it returns the entire field, as if
+.FN gd_get_carray_slice
+were called with
+.ARG start
+equal to zero and
+.ARG len
+equal to the value returned by
+.F3 gd_array_len .
+The
+.FN gd_get_constant
+function is equivalent to calling
+.FN gd_get_carray_slice
+with
+.ARG start
+equal to zero and
+.ARG len
+equal to one.
+
+The 
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+The argument
+.ARG data_out
+must point to a valid memory location of sufficient size to hold all the
+requested data of the return type specified.  The number of elements returned
+by
+.FN gd_get_carray
+may be obtained by calling
+.F3 gd_array_len .
+Unlike
+.F3 gd_getdata ,
+calling
+.FN gd_get_carray_slice
+never results in a short read; attempting to read past the end of the
+field will result in an error, and no data will be returned.
+
+The 
+.ARG return_type
+argument should be one of the following symbols, which indicates the desired
+return type of the data:
+.RS
+.DD GD_UINT8
+unsigned 8-bit integer
+.DD GD_INT8
+signed (two's complement) 8-bit integer
+.DD GD_UINT16
+unsigned 16-bit integer
+.DD GD_INT16
+signed (two's complement) 16-bit integer
+.DD GD_UINT32
+unsigned 32-bit integer
+.DD GD_INT32
+signed (two's complement) 32-bit integer
+.DD GD_UINT64
+unsigned 64-bit integer
+.DD GD_INT64
+signed (two's complement) 64-bit integer
+.DD GD_FLOAT32
+IEEE-754 standard 32-bit single precision floating point number
+.DD GD_FLOAT64
+IEEE-754 standard 64-bit double precision floating point number
+.DD GD_COMPLEX64
+C99-conformant 64-bit single precision complex number
+.DD GD_COMPLEX128
+C99-conformant 128-bit double precision complex number
+.DD GD_NULL
+the null type: the database is queried as usual, but no data is returned.
+In this case,
+.ARG data_out
+is ignored and may be NULL.
+.RE
+
+The return type of the field need not be the same as the type of the data stored
+in the database.  Type conversion will be performed as necessary to return the
+requested type.  If the
+.ARG field_code
+does not indicate a representation, but conversion from a complex value to a
+purely real one is required, only the real portion of the requested vector will
+be returned.
+
+.SH RETURN VALUE
+On success,
+.FN gd_get_carray ,
+.FN gd_get_carray_slice ,
+and
+.FN gd_get_constant
+return zero.  On error, they return a negative-valued error code.  Possible
+error codes are:
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_CODE
+The field specified by
+.ARG field_code
+was not found in the database.
+.DD GD_E_BAD_DIRFILE
+An invalid
+.ARG dirfile
+was supplied.
+.DD GD_E_BAD_FIELD_TYPE
+The supplied
+.ARG field_code
+was not a
+.BR CONST
+nor
+.BR CARRAY .
+.DD GD_E_BAD_TYPE
+An invalid
+.ARG return_type
+was specified.
+.DD GD_E_BOUNDS
+A request for data beyond the end of the field was made.
+.DD GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+maintainer.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN get_constant
+function appeared in GetData-0.4.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_get_constant .
+In this release, the
+.FN gd_get_carray
+and
+.FN gd_get_carray_slice
+functions also appeared.
+
+In GetData-0.10.0, the error return from these functions changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+.F3 gd_array_len ,
+.F3 gd_carrays ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_open ,
+.F3 gd_put_carray_slice ,
+dirfile(5)

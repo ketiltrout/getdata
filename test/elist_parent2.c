@@ -34,7 +34,7 @@ int main(void)
   MAKEFORMATFILE(format, "INDEX/sub CONST UINT8 1\n");
 
   D = gd_open(filedir, GD_RDONLY);
-  field_list = gd_entry_list(D, GD_ALL_FRAGMENTS, "INDEX/sub", 0, 0);
+  field_list = gd_entry_list(D, "INDEX/sub", 0, 0);
   error = gd_error(D);
   CHECKI(error, GD_E_BAD_CODE);
   CHECKP(field_list);

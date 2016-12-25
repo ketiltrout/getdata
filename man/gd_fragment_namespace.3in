@@ -1,0 +1,112 @@
+.\" gd_fragment_namespace.3.  The gd_fragment_namespace man page.
+.\"
+.\" Copyright (C) 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_fragment_namespace 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_fragment_namespace \(em report or change the root namespace of a fragment of
+a dirfile database
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "const char *gd_fragment_namespace(DIRFILE *" dirfile ", int
+.IB fragment_index ", char *" new_namespace );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_fragment_namespace
+function can be used to update and/or query the root namespace of a fragment
+in the dirfile(5) database specified by
+.ARG dirfile .
+
+If
+.ARG new_namespace
+is NULL, then the current root namespace of the fragment indexed by
+.ARG fragment_index
+is returned.  If
+.ARG new_namespace
+is non-NULL, then the root namespace is first changed to the string provided
+before being reported.  The new namespace may optionally contain a single,
+trailing dot
+.RB ( . ).
+To remove an existing root namespace, pass a pointer to the empty string
+.RB ( """""" )
+as
+.ARG new_namespace .
+
+The root namespace of the root format file (the one indexed by
+.ARG fragment_index =0)
+may not be changed.  It is always the empty string.
+
+The
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_fragment_namespace
+returns a non-NULL pointer to a read-only string containing the current root
+namespace of the fragment specified.  This will be a copy of the string
+.ARG new_namespace ,
+if that parameter was non-NULL.  If the fragment's root namespace is empty,
+a pointer to the empty string
+.RB ( """""" )
+will be returned.
+
+On error, this function returns NULL and sets the dirfile error to a non-zero
+error value.  Possible
+dirfile error values are:
+.DD GD_E_ACCMODE
+The dirfile was opened read-only.
+.DD GD_E_ALLOC
+A memory allocation error occurred.
+.DD GD_E_BAD_CODE
+The supplied
+.ARG new_fragment
+was not a valid namespace.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_INDEX
+The supplied index was out of range.  This error will also be returned if an
+attempt is made to change the root namespace of the root format file
+.RI ( fragment_index
+zero).
+.DD GD_E_DUPLICATE
+Attempting to change the root namespace resulted in a duplicated field
+definition.
+.DD GD_E_PROTECTED
+The protection level of the specified fragment prohibits metadata changes.
+.PP
+The dirfile error may be retrieved by calling
+.F3 gd_error .
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN gd_fragment_namespace
+function appeared in GetData-0.10.0.
+
+.SH SEE ALSO
+.F3 gd_alter_affixes ,
+.F3 gd_include_ns ,
+.F3 gd_open ,
+dirfile(5),
+dirfile-format(5)

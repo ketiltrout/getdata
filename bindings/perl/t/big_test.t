@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1748;
+use Test::More tests => 1754;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -1702,17 +1702,17 @@ CheckOK(236);
 CheckNum(236, $s, 0);
 
 # 237: gd_nentries
-$s = $_->entry_list($GetData::ALL_FRAGMENTS, "data", $GetData::SCALAR_ENTRIES,
+$s = $_->entry_list("data", $GetData::SCALAR_ENTRIES,
   $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
 CheckOK2(237, 1);
 CheckNum2(237, 1, $s, 7);
-$s = $_->entry_list($GetData::ALL_FRAGMENTS, undef, $GetData::VECTOR_ENTRIES,
+$s = $_->entry_list(undef, $GetData::VECTOR_ENTRIES,
   $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
 CheckOK2(237, 2);
 CheckNum2(237, 2, $s, 25);
 
 # 239: gd_entry_list
-@a = $_->entry_list($GetData::ALL_FRAGMENTS, undef, $GetData::VECTOR_ENTRIES,
+@a = $_->entry_list(undef, $GetData::VECTOR_ENTRIES,
   $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
 CheckOK(239);
 CheckSArray(239, \@a, qw(bit div data mult new1 new3 new4 new6 new7 new8 sbit
@@ -2274,6 +2274,15 @@ CheckString(303, $s, "ns");
 $s = $_->fragment_namespace(2, 'ns2');
 CheckOK(304);
 CheckString(304, $s, "ns2");
+
+# 305: match_entries
+$s = scalar $_->match_entries('^lin', 0);
+CheckOK2(305, 0);
+CheckNum2(305, 1, $s, 2);
+
+@a = $_->match_entries('^lin', 0);
+CheckOK2(305, 2);
+CheckSArray2(292, 3, \@a, qw(lincom linterp));
 
 
 

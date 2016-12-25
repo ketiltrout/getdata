@@ -1,0 +1,95 @@
+.\" gd_nframes.3.  The gd_nframes man page.
+.\"
+.\" Copyright (C) 2008, 2010, 2011, 2014, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_nframes 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_nframes \(em report the size of a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "off_t gd_nframes(DIRFILE *" dirfile );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_nframes
+function queries a dirfile(5) database specified by
+.ARG dirfile
+and returns the number of frames in the database.  Since different fields may
+have differing number of frames, the Dirfile Standards (see
+dirfile(5))
+dictate that the number of frames in the database is defined to be equal to the
+number of frames in the reference field defined by the
+.B /REFERENCE
+directive (see
+dirfile-format(5))
+or, if no such reference field is defined, by the first raw field specified in
+the format specification.
+
+If no vector fields are defined in the database,
+.FN gd_nframes
+returns zero and succeeds.
+
+The 
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_nframes
+returns the number of frames in the dirfile, which is never negative.  On error,
+it returns a negative-valued error code.  Possible error codes are:
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_IO
+An I/O error occurred while determining the number of samples in the data file
+associated with the reference field.
+.DD GD_E_UNKNOWN_ENCODING
+The number of samples available for the reference field could not be determined
+because the encoding used to store the reference field's data file was not
+understood.
+.DD GD_E_UNSUPPORTED
+GetData does not support determining the number of samples for the encoding of
+of the data file associated with the reference field.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN get_nframes
+function appeared in GetData-0.3.0.
+
+In GeData-0.7.0, this function was renamed to
+.FN gd_nframes .
+
+.SH SEE ALSO
+dirfile(5),
+dirfile-encoding(5),
+.F3 gd_open ,
+.F3 gd_bof ,
+.F3 gd_eof ,
+.F3 gd_error ,
+.F3 gd_error_string

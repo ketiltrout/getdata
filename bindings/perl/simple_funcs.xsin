@@ -15,7 +15,7 @@ int add_linterp(DIRFILE *dirfile, const char *field_code, const char *in_field,
 int add_multiply(DIRFILE *dirfile, const char *field_code,
     const char *in_field1, const char *in_field2, int fragment_index=0)
 int add_phase(DIRFILE *dirfile, const char *field_code, const char *in_field,
-    gd_shift_t shift, int fragment_index=0)
+    gd_int64_t shift, int fragment_index=0)
 int add_sbit(DIRFILE *dirfile, const char *field_code, const char *in_field,
     int bitnum, int numbits, int fragment_index=0)
 int add_string(DIRFILE *dirfile, const char *field_code, const char *value,
@@ -36,7 +36,7 @@ int alter_divide(DIRFILE *dirfile, const char *field_code,
 int alter_multiply(DIRFILE *dirfile, const char *field_code,
     gdp_char *in_field1=NULL, gdp_char *in_field2=NULL)
 int alter_phase(DIRFILE *dirfile, const char *field_code,
-    gdp_char *in_field, gdp_shift_t shift)
+    gdp_char *in_field, gdp_int64_t shift)
 int alter_sbit(DIRFILE *dirfile, const char *field_code,
     gdp_char *in_field=NULL, gdp_ffff_t bitnum=-1, gdp_numbits_t numbits=0)
 size_t array_len(DIRFILE *dirfile, const char *field_code)
@@ -62,7 +62,7 @@ int madd_linterp(DIRFILE *dirfile, const char *parent, const char *field_code,
 int madd_multiply(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *in_field1, const char *in_field2)
 int madd_phase(DIRFILE *dirfile, const char *parent, const char *field_code,
-    const char *in_field, gd_shift_t shift)
+    const char *in_field, gd_int64_t shift)
 int madd_sbit(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *in_field, int bitnum, int numbits)
 int madd_spec(DIRFILE *dirfile, const char *line, const char *parent)

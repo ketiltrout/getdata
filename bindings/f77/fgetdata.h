@@ -722,17 +722,16 @@ void F77_FUNC(gdvbpx, GDVBPX) (const int32_t *dirfile, const char *prefix,
 void F77_FUNC(gdmxlb, GDMXLB) (const int32_t *dirfile, const int32_t *lookback);
 
 void F77_FUNC(gdnent, GDNENT) (int32_t *nentries, const int32_t *dirfile,
-    const int32_t *fragment, const char *parent, const int32_t *parent_l,
-    const int32_t *type, const int32_t *flags);
+    const char *parent, const int32_t *parent_l, const int32_t *type,
+    const int32_t *flags);
 
 void F77_FUNC(gdentx, GDENTX) (int32_t *max, const int32_t *dirfile,
-    const int32_t *fragment, const char *parent, const int32_t *parent_l,
-    const int32_t *type, const int32_t *flags);
+    const char *parent, const int32_t *parent_l, const int32_t *type,
+    const int32_t *flags);
 
 void F77_FUNC(gdentn, GDENTN) (char *name, int32_t *name_l,
-    const int32_t *dirfile, const int32_t *fragment, const char *parent,
-    const int32_t *parent_l, const int32_t *type, const int32_t *flags,
-    const int32_t *field_num);
+    const int32_t *dirfile, const char *parent, const int32_t *parent_l,
+    const int32_t *type, const int32_t *flags, const int32_t *field_num);
 
 void F77_FUNC(gdgewd, GDGEWD) (char *in_field, int32_t *in_field_l,
     char *check_field, int32_t *check_field_l, int32_t *windop,
@@ -1091,6 +1090,19 @@ void F77_FUNC(gdxstp, GDXSTP) (char *value, int32_t *value_l, const char *data,
     const int32_t *index);
 
 void F77_FUNC(gddstp, GDDSTP) (char *data);
+
+void F77_FUNC(gdmatx, GDMATX) (int32_t *max, const int32_t *dirfile,
+    const char *regex, const int32_t *regex_l, const int32_t *fragment,
+    const int32_t *type, const int32_t *flags);
+
+void F77_FUNC(gdmatn, GDMATN) (char *name, int32_t *name_l,
+    const int32_t *dirfile, const char *regex, const int32_t *regex_l,
+    const int32_t *fragment, const int32_t *type, const int32_t *flags,
+    const int32_t *field_num);
+
+void F77_FUNC(gdnmat, GDNMAT) (int32_t *nentries, const int32_t *dirfile,
+    const char *regex, const int32_t *regex_l, const int32_t *fragment,
+    const int32_t *type, const int32_t *flags);
 
 #ifdef __cplusplus
 }

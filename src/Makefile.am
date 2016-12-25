@@ -139,11 +139,13 @@ libgetdata_la_LDFLAGS = $(EXPORT_DYNAMIC) -export-symbols-regex '^[^_]' \
 												-version-info \
 												${GETDATA_IFACE_VERSION}:${GETDATA_IMPL_REVISION}:${GETDATA_IFACE_AGE} \
 												$(EXTERNAL_LDFLAGS) $(EXTERNAL_LIBS)
-libgetdata_la_LIBADD = $(LIBLTDL) $(DLOPEN_LIBGETDATASLIM_LA) \
-											 $(DLOPEN_LIBGETDATAGZIP_LA) 
-											 $(DLOPEN_LIBGETDATABZIP2_LA) \
-											 $(DLOPEN_LIBGETDATALZMA_LA) $(DLOPEN_LIBGETDATAZZIP_LA) \
-											 $(DLOPEN_LIBGETDATAZZSLIM_LA) $(DLOPEN_LIBGETDATAFLAC_LA)
+libgetdata_la_LIBADD = $(LIBLTDL) $(DLOPEN_LIBGETDATABZIP2_LA) \
+											 $(DLOPEN_LIBGETDATAFLAC_LA) \
+											 $(DLOPEN_LIBGETDATAGZIP_LA) \
+											 $(DLOPEN_LIBGETDATALZMA_LA) \
+											 $(DLOPEN_LIBGETDATASLIM_LA) \
+											 $(DLOPEN_LIBGETDATAZZIP_LA) \
+											 $(DLOPEN_LIBGETDATAZZSLIM_LA)
 
 libgetdataslim_la_SOURCES = slim.c
 libgetdataslim_la_LDFLAGS = $(SLIM_LDFLAGS) -release $(GETDATA_LIB_VERSION) \

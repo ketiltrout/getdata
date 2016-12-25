@@ -1,0 +1,99 @@
+.\" gd_encoding.3.  The gd_encoding man page.
+.\"
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_encoding 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_encoding \(em report the binary encoding of data in a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "unsigned long gd_encoding(DIRFILE *" dirfile ", int " fragment_index );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_encoding
+function queries a dirfile(5) database specified by
+.ARG dirfile
+and returns the data encoding for the fragment indexed by
+.ARG fragment_index .
+The data encoding of a fragment indicate the encoding of data files associated
+with
+.B RAW
+fields defined in the specified fragment.  The encoding of a fragment
+containing no
+.B RAW
+fields is ignored.
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_encoding
+returns the binary encoding of the specified fragment, which will one of the
+following symbols:
+.IP
+.SC
+.BR GD_UNENCODED ,
+.BR GD_BZIP2_ENCODED ,
+.BR GD_FLAC_ENCODED ,
+.BR GD_GZIP_ENCODED ,
+.BR GD_LZMA_ENCODED ,
+.BR GD_SIE_ENCODED ,
+.BR GD_SLIM_ENCODED ,
+.BR GD_TEXT_ENCODED ,
+.BR GD_ZZIP_ENCODED ,
+.BR GD_ZZSLIM_ENCODED ,
+.BR GD_ENC_UNSUPPORTED .
+.EC
+.PP
+If the encoding scheme specified in the dirfile
+metadata is unknown to GetData,
+.B GD_ENC_UNSUPPORTED
+will be returned.  See
+.F3 gd_open
+and dirfile-encoding(5) for the meanings of the other symbols and details on the
+supported encoding schemes.
+
+On error, this function returns zero and stores a negative-valued error code in
+the
+.B DIRFILE
+object which may be retrieved by a subsequent call to
+.F3 gd_error .
+Possible error codes are:
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_INDEX
+The supplied index was out of range.
+.PP
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN get_encoding
+function appeared in GetData-0.5.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_encoding .
+
+.SH SEE ALSO
+.F3 gd_alter_encoding ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_getdata ,
+.F3 gd_open ,
+dirfile(5), dirfile-encoding(5)

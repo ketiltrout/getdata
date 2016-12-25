@@ -1,0 +1,135 @@
+.\" gd_close.3.  The gd_close man page.
+.\"
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2014, 2016 D.V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_close 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_close, gd_discard \(em close a Dirfile and free associated memory
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_close(DIRFILE *" dirfile );
+.HP
+.BI "int gd_discard(DIRFILE *" dirfile );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_close
+and
+.FN gd_discard
+attempt to close the open Dirfile
+.ARG dirfile
+and free all memory associated with it.
+
+The
+.FN gd_close
+function first flushes all pending metadata updates to disk.  This step is
+skipped by
+.FN gd_discard ,
+which simply discards metadata changes.  For dirfiles opened read-only,
+these two functions are equivalent.
+
+Next, all pending data is flushed to disk and all open data files closed.
+In order to ensure that modified data files associated with
+.B RAW
+fields are properly terminated, changes to
+.B RAW
+data files are still flushed to disk by
+.FN gd_discard .
+
+Finally, if the above didn't encounter an error, these functions free memory
+associated with the DIRFILE object.
+
+If
+.ARG dirfile
+is NULL, nothing happens, and the call succeeds.
+
+One of these functions should be called on all pointers returned by
+.F3 gd_cbopen ,
+.F3 gd_open ,
+and
+.F3 gd_invalid_dirfile ,
+even if the call to those function failed.  After
+.FN gd_close
+or
+.FN gd_discard
+returns successfully, the pointer
+.ARG dirfile
+should be considered invalid.
+
+Metadata is written to disk using the current Standards Version as stored in the
+.ARG dirfile
+object.  See
+.F3 gd_dirfile_standards
+to change or report the current Standards Version.  If the dirfile metadata
+conforms to no known Standards Version, Standards non-compliant metadata will
+be written.
+
+.SH RETURN VALUE
+.FN gd_close
+and
+.FN gd_discard
+return zero on success.  On error, they do not de-allocate
+.ARG dirfile
+and instead return a negative-valued error code.  Possible error codes are:
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_LINE_TOO_LONG
+While attempting to flush modified metadata to disk, a field specification line
+exceeded the maximum allowed length.  On most platforms, the maximum length is
+at least 2**31 bytes, so this typically indicates something pathological
+happening.
+.DD GD_E_IO
+An I/O error occurred while trying to write modified data or metadata to disk.
+In this case, another call to
+.FN gd_close
+or
+.FN gd_discard
+may be attempted.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The function
+.FN dirfile_close
+appeared in GetData-0.3.0.
+
+The function
+.FN dirfile_discard
+appeared in GetData-0.6.0.
+
+In GetData-0.7.0 these functions were renamed to
+.FN gd_close
+and
+.FG gd_discard .
+
+In GetData-0.10.0, the error return from these functions changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+.F3 gd_dirfile_standards ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_flush ,
+.F3 gd_invalid_dirfile ,
+.F3 gd_open

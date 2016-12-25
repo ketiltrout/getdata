@@ -34,17 +34,17 @@ namespace GetData {
     public:
       PhaseEntry() : Entry() { E.field_type = GD_PHASE_ENTRY; };
 
-      PhaseEntry(const char* field_code, const char* in_field, gd_shift_t shift,
+      PhaseEntry(const char* field_code, const char* in_field, gd_int64_t shift,
           int fragment_index = 0);
 
       virtual const char *Input(int index = 0) const {
         return (index == 0) ? E.in_fields[0] : NULL;
       };
 
-      virtual gd_shift_t Shift() const { return E.u.phase.shift; };
+      virtual gd_int64_t Shift() const { return E.u.phase.shift; };
 
       int SetInput(const char* field);
-      int SetShift(gd_shift_t shift);
+      int SetShift(gd_int64_t shift);
       int SetShift(const char* shift);
 
       virtual const char *Scalar(int index = 0) const {

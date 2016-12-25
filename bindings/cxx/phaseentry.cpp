@@ -23,7 +23,7 @@
 using namespace GetData;
 
 PhaseEntry::PhaseEntry(const char* field_code, const char* in_field,
-    gd_shift_t shift, int fragment_index) : Entry()
+    gd_int64_t shift, int fragment_index) : Entry()
 {
   E.field = strdup(field_code);
   E.field_type = GD_PHASE_ENTRY;
@@ -48,7 +48,7 @@ int PhaseEntry::SetInput(const char* field)
   return 0;
 }
 
-int PhaseEntry::SetShift(gd_shift_t shift)
+int PhaseEntry::SetShift(gd_int64_t shift)
 {
   E.u.phase.shift = shift;
 

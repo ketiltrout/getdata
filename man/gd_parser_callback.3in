@@ -1,0 +1,67 @@
+.\" gd_parser_callback.3.  The gd_parser_callback man page.
+.\"
+.\" Copyright (C) 2008, 2009, 2010, 2016 D.V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_parser_callback 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_parser_callback \(em set the syntax error callback handler for a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "void gd_parser_callback(DIRFILE *" dirfile ", gd_parser_callback_t"
+.IB sehandler ", void *" extra );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_parser_callback
+function updates the syntax error callback function of the DIRFILE object
+.ARG dirfile
+to be
+.ARG sehandler ,
+and the caller supplied extra pointer passed to the handler to be
+.ARG extra ,
+discarding any syntax error handler and extra pointer which were previously
+registered for this DIRFILE.  If
+.ARG sehandler
+is NULL, the existing handler will be removed and the default behaviour (abort
+on error) restored.  See
+.F3 gd_cbopen
+for a discussion on the requirements for the syntax handler.
+
+Since parsing of an existing format specification occurs when the DIRFILE object
+is created, before this function can be called, this function is only useful to
+set or modify a callback function or its caller data before calling
+.F3 gd_include ,
+which will invoke the callback function if syntax errors are found in the
+included fragment.
+
+This function always succeeds, and has no return value.
+
+.SH HISTORY
+
+The
+.FN dirfile_parser_callback
+function appeared in GetData-0.5.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_parser_callback .
+
+.SH SEE ALSO
+.F3 gd_cbopen ,
+.F3 gd_include ,
+dirfile(5)

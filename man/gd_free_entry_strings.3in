@@ -1,0 +1,79 @@
+.\" gd_free_entry_strings.3.  The gd_free_entry_strings man page.
+.\"
+.\" Copyright (C) 2008, 2010, 2013, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_free_entry_strings 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_free_entry_strings \(em free strings in a GetData gd_entry_t object
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "gd_entry_t *gd_free_entry_strings(gd_entry_t *" entry );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_free_entry_strings
+function frees the character strings found in the gd_entry_t object
+.ARG entry
+which were previously allocated by a call to
+.F3 gd_entry .
+After freeing a string, the associated pointer is set to NULL.  If
+.ARG entry
+is NULL, this function does nothing.
+
+If non-NULL,
+.ARG entry
+must point to a valid and properly initialised gd_entry_t object, such as that
+returned by
+.F3 gd_entry .
+By default, strings are deallocated by calling
+.F3 free
+on each, but a different memory manager may be specified by calling
+.F3 gd_alloc_funcs
+before calling this function.
+
+See 
+.F3 gd_entry
+for a description of the gd_entry_t data type.
+
+.SH RETURN VALUE
+The function
+.FN gd_free_entry_strings
+always returns its input,
+.ARG entry .
+
+.SH NOTES
+This function is provided as a convenience only.  The caller may deallocate the
+strings in the
+.B gd_entry_t
+object provided by
+.F3 gd_entry
+itself simply by calling the deallocator on the each initialised string member,
+if they prefer to do so.
+
+.SH HISTORY
+The
+.FN dirfile_free_entry_strings
+function appeared in GetData-0.3.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_free_entry_strings .
+
+.SH SEE ALSO
+.F3 gd_alloc_funcs ,
+.F3 gd_entry

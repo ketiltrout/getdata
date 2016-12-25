@@ -3265,18 +3265,43 @@ PHP_FUNCTION(gd_entry_list)
 {
   char *parent;
   GDPHP_SLEN parent_len;
-  GDPHP_LONG type = 0, flags = 0, fragment = GD_ALL_FRAGMENTS;
+  GDPHP_LONG type = 0, flags = 0;
   DIRFILE *D;
 
   const char **fl;
   char *parentp;
   dtracephp();
 
-  GDPHP_PARSED("|lsll", &fragment, &parent, &parent_len, &type, &flags);
+  GDPHP_PARSED("|sll", &parent, &parent_len, &type, &flags);
 
   parentp = gdphp_check_null_string(parent);
 
-  fl = gd_entry_list(D, fragment, parentp, type, flags);
+  fl = gd_entry_list(D, parentp, type, flags);
+
+  if (fl == NULL)
+    GDPHP_RETURN_F;
+
+  gdphp_to_string_array(return_value, fl, 0);
+
+  dreturnvoid();
+}
+
+PHP_FUNCTION(gd_match_entries)
+{
+  char *regex;
+  GDPHP_SLEN regex_len;
+  GDPHP_LONG type = 0, flags = 0, fragment = GD_ALL_FRAGMENTS;
+  DIRFILE *D;
+
+  const char **fl = NULL;
+  char *regexp;
+  dtracephp();
+
+  GDPHP_PARSED("|slll", &regex, &regex_len, &fragment, &type, &flags);
+
+  regexp = gdphp_check_null_string(regex);
+
+  gd_match_entries(D, regexp, fragment, type, flags, &fl);
 
   if (fl == NULL)
     GDPHP_RETURN_F;
@@ -4603,17 +4628,17 @@ PHP_FUNCTION(gd_nentries)
 {
   char *parent;
   GDPHP_SLEN parent_len;
-  GDPHP_LONG n, type = 0, flags = 0, fragment = GD_ALL_FRAGMENTS;
+  GDPHP_LONG n, type = 0, flags = 0;
   DIRFILE *D;
 
   char *parentp;
   dtracephp();
 
-  GDPHP_PARSED("|lsll", &fragment, &parent, &parent_len, &type, &flags);
+  GDPHP_PARSED("|sll", &parent, &parent_len, &type, &flags);
 
   parentp = gdphp_check_null_string(parent);
 
-  n = gd_nentries(D, fragment, parentp, type, flags);
+  n = gd_nentries(D, parentp, type, flags);
 
   GDPHP_CHECK_ERROR(D);
 
@@ -5435,6 +5460,7 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_madd_string, NULL)
     PHP_FE(gd_madd_window, NULL)
     PHP_FE(gd_malter_spec, NULL)
+    PHP_FE(gd_match_entries, NULL)
     PHP_FE(gd_mcarrays, NULL)
     PHP_FE(gd_mconstants, NULL)
     PHP_FE(gd_metaflush, NULL)

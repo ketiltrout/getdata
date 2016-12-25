@@ -576,16 +576,16 @@ void Dirfile::MplexLookback(int lookback) const
   gd_mplex_lookback(D, lookback);
 }
 
-unsigned int Dirfile::NEntries(int fragment, const char *parent, int type,
-    unsigned int flags) const
+unsigned int Dirfile::NEntries(const char *parent, int type, unsigned int flags)
+  const
 {
-  return gd_nentries(D, fragment, parent, type, flags);
+  return gd_nentries(D, parent, type, flags);
 }
 
-const char** Dirfile::EntryList(int fragment, const char *parent, int type,
+const char** Dirfile::EntryList(const char *parent, int type,
     unsigned int flags) const
 {
-  return gd_entry_list(D, fragment, parent, type, flags);
+  return gd_entry_list(D, parent, type, flags);
 }
 
 char* Dirfile::LinterpTableName(const char *field_code)
@@ -619,4 +619,10 @@ int Dirfile::PutSarray(const char *field_code, const char **data_in,
     return gd_put_sarray(D, field_code, data_in);
   else
     return gd_put_sarray_slice(D, field_code, start, len, data_in);
+}
+
+unsigned int Dirfile::MatchEntries(const char *regex, int fragment, int type,
+    unsigned int flags, const char ***entries)
+{
+  return gd_match_entries(D, regex, fragment, type, flags, entries);
 }

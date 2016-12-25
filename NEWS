@@ -127,7 +127,9 @@ New in version 0.10.0a:
 
   * BUG FIX: gd_alter_protection() wasn't marking affected fragments as
     modified, meaning the change in protection level would be lost upon
-    close unless other metadata changes were made to the fragment as well.
+    close unless other metadata changes were made to the fragment as well,
+    or a flush of the fragment's metadata was triggered expicilty with a
+    call to gd_rewrite_fragment().
 
   * BUG FIX: The metadata update performed by gd_delete() now successfuly
     updates all fields which used the deleted field as an input.
@@ -210,6 +212,11 @@ New in version 0.10.0a:
     will still use the Standard Library's malloc() and free() for much of
     it's internal storage.
 
+  * A new function, gd_match_entries(), extends the functionality of
+    gd_entry_list() and gd_nentries() by additionally allowing both
+    searches restricted to a particular fragment and also regular
+    expression matching against entry names.
+
   * A number of functions which used to return -1 on error now instead
     return an appropriate error code, previously only availably through
     gd_error().  These error codes are all negative-valued.  Functions
@@ -239,15 +246,18 @@ New in version 0.10.0a:
     previously it was size_t, despite the documentation having always
     claimed it returned int.
 
-  * gd_entry_list() and gd_nentries() now take an additional paremter,
-    fragment, which optionally allows searching only one metadata fragment.
-    Setting this to GD_ALL_FRAGMENTS restores the previous behaviour
-    (search all fragments).
+  * A new data type symbol, GD_STRING, exists to represent string data.
+    The gd_native_type() function now returns GD_STRING for STRING fields
+    (as well as for the new SARRAY and SINDIR fields).
 
   * The GD_FUNCTION_ALIASES block, and hence the long-deprecated
     GetData-0.6 API, has been removed from getdata.h.  Anyone still using
     the GetData-0.6 API should modernise to avoid known problems with that
     API.
+
+  * The gd_shift_t type, which was used for PHASE field shifts, has been
+    deprecated.  It has been replaced with gd_int64_t, which is what it
+    was always defined as.
 
   * BUG FIX: gd_getdata() and gd_putdata() now properly report GD_E_IO when
     an I/O error occurs while reading a LINTERP table.  Previously GD_E_LUT
@@ -279,6 +289,12 @@ New in version 0.10.0a:
     by Alexandra Rahlin.
 
   Miscellaneous:
+
+  * The --enable-assert configure option, which hasn't done anything for a
+    long time, has been removed.
+
+  * A new configure option, --disable-util, can be used to suppress building
+    of the executables in the util/ subdirectory.
 
   * In the standard autotools build system, encodings which use external
     libraries for compression (gzip, bzip2, flac, lzma, slim, zzip, zzslim)
@@ -1004,6 +1020,7 @@ New in version 0.8.6:
 
   * BUG FIX: gd_flush(), gd_sync(), gd_raw_close() no longer segfault when
     operating on a LINCOM with only one input field.
+
   * BUG FIX: gd_seek() now works correctly on PHASE fields; previously, the
     sign of the PHASE shift was flipped.
 

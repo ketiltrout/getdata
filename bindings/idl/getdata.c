@@ -4164,8 +4164,9 @@ IDL_VPTR gdidl_get_eof(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
+/* @@DLM: F gdidl_get_field_list GD_MATCH_ENTRIES 1 1 KEYWORDS */
+/* the following aliases are needed for backwards compatibility */
 /* @@DLM: F gdidl_get_field_list GD_ENTRY_LIST 1 1 KEYWORDS */
-/* the following alias is needed for backwards compatibility */
 /* @@DLM: F gdidl_get_field_list GD_FIELD_LIST 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
 {
@@ -4174,34 +4175,47 @@ IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
   unsigned int i, nentries, flags = 0;
   const char **list;
   const char *parent = NULL;
+  const char *regex = NULL;
 
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
     int type;
     IDL_STRING parent;
-    int parent_x;
+    IDL_STRING regex;
+    int parent_x, regex_x, fragment_x;
     int hidden, noalias, scalars, vectors, aliases, fragment;
+    int extended, pcre, javascript, icase, unicode;
   } KW_RESULT;
   KW_RESULT kw;
 
   GDIDL_KW_INIT_ERROR;
   kw.type = 0;
+  kw.fragment = 0;
   kw.hidden = kw.noalias = kw.scalars = kw.vectors = kw.aliases = 0;
-  kw.fragment = GD_ALL_FRAGMENTS;
-  kw.parent_x = 0;
+  kw.extended = kw.pcre = kw.javascript = kw.icase = kw.unicode = 0;
+  kw.parent_x = kw.regex_x = 0;
 
   static IDL_KW_PAR kw_pars[] = {
     { "ALIASES", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(aliases) },
+    { "CASELESS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(icase) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
-	  { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment) },	
+    { "EXTENDED", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(extended) },
+    { "FRAGMENT", IDL_TYP_INT, 1, 0, IDL_KW_OFFSETOF(fragment_x),
+      IDL_KW_OFFSETOF(fragment) },
     { "HIDDEN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(hidden) },
+    { "ICASE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(icase) },
+    { "JAVASCRIPT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(javascript) },
     { "NOALIAS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(noalias) },
     { "PARENT", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(parent_x),
       IDL_KW_OFFSETOF(parent) },
+    { "PCRE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pcre) },
+    { "REGEX", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(regex_x),
+      IDL_KW_OFFSETOF(regex) },
     { "SCALARS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(scalars) },
     { "TYPE", IDL_TYP_UINT, 1, 0, 0, IDL_KW_OFFSETOF(type) },
+    { "UNICODE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(unicode) },
     { "VECTORS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(vectors) },
     { NULL }
   };
@@ -4210,8 +4224,30 @@ IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
+  if (kw.parent_x && kw.regex_x)
+    GDIDL_KW_ABORT("parent and regex may not both be specified");
+  if (kw.parent_x && kw.fragment_x)
+    GDIDL_KW_ABORT("parent and fragment may not both be specified");
+
+  if (!kw.fragment_x)
+    kw.fragment = GD_ALL_FRAGMENTS;
+
   if (kw.parent_x)
     parent = IDL_STRING_STR(&kw.parent);
+
+  if (kw.regex_x) {
+    regex = IDL_STRING_STR(&kw.regex);
+    if (kw.extended)
+      flags |= GD_REGEX_EXTENDED;
+    if (kw.icase)
+      flags |= GD_REGEX_ICASE;
+    if (kw.javascript)
+      flags |= GD_REGEX_JAVASCRIPT;
+    if (kw.pcre)
+      flags |= GD_REGEX_PCRE;
+    if (kw.unicode)
+      flags |= GD_REGEX_UNICODE;
+  }
 
   if (kw.hidden)
     flags |= GD_ENTRIES_HIDDEN;
@@ -4227,8 +4263,11 @@ IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
       kw.type = GD_ALIAS_ENTRIES;
   }
 
-  nentries = gd_nentries(D, kw.fragment, parent, kw.type, flags);
-  list = gd_entry_list(D, kw.fragment, parent, kw.type, flags);
+  if (kw.parent_x) {
+    nentries = gd_nentries(D, parent, kw.type, flags);
+    list = gd_entry_list(D, parent, kw.type, flags);
+  } else
+    nentries = gd_match_entries(D, regex, kw.fragment, kw.type, flags, &list);
 
   GDIDL_SET_ERROR(D);
 
@@ -4408,21 +4447,19 @@ IDL_VPTR gdidl_get_nfields(int argc, IDL_VPTR argv[], char *argk)
     int type;
     IDL_STRING parent;
     int parent_x;
-    int aliases, hidden, noalias, scalars, vectors, fragment;
+    int aliases, hidden, noalias, scalars, vectors;
   } KW_RESULT;
   KW_RESULT kw;
 
   GDIDL_KW_INIT_ERROR;
   kw.type = 0;
   kw.hidden = kw.noalias = kw.scalars = kw.vectors = kw.aliases = 0;
-  kw.fragment = GD_ALL_FRAGMENTS;
   kw.parent_x = 0;
 
   static IDL_KW_PAR kw_pars[] = {
     { "ALIASES", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(aliases) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
-    { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment) },
     { "HIDDEN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(hidden) },
     { "NOALIAS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(noalias) },
     { "PARENT", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(parent_x),
@@ -4454,7 +4491,7 @@ IDL_VPTR gdidl_get_nfields(int argc, IDL_VPTR argv[], char *argk)
       kw.type = GD_ALIAS_ENTRIES;
   }
 
-  nentries = gd_nentries(D, kw.fragment, parent, kw.type, flags);
+  nentries = gd_nentries(D, parent, kw.type, flags);
 
   GDIDL_SET_ERROR(D);
 

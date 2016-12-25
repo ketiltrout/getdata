@@ -1,0 +1,63 @@
+.\" gd_frameoffset64.3.  The gd_frameoffset64 man page.
+.\"
+.\" Copyright (C) 2008, 2010, 2016 D.V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_frameoffset64 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_frameoffset64, gd_alter_frameoffset64 \(em report or change the frame
+offset of fields in a dirfile, with largefile support
+
+.SH SYNOPSIS
+.SC
+.B #define GD_64BIT_API
+.br
+.B #include <getdata.h>
+.HP
+.BI "gd_off64_t gd_frameoffset(DIRFILE *" dirfile ", int " fragment_index );
+.HP
+.BI "int gd_alter_frameoffset64(DIRFILE *" dirfile ", gd_off64_t " offset ,
+.BI "int " fragment_index ", int " move );
+.EC
+
+.SH DESCRIPTION
+These versions of
+.F3 gd_frameoffset
+and
+.F3 gd_alter_frameoffset
+use a 64-bit offset type
+.RB ( gd_off64_t ),
+where one is available, regardless of the size of
+.BR off_t .
+They are only available if
+.BR GD_64BIT_API
+has been defined before including getdata.h.
+
+If
+.B off_t
+is a 64-bit type, these functions will the same as
+.F3 gd_framenum_subset
+and
+.F3 gd_alter_frameoffset .
+Otherwise,
+.F3 gd_framenum_subset
+and
+.F3 gd_alter_frameoffset
+will be versions of these function which use a 32-bit
+.BR off_t .
+
+.SH SEE ALSO
+.F3 gd_alter_frameoffset ,
+.F3 gd_frameoffset ,
+.BR feature_test_macros (7)

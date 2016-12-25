@@ -1,0 +1,110 @@
+.\" gd_uninclude.3.  The gd_uninclude man page.
+.\"
+.\" Copyright (C) 2008, 2010, 2014, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_uninclude 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_uninclude \(em remove a format specification fragment from a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_uninclude(DIRFILE *" dirfile ", int " fragment_index ,
+.BI "int " del );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_uninclude
+removes the format specification fragment indexed by
+.ARG fragment_index
+from the specified dirfile, as well as any fragments the indicated fragment
+INCLUDEs.  Fields defined in the removed fragments will be removed from the
+dirfile.
+
+Before removing the specified fragment, all pending writes are flushed to
+.B RAW
+fields defined the the removed fragments.  If
+.ARG del
+is zero, metadata changes will also be written to the removed fragments.  If
+.ARG del
+is non-zero, the format specification fragments will be deleted from disk, if
+possible.  Regardless of the value of
+.ARG del ,
+binary data files associated with
+.B RAW
+fields defined in the removed fragments will not be deleted.  To delete these
+binary files, use
+.F3 gd_delete
+before calling this function.
+
+The primary format specification (the fragment indexed by zero) cannot be
+removed from the dirfile.
+
+.SH RETURN VALUE
+On success,
+.FN gd_uninclude
+returns zero.  On error, a negative-valued error code is returned.  Possible
+error codes are:
+.DD GD_E_ACCMODE
+The supplied dirfile was opened in read-only mode.
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_INDEX
+The supplied fragment index was out of range, or an attempt was made to remove
+the primary format specification.
+.DD GD_E_IO
+An I/O error occurred while trying to write modified data or metadata to disk.
+.DD GD_E_PROTECTED
+The metadata of the fragment which included the removed fragment was protected
+from change.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH NOTES
+This function re-arranges the remaining format specification fragments in some
+unspecified way, except for the primary fragment, which is guaranteed to remain
+at index zero.  Callers which cache format specification fragment indices must
+re-initialise their cache after calling this function.
+
+.SH HISTORY
+The
+.FN dirfile_uninclude
+function appeared in GetData-0.5.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_uninclude .
+
+In GetData-0.10.0, the error return from this function changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+.F3 gd_delete ,
+.F3 gd_include ,
+.F3 gd_open ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_fragmentname ,
+.F3 gd_nfragments ,
+.F3 gd_reference ,
+dirfile(5), dirfile-encoding(5), dirfile-format(5)

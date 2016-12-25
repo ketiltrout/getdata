@@ -1,0 +1,98 @@
+.\" gd_raw_filename.3.  The gd_raw_filename man page.
+.\"
+.\" Copyright (C) 2008, 2009, 2010, 2013, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_raw_filename 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_raw_filename \(em retrieve the pathname of a binary file in a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "char *gd_raw_filename(DIRFILE *" dirfile ", const char"
+.BI * field_code );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_raw_filename
+function reports the pathname of the file backing the
+.B RAW
+field specified by
+.ARG field_code
+in the dirfile specified by
+.ARG dirfile .
+If
+.ARG field_code
+contains a valid representation suffix, it will be ignored.
+
+.SH RETURN VALUE
+On success,
+.FN gd_raw_filename
+returns the full pathname of the binary file associated with the specified
+field in a newly-allocated buffer.  By default, this buffer is allocated with
+.F3 malloc ,
+but a different memory manager may be specified by calling
+.F3 gd_alloc_funcs
+before calling this function.  The caller is responsible for deallocating the
+returned buffer.
+
+On error, this function returns NULL and stores a negative-valued error code in
+the
+.B DIRFILE
+object which may be retrieved by a subsequent call to
+.F3 gd_error .
+Possible error codes are:
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_CODE
+The field specified by
+.ARG field_code
+was not found.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_FIELD_TYPE
+The field specified by
+.ARG field_code
+was not a
+.B RAW
+field.
+.DD GD_E_UNKNOWN_ENCODING
+The encoding scheme of the specified field could not be determined or was not
+understood by GetData.
+.PP
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN get_raw_filename
+function appeared in GetData-0.4.2.  Memory for the string it returned was
+managed by GetData.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_raw_filename .
+
+In GetData-0.8.0, the returned string changed to a malloc'd buffer, and the
+responsibility for freeing the buffer passed to the caller.
+
+.SH SEE ALSO
+.F3 free ,
+.F3 gd_entry ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 malloc ,
+dirfile(5), dirfile-encoding(5), dirfile-format(5)

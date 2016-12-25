@@ -1,0 +1,127 @@
+.\" gd_put_string.3.  The gd_put_string man page.
+.\"
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_put_string 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_put_string \(em write a STRING or SARRAY element to a Dirfile database
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_put_string(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" data_in );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_put_string
+function queries a dirfile(5) database specified by
+.ARG dirfile
+and stores the character string
+.ARG data_in
+in the
+.B STRING
+or
+.B SARRAY
+scalar field, specified by
+.ARG field_code .
+If
+.ARG field_code
+specifies a
+.B SARRAY
+field, the supplied string is stored as the first element.
+
+The 
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+
+Because string values are stored in the dirfile metadata, the new value of
+.ARG field_code
+won't be written to disk until the dirfile metadata is flushed with
+.F3 gd_metaflush ,
+or until the dirfile is closed with
+.F3 gd_close .
+
+The
+.F3 gd_put_sarray
+function provides another way of storing
+.B STRING
+and
+.B SARRAY
+data to a Dirfile.
+
+.SH RETURN VALUE
+On success,
+.FN gd_put_string
+returns zero.  On error, this a negative-valued error code.  Possible error
+codes are:
+.DD GD_E_ACCMODE
+The specified
+.ARG dirfile
+was opened read-only.
+.DD GD_E_BAD_CODE
+The field specified by
+.ARG field_code
+was not found in the database.
+.DD GD_E_BAD_DIRFILE
+An invalid
+.ARG dirfile
+was supplied.
+.DD GD_E_BAD_FIELD_TYPE
+The supplied
+.ARG field_code
+referred to a field of type other than
+.BR SARRAY
+or
+.BR STRING .
+.DD GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+maintainer.
+.DD GD_E_PROTECTED
+The fragment containing the string was protected from change.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN put_string
+function apepared in GetData-0.4.0.  It returned a
+.B size_t
+cotnaining length of the string written, or zero on error.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_put_strint .
+
+In GetData-0.10.0, this function's return value changed to zero on success, or
+or else a negative-valued error code.
+
+.SH SEE ALSO
+dirfile(5),
+.F3 gd_close ,
+.F3 gd_get_string ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_metaflush ,
+.F3 gd_open ,
+.F3 gd_put_sarray .

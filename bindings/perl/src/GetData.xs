@@ -47,7 +47,7 @@ typedef GD_DCOMPLEXP_t gdp_complex_undef;
 typedef GD_DCOMPLEXA(gdp_complex);
 typedef int gdp_ffff_t;
 typedef int gdp_numbits_t;
-typedef gd_shift_t gdp_shift_t;
+typedef gd_int64_t gdp_int64_t;
 typedef unsigned int gdp_uint_t;
 typedef gd_type_t gdp_type_t;
 typedef int gdp_int;
@@ -554,7 +554,7 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const gd_entry_t *old_E,
       mask = gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
 
       if (!(mask & 1))
-        GDP_EHASH_FETCH_IV(partial, "shift", E->EN(phase,shift), gd_shift_t);
+        GDP_EHASH_FETCH_IV(partial, "shift", E->EN(phase,shift), gd_int64_t);
       break;
     case GD_POLYNOM_ENTRY:
       gdp_fetch_in_fields(E->in_fields, sv, partial, 1, 1, pkg, func);
@@ -1931,9 +1931,8 @@ field_list_by_type(dirfile, type)
     dreturnvoid();
 
 void
-entry_list(dirfile, fragment, parent, type, flags)
+entry_list(dirfile, parent, type, flags)
     DIRFILE * dirfile
-    gdp_ffff_t fragment
     gdp_char * parent
     gdp_int    type
     gdp_uint_t flags
@@ -1942,13 +1941,13 @@ entry_list(dirfile, fragment, parent, type, flags)
   ALIAS:
     GetData::Dirfile::entry_list = 1
   PPCODE:
-    dtrace("%p, %i, \"%s\", %i, %u; %i", dirfile, fragment, parent, type, flags,
-      (int)GIMME_V);
+    dtrace("%p, \"%s\", %i, %u; %i", dirfile, parent, type, flags,
+        (int)GIMME_V);
 
     /* in array context, return the field list, otherwise return nfields */
     if (GIMME_V == G_ARRAY) {
       int i;
-      const char **el = gd_entry_list(dirfile, fragment, parent, type, flags);
+      const char **el = gd_entry_list(dirfile, parent, type, flags);
 
       GDP_UNDEF_ON_ERROR();
 
@@ -1957,10 +1956,46 @@ entry_list(dirfile, fragment, parent, type, flags)
         GDP_PUSHpvz(el[i]);
       }
     } else {
-      unsigned int ne = gd_nentries(dirfile, fragment, parent, type, flags);
+      unsigned int ne = gd_nentries(dirfile, parent, type, flags);
 
       GDP_UNDEF_ON_ERROR();
 
+      EXTEND(sp, 1);
+      GDP_PUSHuv(ne);
+    }
+
+    dreturnvoid();
+
+void
+match_entries(dirfile, regex, fragment=-1, type=0, flags=0)
+    DIRFILE * dirfile
+    gdp_char * regex
+    gdp_ffff_t fragment
+    gdp_int    type
+    gdp_uint_t flags
+  PREINIT:
+    GDP_DIRFILE_ALIAS;
+    const char **el;
+    unsigned int ne;
+  ALIAS:
+    GetData::Dirfile::match_entries = 1
+  PPCODE:
+    dtrace("%p, \"%s\", %i, %i, %u; %i", dirfile, regex, fragment, type, flags,
+        (int)GIMME_V);
+
+    ne = gd_match_entries(dirfile, regex, fragment, type, flags, &el);
+
+    GDP_UNDEF_ON_ERROR();
+
+    /* in array context, return the field list, otherwise return nfields */
+    if (GIMME_V == G_ARRAY) {
+      int i;
+
+      for (i = 0; el[i]; ++i) {
+        EXTEND(sp, 1);
+        GDP_PUSHpvz(el[i]);
+      }
+    } else {
       EXTEND(sp, 1);
       GDP_PUSHuv(ne);
     }

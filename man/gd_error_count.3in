@@ -1,0 +1,66 @@
+.\" gd_error_count.3.  The gd_error_count man page.
+.\"
+.\" Copyright (C) 2011, 2013, 2016 D.V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_error_count 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_error_count \(em report the number of errors encountered by the GetData
+library
+
+.SH SYNOPSIS
+.B #inlcude <getdata.h>
+.HP
+.SC
+.BI "int gd_error_count(DIRFILE *" dirfile );
+.EC
+
+.SH DESCRIPTION
+The first time
+.FN gd_error_count
+is called with the DIRFILE object
+.ARG dirfile ,
+it returns the number of errors encountered by the GetData library while
+operating on
+.ARG dirfile
+since its creation.  Calling this function resets the internal count, so
+that subsequent calls to
+.FN gd_error_count
+return the number of errors encountered only since the previous call to this
+function, for the specified DIRFILE.
+
+The errors themselves are not cached by the library.  The error status of the 
+.I last
+library call on
+.ARG dirfile
+(which might be
+.BR GD_E_OK ,
+indicating no error) can be obtained by calling
+.F3 gd_error .
+
+.SH RETURN VALUE
+The
+.FN gd_error_count
+function always returns the number of GetData errors encountered since the last
+time it was called, or since the dirfile was created. This will be zero, if no
+error has occurred over the given time.
+
+.SH HISTORY
+The
+.FN gd_error_count
+function appeared in GetData-0.8.0.
+
+.SH SEE ALSO
+.F3 gd_error ,
+.F3 gd_error_string

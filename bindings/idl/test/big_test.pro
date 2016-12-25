@@ -1804,6 +1804,11 @@ n = gd_fragment_namespace(d, fragment=2, namespace='ns2')
 nume += check_ok(304, d)
 nume += check_simple(304, n, 'ns2')
 
+;  305: gd_match_entries
+n = gd_match_entries(d, fragment=0, regex="^lin")
+nume += check_ok(305, d)
+nume += check_simple(305, n, [ "lincom", "linterp" ])
+
 
 
 

@@ -1,0 +1,101 @@
+.\" gd_array_len.3.  The gd_array_len man page.
+.\"
+.\" Copyright (C) 2010, 2011, 2012, 2014, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_array_len 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_array_len \(em returns the length of a CARRAY or SARRAY field in a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "size_t gd_array_len(DIRFILE *" dirfile ", const char *" field_code );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_array_len
+function queries a dirfile(5) database specified by
+.ARG dirfile
+and calculates the length of the
+.BR CARRAY ", " CONST ", " STRING ,
+or
+.B SARRAY
+field called
+.ARG field_code .
+If
+.ARG field_code
+contains a valid representation suffix, it will be ignored.
+
+The 
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_array_len
+returns a positive integer indicating the array length of the field specified.
+(The length of a
+.B CONST
+or a
+.B STRING
+field is always 1.) On error, it returns a negative-valued error code.  Possible
+error codes are:
+.DD GD_E_BAD_CODE
+The field specified by
+.ARG field_code
+was not found in the database.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_FIELD_TYPE
+The field specified by
+.ARG field_code
+was not of one of the field types listed above.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN gd_carray_len
+function appeared in GetData-0.7.0.  It was restricted to
+.B CONST
+and
+.B CARRAY
+entries.
+
+In GetData-0.9.0, this function was renamed to
+.BR gd_array_len ,
+and
+.B STRING
+entries were now valid for this function.
+
+Before GetData-0.10.0, this function could also fail with the error code
+.BR GD_E_ALLOC .
+
+In GetData-0.10.0, the error return from this function changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+dirfile(5),
+.F3 gd_open ,
+.F3 gd_error ,
+.F3 gd_error_string

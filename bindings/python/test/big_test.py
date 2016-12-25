@@ -1931,7 +1931,7 @@ CheckSimple(236, d.verbose_prefix, "big_test: ")
 
 # 237: gd_nentries check
 try:
-  n = d.nentries(pygetdata.ALL_FRAGMENTS, "data", pygetdata.SCALAR_ENTRIES,
+  n = d.nentries("data", pygetdata.SCALAR_ENTRIES,
       pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
 except:
   CheckOK2(237, 1)
@@ -2240,6 +2240,13 @@ try:
 except:
   CheckOK2(304, 4)
 CheckSimple2(304, 5, n, B(""))
+
+# 305: gd_match_entries
+try:
+  n = d.match_entries(regex='^lin', fragment=0)
+except:
+  CheckOK2(305, 0)
+CheckSimple2(305, 1, n, [ B('lincom'), B('linterp') ])
 
 
 

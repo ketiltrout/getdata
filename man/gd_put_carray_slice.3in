@@ -1,0 +1,210 @@
+.\" gd_put_carray_slice.3.  The gd_put_carray_slice man page.
+.\"
+.\" Copyright (C) 2010, 2011, 2012, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_put_carray_slice 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_put_carray, gd_put_carray_slice, gd_put_constant \(em write CONST or CARRAY
+data to a dirfile database
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_put_carray_slice(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "unsigned int " start ", size_t " len ", gd_type_t " data_type ,
+.BI "const void *" data_in );
+.HP
+.BI "int gd_put_carray(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_type_t " data_type ", const void *" data_in );
+.HP
+.BI "int gd_put_constant(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_type_t " data_type ", const void *" data_in );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_put_carray_slice
+function writes data to a dirfile(5) database specified by
+.ARG dirfile
+into the
+.B CARRAY
+scalar array
+.ARG field_code .
+The data in the field is converted from the data type specified by
+.ARG data_type ,
+and read from in the user-supplied buffer
+.ARG data_in .
+The location of the first element of the field into which data is stored is
+given by
+.ARG start ,
+and the number of elements stored is given by
+.ARG len .
+
+The
+.FN gd_put_carray
+function behaves similarly, except the whole scalar array is written, as if
+.FN gd_put_carray_slice
+were called with
+.ARG start
+equal zero and
+.ARG len
+equal to the value returned by
+.F3 gd_array_len .
+The
+.FN gd_put_constant
+function is equivalent to calling
+.FN gd_put_carray_slice
+with
+.ARG start
+equal to zero and
+.ARG len
+equal to one.  None of these interfaces can write to field representations.
+
+The argument
+.ARG data_in
+must point to a valid memory location containing all the data to be written.
+The number of elements which will be stored by
+.FN gd_put_carray
+may be obtained by calling
+.F3 gd_array_len .
+Unlike
+.F3 gd_putdata ,
+writing data past the end of the field is not permitted.  To add data to a
+.BR CARRAY ,
+first increase its length by calling
+.F3 gd_alter_carray ,
+or another equivalent function.
+
+The 
+.ARG data_type
+argument should be one of the following symbols, which indicates the type
+of the data pointed to by
+.ARG data_in :
+.RS
+.TP 11
+.B GD_UINT8
+unsigned 8-bit integer
+.DD GD_INT8
+signed (two's complement) 8-bit integer
+.DD GD_UINT16
+unsigned 16-bit integer
+.DD GD_INT16
+signed (two's complement) 16-bit integer
+.DD GD_UINT32
+unsigned 32-bit integer
+.DD GD_INT32
+signed (two's complement) 32-bit integer
+.DD GD_UINT64
+unsigned 64-bit integer
+.DD GD_INT64
+signed (two's complement) 64-bit integer
+.DD GD_FLOAT32
+IEEE-754 standard 32-bit single precision floating point number
+.DD GD_FLOAT64
+IEEE-754 standard 64-bit double precision floating point number
+.DD GD_COMPLEX64
+C99-conformant 64-bit single precision complex number
+.DD GD_COMPLEX128
+C99-conformant 128-bit double precision complex number
+.RE
+
+The type of the input data need not be the same as the storage type of the
+field.  Type conversion will be performed as necessary to return the requested
+type.  The 
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+
+.SH RETURN VALUE
+On success,
+.FN gd_put_carray ,
+.FN gd_put_carray_slice
+and
+.FN gd_put_constant
+return zero.  On error, they return a negative-valued error code.  Possible
+error codes are:
+.DD GD_E_ACCMODE
+The specified
+.ARG dirfile
+was opened read-only.
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_CODE
+The field specified by
+.ARG field_code
+was not found in the database.
+.DD GD_E_BAD_DIRFILE
+An invalid
+.AR.ARG
+was supplied.
+.DD GD_E_BAD_FIELD_TYPE
+The supplied
+.ARG field_code
+was not a
+.B CONST
+nor a
+.BR CARRAY .
+The caller should use
+.F3 gd_putdata ,
+.F3 gd_put_constant ,
+or
+.F3 gd_put_string
+instead.
+.DD GD_E_BAD_TYPE
+An invalid
+.ARG data_type
+was specified.
+.DD GD_E_BOUNDS
+A request for data beyond the end of the field was made.
+.DD GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+maintainer.
+.DD GD_E_PROTECTED
+The fragment containing the constant was protected from change.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN put_constant
+function appeared in GetData-0.4.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_put_constant .
+The functions
+.FN gd_put_carray
+and
+.FN gd_put_carray_slice
+functions also appeared in this release.
+
+In GetData-0.10.0, the error return from this function changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+dirfile(5),
+.F3 gd_array_len ,
+.F3 gd_carrays ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_get_carray_slice ,
+.F3 gd_open ,
+.F3 gd_put_constant

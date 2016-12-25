@@ -63,7 +63,7 @@ mexfiles=gd_add gd_add_alias \
 				 gd_invalid_dirfile gd_linterp_tablename gd_madd gd_madd_alias \
 				 gd_madd_carray gd_madd_const gd_madd_sarray \
 				 gd_madd_spec gd_madd_string \
-				 gd_malter_spec gd_mcarrays \
+				 gd_malter_spec gd_match_entries gd_mcarrays \
 				 gd_mconstants gd_metaflush gd_move gd_mplex_lookback gd_msarrays \
 				 gd_mstrings gd_naliases gd_native_type gd_nentries gd_nfragments \
 				 gd_nframes gd_open gd_parent_fragment gd_protection \

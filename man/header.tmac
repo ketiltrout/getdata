@@ -1,0 +1,75 @@
+.\" header.tmac.  GetData manual macros.
+.\"
+.\" Copyright (C) 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+
+.\" Format a function name with optional trailer: func_name()trailer
+.de FN \" func_name [trailer]
+.nh
+.BR \\$1 ()\\$2
+.hy
+..
+
+.\" Format a reference to section 3 of the manual: name(3)trailer
+.de F3 \" func_name [trailer]
+.nh
+.BR \\$1 (3)\\$2
+.hy
+..
+
+.\" Format the header of a list of definitons
+.de DD \" name alt...
+.ie "\\$2"" \{ \
+.TP 8
+.PD
+.B \\$1 \}
+.el \{ \
+.PP
+.B \\$1
+.PD 0
+.DD \\$2 \\$3 \}
+..
+
+.\" Start a code block: Note: groff defines an undocumented .SC for
+.\" Bell Labs man legacy reasons.
+.de SC
+.fam C
+.na
+.nh
+..
+
+.\" End a code block
+.de EC
+.hy
+.ad
+.fam
+..
+
+.\" Format a structure pointer member: struct->member\fRtrailer
+.de SPM \" struct member trailer
+.nh
+.ie "\\$3"" .IB \\$1 ->\: \\$2
+.el .IB \\$1 ->\: \\$2\fR\\$3
+.hy
+..
+
+.\" Format a function argument
+.de ARG \" name trailer
+.nh
+.ie "\\$2"" .I \\$1
+.el .IR \\$1 \\$2
+.hy
+..
+
+.\" Hyphenation exceptions
+.hw sarray carray lincom linterp

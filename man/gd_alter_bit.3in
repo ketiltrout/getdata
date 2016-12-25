@@ -1,0 +1,412 @@
+.\" gd_alter_bit.3.  The gd_alter_bit man page.
+.\"
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013, 2014, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_alter_bit 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_alter_bit, gd_alter_carray, gd_alter_clincom, gd_alter_const,
+gd_alter_cpolynom, gd_alter_crecip, gd_alter_divide, gd_alter_indir,
+gd_alter_lincom, gd_alter_linterp, gd_alter_multiply, gd_alter_phase,
+gd_alter_polynom, gd_alter_raw, gd_alter_recip, gd_alter_sarray, gd_alter_sbit,
+gd_alter_sindir
+\(em modify a field in a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_alter_bit(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", int " bitnum ", int " numbits );
+.HP
+.BI "int gd_alter_carray(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_type_t " const_type ", size_t " array_len );
+.HP
+.BI "int gd_alter_clincom(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int " n_fields ", const char **" in_fields ", const double complex *" cm ,
+.BI "const double complex *" cb );
+.HP
+.BI "int gd_alter_const(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_type_t " const_type );
+.HP
+.BI "int gd_alter_cpolynom(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int " poly_ord ", const char *" in_field ", const double complex *" ca );
+.HP
+.BI "int gd_alter_crecip(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", complex double " cdividend );
+.HP
+.BI "int gd_alter_divide(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field1 ", const char *" in_field2 );
+.HP
+.BI "int gd_alter_indir(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" index_field ", const char *" carray_field );
+.HP
+.BI "int gd_alter_lincom(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int " n_fields ", const char **" in_fields ", const double *" m ,
+.BI "const double *" b );
+.HP
+.BI "int gd_alter_linterp(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", const char *" table ", int " rename_table );
+.HP
+.BI "int gd_alter_mplex(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", const char *" count_field ,
+.BI "int " count_val ", int " period );
+.HP
+.BI "int gd_alter_multiply(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field1 ", const char *" in_field2 );
+.HP
+.BI "int gd_alter_phase(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", gd_int64_t " shift );
+.HP
+.BI "int gd_alter_polynom(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int " poly_ord ", const char *" in_field ", const double *" ca );
+.HP
+.BI "int gd_alter_raw(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_type_t " data_type ", unsigned int " spf ", int " recode );
+.HP
+.BI "int gd_alter_recip(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", double " dividend );
+.HP
+.BI "int gd_alter_sarray(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "size_t " array_len );
+.HP
+.BI "int gd_alter_sbit(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", int " bitnum ", int " numbits );
+.HP
+.BI "int gd_alter_sindir(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" index_field ", const char *" sarray_field );
+.HP
+.BI "int gd_alter_window(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", const char *" check_field ,
+.BI "gd_windop_t " windop ", gd_triplet_t " threshold );
+.EC
+
+.SH DESCRIPTION
+These functions provide alternatives to using the
+.F3 gd_alter_entry
+function to modify a field of the indicated type in the dirfile specified by
+.ARG dirfile .
+.PP
+In all of these calls,
+.ARG field_code
+indicates the the field to be modified, which may be a regular field, or a
+metafield specified by its full (slashed) field code, but should not contain a
+representation suffix.  The meaning and valid
+types of other arguments may be obtained from the
+.F3 get_entry
+and
+dirfile-format(5)
+manual pages.  The
+.B gd_int64_t
+type is a signed 64-bit integer type.  The
+.B gd_triplet_t
+type is defined as:
+.PP
+.in +4n
+.nf
+.fam C
+typedef union {
+  gd_int64_t i;
+  gd_uint64_t u;
+  double r;
+} gd_triplet_t;
+.fam
+.fi
+.in
+.PP
+Which element of this
+.B gd_triplet_t
+union to set depends on the operator selected for the
+.B WINDOW
+field.  See
+.F3 gd_entry
+for details.
+
+The
+.FN gd_alter_clincom
+and
+.FN gd_alter_cpolynom
+functions are identical to
+.FN gd_alter_lincom
+and
+.FN gd_alter_polynom ,
+except they take complex scalar parameters, instead of purely real values.  This
+only matters for the input of
+.I new
+parameters; if the scalar parameters are not
+changed (by passing NULL instead of a list of scalars), the functions can be
+used interchangeably, regardless of whether the altered field has complex scalar
+parameters or not.
+
+If the corresponding parameters are to be changed, the
+.FN gd_alter_lincom
+and
+.FN gd_alter_clincom
+functions take pointers to three arrays of length
+.ARG n_fields
+containing the input field names
+.RI ( in_fields ),
+the gain factors
+.RI ( m " or " cm ),
+and the offset terms
+.RI ( b " or " cb ).
+Similarly,
+.FN gd_alter_polynom
+and
+.FN gd_alter_cpolynom
+take an array of length
+.ARG poly_ord
++ 1 containing the polynomial co-efficients
+.RI ( a " or " ca ).
+
+Some field parameters have special values which indicate no change should be
+made to the parameter.  These special values are:
+.DD NULL\fR:
+any of the string parameters, also 
+.IR m ", " b ", " a ", " cm ", " cb ", or " ca ;
+.DD 0\fR:
+.IR spf ", " n_fields ", " numbits ", " cdividend ", " dividend ", or " array_len ;
+.DD -1\fR:
+.IR bitnum " or " period ;
+.DD GD_NULL\fR:
+.IR data_type " or " const_type ;
+.DD GD_WINDOP_UNK\fR:
+.ARG windop .
+.PP
+All field parameters introduced with this interface must contain literal
+parameters.  Field parameters which are scalar fields cannot be introduced with
+these functions.  To do that, use
+.F3 gd_alter_entry ,
+.F3 gd_alter_spec
+or
+.F3 gd_malter_spec ,
+as appropriate.
+
+If
+.ARG rename_table
+is non-zero, the look-up table referenced by the
+.B LINTERP
+field will be renamed to the path given by
+.ARG table .
+If
+.ARG recode
+is non-zero, the binary file associated with the
+.B RAW
+field will be re-encoded to reflect the new field parameters.  In this case,
+the field's I/O pointer will be reset to the beginning-of-frame.
+
+If
+.FN gd_alter_carray
+is used to increase the length of a
+.B CARRAY
+field, the added elements will be uninitialised.  Use
+.F3 gd_put_carray_slice
+or equivalent to initialise them.  Similarly, increasing the length of a
+.B SARRAY
+with
+.FN gd_alter_sarray
+will set the added elements to the empty string ("").  Use
+.F3 gd_put_sarray_slice
+or equivalent to modify them.
+
+See
+.B NOTES
+below for information on using
+.BR gd_alter_clincom "(), " gd_alter_crecip (),
+and 
+.FN gd_alter_cpolynom
+in the C89 GetData API.
+
+.SH RETURN VALUE
+On success, these functions return zero.  On error, a negative-valued error
+code is returned.  Possible error codes are:
+.ECODE GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.ECODE GD_E_ALLOC
+The library was unable to allocate memory.
+.ECODE GD_E_BAD_CODE
+The field specified by
+.ARG field_code
+was not found, or a supplied field code did not contain the appropriate prefix
+or suffix.
+.ECODE GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.ECODE GD_E_BAD_ENTRY
+One or more of the field parameters specified was invalid.
+.ECODE GD_E_BAD_FIELD_TYPE
+The field specified by
+.ARG field_code
+was of the wrong type for the function called.
+.ECODE GD_E_BAD_TYPE
+The
+.ARG data_type
+.ARG const_type
+argument was invalid.
+.ECODE GD_E_IO
+An I/O error occurred while translating the binary file associated with a
+modified
+.B RAW
+field, or an I/O error occurred while attempting to rename a
+.B LINTERP
+table file.
+.ECODE GD_E_PROTECTED
+The metadata of the fragment was protected from change.  Or, a request to
+translate the binary file associated with a
+.B RAW
+field was attempted, but the data of the fragment was protected.
+.ECODE GD_E_UNKNOWN_ENCODING
+The encoding scheme of the indicated format specification fragment is not known
+to the library.  As a result, the library was unable to translate the binary
+file be associated with a modified
+.B RAW
+field.
+.ECODE GD_E_UNSUPPORTED
+The encoding scheme of the indicated format specification fragment does not
+support translating the binary file associated with a modified
+.B RAW
+field.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after these functions return by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH NOTES
+The C89 GetData API provides different prototypes for
+.BR gd_alter_clincom "(), " gd_alter_cpolynom (),
+and
+.FN gd_alter_crecip :
+.PP
+.SC
+.B #define GD_C89_API
+.br
+.B #include <getdata.h>
+.HP
+.BI "int gd_alter_clincom(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int " n_fields ", const char **" in_fields ", const double *" cm ,
+.BI "const double *" cb );
+.HP
+.BI "int gd_alter_cpolynom(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int " poly_ord ", const char *" in_fields ", const double *" ca );
+.HP
+.BI "int gd_alter_crecip(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", const double " cdividend\fR[2] );
+.EC
+.PP
+In this case, the array pointers passed as
+.ARG cm ,
+.ARG cb
+or
+.ARG ca
+should have twice as many (purely real) elements, consisting of alternating
+real and imaginary parts for the complex data.  That is, for example,
+.ARG ca [0]
+should be the real part of the first co-efficient,
+.ARG ca [1]
+the imaginary part of the first co-efficient,
+.ARG ca [2]
+the real part of the second co-efficient,
+.ARG ca [3]
+the imaginary part of the second co-efficient, and so on.  Similarly, the
+.ARG cdividend
+parameter becomes a double precision array of length two.
+.PP
+For
+.FN gd_alter_clincom
+and
+.FN gd_alter_cpolynom ,
+these are simply different (but equivalent) declarations of the C99 function
+entry point.  For
+.FN gd_alter_crecip ,
+however, a different entry point is needed (since the
+.ARG cdividend
+parameter is passed by reference instead of by value).  In the interests of
+portability, the C89 version of
+.FN gd_alter_crecip
+is always available, and may be accessed as
+.FN gd_alter_crecip89 ,
+with the C89 prototype, in both the C99 and C89 APIs.  Passing NULL as
+.ARG cdividend
+is equivalent to specifying a dividend of zero: it indicates no change to the
+dividend parameter.
+
+.SH HISTORY
+The functions
+.FN dirfile_alter_bit ,
+.FN dirfile_alter_const ,
+.FN dirfile_alter_lincom ,
+.FN dirfile_alter_linterp ,
+.FN dirfile_alter_multiply ,
+.FN dirfile_alter_phase ,
+and
+.FN dirfile_alter_raw
+appeared in GetData-0.5.0.
+
+The functions
+.FN dirfile_alter_clincom ,
+.FN dirfile_alter_cpolynom ,
+.FN dirfile_alter_polynom ,
+and
+.FN dirfile_alter_sbit
+appeared in GetData-0.6.0.
+
+In GetData-0.7.0, the functions were renamed to
+.FN gd_alter_bit ,
+.FN gd_alter_clincom ,
+.FN gd_alter_const ,
+.FN gd_alter_cpolynom ,
+.FN gd_alter_lincom ,
+.FN gd_alter_linterp ,
+.FN gd_alter_multiply ,
+.FN gd_alter_phase ,
+.FN gd_alter_polynom ,
+.FN gd_alter_raw ,
+and
+.FN gd_alter_sbit .
+The functions
+.FN gd_alter_carray ,
+.FN gd_alter_crecip ,
+.FN gd_alter_crecip89 ,
+.FN gd_alter_divide ,
+and
+.FN gd_alter_recip
+also appeared in this version.
+
+The functions
+.FN gd_alter_mplex
+and
+.FN gd_alter_window
+appeared in GetData-0.8.0.
+
+In GetData-0.10.0, the error return from these functions changed from -1 to a
+negative-valued error code.  The functions
+.FN gd_alter_indir ,
+.FN gd_alter_sarray ,
+and
+.FN gd_alter_sindir
+also appeared in this version.
+
+.SH SEE ALSO
+.F3 gd_alter_entry ,
+.F3 gd_alter_spec ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_malter_spec ,
+.F3 gd_metaflush ,
+.F3 gd_open ,
+.F3 gd_put_carray_slice ,
+.F3 gd_put_sarray_slice ,
+dirfile-format(5)

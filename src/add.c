@@ -1125,7 +1125,7 @@ int gd_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
 
 /* add a PHASE entry */
 int gd_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
-    gd_shift_t shift, int fragment_index) gd_nothrow
+    gd_int64_t shift, int fragment_index) gd_nothrow
 {
   gd_entry_t E;
 
@@ -1528,7 +1528,7 @@ int gd_madd_multiply(DIRFILE* D, const char *parent, const char* field_code,
 
 /* add a META PHASE entry */
 int gd_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
-    const char* in_field, gd_shift_t shift) gd_nothrow
+    const char* in_field, gd_int64_t shift) gd_nothrow
 {
   gd_entry_t E;
 

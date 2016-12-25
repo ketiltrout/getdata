@@ -180,7 +180,7 @@ int _GD_ListEntry(const gd_entry_t *E, int meta_ok, int hidden_ok, int noalias,
 }
 
 static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
-    size_t offs, int fragment, int type, unsigned int flags) gd_nothrow
+    size_t offs, int type, unsigned int flags) gd_nothrow
 {
   char** el;
   int i, index;
@@ -195,8 +195,7 @@ static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
   struct gd_flist_ *l;
   int nentries;
 
-  dtrace("%p, %p, %" PRIuSIZE ", %i, 0x%X, 0x%X", D, p, offs, fragment, type,
-      flags);
+  dtrace("%p, %p, %" PRIuSIZE ", 0x%X, 0x%X", D, p, offs, type, flags);
 
   index = _GD_EntryIndex(type);
   if (index < 0) {
@@ -241,8 +240,8 @@ static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
       el = ptr;
     }
 
-    if (_GD_ListEntry(entry[i], p ? 1 : 0, hidden, noalias, special, fragment,
-          ctype))
+    if (_GD_ListEntry(entry[i], p ? 1 : 0, hidden, noalias, special,
+          GD_ALL_FRAGMENTS, ctype))
     {
       el[n++] = entry[i]->field + offs;
     }
@@ -265,14 +264,14 @@ static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
   return (const char **)el;
 }
 
-const char **gd_entry_list(DIRFILE* D, int fragment, const char *parent,
-    int type, unsigned int flags) gd_nothrow
+const char **gd_entry_list(DIRFILE* D, const char *parent, int type,
+    unsigned int flags) gd_nothrow
 {
   const char **el;
   size_t offs = 0;
   struct gd_private_entry_ *p = NULL;
 
-  dtrace("%p, %i, \"%s\", %i, %u", D, fragment, parent, type, flags);
+  dtrace("%p, \"%s\", %i, %u", D, parent, type, flags);
 
   GD_RETURN_IF_INVALID(D, "%p", NULL);
 
@@ -290,7 +289,7 @@ const char **gd_entry_list(DIRFILE* D, int fragment, const char *parent,
     offs = strlen(P->field) + 1;
   }
 
-  el = _GD_EntryList(D, p, offs, fragment, type, flags);
+  el = _GD_EntryList(D, p, offs, type, flags);
   dreturn("%p", el);
   return el;
 }
@@ -722,7 +721,7 @@ const char **gd_field_list_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
   const char** el;
   dtrace("%p, 0x%X", D, type);
 
-  el = gd_entry_list(D, GD_ALL_FRAGMENTS, NULL, type, 0);
+  el = gd_entry_list(D, NULL, type, 0);
   dreturn("%p", el);
   return el;
 }
@@ -732,7 +731,7 @@ const char **gd_vector_list(DIRFILE* D) gd_nothrow
   const char **el;
   dtrace("%p", D);
 
-  el = gd_entry_list(D, GD_ALL_FRAGMENTS, NULL, GD_VECTOR_ENTRIES, 0);
+  el = gd_entry_list(D, NULL, GD_VECTOR_ENTRIES, 0);
   dreturn("%p", el);
   return el;
 }
@@ -743,7 +742,7 @@ const char **gd_field_list(DIRFILE* D) gd_nothrow
 
   dtrace("%p", D);
 
-  el = gd_entry_list(D, GD_ALL_FRAGMENTS, NULL, GD_ALL_ENTRIES, 0);
+  el = gd_entry_list(D, NULL, GD_ALL_ENTRIES, 0);
   dreturn("%p", el);
   return el;
 }
@@ -804,7 +803,7 @@ const char **gd_mfield_list_by_type(DIRFILE* D, const char* parent,
   const char **el;
   dtrace("%p, \"%s\", 0x%X", D, parent, type);
 
-  el = gd_entry_list(D, GD_ALL_FRAGMENTS, parent, type, 0);
+  el = gd_entry_list(D, parent, type, 0);
   dreturn("%p", el);
   return el;
 }
@@ -814,7 +813,7 @@ const char **gd_mvector_list(DIRFILE* D, const char* parent) gd_nothrow
   const char **el;
   dtrace("%p, \"%s\"", D, parent);
 
-  el = gd_entry_list(D, GD_ALL_FRAGMENTS, parent, GD_VECTOR_ENTRIES, 0);
+  el = gd_entry_list(D, parent, GD_VECTOR_ENTRIES, 0);
   dreturn("%p", el);
   return el;
 }
@@ -824,7 +823,196 @@ const char **gd_mfield_list(DIRFILE* D, const char* parent) gd_nothrow
   const char **el;
   dtrace("%p, \"%s\"", D, parent);
 
-  el = gd_entry_list(D, GD_ALL_FRAGMENTS, parent, GD_ALL_ENTRIES, 0);
+  el = gd_entry_list(D, parent, GD_ALL_ENTRIES, 0);
   dreturn("%p", el);
   return el;
+}
+
+#ifndef GD_NO_REGEX
+static void gd_compile_regex(DIRFILE *D, const char *regex, int cflags,
+    regex_t *preg)
+{
+  dtrace("%p, \"%s\", 0x%X, %p", D, regex, cflags, preg);
+
+  int regerr = regcomp(preg, regex, cflags);
+  if (regerr) {
+    /* Get error string length */
+    size_t rerror_len = regerror(regerr, preg, NULL, 0);
+
+    /* Allocate error buffer and save error string, if possible */
+    char *rerror = _GD_Malloc(D, rerror_len);
+    if (rerror) {
+      regerror(regerr, preg, rerror, rerror_len);
+      _GD_SetError(D, GD_E_ARGUMENT, GD_E_ARG_REGEX, NULL, 0, rerror);
+      free(rerror);
+    }
+
+    regfree(preg);
+  }
+  
+  dreturnvoid();
+}
+#endif
+
+#ifndef GD_NO_PCRE
+static void gd_compile_pcre(DIRFILE *D, const char *regex, int options,
+    pcre **code)
+{
+  const char *errptr;
+  int erroffset;
+
+  dtrace("%p, \"%s\", 0x%X, %p", D, regex, options, code);
+
+  *code = pcre_compile(regex, options, &errptr, &erroffset, NULL);
+
+  if (*code == NULL) /* Error */
+    _GD_SetError(D, GD_E_ARGUMENT, GD_E_ARG_PCRE, NULL, erroffset, errptr);
+
+  dreturnvoid();
+}
+#endif
+
+unsigned int gd_match_entries(DIRFILE *D, const char *regex, int fragment,
+    int type, unsigned int flags, const char ***list) gd_nothrow
+{
+#ifndef GD_NO_REGEX
+  regex_t preg;
+  const int regex_flags = ((flags & GD_REGEX_EXTENDED) ? REG_EXTENDED : 0)
+    | ((flags & GD_REGEX_ICASE) ? REG_ICASE : 0) | REG_NOSUB;
+#endif
+#ifndef GD_NO_PCRE
+  pcre *pcre_code;
+  const int pcre_exec_options =
+    (flags & GD_REGEX_UNICODE) ? PCRE_BSR_UNICODE : PCRE_BSR_ANYCRLF;
+  const int pcre_compile_options = pcre_exec_options
+    | PCRE_DOLLAR_ENDONLY | PCRE_DOTALL
+    | ((flags & GD_REGEX_JAVASCRIPT) ? PCRE_JAVASCRIPT_COMPAT : 0)
+    | ((flags & GD_REGEX_EXTENDED) ? PCRE_EXTENDED : 0)
+    | ((flags & GD_REGEX_ICASE) ? PCRE_CASELESS : 0)
+    | ((flags & GD_REGEX_UNICODE) ? PCRE_UTF8 : 0)
+    ;
+#endif
+  unsigned int len = 10, n = 0, i;
+
+  const int special = (type & GD_SPECIAL_ENTRY_BIT) ? type : 0;
+  const gd_entype_t ctype =
+    (type & GD_SPECIAL_ENTRY_BIT) ? GD_NO_ENTRY : (gd_entype_t)type;
+  const int hidden = (flags & GD_ENTRIES_HIDDEN);
+  const int noalias = (flags & GD_ENTRIES_NOALIAS);
+  const int use_pcre = flags & GD_REGEX_PCRE;
+
+  dtrace("%p, \"%s\", %i, %i, 0x%X, %p", D, regex, fragment, type, flags, list);
+
+  if (list)
+    *list = NULL;
+
+  GD_RETURN_IF_INVALID(D, "%i", 0);
+
+  /* We don't cache the result of this function */
+  if (D->regex_list) {
+    free(D->regex_list);
+    D->regex_list = NULL;
+  }
+
+  /* Check type */
+  if (_GD_EntryIndex(type) < 0) {
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_TYPE, NULL, type, NULL);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (list) {
+    D->regex_list = _GD_Malloc(D, sizeof(D->regex_list[0]) * len);
+    if (D->regex_list == NULL) {
+      dreturn("%i", 0);
+      return 0;
+    }
+  }
+
+  if (regex) {
+    /* Compile */
+    if (use_pcre) {
+#ifndef GD_NO_PCRE
+      gd_compile_pcre(D, regex, pcre_compile_options, &pcre_code);
+#else
+      _GD_SetError(D, GD_E_UNSUPPORTED, GD_E_SUPPORT_REGEX, NULL, 0, "PCRE");
+#endif
+    } else {
+      /* POSIX regex */
+#ifndef GD_NO_REGEX
+      gd_compile_regex(D, regex, regex_flags, &preg);
+#else
+      _GD_SetError(D, GD_E_UNSUPPORTED, GD_E_SUPPORT_REGEX, NULL, 0 "POSIX");
+#endif
+    }
+
+    if (D->error) {
+      free(D->regex_list);
+      D->regex_list = NULL;
+      dreturn("%i", 0);
+      return 0;
+    }
+  }
+
+  /* Regex searches are always performed against the full entry list */
+  for (i = n = 0; i < D->n_entries; ++i) {
+    if (list && n == len - 1) { /* leave space for the terminating NULL */
+      void *ptr = _GD_Realloc(D, D->regex_list, sizeof(D->regex_list[0])
+          * (len *= 2));
+      if (ptr == NULL) {
+        if (regex)
+          regfree(&preg);
+        free(D->regex_list);
+        D->regex_list = NULL;
+        dreturn("%i", 0);
+        return 0;
+      }
+      D->regex_list = ptr;
+    }
+
+    /* Check Dirfile metadata */
+    if (_GD_ListEntry(D->entry[i], 1, hidden, noalias, special, fragment,
+          ctype))
+    {
+      /* Run the regex, if provided */
+      if (regex == NULL
+#ifndef GD_NO_PCRE
+          || (use_pcre && pcre_exec(pcre_code, NULL, D->entry[i]->field,
+              D->entry[i]->e->len, 0, pcre_exec_options, NULL, 0) == 0)
+#endif
+#ifndef GD_NO_REGEX
+          || (!use_pcre && regexec(&preg, D->entry[i]->field, 0, NULL, 0) == 0)
+#endif
+         )
+      {
+        if (list)
+          D->regex_list[n] = D->entry[i]->field;
+        n++;
+      }
+    }
+  }
+
+  if (regex) {
+#ifndef GD_NO_REGEX
+    if (!use_pcre)
+      regfree(&preg);
+#endif
+#ifndef GD_NO_PCRE
+    if (use_pcre)
+      pcre_free(pcre_code);
+#endif
+  }
+
+  if (list) {
+    if (n == 0) {
+      free(D->regex_list);
+      D->regex_list[0] = NULL;
+      *list = zero_list;
+    } else {
+      D->regex_list[n] = NULL;
+      *list = D->regex_list;
+    }
+  }
+  dreturn("%u", n);
+  return n;
 }

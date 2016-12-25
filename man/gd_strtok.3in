@@ -1,0 +1,106 @@
+.\" gd_strtok.3.  The gd_strtok man page.
+.\"
+.\" Copyright (C) 2012, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_strtok 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_strtok \(em tokenise a string using the GetData parser
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "char *gd_strtok(DIRFILE *" dirfile ", const char *" string );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_strtok
+function parses a string into a series of tokens according to the rules of the
+Dirfile metadata syntax (see dirfile-format(5)).  The first time
+.FN gd_strtok
+is called, the string to be parsed should be passed in
+.ARG string .
+The first token will be returned.  In subsequent calls to parse the same string,
+.ARG string
+should be NULL (as with
+.F3 strtok ).
+Each time 
+.FN gd_strtok
+is called like this, the next token is returned.
+
+Operation of the Dirfile tokeniser varies between Dirfile Standards Versions.
+The Standards Version used is the current Version of the loaded DIRFILE
+.ARG dirfile .
+Use
+.F3 gd_dirfile_standards
+to retrieve or change this value.  Changing the Standards Version of
+.ARG dirfile
+while parsing a string will affect the parsing of subsequent tokens, but does
+not affect tokens already returned.  A copy of the string is cached in the
+.ARG dirfile
+object.  Calling
+.FN gd_strtok
+with different
+.ARG dirfile s
+will parse different strings.
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_strtok
+returns a copy of the first token, if
+.ARG string
+is non-NULL, or else a subsequent token from the previously specified string,
+if
+.ARG string
+is NULL.  Every non-NULL pointer returned by
+.FN gd_strtok
+points to a new buffer allocated on the heap.  By default,
+.F3 strdup
+is used the allocate the buffers, but an alternate memory manager may be
+used by calling
+.F3 gd_alloc_funcs
+before calling this function.  The caller is responsible for deallocating all
+these buffers.
+.PP
+If no more tokens are available, or if an error occurred, NULL is returned.
+If an error has occurred, it will also set the dirfile error a non-zero error
+value.  Possible error values are:
+.DD GD_E_ALLOC
+A memory allocation error occurred.
+.DD GD_E_ARGUMENT
+There was no string to parse (i.e.
+.ARG string
+was NULL, but no previous call specified a string to parse).
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_FORMAT
+A syntax error was found in the string.
+.PP
+The dirfile error may be retrieved by calling
+.F3 gd_error .
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN gd_strtok
+function appeared in GetData-0.8.0.
+
+.SH SEE ALSO
+.F3 gd_dirfile_standards ,
+.F3 gd_open ,
+dirfile-format(5)

@@ -1,0 +1,204 @@
+.\" gd_getdata.3.  The gd_getdata man page.
+.\"
+.\" Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_seek 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_seek \(em reposition a Dirfile field pointer
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "off_t gd_seek(DIRFILE *" dirfile ", const char *" field_code ", off_t"
+.IB frame_num ", off_t " sample_num ", int " flags );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_seek
+function changes the position of the I/O pointer associated with the field
+.ARG field_code
+in the dirfile(5) database specified by
+.ARG dirfile .
+In normal operation,
+.FN gd_seek
+advances the field I/O pointer
+.ARG frame_num
+frames plus
+.ARG sample_num
+samples from the origin point specified in
+.ARG flags ,
+which should contain one of
+.BR GD_SEEK_SET ", " GD_SEEK_CUR ,
+or
+.BR GD_SEEK_END ,
+indicating, respectively, sample zero, the current position of the
+field pointer, and the location of the end-of-field marker (see
+.F3 gd_eof ).
+
+In addition to one of the symbols above, the
+.ARG flags
+parameter may also, optionally, be bitwise or'd with
+.BR GD_SEEK_WRITE ,
+which will result in the field being padded (with zero for integer types, or a
+IEEE-754 conforming not-a-number otherwise) in the event of seeking past the
+end-of-field marker.
+
+The effect of attempting to seek past the end-of-field is encoding specific.
+Some encodings don't actually add the padding requested by
+.B GD_SEEK_WRITE
+unless a subsequent
+.F3 gd_putdata
+call is used to add more data to the field at the new end-of-field.  Other
+encodings add the padding, advancing the end-of-field, regardless of subsequent
+writes.  Similarly, attempting to seek past the end-of-field marker in read mode
+(without specifying
+.BR GD_SEEK_WRITE )
+is also encoding specific: in some encodings the field pointer will be moved
+past the end-of-field marker, while in others, it will be repositioned to the
+end of field.  Check the return value to determine the result.
+
+In general,
+.B GD_SEEK_WRITE
+should be used on
+.FN gd_seek
+calls before a write via
+.F3 gd_putdata ,
+while calls before a read via
+.F3 gd_getdata
+should omit the
+.B GD_SEEK_WRITE
+flag.  So the following:
+.IP
+.SC
+.BI "gd_seek(" dirfile ", " field_code ", " a ", " b ,
+.B GD_SEEK_SET | GD_SEEK_WRITE);
+.br
+.BI "gd_putdata(" dirfile ", "field_code ", GD_HERE, 0, " c ", " d ", " type ,
+.IB data );
+.EC
+.P
+is equivalent to:
+.IP
+.SC
+.BI "gd_putdata(" dirfile ", "field_code ", " a ", " b ", " c ", " d ", " type ,
+.IB data );
+.P
+and, similarly,
+.IP
+.SC
+.BI "gd_seek(" dirfile ", " field_code ", " a ", " b ", GD_SEEK_SET);"
+.br
+.BI "gd_getdata(" dirfile ", "field_code ", GD_HERE, 0, " c ", " d ", " type ,
+.IB data );
+.EC
+.P
+is equivalent to:
+.IP
+.SC
+.BI "gd_getdata(" dirfile ", "field_code ", " a ", " b ", " c ", " d ", " type ,
+.IB data );
+.P
+Only
+.B RAW
+fields (and the implicit
+.I INDEX
+field) have field I/O pointers associated with them.  Calling
+.FN gd_seek
+on a derived field will move the field pointers of all of the field's inputs.
+It is possible to create derived fields which simultaneously read from different
+places of the same input field.  Calling
+.FN gd_seek
+on such a field will result in an error.
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_seek
+returns a non-negative integer indicating the I/O position, in samples, of the
+specified field after performing the seek.  On error, it returns a
+negative-valued error code.  Possible error codes are:
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_ARGUMENT
+The
+.ARG flags
+parameter didn't contain exactly one of
+.BR GD_SEEK_SET ", " GD_SEEK_CUR ,
+or
+.BR GD_SEEK_END .
+.DD GD_E_BAD_CODE
+The field specified by
+.ARG field_code ,
+or one of the fields it uses for input, was not found in the database.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_FIELD_TYPE
+An attempt was made to seek relative to
+.B GD_SEEK_END
+on the
+.I INDEX
+field, which has no end-of-field marker.
+.DD GD_E_DIMENSION
+The specified field or one of its inputs wasn't of vector type.
+.DD GD_E_DOMAIN
+The field position couldn't be set due to a derived field reading simultaneously
+from more than one place in a
+.B RAW
+field.
+.DD GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+maintainer.
+.DD GD_E_IO
+An error occurred while trying to open or read from a file on disk containing
+a raw field.
+.DD GD_E_RANGE
+The request resulted an attempt to move the I/O pointer of the specified field
+or one of its inputs to a negative sample number.
+.DD GD_E_RECURSE_LEVEL
+Too many levels of recursion were encountered while trying to resolve
+.ARG field_code .
+This usually indicates a circular dependency in field specification in the
+dirfile.
+.DD GD_E_UNKNOWN_ENCODING
+The encoding scheme of a RAW field could not be determined.  This may also
+indicate that the binary file associated with the RAW field could not be found.
+.DD GD_E_UNSUPPORTED
+Reading from dirfiles with the encoding scheme of the specified dirfile is not
+supported by the library.  See
+dirfile-encoding(5)
+for details on dirfile encoding schemes.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN gd_seek
+function appeared in GetData-0.8.0.
+
+In GetData-0.10.0, the error return from this function changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+.F3 gd_getdata ,
+.F3 gd_open ,
+.F3 gd_putdata ,
+.F3 gd_tell

@@ -303,3 +303,4 @@
 302 F9CIpPmh gd_include_ns
 303 F9CIpPmh gd_fragment_namespace (NULL)
 304 F9CIpPmh gd_fragment_namespace (non-NULL)
+305 F9CIpPmh gd_match_entry

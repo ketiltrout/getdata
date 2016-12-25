@@ -21,7 +21,7 @@
 #include "internal.h"
 
 static unsigned int _GD_NEntries(DIRFILE *D, struct gd_private_entry_ *p,
-    int fragment, int type, unsigned int flags)
+    int type, unsigned int flags)
 {
   int i;
   unsigned int u, n = 0;
@@ -30,7 +30,7 @@ static unsigned int _GD_NEntries(DIRFILE *D, struct gd_private_entry_ *p,
   const int hidden = (flags & GD_ENTRIES_HIDDEN);
   const int noalias = (flags & GD_ENTRIES_NOALIAS);
 
-  dtrace("%p, %p, %i, 0x%X, 0x%X", D, p, fragment, type, flags);
+  dtrace("%p, %p, 0x%X, 0x%X", D, p, type, flags);
 
   if (type == GD_VECTOR_ENTRIES || type == GD_SCALAR_ENTRIES ||
       type == GD_ALIAS_ENTRIES)
@@ -49,14 +49,14 @@ static unsigned int _GD_NEntries(DIRFILE *D, struct gd_private_entry_ *p,
   if (p) {
     for (i = 0; i < p->n_meta; ++i)
       if (_GD_ListEntry(p->p.meta_entry[i], 1, hidden, noalias, special,
-            fragment, ctype))
+            GD_ALL_FRAGMENTS, ctype))
       {
         n++;
       }
   } else {
     for (u = 0; u < D->n_entries; ++u)
-      if (_GD_ListEntry(D->entry[u], 0, hidden, noalias, special, fragment,
-            ctype))
+      if (_GD_ListEntry(D->entry[u], 0, hidden, noalias, special,
+            GD_ALL_FRAGMENTS, ctype))
       {
         n++;
       }
@@ -66,13 +66,13 @@ static unsigned int _GD_NEntries(DIRFILE *D, struct gd_private_entry_ *p,
   return n;
 }
 
-unsigned int gd_nentries(DIRFILE *D, int fragment, const char *parent,
+unsigned int gd_nentries(DIRFILE *D, const char *parent,
     int type, unsigned int flags) gd_nothrow
 {
   unsigned int n;
   struct gd_private_entry_ *p = NULL;
 
-  dtrace("%p, %i, \"%s\", 0x%X, 0x%X", D, fragment, parent, type, flags);
+  dtrace("%p, \"%s\", 0x%X, 0x%X", D, parent, type, flags);
 
   GD_RETURN_IF_INVALID(D, "%u", 0);
 
@@ -89,7 +89,7 @@ unsigned int gd_nentries(DIRFILE *D, int fragment, const char *parent,
     p = P->e;
   }
 
-  n = _GD_NEntries(D, p, fragment, type, flags);
+  n = _GD_NEntries(D, p, type, flags);
   dreturn("%u", n);
   return n;
 }
@@ -99,7 +99,7 @@ unsigned int gd_nfields(DIRFILE* D) gd_nothrow
   unsigned int n;
   dtrace("%p", D);
 
-  n = gd_nentries(D, GD_ALL_FRAGMENTS, NULL, 0, 0);
+  n = gd_nentries(D, NULL, 0, 0);
   dreturn("%u", n);
   return n;
 }
@@ -109,7 +109,7 @@ unsigned int gd_nvectors(DIRFILE* D) gd_nothrow
   unsigned int n;
   dtrace("%p", D);
 
-  n = gd_nentries(D, GD_ALL_FRAGMENTS, NULL, GD_VECTOR_ENTRIES, 0);
+  n = gd_nentries(D, NULL, GD_VECTOR_ENTRIES, 0);
   dreturn("%u", n);
   return n;
 }
@@ -119,7 +119,7 @@ unsigned int gd_nfields_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
   unsigned int n;
   dtrace("%p, 0x%X", D, type);
 
-  n = gd_nentries(D, GD_ALL_FRAGMENTS, NULL, type, 0);
+  n = gd_nentries(D, NULL, type, 0);
   dreturn("%u", n);
   return n;
 }
@@ -129,7 +129,7 @@ unsigned int gd_nmfields(DIRFILE* D, const char* parent) gd_nothrow
   unsigned int n;
   dtrace("%p, \"%s\"", D, parent);
 
-  n = gd_nentries(D, GD_ALL_FRAGMENTS, parent, 0, 0);
+  n = gd_nentries(D, parent, 0, 0);
   dreturn("%u", n);
   return n;
 }
@@ -139,7 +139,7 @@ unsigned int gd_nmvectors(DIRFILE* D, const char* parent) gd_nothrow
   unsigned int n;
   dtrace("%p, \"%s\"", D, parent);
 
-  n = gd_nentries(D, GD_ALL_FRAGMENTS, parent, GD_VECTOR_ENTRIES, 0);
+  n = gd_nentries(D, parent, GD_VECTOR_ENTRIES, 0);
   dreturn("%u", n);
   return n;
 }
@@ -150,7 +150,7 @@ unsigned int gd_nmfields_by_type(DIRFILE* D, const char* parent,
   unsigned int n;
   dtrace("%p, \"%s\", %i", D, parent, type);
 
-  n = gd_nentries(D, GD_ALL_FRAGMENTS, parent, type, 0);
+  n = gd_nentries(D, parent, type, 0);
   dreturn("%u", n);
   return n;
 }

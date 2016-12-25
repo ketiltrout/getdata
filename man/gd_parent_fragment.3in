@@ -1,0 +1,77 @@
+.\" gd_parent_fragment.3.  The gd_parent_fragment man page.
+.\"
+.\" Copyright (C) 2008, 2010, 2012, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_parent_fragment 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_parent_fragment \(em retrieve the parent fragment of a fragment in a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_parent_fragment(DIRFILE *" dirfile ", int " fragment_index );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_parent_fragment
+function queries a dirfile(5) database specified by
+.ARG dirfile
+and returns the index of the fragment which contains the
+.B INCLUDE
+directive for the fragment indexed by
+.ARG fragment_index .
+
+Since the primary format specification fragment is not included in any other
+fragment, passing zero for
+.ARG fragment_index
+will result in an error.
+
+.SH RETURN VALUE
+On success,
+.FN gd_parent_fragment
+returns the index of the specified fragment's parent.  On error,
+.FN gd_parent_fragment
+returns a negative-valued error code.  Possible error codes are:
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_INDEX
+The supplied index was out of range, or was equal to zero.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN get_parent_fragment
+function appeared in GetData-0.5.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_parent_fragment .
+
+In GetData-0.10.0, the error return from this function changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+dirfile(5),
+.F3 gd_include ,
+.F3 gd_open ,
+.F3 gd_fragmentname ,
+.F3 gd_nfragments

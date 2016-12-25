@@ -1,0 +1,97 @@
+.\" gd_metaflush.3.  The gd_metaflush man page.
+.\"
+.\" Copyright (C) 2008, 2010, 2011, 2012, 2014, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_metaflush 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_metaflush \(em write modified Dirfile metadata to disk
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_metaflush(DIRFILE *" dirfile );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_metaflush
+function flushes all pending metadata changes in the dirfile specified by
+.ARG dirfile 
+to disk.  This is accomplished by re-writing the format specification fragments
+containing modified metadata, overwriting the existing files.  Format file
+fragments which are unchanged are not touched.
+.PP
+Metadata is written to disk using the current Standards Version as stored in the
+.ARG dirfile
+object.  See
+.F3 gd_dirfile_standards
+to change or report the current Standards Version.  If the dirfile metadata
+conforms to no known Standards Version, a Standards non-compliant fragment will
+be written.
+.PP
+This function flushes only metadata.  To flush the field data as well, call
+.F3 gd_sync
+instead.
+
+.SH RETURN VALUE
+On success, zero is returned.  On error, a negative-valued error code is
+returned.  Possible error codes are:
+.DD GD_E_ACCMODE
+The supplied dirfile was opened in read-only mode.
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_IO
+An I/O error occurred while trying to write modified metadata to disk.
+.DD GD_E_LINE_TOO_LONG
+While attempting to flush modified metadata to disk, a field specification line
+exceeded the maximum allowed length.  On most platforms, the maximum length is
+at least 2**31 bytes, so this typically indicates something pathological
+happening.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH NOTES
+When writing metadata using Standards Version 4 or earlier, the reference field
+may change, owing to the lack of a
+.B /REFERENCE
+directive.  A work-around is to upgrade to Standards Version 5 or later.
+
+.SH HISTORY
+The
+.FN dirfile_metaflush
+function appeared in GetData-0.4.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_metaflush .
+
+in GetData-0.10.0, the error return from this function changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+.F3 gd_close ,
+.F3 gd_dirfile_standards ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_open ,
+.F3 gd_rewrite_fragment ,
+.F3 gd_sync

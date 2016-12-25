@@ -1,0 +1,88 @@
+.\" gd_aliases.3.  The gd_aliases man page.
+.\"
+.\" Copyright (C) 2012, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_aliases 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_aliases \(em retrieve a list of aliases for a field in a Dirfile database
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "const char **gd_aliases(DIRFILE *" dirfile ", const char *" field_code );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_aliases
+function queries a dirfile(5) database specified by
+.ARG dirfile
+and returns a read-only list of aliases of the field specified by
+.ARG field_code .
+
+The
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+
+The array returned will be de-allocated by a call to
+.F3 gd_close
+and should not be de-allocated by the caller.  The list returned should not be
+assumed to be in any particular order.  The array is terminated by a NULL
+pointer.  The number of strings in the array can be obtained from a call to
+.F3 gd_naliases .
+
+The caller may not modify any strings in the array, or the array itself.  Doing
+so may cause database corruption.  The pointer returned is guaranteed to be
+valid until
+.FN gd_aliases
+is called again with the same arguments, or until the array is de-allocated by
+a call to
+.F3 gd_close .
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_aliases
+returns a pointer to an array of strings containing the values of all the
+aliases for the specified field.  The array is terminated by a NULL pointer.
+If successful, this list will always contain at least one entry, to wit:
+.ARG field_code .
+
+On error it returns NULL and sets the dirfile error to a non-zero error value.
+Possible error values are:
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_CODE
+The specified field code was not found in the database.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.PP
+The dirfile error may be retrieved by calling
+.F3 gd_error .
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN gd_aliases
+function appeared in GetData-0.8.0.
+
+.SH SEE ALSO
+.F3 gd_open ,
+.F3 gd_alias_target ,
+.F3 gd_naliases ,
+dirfile(5)

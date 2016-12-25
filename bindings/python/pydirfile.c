@@ -3274,23 +3274,23 @@ static int gdpy_dirfile_setmplexlookback(struct gdpy_dirfile_t *self,
 static PyObject *gdpy_dirfile_nentries(struct gdpy_dirfile_t *self,
     PyObject *args, PyObject *keys)
 {
-  char *keywords[] = { "fragment", "parent", "type", "flags", NULL };
+  char *keywords[] = { "parent", "type", "flags", NULL };
   unsigned int nentries, flags = 0;
-  int type = 0, fragment = GD_ALL_FRAGMENTS;
+  int type = 0;
   char *parent = NULL;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "|ietiI:pygetdata.dirfile.nentries", keywords, &fragment,
-        self->char_enc, &parent, &type, &flags))
+        "|etiI:pygetdata.dirfile.nentries", keywords, self->char_enc, &parent,
+        &type, &flags))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  nentries = gd_nentries(self->D, fragment, parent, type, flags);
+  nentries = gd_nentries(self->D, parent, type, flags);
   PyMem_Free(parent);
 
   GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
@@ -3305,8 +3305,8 @@ static PyObject *gdpy_dirfile_entrylist(struct gdpy_dirfile_t *self,
     void *args, void *keys)
 {
   const char **entries;
-  char *keywords[] = { "fragment", "parent", "type", "flags", NULL };
-  int type = 0, fragment = GD_ALL_FRAGMENTS;
+  char *keywords[] = { "parent", "type", "flags", NULL };
+  int type = 0;
   unsigned int flags = 0;
   char *parent = NULL;
   PyObject *pyobj;
@@ -3314,15 +3314,46 @@ static PyObject *gdpy_dirfile_entrylist(struct gdpy_dirfile_t *self,
   dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "|ietiI:pygetdata.dirfile.entry_list", keywords, &fragment,
-        self->char_enc, &parent, &type, &flags))
+        "|etiI:pygetdata.dirfile.entry_list", keywords, self->char_enc, &parent,
+        &type, &flags))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  entries = gd_entry_list(self->D, fragment, parent, type, flags);
+  entries = gd_entry_list(self->D, parent, type, flags);
   PyMem_Free(parent);
+
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
+
+  pyobj = gdpyobj_from_strarr(entries, self->char_enc);
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static PyObject *gdpy_dirfile_matchentries(struct gdpy_dirfile_t *self,
+    void *args, void *keys)
+{
+  const char **entries;
+  char *keywords[] = { "regex", "fragment", "type", "flags", NULL };
+  int type = 0, fragment = GD_ALL_FRAGMENTS;
+  unsigned int flags = 0;
+  char *regex = NULL;
+  PyObject *pyobj;
+
+  dtrace("%p, %p, %p", self, args, keys);
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "|etiiI:pygetdata.dirfile.entry_list", keywords, self->char_enc, &regex,
+        &fragment, &type, &flags))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  gd_match_entries(self->D, regex, fragment, type, flags, &entries);
+  PyMem_Free(regex);
 
   GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
 
@@ -3766,16 +3797,15 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "gd_native_type(3)."
   },
   {"nentries", (PyCFunction)gdpy_dirfile_nentries, METH_VARARGS | METH_KEYWORDS,
-    "nentries([fragment, parent, type, flags])\n\n"
-      "Return a count of entries in the database.  If 'fragment' is given\n"
-      "given and not pygetdata.ALL_FRAGMENTS, only that fragment will be\n"
-      "searched.  If 'parent' is given, metafields under 'parent' will be\n"
-      "considered, otherwise top-level fields are counted.  If given,\n"
-      "'type' should be either one of the the pygetdata.*_ENTRY symbols,\n"
-      "or else one of the special pygetdata.*_ENTRIES symbols; if not\n"
-      "given, 'type' defaults to pygetdata.ALL_ENTRIES.  If given 'flags'\n"
-      "should be a bitwise or'd collection of zero or more of the\n"
-      "pygetdata.ENTRIES_* flags.  See gd_nentries(3)."
+    "nentries([parent, type, flags])\n\n"
+      "Return a count of entries in the database.  If 'parent' is given,\n"
+      "metafields under 'parent' will be considered, otherwise top-level\n"
+      "fields are counted.  If given, 'type' should be either one of the\n"
+      "the pygetdata.*_ENTRY symbols, or else one of the special\n"
+      "pygetdata.*_ENTRIES symbols; if not given, 'type' defaults to\n"
+      "pygetdata.ALL_ENTRIES.  If given 'flags' should be a bitwise or'd\n"
+      "collection of zero or more of the pygetdata.ENTRIES_* flags.  See\n"
+      "gd_nentries(3)."
   },
   {"nfields", (PyCFunction)gdpy_dirfile_getnfields,
     METH_VARARGS | METH_KEYWORDS,
@@ -3853,7 +3883,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "gd_include manual page.  If 'namespace' is given, it will be used\n"
       "as the fragment's root namespace.  If 'prefix' or 'suffix' are\n"
       "given, they will be applied to the field codes defined in the\n"
-      /*--- handy ruler: closing quote as indicated (or earlier)---------\n" */
       "file.  See gd_include(3)."
   },
   {"madd", (PyCFunction)gdpy_dirfile_madd, METH_VARARGS | METH_KEYWORDS,
@@ -4061,16 +4090,29 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   },
   {"entry_list", (PyCFunction)gdpy_dirfile_entrylist,
     METH_VARARGS | METH_KEYWORDS,
-    "entry_list([fragment, parent, type, flags])\n\n"
-      "Return a list of entry names in the database.  If 'fragment' is\n"
-      "given and not pygetdata.ALL_FRAGMENTS, only that fragment will be\n"
-      "searched.  If 'parent' is given, metafields under 'parent' will be\n"
-      "considered, otherwise top-level entries are returned.  If given,\n"
-      "'type' should be either one of the the pygetdata.*_ENTRY symbols,\n"
-      "or else one of the special pygetdata.*_ENTRIES symbols; if not\n"
-      "given, 'type' defaults to pygetdata.ALL_ENTRIES.  If given 'flags'\n"
-      "should be a bitwise or'd collection of zero or more of the\n"
-      "pygetdata.ENTRIES_* flags.  See gd_entry_list(3)."
+    "entry_list([parent, type, flags])\n\n"
+      "Return a list of entry names in the database.  If 'parent' is\n"
+      "given, metafields under 'parent' will be considered, otherwise\n"
+      "top-level entries are returned.  If given, 'type' should be either\n"
+      "one of the the pygetdata.*_ENTRY symbols, or else one of the\n"
+      "special pygetdata.*_ENTRIES symbols; if not given, 'type' defaults\n"
+      "to pygetdata.ALL_ENTRIES.  If given 'flags' should be a bitwise\n"
+      "or'd collection of zero or more of the pygetdata.ENTRIES_* flags.\n"
+      "See gd_entry_list(3)."
+  },
+  {"match_entries", (PyCFunction)gdpy_dirfile_matchentries,
+    METH_VARARGS | METH_KEYWORDS,
+    "match_entries([regex, fragment, type, flags])\n\n"
+      /*--- handy ruler: closing quote as indicated (or earlier)---------\n" */
+      "Return a list of entry names in the database.  If 'regex' is\n"
+      "given, it is a regular expression to match against the entry names\n"
+      "If given and not pygetdata.ALL_FRAGMENTS, only the fragment\n"
+      "indexed by 'fragment' is searched.  If given, 'type' should be\n"
+      "either one of the the pygetdata.*_ENTRY symbols, or else one of\n"
+      "the special pygetdata.*_ENTRIES symbols; if not given, 'type'\n"
+      "defaults to pygetdata.ALL_ENTRIES.  If given 'flags' should be a\n"
+      "bitwise or'd collection of zero or more of the pygetdata.ENTRIES_*\n"
+      "and pygetdata.REGEX_* flags.  See gd_match_entries(3)."
   },
   { NULL, NULL, 0, NULL }
 };

@@ -1,0 +1,128 @@
+.\" gd_error.3.  The gd_error man page.
+.\"
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2014, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_error 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_error, gd_error_string \(em report a GetData library error
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_error(const DIRFILE *" dirfile );
+.HP
+.BI "char *gd_error_string(const DIRFILE *" dirfile ", char *" buffer ", size_t
+.IB buflen );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_error
+function determines the success or failure of the most recent GetData library
+function call that operated on
+.ARG dirfile .
+If the last call succeeded,
+.FN gd_error
+will return
+.B GD_E_OK
+(which equals zero).  If the last call failed,
+.FN gd_error
+returns a negative-valued error code indicating the cause of the failure.
+Possible codes vary from function to function.  See corresponding manual page of
+the function that failed for a list of possible codes.
+
+The
+.FN gd_error_string
+function behaves similarly, but composes a string describing the error.  If 
+.ARG buffer
+is not NULL, the string is written to this memory location.  At most
+.ARG buflen
+characters will be written including the terminating NUL byte.  If
+.ARG buffer
+is not large enough to hold the entire string, the string will be truncated, but
+the truncated string will still be NUL-terminated.
+
+If
+.ARG buffer
+is NULL,
+.FN gd_error_string
+will allocate a string of sufficient length on the heap.  In this case,
+.ARG buflen
+is ignored.  By default,
+.F3 malloc
+is used to allocate this buffer, but an alternate memory manager may be
+specified by calling
+.F3 gd_alloc_funcs
+before calling this function.  The caller is responsible for deallocating this
+string when it is no longer needed.
+
+The functions
+.F3 gd_alloc_funcs ,
+.F3 gd_error_count ,
+.F3 gd_flags ,
+.F3 gd_free_entry_strings ,
+.F3 gd_mplex_lookback ,
+and
+.F3 gd_parser_callback
+are ignored by these functions, since they always succeed.  Previous
+.BR gd_error()
+and
+.BR gd_error_string()
+calls are also ignored.
+
+.SH RETURN VALUE
+The
+.FN gd_error
+function always returns the integer error code of the last library call on the
+supplied DIRFILE object.
+
+If
+.ARG buffer
+is non-NULL,
+.FN gd_error_string
+returns 
+.ARG buffer ,
+unless
+.ARG buflen
+is less than one, in which case it returns NULL.  If
+.ARG buffer
+is NULL, this function returns a newly allocated string of sufficient length
+which should be deallocated by the caller, or NULL, if memory allocation failed.
+
+.SH HISTORY
+The
+.FN get_error_string
+function appeared in GetData-0.3.0.
+
+The
+.FN get_error
+function appeared in GetData-0.4.0.  Before this, the error code was directly
+accessible via the
+.SPM dirfile error
+member in the
+.B DIRFILE
+structure.
+
+In GetData-0.7.0, these functions were renamed to
+.FN gd_error
+and
+.FN gd_error_string .
+This is also the first release in which
+.FN gd_error_string
+would allocate a buffer for the error string if passed NULL.
+
+.SH SEE ALSO
+.F3 gd_error_count

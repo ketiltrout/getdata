@@ -1,0 +1,81 @@
+.\" gd_protection.3.  The gd_protection man page.
+.\"
+.\" Copyright (C) 2008, 2010, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_protection 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_protection \(em report the protection level of a Dirfile fragment
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_protection(DIRFILE *" dirfile ", int " fragment_index );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_protection
+function queries a dirfile(5) database specified by
+.ARG dirfile
+and determines the advisory protection level for the fragment indexed by
+.ARG fragment_index .
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_protection
+returns a non-negative integer indicating the the advisory protection level of
+the specified fragment.  This integer will equal
+one of the following symbols:
+.IP
+.SC
+.BR GD_PROTECT_NONE ,\~ GD_PROTECT_FORMAT ,\~ GD_PROTECT_DATA ,\~
+.BR GD_PROTECT_ALL .
+.EC
+.PP
+The meaning of these symbols are explained in the
+.F3 gd_alter_protection
+man page.  On error, it returns a negative-valued error code.  Possible error
+codes are:
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_INDEX
+The supplied index was out of range.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN get_protection
+function appeared in GetData-0.5.0.
+
+In GetData-0.7.0 this function was renamed to
+.FN gd_protection .
+
+In GetData-0.10.0, the error return from this function changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+.F3 gd_open ,
+.F3 gd_alter_protection ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+dirfile(5),
+dirfile-format(5)

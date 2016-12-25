@@ -1,0 +1,108 @@
+.\" gd_reference.3.  The gd_reference man page.
+.\"
+.\" Copyright (C) 2008, 2010, 2016 D.V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_reference 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_reference \(em retrieve or set the reference field for a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "const char *gd_reference(DIRFILE *" dirfile ", const char"
+.BI * field_code );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_reference
+function sets or retrieves the reference field (see 
+dirfile(5))
+associated with the dirfile specified by
+.IR dirfile .
+If the
+.I field_code
+argument is non-NULL, the reference field for the dirfile will be set to the
+field specified.  If
+.I field_code
+is NULL, the reference field is not modified.  The field code should refer to
+a RAW field, and may not contain a representation suffix.
+
+.SH RETURN VALUE
+On success,
+.FN gd_reference
+returns the field code of the dirfile's reference field, which will be
+.IR field_code ,
+if
+.I field_code
+is non-NULL.   If no
+.B RAW
+fields are defined in the dirfile, this function will return NULL, without
+raising an error.  On error, NULL is returned and the dirfile error is set to a
+non-zero error value.  Possible error values are:
+.DD GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_CODE
+The field specified by
+.I field_code
+was not found.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_FIELD_TYPE
+The field specified by
+.I field_code
+was not a
+.B RAW
+field.
+.DD GD_E_PROTECTED
+The metadata of the primary format specification fragment (the file named
+.I format
+in the root dirfile directory) was protected from change.
+.PP
+The dirfile error may be retrieved by calling
+.F3 gd_error .
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN get_reference
+function appeared in GetData-0.4.2.  It took only one parameter (the
+.BR DIRFILE ),
+and returned the current reference field.
+
+The
+.FN dirfile_reference
+function appeared in GetData-0.5.0.
+
+In GetData-0.7.0, the
+.FN dirfile_reference
+function was renamed to
+.FN gd_reference
+and the
+.FN get_reference
+function was removed.
+
+.SH SEE ALSO
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_metaflush ,
+.F3 gd_open ,
+dirfile(5),
+dirfile-format(5)

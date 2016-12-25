@@ -1,0 +1,106 @@
+.\" gd_add_alias.3.  The gd_add_alias man page.
+.\"
+.\" Copyright (C) 2012, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_add_alias 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_add_alias, gd_madd_alias \(em add a field to a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_add_alias(DIRFILE *" dirfile ", const char *" alias_name ,
+.BI "const char *" target_code ", int " fragment_index );
+.HP
+.BI "int gd_madd_alias(DIRFILE *" dirfile ", const char *" parent ,
+.BI "const char *" alias_name ", const char *" target_code );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_add_alias
+function adds the alias named
+.ARG alias_name
+pointing to
+.ARG target_code
+to the fragment indexed by
+.ARG fragment_index
+in the dirfile specified by
+.ARG dirfile .
+The
+.FN gd_madd_alias
+function behaves similarly, but adds the field as a meta-entry under the field
+indicated by the field code
+.ARG parent .
+
+.SH RETURN VALUE
+On success,
+.FN gd_add_alias
+and
+.FN gd_madd_alias
+return zero.   On error, a negative-valued error code is returned.  Possible
+error codes are:
+.DD GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_CODE
+Either the
+.ARG alias_name
+was invalid: containing an invalid character or lacking the containing
+fragment's namespace or affixes, or else the
+.ARG parent
+field code was not found, or was already a metafield.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_INDEX
+The
+.ARG fragment_index
+specified was out of range.
+.DD GD_E_DUPLICATE
+The
+.ARG alias_name
+parameter duplicated that of an already existing entry.
+.DD GD_E_PROTECTED
+The metadata of the fragment was protected from change.  Or, the creation of a
+.B RAW
+field was attempted and the data of the fragment was protected.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The functions
+.FN gd_add_alias
+and
+.FN gd_madd_alias
+appeared in GetData-0.8.0.
+
+In GetData-0.10.0, the error return from these functions changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+.F3 gd_add ,
+.F3 gd_alias_target ,
+.F3 gd_entry ,
+.F3 gd_madd ,
+.F3 gd_metaflush ,
+.F3 gd_open ,
+dirfile-format(5)

@@ -115,8 +115,6 @@ int gd_system(const char* command)
         __VA_ARGS__); } \
   } while(0)
 
-#define strcmpn(n,v) (((n) == NULL) ? 1 : strcmp((n),(v)))
-
 /* Write string literal t to format file f. */
 #define MAKEFORMATFILE(f,t) \
   do { \
@@ -170,9 +168,9 @@ int gd_system(const char* command)
 #define CHECKPNi(i,n)  CHECKi(i,(n) == NULL,n,"%p","%s",n,"non-NULL")
 #define CHECKPP(n,v)   CHECK((n) != (v),n,"%p","%p",n,v)
 #define CHECKPPi(i,n,v) CHECKi(i,(n) != (v),n,"%p","%p",n,v)
-#define CHECKS(n,v)    CHECK((n == NULL) || strcmpn((n),(v)),n,"\"%s\"",\
+#define CHECKS(n,v)    CHECK((n == NULL) || strcmp((n),(v)),n,"\"%s\"",\
     "\"%s\"",(n),(v));
-#define CHECKSi(i,n,v) CHECKi(i,(n == NULL) || strcmpn((n),(v)),n,"\"%s\"",\
+#define CHECKSi(i,n,v) CHECKi(i,(n == NULL) || strcmp((n),(v)),n,"\"%s\"",\
     "\"%s\"",(n),(v));
 #define CHECKSp(n,v)   CHECK((n == NULL) || strncmp((n),(v), sizeof(v) - 1),n,\
     "\"%s\"","\"%s\"",(n),(v));

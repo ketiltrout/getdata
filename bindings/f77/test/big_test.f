@@ -2124,15 +2124,15 @@ C     236: GDVBPX check
       CALL CHKEOK(ne, 236, d)
 
 C     237: GDNENT check
-      CALL GDNENT(n, d, GD_ALL, "data", 4, GDEN_S, GDEN_H + GDEN_N)
+      CALL GDNENT(n, d, "data", 4, GDEN_S, GDEN_H + GDEN_N)
       CALL CHKOK2(ne, 237, 1, d)
       CALL CHKIN2(ne, 237, 1, n, 6)
-      CALL GDNENT(n, d, GD_ALL, "", -1, GDEN_V, GDEN_H + GDEN_N)
+      CALL GDNENT(n, d, "", -1, GDEN_V, GDEN_H + GDEN_N)
       CALL CHKOK2(ne, 237, 2, d)
       CALL CHKIN2(ne, 237, 2, n, 28)
 
 C     238: GDENTX check
-      CALL GDENTX(l, d, GD_ALL, "", -1, GDEN_V, GDEN_H + GDEN_N)
+      CALL GDENTX(l, d, "", -1, GDEN_V, GDEN_H + GDEN_N)
       CALL CHKEOK(ne, 238, d)
       CALL CHKINT(ne, 238, l, 7)
 
@@ -2167,7 +2167,7 @@ C     239: GDENTN check
       fields(28) = "polynom"
       DO 2390 i = 1, n
       l = flen
-      CALL GDENTN(fn, l, d, GD_ALL, "", -1, GDEN_V, GDEN_H + GDEN_N, i)
+      CALL GDENTN(fn, l, d, "", -1, GDEN_V, GDEN_H + GDEN_N, i)
       CALL CHKOK2(ne, 239, i, d)
       CALL CHKIN2(ne, 239, i, l, flen)
       CALL CHKST2(ne, 239, i, fn, fields(i))
@@ -3214,6 +3214,26 @@ C     304: GDFRNS check (update)
       CALL CHKEOK(ne, 304, d)
       CALL CHKIN2(ne, 304, 1, l, flen)
       CALL CHKST2(ne, 304, 2, fields(1), 'NS2')
+
+C     305: GDMATN, GDMATX, GDNMAT checks
+      CALL GDMATX(m, d, "^lin", 4, 0, 0, 0)
+      CALL CHKOK2(ne, 305, 0, d)
+      CALL CHKINT(ne, 305, m, 7)
+
+      CALL GDNMAT(n, d, "^lin", 4, 0, 0, 0)
+      CALL CHKOK2(ne, 305, 1, d)
+      CALL CHKINT(ne, 305, n, 2)
+
+      CALL GDMATN(fn, l, d, "^lin", 4, 0, 0, 0, 1)
+      CALL CHKOK2(ne, 305, 3, d)
+      CALL CHKIN2(ne, 305, 4, l, flen)
+      CALL CHKST2(ne, 305, 5, fn, "lincom")
+
+      CALL GDMATN(fn, l, d, "^lin", 4, 0, 0, 0, 2)
+      CALL CHKOK2(ne, 305, 6, d)
+      CALL CHKIN2(ne, 305, 7, l, flen)
+      CALL CHKST2(ne, 305, 8, fn, "linterp")
+
 
 
 

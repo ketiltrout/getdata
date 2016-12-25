@@ -1,4 +1,4 @@
-% Copyright (C) 2013 D. V. Wiebe
+% Copyright (C) 2013, 2016 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -1955,7 +1955,7 @@ try
 
   % 237: gd_nentries
   try
-    d = gd_nentries(D, GD.ALL_FRAGMENTS, 'data', GD.SCALAR_ENTRIES, ...
+    d = gd_nentries(D, 'data', GD.SCALAR_ENTRIES, ...
     GD.ENTRIES_HIDDEN + GD.ENTRIES_NOALIAS);
     ne = ne + check_num(237, d, 7);
   catch exc
@@ -1964,7 +1964,7 @@ try
 
   % 239: gd_entry_list
   try
-    d = gd_entry_list(D, GD.ALL_FRAGMENTS, 'data', GD.SCALAR_ENTRIES, ...
+    d = gd_entry_list(D, 'data', GD.SCALAR_ENTRIES, ...
     GD.ENTRIES_HIDDEN + GD.ENTRIES_NOALIAS);
     ne = ne + check_sarray(239, d, {'mstr', 'mconst', 'mcarray', 'msarray', ...
     'mnew11', 'mnew12', 'mnew17'});
@@ -2330,6 +2330,14 @@ try
     ne = ne + check_string(304, d, 'ns2');
   catch exc
     ne = ne + check_ok(exc, 304);
+  end
+
+  % 305: gd_match_entries
+  try
+    d = gd_match_entries(D, '^lin', 0);
+    ne = ne + check_sarray(305, d, {'lincom'; 'linterp'});
+  catch exc
+    ne = ne + check_ok(exc, 305);
   end
 
 

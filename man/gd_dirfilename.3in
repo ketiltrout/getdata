@@ -1,0 +1,72 @@
+.\" gd_dirfilename.3.  The dirfilename man page.
+.\"
+.\" Copyright (C) 2008, 2010, 2012, 2016 D.V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_dirfilename 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_dirfilename \(em retrieve the name of a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "const char *gd_dirfilename(DIRFILE *" dirfile );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_dirfilename
+function queries a dirfile(5) database specified by
+.ARG dirfile
+and returns its name.  The name of a dirfile is an absolute pathname which
+refers to the dirfile base directory.
+
+The 
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_dirfilename
+returns a pointer to a constant string containing the pathname of the dirfile.
+On error, 
+.FN gd_dirfilename
+returns NULL and stores a negative-valued error code in the
+.B DIRFILE
+object which may be retrieved by a subsequent call to
+.F3 gd_error .
+Possible error codes are:
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.PP
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+
+The function
+.FN dirfilename
+appeared in GetData-0.3.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_dirfilename .
+
+In GetData-0.10.0, the error return from this function changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+.F3 gd_open ,
+.BR path_resolution (7)

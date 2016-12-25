@@ -1,0 +1,125 @@
+.\" gd_dirfile_standards.3.  The gd_dirfile_standards man page.
+.\"
+.\" Copyright (C) 2010, 2012, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_dirfile_standards 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_dirfile_standards \(em change or report the current Dirfile Standards Version
+for a DirFile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_dirfile_standards(DIRFILE *" dirfile ", int " version );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_dirfile_standards
+function sets the current Standards Version for the open dirfile
+.ARG dirfile
+to the value specified by
+.ARG version ,
+determining the syntax used to write metadata to disk for
+.ARG dirfile .
+
+The Standards Version of the loaded dirfile also affects the operation of
+functions which add fields, such as
+.F3 dirfile_add
+or 
+.F3 dirfile_add_spec ;
+and functions which modify field metadata, such as
+.F3 dirfile_alter_entry
+or 
+.F3 dirfile_alter_spec .
+For specific behaviour see the manual page of the appropriate function.
+
+The
+.ARG version
+parameter should be between zero and the value of the symbol
+.BR GD_DIRFILE_STANDARDS_VERSION ,
+which is the newest Standards Version understood by GetData, inclusive, or else
+one of the following special symbols:
+.DD GD_VERSION_EARLIEST
+Specifies the current Standards Version should be set to the earliest version
+that supports all the features of the loaded
+.ARG dirfile ;
+.DD GD_VERSION_CURRENT
+Specifies that the current Standards Version should not be changed.  In this
+case, this function simply reports the current Standards Version;
+.DD GD_VERSION_LATEST
+Specifies the current Standards Version should be set to the latest version
+that supports all the features of the loaded
+.ARG dirfile ;
+
+If the loaded dirfile does not conform to the specified
+.ARG version ,
+this function fails, and the current Standards Version is unchanged.  If the
+loaded dirfile conforms to no known Standards Version, this function will fail
+regardless of the value of
+.ARG version
+(even if
+.B GD_VERSION_CURRENT
+is used).
+
+The caller should not assume that the loaded dirfile conforms to every Standards
+Version between the values reported by
+.B GD_VERSION_EARLIEST
+and
+.BR GD_VERSION_LATEST .
+
+.SH RETURN VALUE
+On success,
+.FN gd_dirfile_standards
+returns the current Standards Version of the loaded dirfile, after possibly
+having been updated by the call.  This will be a non-negative integer between
+zero and
+.BR GD_DIRFILE_STANDARDS_VERSION
+inclusive.  On error, a negative-valued error code is returned, and the current
+Standards Version is not changed.  Possible error codes are:
+.DD GD_E_ARGUMENT
+The loaded dirfile did not conform to the specified version.  Or the dirfile
+conforms to no known Standards Version.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH NOTES
+This function only changes the current Standards Version of the loaded dirfile.
+It does not update the any format specification fragments on disk to conform to
+the specified Standards Version.  To do that, use
+.F3 gd_metaflush
+or 
+.F3 gd_rewrite_fragment .
+
+.SH HISTORY
+The function
+.FN gd_dirfile_standards
+appeared in GetData-0.7.0.
+
+In GetData-0.10.0, the error return from this function changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+.F3 gd_open ,
+.F3 gd_metaflush ,
+.F3 gd_rewrite_fragment

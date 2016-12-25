@@ -1,0 +1,88 @@
+.\" gd_verbose_prefix.3.  The gd_verbose_prefix man page.
+.\"
+.\" Copyright (C) 2012, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_verbose_prefix 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_verbose_prefix \(em set the prefix on error messages printed by GetData
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_verbose_prefix(DIRFILE *" dirfile ", const char *" prefix );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_verbose_prefix
+sets the prefix printed before error messages output by the GetData library
+for the dirfile(5) database specified by
+.ARG dirfile .
+If
+.ARG prefix
+is NULL, the current prefix (if any) is deleted and no new prefix is saved.
+
+GetData only prints error messages for a given Dirfile if opened along with the
+.B GD_VERBOSE
+flag, or if the flag has been subsequently set on the dirfile using
+.F3 gd_flags .
+If this flag is not set, this function still updates the prefix, but GetData
+does not use it.
+.PP
+If
+.B GD_VERBOSE
+is set, when the library encounters an error, it prints the supplied prefix (if
+any), followed immediately by the error message (which is the message returned
+by
+.F3 gd_error_string ),
+followed by a newline.  All output goes to the caller's standard error
+.RB ( stderr (3)).
+
+The 
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_verbose_prefix
+returns zero.  On error, it returns a negative-valued error code.  Possible
+error codes are:
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN gd_verbose_prefix
+function appared in GetData-0.8.0.
+
+In GetData-0.10.0, the error return from this function changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_flags ,
+.F3 gd_open ,
+.F3 stderr ,
+dirfile(5)

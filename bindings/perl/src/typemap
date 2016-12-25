@@ -28,7 +28,7 @@ DIRFILE * T_DIRFILE
 gd_entry_t T_ENTRY
 gd_entype_t T_UV
 gd_off64_t T_IV
-gd_shift_t T_IV
+gd_int64_t T_IV
 gd_triplet_t T_TRIPLET
 gd_type_t T_IV
 gd_windop_t T_IV
@@ -40,7 +40,7 @@ gdp_char * T_PV_NULL
 gdp_ffff_t T_IV_FFFF
 gdp_int T_IV_ZERO
 gdp_numbits_t T_IV_ZERO
-gdp_shift_t T_IV_ZERO
+gdp_int64_t T_IV_ZERO
 gdp_uint_t T_UV_ZERO
 gdp_type_t T_IV_ZERO
 gdp_complex T_COMPLEX_ZERO

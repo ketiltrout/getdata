@@ -1,3 +1,72 @@
+2016-12-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1130
+	* configure.ac: Add --disable-util.  Remove --enable-assert.  Locate
+	regex libraries.
+
+	* src/internal.h: Deprecate gd_shift_t.
+	* src/add.c (gd_add_phase gd_madd_phase): Replace gd_shift_t with
+	gd_int64_t.
+
+	* src/field_list.c (_GD_EntryList gd_entry_list) src/nfields.c (_GD_NEntries
+	gd_nentries: Remove fragment.
+	* util/checkdirfile.c: Updated.
+
+	* src/internal.h: Add regex_list to struct gd_dirfile_.
+	* src/field_list.c (gd_compile_regex gd_compile_pcre gd_match_entries):
+	Added.
+	* src/errors.c: Add GD_E_UNSUPPORTED:GD_E_SUPPORT_REGEX,
+	GD_E_ARGUMENT:GD_E_ARG_REGEX, GD_E_ARGUMENT:GD_E_ARG_PCRE.
+	* src/getdata.h.in: Add GD_REGEX_PCRE, GD_REGEX_EXTENDED, GD_REGEX_ICASE,
+	GD_REGEX_CASELESS, GD_REGEX_JAVASCRIPT, GD_REGEX_UNICODE.
+
+	* src/internal.h: Remove unused alias_list from struct gd_flist_.
+
+	* test/add_spec_affix.c: Reimplemented.
+	* test/elist_alias.c test/elist_hidden.c test/elist_noalias.c
+	test/elist_parent.c test/elist_parent2.c test/elist_scalar.c
+	test/elist_type.c test/nentries_alias.c test/nentries_entype.c
+	test/nentries_hidden.c test/nentries_noalias.c test/nentries_scalar.c:
+	Updated.
+	* test/match_fragment.c: Moved from test/elist_fragment.c and updated.
+	* test/match_pcre.c test/match_pcre_bad.c test/match_pcre_caseless.c
+	test/match_pcre_ext.c test/match_pcre_js.c test/match_pcre_utf8.c
+	test/match_regex.c test/match_regex_bad.c test/match_regex_ext.c
+	test/match_regex_icase.c: Added.
+	* test/nentries_fragment.c: Deleted.
+
+	* man/gd_mstrings.3: Merged into man/gd_strings.3.
+	* man/*.3in: moved from *.3
+	* man/header.tmac: Added.
+
+	* bindings/make_parameters.c: Add GD_REGEX_* flags.
+	* bindings/cxx/dirfile.cpp (Dirfile::NEntries Dirfile::EntryList)
+	bindings/f77/fgetdata.c (GDNENT GDENTX GDENTN) bindings/f77/getdata.f90.in
+	(fgd_nentries fgd_entry_name_max fgd_entry_list)
+	bindings/matlab/gd_entry_list.c bindings/matlab/gd_field_list.m
+	bindings/matlab/gd_field_list_by_type.m bindings/matlab/gd_mfield_list.m
+	bindings/matlab/gd_mfield_list_by_type.m bindings/matlab/gd_mvector_list.m
+	bindings/matlab/gd_nentries.c bindings/matlab/gd_nfields.m
+	bindings/matlab/gd_nfields_by_type.m bindings/matlab/gd_nmfields.m
+	bindings/matlab/gd_nmfields_by_type.m bindings/matlab/gd_nmvectors.m
+	bindings/matlab/gd_nvectors.m bindings/matlab/gd_vector_list.m
+	bindings/perl/src/GetData.xs (entry_list) bindings/php/getdata.c
+	(gd_entry_list gd_nentries) bindings/python/pydirfile.c
+	(gdpy_dirfile_nentries gdpy_dirfile_entrylist): Remove fragment parameter.
+	* bindings/idl/getdata.c (gdidl_get_field_list): Support gd_match_entries().
+	* bindings/cxx/dirfile.cpp (Dirfile::MatchEntries) bindings/f77/fgetdata.c
+	(GDMATX GDMATN GDNMAT) bindings/f77/getdata.f90.in (fgd_match_entries_max
+	fgd_match_entries) bindings/matlab/gd_match_entries.c gd_nvectors.m
+	bindings/matlab/gd_vector_list.m (match_entries) bindings/php/getdata.c
+	(gd_match_entries) bindings/python/pydirfile.c (gdpy_dirfile_matchentries):
+	Added.
+	* bindings/cxx/getdata/phaseentry.h bindings/cxx/phaseentry.cpp
+	(PhaseEntry::PhaseEntry PhaseEntry::SetShift) bindings/perl/simple_funcs.pl
+	bindings/perl/simple_funcs.xsin bindings/perl/src/GetData.xs
+	bindings/perl/src/typemap: Replace gd_shift_t with gd_int64_t.
+	* bindings/cxx/test/big_test.cpp bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro
+	bindings/matlab/test/big_test.m bindings/perl/t/big_test.t
+	bindings/php/test/big_test.php bindings/python/test/big_test.py: Add test 305.
+
 2016-12-08   D. V. Wiebe <getdata@ketiltrout.net> svn:1129
 	* bindings/matlab/gd_include.c: Initialise ns to NULL.
 

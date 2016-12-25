@@ -1,0 +1,52 @@
+.\" gd_nframes64.3.  The gd_nframes64 man page.
+.\"
+.\" Copyright (C) 2008, 2010, 2012, 2016 D.V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_nframes64 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_nframes64 \(em report the size of a Dirfile, with largefile support
+
+.SH SYNOPSIS
+.B #define GD_64BIT_API
+.br
+.SC
+.B #include <getdata.h>
+.HP
+.BI "gd_off64_t gd_nframes64(DIRFILE *" dirfile );
+.EC
+
+.SH DESCRIPTION
+This version of
+.F3 gd_nframes
+uses a 64-bit offset type
+.RB ( gd_off64_t ),
+where one is available, regardless of the size of
+.BR off_t .
+It is only guaranteed to be available if
+.BR GD_64BIT_API
+is defined before including getdata.h.
+
+If
+.B off_t
+is a 64-bit type, this function will the same as
+.F3 gd_nframes .
+Otherwise,
+.F3 gd_nframes
+will be a version of this function which uses a 32-bit
+.BR off_t .
+
+.SH SEE ALSO
+.F3 gd_nframes ,
+.BR feature_test_macros (7)

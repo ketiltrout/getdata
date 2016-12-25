@@ -1445,14 +1445,13 @@ check_ok(236, $D);
 check_var(236, $v, TRUE);
 
 # 237: nentries
-$v = gd_nentries($D, GD_ALL_FRAGMENTS, 'data', GD_SCALAR_ENTRIES,
+$v = gd_nentries($D, 'data', GD_SCALAR_ENTRIES,
   GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
 check_ok(237, $D);
 check_var(237, $v, 7);
 
 # 239: entry_list
-$v = gd_entry_list($D, GD_ALL_FRAGMENTS, null, GD_VECTOR_ENTRIES,
-  GD_ENTRIES_NOALIAS);
+$v = gd_entry_list($D, null, GD_VECTOR_ENTRIES, GD_ENTRIES_NOALIAS);
 check_ok(239, $D);
 check_var(239, $v, array( 'bit', 'div', 'data', 'mult', 'new1', 'new3', 'new4',
   'new6', 'new7', 'new8', 'sbit', 'INDEX', 'indir', 'mplex', 'new14', 'new16',
@@ -1911,6 +1910,11 @@ check_var2(303, 1, $v, 'ns');
 $v = gd_fragment_namespace($D, 2, 'ns2');
 check_ok2(304, 0, $D);
 check_var2(304, 1, $v, 'ns2');
+
+# 305: gd_match_entries
+$v = gd_match_entries($D, "^lin", 0);
+check_ok2(305, 0, $D);
+check_var2(305, 1, $v, array('lincom', 'linterp'));
 
 
 

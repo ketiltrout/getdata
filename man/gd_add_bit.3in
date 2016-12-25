@@ -1,0 +1,439 @@
+.\" gd_add_bit.3.  The gd_add_bit man page.
+.\"
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013, 2014, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_add_bit 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_add_bit, gd_add_carray gd_add_clincom, gd_add_const, gd_add_cpolynom,
+gd_add_crecip, gd_add_divide, gd_add_indir, gd_add_lincom, gd_add_linterp,
+gd_add_multiply, gd_add_phase, gd_add_polynom, gd_add_raw, gd_add_recip,
+gd_add_sarray, gd_add_sbit, gd_add_sindir, gd_add_string
+\(em add a field to a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_add_bit(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", int " bitnum ", int " numbits ,
+.BI "int " fragment_index );
+.HP
+.BI "int gd_add_carray(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "gd_type_t " const_type ", size_t " array_len ", gd_type_t " data_type ,
+.BI "void *" value ", int " fragment_index );
+.HP
+.BI "int gd_add_clincom(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int " n_fields ", const char **" in_fields ", const double complex *" cm ,
+.BI "const double complex *" cb ", int " fragment_index );
+.HP
+.BI "int gd_add_const(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "gd_type_t " const_type ", gd_type_t " data_type ", void *" value ,
+.BI "int " fragment_index );
+.HP
+.BI "int gd_add_cpolynom(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int " poly_ord ", const char *" in_fields ", const double complex *" ca ,
+.BI "int " fragment_index );
+.HP
+.BI "int gd_add_crecip(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", double complex " cdividend ,
+.BI "int " fragment_index );
+.HP
+.BI "int gd_add_divide(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field1 ", const char *" in_field2 ,
+.BI "int " fragment_index );
+.HP
+.BI "int gd_add_indir(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" index_field ", const char *" carray_field ,
+.BI "int " fragment_index );
+.HP
+.BI "int gd_add_lincom(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int " n_fields ", const char **" in_fields ", const double *" m ,
+.BI "const double *" b ", int " fragment_index );
+.HP
+.BI "int gd_add_linterp(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", const char *" table ", int " fragment_index );
+.HP
+.BI "int gd_add_mplex(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", const char *" count_field ,
+.BI "int " count_val ", int " period ", int " fragment_index );
+.HP
+.BI "int gd_add_multiply(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field1 ", const char *" in_field2 ,
+.BI "int " fragment_index );
+.HP
+.BI "int gd_add_phase(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", gd_int64_t " shift ", int " fragment_index );
+.HP
+.BI "int gd_add_polynom(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int " poly_ord ", const char *" in_fields ", const double *" a ,
+.BI int " fragment_index );
+.HP
+.BI "int gd_add_raw(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "gd_type_t " data_type ", unsigned int " spf ", int " fragment_index );
+.HP
+.BI "int gd_add_recip(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", double " dividend ", int " fragment_index );
+.HP
+.BI "int gd_add_sarray(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "size_t " array_len ", const char **" values ",int " fragment_index );
+.HP
+.BI "int gd_add_sbit(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", int " bitnum ", int " numbits ,
+.BI "int " fragment_index );
+.HP
+.BI "int gd_add_sindir(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" index_field ", const char *" sarray_field ,
+.BI "int " fragment_index );
+.HP
+.BI "int gd_add_string(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" value ", int " fragment_index );
+.HP
+.BI "int gd_add_window(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", const char *" check_field ", gd_windop_t"
+.IB windop ", gd_triplet_t " threshold ", int " fragment_index );
+.EC
+
+.SH DESCRIPTION
+These functions provide alternatives to using the
+.F3 gd_add
+or
+.F3 gd_add_spec
+functions to add a new field of the indicated type to the dirfile specified by
+.ARG dirfile .
+.PP
+In all of these calls,
+.ARG field_name
+indicates the name of the field to be added.  Further,
+.ARG fragment_index
+is the index of the format specification fragment into which the field should be
+added.  (To convert a fragment index to its file name, see
+.F3 gd_fragmentname .)
+The meaning and allowed types of other arguments may be obtained from the
+.F3 gd_entry
+and dirfile-format(5) manual pages.
+
+The
+.FN gd_add_clincom
+and
+.FN gd_add_cpolynom
+functions are identical to
+.FN gd_add_lincom
+and
+.FN gd_add_polynom ,
+except they take complex scalar parameters, instead of purely real values.
+
+The
+.FN gd_add_lincom
+and
+.FN gd_add_clincom
+functions takes pointers to three arrays of length
+.ARG n_fields
+containing the input field names
+.RI ( in_fields ),
+the gain factors
+.RI ( m " or " cm ),
+and the offset terms
+.RI ( b " or " cb ).
+Similarly,
+.FN gd_add_polynom
+and
+.FN gd_add_cpolynom
+take an array of length
+.ARG poly_ord
++ 1
+containing the polynomial co-efficients
+.RI ( a " or " ca ).
+
+The
+.FN gd_add_carray ,
+.FN gd_add_const ,
+.FN gd_add_sarray ,
+and
+.FN gd_add_string
+functions add the field and set the value of the field to
+.ARG value .
+For
+.FN gd_add_const
+and
+.FN gd_add_carray ,
+the
+.ARG const_type
+argument specifies the storage type for the const, while
+.ARG data_type
+specifies the data type of the value pointed to by
+.ARG value .
+For
+.nh
+.FN gd_add_sarray ,
+.hy
+.ARG value
+should be an array of
+.ARG array_len
+string pointers.
+
+The
+.B gd_int64_t
+type is a signed 64-bit integer type.  The
+.B gd_triplet_t
+type is defined as:
+.PP
+.in +4n
+.nf
+.fam C
+typedef union {
+  gd_int64_t i;
+  gd_uint64_t u;
+  double r;
+} gd_triplet_t;
+.fam
+.fi
+.in
+.PP
+Which element of this
+.B gd_triplet_t
+union to set depends on the operator selected for the
+.B WINDOW
+field.  See
+.F3 gd_entry
+for details.
+.PP
+A metafield may be added to the dirfile either by calling these functions with
+.ARG field_name
+containing the fully formed
+.RI """" <parent-field> / <meta-field> """"
+field code, or else by using the corresponding
+.BR gd_madd_ ...()
+function (see
+.F3 gd_madd_bit ,
+&c.) When adding a metafield with these functions,
+.I fragment_index
+is ignored and GetData will add the new metafield to the same format
+specification fragment in which the parent field is defined.  If the specified
+parent field name is an alias, the canonical name of the field will be
+substituted.
+
+All fields added with this interface must contain literal parameters.  Fields
+with scalar fields as parameters cannot be added with these functions.  Those
+fields must be added with
+.F3 gd_add
+or
+.F3 gd_add_spec .
+
+See
+.B NOTES
+below for information on using
+.FN gd_add_clincom ,
+.FN gd_add_cpolynom ,
+and
+.FN gd_add_crecip
+in the C89 GetData API.
+
+.SH RETURN VALUE
+On success, any of these functions returns zero.   On error, a negative-valued
+error value is returned.  Possible error values are:
+.DD GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_CODE
+The
+.IR field_name
+contained invalid characters; or it or an input field did not contain the
+affected fragment's prefix or suffix.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_ENTRY
+One or more of the field parameters specified was invalid.
+.DD GD_E_BAD_INDEX
+The
+.IR fragment_index
+argument was out of range.
+.DD GD_E_BAD_TYPE
+The
+.IR data_type " or " const_type
+argument provided to
+.FN gd_add_raw
+or
+.FN gd_add_const
+was invalid.
+.DD GD_E_DUPLICATE
+The
+.IR field_name
+provided duplicated that of an already existing field.
+.DD GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+GetData developers.
+.DD GD_E_IO
+.RB ( gd_add_raw ()
+only)  An I/O error occurred while creating an empty binary file to be
+associated with a newly added
+.B RAW
+field.
+.DD GD_E_PROTECTED
+The metadata of the fragment was protected from change.  Or, the creation of a
+.B RAW
+field was attempted and the data of the fragment was protected.
+.DD GD_E_UNKNOWN_ENCODING
+.RB ( gd_add_raw ()
+only) The encoding scheme of the indicated format specification fragment is not
+known to the library.  As a result, the library was unable to create an empty
+binary file to be associated with a newly added
+.B RAW
+field.
+.DD GD_E_UNSUPPORTED
+.RB ( gd_add_raw ()
+only) The encoding scheme of the indicated format specification fragment does
+not support creating an empty binary file to be associated with a newly added
+.B RAW
+field.
+.PP
+The dirfile error may also be retrieved by calling
+.F3 gd_error .
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.F3 gd_error_string .
+
+.SH NOTES
+The C89 GetData API provides different prototypes for
+.FN gd_add_clincom ,
+.FN gd_add_cpolynom ,
+and
+.FN gd_add_crecip :
+.PP
+.nf
+.B #define GD_C89_API
+.br
+.B #include <getdata.h>
+.fi
+.HP
+.SC
+.BI "int gd_add_clincom(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int " n_fields ", const char **" in_fields ", const double *" cm ,
+.BI "const double *" cb ", int " fragment_index );
+.HP
+.BI "int gd_add_cpolynom(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int " poly_ord ", const char *" in_fields ", const double *" ca ,
+.BI "int " fragment_index );
+.HP
+.BI "int gd_add_crecip(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", const double " cdividend\fR[2] ,
+.BI "int " fragment_index );
+.EC
+.PP
+In this case, the array pointers passed as
+.IR cm ", " cb
+or
+.IR ca
+should have twice as many (purely real) elements, consisting of alternating
+real and imaginary parts for the complex data.  That is, for example,
+.IR ca [0]
+should be the real part of the first co-efficient,
+.IR ca [1]
+the imaginary part of the first co-efficient,
+.IR ca [2]
+the real part of the second co-efficient,
+.IR ca [3]
+the imaginary part of the second co-efficient, and so on.  Similarly, the
+.I cdividend
+parameter becomes a double precision array of length two.
+.PP
+For
+.FN gd_add_clincom
+and
+.FN gd_add_cpolynom ,
+these are simply different (but equivalent) declarations of the C99 function
+entry point.  For
+.FN gd_add_crecip ,
+however, a different entry point is needed (since the
+.I cdividend
+parameter is passed by reference instead of by value).  In the interests of
+portability, the C89 version of
+.FN gd_add_crecip
+is always available, and may be accessed as
+.FN gd_add_crecip89 ,
+with the C89 prototype, in both the C99 and C89 APIs.
+
+.SH HISTORY
+The functions
+.FN dirfile_add_bit ,
+.FN dirfile_add_const ,
+.FN dirfile_add_lincom ,
+.FN dirfile_add_linterp ,
+.FN dirfile_add_multiply ,
+.FN dirfile_add_phase ,
+.FN dirfile_add_raw ,
+and
+.FN dirfile_add_string
+appeared in GetData-0.4.0.
+
+The functions
+.FN dirfile_add_clincom ,
+.FN dirfile_add_cpolynom ,
+.FN dirfile_add_polynom ,
+and
+.FN dirfile_add_sbit
+appeared in GetData-0.6.0.
+
+In GetData-0.7.0, the functions were renamed to
+.FN gd_add_bit ,
+.FN gd_add_clincom ,
+.FN gd_add_const ,
+.FN gd_add_cpolynom ,
+.FN gd_add_lincom ,
+.FN gd_add_linterp ,
+.FN gd_add_multiply ,
+.FN gd_add_phase ,
+.FN gd_add_polynom ,
+.FN gd_add_raw ,
+.FN gd_add_sbit ,
+and
+.FN gd_add_string .
+The functions
+.FN gd_add_carray ,
+.FN gd_add_crecip ,
+.FN gd_add_divide ,
+and
+.FN gd_add_recip
+also appeared in this version.
+
+In GetData-0.8.0, these functions first allowed adding metafields by providing
+the full (slashed) field name.  The functions
+.FN gd_add_mplex
+and
+.FN gd_add_window
+also appeared in this version.
+
+In GetData-0.10.0, the error return from these functions changed from -1 to a
+negative-valued error code.  The functions
+.FN gd_add_indir ,
+.FN gd_add_sarray ,
+and
+.FN gd_add_sindir
+also appeared in this version.
+
+.SH SEE ALSO
+.F3 gd_add ,
+.F3 gd_add_spec ,
+.F3 gd_entry ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+the corresponding
+.BR gd_madd_ <entry-type>
+functions (e.g.
+.F3 gd_madd_bit ),
+.F3 gd_metaflush ,
+.F3 gd_open ,
+dirfile-format(5)

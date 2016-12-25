@@ -2506,17 +2506,17 @@ program big_test
   call check_ok(ne, 236, d)
 
 ! 237: fgd_nentries check
-  n = fgd_nentries(d, GD_ALL_FRAGMENTS, "data", GD_SCALAR_ENTRIES, &
+  n = fgd_nentries(d, "data", GD_SCALAR_ENTRIES, &
     IOR(GD_ENTRIES_HIDDEN, GD_ENTRIES_NOALIAS))
   call check_ok2(ne, 237, 1, d)
   call check_int2(ne, 237, 1, n, 6)
-  n = fgd_nentries(d, GD_ALL_FRAGMENTS, "", GD_VECTOR_ENTRIES, &
+  n = fgd_nentries(d, "", GD_VECTOR_ENTRIES, &
     IOR(GD_ENTRIES_HIDDEN, GD_ENTRIES_NOALIAS))
   call check_ok2(ne, 237, 2, d)
   call check_int2(ne, 237, 2, n, 29)
 
 ! 238: fgd_field_name_max check
-  i = fgd_entry_name_max(d, "", GD_ALL_FRAGMENTS, GD_VECTOR_ENTRIES, &
+  i = fgd_entry_name_max(d, "", GD_VECTOR_ENTRIES, &
     IOR(GD_ENTRIES_HIDDEN, GD_ENTRIES_NOALIAS))
   call check_ok(ne, 238, d)
   call check_int(ne, 238, i, 7)
@@ -2529,7 +2529,7 @@ program big_test
     'new18      ', 'new19      ', 'new21      ', 'phase      ', 'recip      ', &
     'lincom     ', 'new135     ', 'window     ', 'linterp    ', 'polynom    ' /)
   l = flen
-  call fgd_entry_list(flist, d, GD_ALL_FRAGMENTS, "", GD_VECTOR_ENTRIES, &
+  call fgd_entry_list(flist, d, "", GD_VECTOR_ENTRIES, &
     IOR(GD_ENTRIES_HIDDEN, GD_ENTRIES_NOALIAS), l)
   call check_ok(ne, 239, d)
   call check_int(ne, 239, l, flen)
@@ -3363,6 +3363,19 @@ program big_test
   str = fgd_alter_namespace(d, 2, 'NS2')
   call check_ok(ne, 304, d)
   call check_eos(ne, 304, str, 'NS2')
+
+! 305: fgd_match_entries
+  i = fgd_match_entries_max(d, "^lin", 0, 0, 0)
+  call check_ok2(ne, 305, 1, d)
+  call check_int2(ne, 305, 2, i, 7)
+  
+  l = flen
+  n = fgd_match_entries(flist, d, "^lin", 0, 0, 0, l)
+  call check_ok2(ne, 305, 3, d)
+  call check_int2(ne, 305, 4, n, 2)
+  call check_str2(ne, 305, 5, flist(1), "lincom")
+  call check_str2(ne, 305, 6, flist(2), "linterp")
+  call check_int2(ne, 305, 7, l, flen)
 
 
 

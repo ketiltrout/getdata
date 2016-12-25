@@ -31,7 +31,7 @@ int main(void)
   rmdirfile();
 
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL);
-  nfields = gd_nentries(D, GD_ALL_FRAGMENTS, NULL, 999, 0);
+  nfields = gd_nentries(D, NULL, 999, 0);
   CHECKI(nfields, 0);
 
   e1 = gd_error(D);

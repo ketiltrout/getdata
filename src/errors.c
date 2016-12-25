@@ -103,7 +103,7 @@ static const struct {
   { GD_E_IO, 0, "Error accessing {2}: ", 1 },
   /* GD_E_INTERNAL_ERROR: 2 = source file, 3 = line */
   { GD_E_INTERNAL_ERROR, 0, "Internal error at [{2},{3}]; "
-    "please report to " PACKAGE_BUGREPORT , 0 },
+    "please report to <" PACKAGE_BUGREPORT ">", 0 },
   /* GD_E_ALLOC: (nothing) */
   { GD_E_ALLOC, 0, "Memory allocation error", 0 },
   /* GD_E_RANGE: (nothing) */
@@ -129,7 +129,9 @@ static const struct {
   { GD_E_BAD_FIELD_TYPE, GD_E_FIELD_STR, "Non-numeric data in {4}", 0 },
   /* GD_E_ACCMODE: (nothing) */
   { GD_E_ACCMODE, 0, "Dirfile has been opened read-only", 0 },
-  /* GD_E_UNSUPPORTED: (nothing) */
+  /* GD_E_UNSUPPORTED: 4 = regex type */
+  { GD_E_UNSUPPORTED, GD_E_SUPPORT_REGEX,
+    "Specified regular expression grammar not supported by library: {4}", 0 },
   { GD_E_UNSUPPORTED, 0, "Operation not supported by current encoding scheme",
     0 },
   /* GD_E_UNKNOWN_ENCODING: (nothing) */
@@ -179,7 +181,7 @@ static const struct {
   { GD_E_DELETE, GD_E_DEL_DERIVED,
     "Cannot delete field {4} used as input to field {2}", 0 },
   { GD_E_DELETE, GD_E_DEL_ALIAS, "Cannot delete field {4} with aliases", 0 },
-  /* GD_E_ARGUMENT: (nothing) */
+  /* GD_E_ARGUMENT: 3 = offset; 4 = string */
   { GD_E_ARGUMENT, GD_E_ARG_WHENCE, "Invalid origin specified", 0 },
   { GD_E_ARGUMENT, GD_E_ARG_ENDIANNESS, "Invalid endianness specified", 0 },
   { GD_E_ARGUMENT, GD_E_ARG_PROTECTION, "Invalid protection level specified",
@@ -189,6 +191,9 @@ static const struct {
     0 },
   { GD_E_ARGUMENT, GD_E_ARG_BAD_VERS,
     "Dirfile does not conform to specified Standards Version", 0 },
+  { GD_E_ARGUMENT, GD_E_ARG_REGEX, "Bad regular expression: {4}", 0},
+  { GD_E_ARGUMENT, GD_E_ARG_PCRE, "Bad regular expression at offset {3}: {4}",
+    0},
   { GD_E_ARGUMENT, 0, "Bad argument", 0 },
   /* GD_E_CALLBACK: 3 = response */
   { GD_E_CALLBACK, 0, "Unrecognised response from callback function: {3}", 0 },
@@ -288,7 +293,7 @@ int gd_error(const DIRFILE* D) gd_nothrow
  * library error.  The message may be truncated but will be null terminated.
  * Returns buffer, or NULL if buflen < 1.
  */
-#define UNKNOWN "Unknown error %i:%i. Please report to " PACKAGE_BUGREPORT
+#define UNKNOWN "Unknown error %i:%i. Please report to <" PACKAGE_BUGREPORT ">"
 char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen) gd_nothrow
 {
   const char* ip;

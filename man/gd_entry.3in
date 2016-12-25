@@ -1,0 +1,1059 @@
+.\" gd_entry.3.  The gd_entry man page.
+.\"
+.\" Copyright (C) 2008-2013, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_entry 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_entry \(em retrieve a Dirfile field's metadata
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_entry(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_entry_t *" entry );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_entry
+function queries a dirfile(5) database specified by
+.ARG dirfile
+and retrieves the metadata associated with the field specified by
+.ARG field_code .
+If
+.ARG field_code
+contains a valid representation suffix, the suffix will be ignored.
+
+The 
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+
+The entry will be stored in the gd_entry_t structure indicated by the
+.ARG entry
+argument, which must be allocated by the caller.  Members available in this
+structure depend on the field type of the field queried.  See below for a
+complete description of this data type.
+
+Strings members in 
+.ARG entry
+filled by this function (including, depending on field type:
+.ARG field ,
+elements of the
+.ARG in_fields 
+and
+.ARG scalar
+arrays, the
+.B LINTERP
+.ARG table
+member) will by dynamically allocated by
+.FN gd_entry .
+Only strings provided by the gd_entry_t for the particular field type described
+will be allocated.  By default, these strings are allocated using
+.F3 strdup ,
+but this can be changed by specifying an alternate memory manager via
+.F3 gd_alloc_funcs .
+The caller is responsible for deallocating these strings.  The
+.F3 gd_free_entry_strings
+function is provided as a convenience to do this.
+
+If the entry's metadata contains scalar field codes which cannot be
+dereferenced, the associated numerical field parameter will be initialised to
+zero.  In this case, the
+.B GD_EN_CALC
+flag in the returned entry object will
+.I NOT
+be set.
+
+The returned
+.ARG entry
+structure, including strings and their pointers may be freely modified by the
+caller.
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_entry
+returns zero and writes the field metadata in the supplied gd_entry_t buffer.
+On error, the supplied gd_entry_t buffer is not modified.  In this case,
+.FN gd_entry
+returns a negative-valued error code.  Possible error codes are:
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_CODE
+The field specified by
+.ARG field_code
+was not found in the database.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH THE ENTRY TYPE
+Members available in the gd_entry_t structure depend on the field type
+described.  All gd_entry_t objects are guaranteed to have at least:
+.PP
+.RS
+.SC
+.nf
+typedef struct {
+  ...
+
+  const char  *field;          /* field code */
+  gd_entype_t  field_type;     /* field type */
+  int          fragment_index; /* format fragment index */
+  unsigned     flags;          /* entry flags */
+
+  ...
+} gd_entry_t;
+.fi
+.EC
+.RE
+.PP
+The
+.ARG field
+member is the field code of the entry (i.e. its string name).  If the call to
+.F3 gd_entry
+is successful, this will be the field name specified as part of the
+.ARG field_code
+argument.
+.PP
+The
+.ARG field_type
+member indicates the field type of the entry.  This is an integer type equal
+to one of the following symbols:
+.IP
+.SC
+.BR GD_BIT_ENTRY ,
+.BR GD_CARRAY_ENTRY ,
+.BR GD_CONST_ENTRY ,
+.BR GD_DIVIDE_ENTRY ,
+.BR GD_INDEX_ENTRY ,
+.BR GD_LINCOM_ENTRY ,
+.BR GD_LINTERP_ENTRY ,
+.BR GD_MPLEX_ENTRY ,
+.BR GD_MULTIPLY_ENTRY ,
+.BR GD_PHASE_ENTRY ,
+.BR GD_POLYNOM_ENTRY ,
+.BR GD_RAW_ENTRY ,
+.BR GD_RECIP_ENTRY ,
+.BR GD_SBIT_ENTRY ,
+.BR GD_STRING_ENTRY ,
+.BR GD_WINDOW_ENTRY .
+.EC
+.PP
+.B GD_INDEX_ENTRY
+is a special field type used only for the implicit
+.I INDEX
+field.  The other entry types are explained in detail in dirfile-format(5).
+.PP
+The 
+.ARG fragment_index
+member indicates the format specification fragment in which this field is
+defined.  This is an integer index to the Dirfile's list of parsed format
+specification fragments.  The name of the file corresponding to
+.ARG fragment_index
+may be obtained by calling
+.F3 gd_fragmentname .
+A value of zero for this field indicates that the field is defined in the
+primary fragment, the file called
+.B format
+in the root dirfile directory (see dirfile(5)).
+.PP
+The
+.ARG flags
+member is a bitwise or'd collection of the following entry flags:
+.DD GD_EN_CALC
+This bit is set only when the non-literal scalar parameter field codes specified
+in the
+.ARG scalar
+member have been resolved, and the corresponding numerical parameter have
+been initialised with these data.  When one or more field code does not exist,
+or is invalid (ie. when
+.F3 gd_validate
+would fail on the specified
+.ARG field_code
+with the error
+.BR GD_E_BAD_SCALAR ),
+then the unresolved numerical parameters are initialised to zero, and this flag
+is not be set.  If the requested field does not allow non-literal scalar
+parameters
+.RB ( CARRAY ,
+.BR CONST ,
+.BR DIVIDE ,
+.BR INDEX ,
+.BR LINTERP ,
+.BR MULTIPLY ,
+.BR STRING ),
+the value of this bit is unspecified.
+.DD GD_EN_COMPSCAL
+For fields which permit complex valued parameters
+.RB ( LINCOM ,
+.BR POLYNOM ,
+.BR RECIP ),
+this bit is set only when at least one parameter is complex valued.  For
+other field types, the value of this bit is unspecified.
+.DD GD_EN_HIDDEN
+This bit is set only when the field has been hidden by the
+.B /HIDDEN
+directive (see
+.F3 gd_hidden ).
+.PP
+Remaining fields in the gd_entry_t structure depend on the value of
+.ARG field_type .
+Callers are advised to check
+.ARG field_type
+before attempting to access the remaining members.  Members for different
+field types may be stored in the same physical location in core.  Accordingly,
+attempting to access a member not declared for the appropriate field type will
+have unspecified results.
+
+.SS Scalar Parameter Members
+A gd_entry_t describing any field type which permits non-literal scalar field
+parameters
+.RB ( BIT ", " LINCOM ", " MPLEX ", " PHASE ", " POLYNOM ", " RAW ", " RECIP ,
+.BR SBIT ", or " WINDOW )
+will also provide:
+.PP
+.RS
+.SC
+.nf
+typedef struct {
+  ...
+
+  const char *scalar[GD_MAX_POLY_ORD + 1];   /* param. fields */
+  int         scalar_ind[GD_MAX_POLY_ORD + 1];
+                                            /* CARRAY indices */
+
+  ...
+} gd_entry_t;
+.fi
+.EC
+.RE
+.PP
+Only certain elements of these arrays will be initialised:
+.IP \(bu
+For
+.B BIT
+and
+.B SBIT
+fields, the first element corresponds to
+.ARG bitnum
+and the second to
+.ARG numbits .
+The remainder are uninitialised.
+.IP \(bu
+For
+.B LINCOM
+fields, the first
+.B GD_MAX_LINCOM
+elements correspond to the slopes
+.RI ( cm )
+and the next
+.B GD_MAX_LINCOM
+elements correspond to the offsets
+.RI ( cb ).
+Only the first
+.ARG n_fields
+elements of these two sets are initialised.  Notably, this means for
+.ARG n_fields
+< GD_MAX_LINCOM, there will be uninitialised elements in the middle of these
+arrays between the element corresponding to
+.IR cm [ n_fields
+- 1] and the element corresponding to
+.ARG cb [0].
+.IP \(bu
+For
+.B MPLEX
+fields, the first element corresponds to
+.ARG count_val
+and the second to
+.ARG period .
+The remainder are uninitialised.
+.IP \(bu
+For
+.B PHASE
+fields, the first element corresponds to
+.ARG shift .
+The remainder are uninitialised.
+.IP \(bu
+For
+.B POLYNOM
+fields, these arrays correspond with the co-efficients
+.ARG ca .
+Only the first
+.ARG poly_ord
++ 1 elements are initialised.
+.IP \(bu
+For
+.B RAW
+fields, the first element corresponds to
+.ARG spf .
+The remainder are uninitialised.
+.IP \(bu
+For
+.B RECIP
+fields, the first element corresponds to
+.ARG cdividend .
+The remainder are uninitialised.
+.IP \(bu
+For
+.B WINDOW
+fields, the first element corresponds to
+.ARG threshold .
+The remainder are uninitialised.
+.PP
+The
+.I scalar
+parameters are NULL if a literal parameter was used, or else a field code
+specifying the scalar parameters. 
+.PP
+If an element of
+.ARG scalar
+specifies a
+.B CARRAY
+field, the corresponding
+.ARG scalar_ind
+will indicate the element of the
+.B CARRAY
+used.  For
+.B CONST
+fields,
+.ARG scalar_ind
+will be -1.
+
+.SS BIT and SBIT Members
+A gd_entry_t describing a
+.B BIT
+or
+.B SBIT
+entry, will also provide:
+.PP
+.RS
+.SC
+.nf
+typedef struct {
+  ...
+
+  const char *in_fields[1];     /* input field code */
+  int         bitnum;           /* first bit */
+  int         numbits;          /* bit length */
+
+  ...
+} gd_entry_t;
+.fi
+.EC
+.RE
+.PP
+The
+.ARG in_fields
+member is an array of length one containing the input field code.
+.PP
+The
+.ARG bitnum
+member indicates the number of the first bit (counted from zero) extracted from
+the input.  If this value was specified as a scalar field code, this will be
+the numerical value of that field, and
+.ARG scalar [0]
+will contain the field code itself, otherwise
+.ARG scalar [0]
+will be NULL.
+.PP
+The
+.ARG numbits
+member indicates the number of bits which are extracted from the input.
+If this value was specified as a scalar field code, this will be the numerical
+value of that field, and
+.ARG scalar [1]
+will contain the field code itself, otherwise
+.ARG scalar [1]
+will be NULL.
+
+.SS CARRAY Members
+A gd_entry_t describing a
+.B CARRAY
+entry, will also provide:
+.PP
+.RS
+.SC
+.nf
+typedef struct {
+  ...
+
+  gd_type_t  const_type; /* data type in format specification */
+  size_t     array_len;  /* length of array data */
+
+  ...
+} gd_entry_t;
+.fi
+.EC
+.RE
+.PP
+The
+.ARG const_type
+member indicates the data type of the constant value stored in the format
+file metadata.  See
+.F3 gd_getdata
+for a list of valid values that a variable of type
+.B gd_type_t
+may take.
+.PP
+The
+.ARG array_len
+member gives the number of elements in the array.
+
+.SS CONST Members
+A gd_entry_t describing a
+.B CONST
+entry, will also provide:
+.PP
+.RS
+.SC
+.nf
+typedef struct {
+  ...
+
+  gd_type_t  const_type; /* data type in format specification */
+
+  ...
+} gd_entry_t;
+.fi
+.EC
+.RE
+.PP
+The
+.ARG const_type
+member indicates the data type of the constant value stored in the format
+file metadata.  See
+.F3 gd_getdata
+for a list of valid values that a variable of type
+.B gd_type_t
+may take.
+
+.SS DIVIDE, INDIR, MULTIPLY, and SINDIR Members
+A gd_entry_t describing a
+.BR DIVIDE ,
+.BR INDIR ,
+.BR MULTIPLY ,
+or
+.B SINDIR
+entry, will also provide:
+.PP
+.RS
+.SC
+.nf
+typedef struct {
+  ...
+
+  const char *in_fields[2];     /* input field codes */
+
+  ...
+} gd_entry_t;
+.fi
+.EC
+.RE
+.PP
+The
+.ARG in_fields
+member is an array of length two containing the input field codes.
+
+.SS INDEX Members
+A gd_entry_t describing an
+.B INDEX
+entry, which is used only for the implicit
+.I INDEX
+field, provides no additional data.
+
+.SS LINCOM Members
+A gd_entry_t describing a
+.B LINCOM
+entry, will also provide:
+.PP
+.RS
+.SC
+.nf
+typedef struct {
+  ...
+
+  int            n_fields;                 /* # of inputs */
+  const char    *in_fields[GD_MAX_LINCOM]; /* input fields(s) */
+  double complex cm[GD_MAX_LINCOM];        /* scale factor(s) */
+  double         m[GD_MAX_LINCOM];         /* scale factor(s) */
+  double complex cb[GD_MAX_LINCOM];        /* offset terms(s) */
+  double         b[GD_MAX_LINCOM];         /* offset terms(s) */
+
+  ...
+} gd_entry_t;
+.fi
+.EC
+.RE
+.PP
+The
+.ARG n_fields
+member indicates the number of input fields.  It will be between one and
+.B GD_MAX_LINCOM
+inclusive.
+.B GD_MAX_LINCOM
+is defined in getdata.h as the maximum number of input fields permitted by a
+.BR LINCOM .
+.PP
+The
+.ARG in_fields
+member is an array of length
+.B GD_MAX_LINCOM
+containing the input field code(s).  Only the first
+.ARG n_fields
+elements of this array are initialised.  The remaining elements contain
+uninitialised data.
+.PP
+The
+.ARG cm
+and
+.ARG cb
+members are arrays of the scale factor(s) and offset term(s) for the
+.BR LINCOM .
+Only the first
+.ARG n_fields
+elements of these array contain meaningful data.
+If any of these values were specified as a scalar field code, this will be the
+numerical value of that field.  The field code corresponding to
+.IR cm [ i ]
+will be stored in
+.IR scalar [ i ]
+and the field code associated with
+.IR cb [ i ]
+will be stored in
+.IR scalar [ i
++
+.BR GD_MAX_LINCOM ].
+Otherwise the corresponding
+.ARG scalar
+member will be NULL.
+See
+.B NOTES
+below on changes to the declaration of
+.ARG cm
+and
+.ARG cb
+when using the C89 GetData API.
+.PP
+The elements of
+.ARG m
+and
+.ARG b
+are the real parts of the corresponding elements of
+.ARG cm
+and
+.ARG cb .
+
+.SS LINTERP Members
+A gd_entry_t describing a
+.B LINTERP
+entry, will also provide:
+.PP
+.RS
+.SC
+.nf
+typedef struct {
+  ...
+
+  const char *table             /* linterp table filename */
+  const char *in_fields[1];     /* input field code */
+
+  ...
+} gd_entry_t;
+.fi
+.EC
+.RE
+.PP
+The
+.ARG table
+member is the pathname to the look up table on disk.  This the path as it appars
+in the format specification.  It may be a path relative to the fragment
+directory.  For an canonicalised, absolute version of this path, see
+.F3 gd_linterp_tablename .
+.PP
+The
+.ARG in_fields
+member is an array of length one containing the input field code.
+
+.SS MPLEX Members
+A gd_entry_t describing a
+.B MPLEX
+entry, will also provide:
+.PP
+.RS
+.SC
+.nf
+typedef struct {
+  ...
+
+  const char *in_fields[2];   /* input field codes */
+  int         count_val;      /* value of the multiplex index */
+  int         period;         /* samples between successive
+                                                      indices */
+
+  ...
+} gd_entry_t;
+.fi
+.EC
+.RE
+.PP
+The
+.ARG in_fields
+member contains the field codes of the input field (element 0) and the multiplex
+index field (element 1).
+.PP
+The
+.ARG count_val
+member is the value of the multiplex index field when the output field is stored
+in the input field.
+.PP
+The
+.ARG period
+member is the number of samples between successive occurrances of
+.ARG count_val
+in the index vector, or zero, if this is not known or constant.  This is only
+used to determine how far to look back for a starting value for the output
+field; see
+.F3 gd_mplex_lookback .
+
+.SS PHASE Members
+A gd_entry_t describing a
+.B PHASE
+entry, will also provide:
+.PP
+.RS
+.SC
+.nf
+typedef struct {
+  ...
+
+  const char *in_fields[1];     /* input field code */
+  gd_int64_t  shift;            /* phase shift */
+
+  ...
+} gd_entry_t;
+.fi
+.EC
+.RE
+.PP
+The
+.ARG in_fields
+member is an array of length one containing the input field code.
+.PP
+The
+.ARG shift
+member indicates the shift in samples.  The
+.B gd_int64_t
+type is a 64-bit signed integer type.  A positive value indicates a shift
+forward in time (towards larger frame numbers).  If this value was specified as
+a scalar field code, this will be the numerical value of that field, and
+.ARG scalar [0]
+will contain the field code itself, otherwise
+.ARG scalar [0]
+will be NULL.
+
+.SS POLYNOM Members
+A gd_entry_t describing a
+.B POLYNOM
+entry, will also provide:
+.PP
+.RS
+.SC
+.nf
+typedef struct {
+  ...
+
+  int            poly_ord;                /* polynomial order */
+  const char    *in_fields[1];            /* input field(s) */
+  double complex ca[GD_MAX_POLY_ORD + 1]; /* co-efficients(s) */
+  double         a[GD_MAX_POLY_ORD + 1];  /* co-efficients(s) */
+
+  ...
+} gd_entry_t;
+.fi
+.EC
+.RE
+.PP
+The
+.ARG poly_ord
+member indicates the order of the polynomial.  It will be between one and
+.B GD_MAX_POLY_ORD
+inclusive.
+.B GD_MAX_POLY_ORD
+is defined in getdata.h as the maximum order of polynomial permitted by a
+.BR POLYNOM .
+.PP
+The
+.ARG in_fields
+member is an array of length one containing the input field code.
+.PP
+The
+.ARG ca
+members are arrays of the co-efficient(s) for the
+.BR POLYNOM .
+Only the first
+.ARG poly_ord
++ 1 elements of this array contains meaningful data.  If any of these values
+were specified as a scalar field code, this will be the numerical value of that
+field.  The field code corresponding to
+.IR ca [ i ]
+will be stored in
+.IR scalar [ i ].
+Otherwise the corresponding
+.ARG scalar
+member will be NULL.  See
+.B NOTES
+below on changes to the declaration of
+.ARG ca
+when using the C89 GetData API.
+.PP
+The elements of
+.ARG a
+are the real parts of the corresponding elements of
+.ARG ca .
+
+.SS RAW Members
+A gd_entry_t describing a
+.B RAW
+entry, will also provide:
+.PP
+.RS
+.SC
+.nf
+typedef struct {
+  ...
+
+  unsigned int  spf;          /* samples per frame on disk */
+  gd_type_t     data_type;    /* data type on disk */
+
+  ...
+} gd_entry_t;
+.fi
+.EC
+.RE
+.PP
+The
+.ARG spf
+member contains the samples per frame of the binary data on disk.  If this value
+was specified as a scalar field code, this will be the numerical value of that
+field, and
+.ARG scalar [0]
+will contain the field code itself, otherwise
+.ARG scalar [0]
+will be NULL.
+.PP
+The
+.ARG data_type
+member indicates the data type of the binary data on disk.  See
+.F3 gd_getdata
+for a list of valid values that a variable of type
+.B gd_type_t
+may take.
+
+.SS RECIP Members
+A gd_entry_t describing a
+.B RECIP
+entry, will also provide:
+.PP
+.RS
+.SC
+.nf
+typedef struct {
+  ...
+
+  const char    *in_fields[1];         /* input field code */
+  double complex cdividend;            /* scalar dividend */
+  double         dividend;             /* scalar dividend */
+
+  ...
+} gd_entry_t;
+.fi
+.EC
+.RE
+.PP
+The
+.ARG in_fields
+member is an array of length one containing the input field code.
+.PP
+The
+.ARG cdividend
+member provides the constant dividend of the computed division.  If this value
+was specified as a scalar field code, this will be the numerical value of that
+field, and
+.ARG scalar [0]
+will contain the field code itself, otherwise
+.ARG scalar [0]
+will be NULL.  The
+.ARG dividend
+member contains the real part of
+.ARG cdividend .
+
+.SS STRING Members
+A gd_entry_t describing a
+.B STRING
+entry provides no additional data.
+
+.SS WINDOW Members
+A gd_entry_t describing a
+.B WINDOW
+entry, will also provide:
+.PP
+.RS
+.SC
+.nf
+typedef struct {
+  ...
+
+  const char    *in_fields[2];  /* input field codes */
+  gd_windop_t   windop;         /* comparison operator */
+  gd_triplet_t  threshold;      /* the value compared against */
+
+  ...
+} gd_entry_t;
+.fi
+.EC
+.RE
+.PP
+The
+.ARG in_fields
+member contains the field codes of the input field (element 0) and the check
+field (element 1).
+.PP
+The
+.ARG windop
+member equals one of the following symbols, indicating the particular comparison
+performed on the check field:
+.DD GD_WINDOP_EQ
+data are extracted when the check field equals
+.ARG threshold ;
+.DD GD_WINDOP_GE
+data are extracted when the check field is greater than or equal to
+.ARG threshold ;
+.DD GD_WINDOP_GT
+data are extracted when the check field is strictly greater than
+.ARG threshold ;
+.DD GD_WINDOP_LE
+data are extracted when the check field is less than or equal to
+.ARG threshold ;
+.DD GD_WINDOP_LT
+data are extracted when the check field is strictly less than
+.ARG threshold ;
+.DD GD_WINDOP_NE
+data are extracted when the check field is not equal to
+.ARG threshold ;
+.DD GD_WINDOP_SET
+data are extracted when at least one bit in
+.ARG threshold 
+is also set in the check field;
+.DD GD_WINDOP_CLR
+data are extracted when at least one bit in
+.ARG threshold 
+is not set in the check field.
+.PP
+The
+.ARG threshold
+is the value against which the check field is compared.  The
+.B gd_triplet_t
+type is defined as:
+.PP
+.RS
+.SC
+.nf
+typedef union {
+  gd_int64_t i;
+  gd_uint64_t u;
+  double r;
+} gd_triplet_t;
+.fi
+.EC
+.RE
+.PP
+The particular element of the union to use depends on the value of
+.ARG windop:
+.IP \(bu
+For
+.B GD_WINDOP_EQ
+and
+.BR GD_WINDOP_NE ,
+the signed integer element,
+.IB threshold . i\fR,
+is set;
+.IP \(bu
+For
+.B GD_WINDOP_SET
+and
+.BR GD_WINDOP_CLR ,
+the unsigned integer element,
+.IB threshold . u\fR,
+is set;
+.IP \(bu
+For all other values of
+.IR windop ,
+the floating point element,
+.IB threshold . r\fR,
+is set.
+
+.SH NOTES
+When using the C89 GetData API (by defining
+.B GD_C89_API
+before including getdata.h), the data types and names of several of the entry
+parameters are different.  The following table lists the correspondences between
+members in the C99 and C89 APIs.
+
+.TS
+center tab(|);
+cbscbs
+rlrl.
+C99 API|C89 API
+int|bitnum|int|u.bit.bitnum
+int|numbits|int|u.bit.numbits
+int|n_fields|int|u.lincom.n_fields
+double complex|cm[]|double|u.lincom.cm[][2]
+double|m[]|double|u.lincom.m[]
+double complex|cb[]|double|u.lincom.cb[][2]
+double|b[]|double|u.lincom.b[]
+const char*|table|const char*|u.linterp.table
+int|count_val|int|u.mplex.count_val
+int|period|int|u.mplex.period
+gd_int64_t|shift|gd_int64_t|u.phase.shift
+int|poly_ord|int|u.polynom.poly_ord
+double complex|ca[]|double|u.polynom.ca[][2]
+double|a[]|double|u.polynom.a[]
+unsigned int|spf|unsigned int|u.raw.spf
+gd_type_t|data_type|gd_type_t|u.raw.data_type
+double complex|cdividend|double|u.recip.cdividend[2]
+double|dividend|double|u.recip.dividend
+gd_type_t|const_type|gd_type_t|u.scalar.const_type
+size_t|array_len|size_t|u.scalar.array_len
+gd_windop_t|windop|gd_windop_t|u.window.windop
+gd_triplet_t|threshold|gd_triplet_t|u.window.threshold
+.TE
+.PP
+In the case of complex valued data in the C89 API, the first element of the
+two-element array is the real part of the complex number, and the second
+element is the imaginary part.
+
+.SH HISTORY
+The
+.FN get_entry
+function appeared in GetData-0.3.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_entry .
+
+In GetData-0.10.0, the error return from these functions changed from -1 to a
+negative-valued error code.
+
+.SS Changes to the gd_entry_t structure
+Field-type specific members have been added to the structure as support for
+those field types have been introduced to the library:
+.IP \(bu
+.BR BIT ,
+.BR LINCOM ,
+.BR LINTERP ,
+.BR MULTIPLY ,
+.BR PHASE ,
+and
+.BR RAW
+were supported in GetData-0.3.0 (Dirfile Standards Version 5).
+.IP \(bu
+.B CONST
+and
+.B STRING
+entries were introduced in GetData-0.4.0 (Dirfile Standards Version 6); this
+is also the first version that treats
+.I INDEX
+as a normal field.  In earlier versions, trying to retrieve the metadata for
+the
+.I INDEX
+field would fail.
+.IP \(bu
+.B POLYNOM
+and
+.B SBIT
+entries were introduced in GetData-0.6.0 (Dirfile Standards Version 7).
+.IP \(bu
+.BR CARRAY ,
+.BR DIVIDE ,
+and
+.B RECIP
+entries were introduced in GetData-0.7.0 (Dirfile Standards Version 8).
+.IP \(bu
+.B MPLEX
+and
+.B WINDOW
+entries were introduced in GetData-0.8.0 (Dirfile Standards Version 9).
+.IP \(bu
+.BR INDIR ,
+.BR SARRAY ,
+and
+.B SINDIR
+entries were introduced in GetData-0.10.0 (Dirfile Standards Version 10).
+.PP
+The
+.ARG scalar
+member appeared in GetData-0.6.0.  This release also introduced the
+complex-valued scalar members
+.RI ( cm ,
+.ARG cb ,
+&c.)
+
+The
+.ARG scalar_ind
+member appeared in GetData-0.7.0.  This was also the first release with
+a working ANSI C (C89) conforming alternate definition.
+.PP
+Before Getdata-0.8.4, the
+.ARG period
+member for
+.B MPLEX
+data was named
+.ARG count_max .
+
+Before GetData-0.9.0, the
+.ARG flags
+member is missing.  In it's place was:
+.PP
+.RS
+.SC
+int comp_scal;     /* Scalar parameters are complex-valued */
+.EC
+.RE
+.PP
+which was non-zero to indicate complex-valued parameters, which is now indicated
+by the
+.B GD_EN_COMPSCAL
+flag.
+
+.SH SEE ALSO
+dirfile(5),
+.F3 gd_alloc_funcs ,
+.F3 gd_cbopen ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_field_list ,
+.F3 gd_fragmentname ,
+.F3 gd_free_entry_strings ,
+.F3 gd_linterp_tablename
+.F3 gd_mplex_lookback ,
+.F3 gd_raw_filename ,
+.F3 gd_validate

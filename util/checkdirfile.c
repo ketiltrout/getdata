@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
   /* Check the validity of each entry defined */
   ne = 0;
   puts("\nChecking fields...");
-  flist = gd_entry_list(dirfile, GD_ALL_FRAGMENTS, NULL, 0,
+  flist = gd_entry_list(dirfile, NULL, 0,
       GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   for (i = 0; flist[i] != NULL; ++i) {
     if (gd_validate(dirfile, flist[i])) {
@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
       ne++;
     }
     nfields++;
-    mflist = gd_entry_list(dirfile, GD_ALL_FRAGMENTS, flist[i], 0,
+    mflist = gd_entry_list(dirfile, flist[i], 0,
         GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
     for (j = 0; mflist[j] != NULL; ++j) {
       char code[GD_MAX_LINE_LENGTH];
@@ -195,8 +195,8 @@ int main(int argc, char* argv[])
 
     /* ferret out dangling meta ALIASes by first collecting a list
      * of all of them, and then trying to use them as field codes */
-    mflist = gd_entry_list(dirfile, GD_ALL_FRAGMENTS, flist[i],
-        GD_ALIAS_ENTRIES, GD_ENTRIES_HIDDEN);
+    mflist = gd_entry_list(dirfile, flist[i], GD_ALIAS_ENTRIES,
+        GD_ENTRIES_HIDDEN);
     for (j = 0; mflist[j] != NULL; ++j) {
       char code[GD_MAX_LINE_LENGTH];
       snprintf(code, GD_MAX_LINE_LENGTH, "%s/%s", flist[i], mflist[j]);
@@ -216,8 +216,7 @@ int main(int argc, char* argv[])
 
   /* ferret out dangling ALIASes by first collecting a list
    * of all of them, and then trying to use them as field codes */
-  flist = gd_entry_list(dirfile, GD_ALL_FRAGMENTS, NULL, GD_ALIAS_ENTRIES,
-      GD_ENTRIES_HIDDEN);
+  flist = gd_entry_list(dirfile, NULL, GD_ALIAS_ENTRIES, GD_ENTRIES_HIDDEN);
   for (i = 0; flist[i] != NULL; ++i) {
     if (gd_entry_type(dirfile, flist[i]) == GD_NO_ENTRY) {
       if (gd_error(dirfile) == GD_E_BAD_CODE) {

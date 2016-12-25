@@ -2,15 +2,15 @@ function nfields = gd_nmvectors(D, parent)
 % GD_NMVECTORS  Retrieve a count of fields
 %
 %   GD_NMVECTORS(DIRFILE,PARENT)
-%             is equivalent to calling GD_NENTRIES(DIRFILE,GD.ALL_FRAGMENTS, ...
-%                                                    PARENT,GD.VECTOR_ENTRIES,0)
+%             is equivalent to calling GD_NENTRIES(DIRFILE,PARENT, ...
+%                                                           GD.VECTOR_ENTRIES,0)
 %
 %   For GD, see GETDATA_CONSTANTS.
 %
 %   See also GD_NENTRIES, GETDATA_CONSTANTS
 
   GD = getdata_constants();
-  nfields = gd_nentries(D, GD.ALL_FRAGMENTS, parent, GD.VECTOR_ENTRIES);
+  nfields = gd_nentries(D, parent, GD.VECTOR_ENTRIES);
 end
 
 % Copyright (C) 2013, 2016 D. V. Wiebe

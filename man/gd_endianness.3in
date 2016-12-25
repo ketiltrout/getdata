@@ -1,0 +1,98 @@
+.\" gd_endianness.3.  The gd_endianness man page.
+.\"
+.\" Copyright (C) 2008, 2010, 2016 D.V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_endianness 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_endianness \(em report the byte sex of fields in a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "unsigned long gd_endianness(DIRFILE *" dirfile ", int " fragment_index );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_endianness
+function queries a dirfile(5) database specified by
+.ARG dirfile
+and retrieves the byte sex of the fragment indexed by
+.ARG fragment_index .
+The byte sex of a fragment indicates the endianness of data files associated
+with
+.B RAW
+fields defined in the specified fragment.  The endianness of a fragment
+containing no
+.B RAW
+fields is not meaningful.
+
+The
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+
+.SH RETURN VALUE
+Upon successful completion,
+.FN gd_endianness
+returns the byte sex of the specified fragment, which will be either
+.nh
+.B GD_BIG_ENDIAN
+or
+.BR GD_LITTLE_ENDIAN .
+.hy
+This will be bitwise-or'd with either
+.B GD_ARM_ENDIAN 
+or 
+.BR GD_NOT_ARM_ENDIAN ,
+indicating whether double-precision floating point data in this fragment are
+stored in the old ARM middle-endian format.
+
+On error, this function returns zero and stores a negative-valued error code in
+the
+.B DIRFILE
+object which may be retrieved by a subsequent call to
+.F3 gd_error .
+Possible error codes are:
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_INDEX
+The supplied index was out of range.
+.PP
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN get_endianness
+function appeared in GetData-0.5.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_endianness .
+This version also added the
+.B GD_ARM_ENDIAN 
+and 
+.BR GD_NOT_ARM_ENDIAN
+flags.
+
+.SH SEE ALSO
+.F3 gd_alter_endianness ,
+.F3 gd_getdata ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_open ,
+dirfile(5),
+dirfile-format(5)

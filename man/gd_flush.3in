@@ -1,0 +1,132 @@
+.\" gd_flush.3.  The gd_flush man page.
+.\"
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2014, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_flush 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_flush gd_raw_close gd_sync \(em write all pending Dirfile changes to disk or
+close open raw fields
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.HP
+.BI "int gd_flush(DIRFILE *" dirfile ", const char *" field_code );
+.HP
+.BI "int gd_raw_close(DIRFILE *" dirfile ", const char *" field_code );
+.HP
+.BI "int gd_sync(DIRFILE *" dirfile ", const char *" field_code );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_sync
+function flushes all pending writes to disk of raw data files associated with
+.ARG field_code ,
+or its input(s), in the dirfile specified by
+.ARG dirfile .
+If the
+.ARG field_code
+contains a valid representation suffix, it will be ignored.
+
+As a special case, if NULL is passed to
+.FN gd_sync
+as
+.ARG field_code ,
+all fields in
+.ARG dirfile
+will be flushed.  In this special case, modified metadata will also be flushed
+to disk as if
+.F3 gd_metaflush
+had been called.  If the dirfile has been opened read-only, this function does
+nothing.  Additionally, some encoding schemes may implement this as a NOP.
+.PP
+The
+.FN gd_raw_close
+function closes any raw data files which GetData has opened associated with
+.ARG field_code ,
+or its input(s).  Again, if
+.ARG field_code
+is NULL, all open data files are closed.  The I/O pointer of any
+.B RAW
+field which is closed is reset to the beginning-of-field.
+.PP
+Calling
+.FN gd_flush
+is essentially equivalent to calling first
+.FN gd_sync
+and then
+.FN gd_raw_close
+(ie. it does both tasks), although, if
+.ARG field_code
+is NULL, the order of operations if may be different than making the two explicit
+calls.
+
+.SH RETURN VALUE
+On success, these functions return zero.   On error, a negative-valued error
+code is returned.  Possible error codes are:
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_CODE
+The field specified by
+.ARG field_code
+was not found in the database.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_IO
+An I/O error occurred while trying to write modified data or metadata to disk.
+.DD GD_E_LINE_TOO_LONG
+While attempting to flush modified metadata to disk, a field specification line
+exceeded the maximum allowed length.  On most platforms, the maximum length is
+at least 2**31 bytes, so this typically indicates something pathological
+happening.
+.DD GD_E_RECURSE_LEVEL
+Too many levels of recursion were encountered while trying to resolve
+.ARG field_code .
+This usually indicates a circular dependency in field specification in the
+dirfile.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN dirfile_flush
+function appeared in GetData-0.3.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_flush .
+
+The
+.FN gd_raw_close
+and
+.FN gd_sync
+functions appeared in GetData-0.8.0.
+
+In GetData-0.10.0, the error return from these functions changed from -1 to a
+negative-valued error code.
+
+.SH SEE ALSO
+.F3 gd_close ,
+.F3 gd_dirfile_standards ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_metaflush ,
+.F3 gd_open

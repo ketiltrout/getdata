@@ -1,0 +1,223 @@
+.\" gd_nentries.3.  The gd_nentries man page.
+.\"
+.\" Copyright (C) 2012, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_nentries 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_nentries, gd_nfields, gd_nfields_by_type gd_nmfields, gd_nmfields_by_type,
+gd_nmvectors, gd_nvectors \(em count field entries in a Dirfile
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "unsigned int gd_nentries(DIRFILE *" dirfile ,
+.BI "const char *" parent ", unsigned int " type ", unsigned int " flags );
+.HP
+.BI "unsigned int gd_nfields(DIRFILE *" dirfile );
+.HP
+.BI "unsigned int gd_nfields_by_type(DIRFILE *" dirfile ", gd_entype_t " type );
+.HP
+.BI "unsigned int gd_nmfields(DIRFILE *" dirfile ", const char *" parent );
+.HP
+.BI "unsigned int gd_nmfields_by_type(DIRFILE *" dirfile ,
+.BI "const char *" parent ", gd_entype_t " type );
+.HP
+.BI "unsigned int gd_nmvectors(DIRFILE *" dirfile ", const char *" parent );
+.HP
+.BI "unsigned int gd_nvectors(DIRFILE *" dirfile );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_nentries
+function queries a dirfile(5) database specified by
+.ARG dirfile
+and counts the number of metadata entries satisfying the provided criteria.  If
+.ARG parent
+is non-NULL, metafields under the field specified by
+.ARG parent
+are considered; otherwise, top-level fields are considered, and metafields
+ignored.
+
+The
+.ARG type
+argument should be one of the following symbols indicating an explicit entry
+type to count:
+.IP
+.SC
+.BR GD_BIT_ENTRY ", " GD_CARRAY_ENTRY ", " GD_CONST_ENTRY ", " GD_DIVIDE_ENTRY ,
+.BR GD_INDEX_ENTRY ", " GD_INDIR_ENTRY ", " GD_LINCOM_ENTRY ,
+.BR GD_LINTERP_ENTRY ", " GD_MPLEX_ENTRY ", " GD_MULTIPLY_ENTRY ,
+.BR GD_PHASE_ENTRY ", " GD_POLYNOM_ENTRY ", " GD_RAW_ENTRY ", " GD_RECIP_ENTRY ,
+.BR GD_SARRAY_ENTRY ", " GD_SBIT_ENTRY ", " GD_SINDIR_ENTRY ,
+.BR GD_STRING_ENTRY ", " GD_WINDOW_ENTRY .
+.EC
+.PP
+.RB ( GD_INDEX_ENTRY
+is a special field type for the implicit
+.I INDEX
+field) or else one of the following special symbols:
+.DD "GD_ALL_ENTRIES \fR(=0)"
+Count entries of all types.
+.DD GD_ALIAS_ENTRIES
+Count only aliases.  This is the only way to get a count including aliases which
+do not point to valid field codes.
+.DD GD_SCALAR_ENTRIES
+Count only scalar field types
+.RB ( CONST ", " CARRAY ", " SARRAY ", " STRING ).
+.DD GD_VECTOR_ENTRIES
+Count only numeric-valued vector field types (all field types except
+.B SINDIR
+and the scalar field types listed above).
+.PP
+The
+.ARG flags
+argument should be zero or more of the following flags, bitwise or'd together:
+.DD GD_ENTRIES_HIDDEN
+Include hidden entries (see
+.F3 gd_hidden )
+in the count: normally hidden entries are skipped;
+.DD GD_ENTRIES_NOALIAS
+Exclude aliases from the count: normally aliases are considered the same as
+their target (that is: a field with
+.I n
+aliases, plus its canonical name, will be counted
+.IR n +1
+times).
+
+.PP
+This function has a subset of the functionality of the
+.F3 gd_match_entries
+function (q.v.).
+
+.SS Special Cases
+The call
+.RS
+.BI gd_nfields( dirfile );
+.RE
+.PP
+is equivalent to
+.RS
+.BI gd_nentries( dirfile ", NULL, GD_ALL_ENTRIES, 0);
+.RE
+.PP
+The call
+.RS
+.BI gd_nfields_by_type( dirfile ", " type );
+.RE
+.PP
+is equivalent to
+.RS
+.BI gd_nentries( dirfile ", NULL, " type ", 0);"
+.RE
+.PP
+The call
+.RS
+.BI gd_nmfields( dirfile ", " parent );
+.RE
+.PP
+is equivalent to
+.RS
+.BI gd_nentries( dirfile ", " parent ", GD_ALL_ENTRIES, 0);"
+.RE
+.PP
+The call
+.RS
+.BI gd_nmfields_by_type( dirfile ", " parent ", " type );
+.RE
+.PP
+is equivalent to
+.RS
+.BI gd_nentries( dirfile ", " parent ", " type ", 0);"
+.RE
+.PP
+The call
+.RS
+.BI gd_nmvectors( dirfile ", " parent );
+.RE
+.PP
+is equivalent to
+.RS
+.BI gd_nentries( dirfile ", " parent ", GD_VECTOR_ENTRIES, 0);"
+.RE
+.PP
+The call
+.RS
+.BI gd_nvectors( dirfile );
+.RE
+.PP
+is equivalent to
+.RS
+.BI gd_nentries( dirfile ", NULL, GD_VECTOR_ENTRIES, 0);"
+.RE
+
+.SH RETURN VALUE
+Upon successful completion, these functions return an unsigned in indicating
+the number of entries in the database satisfying the supplied criteria.
+
+On error, these functions return zero and store a negative-valued error code in
+the
+.B DIRFILE
+object which may be retrieved by a subsequent call to
+.F3 gd_error .
+Possible error codes are:
+.DD GD_E_BAD_CODE
+The supplied parent field code was not found, or referred to a metafield itself.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_BAD_ENTRY
+The
+.ARG type
+parameter supplied was not one of the symbols listed above.
+.PP
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The
+.FN get_nfields
+function appeared in GetData-0.3.0.
+
+The
+.FN get_nfields_by_type ,
+.FN get_nmfields ,
+.FN get_nmfields_by_type ,
+.FN get_nmvectors ,
+and
+.FN get_nvectors
+functions appeared in GetData-0.4.0.
+
+In GetData-0.7.0, these functions were renamed to
+.FN gd_nfields ,
+.FN gd_nfields_by_type ,
+.FN gd_nmfields ,
+.FN gd_nmfields_by_type ,
+.FN gd_nmvectors ,
+and
+.FN gd_nvectors .
+
+The
+.FN gd_nentries
+function appeared in GetData-0.8.0.
+
+.SH SEE ALSO
+dirfile(5),
+.F3 gd_open ,
+.F3 gd_entry_list ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_hidden ,
+.F3 gd_match_entries

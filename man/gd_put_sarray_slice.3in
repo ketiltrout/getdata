@@ -1,0 +1,148 @@
+.\" gd_put_sarray_slice.3.  The gd_put_sarray_slice man page.
+.\"
+.\" Copyright (C) 2010, 2011, 2012, 2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_put_sarray_slice 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_put_sarray, gd_put_sarray_slice \(em write STRING or SARRAY data to a Dirfile database
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "int gd_put_sarray_slice(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "unsigned int " start ", size_t " len ", const char **" data_in );
+.HP
+.BI "int gd_put_sarray(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" data_in );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_put_sarray_slice
+function writes string data to a dirfile(5) database specified by
+.ARG dirfile
+into the
+.B STRING
+or
+.B SARRAY
+scalar array
+.ARG field_code .
+The location of the first element of the field into which data is stored is
+given by
+.ARG start ,
+and the number of elements stored is given by
+.ARG len .
+
+If
+.ARG field_code
+specifies a
+.B STRING
+field, it is treated as if it were a
+.B SARRAY
+field of length one.
+
+The
+.FN gd_put_sarray
+function behaves similarly, except the whole scalar array is written, as if
+.FN gd_put_sarray_slice
+were called with
+.ARG start
+equal zero and
+.ARG len
+equal to the value returned by
+.F3 gd_array_len .
+
+The argument
+.ARG data_in
+must point to an array of pointers to character strings, which are the
+values to store.  The number of elements which will be stored by
+.FN gd_put_sarray
+may be obtained by calling
+.F3 gd_array_len .
+Unlike
+.F3 gd_putdata ,
+writing data past the end of the field is not permitted.  To add data to a
+.BR SARRAY ,
+first increase its length by calling
+.F3 gd_alter_sarray ,
+or another equivalent function.
+
+The
+.F3 gd_put_string
+function provides another way of writing data to a
+.B STRING
+field.
+
+.SH RETURN VALUE
+On success,
+.FN gd_put_sarray
+and
+.FN gd_put_sarray_slice
+return zero.  On error, they return a negative-valued error code.  Possible
+error codes are:
+.DD GD_E_ACCMODE
+The specified
+.ARG dirfile
+was opened read-only.
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_CODE
+The field specified by
+.ARG field_code
+was not found in the database.
+.DD GD_E_BAD_DIRFILE
+An invalid
+.ARG dirfile
+was supplied.
+.DD GD_E_BAD_FIELD_TYPE
+The supplied
+.ARG field_code
+was not a
+.B STRING
+nor a
+.BR SARRAY .
+.DD GD_E_BOUNDS
+A request for data beyond the end of the field was made.
+.DD GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+maintainer.
+.DD GD_E_PROTECTED
+The fragment containing the constant was protected from change.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH HISTORY
+The 
+.FN gd_put_sarray
+and
+.FN gd_put_sarray_slice
+functions appeared in GetData-0.10.0.
+
+.SH SEE ALSO
+dirfile(5),
+.F3 gd_array_len ,
+.F3 gd_sarrays ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_get_sarray_slice ,
+.F3 gd_open ,
+.F3 gd_put_string

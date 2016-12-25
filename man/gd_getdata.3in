@@ -1,0 +1,564 @@
+.\" gd_getdata.3.  The gd_getdata man page.
+.\"
+.\" Copyright (C) 2008-2016 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_getdata 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+
+.SH NAME
+gd_getdata \(em retrieve data from a Dirfile database
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "size_t gd_getdata(DIRFILE *" dirfile ", const char *" field_code ", off_t"
+.IB first_frame ", off_t " first_sample ", size_t " num_frames ", size_t"
+.IB num_samples ", gd_type_t " return_type ", void *" data_out );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_getdata
+function queries a dirfile(5) database specified by
+.ARG dirfile
+for the field
+.ARG field_code .
+It fetches
+.ARG num_frames
+frames plus
+.ARG num_samples
+samples from this field, starting 
+.ARG first_sample
+samples past frame
+.ARG first_frame . 
+The data is converted to the data type specified by
+.ARG return_type ,
+and stored in the user-supplied buffer
+.ARG data_out .
+
+The 
+.ARG field_code
+may contain one of the representation suffixes listed in dirfile-format(5).
+If it does,
+.FN gd_getdata
+will compute the appropriate complex norm before returning the data.
+
+The 
+.ARG dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.F3 gd_open .
+The argument
+.ARG data_out
+must point to a valid memory location of sufficient size to hold all data
+requested.
+
+Unless using
+.B GD_HERE 
+(see below), the first sample returned will be
+.IP
+.IR first_frame " * " samples_per_frame " + " first_sample
+.PP
+as measured from the start of the dirfile, where
+.ARG samples_per_frame
+is the number of samples per frame as returned by
+.F3 gd_spf .
+The number of samples fetched is, similarly,
+.IP
+.IR num_frames " * " samples_per_frame " + " num_samples .
+.PP
+Although calling
+.FN gd_getdata
+using both samples and frames is possible, the function is typically called
+with either
+.ARG num_samples
+and
+.ARG first_sample ,
+or
+.ARG num_frames
+and
+.ARG first_frames ,
+equal to zero.
+
+Instead of explicitly specifying the origin of the read, the caller may pass the
+special symbol
+.B GD_HERE
+as
+.ARG first_frame .
+This will result in the read occurring at the current position of the I/O
+pointer for the field (see
+.B GetData I/O Pointers
+below for a discussion of field I/O pointers).  In this case, the value of
+.ARG first_sample
+is ignored.
+
+When reading a
+.B SINDIR
+field,
+.ARG return_type
+must be
+.BR GD_STRING .
+For all other field types, the
+.ARG return_type
+argument should be one of the following symbols, which indicates the desired
+return type of the data:
+.RS
+.DD GD_UINT8
+unsigned 8-bit integer
+.DD GD_INT8
+signed (two's complement) 8-bit integer
+.DD GD_UINT16
+unsigned 16-bit integer
+.DD GD_INT16
+signed (two's complement) 16-bit integer
+.DD GD_UINT32
+unsigned 32-bit integer
+.DD GD_INT32
+signed (two's complement) 32-bit integer
+.DD GD_UINT64
+unsigned 64-bit integer
+.DD GD_INT64
+signed (two's complement) 64-bit integer
+.DD GD_FLOAT32
+IEEE-754 standard 32-bit single precision floating point number
+.DD GD_FLOAT64
+IEEE-754 standard 64-bit double precision floating point number
+.DD GD_COMPLEX64
+C99-conformant 64-bit single precision complex number
+.DD GD_COMPLEX128
+C99-conformant 128-bit double precision complex number
+.DD GD_NULL
+the null type: the database is queried as usual, but no data is returned.
+In this case,
+.ARG data_out
+is ignored and may be NULL.
+.RE
+
+The return type of the data need not be the same as the type of the data stored
+in the database.  Type conversion will be performed as necessary to return the
+requested type.  If the
+.ARG field_code
+does not indicate a representation, but conversion from a complex value to a
+purely real one is required, only the real portion of the requested vector will
+be returned.
+
+Upon successful completion, the I/O pointer of the field will be on the sample
+immediately following the last sample returned, if possible.  On error, the
+position of the I/O pointer is not specified, and may not even be well defined.
+
+.SS Behaviour While Reading Specific Field Types
+
+.TP
+.BR MPLEX :
+Reading an
+.B MPLEX
+field typically requires GetData to read data before the range returned in order
+to determine the value of the first sample returned.  This can become expensive
+if the encoding of the underlying RAW data does not support seeking backwards
+(which is true of most compression encodings).  How much preceding data GetData
+searches for the initial value of the returned data can be adjusted, or the
+lookback disabled completely, using
+.F3 gd_mplex_lookback .
+If the initial value of the field is not found in the data searched, GetData
+will fill the returned vector, up to the next available sample of the
+mulitplexed field, with zero for integer return types, or IEEE-754-conforming
+NaN (not-a-number) for floating point return types, as it does when providing
+data before the beginning-of-field.
+
+GetData caches the value of the last sample from every
+.B MPLEX
+it reads so that a subsequent read of the field starting from the following
+sample (either through an explicit starting sample given by the caller or else
+implicitly using
+.BR GD_HERE )
+will not need to scan the field backwards.  This cache is invalidated if a
+different return type is used, or if an intervening operation moves the field's
+I/O pointer.
+
+.TP
+.BR SINDIR :
+The only allowed
+.ARG return_type
+when reading
+.B SINDIR
+data is
+.BR GD_STRING .
+The
+.ARG data
+argument should be of type
+.BR "const char **" ,
+and be large enough to hold one pointer for each sample requested.  It will be
+filled with pointers to read-only string data.  The caller should not free the
+returned string pointers.  For convenience when allocating buffers, the
+.B GD_STRING
+constant has the property:
+.nh
+.BI "GD_SIZE(GD_STRING) == sizeof(" "const char *" )\fR.
+.hy
+On samples where the index vector is out of range of the
+.BR SARRAY ,
+and also on samples before the index vector's frame offset, the value stored in
+.ARG data
+will be the NULL pointer.
+
+.TP
+.BR PHASE :
+A forward-shifted
+.B PHASE
+field will always encounter the end-of-field marker before its input field does.
+This has ramifications when reading
+streaming data
+with
+.FN gd_getdata
+and using
+.F3 gd_nframes
+to gauge field lengths (that is: a
+forward-shifted
+.B PHASE
+field always has less data in it than
+.F3 gd_nframes
+implies that it does).  As with any other field,
+.FN gd_getdata
+will return a short count whenever a read from a
+.B PHASE
+field encounters the end-of-field marker.
+
+Backward-shifted
+.B PHASE
+fields do not suffer from this problem, since
+.FN gd_getdata
+pads reads past the beginning-of-field marker with NaN or zero as appropriate.
+Database creators who wish to use the
+.B PHASE
+field type with streaming data are encouraged to work around this limitation
+by only using backward-shifted 
+.B PHASE
+fields, by writing
+.B RAW
+data at the maximal frame lag, and then back-shifting all data which should have
+been written earlier.  Another possible work-around is to write
+systematically less data to the reference
+.B RAW
+field in proportion to the maximal forward phase shift.  This method will work
+with applications which respect the database size reported by
+.F3 gd_nframes
+resulting in these applications effectively ignoring all frames past the frame
+containing the maximally forward-shifted
+.B PHASE
+field's end-of-field marker.
+
+.TP
+.BR WINDOW :
+The samples of a
+.B WINDOW
+for which the field conditional is false will be filled with either zero for
+integer return types, or IEEE-754-conforming NaN (not-a-number) for floating
+point return types.
+
+.SH RETURN VALUE
+In all cases,
+.FN gd_getdata
+returns the number of samples (not bytes) successfully read from the database.
+If the end-of-field is encountered before the requested number of samples have
+been read, a short count will result.  this is not an error.
+
+Requests for data before the beginning-of-field marker, which may have
+been shifted from frame zero by a
+.B PHASE
+field or
+.B /FRAMEOFFSET
+directive, will result in the the data being padded at the front by NaN or zero,
+depending on whether the return type is of floating point or integral type.
+
+On error, this function returns zero and stores a negative-valued error code in
+the
+.B DIRFILE
+object which may be retrieved by a subsequent call to
+.F3 gd_error .
+Possible error codes are:
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_CODE
+The field specified by
+.ARG field_code ,
+or one of the fields it uses for input, was not found in the database.
+.DD GD_E_BAD_DIRFILE
+An invalid
+.ARG dirfile
+was supplied.
+.DD GD_E_BAD_SCALAR
+A scalar field used in the definition of the field was not found, or was not of
+scalar type.
+.DD GD_E_BAD_TYPE
+An invalid
+.ARG return_type
+was specified.
+.DD GD_E_DIMENSION
+The supplied
+.ARG field_code
+referred to a 
+.BR CONST ,\~ CARRAY ,
+or 
+.B STRING
+field.  The caller should use
+.F3 gd_get_constant ,\~ gd_get_carray (3) ,
+or
+.F3 gd_get_string
+instead.  Or, a scalar field was found where a vector field was expected in
+the definition of
+.ARG field_code
+or one of its inputs.
+.DD GD_E_DOMAIN
+An immediate read was attempted using
+.BR GD_HERE ,
+but the I/O pointer of the field was not well defined because two or more of
+the field's inputs did not agree as to the location of the I/O pointer.
+.DD GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+maintainer.
+.DD GD_E_IO
+An error occurred while trying to open or read from a file on disk containing
+a raw field or LINTERP table.
+.DD GD_E_LUT
+A LINTERP table was malformed.
+.DD GD_E_RANGE
+An attempt was made to read data outside the addressable Dirfile range (more
+than 2**63 samples past the start of the dirfile).
+.DD GD_E_RECURSE_LEVEL
+Too many levels of recursion were encountered while trying to resolve
+.ARG field_code .
+This usually indicates a circular dependency in field specification in the
+dirfile.
+.DD GD_E_UNKNOWN_ENCODING
+The encoding scheme of a RAW field could not be determined.  This may also
+indicate that the binary file associated with the RAW field could not be found.
+.DD GD_E_UNSUPPORTED
+Reading from dirfiles with the encoding scheme of the specified dirfile is not
+supported by the library.  See
+dirfile-encoding(5)
+for details on dirfile encoding schemes.
+.PP
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+.SH NOTES
+To save memory,
+.FN gd_getdata
+uses the memory pointed to by
+.ARG data_out
+as scratch space while computing derived fields.  As a result, if an error is
+encountered during the computation, the contents of this memory buffer are
+unspecified, and may have been modified by this call, even though
+.FN gd_getdata
+will report zero samples returned on error.
+
+Reading slim-compressed data (see defile-encoding(5)), may cause unexpected
+memory usage.  This is because slimlib internally caches open decompressed files
+as they are read, and GetData doesn't close data files between
+.FN gd_getdata
+calls for efficiency's sake.  Memory used by this internal slimlib buffer can be
+reclaimed by calling
+.F3 gd_raw_close
+on fields when finished reading them.
+
+When operating on a platform whose
+.B size_t
+is
+.IR N -bytes
+wide, a single call of
+.FN gd_getdata
+will never return more than (2**(\fIN\fR-1) - 1) samples.  The request will
+be truncated at (2**(\fIN\fR-\fIM\fR) - 1) samples, where \fIM\fR is the size,
+in bytes, of the largest data type used to calculate the returned field.  If a
+larger request is specified, less data than requested will be returned, without
+raising an error.  This limit is imposed even when 
+.ARG return_type
+is
+.B GD_NULL
+or when reading from the
+.I INDEX
+field (i.e., even when no actual I/O or calculation occurs).  In all cases, the
+actual amount of data is returned.
+
+.SH GETDATA I/O POINTERS
+This is a general discussion of field I/O pointers in the GetData library, and
+contains information not directly applicable to
+.FN gd_getdata .
+
+Every
+.B RAW
+field in an open Dirfile has an
+.I I/O pointer
+which indicates the library's current read and write poisition in the field.
+These I/O pointers are useful when performing sequential reads or writes on
+Dirfile fields (see
+.B GD_HERE
+in the description above).  The value of the I/O pointer of a field is reported
+by
+.F3 gd_tell .
+
+Derived fields have virtual I/O pointers arising from the I/O pointers of their
+input fields.  These virtual I/O pointers may be valid (when all input fields
+agree on their position in the dirfile) or invalid (when the input fields are
+not in agreement).  The I/O pointer of some derived fields is
+.I always
+invalid.  The usual reason for this is the derived field simultaneously reading
+from two different places in the same
+.B RAW
+field.  For example, given the following Dirfile metadata specification:
+
+.RS
+a \fBRAW UINT8\fR 1
+.br
+b \fBPHASE\fR a 1
+.br
+c \fBLINCOM\fR 2 a 1 0 b 1 0
+.RE
+
+the derived field
+.I c
+never has a valid I/O pointer, since any particular sample of
+.I c
+ultimately involves reading from more than one place in the
+.B RAW
+field
+.IR a .
+Attempting to perform sequential reads or writes (with
+.BR GD_HERE )
+on a derived field when its I/O pointer is invalid will result in an error
+(specifically,
+.BR GD_E_DOMAIN ).
+
+The implicit
+.I INDEX
+field has an effective I/O pointer than mostly behaves like a true
+.B RAW
+field I/O pointer, except that it permits simultaneous reads from multiple
+locations.  So, given the following metadata specification:
+
+.RS
+d \fBPHASE\fR INDEX 1
+.br
+e \fBLINCOM\fR 2 INDEX 1 0 d 1 0
+.RE
+
+the I/O pointer of the derived field
+.I e
+will always be valid, unlike the similarly defined
+.I c
+above.  The virtual I/O pointer of a derived field will change in response to
+movement of the
+.B RAW
+I/O pointers underlying the derived fields inputs, and vice versa: moving the
+I/O pointer of a derived field will move the I/O pointer of the
+.B RAW
+fields from which it ultimately derives.  As a result, the I/O pointer of
+any particular field may move in unexpected ways if multiple fields are
+manipulated at the same time.
+
+When a Dirfile is first opened, the I/O pointer of every
+.B RAW
+field is set to the beginning-of-frame
+(the value returned by
+.F3 gd_bof ),
+as is the I/O pointer of any newly-created
+.B RAW
+field.
+
+The following library calls cause I/O pointers to move:
+.TP
+.BR gd_getdata "() and " gd_putdata (3)
+These functions move the I/O pointer of affected fields to the sample
+immediately following the last sample read or written, both when performed at
+an absolutely specified position and when called for a sequential read or write
+using
+.BR GD_HERE .
+When reading a derived field which simultaneously reads from more than one place
+in a
+.B RAW
+field (such as
+.I c
+above), the position of that
+.B RAW
+field's I/O pointer is unspecified (that is: it is not specified which input
+field is read first).
+.TP
+.F3 gd_seek
+This function is used to manipulate I/O pointers directly.
+.TP
+.BR gd_flush "(3) and " gd_raw_close (3)
+These functions set the I/O pointer of any
+.B RAW
+field which is closed back to the beginning-of-field.
+.TP
+.I calls which result in modifications to raw data files:
+this may happen when calling any of:
+.F3 gd_alter_encoding ,
+.F3 gd_alter_endianness ,
+.F3 gd_alter_frameoffset ,
+.F3 gd_alter_entry ,
+.F3 gd_alter_raw ,
+.F3 gd_alter_spec ,
+.F3 gd_malter_spec ,
+.F3 gd_move ,
+or
+.F3 gd_rename ;
+these functions close affected
+.B RAW
+fields before making changes to the raw data files, and so reset the
+corresponding I/O pointers to the beginning-of-field.
+
+.PP
+In general, when these calls fail, the I/O pointers of affected fields may be
+anything, even out-of-bounds or invalid.  After an error, the caller should
+issue an explicit
+.F3 gd_seek
+to repoisition I/O pointers before attempting further sequential operations.
+
+.SH HISTORY
+The function
+.FN getdata
+appeared in GetData-0.3.0.
+
+The
+.B GD_COMPLEX64
+and
+.B GD_COMPLEX128
+data types appeared in GetData-0.6.0.
+
+In GetData-0.7.0, this function was renamed to
+.FN gd_getdata .
+
+The
+.B GD_HERE
+symbol used for sequential reads appeared in GetData-0.8.0.
+
+The
+.B GD_STRING
+data type appeared in GetData-0.10.0.
+
+.SH SEE ALSO
+.F3 GD_SIZE ,
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_get_constant ,
+.F3 gd_get_string ,
+.F3 gd_mplex_lookback ,
+.F3 gd_nframes ,
+.F3 gd_open ,
+.F3 gd_raw_close ,
+.F3 gd_seek ,
+.F3 gd_spf ,
+.F3 gd_putdata ,
+dirfile(5), dirfile-encoding(5)
