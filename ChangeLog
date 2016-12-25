@@ -1,4 +1,4 @@
-2016-12-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1130
+2016-12-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1130,1131
 	* configure.ac: Add --disable-util.  Remove --enable-assert.  Locate
 	regex libraries.
 
