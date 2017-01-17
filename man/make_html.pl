@@ -101,7 +101,7 @@ my $dl_end = 0;
 my $pd_data;
 my $vers="Version 0.0.0";
 my $date="Date unknown.";
-open F, $f or die $!;
+open F, $f or die "Can't open $f: $!";
 while(<F>) {
   next if (/^\.\\"/);
   chomp;
@@ -128,6 +128,16 @@ while(<F>) {
   s/ *\\\(em */&mdash;/g;
   s/\\\(co/&copy;/g;
   s/ -([0-9])/ &minus;$1/g;
+
+  # Undo header.tmac
+  s/^\.F3 ([^ ]*) *(.*)/.BR $1 (3)$2/;
+  s/^\.FN ([^ ]*) *(.*)/.BR $1 ()$2/;
+  s/^\.SC$/.fam C/;
+  s/^\.EC$/.fam/;
+  s/^\.ARG ([^ ]+)$/.I $1/;
+  s/^\.ARG ([^ ]+) +(.*)/.IR $1 $2/;
+  s/^\.SPM ([^ ]+) ([^ ]+) ([^ ]+)/.IB $1 -> $2\\fR$3/;
+  s/^\.SPM ([^ ]+) ([^ ]+)/.IB $1 -> $2/;
 
   s/ /&nbsp;/g if ($nf and not /^\./);
 
@@ -179,6 +189,27 @@ while(<F>) {
     "($sect)</H1>";
   } elsif (/^[^.]/) {
     $html .= FixFont("R", $_) . " ";
+  } elsif (/^\.DD (.*)$/) {
+    my $args = $1;
+
+    if ($dl == 1) {
+      $html .= "</DD>";
+    } else {
+      push @dlstack, $dl if ($dl);
+      $html .= "<DL>";
+    }
+
+    if ($args =~ /^"([^"]+)"$/ || $args =~/^([^ ]+)$/) {
+      $html .= "<DT>" . FixFont("B", $1) . "</DT><DD>";
+    } elsif ($args =~ /^([^ ]+) +([^ ]+)$/) {
+      $html .= "<DT>" . FixFont("B", "$1") . "<BR>";
+      $html .= FixFont("B", "$2") . "</DT><DD>";
+    } elsif ($args =~ /^([^ ]+) +([^ ]+) +([^ ]+)$/) {
+      $html .= "<DT>" . FixFont("B", "$1") . "<BR>";
+      $html .= FixFont("B", "$2") . "<BR>";
+      $html .= FixFont("B", "$3") . "</DT><DD>";
+    }
+    $dl = 1;
   } elsif (/^\.B (.*)/) {
     if ($pd) {
       $pd_data = $1;

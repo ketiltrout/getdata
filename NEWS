@@ -117,6 +117,9 @@ New in version 0.10.0a:
     This also affects the corresponding special case functions
     (gd_nvectors(), gd_vector_list() &c.)
 
+  * BUG FIX: When building in ANSI-C mode, the computation of complex-
+    valued RECIP fields is now correct.
+
   * BUG FIX: The gd_include() family of functions now correcrtly clean up
     after encountering an error.  Previously, encountering a syntax error
     would result in these functions erroneously adding fields specified
@@ -293,8 +296,8 @@ New in version 0.10.0a:
   * The --enable-assert configure option, which hasn't done anything for a
     long time, has been removed.
 
-  * A new configure option, --disable-util, can be used to suppress building
-    of the executables in the util/ subdirectory.
+  * A new configure option, --disable-util, can be used to suppress
+    building of the executables in the util/ subdirectory.
 
   * In the standard autotools build system, encodings which use external
     libraries for compression (gzip, bzip2, flac, lzma, slim, zzip, zzslim)

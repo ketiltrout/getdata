@@ -231,47 +231,47 @@ in the C89 GetData API.
 .SH RETURN VALUE
 On success, these functions return zero.  On error, a negative-valued error
 code is returned.  Possible error codes are:
-.ECODE GD_E_ACCMODE
+.DD GD_E_ACCMODE
 The specified dirfile was opened read-only.
-.ECODE GD_E_ALLOC
+.DD GD_E_ALLOC
 The library was unable to allocate memory.
-.ECODE GD_E_BAD_CODE
+.DD GD_E_BAD_CODE
 The field specified by
 .ARG field_code
 was not found, or a supplied field code did not contain the appropriate prefix
 or suffix.
-.ECODE GD_E_BAD_DIRFILE
+.DD GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
-.ECODE GD_E_BAD_ENTRY
+.DD GD_E_BAD_ENTRY
 One or more of the field parameters specified was invalid.
-.ECODE GD_E_BAD_FIELD_TYPE
+.DD GD_E_BAD_FIELD_TYPE
 The field specified by
 .ARG field_code
 was of the wrong type for the function called.
-.ECODE GD_E_BAD_TYPE
+.DD GD_E_BAD_TYPE
 The
 .ARG data_type
 .ARG const_type
 argument was invalid.
-.ECODE GD_E_IO
+.DD GD_E_IO
 An I/O error occurred while translating the binary file associated with a
 modified
 .B RAW
 field, or an I/O error occurred while attempting to rename a
 .B LINTERP
 table file.
-.ECODE GD_E_PROTECTED
+.DD GD_E_PROTECTED
 The metadata of the fragment was protected from change.  Or, a request to
 translate the binary file associated with a
 .B RAW
 field was attempted, but the data of the fragment was protected.
-.ECODE GD_E_UNKNOWN_ENCODING
+.DD GD_E_UNKNOWN_ENCODING
 The encoding scheme of the indicated format specification fragment is not known
 to the library.  As a result, the library was unable to translate the binary
 file be associated with a modified
 .B RAW
 field.
-.ECODE GD_E_UNSUPPORTED
+.DD GD_E_UNSUPPORTED
 The encoding scheme of the indicated format specification fragment does not
 support translating the binary file associated with a modified
 .B RAW

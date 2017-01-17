@@ -76,7 +76,7 @@ type to match:
 is a special field type for the implicit
 .I INDEX
 field) or else one of the following special symbols:
-.DD GD_ALL_ENTRIES \fR(= 0)
+.DD "GD_ALL_ENTRIES \fR(=\fB0\fR)"
 Match entries of all types.
 .DD GD_ALIAS_ENTRIES
 Match only aliases.  This is the only way to match aliases which do not point
@@ -204,16 +204,13 @@ library when it is built.
 
 When calling
 .FN gd_match_entries ,
-the choice of regular expression grammar to use is controlled by bitwise-or'ing\
+the choice of regular expression grammar to use is controlled by bitwise-or'ing
 .I flags
 with zero or more of the following symbols:
 .DD GD_REGEX_PCRE
 Use the Perl-compatible Regular Expression (PCRE) library for regular expression
 matching. Without this flag, the POSIX regex library is used.
-.PP
-.PD 0
-.B GD_REGEX_CASELESS
-.DD GD_REGEX_ICASE
+.DD GD_REGEX_CASELESS GD_REGEX_ICASE
 Perform case-insensitive matching. These two symbols are synonyms. This is
 equivalent to the
 .B REG_ICASE
@@ -223,7 +220,6 @@ and the
 .B PCRE_CASELESS
 flag in
 .F3 pcreapi .
-.PD
 .PP
 The following flags are only supported when using the PCRE library (i.e., when
 .B GD_REGEX_PCRE
