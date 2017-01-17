@@ -116,15 +116,15 @@
 #include <regex.h>
 #endif
 
-#ifndef SIZEOF_SIZE_T
-#define SIZEOF_SIZE_T (sizeof size_t)
-#endif
 
 /* MSCVRT defines size_t but not ssize_t */
 #ifdef __MSVCRT__
-#if SIZEOF_SIZE_T == 8
+#undef SIZEOF_SIZE_T
+#ifdef _WIN64
+#define SIZEOF_SIZE_T 8
 typedef __int64 ssize_t;
 #else
+#define SIZEOF_SIZE_T 4
 typedef int ssize_t;
 #endif
 #endif
@@ -428,6 +428,9 @@ extern "C" {
 }
 #endif
 
+#ifdef WIN32
+#define __func__ __FUNCTION__
+#endif
 
 #define dtracevoid() printf("%s %s()\n", gd_coladd(), __func__)
 #define dtrace(fmt, ...) printf("%s %s(" fmt ")\n", gd_coladd(), \

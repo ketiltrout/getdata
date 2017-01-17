@@ -25,9 +25,9 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
-  const char *format2 = "dirfile/format1";
+  const char *format2 = "dirfile/format2";
   const char *format_data = "/INCLUDE format1 ns1.\n";
-  const char *format1_data = "data RAW UINT8 11\n";
+  const char *format1_data = "#\n";
   const char *format2_data = "data RAW UINT8 11\n";
   int fd, error, r = 0, v;
   DIRFILE *D;
@@ -48,7 +48,7 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  gd_include_ns(D, "format1", 1, ".ns2", 0);
+  gd_include_ns(D, "format2", 1, ".ns2", 0);
   error = gd_error(D);
   CHECKI(error, 0);
   v = gd_validate(D, "ns1.ns2.data");

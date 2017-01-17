@@ -24,12 +24,6 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
-    "data1 RAW UINT8 1\n"
-    "data2 RAW UINT8 1\n"
-    "data3 RAW UINT8 1\n"
-    "data4 CONST UINT8 1\n"
-    "data4/sub LINCOM data1 1 0 data2 1 0\n";
   int fd, i, error, r = 0;
   const char **field_list;
   DIRFILE *D;
@@ -44,10 +38,6 @@ int main(void)
       "data4 CONST UINT8 1\n"
       "data4/sub LINCOM data1 1 0 data2 1 0\n"
       "data5 SINDIR in in\n");
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   field_list = gd_vector_list(D);

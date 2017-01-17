@@ -1680,7 +1680,7 @@ static void _GD_IndirData(char *restrict cbuf, gd_type_t ctype,
     if (ibuf[i] < 0 || ibuf[i] >= ilen)
       _GD_FillZero(cbuf + size * i, ctype, 1);
     else
-      memcpy(cbuf + size * i, carray + size * ibuf[i], size);
+      memcpy(cbuf + size * i, (const char*)carray + size * ibuf[i], size);
 
   dreturnvoid();
 }

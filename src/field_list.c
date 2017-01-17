@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2016 D. V. Wiebe
+/* Copyright (C) 2008-2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -298,7 +298,7 @@ static void *_GD_Constants(DIRFILE* D, const char* parent,
     gd_type_t return_type) gd_nothrow
 {
   int i, nentries;
-  void* fl;
+  char *fl;
   gd_entry_t *P;
   gd_entry_t **entry;
   void **list;
@@ -942,7 +942,7 @@ unsigned int gd_match_entries(DIRFILE *D, const char *regex, int fragment,
 #ifndef GD_NO_REGEX
       gd_compile_regex(D, regex, regex_flags, &preg);
 #else
-      _GD_SetError(D, GD_E_UNSUPPORTED, GD_E_SUPPORT_REGEX, NULL, 0 "POSIX");
+      _GD_SetError(D, GD_E_UNSUPPORTED, GD_E_SUPPORT_REGEX, NULL, 0, "POSIX");
 #endif
     }
 
@@ -960,8 +960,10 @@ unsigned int gd_match_entries(DIRFILE *D, const char *regex, int fragment,
       void *ptr = _GD_Realloc(D, D->regex_list, sizeof(D->regex_list[0])
           * (len *= 2));
       if (ptr == NULL) {
+#ifndef GD_NO_REGEX
         if (regex)
           regfree(&preg);
+#endif
         free(D->regex_list);
         D->regex_list = NULL;
         dreturn("%i", 0);

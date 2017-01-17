@@ -26,8 +26,8 @@ endmacro()
 #TODO add configure
 add_definitions(
   -DPACKAGE_NAME=\"GetData\"
-  -DPACKAGE_VERSION=\"0.9.x\"
-  -DGETDATA_LIB_VERSION=\"0.9.x\"
+  -DPACKAGE_VERSION=\"0.10.x\"
+  -DGETDATA_LIB_VERSION=\"0.10.x\"
   -DPACKAGE_BUGREPORT=\"getdata-devel@lists.sourceforge.net\"
   -DUNALIGNED_ACCESS_OK
   )
@@ -35,9 +35,13 @@ add_definitions(
 # kst2 doesn't need the legacy API
 set(DEFINE_GD_LEGACY_API "/* #undef GD_LEGACY_API */")
 
+# Disable REGEX support
+set(DEFINE_GD_NO_REGEX "#define GD_NO_REGEX 1")
+set(DEFINE_GD_NO_PCRE "#define GD_NO_PCRE 1")
+
 # Version macros
-set(DEFINE_GD_GETDATA_VERSION  "#define GD_GETDATA_VERSION \"0.9.x\"")
-set(DEFINE_GD_GETDATA_INT_VERSION  "#define GD_GETDATA_INT_VERSION 900")
+set(DEFINE_GD_GETDATA_VERSION  "#define GD_GETDATA_VERSION \"0.10.x\"")
+set(DEFINE_GD_GETDATA_INT_VERSION  "#define GD_GETDATA_INT_VERSION 1000")
 
 if(MSVC)
   ## Substitutions needed to build getdata.h
@@ -96,11 +100,8 @@ if(MSVC)
 endif()
 
 if(MINGW)
-  set(DEFINE_gd_int16_t  "#define gd_int16_t  __int16")
-  set(DEFINE_gd_uint16_t "#define gd_uint16_t unsigned __int16")
   set(DEFINE_gd_int64_t  "#define gd_int64_t  __int64")
   set(DEFINE_gd_uint64_t "#define gd_uint64_t unsigned __int64")
-  set(DEFINE_gd_off64_t "#define gd_off64_t off64_t")
 
   add_definitions(
     -D__MSVCRT_VERSION__=0x0601

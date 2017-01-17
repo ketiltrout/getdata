@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2013, 2015, 2016 D. V. Wiebe
+// Copyright (C) 2008-2013, 2015-2017 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -130,7 +130,7 @@ namespace GetData {
       };
 
       /* PHASE methods */
-      virtual gd_shift_t Shift() const {
+      virtual gd_int64_t Shift() const {
         return (E.field_type == GD_PHASE_ENTRY) ? E.u.phase.shift : 0;
       };
 

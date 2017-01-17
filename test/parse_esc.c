@@ -39,7 +39,7 @@ int main(void)
   CHECKI(e1, 0);
 
   gd_get_sarray(D, "string", &s);
-  CHECKS(s, "\a\bcd\e\fghijklm\nopq\rs\t\vwyz\\\"#");
+  CHECKS(s, "\a\bcd\x1B\fghijklm\nopq\rs\t\vwyz\\\"#");
   gd_discard(D);
 
   unlink(format);

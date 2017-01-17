@@ -37,6 +37,7 @@ int main(void)
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_add_spec(D, "data CONST UINT8 2", 1);
   e1 = gd_error(D);
+  CHECKI(e1, 0);
 
   e2 = gd_validate(D, "[data]");
   CHECKI(e2, 0);

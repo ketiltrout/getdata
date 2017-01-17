@@ -1,3 +1,19 @@
+2017-01-17   D. V. Wiebe <getdata@ketiltrout.net> svn:1134
+	* bindings/cxx/getdata/entry.h: replace gd_shift_t with gd_int64_t.
+	* src/field_list.c (_GD_Constants): char *fl;
+	* src/field_list.c (gd_match_entries): Fix GD_NO_REGEX case.
+	* src/getdata.c (_GD_IndirData): Fix carray pointer arithmetic.
+	* src/internal.h: Fix ssize_t definition on WIN32/WIN64.  Define __func__
+	if needed.
+
+	* test/add_spec_affix.c: Check e1.
+	* test/cvlist_meta_meta.c: Deleted.
+
+	* test/vlist.c test/include_ns_dotns.c: Fix test.
+	* test/parse_esc.c: Use '\x1B' instead of '\e'.
+
+	* test/test.h (MAKEDATAFILE): Use O_BINARY.
+
 2017-01-16   D. V. Wiebe <getdata@ketiltrout.net> svn:1132
 	* bindings/python/pyentry.c (gdpy_entry_geta): Fix self->E->EN access.
 	* src/common.c (INVERTC): Fix non-C99 case.
