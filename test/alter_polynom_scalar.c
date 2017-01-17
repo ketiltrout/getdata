@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -44,9 +44,9 @@ int main(void)
   CHECKI(e1, 0);
 
   gd_entry(D, "polynom", &E);
-  CHECKI(E.EN(lincom,a[0]), 2);
-  CHECKI(E.EN(lincom,a[1]), 3);
-  CHECKI(E.EN(lincom,a[2]), 4);
+  CHECKI(E.EN(polynom,a[0]), 2);
+  CHECKI(E.EN(polynom,a[1]), 3);
+  CHECKI(E.EN(polynom,a[2]), 4);
   CHECKS(E.scalar[0], "c2");
   CHECKS(E.scalar[1], "c3");
   CHECKP(E.scalar[2]);

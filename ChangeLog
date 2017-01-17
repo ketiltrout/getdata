@@ -1,3 +1,10 @@
+2017-01-16   D. V. Wiebe <getdata@ketiltrout.net> svn:1132
+	* bindings/python/pyentry.c (gdpy_entry_geta): Fix self->E->EN access.
+	* src/common.c (INVERTC): Fix non-C99 case.
+	* test/add_name_len.c test/alter_polynom_scalar.c: ANSI C fixes.
+	* test/parse_ns_par.c: Deleted.
+	* util/checkdirfile.c: Include inttypes.h if present.
+
 2016-12-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1130,1131
 	* configure.ac: Add --disable-util.  Remove --enable-assert.  Locate
 	regex libraries.

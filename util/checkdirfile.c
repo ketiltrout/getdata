@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2010, 2012, 2014-2016 D. V. Wiebe
+/* Copyright (C) 2007-2010, 2012, 2014-2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,6 +24,10 @@
 #ifdef HAVE__SNPRINTF
 #define snprintf _snprintf
 #endif
+#endif
+
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
 #endif
 
 #include <stdlib.h>

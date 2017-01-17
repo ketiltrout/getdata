@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2014, 2016 D. V. Wiebe
+/* Copyright (C) 2008-2014, 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -31,7 +31,7 @@ int main(void)
   memset(&E, 0, sizeof E);
   E.field = "abcdefghijklmnopqrstuvwxyz";
   E.field_type = GD_RAW_ENTRY;
-  E.spf = 1;
+  E.EN(raw,spf) = 1;
 
   rmdirfile();
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL);

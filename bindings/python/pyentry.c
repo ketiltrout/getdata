@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2016 D. V. Wiebe
+/* Copyright (C) 2009-2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1938,7 +1938,7 @@ static PyObject *gdpy_entry_geta(struct gdpy_entry_t *self, void *closure)
     obj = PyTuple_New(self->E->EN(polynom,poly_ord) + 1);
     for (i = 0; i <= self->E->EN(polynom,poly_ord); ++i) {
       PyObject *scalar = gdpyobj_from_scalar(self->E, i, GD_COMPLEX128,
-          &self->E->EN(lincom,ca)[i], self->char_enc);
+          &self->E->EN(polynom,ca)[i], self->char_enc);
       if (scalar == NULL) {
         Py_DECREF(obj);
         obj = NULL;

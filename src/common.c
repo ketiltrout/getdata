@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2016 D. V. Wiebe
+ * Copyright (C) 2005-2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -859,12 +859,11 @@ void _GD_InvertData(DIRFILE *restrict D, void *restrict data,
 #define INVERTC(t) \
   do { \
     for (i = 0; i < n_read; i++) { \
-      const t d = ((t *)data)[2 * i] * ((t *)data)[2 * i] + \
-      ((t *)data)[2 * i + 1] * ((t *)data)[2 * i + 1]; \
-      ((t *)data)[2 * i] = (t)((dividend[0] * ((t *)data)[2 * i] + \
-          dividend[1] * ((t *)data)[2 * i + 1]) / d); \
-      ((t *)data)[2 * i + 1] = (t)((dividend[1] * ((t *)data)[2 * i] - \
-          dividend[0] * ((t *)data)[2 * i]) / d); \
+      const t re = ((t*)data)[2 * i]; \
+      const t im = ((t*)data)[2 * i + 1]; \
+      const t d = (re * re + im * im); \
+      ((t *)data)[2 * i] = (t)((dividend[0] * re + dividend[1] * im) / d); \
+      ((t *)data)[2 * i + 1] = (t)((dividend[1] * re - dividend[0] * im) / d); \
     } \
   } while (0)
 
