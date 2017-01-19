@@ -20,6 +20,10 @@
  */
 #include "internal.h"
 
+#ifdef HAVE_PCRE_H
+#include <pcre.h>
+#endif
+
 /* zero length lists */
 static const char *zero_list[1] = { NULL };
 static gd_carray_t zero_carrays[1] = { {0, NULL} };

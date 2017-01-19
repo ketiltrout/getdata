@@ -109,9 +109,6 @@
 #ifdef HAVE_IO_H
 #include <io.h>
 #endif
-#ifdef HAVE_PCRE_H
-#include <pcre.h>
-#endif
 #ifdef HAVE_REGEX_H
 #include <regex.h>
 #endif

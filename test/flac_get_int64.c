@@ -71,7 +71,7 @@ int main(void)
   CHECKI(n, 8);
 
   for (i = 0; i < 8; ++i)
-    CHECKXi(i,c[i],0x01020304);
+    CHECKXi(i,c[i],0x01020304*i);
 #else
   CHECKI(error, GD_E_UNSUPPORTED);
   CHECKI(n, 0);

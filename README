@@ -128,16 +128,30 @@ The only library required to build GetData is the C Standard Library.  Several
 other external will be used if found by ./configure to provide support for
 various data encodings (typically compression schemes).  These are:
 
-- the slim compression library by Joseph Fowler;
-- the zlib library by Jean-loup Gailly and Mark Adler;
 - the bzip2 compression library by Julian Seward;
+- the libFLAC library by Josh Coalson and the Xiph.Org Foundation;
 - the lzma library, part of the XZ Utils suite by Lasse Collin, Ville Koskinen,
-  and Igor Pavlov; and,
+  and Igor Pavlov;
+- the slim compression library by Joseph Fowler;
+- the zlib library by Jean-loup Gailly and Mark Adler; and,
 - the zzip library by Tomi Ollila and Guido Draheim.
 
 If these libraries are not found by configure, GetData will lack support for
 the associated encoding scheme and fail gracefully if encountering dirfiles so
 encoded.
+
+GetData has optional support for regular expression matching of field names.
+This support is implemented through the use of two additional libraries,
+specifically:
+
+- the POSIX standard regex(7) library (providing regcomp and regexec),
+  originally written by Henry Spencer.
+- the Perl-Compatible Regular Expression (PCRE) library by Philip Hazel.
+
+If these libraries are not found at build time, partial or all regular
+expression support will be missing from the library: the appropriate GetData
+API (gd_match_entries) will exist, but attempting to preform a regex search
+will fail.
 
 Building bindings requires appropriate compilers/interpreters and libraries for
 the various languages.  In particular:
@@ -151,9 +165,10 @@ the various languages.  In particular:
   they will not work on an unlicenced interpreter in timed demo mode
 - the MATLAB bindings require both a MATLAB interpreter and a MEX compiler
 - the Perl bindings require a Perl5 interpreter version 5.6 or later, as well
-  as the Math::Complex and Module::Build modules.
-- the Python bindings require Python 2.3 or later.  NumPy is also highly
-  recommended for efficient use.
+  as the Math::Complex module.
+- the PHP bindings support both PHP5 and PHP7.
+- the Python bindings support both Python2, from version 2.4, as well as
+  Python3, from version 3.2.
 
 USING THE LIBRARY
 =================

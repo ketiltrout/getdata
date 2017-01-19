@@ -569,7 +569,7 @@ if test "x${use_modules}" != "xno"; then
   LIBS=$saved_libs
 
   if test "x$have_ltdl" == "xno"; then
-    AC_MSG_ERROR([libltdl is required to build modules.  Please either specify the location of the libltdl library using --with-ldtl=PREFIX or else disable the building of modules by using --disable-modules.])
+    AC_MSG_ERROR([libltdl is required to build modules.  Please either specify the location of the libltdl library using --with-ltdl=PREFIX or else disable the building of modules by using --disable-modules.])
   fi
 
   if test "x$ltdl_prefix" != "x"; then
