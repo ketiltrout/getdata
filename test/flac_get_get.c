@@ -31,8 +31,7 @@ int main(void)
   const char *flacdata = "dirfile/data.flac";
   uint16_t c1[8], c2[8];
   char command[4096];
-  uint16_t data_data[256];
-  int fd, i, n1, e1, e2, n2, e3, r = 0;
+  int i, n1, e1, e2, n2, e3, r = 0;
   DIRFILE *D;
 
   memset(c1, 0, 16);

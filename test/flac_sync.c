@@ -29,7 +29,6 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data_flac = "dirfile/data.flac";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT8 8\n";
   uint8_t c[8];
   char command[4096];
   uint8_t d;

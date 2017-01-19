@@ -29,11 +29,9 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *flacdata = "dirfile/data.flac";
-  const char *format_data = "data RAW UINT64 8\n";
   int64_t c[8];
   char command[4096];
-  int64_t data_data[256];
-  int fd, n, error, r = 0;
+  int n, error, r = 0;
 #ifdef USE_FLAC
   int i;
 #endif
@@ -44,7 +42,7 @@ int main(void)
   mkdir(filedir, 0700);
 
   MAKEFORMATFILE(format, "data RAW UINT64 8\n");
-  MAKEDATAFILE(data, uint64_t, i, 256);
+  MAKEDATAFILE(data, uint64_t, i * 0x01020304, 256);
 
 #ifdef WORDS_BIGENDIAN
 #define ENDIANNESS "--endian=big"
@@ -61,11 +59,11 @@ int main(void)
     return 1;
 
 #ifdef USE_FLAC
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE | GD_LITTLE_ENDIAN);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 #else
-  D = gd_open(filedir, GD_RDONLY | GD_LITTLE_ENDIAN);
+  D = gd_open(filedir, GD_RDONLY);
 #endif
-  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT64, c);
+  n = gd_getdata(D, "data", 0, 0, 1, 0, GD_UINT64, c);
   error = gd_error(D);
 
 #ifdef USE_FLAC
@@ -73,7 +71,7 @@ int main(void)
   CHECKI(n, 8);
 
   for (i = 0; i < 8; ++i)
-    CHECKXi(i,c[i],40+i);
+    CHECKXi(i,c[i],0x01020304);
 #else
   CHECKI(error, GD_E_UNSUPPORTED);
   CHECKI(n, 0);

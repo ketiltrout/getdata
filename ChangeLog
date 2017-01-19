@@ -1,3 +1,6 @@
+2017-01-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1136
+	* test/flac_get_int64.c: Correct.
+
 2017-01-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1135
 	* src/encoding.c: set GD_EF_SWAP instead of GD_EF_ECOR for flac.
 	* src/flac.c (_GD_FlacDecodeCallback _GD_FlacWrite): Ensure non-native

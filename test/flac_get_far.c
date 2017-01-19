@@ -29,11 +29,9 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *flacdata = "dirfile/data.flac";
-  const char *format_data = "data RAW UINT16 8\n";
   uint16_t c[8];
   char command[4096];
-  uint16_t data_data[256];
-  int fd, n, error, r = 0;
+  int n, error, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);

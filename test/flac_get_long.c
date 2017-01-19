@@ -30,10 +30,9 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *flacdata = "dirfile/data.flac";
-  const char *format_data = "data RAW UINT16 8\n";
   char command[4096];
   uint16_t *datar;
-  int i, fd, n, error, r = 0;
+  int i, n, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();

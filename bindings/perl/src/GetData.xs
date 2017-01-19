@@ -960,7 +960,6 @@ static int gdp_parser_callback(gd_parser_data_t *pdata, void *extra)
   SV *callback_data = ((struct gdp_callback_stuff_t *)extra)->data;
   SV *ret, **dummy;
   int n, sem = GD_SYNTAX_ABORT;
-  int was_rv = 0;
   AV *av;
   int len;
 
@@ -1012,7 +1011,6 @@ static int gdp_parser_callback(gd_parser_data_t *pdata, void *extra)
   /* de-reference as needed */
   while (SvROK(ret)) {
     ret = SvRV(ret);
-    was_rv = 1;
   }
 
   /* ferret out response */
@@ -2517,7 +2515,6 @@ strtok(dirfile, string)
   DIRFILE * dirfile
   const char * string
   PREINIT:
-    int i;
     char *token;
     GDP_DIRFILE_ALIAS;
   ALIAS:
