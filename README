@@ -236,36 +236,33 @@ to indicate this.
 LARGEFILE SUPPORT
 =================
 
-When built on a platform using the GNU C Library, or another compatible
-C Library, the new GetData API will respect the feature test macros
-_LARGEFILE64_SOURCE and _FILE_OFFSET_BITS affecting largefile (> 2 GB)
-support.  If one or the other of these are to be used, they must be defined
-before including getdata.h or any Standard C Library header file.
+The default GetData API uses the standard C type off_t for frame and sample
+offsets into the database.  To overcome the addressable limit imposed by a
+32-bit off_t, GetData provides an optional API for largefile support. Defining
+GD_64BIT_API before including getdata.h will define the 64-bit type
+gd_off64_t, as well as declare additional functions that use this 64-bit type.
+If the platform provides off64_t, the GetData type will be simply that.
 
-The first of these, _LARGEFILE64_SOURCE, if defined before including getdata.h,
-will enable the obsolete, transitional largefile extensions defined by the LFS.
-This will enable explicit support for large files through the definition of the
-64-bit explicit type `off64_t', and result in GetData defining the explicitly
-64-bit interfaces `gd_getdata64', `gd_putdata64', `gd_get_nframes64', &c.  This
-macro is largely obsolete, and using _FILE_OFFSET_BITS is preferred, if
-supported.
+On platforms where off_t is 64-bits wide, this API may still be useful for
+portable programming; in this case gd_off64_t is simply off_t. On some
+platforms this API may be automatically enabled; in this case, the symbol
+GD_64BIT_API is ignored.
 
-The second macro, _FILE_OFFSET_BITS, determines the size of `off_t'.  If not
-defined, or defined to `32', `off_t' will be the old 32-bit type.  If, instead,
-this macro is defined to `64', `off_t' will be the largefile supporting 64-bit
-type, and calls to gd_getdata, gd_putdata, &c. will intrinsically have largefile
-support.  On 64-bit systems this macro has no effect, since a 64-bit `off_t'
-is used all the time.
+The explicit 64-bit functions this API declares are:
 
-If your system uses the GNU C Library, the feature_test_macros(7) man page
-will provide further explanation.  On systems where these macros are
-unsupported, the gd_getdata64, &c. interfaces will never be defined, and the
-size of `off_t' will be system dependent.  In this case, GetData will likely
-lack largefile support.
+  * gd_alter_frameoffset64
+  * gd_bof64
+  * gd_eof64
+  * gd_framenum_subset64
+  * gd_frameoffset64
+  * gd_getdata64
+  * gd_nframes64
+  * gd_putdata64
+  * gd_seek64
+  * gd_tell64 
 
-If you build GetData against a C Library that lacks largefile support, the
-GetData library will not support large files either, no matter what you do with
-these macros.
+These functions behave identically to the versions without the -64 suffix,
+except they use gd_off64_t in place of off_t. 
 
 
 AUTHOR

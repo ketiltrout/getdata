@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2016 D. V. Wiebe
+/* Copyright (C) 2008-2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -210,7 +210,7 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
 #endif
-  GD_EXT_ENCODING_GENOP(GD_FLAC_ENCODED, ".flac", GD_EF_ECOR | GD_EF_OOP,
+  GD_EXT_ENCODING_GENOP(GD_FLAC_ENCODED, ".flac", GD_EF_SWAP | GD_EF_OOP,
       "Flac", "flac"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES

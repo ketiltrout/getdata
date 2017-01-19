@@ -1,4 +1,4 @@
-/* Copyright (C) 2015, 2016 D. V. Wiebe
+/* Copyright (C) 2015, 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -35,14 +35,20 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   MAKEFORMATFILE(format, "data RAW UINT16 8\n");
   MAKEDATAFILE(data, uint16_t, i, 256);
 
+#ifdef WORDS_BIGENDIAN
+#define ENDIANNESS "--endian=big"
+#else
+#define ENDIANNESS "--endian=little"
+#endif
+
   /* encode */
   snprintf(command, 4096,
-      "%s --endian=little --silent --sample-rate=1 --channels=1 --bps=16 "
+      "%s " ENDIANNESS " --silent --sample-rate=1 --channels=1 --bps=16 "
       "--sign=signed --delete-input-file %s >/dev/null 2>/dev/null", FLAC,
       data);
   if (gd_system(command))

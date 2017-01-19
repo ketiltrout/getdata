@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -39,7 +39,6 @@ int main(void)
     BIG_JUMP + 12 };
 
   rmdirfile();
-  mkdir(filedir, 0777);
 
   D = gd_open(filedir, GD_RDWR | ENC_ENCODED | GD_LITTLE_ENDIAN
       | GD_VERBOSE | GD_CREAT | GD_EXCL);
@@ -61,6 +60,8 @@ int main(void)
   n2 = gd_getdata(D, "data", 0, 0, 0, 100, GD_UINT32, d);
   CHECKI(n2, 100);
 
+  if (n2 > 100)
+    n2 = 100;
   for (i = 0; i < n2; ++i) {
     if (i == 5 || i == 8 || i == 12 || i == 15)
       CHECKXi(i, d[i], i);

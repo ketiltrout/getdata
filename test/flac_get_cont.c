@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,9 +24,15 @@
 #define ENC_SKIP_TEST 1
 #endif
 
+#ifdef WORDS_BIGENDIAN
+#define ENDIANNESS "--endian=big"
+#else
+#define ENDIANNESS "--endian=little"
+#endif
+
 #define ENC_SUFFIX ".flac"
 #define ENC_COMPRESS snprintf(command, 4096, \
-    "%s --endian=little --silent --sample-rate=1 --channels=2 --bps=16 " \
+    "%s " ENDIANNESS " --silent --sample-rate=1 --channels=2 --bps=16 " \
     "--sign=signed --delete-input-file %s >/dev/null 2>/dev/null", FLAC, \
     data)
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -29,7 +29,7 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0770);
+  mkdir(filedir, 0700);
 
   MAKEFORMATFILE(format, "string STRING \\a\\b\\c\\d\\e\\f\\g\\h\\i\\j\\k\\l"
       "\\m\\n\\o\\p\\q\\r\\s\\t\\v\\w\\y\\z\\\\\\\"\\#");

@@ -165,6 +165,12 @@ New in version 0.10.0a:
     writes to compressed data files which were causing data corruption have
     been fixed.
 
+  * BUG FIX: When reading LZMA-compressed data, gd_getdata() no longer hangs
+    if liblzma returns only part of a multibyte sample.
+
+  * BUG FIX: The FLAC encoding now works correctly with non-native endian
+    data.
+
   * BUG FIX: Writes to ASCII (text) encoded files weren't properly updating
     the file's I/O position, leading to subsequent reads and writes
     occurring in the wrong place.
@@ -260,7 +266,7 @@ New in version 0.10.0a:
 
   * The gd_shift_t type, which was used for PHASE field shifts, has been
     deprecated.  It has been replaced with gd_int64_t, which is what it
-    was always defined as.
+    was always typedef'd to.
 
   * BUG FIX: gd_getdata() and gd_putdata() now properly report GD_E_IO when
     an I/O error occurs while reading a LINTERP table.  Previously GD_E_LUT

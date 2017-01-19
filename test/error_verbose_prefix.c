@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. V. Wiebe
+/* Copyright (C) 2012-2013, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -43,9 +43,10 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
-  close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
-  mkfifo(fifo, 0666);
+  mkdir(filedir, 0700);
+  MAKEFORMATFILE(format, "#");
+
+  mkfifo(fifo, 0600);
 
   /* read our standard error */
   if ((pid = fork()) == 0) {
@@ -81,7 +82,7 @@ int main(void)
   CHECKI(e1, 0);
   CHECKI(e2, GD_E_BAD_CODE);
 
-  wait(&status);
+  waitpid(pid, &status, 0);
   if (status)
     r = 1;
 

@@ -1,3 +1,34 @@
+2017-01-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1135
+	* src/encoding.c: set GD_EF_SWAP instead of GD_EF_ECOR for flac.
+	* src/flac.c (_GD_FlacDecodeCallback _GD_FlacWrite): Ensure non-native
+	endianness channelisation occurs in the right order.
+	* src/flac.c (_GD_FlacOpen _GD_FlacSize): The size parameter is no longer
+	unused; pass it to _GD_FlacDoOpen.
+	* src/flac.c (_GD_FlacDoOpen): Record the value of swap.
+	* test/flac_get_big.c test/flac_get_cont.c test/flac_get_far.c
+	test/flac_get_get.c test/flac_get_get2.c test/flac_get_int64.c
+	test/flac_get_int8.c test/flac_get_little.c test/flac_get_long.c
+	test/flac_move_from.c test/flac_put_big.c test/flac_put_little.c
+	test/flac_seek.c test/flac_seek_far.c test/flac_sync.c: Test endianness
+	correctly.
+
+	* src/lzma.c (_GD_LzmaRead): Deal with a trailing partial sample in the
+	returned LZMA data.
+	* src/lzma.c (_GD_LzmaReady): Read more data when we have less than one
+	full sample.
+	* src/lzma.c (_GD_LzmaClear): Handle a trailing partial sample.
+
+	* test/enc_complex128.c test/enc_complex64.c test/enc_float32.c
+	test/enc_float64.c test/enc_int16.c test/enc_int32.c test/enc_int64.c
+	test/enc_int8.c test/enc_put_offs.c test/enc_uint16.c test/enc_uint32.c
+	test/enc_uint64.c test/enc_uint8.c: Don't accidentally read out of bounds.
+	Remove unnecessary mkdir() calls.
+
+	* test/error_verbose.c test/error_verbose_prefix.c: Use waitpid instead of
+	wait.
+
+	* test/include_ns_dotns.c: Correct test.
+
 2017-01-17   D. V. Wiebe <getdata@ketiltrout.net> svn:1134
 	* bindings/cxx/getdata/entry.h: replace gd_shift_t with gd_int64_t.
 	* src/field_list.c (_GD_Constants): char *fl;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -41,22 +41,20 @@ int main(void)
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
+  MAKEFORMATFILE(format, "data RAW UINT64 8\n");
+  MAKEDATAFILE(data, uint64_t, i, 256);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256 * sizeof(uint64_t));
-  close(fd);
+#ifdef WORDS_BIGENDIAN
+#define ENDIANNESS "--endian=big"
+#else
+#define ENDIANNESS "--endian=little"
+#endif
 
   /* encode */
   snprintf(command, 4096,
-      "%s --endian=little --silent --sample-rate=1 --channels=4 --bps=16 "
+      "%s " ENDIANNESS " --silent --sample-rate=1 --channels=4 --bps=16 "
       "--sign=signed --delete-input-file %s >/dev/null 2>/dev/null", FLAC,
       data);
   if (gd_system(command))

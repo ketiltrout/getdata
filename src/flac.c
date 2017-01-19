@@ -44,6 +44,7 @@ struct gd_flacdata {
   FILE* stream;
   unsigned bps; /* bits per sample */
   unsigned cps; /* channels per sample */
+  int swap; /* Byte-swapping required */
 
   int stream_end;
   int error; /* error flag */
@@ -111,6 +112,10 @@ static FLAC__StreamDecoderWriteStatus _GD_FlacDecodeCallback(
     for (u = 0; u < frame->header.blocksize; ++u)
       /* there's only one channel in this case */
       gdfl->data[u] = (int8_t)buffer[0][u];
+  else if (gdfl->swap)
+    for (u = 0; u < frame->header.blocksize; ++u)
+      for (c = gdfl->cps; c > 0; --c)
+        *(ptr++) = (int16_t)buffer[c - 1][u];
   else
     for (u = 0; u < frame->header.blocksize; ++u)
       for (c = 0; c < gdfl->cps; ++c)
@@ -136,14 +141,14 @@ static void _GD_FlacErrorCallback(const FLAC__StreamDecoder *decoder gd_unused_,
 }
 
 static struct gd_flacdata *_GD_FlacDoOpen(int dirfd, struct gd_raw_file_* file,
-    gd_type_t data_type, unsigned int mode)
+    gd_type_t data_type, int swap, unsigned int mode)
 {
   int fd, status;
   struct gd_flacdata *gdfl;
   FILE *stream;
   const char *fdmode = "rb";
 
-  dtrace("%i, %p, 0x%X, 0x%X", dirfd, file, data_type, mode);
+  dtrace("%i, %p, 0x%X, %i, 0x%X", dirfd, file, data_type, swap, mode);
 
   if (mode & GD_FILE_READ) {
     fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666);
@@ -185,9 +190,11 @@ static struct gd_flacdata *_GD_FlacDoOpen(int dirfd, struct gd_raw_file_* file,
   if (GD_SIZE(data_type) <= 2) {
     gdfl->bps = GD_SIZE(data_type) * 8;
     gdfl->cps = 1;
+    gdfl->swap = 0;
   } else {
     gdfl->bps = 16;
     gdfl->cps = GD_SIZE(data_type) / 2;
+    gdfl->swap = swap;
   }
 
   if (mode & GD_FILE_READ) {
@@ -241,11 +248,11 @@ OPEN_ERROR:
 }
 
 int _GD_FlacOpen(int dirfd, struct gd_raw_file_* file, gd_type_t data_type,
-    int swap gd_unused_, unsigned int mode)
+    int swap, unsigned int mode)
 {
-  dtrace("%i, %p, 0x%X, <unused>, 0x%X", dirfd, file, data_type, mode);
+  dtrace("%i, %p, 0x%X, %i, 0x%X", dirfd, file, data_type, swap, mode);
 
-  file->edata = _GD_FlacDoOpen(dirfd, file, data_type, mode);
+  file->edata = _GD_FlacDoOpen(dirfd, file, data_type, swap, mode);
 
   if (file->edata == NULL) {
     dreturn("%i", 1);
@@ -348,6 +355,10 @@ ssize_t _GD_FlacWrite(struct gd_raw_file_ *file, const void *data,
     if (gdfl->bps == 8)
       for (i = 0; i < nmemb; ++i)
         buffer[0][i] = *(i8++);
+    else if (gdfl->swap)
+      for (i = 0; i < nmemb; ++i)
+        for (c = gdfl->cps; c > 0; --c)
+          buffer[c - 1][i] = *(i16++);
     else
       for (i = 0; i < nmemb; ++i)
         for (c = 0; c < gdfl->cps; ++c)
@@ -489,14 +500,14 @@ int _GD_FlacClose(struct gd_raw_file_ *file)
 }
 
 off64_t _GD_FlacSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
-    int swap gd_unused_)
+    int swap)
 {
   struct gd_flacdata *gdfl;
   off_t n;
 
-  dtrace("%i, %p, 0x%X, <unused>", dirfd, file, data_type);
+  dtrace("%i, %p, 0x%X, %i", dirfd, file, data_type, swap);
 
-  gdfl = _GD_FlacDoOpen(dirfd, file, data_type, GD_FILE_READ);
+  gdfl = _GD_FlacDoOpen(dirfd, file, data_type, swap, GD_FILE_READ);
 
   if (gdfl == NULL) {
     dreturn("%i", -1);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2016 D. V. Wiebe
+/* Copyright (C) 2009-2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -148,17 +148,18 @@ int _GD_LzmaOpen(int dirfd, struct gd_raw_file_* file,
  * This doesn't update next_out, so we don't have to worry about updating
  * offset.
  */
-static int _GD_LzmaReady(struct gd_lzmadata *lzd, size_t nreq, int *errnum)
+static int _GD_LzmaReady(struct gd_lzmadata *lzd, size_t nreq, int size,
+    int *errnum)
 {
   lzma_ret e;
   int ready;
   
-  dtrace("%p, %" PRIuSIZE ", %p", lzd, nreq, errnum);
+  dtrace("%p, %" PRIuSIZE ", %i, %p", lzd, nreq, size, errnum);
 
   ready = READY(*lzd);
 
   /* already have some data, or no more data to read */
-  if (LZEOF(*lzd) || ready > 0) {
+  if (LZEOF(*lzd) || ready >= size) {
     dreturn("%i", ready);
     return ready;
   }
@@ -200,12 +201,14 @@ static int _GD_LzmaReady(struct gd_lzmadata *lzd, size_t nreq, int *errnum)
   return ready;
 }
 
-/* clear the output buffer, retaining a bit of data for lookback purposes */
-static void _GD_LzmaClear(struct gd_lzmadata *lzd)
+/* clear the output buffer, retaining a bit of data for lookback purposes
+ * If "part" is non-zero, then it gives the length of a partial sample
+ * found at the end of the buffer. */
+static void _GD_LzmaClear(struct gd_lzmadata *lzd, int part)
 {
   int n = 0;
 
-  dtrace("%p", lzd);
+  dtrace("%p, %i", lzd, part);
   
   /* amount of data to keep */
   n = NOUT(*lzd);
@@ -215,7 +218,7 @@ static void _GD_LzmaClear(struct gd_lzmadata *lzd)
   memmove(lzd->data_out, lzd->xz.next_out - n, n);
   lzd->xz.next_out = lzd->data_out + n; 
   lzd->xz.avail_out = GD_LZMA_DATA_OUT - n;
-  lzd->offset = n;
+  lzd->offset = n - part;
 
   dreturnvoid();
 }
@@ -288,10 +291,11 @@ off64_t _GD_LzmaSeek(struct gd_raw_file_* file, off64_t count,
   struct gd_lzmadata *lzd;
   lzma_ret e;
   uint64_t byte_count;
+  const unsigned size = GD_SIZE(data_type);
 
   dtrace("%p, %" PRId64 ", 0x%X, 0x%X", file, (int64_t)count, data_type, mode);
 
-  byte_count = count * GD_SIZE(data_type);
+  byte_count = count * size;
 
   lzd = (struct gd_lzmadata *)file->edata;
 
@@ -330,9 +334,9 @@ off64_t _GD_LzmaSeek(struct gd_raw_file_* file, off64_t count,
     /* seek forward the slow way */
     while (lzd->xz.total_out < byte_count) {
       /* discard output */
-      _GD_LzmaClear(lzd);
+      _GD_LzmaClear(lzd, 0);
 
-      if (_GD_LzmaReady(lzd, lzd->xz.avail_out, &file->error) < 0) {
+      if (_GD_LzmaReady(lzd, lzd->xz.avail_out, size, &file->error) < 0) {
         dreturn("%i", -1);
         return -1;
       }
@@ -345,7 +349,7 @@ off64_t _GD_LzmaSeek(struct gd_raw_file_* file, off64_t count,
     if (lzd->xz.total_out < byte_count) {
       /* ran out of data */
       lzd->offset = NOUT(*lzd);
-      file->pos = lzd->xz.total_out / GD_SIZE(data_type);
+      file->pos = lzd->xz.total_out / size;
     } else {
       lzd->offset = byte_count - BASE(*lzd);
       file->pos = count;
@@ -357,7 +361,7 @@ off64_t _GD_LzmaSeek(struct gd_raw_file_* file, off64_t count,
       if (n > GD_LZMA_DATA_IN)
         n = GD_LZMA_DATA_IN;
 
-      _GD_LzmaWrite(file, lzd->data_in, data_type, n / GD_SIZE(data_type));
+      _GD_LzmaWrite(file, lzd->data_in, data_type, n / size);
     }
     lzd->offset = 0;
   }
@@ -372,32 +376,33 @@ ssize_t _GD_LzmaRead(struct gd_raw_file_ *file, void *data, gd_type_t data_type,
   uint64_t bytes_remaining;
   struct gd_lzmadata *lzd = (struct gd_lzmadata *)file->edata;
   ssize_t samples_read = 0;
+  const unsigned size = GD_SIZE(data_type);
 
   dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, data, data_type, nmemb);
 
-  if (nmemb > GD_SSIZE_T_MAX / GD_SIZE(data_type))
-    nmemb = GD_SSIZE_T_MAX / GD_SIZE(data_type);
-  bytes_remaining = nmemb * GD_SIZE(data_type);
+  if (nmemb > GD_SSIZE_T_MAX / size)
+    nmemb = GD_SSIZE_T_MAX / size;
+  bytes_remaining = nmemb * size;
 
   /* decoding loop */
   while (bytes_remaining > 0) {
     int bytes_ready, samples_ready;
 
-    bytes_ready = _GD_LzmaReady(lzd, bytes_remaining, &file->error);
+    bytes_ready = _GD_LzmaReady(lzd, bytes_remaining, size, &file->error);
     if (bytes_ready < 0) {
       dreturn("%i", -1);
       return -1;
-    } else if (bytes_ready == 0) {
+    } else if (bytes_ready < (int)size) {
       /* clear the output buffer */
-      _GD_LzmaClear(lzd);
+      _GD_LzmaClear(lzd, bytes_ready);
     } else {
       /* copy whole samples */
-      samples_ready = bytes_ready / GD_SIZE(data_type);
+      samples_ready = bytes_ready / size;
 
       if (samples_read + samples_ready > (ssize_t)nmemb)
         samples_ready = nmemb - samples_read;
 
-      bytes_ready = samples_ready * GD_SIZE(data_type);
+      bytes_ready = samples_ready * size;
 
       memcpy(data, lzd->data_out + lzd->offset, bytes_ready);
 
@@ -481,6 +486,7 @@ off64_t _GD_LzmaSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 {
   struct gd_lzmadata *lzd;
   off64_t n;
+  const unsigned size = GD_SIZE(data_type);
 
   dtrace("%i, %p, 0x%X, <unused>", dirfd, file, data_type);
 
@@ -493,7 +499,7 @@ off64_t _GD_LzmaSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 
   /* read until EOF */
   while (!LZEOF(*lzd)) {
-    if (_GD_LzmaReady(lzd, GD_LZMA_DATA_OUT, &file->error) < 0) {
+    if (_GD_LzmaReady(lzd, GD_LZMA_DATA_OUT, size, &file->error) < 0) {
       dreturn("%i", -1);
       return -1;
     }
@@ -504,7 +510,7 @@ off64_t _GD_LzmaSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
   }
 
   /* liblzma very graciously does the bookkeeping for us */
-  n = lzd->xz.total_out / GD_SIZE(data_type);
+  n = lzd->xz.total_out / size;
 
   lzma_end(&lzd->xz);
   fclose(lzd->stream);

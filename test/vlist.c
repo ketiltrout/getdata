@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013, 2015, 2016 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2015, 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,7 +24,7 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int fd, i, error, r = 0;
+  int i, error, r = 0;
   const char **field_list;
   DIRFILE *D;
 

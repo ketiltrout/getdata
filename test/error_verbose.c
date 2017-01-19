@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2014 D. V. Wiebe
+/* Copyright (C) 2012-2014, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -72,7 +72,7 @@ int main(void)
 
   CHECKI(error, GD_E_IO);
 
-  wait(&status);
+  waitpid(pid, &status, 0);
   if (status)
     r = 1;
 

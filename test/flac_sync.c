@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2015, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -39,14 +39,12 @@ int main(void)
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format, "data RAW UINT8 8\n");
 
   for (i = 0; i < 8; ++i)
     c[i] = (uint8_t)(40 + i);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
 
   D = gd_open(filedir, GD_RDWR | GD_FLAC_ENCODED | GD_VERBOSE);
   gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
@@ -64,9 +62,15 @@ int main(void)
   }
   CHECKI(stat_data, 0);
 
+#ifdef WORDS_BIGENDIAN
+#define ENDIANNESS "--endian=big"
+#else
+#define ENDIANNESS "--endian=little"
+#endif
+
   /* uncompress */
   snprintf(command, 4096, "%s --silent --decode --delete-input-file "
-      "--force-raw-format --sign=signed --endian=little %s --output-name=%s "
+      "--force-raw-format --sign=signed " ENDIANNESS " %s --output-name=%s "
       ">/dev/null 2>/dev/null", FLAC, data_flac, data);
   if (gd_system(command)) {
     r = 1;

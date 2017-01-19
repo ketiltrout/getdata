@@ -1,4 +1,4 @@
-/* Copyright (C) 2015, 2016 D. V. Wiebe
+/* Copyright (C) 2015, 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -29,11 +29,10 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data_flac = "dirfile/data.flac";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT16 8\n";
-  uint16_t c[8];
+  uint32_t c[8];
 #ifdef USE_FLAC
   char command[4096];
-  uint16_t d;
+  uint32_t d;
 #endif
   struct stat buf;
   int fd, i, n, e1, e2, stat_data, unlink_data, unlink_flac, r = 0;
@@ -41,14 +40,17 @@ int main(void)
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
+    
+  MAKEFORMATFILE(format, "data RAW UINT32 8\n");
 
+#ifdef WORDS_BIGENDIAN
   for (i = 0; i < 8; ++i)
-    c[i] = 0x0101 * i;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+    c[i] = 0x04030201 * i;
+#else
+  for (i = 0; i < 8; ++i)
+    c[i] = 0x01020304 * i;
+#endif
 
 #ifdef USE_FLAC
   D = gd_open(filedir, GD_RDWR | GD_FLAC_ENCODED | GD_LITTLE_ENDIAN
@@ -56,7 +58,7 @@ int main(void)
 #else
   D = gd_open(filedir, GD_RDWR | GD_FLAC_ENCODED | GD_LITTLE_ENDIAN);
 #endif
-  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
+  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT32, c);
   e1 = gd_error(D);
 
 #ifdef USE_FLAC
@@ -76,6 +78,7 @@ int main(void)
   CHECKI(stat_data, 0);
   if (stat_data)
     perror("stat");
+
   snprintf(command, 4096, "%s --silent --decode --delete-input-file "
       "--force-raw-format --sign=signed --endian=little %s --output-name=%s",
       FLAC, data_flac, data);
@@ -89,7 +92,7 @@ int main(void)
         if (i < 40 || i > 48) {
           CHECKXi(i, d, 0);
         } else
-          CHECKXi(i, d, (i - 40) * 0x0101);
+          CHECKXi(i, d, (uint32_t)(i - 40) * 0x01020304U);
         i++;
       }
       CHECKI(i, 48);

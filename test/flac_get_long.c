@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -32,29 +32,26 @@ int main(void)
   const char *flacdata = "dirfile/data.flac";
   const char *format_data = "data RAW UINT16 8\n";
   char command[4096];
-  uint16_t *dataw, *datar;
+  uint16_t *datar;
   int i, fd, n, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  dataw = malloc(N * sizeof(*dataw));
   datar = malloc(N * sizeof(*datar));
 
-  for (i = 0; i < N; ++i)
-    dataw[i] = i;
+  MAKEFORMATFILE(format, "data RAW UINT16 8\n");
+  MAKEDATAFILE(data, uint16_t, i, N);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, dataw, N * sizeof(*dataw));
-  close(fd);
+#ifdef WORDS_BIGENDIAN
+#define ENDIANNESS "--endian=big"
+#else
+#define ENDIANNESS "--endian=little"
+#endif
 
   snprintf(command, 4096,
-      "%s --endian=little --silent --sample-rate=1 --channels=1 --bps=16 "
+      "%s " ENDIANNESS " --silent --sample-rate=1 --channels=1 --bps=16 "
       "--sign=signed --delete-input-file %s >/dev/null 2>/dev/null", FLAC,
       data);
   if (gd_system(command))
@@ -70,12 +67,11 @@ int main(void)
   gd_discard(D);
 
   for (i = 0; i < N; ++i)
-    CHECKIi(i, datar[i], dataw[i]);
+    CHECKIi(i, datar[i], i);
 
   unlink(flacdata);
   unlink(format);
   rmdir(filedir);
-  free(dataw);
   free(datar);
 
   return r;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -36,7 +36,6 @@ int main(void)
   int i = 0;
 
   rmdirfile();
-  mkdir(filedir, 0777);
 
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL | GD_ENC_ENCODED
       | GD_VERBOSE);
@@ -55,6 +54,8 @@ int main(void)
   /* Can't check NAN against itself */
   CHECKNAN(data_out[0]);
 
+  if (e3 > 4)
+    e3 = 4;
   for (i = 1; i < 2 * e3; ++i)
     CHECKFi(i, data_out[i], data_in[i]);
 

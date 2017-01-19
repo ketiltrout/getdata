@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -36,7 +36,6 @@ int main(void)
   int i = 0;
 
   rmdirfile();
-  mkdir(filedir, 0777);
 
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL | GD_ENC_ENCODED
       | GD_VERBOSE);
@@ -52,6 +51,8 @@ int main(void)
 
   gd_discard(D);
 
+  if (e3 > 8)
+    e3 = 8;
   for (i = 0; i < e3; ++i)
     CHECKUi(i, data_out[i], data_in[i]);
 
