@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,50 +18,29 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Parser check */
 #include "test.h"
-
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
-    "data1 RAW UINT8 1\n"
-    "data2 RAW UINT8 1\n"
-    "REFERENCE data2\n"
-    ;
-
   const char *data1 = "dirfile/data1";
   const char *data2 = "dirfile/data2";
 
-  uint8_t data_data[4] = { 0, 1, 2, 3 };
-  int fd, error, error2, r = 0;
+  int error, error2, r = 0;
   DIRFILE *D;
   off_t nf;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data1, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 4);
-  close(fd);
-
-  fd = open(data2, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 3);
-  close(fd);
+  MAKEFORMATFILE(format,
+    "data1 RAW UINT8 1\n"
+    "data2 RAW UINT8 1\n"
+    "REFERENCE data2\n"
+    );
+  MAKEDATAFILE(data1, uint8_t, i, 4);
+  MAKEDATAFILE(data2, uint8_t, i, 3);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 

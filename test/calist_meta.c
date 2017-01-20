@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013, 2015, 2016 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2015, 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,14 +24,6 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
-    "data0 CARRAY UINT8 4 8 12 16 20 24 28 32\n"
-    "parent CARRAY UINT8 1\n"
-    "parent/data1 CARRAY UINT8 1 2 3 4 5\n"
-    "parent/data2 CARRAY UINT8 2 4 6 8 10 12\n"
-    "parent/data3 CARRAY UINT8 3 6 9 12 15 18 21\n"
-    "META parent data4 LINTERP UINT8 1\n"
-    "/ALIAS parent/data5 data0\n";
   int j, error, r = 0;
   size_t i;
   struct uint8_carrays {
@@ -41,11 +33,17 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  j = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(j, format_data, strlen(format_data));
-  close(j);
+  MAKEFORMATFILE(format,
+    "data0 CARRAY UINT8 4 8 12 16 20 24 28 32\n"
+    "parent CARRAY UINT8 1\n"
+    "parent/data1 CARRAY UINT8 1 2 3 4 5\n"
+    "parent/data2 CARRAY UINT8 2 4 6 8 10 12\n"
+    "parent/data3 CARRAY UINT8 3 6 9 12 15 18 21\n"
+    "META parent data4 LINTERP UINT8 1\n"
+    "/ALIAS parent/data5 data0\n"
+  );
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   field_list = (struct uint8_carrays *)gd_mcarrays(D, "parent", GD_UINT8);

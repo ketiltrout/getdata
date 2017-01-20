@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,6 +20,12 @@
  */
 #include "test.h"
 
+#ifdef WORDS_BIGENDIAN
+#define ENDIAN "ENDIAN little"
+#else
+#define ENDIAN "ENDIAN big"
+#endif
+
 int main(void)
 {
 #ifndef TEST_LZMA
@@ -29,12 +35,6 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data_xz = "dirfile/data.xz";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT16 8\n"
-#ifdef WORDS_BIGENDIAN
-  "ENDIAN little\n";
-#else
-  "ENDIAN big\n";
-#endif
   uint16_t c[8];
 #ifdef USE_LZMA
   char command[4096];
@@ -46,14 +46,12 @@ int main(void)
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   for (i = 0; i < 8; ++i)
     c[i] = (uint16_t)(0x102 * i);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT16 8\n" ENDIAN "\n");
 
 #ifdef USE_LZMA
   D = gd_open(filedir, GD_RDWR | GD_LZMA_ENCODED | GD_VERBOSE);

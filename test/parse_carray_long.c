@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,27 +21,17 @@
 /* Parser check */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "c CARRAY UINT8 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41\n";
-  int fd, error, r = 0;
+  int error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "c CARRAY UINT8 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41\n");
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   error = gd_error(D);

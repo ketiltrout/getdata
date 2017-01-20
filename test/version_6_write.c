@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,21 +24,19 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
-    "/VERSION 6\n"
-    "b\\ c CONST UINT8 8\n"
-    "\"a \\#r\" RAW UINT8 b\\ c\n"
-    "/META \"a \\#r\" \\x64\\c\\157 PHASE \"a \\#r\" 0\n";
-  int fd, e, e2, q, c, r = 0;
+  int e, e2, q, c, r = 0;
   DIRFILE *D;
   unsigned int s;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "/VERSION 6\n"
+    "b\\ c CONST UINT8 8\n"
+    "\"a \\#r\" RAW UINT8 b\\ c\n"
+    "/META \"a \\#r\" \\x64\\c\\157 PHASE \"a \\#r\" 0\n"
+  );
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   e = gd_dirfile_standards(D, 6);

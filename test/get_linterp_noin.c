@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,31 +21,20 @@
 /* Attempt to read LINTERP */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *table = "dirfile/table";
-  const char *format_data = "linterp LINTERP data ./table\n";
   unsigned char c = 0;
-  int fd, i, n, error, r = 0;
+  int i, n, error, r = 0;
   DIRFILE *D;
   FILE *t;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "linterp LINTERP data ./table\n");
 
   t = fopen(table, "wt");
   for (i = 0; i < 10; ++i)

@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,14 +20,11 @@
  */
 #include "test.h"
 
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
+#ifdef WORDS_BIGENDIAN
+#define ENDIAN "ENDIAN little"
+#else
+#define ENDIAN "ENDIAN big"
+#endif
 
 int main(void)
 {
@@ -38,12 +35,6 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data_gz = "dirfile/data.gz";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT16 8\n"
-#ifdef WORDS_BIGENDIAN
-  "ENDIAN little\n";
-#else
-  "ENDIAN big\n";
-#endif
   uint16_t c[8];
 #ifdef USE_GZIP
   char command[4096];
@@ -55,14 +46,12 @@ int main(void)
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   for (i = 0; i < 8; ++i)
     c[i] = (uint16_t)(0x102 * i);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT16 8\n" ENDIAN "\n");
 
 #ifdef USE_GZIP
   D = gd_open(filedir, GD_RDWR | GD_GZIP_ENCODED | GD_VERBOSE);

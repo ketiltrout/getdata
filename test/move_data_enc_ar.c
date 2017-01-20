@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,15 +21,6 @@
 /* Test move */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-#include <inttypes.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -37,9 +28,6 @@ int main(void)
   const char *format1 = "dirfile/format1";
   const char *data = "dirfile/data";
   const char *txtdata = "dirfile/data.txt";
-  const char *format_data =
-    "/INCLUDE format1\ndata RAW UINT16 11\nENCODING text\n";
-  const char *format1_data = "ENCODING none\n";
   int r = 0;
   uint16_t d;
   int fd, i, ret, e1, e2, ge_ret, unlink_data, unlink_txtdata;
@@ -48,15 +36,10 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
+  MAKEFORMATFILE(format, "/INCLUDE format1\ndata RAW UINT16 11\nENCODING text\n");
+  MAKEFORMATFILE(format1, "ENCODING none\n");
 
   stream = fopen(txtdata, "w");
   for (i = 0; i < 128; ++i)

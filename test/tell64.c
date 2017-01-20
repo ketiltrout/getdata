@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -23,37 +23,20 @@
 
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT8 8\n";
-  unsigned char data_data[256];
-  int fd, e1, e2, r = 0;
+  int e1, e2, r = 0;
   off64_t n;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 8\n");
+  MAKEDATAFILE(data, unsigned char, i, 256);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   gd_getdata(D, "data", 5, 0, 1, 0, GD_NULL, NULL);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,18 +24,15 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "data RAW UINT8 8\nlincom LINCOM 1 data 1 0\n";
-  int fd, ret, v, e1, e2, r = 0;
+  int ret, v, e1, e2, r = 0;
   size_t n;
   double c;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 8\nlincom LINCOM 1 data 1 0\n");
 
   D = gd_open(filedir, GD_RDWR);
   /* in order to initialise the lincom's entry cache */

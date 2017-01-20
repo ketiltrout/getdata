@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,30 +21,18 @@
 /* Global metadata check */
 #include "test.h"
 
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "data CONST UINT8 1\n";
-  int fd, error, r = 0;
+  int error, r = 0;
   const char *ref;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data CONST UINT8 1\n");
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   ref = gd_reference(D, NULL);

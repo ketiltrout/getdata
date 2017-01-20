@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013, 2016 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -25,22 +25,20 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data =
-    "data RAW UINT16 1\n"
-    "mult1 MULTIPLY data INDEX\n"
-    "mult2 MULTIPLY INDEX INDEX\n"
-    "mult3 MULTIPLY INDEX data\n";
   int fd, error0, error1, error2, error3, r = 0;
   const size_t len = strlen(data);
   off_t eof_INDEX, eof_mult1, eof_mult2, eof_mult3;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "data RAW UINT16 1\n"
+    "mult1 MULTIPLY data INDEX\n"
+    "mult2 MULTIPLY INDEX INDEX\n"
+    "mult3 MULTIPLY INDEX data\n"
+  );
 
   fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data, len);

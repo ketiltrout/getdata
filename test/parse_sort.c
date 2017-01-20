@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013, 2016 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -33,7 +33,7 @@ int main(void)
   };
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   MAKEFORMATFILE(format,
       "c RAW UINT8 1\n"

@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,12 +20,6 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-
 int main(void)
 {
 #if ! defined HAVE_SYMLINK || defined GD_NO_GETCWD
@@ -42,8 +36,8 @@ int main(void)
   gdtest_getcwd(ptr, cwd, cwd_size);
 
   rmdirfile();
-  mkdir("dirfile", 0777);
-  close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
+  mkdir("dirfile", 0700);
+  MAKEEMPTYFILE(format, 0600);
 
   /* make a symlink */
   targ = (char*)malloc(cwd_size + 80);

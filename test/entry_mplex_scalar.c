@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. V. Wiebe
+/* Copyright (C) 2012-2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,20 +24,18 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
-    "a CONST UINT16 1\n"
-    "b CARRAY UINT16 2 3 4 5\n"
-    "data MPLEX in1 in2 a b<3>\n";
-  int fd, n, error, r = 0;
+  int n, error, r = 0;
   DIRFILE *D;
   gd_entry_t E;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "a CONST UINT16 1\n"
+    "b CARRAY UINT16 2 3 4 5\n"
+    "data MPLEX in1 in2 a b<3>\n"
+  );
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,28 +21,18 @@
 /* Attempt to write a non-existant field */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "#\n";
   unsigned char c = 0;
-  int fd, n, error, r = 0;
+  int n, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "#\n");
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
   n = gd_putdata(D, "no-such-field", 5, 0, 1, 0, GD_UINT8, &c);

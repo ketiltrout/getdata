@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,22 +20,12 @@
  */
 #include "test.h"
 
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *table = "dirfile/table";
-  const char *format_data = "linterp LINTERP data ./table\ndata RAW INT8 8\n";
   int8_t c[8], d;
   struct stat buf;
   int fd, i, n, e1, e2, r = 0;
@@ -44,14 +34,12 @@ int main(void)
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   for (i = 0; i < 8; ++i)
     c[i] = (int8_t)(40 + i);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "linterp LINTERP data ./table\ndata RAW INT8 8\n");
 
   t = fopen(table, "wt");
   for (i = 0; i < 10; ++i)

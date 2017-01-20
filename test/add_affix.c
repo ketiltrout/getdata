@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2012 D. V. Wiebe
+/* Copyright (C) 2011-2012, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -26,19 +26,15 @@ int main(void)
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
   const char *data = "dirfile/data";
-  const char *format_data = "AconstZ CONST UINT8 3\n/INCLUDE format1 A Z\n";
-  int n, fd, e1, e2, e3, e4, e5, r = 0;
+  int n, e1, e2, e3, e4, e5, r = 0;
   DIRFILE *D;
   gd_entry_t E, e;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  close(open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666));
+  MAKEFORMATFILE(format, "AconstZ CONST UINT8 3\n/INCLUDE format1 A Z\n");
+  MAKEEMPTYFILE(format1, 0600);
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
 

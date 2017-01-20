@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2015, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -25,19 +25,16 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data.txt";
-  const char *format_data = "data RAW UINT8 8\n";
   unsigned char c[8];
-  int fd, i, n1, n2, e1, e2, r = 0;
+  int i, n1, n2, e1, e2, r = 0;
   DIRFILE *D;
   FILE* stream;
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 8\n");
 
   stream = fopen(data, "w");
   for (i = 0; i < 256; ++i)

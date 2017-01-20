@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2015 D. V. Wiebe
+/* Copyright (C) 2013, 2015, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,22 +20,11 @@
  */
 #include "test.h"
 
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data =
-    "polynom POLYNOM data 0;1 0.5;0.5\n"
-    "data RAW INT8 8\n";
   int8_t d;
   double c[16];
   struct stat buf;
@@ -43,16 +32,17 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   for (i = 0; i < 8; ++i) {
     c[2 * i] = 0.5;
     c[2 * i + 1] = 40 + i + 0.5;
   }
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "polynom POLYNOM data 0;1 0.5;0.5\n"
+    "data RAW INT8 8\n"
+  );
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
   n = gd_putdata(D, "polynom", 5, 0, 1, 0, GD_COMPLEX128, c);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,37 +21,22 @@
 /* Test include */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *subdir = "dirfile/sub";
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/sub/format";
-  const char *format_data = "data RAW UINT8 1\nREFERENCE data\n";
-  const char *format1_data = "mata RAW UINT8 11\nREFERENCE mata\n";
-  int fd, e1, e2, r = 0;
+  int e1, e2, r = 0;
   const char *r1;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
-  mkdir(subdir, 0777);
+  mkdir(filedir, 0700);
+  mkdir(subdir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 1\nREFERENCE data\n");
+  MAKEFORMATFILE(format1, "mata RAW UINT8 11\nREFERENCE mata\n");
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_include_affix(D, "sub/format", 0, "prefix_", NULL, GD_IGNORE_REFS);

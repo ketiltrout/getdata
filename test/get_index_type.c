@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -59,9 +59,9 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
+  MAKEEMPTYFILE(format, 0600);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 

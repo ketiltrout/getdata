@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,14 +21,6 @@
 /* Test endianness */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -36,7 +28,6 @@ int main(void)
   const char *format1 = "dirfile/format1";
   const char *format2 = "dirfile/format2";
   const char *format3 = "dirfile/format3";
-  const char *format_data = "ENDIAN little\nINCLUDE format1\n";
   const char *format_data1 = "ENDIAN big\nINCLUDE format2\n";
   const char *format_data2 = "ENDIAN big arm\nINCLUDE format3\n";
   const char *format_data3 = "ENDIAN little arm\n";
@@ -45,11 +36,9 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "ENDIAN little\nINCLUDE format1\n");
 
   fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data1, strlen(format_data1));

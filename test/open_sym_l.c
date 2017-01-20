@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,13 +21,6 @@
 /* this tests whether _GD_CanonicalPath can deal with symlink loops */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
 #if ! defined HAVE_SYMLINK || defined GD_NO_GETCWD
@@ -43,7 +36,7 @@ int main(void)
   gdtest_getcwd(ptr, cwd, cwd_size);
 
   rmdirfile();
-  mkdir("dirfile", 0777);
+  mkdir("dirfile", 0700);
 
   /* make a bad symlink */
   symlink("link", link);

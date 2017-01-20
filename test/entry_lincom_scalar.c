@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,37 +21,26 @@
 /* Try to read LINCOM entry */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <math.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
+  int n, error, r = 0;
+  DIRFILE *D;
+  gd_entry_t E;
+
+  rmdirfile();
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format,
     "m1 CONST FLOAT64 1\n"
     "b1 CONST FLOAT64 2\n"
     "m2 CONST FLOAT64 3\n"
     "b2 CONST FLOAT64 4\n"
     "m3 CONST FLOAT64 5\n"
     "b3 CONST FLOAT64 6\n"
-    "data LINCOM 3 in1 m1 b1 in2 m2 b2 in3 m3 b3\n";
-  int fd, n, error, r = 0;
-  DIRFILE *D;
-  gd_entry_t E;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+    "data LINCOM 3 in1 m1 b1 in2 m2 b2 in3 m3 b3\n"
+  );
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 

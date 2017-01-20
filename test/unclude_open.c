@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,14 +20,6 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -35,36 +27,18 @@ int main(void)
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
   const char *format2 = "dirfile/format2";
-  const char *format_data = "/INCLUDE format1\na CONST UINT8 1\n";
-  const char *format1_data = "data RAW UINT8 11\n/INCLUDE format2\n";
-  const char *format2_data = "c CONST UINT8 11\n";
-  int fd, ret, e1, e2, unlink_format1, unlink_format2, r = 0;
+  int ret, e1, e2, unlink_format1, unlink_format2, r = 0;
   unsigned int nfields, nfragments;
-  unsigned char data_data[256];
   uint8_t c = 3;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
-
-  fd = open(format2, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format2_data, strlen(format2_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEFORMATFILE(format, "/INCLUDE format1\na CONST UINT8 1\n");
+  MAKEFORMATFILE(format1, "data RAW UINT8 11\n/INCLUDE format2\n");
+  MAKEFORMATFILE(format2, "c CONST UINT8 11\n");
+  MAKEDATAFILE(data, unsigned char, i, 256);
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_putdata(D, "data", 0, 0, 0, 1, GD_UINT8, &c);

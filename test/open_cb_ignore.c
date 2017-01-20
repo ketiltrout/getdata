@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,13 +21,6 @@
 /* Parser check */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 static int saw_callback = 0;
 
 int callback(gd_parser_data_t *pdata gd_unused_, void *extra gd_unused_)
@@ -41,16 +34,13 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "BADDIRECTIVE BADTYPE\n";
-  int fd, error, r = 0;
+  int error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "BADDIRECTIVE BADTYPE\n");
 
   D = gd_cbopen(filedir, GD_RDONLY, callback, NULL);
   error = gd_error(D);

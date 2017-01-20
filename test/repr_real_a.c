@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,42 +18,22 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read argument representation */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-#include <math.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW FLOAT64 1\n";
   double c[8];
-  double data_data[100];
   int i, n, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (i = 0; i < 100; ++i)
-    data_data[i] = sin(i * 3.14159265358979323846 / 5.);
-
-  i = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(i, format_data, strlen(format_data));
-  close(i);
-
-  i = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(i, data_data, 100 * sizeof(double));
-  close(i);
+  MAKEFORMATFILE(format, "data RAW FLOAT64 1\n");
+  MAKEDATAFILE(data, double, sin(i * 3.14159265358979323846 / 5.), 100);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   n = gd_getdata(D, "data.a", 5, 0, 8, 0, GD_FLOAT64, &c);
@@ -68,7 +48,8 @@ int main(void)
   CHECKI(error,0);
   CHECKI(n,8);
   for (i = 0; i < 8; ++i)
-    CHECKFi(i,c[i],(data_data[i] > 0) ? 3.14159265358979323846 : 0);
+    CHECKFi(i,c[i],(sin((5 + i) * 3.14159265358979323846 / 5.) < 0)
+        ? 3.14159265358979323846 : 0);
 
   return r;
 }

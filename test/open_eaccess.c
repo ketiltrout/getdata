@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,13 +20,6 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -35,8 +28,8 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
-  close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0000));
+  mkdir(filedir, 0700);
+  MAKEEMPTYFILE(format, 0000);
 
   /* ensure filesystem honours access */
   if ((fd = open(format, O_RDONLY)) >= 0 || errno != EACCES) {

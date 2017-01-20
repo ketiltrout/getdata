@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -25,16 +25,13 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "data RAW UINT8 1\n/ALIAS rata data\n";
-  int fd, error, r = 0;
+  int error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 1\n/ALIAS rata data\n");
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   error = gd_error(D);

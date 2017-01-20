@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,14 +21,6 @@
 /* CheckStandards Version 5 strictness */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <stdio.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int cb(gd_parser_data_t *pdata, void *ll)
 {
   ((int*)ll)[pdata->linenum - 1] = 1;
@@ -40,35 +32,26 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/ar";
-  const char *format_data =
+  uint16_t c[8];
+  int ll[7] = {0, 0, 0, 0, 0, 0, 0};
+  uint16_t d[8];
+  int n, error, m, error2, i, r = 0;
+  DIRFILE *D;
+
+  memset(c, 0, 8);
+  rmdirfile();
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format,
     "/VERSION 5\n"
     "ENDIAN little\n"
     "X<r RAW UINT8 8\n"
     "/ENCODING raw\n"
     "/REFERENCE ar\n"
     "/PROTECT none\n"
-    "ar RAW UINT8 8\n";
-  uint16_t c[8];
-  int ll[7] = {0, 0, 0, 0, 0, 0, 0};
-  uint16_t d[8];
-  unsigned char data_data[256];
-  int fd, n, error, m, error2, i, r = 0;
-  DIRFILE *D;
-
-  memset(c, 0, 8);
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+    "ar RAW UINT8 8\n"
+  );
+  MAKEDATAFILE(data, unsigned char, i, 256);
 
   D = gd_cbopen(filedir, GD_RDONLY | GD_PEDANTIC, cb, ll);
   n = gd_getdata(D, "ar", 5, 0, 1, 0, GD_UINT16, c);

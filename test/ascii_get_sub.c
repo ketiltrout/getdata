@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,14 +20,6 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -35,26 +27,19 @@ int main(void)
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/sub/format1";
   const char *data = "dirfile/sub/data.txt";
-  const char *format1_data = "data RAW UINT8 8\n";
-  const char *format_data = "/INCLUDE sub/format1\n";
   unsigned char c[8];
-  int fd, i, n, error, r = 0;
+  int i, n, error, r = 0;
   DIRFILE *D;
   FILE* stream;
 
   memset(c, 0, 8);
   rmdirfile();
 
-  mkdir(filedir, 0777);
-  mkdir(subdir, 0777);
+  mkdir(filedir, 0700);
+  mkdir(subdir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
+  MAKEFORMATFILE(format, "/INCLUDE sub/format1\n");
+  MAKEFORMATFILE(format1, "data RAW UINT8 8\n");
 
   stream = fopen(data, "w");
   for (i = 0; i < 256; ++i)

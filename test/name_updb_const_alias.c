@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. V. Wiebe
+/* Copyright (C) 2012-2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,23 +24,21 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = 
-    "early RAW UINT8 c\n"
-    "late RAW UINT8 c\n"
-    "/ALIAS b c\n"
-    "e CONST UINT8 2\n"
-    "/ALIAS c e\n";
-  int fd, e1, e2, e3, e4, r = 0;
+  int e1, e2, e3, e4, r = 0;
   const char *s1, *s2, *s3;
   DIRFILE *D;
   gd_entry_t E;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "early RAW UINT8 c\n"
+    "late RAW UINT8 c\n"
+    "/ALIAS b c\n"
+    "e CONST UINT8 2\n"
+    "/ALIAS c e\n"
+  );
 
   D = gd_open(filedir, GD_RDWR);
   gd_validate(D, "early");

@@ -26,29 +26,21 @@ int main(void)
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
   const char *data = "dirfile/data";
-  const char *format_data = "/INCLUDE format1\ndata RAW UINT16 11";
-  uint16_t d, data_data[128];
+  uint16_t d;
   int fd, i, ret, error, ge_ret, r = 0;
   gd_entry_t E;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 128; ++fd)
-    data_data[fd] = fd * 0x201;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "/INCLUDE format1\ndata RAW UINT16 11");
 #ifdef WORDS_BIGENDIAN
   MAKEFORMATFILE(format1, "ENDIAN little\n");
 #else
   MAKEFORMATFILE(format1, "ENDIAN big\n");
 #endif
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEDATAFILE(data, uint16_t, i * 0x201, 128);
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
   ret = gd_move(D, "data", 1, GD_REN_DATA);

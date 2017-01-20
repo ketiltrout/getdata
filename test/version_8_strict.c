@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -32,7 +32,17 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/ar";
-  const char *format_data =
+  uint16_t c[8];
+  int ll[NLINES];
+  int i, n, error, r = 0;
+  DIRFILE *D;
+
+  memset(c, 0, 16);
+  memset(ll, 0, NLINES * sizeof(int));
+  rmdirfile();
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format,
     "/VERSION 8\n"
     "X<r RAW UINT8 8\n"
     "X.r RAW UINT8 8\n"
@@ -45,28 +55,10 @@ int main(void)
     "/FRAMEOFFSET 3\n"
     "e RECIP ar/c Xr\n"
     "e DIVIDE ar Xr\n"
-    "ar/c CONST COMPLEX128 3;3\n";
-  uint16_t c[8];
-  int ll[NLINES];
-  unsigned char data_data[256];
-  int fd, i, n, error, r = 0;
-  DIRFILE *D;
+    "ar/c CONST COMPLEX128 3;3\n"
+  );
 
-  memset(c, 0, 16);
-  memset(ll, 0, NLINES * sizeof(int));
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEDATAFILE(data, unsigned char, i, 256);
 
   D = gd_cbopen(filedir, GD_RDONLY | GD_PEDANTIC, cb, ll);
   n = gd_getdata(D, "ar", 5, 0, 1, 0, GD_UINT16, c);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,45 +20,24 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
   const char *data = "dirfile/data";
-  const char *format_data = "/INCLUDE format1\ndata RAW UINT8 11";
-  const char *format1_data = "#\n";
-  unsigned char data_data[256];
-  int fd, ret, error, ge_ret, r = 0;
+  int ret, error, ge_ret, r = 0;
   gd_entry_t E;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
+  MAKEFORMATFILE(format, "/INCLUDE format1\ndata RAW UINT8 11");
+  MAKEFORMATFILE(format1, "#\n");
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEDATAFILE(data, unsigned char, i, 256);
 
   ret = gd_move(D, "data", 1, GD_REN_DATA);
   error = gd_error(D);

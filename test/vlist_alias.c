@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,35 +21,25 @@
 /* Retreiving the number of fields of a field should succeed cleanly */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
+  int i, error, r = 0;
+  const char **field_list;
+  DIRFILE *D;
+
+  rmdirfile();
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format,
     "data1 RAW UINT8 1\n"
     "data2 RAW UINT8 1\n"
     "data3 RAW UINT8 1\n"
     "/ALIAS alias1 data3\n"
     "/ALIAS alias2 data4\n"
-    "data4 CONST UINT8 1\n";
-  int fd, i, error, r = 0;
-  const char **field_list;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+    "data4 CONST UINT8 1\n"
+  );
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   field_list = gd_vector_list(D);

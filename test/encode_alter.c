@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,25 +21,14 @@
 /* Test encoding */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <inttypes.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *txtdata = "dirfile/data.txt";
-  const char *format_data = "data RAW UINT16 8\nENCODING none\n";
   const char *txt_data =
     "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n";
-  uint16_t data_data[128];
   uint16_t c[8];
   int fd, ret, error, r = 0;
   off_t n;
@@ -47,22 +36,15 @@ int main(void)
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 128; ++fd)
-    data_data[fd] = 0x201 * fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT16 8\nENCODING none\n");
 
   fd = open(txtdata, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, txt_data, strlen(txt_data));
   close(fd);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEDATAFILE(data, uint16_t, 0x201 * i, 128);
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   ret = gd_alter_encoding(D, GD_TEXT_ENCODED, 0, 0);

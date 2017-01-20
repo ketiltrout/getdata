@@ -1,4 +1,4 @@
-/* Copyright (C) 2015, 2016 D. V. Wiebe
+/* Copyright (C) 2015, 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -37,7 +37,7 @@ int main(void)
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   for (i = 0; i < 8; ++i)
     c[i] = 1.234 * i;

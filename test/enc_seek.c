@@ -1,4 +1,4 @@
-/* Copyright (C) 2015, 2016 D. V. Wiebe
+/* Copyright (C) 2015, 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -35,7 +35,7 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   MAKEFORMATFILE(format, "data RAW UINT16 8\n");
   MAKEDATAFILE(data, uint16_t, i, 256);

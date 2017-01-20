@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2015, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,24 +20,19 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data.sie";
-  const char *format_data = "/ENCODING sie\n/ENDIAN little\n";
   unsigned char c[] = {1, 1, 2, 1};
   DIRFILE *D;
-  int fd, n1, n2, r = 0;
+  int n1, n2, r = 0;
 
   rmdirfile();
-  mkdir(filedir, 0777); 
+  mkdir(filedir, 0700); 
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "/ENCODING sie\n/ENDIAN little\n");
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_add_raw(D, "data", GD_UINT8, 1, 0);

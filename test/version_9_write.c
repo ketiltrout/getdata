@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013, 2014, 2016 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2014, 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -36,12 +36,11 @@ int main(void)
 
   memset(c, 0, 16);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   MAKEFORMATFILE(format[0],
       "/VERSION 8\n"
       "/INCLUDE format1\n");
-
   MAKEFORMATFILE(format[1],
       "/VERSION 9\n"
       "Xr RAW COMPLEX128 0xA\n"
@@ -56,7 +55,6 @@ int main(void)
       "/ALIAS d z\n"
       "/HIDDEN Xy\n"
       );
-
   MAKEFORMATFILE(format[2], "/INCLUDE format3 \"\" Y\n");
   MAKEFORMATFILE(format[3], "/ALIAS d INDEX\n/HIDDEN d\n");
   MAKEFORMATFILE(format[4], "/ALIAS n m\n");

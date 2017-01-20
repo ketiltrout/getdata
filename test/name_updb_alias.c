@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. V. Wiebe
+/* Copyright (C) 2012-2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,7 +24,15 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = 
+  int e0, e1, e2, e3, e4, e5, e6, r = 0;
+  const char *s1, *s2, *s3, *s4, *s5, *s6;
+  gd_entry_t E;
+  DIRFILE *D;
+
+  rmdirfile();
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format,
     "early  PHASE cata 0\n"
     "earlya PHASE data 0\n"
     "/ALIAS aata cata\n"
@@ -32,18 +40,8 @@ int main(void)
     "late   PHASE cata 0\n"
     "latea  PHASE data 0\n"
     "cata RAW UINT8 8\n"
-    "/ALIAS data cata\n";
-  int fd, e0, e1, e2, e3, e4, e5, e6, r = 0;
-  const char *s1, *s2, *s3, *s4, *s5, *s6;
-  gd_entry_t E;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+    "/ALIAS data cata\n"
+  );
 
   D = gd_open(filedir, GD_RDWR);
   gd_validate(D, "early");

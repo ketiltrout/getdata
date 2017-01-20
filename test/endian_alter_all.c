@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,39 +20,24 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <inttypes.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
-  const char *format_data =
-    "data RAW UINT16 8\n"
-    "/ENDIAN little\n"
-    "/INCLUDE format1\n";
-  const char *format1_data = "data1 RAW UINT16 8\n/ENDIAN little arm\n";
   unsigned long e0, e1, e2, e3;
-  int fd, ret, error, r = 0;
+  int ret, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "data RAW UINT16 8\n"
+    "/ENDIAN little\n"
+    "/INCLUDE format1\n"
+  );
+  MAKEFORMATFILE(format1, "data1 RAW UINT16 8\n/ENDIAN little arm\n");
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   e0 = gd_endianness(D, 0);

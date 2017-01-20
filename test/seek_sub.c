@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,13 +20,6 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -34,31 +27,17 @@ int main(void)
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/sub/format1";
   const char *data = "dirfile/sub/data";
-  const char *format_data = "/INCLUDE sub/format1\n";
-  const char *format1_data = "data RAW UINT8 8\n";
-  unsigned char data_data[256];
-  int fd, e1, e2, r = 0;
+  int e1, e2, r = 0;
   off_t m, n;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
-  mkdir(subdir, 0777);
+  mkdir(filedir, 0700);
+  mkdir(subdir, 0700);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEFORMATFILE(format, "/INCLUDE sub/format1\n");
+  MAKEFORMATFILE(format1, "data RAW UINT8 8\n");
+  MAKEDATAFILE(data, unsigned char, i, 256);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   m = gd_seek(D, "data", 6, 0, GD_SEEK_SET);

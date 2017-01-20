@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -25,7 +25,6 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data.sie";
-  const char *format_data = "data RAW UINT8 8\n/ENCODING sie\n/ENDIAN big\n";
   unsigned char c[16];
   const uint8_t data_data[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x12,
@@ -36,11 +35,9 @@ int main(void)
   int fd, e1, e2, r = 0;
 
   rmdirfile();
-  mkdir(filedir, 0777); 
+  mkdir(filedir, 0700); 
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 8\n/ENCODING sie\n/ENDIAN big\n");
 
   D = gd_open(filedir, GD_RDONLY);
   gd_getdata(D, "data", 3, 0, 2, 0, GD_UINT8, c);

@@ -115,6 +115,14 @@ int gd_system(const char* command)
         __VA_ARGS__); } \
   } while(0)
 
+/* Create an empty file with mode m */
+#define MAKEEMPTYFILE(f,m) \
+  do { \
+    int fd = open(f, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, m); \
+    if (fd < 0) { perror("open"); exit(1); } \
+    if (close(fd)) { perror("close"); exit(1); } \
+  } while (0)
+
 /* Write string literal t to format file f. */
 #define MAKEFORMATFILE(f,t) \
   do { \

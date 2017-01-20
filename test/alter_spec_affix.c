@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -26,30 +26,16 @@ int main(void)
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
   const char *data = "dirfile/data";
-  const char *format_data = "/INCLUDE format1 A Z\n";
-  const char *format1_data = "data RAW UINT8 1\n";
-  unsigned char data_data[256];
-  int fd, ret, error, r = 0;
+  int ret, error, r = 0;
   off64_t n;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEFORMATFILE(format, "/INCLUDE format1 A Z\n");
+  MAKEFORMATFILE(format1, "data RAW UINT8 1\n");
+  MAKEDATAFILE(data, unsigned char, i, 256);
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   ret = gd_alter_spec(D, "AdataZ RAW UINT16 4\n", 0);

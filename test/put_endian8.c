@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,15 +20,6 @@
  */
 /* Attempt to write UINT8 with the opposite endianness */
 #include "test.h"
-
-#include <inttypes.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
 
 static int BigEndian(void)
 {
@@ -52,7 +43,7 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777); 
+  mkdir(filedir, 0700); 
 
   sprintf(format_data, "data RAW UINT8 1\nENDIAN %s\n", (big_endian)
       ? "little" : "big");

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,31 +21,20 @@
 /* Truncating a read-only dirfile should fail cleanly */
 #include "test.h"
 
-#include <stdlib.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
-  const char *format_data = "/INCLUDE format1\n";
-  int error, fd, r = 0;
+  int error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0444);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  close(open(format1, O_CREAT | O_EXCL | O_WRONLY, 0444));
-  chmod(filedir, 0555);
+  MAKEFORMATFILE(format, "/INCLUDE format1\n");
+  MAKEEMPTYFILE(format1, 0400);
+  chmod(filedir, 0500);
 
   /* ensure filesystem honours read-onlyness */
   if (!unlink(format1) || errno != EACCES) {
@@ -58,7 +47,7 @@ int main(void)
   error = gd_error(D);
   gd_discard(D);
 
-  chmod(filedir, 0777);
+  chmod(filedir, 0700);
   unlink(format1);
   unlink(format);
   rmdir(filedir);

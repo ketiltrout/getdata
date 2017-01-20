@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,31 +21,19 @@
 /* Test field modifying */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <inttypes.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "carray CARRAY FLOAT32 8.3 7.2 6.1 5.0 3.9 2.8 1.7\n";
-  int fd, i, ret, error, n, r = 0;
+  int i, ret, error, n, r = 0;
   size_t z;
   DIRFILE *D;
   double d[5];
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "carray CARRAY FLOAT32 8.3 7.2 6.1 5.0 3.9 2.8 1.7\n");
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   ret = gd_alter_carray(D, "carray", GD_NULL, 5);

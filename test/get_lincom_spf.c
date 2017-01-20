@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,15 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read LINCOM */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
 
 int main(void)
 {
@@ -34,33 +26,22 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *cata = "dirfile/cata";
-  const char *format_data = "lincom LINCOM 2 data 2 3 cata 1 0\n"
-    "data RAW UINT8 2\n"
-    "cata RAW UINT8 3\n";
   unsigned char c[10];
-  unsigned char data_data[256];
-  int fd, n, error, r = 0;
+  int n, error, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 10);
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
-
-  fd = open(cata, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEFORMATFILE(format,
+    "lincom LINCOM 2 data 2 3 cata 1 0\n"
+    "data RAW UINT8 2\n"
+    "cata RAW UINT8 3\n"
+  );
+  MAKEDATAFILE(data, unsigned char, i, 256);
+  MAKEDATAFILE(cata, unsigned char, i, 256);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   n = gd_getdata(D, "lincom", 5, 0, 5, 0, GD_UINT8, &c);

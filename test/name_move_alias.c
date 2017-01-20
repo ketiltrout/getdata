@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013, 2016 D. V. Wiebe
+/* Copyright (C) 2012-2013, 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -36,7 +36,7 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   MAKEFORMATFILE(format,
       "cata RAW UINT8 8\n/ALIAS data cata\neata RAW UINT8 8\n");

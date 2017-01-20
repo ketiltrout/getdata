@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -29,7 +29,7 @@ int main(void)
   gd_type_t t1, t2, t3, t4;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   MAKEFORMATFILE(format,
       "code RAW UINT64 1\n"

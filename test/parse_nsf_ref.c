@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,31 +20,22 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
-    "/NAMESPACE ns\n"
-    "data RAW UINT8 1\n"
-    "/REFERENCE data\n";
-  int fd, e1, e2, r = 0;
+  int e1, e2, r = 0;
   const char *ref;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "/NAMESPACE ns\n"
+    "data RAW UINT8 1\n"
+    "/REFERENCE data\n"
+  );
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   e1 = gd_error(D);

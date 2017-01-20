@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -35,7 +35,6 @@ int main(void)
       "data RAW UINT8 8\n"
       "/FRAMEOFFSET 13\n"
       "/PROTECT format\n");
-
   MAKEDATAFILE(data, uint8_t, i, 256);
 
   D = gd_open(filedir, GD_RDWR);

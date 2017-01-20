@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,34 +20,28 @@
  */
 #include "test.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data =
-    "indir INDIR data carray\n"
-    "carray CARRAY INT8 1 2 3 4 5 6 7 8 9 0\n"
-    "data RAW INT8 8\n";
   int8_t c[8];
   struct stat buf;
-  int fd, i, n, e1, e2, r = 0;
+  int i, n, e1, e2, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   for (i = 0; i < 8; ++i)
     c[i] = (int8_t)(40 + i);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "indir INDIR data carray\n"
+    "carray CARRAY INT8 1 2 3 4 5 6 7 8 9 0\n"
+    "data RAW INT8 8\n"
+  );
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
   n = gd_putdata(D, "indir", 5, 0, 1, 0, GD_INT8, c);

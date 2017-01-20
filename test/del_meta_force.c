@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,35 +21,26 @@
 /* Attempt to delete a field */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "data RAW UINT8 8\n"
+  int ret, error, nf, r = 0;
+  DIRFILE *D;
+
+  rmdirfile();
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format,
+    "data RAW UINT8 8\n"
     "META data e STRING 1\n"
     "META data q STRING 2\n"
     "META data a STRING 3\n"
     "META data b STRING 4\n"
     "META data z STRING 5\n"
     "META data l STRING 6\n"
-    "s STRING e\n";
-  int fd, ret, error, nf, r = 0;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+    "s STRING e\n"
+  );
 
   D = gd_open(filedir, GD_RDWR);
   ret = gd_delete(D, "data", GD_DEL_META);

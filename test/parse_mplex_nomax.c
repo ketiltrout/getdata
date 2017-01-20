@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. V. Wiebe
+/* Copyright (C) 2012-2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,17 +24,14 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "data MPLEX in1 in2 6\n";
-  int fd, e1, e2, r = 0;
+  int e1, e2, r = 0;
   gd_entry_t E;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data MPLEX in1 in2 6\n");
 
   D = gd_open(filedir, GD_RDONLY);
   e1 = gd_error(D);

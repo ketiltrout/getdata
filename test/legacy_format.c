@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,13 +20,6 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
 #ifndef GD_LEGACY_API
@@ -34,7 +27,15 @@ int main(void)
 #else
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
+  int i, error = 0, r = 0;
+  double three = 3.;
+  int *three_ptr = (void*)(&three);
+  struct FormatType *f;
+
+  rmdirfile();
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format,
     "bit BIT raw 5 6\n"
     "const CONST UINT8 1\n"
     "carray CARRAY UINT8 1 2 3\n"
@@ -49,18 +50,8 @@ int main(void)
     "recip RECIP sbit 3\n"
     "sbit SBIT raw 7 8\n"
     "window WINDOW raw phase LE 3\n"
-    "/FRAMEOFFSET 12\n";
-  int fd, i, error = 0, r = 0;
-  double three = 3.;
-  int *three_ptr = (void*)(&three);
-  struct FormatType *f;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+    "/FRAMEOFFSET 12\n"
+  );
 
   f = GetFormat(filedir, &error);
   CHECKI(error, 0);

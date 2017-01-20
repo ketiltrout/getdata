@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -22,32 +22,19 @@
 #define GD_C89_API
 #include "test.h"
 
-#include <math.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
-    "lincom LINCOM data 3.3;4.4 5.5;6.6 data 7.7;8.8 9.9;1.1\n";
-  int fd, error, error2, error3, r = 0;
+  int error, error2, error3, r = 0;
   const double ca[] = { 2.1, 3.2, 4.3, 5.4, 6.5, 7.6 };
   gd_entry_t E;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "lincom LINCOM data 3.3;4.4 5.5;6.6 data 7.7;8.8 9.9;1.1\n");
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_entry(D, "lincom", &E);

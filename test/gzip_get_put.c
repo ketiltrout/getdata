@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,15 +21,6 @@
 /* Attempt to write UINT8 */
 #include "test.h"
 
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
 #ifndef TEST_GZIP
@@ -39,7 +30,6 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data_gz = "dirfile/data.gz";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT8 8\n";
   const unsigned char gzdata[279] = {
     0x1f, 0x8b, 0x08, 0x00, 0x0d, 0x87, 0xb0, 0x4e,
     0x00, 0x03, 0x01, 0x00, 0x01, 0xff, 0xfe, 0x00,
@@ -87,14 +77,12 @@ int main(void)
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   for (i = 0; i < 8; ++i)
     d[i] = (uint8_t)(80 + i);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 8\n");
 
   fd = open(data_gz, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, gzdata, 279);

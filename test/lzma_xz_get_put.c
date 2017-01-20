@@ -1,4 +1,4 @@
-/* Copyright (C) 2014, 2015 D. V. Wiebe
+/* Copyright (C) 2014, 2015, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -29,7 +29,6 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data_xz = "dirfile/data.xz";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT8 8\n";
   const unsigned char xzdata[300] = {
     0xfd, 0x37, 0x7a, 0x58, 0x5a, 0x00, 0x00, 0x04,
     0xe6, 0xd6, 0xb4, 0x46, 0x02, 0x00, 0x21, 0x01,
@@ -79,14 +78,12 @@ int main(void)
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   for (i = 0; i < 8; ++i)
     d[i] = (uint8_t)(80 + i);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 8\n");
 
   fd = open(data_xz, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, xzdata, 300);

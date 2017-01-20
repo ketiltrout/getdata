@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -26,30 +26,20 @@ int main(void)
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
   const char *format2 = "dirfile/format2";
-  const char *format_data =
-    "/INCLUDE format1\n"
-    "/INCLUDE format2\n"
-    "a CONST UINT8 1\n";
-  const char *format1_data = "b CONST UINT8 11\n";
-  const char *format2_data = "c CONST UINT8 11\n";
   int f, ret, e1, e2, unlink_format1, unlink_format2, r = 0;
   unsigned int nfields, nfragments;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  f = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(f, format_data, strlen(format_data));
-  close(f);
-
-  f = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(f, format1_data, strlen(format1_data));
-  close(f);
-
-  f = open(format2, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(f, format2_data, strlen(format2_data));
-  close(f);
+  MAKEFORMATFILE(format,
+    "/INCLUDE format1\n"
+    "/INCLUDE format2\n"
+    "a CONST UINT8 1\n"
+  );
+  MAKEFORMATFILE(format1, "b CONST UINT8 11\n");
+  MAKEFORMATFILE(format2, "c CONST UINT8 11\n");
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   ret = gd_uninclude(D, 1, 0);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,15 +21,12 @@
 /* Attempt to compress an SIE file */
 #include "test.h"
 
-#include <stdlib.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data_sie = "dirfile/data.sie";
   const char *data_raw = "dirfile/data";
-  const char *format_data = "data RAW UINT8 8\n/ENCODING none\n/ENDIAN little\n";
   uint8_t check[27];
   const uint8_t data_out[] = {
     0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12,
@@ -48,11 +45,9 @@ int main(void)
   int fd, i, e1, e2, r = 0, unlink_data_sie, unlink_data_raw;
 
   rmdirfile();
-  mkdir(filedir, 0777); 
+  mkdir(filedir, 0700); 
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 8\n/ENCODING none\n/ENDIAN little\n");
 
   fd = open(data_raw, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_in, 0x31 * sizeof(unsigned char));

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013, 2016 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,22 +24,21 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "data RAW UINT8 8\n"
+  int ret, error, r = 0;
+  DIRFILE *D;
+
+  rmdirfile();
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format,
+    "data RAW UINT8 8\n"
     "META data e CONST UINT8 1\n"
     "META data q CONST UINT8 2\n"
     "META data a CONST UINT8 3\n"
     "META data b CONST UINT8 4\n"
     "META data z CONST UINT8 5\n"
-    "META data l CONST UINT8 6\n";
-  int fd, ret, error, r = 0;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+    "META data l CONST UINT8 6\n"
+  );
 
   D = gd_open(filedir, GD_RDWR);
   ret = gd_delete(D, "data", 0);

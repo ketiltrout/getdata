@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013, 2016 D. V. Wiebe
+/* Copyright (C) 2012-2013, 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -40,7 +40,7 @@ int main(void)
   gd_entry_t E;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   MAKEFORMATFILE(format,
     "early PHASE cata 0\n"

@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,36 +21,25 @@
 /* Try to read LINCOM entry */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <math.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
-    "a0 CONST FLOAT64 1\n"
-    "a1 CONST FLOAT64 2\n"
-    "a2 CONST FLOAT64 3\n"
-    "a3 CONST FLOAT64 4\n"
-    "a4 CONST FLOAT64 5\n"
-    "data POLYNOM in a0 a1 a2 a3 a4\n";
   int fd, n, error, r = 0;
   DIRFILE *D;
   gd_entry_t E;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "a0 CONST FLOAT64 1\n"
+    "a1 CONST FLOAT64 2\n"
+    "a2 CONST FLOAT64 3\n"
+    "a3 CONST FLOAT64 4\n"
+    "a4 CONST FLOAT64 5\n"
+    "data POLYNOM in a0 a1 a2 a3 a4\n"
+  );
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 

@@ -42,7 +42,7 @@ int main(void)
   mkdir(filedir, 0700);
 
   MAKEFORMATFILE(format, "data RAW UINT64 8\n");
-  MAKEDATAFILE(data, uint64_t, i * 0x01020304, 256);
+  MAKEDATAFILE(data, uint64_t, i * 0x01020304LU, 256);
 
 #ifdef WORDS_BIGENDIAN
 #define ENDIANNESS "--endian=big"

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,15 +21,6 @@
 /* Attempt to read UINT8 */
 #include "test.h"
 
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-
 int main(void)
 {
 #if !defined USE_GZIP || !defined TEST_GZIP
@@ -39,28 +30,18 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *gzipdata = "dirfile/data.gz";
-  const char *format_data = "data RAW UINT16 8\n";
   uint16_t c1[8], c2[8];
   char command[4096];
-  uint16_t data_data[256];
-  int fd, i, n1, error1, n2, error2, r = 0;
+  int i, n1, error1, n2, error2, r = 0;
   DIRFILE *D;
 
   memset(c1, 0, 16);
   memset(c2, 0, 16);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256 * sizeof(uint16_t));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT16 8\n");
+  MAKEDATAFILE(data, uint16_t, i, 256);
 
   /* compress */
   snprintf(command, 4096, "%s -f %s > /dev/null", GZIP, data);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,39 +21,20 @@
 /* Attempt to read SBIT */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <inttypes.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data = "bit SBIT data 7 4\ndata RAW UINT16 1\n";
   int16_t c[10];
-  uint16_t data_data[256];
   int fd, n, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = 0x0101 * (uint16_t)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256 * sizeof(uint16_t));
-  close(fd);
+  MAKEFORMATFILE(format, "bit SBIT data 7 4\ndata RAW UINT16 1\n");
+  MAKEDATAFILE(data, uint16_t, 0x0101 * (uint16_t)i, 256);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   n = gd_getdata(D, "bit", 5, 0, 10, 0, GD_INT16, c);

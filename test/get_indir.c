@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,38 +20,25 @@
  */
 #include "test.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data =
-    "indir INDIR data carray\n"
-    "carray CARRAY INT32 10 20 30 11 21 31 12 22 32 13 23 33 14 24 34\n"
-    "data RAW UINT8 8\n";
   int32_t c[8];
   int32_t val[8] = {23, 33, 14, 24, 34, 0, 0, 0};
-  unsigned char data_data[256];
-  int i, fd, n, error, r = 0;
+  int i, n, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)(fd + 2);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEFORMATFILE(format,
+    "indir INDIR data carray\n"
+    "carray CARRAY INT32 10 20 30 11 21 31 12 22 32 13 23 33 14 24 34\n"
+    "data RAW UINT8 8\n"
+  );
+  MAKEDATAFILE(data, unsigned char, (i + 2), 256);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   n = gd_getdata(D, "indir", 1, 0, 1, 0, GD_INT32, &c);

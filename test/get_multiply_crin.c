@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,35 +21,25 @@
 /* Attempt to read MULTIPLY */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data = "mult MULTIPLY data INDEX\ndata RAW COMPLEX128 1\n";
   double c[16];
   double data_data[512];
   int i, n, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   for (i = 0; i < 256; ++i) {
     data_data[i * 2] = (double)i;
     data_data[i * 2 + 1] = (double)i / 256.;
   }
 
-  i = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(i, format_data, strlen(format_data));
-  close(i);
+  MAKEFORMATFILE(format, "mult MULTIPLY data INDEX\ndata RAW COMPLEX128 1\n");
 
   i = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(i, data_data, 512 * sizeof(double));

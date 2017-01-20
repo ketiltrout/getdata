@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,22 +24,20 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
-    "data1 STRING UINT8 1\n"
-    "data2 STRING UINT8 1\n"
-    "/HIDDEN data2\n"
-    "data3 STRING UINT8 1\n"
-    "data4 CONST UINT8 1\n";
-  int fd, i, error, r = 0;
+  int i, error, r = 0;
   const char **field_list;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "data1 STRING UINT8 1\n"
+    "data2 STRING UINT8 1\n"
+    "/HIDDEN data2\n"
+    "data3 STRING UINT8 1\n"
+    "data4 CONST UINT8 1\n"
+  );
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   field_list = gd_field_list_by_type(D, GD_STRING_ENTRY);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,24 +24,22 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
+  int error, r = 0;
+  const char ***field_list;
+  DIRFILE *D;
+
+  rmdirfile();
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format,
     "data0 SARRAY sierra tango uniform victor whiskey xray yankee zulu\n"
     "parent SARRAY nil\n"
     "parent/data1 SARRAY alfa bravo charlie delta echo\n"
     "parent/data2 SARRAY foxtrot golf hotel india juliet kilo\n"
     "parent/data3 SARRAY lima mike november oscar papa quebec romeo\n"
     "META parent data4 LINTERP UINT8 1\n"
-    "/ALIAS parent/data5 data0\n";
-  int j, error, r = 0;
-  const char ***field_list;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  j = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(j, format_data, strlen(format_data));
-  close(j);
+    "/ALIAS parent/data5 data0\n"
+  );
 
   D = gd_open(filedir, GD_RDONLY);
   field_list = gd_msarrays(D, "parent/data1");

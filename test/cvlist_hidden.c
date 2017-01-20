@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013, 2015 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2015, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,7 +24,14 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
+  int i, error, r = 0;
+  const uint8_t *data;
+  DIRFILE *D;
+
+  rmdirfile();
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format,
     "data1 CONST UINT8 2\n"
     "data2 CONST UINT8 4\n"
     "/HIDDEN data2\n"
@@ -32,17 +39,8 @@ int main(void)
     "/ALIAS data4 data2\n"
     "data5 CONST UINT8 5\n"
     "/ALIAS data6 data5\n"
-    "/HIDDEN data6\n";
-  int i, error, r = 0;
-  const uint8_t *data;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  i = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(i, format_data, strlen(format_data));
-  close(i);
+    "/HIDDEN data6\n"
+  );
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   data = (const uint8_t *)gd_constants(D, GD_UINT8);

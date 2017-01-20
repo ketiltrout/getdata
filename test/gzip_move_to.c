@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,18 +20,12 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data_gz = "dirfile/data.gz";
   const char *data_raw = "dirfile/data";
-  const char *format_data = "data RAW UINT8 8\n/ENCODING none\n/ENDIAN little\n";
   uint8_t data_in[256];
   DIRFILE *D;
 #ifdef USE_GZIP
@@ -43,14 +37,12 @@ int main(void)
   struct stat buf;
 
   rmdirfile();
-  mkdir(filedir, 0777); 
+  mkdir(filedir, 0700); 
 
   for (fd = 0; fd < 256; ++fd)
     data_in[fd] = (unsigned char)fd;
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 8\n/ENCODING none\n/ENDIAN little\n");
 
   fd = open(data_raw, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_in, 256);

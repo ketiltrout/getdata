@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,40 +20,22 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *table = "dirfile/table";
-  const char *format_data = "linterp LINTERP data ./table\ndata RAW UINT8 1\n";
   unsigned char c = 0;
-  unsigned char data_data[64];
-  int fd, n, error, r = 0;
+  int n, error, r = 0;
   DIRFILE *D;
   FILE *t;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 64; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 64);
-  close(fd);
+  MAKEFORMATFILE(format, "linterp LINTERP data ./table\ndata RAW UINT8 1\n");
+  MAKEDATAFILE(data, unsigned char, i, 64);
 
   t = fopen(table, "wt");
   fputs("0 0\n", t);

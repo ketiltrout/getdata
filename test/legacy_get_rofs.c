@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,13 +21,6 @@
 /* Attempt to read UINT8 from a read-only filesystem via the legacy interface */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
 #ifndef GD_LEGACY_API
@@ -36,17 +29,12 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT8 8\n";
   unsigned char c[8];
-  unsigned char data_data[256];
   int fd, i, n, error, r = 0;
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
-
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
+  mkdir(filedir, 0700);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0444);
   write(fd, format_data, strlen(format_data));

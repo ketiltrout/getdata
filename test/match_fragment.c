@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013, 2016 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -38,7 +38,6 @@ int main(void)
       "data2 RAW UINT8 1\n"
       "/HIDDEN data2\n"
       "/INCLUDE format1\n");
-
   MAKEFORMATFILE(format1, "data3 RAW UINT8 1\n");
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. V. Wiebe
+/* Copyright (C) 2012-2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -26,37 +26,20 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *count = "dirfile/count";
-  const char *format_data =
-    "mplex MPLEX data count 7 8\n"
-    "count RAW UINT8 8\n"
-    "data RAW UINT8 8\n";
   unsigned char c[8];
-  unsigned char data_data[256];
-  int fd, n, i, e1, e2, r = 0;
+  int n, i, e1, e2, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-  data_data[0] = 111;
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
-
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] %= 3;
-  data_data[0] = 7;
-
-  fd = open(count, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEFORMATFILE(format,
+    "mplex MPLEX data count 7 8\n"
+    "count RAW UINT8 8\n"
+    "data RAW UINT8 8\n"
+  );
+  MAKEDATAFILE(data, unsigned char, i ? i : 111, 256);
+  MAKEDATAFILE(count, unsigned char, i ? i % 3 : 7, 256);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   gd_mplex_lookback(D, GD_LOOKBACK_ALL);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2015, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,38 +20,26 @@
  */
 #include "test.h"
 
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data.txt";
-  const char *format_data = "data RAW UINT8 8\n";
   uint8_t c[8];
   int d, n1, n2, e1, e2, e3;
-  int fd, i, r = 0;
+  int i, r = 0;
   struct stat buf;
   FILE* stream;
   DIRFILE *D;
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   for (i = 0; i < 8; ++i)
     c[i] = (uint8_t)(40 + i);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 8\n");
 
   D = gd_open(filedir, GD_RDWR | GD_TEXT_ENCODED | GD_VERBOSE);
   n1 = gd_seek(D, "data", 5, 0, GD_SEEK_SET | GD_SEEK_WRITE);

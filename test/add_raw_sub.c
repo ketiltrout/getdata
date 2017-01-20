@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,14 +20,6 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <stdio.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -35,23 +27,16 @@ int main(void)
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/sub/format1";
   const char *data = "dirfile/sub/data";
-  const char *format_data = "/INCLUDE sub/format1\n";
-  const char *format1_data = "#\n";
   gd_entry_t e;
-  int error, fd, r = 0;
+  int error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
-  mkdir(subdir, 0777);
+  mkdir(filedir, 0700);
+  mkdir(subdir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
+  MAKEFORMATFILE(format, "/INCLUDE sub/format1\n");
+  MAKEFORMATFILE(format1, "#\n");
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE | GD_UNENCODED);
   gd_add_raw(D, "data", GD_UINT8, 2, 1);

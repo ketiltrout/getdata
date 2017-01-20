@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2015 D. V. Wiebe
+/* Copyright (C) 2013, 2015, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -23,14 +23,6 @@
  * garbage collection in _GD_ReleaseDir */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
 #if defined GD_NO_GETCWD
@@ -44,7 +36,6 @@ int main(void)
   const char *format_data1 = "linterp LINTERP data ";
   const char *format_data2 = "/dirfile/lut/table\ndata RAW UINT8 1\n";
   unsigned char c = 0;
-  unsigned char data_data[64];
   int fd, i, n, error, r = 0;
   DIRFILE *D;
   FILE *t;
@@ -52,8 +43,8 @@ int main(void)
   char *ptr, *cwd = NULL;
 
   rmdirfile();
-  mkdir(filedir, 0777);
-  mkdir(lutdir, 0777);
+  mkdir(filedir, 0700);
+  mkdir(lutdir, 0700);
 
   gdtest_getcwd(ptr, cwd, cwd_size);
 
@@ -63,12 +54,7 @@ int main(void)
   write(fd, format_data2, strlen(format_data2));
   close(fd);
 
-  for (fd = 0; fd < 64; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 64);
-  close(fd);
+  MAKEDATAFILE(data, unsigned char, i, 64);
 
   t = fopen(table, "wt");
   for (i = 0; i < 30; ++i)

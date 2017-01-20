@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. V. Wiebe
+/* Copyright (C) 2012-2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -26,35 +26,20 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *count = "dirfile/count";
-  const char *format_data =
-    "mplex MPLEX data count 1 3\n"
-    "count RAW UINT8 8\n"
-    "data RAW UINT8 8\n";
   unsigned char c[8], d[8];
-  unsigned char data_data[256];
   int i, n, m, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  i = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(i, format_data, strlen(format_data));
-  close(i);
-
-  for (i = 0; i < 256; ++i)
-    data_data[i] = (unsigned char)i;
-
-  i = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(i, data_data, 256);
-  close(i);
-
-  for (i = 0; i < 256; ++i)
-    data_data[i] %= 3;
-
-  i = open(count, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(i, data_data, 256);
-  close(i);
+  MAKEFORMATFILE(format,
+    "mplex MPLEX data count 1 3\n"
+    "count RAW UINT8 8\n"
+    "data RAW UINT8 8\n"
+  );
+  MAKEDATAFILE(data, unsigned char, i, 256);
+  MAKEDATAFILE(count, unsigned char, i % 3, 256);
 
   for (i = 0; i < 8; ++i)
     d[i] = 80 + i;

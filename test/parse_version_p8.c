@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -27,23 +27,17 @@ int main(void)
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
   const char *data = "dirfile/ar";
-  const char *format_data =
-    "/INCLUDE format1\n"
-    "r.d RECIP a b EQ 1.\n";
-  const char *format1_data = "/VERSION 8\n";
-  int fd, error, r = 0;
+  int error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "/INCLUDE format1\n"
+    "r.d RECIP a b EQ 1.\n"
+  );
+  MAKEFORMATFILE(format1, "/VERSION 8\n");
 
   D = gd_open(filedir, GD_RDONLY);
   error = gd_error(D);

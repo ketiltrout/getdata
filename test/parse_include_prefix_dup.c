@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -25,21 +25,14 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
-  const char *format_data = "INCLUDE format1 pre\npredata RAW UINT8 1\n";
-  const char *format1_data = "data RAW UINT8 11\n";
-  int fd, e, r = 0;
+  int e, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
+  MAKEFORMATFILE(format, "INCLUDE format1 pre\npredata RAW UINT8 1\n");
+  MAKEFORMATFILE(format1, "data RAW UINT8 11\n");
 
   D = gd_open(filedir, GD_RDONLY);
   e = gd_error(D);

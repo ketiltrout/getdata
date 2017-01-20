@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -29,7 +29,6 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data_bz2 = "dirfile/data.bz2";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT8 8\n";
   uint8_t c[8];
   char command[4096];
   uint8_t d;
@@ -39,14 +38,12 @@ int main(void)
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   for (i = 0; i < 8; ++i)
     c[i] = (uint8_t)(40 + i);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 8\n");
 
   D = gd_open(filedir, GD_RDWR | GD_BZIP2_ENCODED | GD_VERBOSE);
   gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);

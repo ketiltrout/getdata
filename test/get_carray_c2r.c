@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,29 +20,18 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <math.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "carray CARRAY COMPLEX128 8.3;7.2 6.1;5.0 3.9;2.8 1.7;0.6\n";
   double c[4];
-  int fd, i, n, error, r = 0;
+  int i, n, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "carray CARRAY COMPLEX128 8.3;7.2 6.1;5.0 3.9;2.8 1.7;0.6\n");
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   n = gd_get_carray(D, "carray", GD_FLOAT64, c);

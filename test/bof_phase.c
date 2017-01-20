@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,42 +20,31 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
-  const char *format_data =
+  int error1, error2, error3, error4, r = 0;
+  off_t bof_phase, bof_phase2, bof_lincom, bof_lincom2;
+  DIRFILE *D;
+
+  rmdirfile();
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format,
     "data RAW UINT16 5\n"
     "phase PHASE data 3\n"
     "/FRAMEOFFSET 35\n"
     "lincom LINCOM 2 phase2 1. 0. phase 1. 0.\n"
     "lincom2 LINCOM 2 phase 1. 0. phase2 1. 0.\n"
-    "INCLUDE format1\n";
-  const char *format1_data = "data2 RAW UINT8 3\n"
+    "INCLUDE format1\n"
+  );
+  MAKEFORMATFILE(format1,
+    "data2 RAW UINT8 3\n"
     "FRAMEOFFSET 43\n"
-    "phase2 PHASE data2 -7\n";
-  int fd, error1, error2, error3, error4, r = 0;
-  off_t bof_phase, bof_phase2, bof_lincom, bof_lincom2;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
+    "phase2 PHASE data2 -7\n"
+  );
 
   D = gd_open(filedir, GD_RDONLY);
   bof_phase = gd_bof(D, "phase");

@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -29,13 +29,9 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *testzip = "dirfile/test.zip";
-  const char *format_data =
-    "data RAW UINT16 8\n"
-    "/ENCODING zzip test\n";
   uint16_t c[8];
   char command[4096];
-  uint16_t data_data[256];
-  int fd, n, error, r = 0;
+  int n, error, r = 0;
 #ifdef USE_ZZIP
   int i;
 #endif
@@ -43,18 +39,13 @@ int main(void)
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256 * sizeof(uint16_t));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "data RAW UINT16 8\n"
+    "/ENCODING zzip test\n"
+  );
+  MAKEDATAFILE(data, uint16_t, i, 256);
 
   /* compress */
   chdir(filedir);

@@ -25,24 +25,20 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW COMPLEX128 8\n";
 #ifdef GD_NO_C99_API
   float c[16];
 #else
   float complex c[8];
 #endif
-  int fd, i, n, error, r = 0;
+  int i, n, error, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  MAKEDATAFILE(data, double, i % 2, 512);
+  MAKEFORMATFILE(format, "data RAW COMPLEX128 8\n");
+  MAKEDATAFILE(data, double, i / 2, 512);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   n = gd_getdata(D, "data", 5, 0, 1, 0, GD_COMPLEX64, c);

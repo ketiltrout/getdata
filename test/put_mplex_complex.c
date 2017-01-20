@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -26,10 +26,6 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *count = "dirfile/count";
-  const char *format_data =
-    "mplex MPLEX data count 1 3\n"
-    "count RAW UINT8 8\n"
-    "data RAW COMPLEX128 8\n";
   double c[16], d[16];
   double data_data[512];
   uint8_t count_data[256];
@@ -37,11 +33,13 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  i = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(i, format_data, strlen(format_data));
-  close(i);
+  MAKEFORMATFILE(format,
+    "mplex MPLEX data count 1 3\n"
+    "count RAW UINT8 8\n"
+    "data RAW COMPLEX128 8\n"
+  );
 
   for (i = 0; i < 256; ++i) {
     data_data[2 * i] = i;

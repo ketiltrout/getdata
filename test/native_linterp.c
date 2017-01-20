@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -25,20 +25,18 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *table = "dirfile/table";
-  const char *format_data =
-    "linterp LINTERP data table\n"
-    "data RAW UINT8 11\n";
   const char *table_data = "0 0\n1 1\n";
   int fd, error, r = 0;
   DIRFILE *D;
   gd_type_t type;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "linterp LINTERP data table\n"
+    "data RAW UINT8 11\n"
+  );
 
   fd = open(table, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, table_data, strlen(table_data));

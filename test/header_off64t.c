@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2015, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -27,17 +27,14 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "/FRAMEOFFSET 0x123456789\n";
-  int fd, error, r = 0;
+  int error, r = 0;
   uint64_t fo;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "/FRAMEOFFSET 0x123456789\n");
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   fo = gd_frameoffset(D, 0);

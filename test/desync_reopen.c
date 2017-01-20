@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. V. Wiebe
+/* Copyright (C) 2012-2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,23 +20,16 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "data RAW UINT8 1\n";
-  int e1, e2, e3, n1, n2, fd, r = 0;
+  int e1, e2, e3, n1, n2, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
-  close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
+  mkdir(filedir, 0700);
+  MAKEEMPTYFILE(format, 0600);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   e1 = gd_error(D);
@@ -45,9 +38,9 @@ int main(void)
   sleep(1);
 
   /* modify the format file */
-  fd = open(format, O_CREAT | O_TRUNC | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+#undef O_EXCL
+#define O_EXCL 0
+  MAKEFORMATFILE(format, "data RAW UINT8 1\n");
 
   n1 = gd_desync(D, GD_DESYNC_REOPEN);
   e2 = gd_error(D);

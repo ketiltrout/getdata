@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -26,7 +26,6 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data_bz2 = "dirfile/data.bz2";
   const char *data_raw = "dirfile/data";
-  const char *format_data = "data RAW UINT8 8\n/ENCODING none\n/ENDIAN little\n";
   uint8_t data_in[256];
   DIRFILE *D;
 #ifdef USE_BZIP2
@@ -38,14 +37,12 @@ int main(void)
   struct stat buf;
 
   rmdirfile();
-  mkdir(filedir, 0777); 
+  mkdir(filedir, 0700); 
 
   for (fd = 0; fd < 256; ++fd)
     data_in[fd] = (unsigned char)fd;
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 8\n/ENCODING none\n/ENDIAN little\n");
 
   fd = open(data_raw, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_in, 256);

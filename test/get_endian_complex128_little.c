@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,22 +21,11 @@
 /* Attempt to read little-endian COMPLEX128 */
 #include "test.h"
 
-#include <inttypes.h>
-#include <stdlib.h>
-#include <math.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW COMPLEX128 1\nENDIAN little\n";
 #ifdef GD_NO_C99_API
   double u[20];
   double v[20][2];
@@ -178,7 +167,7 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777); 
+  mkdir(filedir, 0700); 
 
 #ifdef GD_NO_C99_API
   v[0][0] = 1.5;
@@ -193,9 +182,7 @@ int main(void)
     v[i] = v[i - 1] * 2.25;
 #endif
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW COMPLEX128 1\nENDIAN little\n");
 
   fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 64 * 16 * sizeof(unsigned char));

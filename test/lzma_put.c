@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -29,26 +29,16 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data_lzma = "dirfile/data.lzma";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT8 8\n";
   uint8_t c[8] = {40, 41, 42, 43, 44, 45, 46, 47};
-  uint8_t data_data[256];
   char command[4096];
-  int fd, n, e1, e2, r = 0;
+  int n, e1, e2, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (uint8_t)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256 * sizeof(uint8_t));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 8\n");
+  MAKEDATAFILE(data, uint8_t, i, 256);
 
   /* compress */
   snprintf(command, 4096, "%s -F lzma -f %s > /dev/null", XZ, data);

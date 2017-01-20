@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,13 +20,6 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 #define GOOD  "z\\x1y\\xcx\\xDw\\x0eE\\x0Ff\\x10g\\x1ah\\x1Ei"
 #define GOODs "z\x1y\xcx\xDw\x0e" "E\x0F" "f\x10g\x1ah\x1Ei"
 #define BAD0  "a\\x00g"
@@ -44,22 +37,20 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
-    "good STRING " GOOD "\n"
-    "bad0 STRING " BAD0 "\n"
-    "bad1 STRING " BAD1 "\n";
-  int fd, error, r = 0;
+  int error, r = 0;
   int le[3] = {0, 0, 0};
   char s[100];
   size_t i;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "good STRING " GOOD "\n"
+    "bad0 STRING " BAD0 "\n"
+    "bad1 STRING " BAD1 "\n"
+  );
 
   D = gd_cbopen(filedir, GD_RDONLY, callback, le);
   error = gd_error(D);

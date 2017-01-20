@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,18 +20,18 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
+  int error, error2, error3, r = 0;
+  unsigned int nvec, nvec2, nvec3;
+  DIRFILE *D;
+
+  rmdirfile();
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format,
     "raw1 RAW UINT8 1\n"
     "META raw1 linterp1 LINTERP raw2 table\n"
     "META raw1 linterp2 LINTERP raw3 table\n"
@@ -44,17 +44,8 @@ int main(void)
     "raw4 RAW UINT8 1\n"
     "const CONST UINT8 1\n"
     "string STRING value\n"
-    "string2 STRING value\n";
-  int fd, error, error2, error3, r = 0;
-  unsigned int nvec, nvec2, nvec3;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+    "string2 STRING value\n"
+  );
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   nvec = gd_nmvectors(D, "raw1");

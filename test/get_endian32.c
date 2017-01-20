@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,15 +21,6 @@
 /* Attempt to read UINT32 with the opposite endianness */
 #include "test.h"
 
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-
 static int BigEndian(void)
 {
   union {
@@ -47,27 +38,21 @@ int main(void)
   const char *data = "dirfile/data";
   char format_data[1000];
   uint32_t c = 0;
-  uint32_t data_data[128];
   const int big_endian = BigEndian();
   int fd, n, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777); 
+  mkdir(filedir, 0700); 
 
   sprintf(format_data, "data RAW UINT32 1\nENDIAN %s\n", (big_endian)
       ? "little" : "big");
-
-  for (fd = 0; fd < 128; ++fd)
-    data_data[fd] = fd * (0x020201);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 128 * sizeof(uint32_t));
-  close(fd);
+  MAKEDATAFILE(data, uint32_t, i * (0x020201), 128);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT32, &c);

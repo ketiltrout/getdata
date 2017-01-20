@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -26,27 +26,16 @@ int main(void)
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
   const char *format2 = "dirfile/format2";
-  const char *format_data = "INCLUDE format1 pre post\n";
-  const char *format1_data = "INCLUDE format2 \"\" POST\n";
-  const char *format2_data = "data RAW UINT8 11\n";
-  int fd, r = 0;
+  int r = 0;
   DIRFILE *D;
   unsigned int spf, spf1, spf2;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
-
-  fd = open(format2, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format2_data, strlen(format2_data));
-  close(fd);
+  MAKEFORMATFILE(format, "INCLUDE format1 pre post\n");
+  MAKEFORMATFILE(format1, "INCLUDE format2 \"\" POST\n");
+  MAKEFORMATFILE(format2, "data RAW UINT8 11\n");
 
   D = gd_open(filedir, GD_RDONLY);
   spf = gd_spf(D, "data");

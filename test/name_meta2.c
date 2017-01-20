@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,16 +24,7 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
-    "parent RAW UINT8 1\n"
-    "parent/early MULTIPLY parent/data parent/data\n"
-    "/ALIAS parent/earlya parent/data\n"
-    "parent/late PHASE parent/data 0\n"
-    "/ALIAS parent/latea parent/data\n"
-    "parent/cata PHASE parent 0\n"
-    "parent/data PHASE parent 0\n"
-    "parent/eata PHASE parent 0\n";
-  int fd, ret, e1, e2, e3, e4, e5, e6, r = 0;
+  int ret, e1, e2, e3, e4, e5, e6, r = 0;
   const char **fl;
 #define NFIELDS 7
   const char *field_list[NFIELDS] = {
@@ -46,11 +37,18 @@ int main(void)
   gd_entry_t E;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "parent RAW UINT8 1\n"
+    "parent/early MULTIPLY parent/data parent/data\n"
+    "/ALIAS parent/earlya parent/data\n"
+    "parent/late PHASE parent/data 0\n"
+    "/ALIAS parent/latea parent/data\n"
+    "parent/cata PHASE parent 0\n"
+    "parent/data PHASE parent 0\n"
+    "parent/eata PHASE parent 0\n"
+  );
 
   D = gd_open(filedir, GD_RDWR);
 

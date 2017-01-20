@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,19 +21,11 @@
 /* Add a dirfile field */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "data RAW UINT8 8\nPROTECT all\n";
-  int fd, error, n, r = 0;
+  int error, n, r = 0;
   DIRFILE *D;
   gd_entry_t E;
 
@@ -44,11 +36,9 @@ int main(void)
   E.EN(raw,data_type) = GD_UINT8;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 8\nPROTECT all\n");
 
   D = gd_open(filedir, GD_RDWR);
   gd_add(D, &E);

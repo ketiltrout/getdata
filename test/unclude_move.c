@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,41 +21,22 @@
 /* Test include */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
   const char *format2 = "dirfile/format2";
-  const char *format_data = "/INCLUDE format1\na CONST UINT8 1\n";
-  const char *format1_data = "b CONST UINT8 11\n/INCLUDE format2\n";
-  const char *format2_data = "c CONST UINT8 11\n";
-  int fd, ret1, ret2, error1, error2, r = 0;
+  int ret1, ret2, error1, error2, r = 0;
   unsigned int nfields, nfragments;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
-
-  fd = open(format2, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format2_data, strlen(format2_data));
-  close(fd);
+  MAKEFORMATFILE(format, "/INCLUDE format1\na CONST UINT8 1\n");
+  MAKEFORMATFILE(format1, "b CONST UINT8 11\n/INCLUDE format2\n");
+  MAKEFORMATFILE(format2, "c CONST UINT8 11\n");
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   ret1 = gd_uninclude(D, 2, 0);

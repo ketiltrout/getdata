@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,19 +24,17 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = 
-    "data SARRAY UINT8 8 9 10 11 12\n"
-    "sindir SINDIR index data\n";
-  int fd, e1, e2, r = 0;
+  int e1, e2, r = 0;
   DIRFILE *D;
   gd_entry_t E;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "data SARRAY UINT8 8 9 10 11 12\n"
+    "sindir SINDIR index data\n"
+  );
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
 

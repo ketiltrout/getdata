@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 D. V. Wiebe
+/* Copyright (C) 2014, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -25,22 +25,15 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
-  const char *format_data = "/INCLUDE format1 ns.\n";
-  const char *format1_data = "#\n";
-  int error, n, r = 0;
+  int error, r = 0;
   gd_entry_t E;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  n = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(n, format_data, strlen(format_data));
-  close(n);
-
-  n = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(n, format1_data, strlen(format1_data));
-  close(n);
+  MAKEFORMATFILE(format, "/INCLUDE format1 ns.\n");
+  MAKEFORMATFILE(format1, "#\n");
 
   E.field =  "ns.w";
   E.field_type = GD_CONST_ENTRY;

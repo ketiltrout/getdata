@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,15 +20,6 @@
  */
 #include "test.h"
 
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
 #if ! (defined TEST_GZIP) || ! (defined USE_GZIP)
@@ -38,7 +29,6 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data_gz = "dirfile/data.gz";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT8 8\n";
   uint8_t c[8];
   char command[4096];
   uint8_t d;
@@ -48,14 +38,12 @@ int main(void)
 
   memset(c, 0, 8);
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   for (i = 0; i < 8; ++i)
     c[i] = (uint8_t)(40 + i);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 8\n");
 
   D = gd_open(filedir, GD_RDWR | GD_GZIP_ENCODED | GD_VERBOSE);
   n1 = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);

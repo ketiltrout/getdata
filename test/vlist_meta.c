@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013, 2015 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2015, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,24 +24,22 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
+  int i, error, r = 0;
+  const char **field_list;
+  DIRFILE *D;
+
+  rmdirfile();
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format,
     "parent RAW UINT8 1\n"
     "META parent data1 LINCOM parent 1 0\n"
     "META parent data2 LINCOM parent 1 0\n"
     "META parent data3 LINCOM parent 1 0\n"
     "META parent data4 CONST UINT8 1\n"
     "other RAW UINT8 1\n"
-    "META other data5 LINCOM parent 1 0\n";
-  int fd, i, error, r = 0;
-  const char **field_list;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+    "META other data5 LINCOM parent 1 0\n"
+  );
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   field_list = gd_mvector_list(D, "parent");

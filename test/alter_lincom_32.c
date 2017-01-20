@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,43 +21,26 @@
 /* Test field modifying */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <inttypes.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW INT32 8\nphase PHASE data 1\n"
-    "lincom LINCOM 3 data 1 3 phase 2 0 data 3 1\n";
-  int32_t data_data[256];
   int32_t c[8];
-  int fd, i, ret, error, n, r = 0;
+  int i, ret, error, n, r = 0;
   DIRFILE *D;
   const char *in_fields[2] = {"data", "phase"};
   const double m[2] = {2, 4};
   const double b[2] = {0, 2};
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (int32_t)fd;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256 * sizeof(int32_t));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "data RAW INT32 8\nphase PHASE data 1\n"
+    "lincom LINCOM 3 data 1 3 phase 2 0 data 3 1\n"
+  );
+  MAKEDATAFILE(data, int32_t, i, 256);
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   ret = gd_alter_lincom(D, "lincom", 2, in_fields, m, b);

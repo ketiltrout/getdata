@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,47 +21,27 @@
 /* Parser check */
 #include "test.h"
 
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "FRAMEOFFSET 1\nINCLUDE format1\nINCLUDE format2";
 
   const char *data1 = "dirfile/data1";
   const char *format1 = "dirfile/format1";
-  const char *format1_data = "data1 RAW UINT8 1\n";
 
   const char *data2 = "dirfile/data2";
   const char *format2 = "dirfile/format2";
-  const char *format2_data = "data2 RAW UINT8 1\nFRAMEOFFSET 2";
 
   int fd, error, error2, error3, r = 0;
   uint8_t data_data[4] = { 0, 1, 2, 3 };
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
-
-  fd = open(format2, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format2_data, strlen(format2_data));
-  close(fd);
+  MAKEFORMATFILE(format, "FRAMEOFFSET 1\nINCLUDE format1\nINCLUDE format2");
+  MAKEFORMATFILE(format1, "data1 RAW UINT8 1\n");
+  MAKEFORMATFILE(format2, "data2 RAW UINT8 1\nFRAMEOFFSET 2");
 
   fd = open(data1, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 4);

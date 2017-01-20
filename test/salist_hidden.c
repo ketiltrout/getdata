@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,12 +24,6 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
-    "data1 SARRAY alfa bravo charlie delta echo\n"
-    "data2 SARRAY foxtrot golf hotel india juliet kilo\n"
-    "data3 SARRAY lima mike november oscar papa quebec romeo\n"
-    "/HIDDEN data2\n"
-    "data4 RAW UINT8 1\n";
   int j, error, r = 0;
   size_t i;
   const char *lists[2][8] = {
@@ -40,11 +34,15 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  j = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(j, format_data, strlen(format_data));
-  close(j);
+  MAKEFORMATFILE(format,
+    "data1 SARRAY alfa bravo charlie delta echo\n"
+    "data2 SARRAY foxtrot golf hotel india juliet kilo\n"
+    "data3 SARRAY lima mike november oscar papa quebec romeo\n"
+    "/HIDDEN data2\n"
+    "data4 RAW UINT8 1\n"
+  );
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   field_list = gd_sarrays(D);

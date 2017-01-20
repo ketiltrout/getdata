@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,13 +21,6 @@
 /* Truncating a read-only dirfile should fail cleanly */
 #include "test.h"
 
-#include <stdlib.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -37,10 +30,10 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
-  close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
-  close(open(data, O_CREAT | O_EXCL | O_WRONLY, 0666));
-  chmod(filedir, 0555);
+  mkdir(filedir, 0700);
+  MAKEEMPTYFILE(format, 0600);
+  MAKEEMPTYFILE(data, 0600);
+  chmod(filedir, 0500);
 
   /* ensure filesystem honours read-onlyness */
   if (!unlink(data) || errno != EACCES) {
@@ -53,7 +46,7 @@ int main(void)
   error = gd_error(D);
   gd_discard(D);
 
-  chmod(filedir, 0777);
+  chmod(filedir, 0700);
   unlink(data);
   unlink(format);
   rmdir(filedir);

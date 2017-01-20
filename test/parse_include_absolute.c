@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2013 D. V. Wiebe
+/* Copyright (C) 2011-2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,14 +21,6 @@
 /* Test include */
 #include "test.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
 #if defined GD_NO_GETCWD
@@ -39,7 +31,6 @@ int main(void)
   const char *format1 = "dirfile/format1";
   const char *format_data1 = "INCLUDE ";
   const char *format_data2 = "/dirfile/format1\n";
-  const char *format1_data = "data RAW UINT8 11\n";
   int cwd_size = 2048;
   char *ptr, *cwd = NULL;
   int fd, r = 0;
@@ -47,7 +38,7 @@ int main(void)
   unsigned int spf;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
   gdtest_getcwd(ptr, cwd, cwd_size);
 
@@ -57,9 +48,7 @@ int main(void)
   write(fd, format_data2, strlen(format_data2));
   close(fd);
 
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
+  MAKEFORMATFILE(format1, "data RAW UINT8 11\n");
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   spf = gd_spf(D, "data");

@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -27,30 +27,16 @@ int main(void)
   const char *format1 = "dirfile/format1";
   const char *data = "dirfile/data";
   const char *txtdata = "dirfile/data.txt";
-  const char *format_data = "/INCLUDE format1\ndata RAW UINT16 11";
-  const char *format1_data = "/PROTECT data\n/ENCODING text\n";
-  uint16_t data_data[128];
   int r = 0;
-  int fd, e1, unlink_data, unlink_txtdata;
+  int e1, unlink_data, unlink_txtdata;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (fd = 0; fd < 128; ++fd)
-    data_data[fd] = fd * 0x201;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEFORMATFILE(format, "/INCLUDE format1\ndata RAW UINT16 11");
+  MAKEFORMATFILE(format1, "/PROTECT data\n/ENCODING text\n");
+  MAKEDATAFILE(data, uint16_t, i * 0x201, 128);
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
   e1 = gd_move(D, "data", 1, GD_REN_DATA);

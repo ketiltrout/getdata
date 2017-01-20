@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2010-2011, 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,35 +20,26 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *data2 = "dirfile/data2";
-  const char *format_data =
-    "data RAW UINT16 1\n"
-    "data2 RAW UINT8 1\n"
-    "lincom LINCOM 2 data2 1. 0. data 1. 0.\n"
-    "lincom2 LINCOM 2 data 1. 0. data2 1. 0.\n";
   int fd, error, error2, r = 0;
   const size_t len = strlen(data);
   off_t n, m;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+  MAKEFORMATFILE(format,
+    "data RAW UINT16 1\n"
+    "data2 RAW UINT8 1\n"
+    "lincom LINCOM 2 data2 1. 0. data 1. 0.\n"
+    "lincom2 LINCOM 2 data 1. 0. data2 1. 0.\n"
+  );
 
   fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data, len);

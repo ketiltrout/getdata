@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. V. Wiebe
+/* Copyright (C) 2015, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,37 +20,20 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data = "FRAMEOFFSET 2\ndata RAW UINT8 1\n";
   unsigned char c1[5], c2[5];
-  unsigned char data_data[256];
-  int i, fd, n1, n2, e1, e2, r = 0;
+  int i, n1, n2, e1, e2, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0700);
 
-  for (i = 0; i < 256; ++i)
-    data_data[i] = (unsigned char)i;
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEFORMATFILE(format, "FRAMEOFFSET 2\ndata RAW UINT8 1\n");
+  MAKEDATAFILE(data, unsigned char, i, 256);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   n1 = gd_getdata(D, "data", 0, 0, 5, 0, GD_UINT8, c1);

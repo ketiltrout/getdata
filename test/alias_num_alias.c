@@ -1,4 +1,4 @@
-/* Copyright (C) 2011, 2013, 2014 D. V. Wiebe
+/* Copyright (C) 2011, 2013, 2014, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,23 +24,21 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data =
+  int e, r = 0;
+  unsigned int n;
+  DIRFILE *D;
+
+  rmdirfile();
+  mkdir(filedir, 0700);
+
+  MAKEFORMATFILE(format,
     "/ALIAS e f\n"
     "/ALIAS a b\n"
     "/ALIAS b d\n"
     "/ALIAS c d\n"
     "/ALIAS d f\n"
-    "f CONST UINT8 1\n";
-  int fd, e, r = 0;
-  unsigned int n;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0777);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
+    "f CONST UINT8 1\n"
+  );
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 

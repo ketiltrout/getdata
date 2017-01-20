@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. V. Wiebe
+/* Copyright (C) 2013, 2017 D.V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,12 +20,6 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-
 int main(void)
 {
 #if ! defined HAVE_SYMLINK
@@ -41,14 +35,14 @@ int main(void)
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
-  mkdir(dira, 0777);
-  mkdir(dirb, 0777);
+  mkdir(filedir, 0700);
+  mkdir(dira, 0700);
+  mkdir(dirb, 0700);
   symlink("a", link);
-  close(open(formata, O_CREAT | O_EXCL | O_WRONLY, 0666));
+  MAKEEMPTYFILE(formata, 0600);
   /* ensure mtime ticks over */
   sleep(1);
-  close(open(formatb, O_CREAT | O_EXCL | O_WRONLY, 0666));
+  MAKEEMPTYFILE(formatb, 0600);
 
   D = gd_open(link, GD_RDONLY | GD_VERBOSE);
 
