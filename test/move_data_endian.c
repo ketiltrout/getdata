@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,15 +20,6 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-#include <inttypes.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -36,11 +27,6 @@ int main(void)
   const char *format1 = "dirfile/format1";
   const char *data = "dirfile/data";
   const char *format_data = "/INCLUDE format1\ndata RAW UINT16 11";
-#ifdef WORDS_BIGENDIAN
-  const char *format1_data = "ENDIAN little\n";
-#else
-  const char *format1_data = "ENDIAN big\n";
-#endif
   uint16_t d, data_data[128];
   int fd, i, ret, error, ge_ret, r = 0;
   gd_entry_t E;
@@ -55,11 +41,11 @@ int main(void)
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
-
+#ifdef WORDS_BIGENDIAN
+  MAKEFORMATFILE(format1, "ENDIAN little\n");
+#else
+  MAKEFORMATFILE(format1, "ENDIAN big\n");
+#endif
   fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 256);
   close(fd);
