@@ -20,6 +20,12 @@
  */
 #include "test.h"
 
+#ifdef WORDS_BIGENDIAN
+#define ENDIAN "ENDIAN little"
+#else
+#define ENDIAN "ENDIAN big"
+#endif
+
 int main(void)
 {
 #ifndef TEST_BZIP2
@@ -29,12 +35,7 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data_bz2 = "dirfile/data.bz2";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT16 8\n"
-#ifdef WORDS_BIGENDIAN
-  "ENDIAN little\n";
-#else
-  "ENDIAN big\n";
-#endif
+  const char *format_data = "data RAW UINT16 8\n" ENDIAN "\n";
   uint16_t c[8];
 #ifdef USE_BZIP2
   char command[4096];

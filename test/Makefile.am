@@ -26,7 +26,7 @@ AM_CPPFLAGS=${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
 # The enc_*.c files aren't directly used as tests.  They're included by
 # corresponding encoding tests.
 EXTRA_DIST=test.h enc_add.c enc_complex64.c enc_complex128.c enc_del.c \
-					 enc_enoent.ca enc_float32.c enc_float64.c enc_get_cont enc_int8.c \
+					 enc_enoent.c enc_float32.c enc_float64.c enc_get_cont.c enc_int8.c \
 					 enc_int16.c enc_int32.c enc_int64.c enc_move_from.c enc_nframes.c \
 					 enc_put_offs.c enc_seek.c enc_uint8.c enc_uint16.c enc_uint32.c \
 					 enc_uint64.c
