@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
         "  checkdirfile [ --help | --version ]  Print this message and exit.\n"
         "\n\n"
         "This program is part of %s.\n"
-        "Copyright (C) 2008-2010, 2012, 2014-2016  D. V. Wiebe\n"
+        "Copyright (C) 2008-2010, 2012, 2014-2017  D. V. Wiebe\n"
         "Please send reports of bugs and other communication to:\n\n  %s\n\n"
         "This program comes with NO WARRANTY, not even for MERCHANTABILITY "
         "or FITNESS\n"
@@ -253,7 +253,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  printf("  Found %" PRIu64 " %s.\n", n, n == 1 ? "frame" : "frames");
+  printf("  Found %" PRIu64 " %s.\n", (uint64_t)n, n == 1 ? "frame" : "frames");
 
   gd_close(dirfile);
   return 0;

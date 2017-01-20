@@ -30,22 +30,21 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   unsigned char c[8];
-  int fd, i, n, error, r = 0;
+  int i, n, error, r = 0;
 
   memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0700);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0444);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0444);
-  write(fd, data_data, 256);
-  close(fd);
+  MAKEFORMATFILE(format, "data RAW UINT8 8\n");
+  MAKEDATAFILE(data, unsigned char, i, 256);
+  chmod(format, 0400);
+  chmod(data, 0400);
 
   n = GetData(filedir, "data", 5, 0, 1, 0, 'c', c, &error);
 
+  chmod(format, 0600);
+  chmod(data, 0600);
   unlink(data);
   unlink(format);
   rmdir(filedir);

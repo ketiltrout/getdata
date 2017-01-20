@@ -61,7 +61,10 @@ int gd_system(const char* command)
 #ifdef _WIN32
 #define rmdirfile() system("rmdir /q/s dirfile");
 #else
-#define rmdirfile() chmod("dirfile", 0755); system("rm -rf dirfile");
+#define rmdirfile() do { \
+  chmod("dirfile", 0700); \
+  if (system("rm -rf dirfile")) { perror("system"); exit(1); \
+} while (0)
 #endif
 
 /* sleep for WIN32/64 */

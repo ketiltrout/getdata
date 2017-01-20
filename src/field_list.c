@@ -885,7 +885,7 @@ unsigned int gd_match_entries(DIRFILE *D, const char *regex, int fragment,
     | ((flags & GD_REGEX_ICASE) ? REG_ICASE : 0) | REG_NOSUB;
 #endif
 #ifndef GD_NO_PCRE
-  pcre *pcre_code;
+  pcre *pcre_code = NULL;
   const int pcre_exec_options =
     (flags & GD_REGEX_UNICODE) ? PCRE_BSR_UNICODE : PCRE_BSR_ANYCRLF;
   const int pcre_compile_options = pcre_exec_options
