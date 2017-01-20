@@ -63,7 +63,7 @@ int gd_system(const char* command)
 #else
 #define rmdirfile() do { \
   chmod("dirfile", 0700); \
-  if (system("rm -rf dirfile")) { perror("system"); exit(1); \
+  if (system("rm -rf dirfile")) { perror("system"); exit(1); } \
 } while (0)
 #endif
 
