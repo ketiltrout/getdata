@@ -1,4 +1,4 @@
-# Copyright (C) 2011-2013 D. V. Wiebe
+# Copyright (C) 2011-2013, 2017 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -24,6 +24,7 @@ _Complex double T_COMPLEX
 unsigned long int T_UV
 
 # GetData types
+struct gdp_dirfile_t * T_GDP_DIRFILE
 DIRFILE * T_DIRFILE
 gd_entry_t T_ENTRY
 gd_entype_t T_UV
@@ -48,15 +49,22 @@ gdp_pentry_t T_PENTRY
 
 
 INPUT
-T_DIRFILE
-  struct gdp_dirfile_t *gdp_dirfile;
-  if (sv_isa($arg, \"GetData::Dirfile\")) {
-    gdp_dirfile = INT2PTR(struct gdp_dirfile_t*, SvIV((SV*)SvRV($arg)));
-    $var = gdp_dirfile->D;
-    if ($var == NULL)
-      $var = gdp_invalid;
-  } else
+T_GDP_DIRFILE
+  if (sv_isa($arg, \"${Package}::Dirfile\"))
+    $var = INT2PTR(struct gdp_dirfile_t*, SvIV((SV*)SvRV($arg)));
+  else
     croak(\"%s::${func_name}() - Invalid dirfile object\", gdp_package);
+T_DIRFILE
+  {
+    struct gdp_dirfile_t *gdp_dirfile;
+    if (sv_isa($arg, \"${Package}::Dirfile\")) {
+      gdp_dirfile = INT2PTR(struct gdp_dirfile_t*, SvIV((SV*)SvRV($arg)));
+      $var = gdp_dirfile->D;
+      if ($var == NULL)
+        $var = gdp_invalid;
+    } else
+      croak(\"%s::${func_name}() - Invalid dirfile object\", gdp_package);
+  }
 T_COMPLEXIN
   if (SvROK($arg) && SvTYPE(SvRV($arg)) == SVt_PVAV) {
     AV *av = (AV*)SvRV($arg);
@@ -161,6 +169,5 @@ T_TRIPLET
  
 
 OUTPUT
-T_DIRFILE
-  gdp_dirfile->D = $var;
-  sv_setref_uv($arg, \"${Package}::Dirfile\", PTR2UV(gdp_dirfile));
+T_GDP_DIRFILE
+  sv_setref_uv($arg, \"${Package}::Dirfile\", PTR2UV($var));

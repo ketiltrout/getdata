@@ -41,6 +41,11 @@ You should have received a copy of the GNU Lesser General Public License along
 with GetData in a file called `COPYING'; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
 
+The Free Software Foundation has also published the License on the World Wide
+Web:
+
+  https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html
+
 
 CONTENTS
 ========
@@ -68,22 +73,23 @@ A full list of features new to this release of GetData may be found in the
 file called `NEWS'.
 
 
-DIRFILE STANDARDS VERSION 9
-===========================
+DIRFILE STANDARDS VERSION 10
+============================
 
-The 0.8.0 release of the GetData Library (July 2012) is the first release to
+The 0.10.0 release of the GetData Library (January 2017) is the first release to
 provide suuport the latest version of the Dirfile Standards, known as Standards
-Version 9.
+Version 10.
 
-Standards Version 9 introduces the following:
-  * Two new field types: MPLEX and WINDOW, both meant to deal with extracting a
-    subset of their input.
-  * Field name munging via /INCLUDEs, aliases, and "hidden" names.
-  * Support for zzip-compressed dirfiles, as well as simple compression via an
-    in-built scheme called Sample Index Encoding.
+Standards Version 10 introduces the following:
+  * Three new field types: INDIR, SARRAY, and SINDIR.
+  * Field code namespaces.
+  * A new representation suffix, .z, which does nothing, which is occasionally
+    needed for disambiguation of syntax.
+  * Support for FLAC (Free Lossless Audio Compression) encoding of data.
+    (FLAC has been supported by GetData since 0.9.0.)
 
-This is the first update to the Dirfile Standards since Standards Version 8
-(November 2010).  A full history of the Dirfile Standards can be found in the
+This is the first update to the Dirfile Standards since Standards Version 9
+(July 2012).  A full history of the Dirfile Standards can be found in the
 dirfile-format(5) man page.
 
 
@@ -91,10 +97,11 @@ BUILDING THE LIBRARY
 ====================
 
 This package may be configured and built using the GNU autotools.  Generic
-installation instructions are provided in the file called `INSTALL'.  A
-brief summary follows.  A C99-compliant compiler is required to build (but not
-to use) the package, although a compatible library with reduced functionality
-can be built with any ANSI C compiler.
+installation instructions are provided in the file called `INSTALL'.  A brief
+summary follows.  If a C99-compliant compiler is used to build the pacakge,
+the library will be built with both a C99 API (the default) as well as a ANSI
+C (C89) API.  If the compiler used to build the library is not C99-compliant,
+only the ANSI C API will be built.
 
 Most users should be able to build the package by simply executing:
 
@@ -144,8 +151,9 @@ GetData has optional support for regular expression matching of field names.
 This support is implemented through the use of two additional libraries,
 specifically:
 
-- the POSIX standard regex(7) library (providing regcomp and regexec),
-  originally written by Henry Spencer.
+- the POSIX standard regex(7) library (providing regcomp(3) and regexec(3)),
+  originally written by Henry Spencer.  On most platforms, this is bundled
+  with the C Standard Library.
 - the Perl-Compatible Regular Expression (PCRE) library by Philip Hazel.
 
 If these libraries are not found at build time, partial or all regular
@@ -156,11 +164,11 @@ will fail.
 Building bindings requires appropriate compilers/interpreters and libraries for
 the various languages.  In particular:
 
-- the C++ bindings require a C++90 compliant compiler
+- the C++ bindings require a C++90-compliant compiler
 - the Fortran-77 bindings require a Fortran-77 compliant compiler
 - the Fortran-95 bindings require both a Fortran-95 compliant compiler and a
-  Fortran-77 compiler (because the Fortran-95 bindings are built on top of
-  the Fortran-77 bindings)
+  Fortran-77 compiler, because the Fortran-95 bindings are built on top of
+  the Fortran-77 bindings;
 - the IDL bindings require a licenced IDL interpreter, version 5.5 or later;
   they will not work on an unlicenced interpreter in timed demo mode
 - the MATLAB bindings require both a MATLAB interpreter and a MEX compiler
@@ -170,15 +178,16 @@ the various languages.  In particular:
 - the Python bindings support both Python2, from version 2.4, as well as
   Python3, from version 3.2.
 
+
 USING THE LIBRARY
 =================
 
 To use the library in C programs, the header file getdata.h should be included.
-This file declares all the various APIs provided by th library.  Programs
+This file declares all the various APIs provided by the library.  Programs
 linking to static versions of the GetData library need to be linked against the
 C Standard Math Library, in addition to GetData itself, plus any other libraries
-required for encodings supported by the library, e.g. using `-lgetdata -lm
-<other-libraries>'.
+required to support the compiled regular expression functionality and encodings
+supported by the library.
 
 The various small programs in the `util' subdirectory of the package provide
 examples of use.
@@ -198,31 +207,33 @@ terms as the GetData Project, we encourage you to submit them for inclusion in
 the package.
 
 
-USING MODULES
-=============
+ENCODING MODULES
+================
 
-Starting with GetData 0.5.0, encoding schemes which rely on optional external
-libraries (slim, gzip, bzip2, &c.) may be built as stand-alone library modules
-which will be dynamically loaded, as needed, at runtime by the core GetData
-library.  This architecture is provided to permit packaging the core GetData
-library separately from the parts of the library requiring the optional external
+Encoding schemes which rely on optional external libraries (slim, gzip, bzip2,
+&c.) may be built as stand-alone library modules which will be dynamically
+loaded, as needed, at runtime by the core GetData library.  This is the
+default behaviour in GetData-0.10.  In earlier versions, by default the
+encoding support was built directly into the core GetData library.
+
+External modules are used primarily to permit packaging the core GetData library
+separately from the parts of the library requiring the optional external
 libraries without having to give up the functionality these extra libraries
 provide.  To enable this behaviour, pass `--enable-modules' to ./configure.
 
 The modules are dynamically loaded via GNU libtool's portable dlopen wrapper
 library, libltdl.  The libltdl library permits dynamic loading of modules on at
-least Solaris, Linux, BSD, HP-UX, Win16, Win32, BeOS, Darwin, MacOS X.  The
-libltdl library is no longer distributed with GetData.  It can usually be found
-as part of the GNU libtool package on any modern GNU system, or else obtained
-for free from the GNU Project.
+least Solaris, Linux, BSD, HP-UX, Win16, Win32, BeOS, Darwin, MacOS X.  It can
+usually be found as part of the GNU libtool package on any modern GNU system,
+or else obtained for free from the GNU Project.
 
 GetData will fail gracefully if a library module is not found or cannot be
 opened at runtime.  In this case, the call which triggered the attempt to load
 the module will fail with the GD_E_UNSUPPORTED error.
 
-The dlopen library (and, by extension, libltdl) is notoriously not thread safe.
-As a result, if a POSIX thread implementation can be found, calls to the dynamic
-loader will be wrapped in a mutex.
+The POSIX dlopen library (and, by extension, libltdl) is notoriously not thread
+safe.  As a result, if a POSIX thread implementation can be found, calls to the
+dynamic loader will be wrapped in a mutex.
 
 
 THE GETDATA HEADER FILE

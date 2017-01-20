@@ -1,3 +1,34 @@
+2017-01-20   D. V. Wiebe <getdata@ketiltrout.net> svn:1143
+	GetData-0.10.0rc2:
+
+	* README, README.win,: Update.
+
+	* bindings/perl/src/typemap [INPUT] (T_DIRFILE): Don't leak the struct
+	gdp_dirfile_t pointer.
+	* bindings/perl/src/typemap [INPUT] (T_GDP_DIRFILE): Added to handle struct
+	gdp_dirfile_t *.
+	* bindings/perl/src/GetData.xs (DESTROY parser_callback close discard): Accept
+	struct gdp_dirfile_t argument explicitly, rather than implcitly via the
+	T_DIRFILE typemap.
+
+	* bindings/perl/src/typemap [OUTPUT] (T_GDP_DIRFILE): Replaced the OUTPUT
+	T_DIRFILE.
+	* bindings/perl/src/GetData.xs (open invalid_dirfile): Change return type to
+	struct gdp_dirfile *.
+
+	* src/field_list.c (gd_match_entries): Properly NULL D->regex_list if n == 0.
+
+2017-01-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1141,1142
+	* test/legacy_get_rofs.c: Unbreak after chainsawing.
+	* test/test.h (rmdirfile): Check system return value.
+
+	* src/field_list.c (gd_match_entries): Suppress compiler warning.
+
+	* util/checkdirfile.c (main): Fix printf.
+
+2017-01-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1140
+	GetData-0.10.0rc1.
+
 2017-01-19   D. V. Wiebe <getdata@ketiltrout.net> svn:1136
 	* test/flac_get_int64.c: Correct.
 

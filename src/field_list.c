@@ -1012,7 +1012,7 @@ unsigned int gd_match_entries(DIRFILE *D, const char *regex, int fragment,
   if (list) {
     if (n == 0) {
       free(D->regex_list);
-      D->regex_list[0] = NULL;
+      D->regex_list = NULL;
       *list = zero_list;
     } else {
       D->regex_list[n] = NULL;

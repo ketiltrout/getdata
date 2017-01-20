@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2016 D. V. Wiebe
+/* Copyright (C) 2011-2017 D. V. Wiebe
  *
  **************************************************************************
  *
@@ -1183,16 +1183,16 @@ BOOT:
   gdp_invalid = gd_invalid_dirfile();
 
 void
-DESTROY(dirfile)
-  DIRFILE * dirfile
+DESTROY(gdp_dirfile)
+  struct gdp_dirfile_t * gdp_dirfile
   PREINIT:
     GDP_DIRFILE_ALIAS;
   ALIAS:
     GetData::Dirfile::DESTROY = 1
   CODE:
-    dtrace("%p", dirfile);
-    if (dirfile != gdp_invalid)
-      gd_discard(dirfile);
+    dtrace("%p", gdp_dirfile);
+    if (gdp_dirfile->D != NULL)
+      gd_discard(gdp_dirfile->D);
     safefree(gdp_dirfile);
   CLEANUP:
     dreturnvoid();
@@ -1214,49 +1214,45 @@ error(dirfile)
     dreturn("%i", RETVAL);
 
 
-DIRFILE *
+struct gdp_dirfile_t *
 open(dirfilename, flags, sehandler=undef, extra=undef)
   const char * dirfilename
   unsigned long flags
   SV * sehandler
   SV * extra
-  PREINIT:
-    struct gdp_dirfile_t *gdp_dirfile;
   CODE:
     dtrace("\"%s\", %lu, %p, %p", dirfilename, flags, sehandler, extra);
-    Newx(gdp_dirfile, 1, struct gdp_dirfile_t);
+    Newx(RETVAL, 1, struct gdp_dirfile_t);
     if (sehandler == undef) {
-      gdp_dirfile->cbdata.func = NULL;
-      gdp_dirfile->cbdata.data = NULL;
+      RETVAL->cbdata.func = NULL;
+      RETVAL->cbdata.data = NULL;
 
-      RETVAL = gd_cbopen(dirfilename, flags, NULL, NULL);
+      RETVAL->D = gd_cbopen(dirfilename, flags, NULL, NULL);
     } else {
-      gdp_dirfile->cbdata.func = sehandler;
-      gdp_dirfile->cbdata.data = extra;
+      RETVAL->cbdata.func = sehandler;
+      RETVAL->cbdata.data = extra;
 
-      RETVAL = gd_cbopen(dirfilename, flags, gdp_parser_callback,
-          &gdp_dirfile->cbdata);
+      RETVAL->D = gd_cbopen(dirfilename, flags, gdp_parser_callback,
+          &RETVAL->cbdata);
     }
   OUTPUT:
     RETVAL
   CLEANUP:
-    dreturn("%p", gdp_dirfile);
+    dreturn("%p", RETVAL);
 
-DIRFILE *
+struct gdp_dirfile_t *
 invalid_dirfile()
-  PREINIT:
-    struct gdp_dirfile_t *gdp_dirfile;
   CODE:
     dtracevoid();
-    Newx(gdp_dirfile, 1, struct gdp_dirfile_t);
-    gdp_dirfile->cbdata.func = NULL;
-    gdp_dirfile->cbdata.data = NULL;
+    Newx(RETVAL, 1, struct gdp_dirfile_t);
+    RETVAL->cbdata.func = NULL;
+    RETVAL->cbdata.data = NULL;
 
-    RETVAL = gd_invalid_dirfile();
+    RETVAL->D = gd_invalid_dirfile();
   OUTPUT:
     RETVAL
   CLEANUP:
-    dreturn("%p", gdp_dirfile);
+    dreturn("%p", RETVAL);
 
 void
 get_carray(dirfile, field_code, return_type)
@@ -1683,8 +1679,8 @@ mconstants(dirfile, parent, return_type)
     dreturnvoid();
 
 void
-parser_callback(dirfile, sehandler, extra=undef)
-  DIRFILE * dirfile
+parser_callback(gdp_dirfile, sehandler, extra=undef)
+  struct gdp_dirfile_t * gdp_dirfile
   SV *sehandler
   SV *extra
   PREINIT:
@@ -1692,17 +1688,20 @@ parser_callback(dirfile, sehandler, extra=undef)
   ALIAS:
     GetData::Dirfile::parser_callback = 1
   CODE:
-    dtrace("%p, %p, %p", dirfile, sehandler, extra);
-    if (sehandler == undef) {
-      gdp_dirfile->cbdata.func = NULL;
-      gdp_dirfile->cbdata.data = NULL;
+    dtrace("%p, %p, %p", gdp_dirfile, sehandler, extra);
+    if (gdp_dirfile->D) {
+      if (sehandler == undef) {
+        gdp_dirfile->cbdata.func = NULL;
+        gdp_dirfile->cbdata.data = NULL;
 
-      gd_parser_callback(dirfile, NULL, NULL);
-    } else {
-      gdp_dirfile->cbdata.func = sehandler;
-      gdp_dirfile->cbdata.data = extra;
+        gd_parser_callback(gdp_dirfile->D, NULL, NULL);
+      } else {
+        gdp_dirfile->cbdata.func = sehandler;
+        gdp_dirfile->cbdata.data = extra;
 
-      gd_parser_callback(dirfile, gdp_parser_callback, &gdp_dirfile->cbdata);
+        gd_parser_callback(gdp_dirfile->D, gdp_parser_callback,
+            &gdp_dirfile->cbdata);
+      }
     }
   CLEANUP:
     dreturnvoid();
@@ -1731,17 +1730,17 @@ get_string(dirfile, field_code)
     safefree(RETVAL);
 
 int
-close(dirfile)
-  DIRFILE * dirfile
+close(gdp_dirfile)
+  struct gdp_dirfile_t * gdp_dirfile
   PREINIT:
     GDP_DIRFILE_ALIAS;
   ALIAS:
     GetData::Dirfile::close = 1
   CODE:
-    dtrace("%p", dirfile);
+    dtrace("%p", gdp_dirfile);
 
-    if (dirfile != gdp_invalid) {
-      RETVAL = gd_close(dirfile);
+    if (gdp_dirfile->D != NULL) {
+      RETVAL = gd_close(gdp_dirfile->D);
 
       if (!RETVAL)
         gdp_dirfile->D = NULL;
@@ -1753,17 +1752,17 @@ close(dirfile)
     dreturn("%i", RETVAL);
 
 int
-discard(dirfile)
-  DIRFILE * dirfile
+discard(gdp_dirfile)
+  struct gdp_dirfile_t * gdp_dirfile
   PREINIT:
     GDP_DIRFILE_ALIAS;
   ALIAS:
     GetData::Dirfile::discard = 1
   CODE:
-    dtrace("%p", dirfile);
+    dtrace("%p", gdp_dirfile);
 
-    if (dirfile != gdp_invalid) {
-      RETVAL = gd_discard(dirfile);
+    if (gdp_dirfile->D != NULL) {
+      RETVAL = gd_discard(gdp_dirfile->D);
 
       if (!RETVAL)
         gdp_dirfile->D = NULL;

@@ -63,23 +63,23 @@ available from the World Wide Web; for details see:
   http://getdata.sourceforge.net/
 
 
-DIRFILE STANDARDS VERSION 9
-===========================
+DIRFILE STANDARDS VERSION 10
+============================
 
-The 0.8.0 release of the GetData Library (July 2012) is the first release to
+The 0.10.0 release of the GetData Library (January 2017) is the first release to
 provide suuport the latest version of the Dirfile Standards, known as Standards
-Version 9.
+Version 10.
 
-Standards Version 9 introduces the following:
-  * Two new field types: MPLEX and WINDOW, both meant to deal with extracting a
-    subset of their input.
-  * Field name munging via /INCLUDEs, aliases, and "hidden" names.
-  * Support for zzip-compressed dirfiles, as well as simple compression via an
-    in-built scheme called Sample Index Encoding.
+Standards Version 10 introduces the following:
+  * Three new field types: INDIR, SARRAY, and SINDIR.
+  * Field code namespaces.
+  * A new representation suffix, .z, which does nothing, which is occasionally
+    needed for disambiguation of syntax.
+  * Support for FLAC (Free Lossless Audio Compression) encoding of data.
+    (FLAC has been supported by GetData since 0.9.0.)
 
-This is the first update to the Dirfile Standards since Standards Version 8
-(November 2010).  A full history of the Dirfile Standards can be found in the
-dirfile-format(5) man page.
+This is the first update to the Dirfile Standards since Standards Version 9
+(July 2012).  A full history of the Dirfile Standards can be found in the
 
 
 BUILDING THE LIBRARY
@@ -93,9 +93,10 @@ binaries.
 
 Best practice is to build outside the source tree. Call CMake in the build
 folder and point it to the 'cmake' folder within the GetData source. For
-instance, to create a project file for Microsoft Visual Studio 10 execute:
+instance, to create a project file for Microsoft Visual Studio 10 execute with
+the command-line tool, try:
 
-  cmake -G"Visual Studio 10" ..\getdata-0.8\cmake
+  cmake -G"Visual Studio 10" ..\getdata-<version>\cmake
 
 Then build the project as usual.
 
@@ -126,29 +127,11 @@ The file cmake/FindGetData.cmake may be used in projects managed by
 CMake and which have to search for a GetData installation.
 
 
-PREREQUISITES
-=============
-
-The only library required to build GetData is the C Standard Library.  Several
-other external will be used if found by ./configure to provide support for
-various data encodings (typically compression schemes).  These are:
-
-- the slim compression library by Joseph Fowler;
-- the zlib library by Jean-loup Gailly and Mark Adler;
-- the bzip2 compression library by Julian Seward;
-- the lzma library, part of the XZ Utils suite by Lasse Collin, Ville Koskinen,
-  and Igor Pavlov; and,
-- the zzip library by Tomi Ollila and Guido Draheim.
-
-If these libraries are not found by configure, GetData will lack support for
-the associated encoding scheme and fail gracefully if encountering dirfiles so
-encoded.
-
-
 USING THE LIBRARY
 =================
 
 To use the library in C programs, the header file getdata.h should be included.
+This file declares all the various APIs provided by the library.
 
 The various small programs in the `util' subdirectory of the package provide
 examples of use.
@@ -161,9 +144,10 @@ supplied dirfile, plus any problems in the metadata itself.
 Bindings exist for using the GetData library in C++.  Documentation for these
 bindings is present in the README.cxx file in the `doc' subdirectory.
 
-Bindings to the GetData library from Fortran, Python, and the Interactive
-Data Language have also been written, but not ported to Microsoft Visual C++.
-If you are interested in these bindings, see the full GetData source release.
+Bindings to the GetData library from Fortran, Perl, PHP, Python, and the
+Interactive Data Language (IDL) have also been written, but not ported to
+Microsoft Visual C++.  If you are interested in these bindings, see the full
+GetData source release.
 
 
 AUTHOR

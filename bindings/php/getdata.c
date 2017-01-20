@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2014, 2015, 2016 D. V. Wiebe
+/* Copyright (C) 2013, 2014, 2015, 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1023,7 +1023,7 @@ static int gdphp_convert_nsarray(char **out, zval *z, int min, int max,
     if (GDPHP_HASH_GET_CURRENT_KEY(a, key, index, i) == HASH_KEY_IS_STRING)
       GDPHP_DIE(ctx, "cannot use associative array");
     else if (index >= max)
-      GDPHP_DIE2(ctx, "bad array index (%lu/%lu)", index, max);
+      GDPHP_DIE2(ctx, "bad array index (%lu/%i)", index, max);
 
     if (Z_TYPE_P(ZP(d)) != IS_STRING)
       GDPHP_DIE(ctx, "string array required");
