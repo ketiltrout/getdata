@@ -34,9 +34,8 @@ int main(void)
   !defined HAVE_WORKING_FORK || defined __CYGWIN__
   return 77; /* skip */
 #else
-  int error, r = 0, status, pipefd[2];
+  int r = 0, status, pipefd[2];
   pid_t pid;
-  DIRFILE *D;
 
   rmdirfile();
 
@@ -70,9 +69,14 @@ int main(void)
 
   /* point stderr at the write side of the pipe */
   if (dup2(pipefd[1], STDERR_FILENO) < 0) {
+    close(pipefd[1]);
+
     perror("dup2");
     kill(pid, SIGKILL);
   } else {
+    DIRFILE *D;
+    int error;
+
     close(pipefd[1]);
 
     D = gd_open(DIRFILENAME, GD_RDONLY | GD_VERBOSE);

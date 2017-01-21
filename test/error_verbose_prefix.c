@@ -69,11 +69,14 @@ int main(void)
 
   /* point stderr at the write side of the pipe */
   if (dup2(pipefd[1], STDERR_FILENO) < 0) {
+    close(pipefd[1]);
     perror("dup2");
     kill(pid, SIGKILL);
   } else {
     int e1, e2;
     DIRFILE *D;
+
+    close(pipefd[1]);
 
     D = gd_open(filedir, GD_RDONLY);
     e1 = gd_error(D);
