@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012, 2014-2016 D. V. Wiebe
+/* Copyright (C) 2008-2012, 2014-2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -59,6 +59,8 @@ static void _GD_FreeD(DIRFILE *D, int keep_dirfile)
   free(D->error_prefix);
   free(D->error_string);
   free(D->error_file);
+
+  free(D->regex_list);
   _GD_FreeFL(&D->fl);
   
   _GD_FreeF(D, 0, D->n_fragment);

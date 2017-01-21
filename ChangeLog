@@ -1,3 +1,6 @@
+2017-01-20   D. V. Wiebe <getdata@ketiltrout.net> svn:1144
+	* src/close.c (_GD_FreeD): Free D->regex_list.
+
 2017-01-20   D. V. Wiebe <getdata@ketiltrout.net> svn:1143
 	GetData-0.10.0rc2:
 
