@@ -228,15 +228,20 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
   dtrace("%p, %p, %" PRId64 ", %" PRIuSIZE ", 0x%X, %p)", D, E, (int64_t)s0, ns,
       return_type, data_out);
 
-  if (s0 < E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset)
-    zero_pad = E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset -
-      s0;
+  if (ns * E->e->u.raw.size == 0) {
+    dreturn("%i", 0);
+    return 0;
+  }
 
   databuffer = _GD_Malloc(D, ns * E->e->u.raw.size);
   if (databuffer == NULL) {
     dreturn("%i", 0);
     return 0;
   }
+
+  if (s0 < E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset)
+    zero_pad = E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset -
+      s0;
 
   /* Generate padding before frameoffset */
   if (zero_pad > 0) {

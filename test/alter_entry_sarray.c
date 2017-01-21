@@ -36,6 +36,7 @@ int main(void)
 
   MAKEFORMATFILE(format, "sarray SARRAY a b c d\n");
 
+  E.flags = 0;
   E.field_type = GD_SARRAY_ENTRY;
   E.EN(scalar,array_len) = 6;
 
