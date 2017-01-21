@@ -1,3 +1,8 @@
+2017-01-21   D. V. Wiebe <getdata@ketiltrout.net> svn:1146
+	* test/error_verbose.c test/error_verbose_prefix.c: Use an anonymous pipe
+	instead of a named fifo.
+	* configure.ac: Look for dup2, kill and pipe instead of mkfifo.
+
 2017-01-20   D. V. Wiebe <getdata@ketiltrout.net> svn:1145
 	* src/getdata.c (_GD_DoRaw): Don't assume malloc(0) returns NULL.
 

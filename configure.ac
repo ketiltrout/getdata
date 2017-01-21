@@ -679,9 +679,10 @@ echo "*** Looking for additional header files"
 echo
 AC_CHECK_HEADERS([asm/unaligned.h Availability.h byteswap.h crtdefs.h direct.h \
                   features.h fcntl.h float.h inttypes.h io.h libgen.h \
-                  libkern/OSByteOrder.h math.h pcre.h regex.h stddef.h \
-                  stdint.h sys/endian.h sys/file.h sys/param.h sys/resource.h \
-                  sys/stat.h sys/time.h sys/types.h sys/wait.h unistd.h])
+                  libkern/OSByteOrder.h math.h pcre.h regex.h signal.h \
+                  stddef.h stdint.h sys/endian.h sys/file.h sys/param.h \
+                  sys/resource.h sys/stat.h sys/time.h sys/types.h sys/wait.h \
+                  unistd.h])
 if test "x$disable_c99" = "xno"; then
 AC_CHECK_HEADERS([complex.h])
 fi
@@ -798,12 +799,12 @@ dnl library functions
 echo
 echo "*** Looking for additional library functions"
 echo
-AC_CHECK_FUNCS([basename _chsize _chsize_s _commit fchmod _fdopen fdopendir \
-                _finite fpathconf fseeko fseeko64 _fstat fstat64 _fstat64 \
-                fstatat fstatat64 fsync ftello ftello64 ftruncate ftruncate64 \
-                getcwd _getcwd getdelim gmtime_r isnan _isnan lseek64 \
-                _lseeki64 lstat lstat64 _mkdir mkfifo nan _open openat \
-                pathconf pcre_compile _read readdir_r readlink regcomp \
+AC_CHECK_FUNCS([basename _chsize _chsize_s _commit dup2 fchmod _fdopen \
+                fdopendir _finite fpathconf fseeko fseeko64 _fstat fstat64 \
+                _fstat64 fstatat fstatat64 fsync ftello ftello64 ftruncate \
+                ftruncate64 getcwd _getcwd getdelim gmtime_r kill isnan _isnan \
+                lseek64 _lseeki64 lstat lstat64 _mkdir nan _open openat \
+                pathconf pcre_compile pipe _read readdir_r readlink regcomp \
                 renameat _rmdir setrlimit snprintf _snprintf stat64 _stat64 \
                 _strtoi64 strtoll strtoq _strtoui64 strtoull strtouq symlink \
                 _unlink unlinkat _write])

@@ -20,61 +20,79 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <string.h>
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
 
 #define DIRFILENAME "a non-existant dirfile"
 int main(void)
 {
-#if !defined HAVE_MKFIFO || !defined HAVE_WORKING_FORK || defined __CYGWIN__
+#if !defined HAVE_DUP2 || !defined HAVE_KILL || !defined HAVE_PIPE || \
+  !defined HAVE_WORKING_FORK || defined __CYGWIN__
   return 77; /* skip */
 #else
-  const char *fifo = "./dirfile";
-  int error, r = 0, status;
-  FILE *stream;
+  int error, r = 0, status, pipefd[2];
   pid_t pid;
   DIRFILE *D;
 
   rmdirfile();
-  mkfifo(fifo, 0666);
 
-  /* read our standard error */
+  /* make a pipe */
+  if (pipe(pipefd)) {
+    perror("pipe");
+    exit(1);
+  }
+
+  /* fork a child to read our standard error */
   if ((pid = fork()) == 0) {
     char string[10000];
-    stream = fopen(fifo, "r");
+    FILE *stream;
+
+    /* CHILD: close the write-side of the pipe */
+    close(pipefd[1]);
+
+    /* Associate the read-side of the pipe with a stream */
+    stream = fdopen(pipefd[0], "r");
 
     fgets(string, 10000, stream);
     CHECKBOS(string, "libgetdata:");
     CHECKSS(string, DIRFILENAME);
+
+    /* Child exits */
     return r;
   }
 
-  /* retarget stderr */
-  freopen(fifo, "w", stderr);
+  /* PARENT: close the read-side of the pipe */
+  close(pipefd[0]);
 
-  D = gd_open(DIRFILENAME, GD_RDONLY | GD_VERBOSE);
-  error = gd_error(D);
-  gd_discard(D);
+  /* point stderr at the write side of the pipe */
+  if (dup2(pipefd[1], STDERR_FILENO) < 0) {
+    perror("dup2");
+    kill(pid, SIGKILL);
+  } else {
+    close(pipefd[1]);
 
-  fputs("\n", stderr);
-  fflush(stderr);
+    D = gd_open(DIRFILENAME, GD_RDONLY | GD_VERBOSE);
+    error = gd_error(D);
+    gd_discard(D);
 
-  /* restore stderr */
-  freopen("/dev/stderr", "w", stderr);
+    fputs("\n", stderr);
+    fflush(stderr);
 
-  unlink(fifo);
+    /* restore stderr */
+    freopen("/dev/stderr", "w", stderr);
 
-  CHECKI(error, GD_E_IO);
+    CHECKI(error, GD_E_IO);
+  }
 
   waitpid(pid, &status, 0);
-  if (status)
+  if (status) {
+    printf("status=%i", status);
     r = 1;
+  }
 
   return r;
 #endif

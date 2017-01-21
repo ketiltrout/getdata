@@ -20,67 +20,83 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <string.h>
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
 
 int main(void)
 {
-#if !defined HAVE_MKFIFO || !defined HAVE_WORKING_FORK || defined __CYGWIN__
+#if !defined HAVE_DUP2 || !defined HAVE_KILL || !defined HAVE_PIPE || \
+  !defined HAVE_WORKING_FORK || defined __CYGWIN__
   return 77; /* skip */
 #else
   const char *filedir = "dirfile";
-  const char *fifo = "dirfile/fifo";
   const char *format = "dirfile/format";
-  int e1, e2, r = 0, status;
-  FILE *stream;
+  int r = 0, status, pipefd[2];
   pid_t pid;
-  DIRFILE *D;
 
   rmdirfile();
   mkdir(filedir, 0700);
   MAKEFORMATFILE(format, "#");
 
-  mkfifo(fifo, 0600);
+  /* make a pipe */
+  if (pipe(pipefd)) {
+    perror("pipe");
+    exit(1);
+  }
 
-  /* read our standard error */
+  /* fork a child to read our standard error */
   if ((pid = fork()) == 0) {
     char string[1024];
-    stream = fopen(fifo, "r");
+    FILE *stream;
+
+    /* CHILD: close the write-side of the pipe */
+    close(pipefd[1]);
+
+    /* Associate the read-side of the pipe with a stream */
+    stream = fdopen(pipefd[0], "r");
 
     fgets(string, 1024, stream);
     CHECKS(string, "getdata-test: libgetdata: Field not found: data\n");
     return r;
   }
 
-  /* retarget stderr */
-  freopen(fifo, "w", stderr);
+  /* PARENT: close the read-side of the pipe */
+  close(pipefd[0]);
 
-  D = gd_open(filedir, GD_RDONLY);
-  e1 = gd_error(D);
-  gd_flags(D, GD_VERBOSE, 0);
-  gd_verbose_prefix(D, "getdata-test: ");
-  gd_validate(D, "data");
-  e2 = gd_error(D);
-  gd_discard(D);
+  /* point stderr at the write side of the pipe */
+  if (dup2(pipefd[1], STDERR_FILENO) < 0) {
+    perror("dup2");
+    kill(pid, SIGKILL);
+  } else {
+    int e1, e2;
+    DIRFILE *D;
 
-  fputs("\n", stderr);
-  fflush(stderr);
+    D = gd_open(filedir, GD_RDONLY);
+    e1 = gd_error(D);
+    CHECKI(e1, 0);
 
-  /* restore stderr */
-  freopen("/dev/stderr", "w", stderr);
+    gd_flags(D, GD_VERBOSE, 0);
+    gd_verbose_prefix(D, "getdata-test: ");
+    gd_validate(D, "data");
 
-  unlink(fifo);
+    e2 = gd_error(D);
+    CHECKI(e2, GD_E_BAD_CODE);
+
+    gd_discard(D);
+
+    fputs("\n", stderr);
+    fflush(stderr);
+
+    /* restore stderr */
+    freopen("/dev/stderr", "w", stderr);
+  }
+
   unlink(format);
   rmdir(filedir);
-
-  CHECKI(e1, 0);
-  CHECKI(e2, GD_E_BAD_CODE);
 
   waitpid(pid, &status, 0);
   if (status)
