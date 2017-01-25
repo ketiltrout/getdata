@@ -76,7 +76,7 @@ will display a brief help message summarising available options.
 PREREQUISITES
 =============
 
-These bindings require GetData 0.8 or newer to build, as well as a MATLAB
+These bindings require GetData-0.10 or newer to build, as well as a MATLAB
 interpreter and MEX compiler.  No other external libraries are required, save
 for the C Standard Library.
 
