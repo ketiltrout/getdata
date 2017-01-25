@@ -22,20 +22,20 @@ New in version 0.10.0rc2:
           namespace.subspace.subsubspace.name
 
       Namespaces were created to provide an alternative to the prefix and
-      suffix added to the /INCLUDE driective in Standards Version 9, which
+      suffix added to the /INCLUDE directive in Standards Version 9, which
       have some unfortunate side-effects due to their modifying field names
       directly.  Because namespaces nest and are syntactically separate
       from field names, they do a better job of encapsulation.
 
     - If the namespace of a field is null (""), which is the default, then
-      the dot separing the namespace from the field name may be omitted.
+      the dot separating the namespace from the field name may be omitted.
 
     - An /INCLUDE statement can specify a namespace which becomes the
       included fragment's "root namespace".  The root namespace of the base
       (top-level) format file is always the nullspace (""), and cannot be
       changed.
 
-    - In additon to root namespaces, there is also a "current namespace".
+    - In addition to root namespaces, there is also a "current namespace".
       At the top of a fragment, the current namespace is set to the root
       namespace.  A /NAMESPACE directive can be used to change the current
       namespace to a subspace under the root namespace.  That is, if the
@@ -72,7 +72,7 @@ New in version 0.10.0rc2:
       of affixes, where it can appears or disappears based on the effects
       of the affixes creating or modifying the specific field name "INDEX".
 
-  * Because syntactially the dot (.) now performs two functions, namely
+  * Because syntactically the dot (.) now performs two functions, namely
     both separating namespaces from each other and field names, but also
     separating a field code from a representation suffix, there exists
     ambiguity in the syntax.  To resolve the ambiguity, a new representa-
@@ -81,8 +81,8 @@ New in version 0.10.0rc2:
 
       name.r
 
-    is interpreted as the real part of the field named "name", asuming such
-    a field exists.  To indicate the field named "r" in the namespace
+    is interpreted as the real part of the field named "name", assuming
+    such a field exists.  To indicate the field named "r" in the namespace
     "name", the field code:
 
       name.r.z
@@ -120,7 +120,7 @@ New in version 0.10.0rc2:
   * BUG FIX: When building in ANSI-C mode, the computation of complex-
     valued RECIP fields is now correct.
 
-  * BUG FIX: The gd_include() family of functions now correcrtly clean up
+  * BUG FIX: The gd_include() family of functions now correctly clean up
     after encountering an error.  Previously, encountering a syntax error
     would result in these functions erroneously adding fields specified
     before the syntax error to the DIRFILE, with a bogus fragment index.
@@ -131,10 +131,10 @@ New in version 0.10.0rc2:
   * BUG FIX: gd_alter_protection() wasn't marking affected fragments as
     modified, meaning the change in protection level would be lost upon
     close unless other metadata changes were made to the fragment as well,
-    or a flush of the fragment's metadata was triggered expicilty with a
+    or a flush of the fragment's metadata was triggered explicitly with a
     call to gd_rewrite_fragment().
 
-  * BUG FIX: The metadata update performed by gd_delete() now successfuly
+  * BUG FIX: The metadata update performed by gd_delete() now successfully
     updates all fields which used the deleted field as an input.
     Previously some fields could be skipped, leading to segfaults later
     when these fields were accessed.
@@ -150,10 +150,10 @@ New in version 0.10.0rc2:
   * BUG FIX: gd_nentries() now correctly rejects invalid values for the
     type parameter.
 
-  * BUG FIX GetData now properly deals wth circular series of aliases,
+  * BUG FIX GetData now properly deals with circular series of aliases,
     turning them all into dangling aliases.  Previously, the alias
     resolution would terminate at some arbitrary point around the loop,
-    resulting in internal errors arrising from attempts to use an alias as
+    resulting in internal errors arising from attempts to use an alias as
     a field.
 
   * BUG FIX: Several bugs in the I/O positioning performed before reads and
@@ -165,8 +165,8 @@ New in version 0.10.0rc2:
     writes to compressed data files which were causing data corruption have
     been fixed.
 
-  * BUG FIX: When reading LZMA-compressed data, gd_getdata() no longer hangs
-    if liblzma returns only part of a multibyte sample.
+  * BUG FIX: When reading LZMA-compressed data, gd_getdata() no longer
+    hangs if liblzma returns only part of a multibyte sample.
 
   * BUG FIX: The FLAC encoding now works correctly with non-native endian
     data.
@@ -189,7 +189,7 @@ New in version 0.10.0rc2:
     the parser callback (by assigning it to pdata->line) has the size given
     by pdata->buflen, which the callback is not required to update, but
     instead determines the buffer size directly.  Previously, this
-    assumtion could result in a segfault within the parser.
+    assumption could result in a segfault within the parser.
 
   * BUG FIX: gd_add_polynom() and gd_add_cpolynom() no longer reject valid
     poly_ord values.
@@ -227,7 +227,7 @@ New in version 0.10.0rc2:
     expression matching against entry names.
 
   * A number of functions which used to return -1 on error now instead
-    return an appropriate error code, previously only availably through
+    return an appropriate error code, previously only available through
     gd_error().  These error codes are all negative-valued.  Functions
     whose error returns have changed and now do this are:
 
@@ -332,7 +332,7 @@ New in version 0.9.4:
 
   Bindings Changes:
 
-  * PYTHON BUG FIX: An erroreous preprocessor definition which made the
+  * PYTHON BUG FIX: An erroneous preprocessor definition which made the
     Python bindings unbuildable for Python 3 has been fixed.  Reported by
     Akito Kusaka.
 
@@ -406,7 +406,7 @@ New in version 0.9.3:
     then ASCII encoded to ensure they're always available, regardless of
     the capabilities of standard error.
 
-  * PYTHON: As a side-effect to the above, pygetdata now accepts unicode
+  * PYTHON: As a side-effect to the above, pygetdata now accepts Unicode
     strings (both in Python2 and in Python3).  The specified
     character_encoding will be used to encode them to C strings before
     being passed to the C library.  If no character_encoding is specified,
@@ -507,7 +507,7 @@ New in version 0.9.1:
 
   * Functions returning entry lists (gd_entry_list(), &c.) or bulk scalar
     field data (gd_constants(), gd_carrays(), &c.) no longer run through
-    the entry list twice, resulting in noticable speed improvements when
+    the entry list twice, resulting in noticeable speed improvements when
     operating on large dirfiles.
 
   * BUG FIX: Top-level aliases pointing to metafields, and non-hidden
@@ -533,7 +533,7 @@ New in version 0.9.1:
 
   * BUG FIX: GetData no longer ignores errors reported by zlib when
     writing to gzipped data files.  In the past, this could, in some
-    cases, cause GetData to wegde.
+    cases, cause GetData to wedge.
 
   API Changes:
 
@@ -618,7 +618,7 @@ New in version 0.9.1:
 
 |=========================================================================|
 
-New in verison 0.9.0:
+New in version 0.9.0:
 
   Library Changes:
 
@@ -700,12 +700,12 @@ New in verison 0.9.0:
   
   * BUG FIX: In addition to the addition of write support mentioned above,
     a number of problems with reading LZMA files has been fixed, which
-    should result in fewer segmentaion faults.
+    should result in fewer segmentation faults.
 
   * BUG FIX: The parser no longer silently appends a closing > to scalar
-    field codes that contain an umatched opening < (e.g. "scalar<3").  This
-    is now interpreted as a simple field code (which may be rejected later
-    due to the presence of the invalid '<' character).
+    field codes that contain an unmatched opening < (e.g. "scalar<3").
+    This is now interpreted as a simple field code (which may be rejected
+    later due to the presence of the invalid '<' character).
 
   * BUG FIX: The parser no longer interprets various numbers as field codes
     when it shouldn't (e.g. when specifying a PHASE shift as "1." instead
@@ -831,12 +831,12 @@ New in verison 0.9.0:
 
   * F77 and F95: The bindings no longer raise SIGABRT when the dirfile
     space is exhausted.  Instead they simply return a dirfile unit number
-    referenceing a static, invalid dirfile.
+    referencing a static, invalid dirfile.
 
   * F77: Functions to add fields with named scalar parameters have been
     added (GDASBT GDASCL GDASCP GDASCR GDASLC GDASMX GDASPH GDASPN GDASRC
     GDASRW GDASSB GDASWD), but only for those field types which permit
-    named scalars.  Similarly, functions for altering field metatdata with
+    named scalars.  Similarly, functions for altering field metadata with
     named scalars are also present (GDLSBT GDLSCL GDLSCP GDLSCR GDLSLC
     GDLSMX GDLSPH GDLSPN GDLSRC GDLSRW GDLSSB GDLSWD).  These are provided
     as an alternative to using GDASCA after the fact.
@@ -866,10 +866,10 @@ New in verison 0.9.0:
   * PYTHON: Building the python bindings now requires NumPy.  Previously,
     NumPy support was optional.
 
-  * PYTHON: for backwards compatiblity, exceptions now exist for deprecated
-    error codes (such as OpenError).  These deprecated exceptions are
-    simply aliases for the current ones and are never returned by the
-    bindings.
+  * PYTHON: for backwards compatibility, exceptions now exist for
+    deprecated error codes (such as OpenError).  These deprecated
+    exceptions are simply aliases for the current ones and are never
+    returned by the bindings.
 
   * C++ BUG FIX: The Entry methods Input, Scalar, and ScalarIndex
     (including subclasses) now return zero or NULL when passed an out-of-
@@ -897,7 +897,7 @@ New in verison 0.9.0:
 
 |=========================================================================|
 
-New in verison 0.8.9:
+New in version 0.8.9:
 
   Library Changes:
 
@@ -906,7 +906,7 @@ New in verison 0.8.9:
     \x##).
 
   * BUG FIX: A number of memory leaks associated with error returns from
-    libary functions have been fixed.
+    library functions have been fixed.
 
   * BUG FIX: Attempting to create a new field or alias with the name of
     an existing dangling alias now fails with error GD_E_DUPLICATE, as it
@@ -937,7 +937,7 @@ New in verison 0.8.9:
 
 |=========================================================================|
 
-New in verison 0.8.8:
+New in version 0.8.8:
 
   Library Changes:
 
@@ -950,7 +950,7 @@ New in verison 0.8.8:
 
 |=========================================================================|
 
-New in verison 0.8.7:
+New in version 0.8.7:
 
   Library Changes:
 
@@ -999,7 +999,7 @@ New in version 0.8.6:
     pletely ignored by gd_[m]add() when corresponding named scalars are
     specified.  Previously, an invalid value in these members would result
     in the entry being rejected, even though the rest of GetData ignored
-    the invalid, unsued value.
+    the invalid, unused value.
 
   * BUG FIX: The parsing of the \x and \u escape sequences is now correct.
 
@@ -1084,11 +1084,11 @@ New in version 0.8.6:
 
 |=========================================================================|
 
-New in verison 0.8.5:
+New in version 0.8.5:
 
   Library Changes:
 
-  * BUG FIX: The zzslim encoding framework, which was inadvertantly
+  * BUG FIX: The zzslim encoding framework, which was inadvertently
     rendered non-compilable in 0.8.4, should once again work.  Reported by
     Matthew Hasselfield.
 
@@ -1103,14 +1103,14 @@ New in version 0.8.4:
 
   Dirfile Changes:
 
-  * CLARIFICATION: Inconsistant behaviour in the library, coupled with
+  * CLARIFICATION: Inconsistent behaviour in the library, coupled with
     contradictory statements in the Dirfile Standards, has resulted in
     confusion over the meaning of the final, optional, parameter in a MPLEX
     definition.  To be clear: this parameter is simply the expected period
-    between successive occurances of the "count" value in the index vector.
-    (It is used by GetData only to figure out a resonable length for the
-    MPLEX lookback.)  The following clarifications and corrections have
-    been made to the definition of the MPLEX field type in
+    between successive occurrences of the "count" value in the index
+    vector.  (It is used by GetData only to figure out a reasonable length
+    for the MPLEX lookback.)  The following clarifications and corrections
+    have been made to the definition of the MPLEX field type in
     dirfile-format(5):
 
     - The final, optional parameter has been renamed from "max" to
@@ -1118,7 +1118,7 @@ New in version 0.8.4:
 
     - This parameter indicates not the maximal range of the index vector,
       as previously stated, but the expected number of samples between
-      successive occurances of the specified "count" value in the index
+      successive occurrences of the specified "count" value in the index
       vector; as before, it should be regarded as a hint, and does not
       place any actual restriction on the contents of the index vector.
 
@@ -1181,7 +1181,7 @@ New in version 0.8.4:
 
   * C++: The Entry and MplexEntry member functions CountMax and SetCountMax
     have been renamed to Period and SetPeriod for consistency with the
-    changes listed above.  CountMax and SetCountMax are still avaialbe as
+    changes listed above.  CountMax and SetCountMax are still available as
     aliases, but are marked deprecated.
 
   * IDL BUG FIX: GD_ENTRY structures representing MPLEX fields are now
@@ -1283,7 +1283,7 @@ New in version 0.8.1:
     and scalar fields are reported by gd_entry(), &c. now include their
     prefix and suffix, if any, which should remove the need to do manual
     affix bookkeeping when reading metadata.  The other side to this change
-    is that when modifying metdata (gd_add(), gd_alter_entry(), &c.),
+    is that when modifying metadata (gd_add(), gd_alter_entry(), &c.),
     supplied field codes must also contain the appropriate affixes.
 
   * A new function, gd_linterp_tablename() has been added which returns a
@@ -1320,8 +1320,8 @@ New in version 0.8.0:
     exclude them from the count and list functions.
 
   * Literal integers in the format may now be specified in octal (using
-    0####) or hexidecimal (using 0x##### or 0X#####) in addition to
-    decimal.  C99-standard hexidecimal floating point literals (0x##.##p##,
+    0####) or hexadecimal (using 0x##### or 0X#####) in addition to
+    decimal.  C99-standard hexadecimal floating point literals (0x##.##p##,
     &c.) are also accepted.
 
   * The /INCLUDE directive can take two additional, optional parameters
@@ -1422,7 +1422,7 @@ New in version 0.8.0:
     longer results in a floating-point exception.
 
   * BUG FIX: Renaming a field now properly flags the fragment which
-    contains it as dirty, which will ensure the rename is writen to disk
+    contains it as dirty, which will ensure the rename is written to disk
     when the metadata are next flushed.
 
   * BUG FIX: Whitespace within tokens is now properly escaped when metadata
@@ -1475,8 +1475,8 @@ New in version 0.8.0:
     modified or deleted with gd_alter_affixes().  A new fragment can be
     added to the dirfile with affixes using gd_include_affix().
 
-  * New aliases may be added with gd_add_alias() or gd_madd_alais.  The
-    target of an alias is retrned by gd_alias_target(); a list of aliases
+  * New aliases may be added with gd_add_alias() or gd_madd_alias.  The
+    target of an alias is returned by gd_alias_target(); a list of aliases
     of a field, or their number, is returned by gd_aliases() and
     gd_naliases().
 
@@ -1514,11 +1514,11 @@ New in version 0.8.0:
     recovers the old behaviour of move_data, and GD_REN_UBDB which will
     cause references to the renamed field to be renamed also in derived
     fields which refer to it.  Without GD_REN_UBDB, these definitions are
-    left unchagned.
+    left unchanged.
 
   * Flags which affect the long-term operation of GetData may be modified
     after open using gd_flags().  Currently these flags are just GD_VERBOSE
-    and GD_PRETTY_PRTNT.
+    and GD_PRETTY_PRINT.
 
   * The gd_flush() function, which both syncs and closes RAW files, has
     been broken up into its two parts with two new functions: gd_sync(),
@@ -1575,7 +1575,7 @@ New in version 0.8.0:
     parties.
 
   * Python: The return_type, num_fields, and num_samples parameters to
-    dirfile.getdata() are now optional.  The return_type defautls to
+    dirfile.getdata() are now optional.  The return_type defaults to
     pygetdata.FLOAT, and if neither num_fields nor num_samples are given,
     all frames (ie. the value of dirfile.nframes) are returned.
 
@@ -1784,7 +1784,7 @@ New in version 0.7.0:
 
   * Since Standards Versions 4 and earlier were never codified, we've made
     some assumptions as to their behaviour in certain undocumented situta-
-    tions.  Most noticably, they still prohibit ASCII control codes (bytes
+    tions.  Most noticeably, they still prohibit ASCII control codes (bytes
     0x01 through 0x1F) and '/' in field names.  We also assume these
     dirfiles have native byte sex, even though some early GetData behaviour
     implied only little-ended data was acceptable.
@@ -1821,7 +1821,7 @@ New in version 0.7.0:
 
   * BUG FIX: Using a complex valued vector as the second input field in a
     MULTIPLY wouldn't result in the field being internally flagged as
-    complex, leading to loss of the imaginary part in certain situtaitons.
+    complex, leading to loss of the imaginary part in certain situations.
 
   * BUG FIX: Trying to write to a LINTERP via a table which isn't monotonic
     now results in error.  Previously, this was allowed, with arbitrary
@@ -1831,12 +1831,12 @@ New in version 0.7.0:
     with, the parser used to get very confused, potentially resulting in
     bizarre behaviour.  On the off chance such a line is encountered,
     GetData will now raise GD_E_LINE_TOO_LONG in these cases. (And, since
-    the maxmium line length has been increased to at least 2**31 charac-
+    the maximum line length has been increased to at least 2**31 charac-
     ters, this should only occur in pathological situations.)
 
   * BUG FIX: Deleting a metafield was not being communicated to its parent,
     resulting in differing opinions within the library as to the deleted
-    field's exsitence.
+    field's existence.
 
   API Changes
 
@@ -1953,8 +1953,8 @@ New in version 0.7.0:
 
   * F77: GDGTCO and GDPTCO no longer return an indicator of success.
 
-  * F77: The signatues of GDGSCA and GDASCA have changed to return/take the
-    scalar index as well.
+  * F77: The signatures of GDGSCA and GDASCA have changed to return/take
+    the scalar index as well.
 
   * F95: For consistency sake, the Fortran 95 bindings have undergone the
     same renaming so they have the same name as their C counterparts.  All
