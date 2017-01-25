@@ -519,15 +519,22 @@ If called in scalar context, returns the entry type of C<$FIELD_CODE>, one
 of the symbols listed above under L</"Entry Types">.  In array context, returns
 a hash describing the indicated field.  See gd_entry_type(3) and gd_entry(3).
 
-=item $dirfile->entry_list ($PARENT, $FRAGMENT, $TYPE, $FLAGS)
+=item $dirfile->match_entries ($REGEX, $FRAGMENT, $TYPE, $FLAGS)
 
 In scalar context, returns the number of entries matching the supplied criteria.
-In list context, returns an array of the names of the entries.  If C<$FRAGMENT>
-is $GetData::ALL_FRAGMENTS or undef, all fragments are searched, otherwise, only
-the specified fragment is considered.  If C<$PARENT> is undef, top-level entries
-are considered, otherwise meta entries under C<$PARENT> are considered.  If
-C<$TYPE> is one of the entry types listed above under L</"Entry Types">, only
-entries of that type are considered.  Alternatley, C<$TYPE> may be one of:
+In list context, returns an array of the names of the entries.  If C<$REGEX> is
+not undef, it is a regular expression which is matched against entry names.
+
+B<NB:> The regular expression handling is done in the underlying C library,
+not in Perl.  As a result, using Perl's regex grammar in C<$REGEX> usually won't
+work as desired.  If the C GetData library has Perl-Compatible Regular
+Expression (PCRE) support, the C<$GetData::REGEX_PCRE> flag can be used to
+select a regular expression grammar which is very similar to Perl's own.
+
+If C<$FRAGMENT> is not $GetData::ALL_FRAGMENTS or undef, only entries defined in
+the specified fragment are searched.  If C<$TYPE> is one of the entry types
+listed above under L</"Entry Types">, only entries of that type are considered.
+Alternatley, C<$TYPE> may be one of:
 
 =over
 
@@ -544,11 +551,26 @@ should be zero or more of the following flags:
 =over
 
 $GetData::ENTRIES_HIDDEN,
-$GetData::ENTRIES_NOALIAS.
+$GetData::ENTRIES_NOALIAS,
+$GetData::REGEX_PCRE,
+$GetData::REGEX_EXTENDED,
+$GetData::REGEX_ICASE,
+$GetData::REGEX_CASELESS,
+$GetData::REGEX_JAVASCRIPT,
+$GetData::REGEX_UNICODE
 
 =back
 
-See gd_nentries(3) and gd_entry_list(3) for the meaning of these symbols.
+See gd_match_entries(3) for the meaning of these symbols.
+
+=item $dirfile->entry_list ($PARENT, $TYPE, $FLAGS)
+
+In scalar context, returns the number of entries matching the supplied criteria.
+In list context, returns an array of the names of the entries.  If C<$PARENT>
+is undef, top-level entries are considered, otherwise meta entries under
+C<$PARENT> are considered.  For C<$TYPE> and C<$FLAGS>, see
+C<$dirfile->match_entries> above (the regex flags listed there are ignored by
+this function), and also gd_nentries(3) and gd_entry_list(3).
 
 =item $dirfile->error ()
 

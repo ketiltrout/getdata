@@ -21,7 +21,7 @@ If the GetData IDL bindings have been found, you should see among the output
 something similar to:
 
   *** GETDATA - IDL GetData bindings (not loaded)
-      Version: 0.8.0, Build Date: Thu Apr 12 00:00:00 UTC 2012, Source: The GetData Project <getdata-devel@lists.sourceforge.net>
+      Version: 0.10.0, Build Date: Tue Jan 25 00:00:00 PST 2017, Source: The GetData Project <getdata-devel@lists.sourceforge.net>
       Path: /usr/local/rsi/idl/bin/bin.linux.x86/idl_getdata.so
 
 The DLM will be automatically loaded by the interpreter the first time a IDL
@@ -595,18 +595,6 @@ FUNCTION GD_ENTRY(dirfile_unit, field_code)
   This function returns a GD_ENTRY structure containing the field metadata for
   the field specified by 'field_code'.  See gd_entry(3).
 
-FUNCTION GD_ENTRY_LIST(dirfile_unit, /ALIASES, /HIDDEN, /NOALIAS, PARENT=parent,
-    /SCALARS, TYPE=type, /VECTORS)
-
-  This function returns a list of entry names defined by the dirfile.  If PARENT
-  is given, a list of metafields for the given parent will be returned otherwise
-  top-level fields are considered.  If TYPE is given, which should be one of the
-  !GD.*_ENTRY constants, only fields of the given type will be returned.  If
-  /ALIASES, /SCALARS or /VECTORS is specified, the TYPE parameter is ignored if
-  it is also given.  The list returned includes aliases, unless /NOALIAS is
-  specified, but not hidden fields, unless /HIDDEN is specified.  See
-  gd_entry_list(3).
-
 FUNCTION GD_ENTRY_TYPE(dirfile_unit, field_code)
 
   This function returns the field type of the field specified by 'field_code'.
@@ -757,6 +745,31 @@ FUNCTION GD_INVALID_DIRFILE()
 
   This functions returns a dirfile unit number corresponding to a newly created
   invalid dirfile.  See gd_invalid_dirfile(3).
+
+FUNCTION GD_MATCH_ENTRIES(dirfile_unit, /ALIASES, /CASELESS, /EXTENDED,
+    FRAGMENT=fragment, /HIDDEN, /ICASE, /JAVASCRIPT, /NOALIAS, PARENT=parent,
+    /PCRE, REGEX=regex, /SCALARS, TYPE=type, /UNICODE, /VECTORS)
+
+  This function returns a list of entry names defined by the dirfile which
+  satisfy the provided criteria.  Not all criteria may be used at the same time:
+  if PARENT is given, then neither REGEX nor FRAGMENT may be supplied.
+
+  The flags /CASELESS, /EXTENDED, /ICASE, /JAVASCRIPT, /PCRE, and /UNICODE affect
+  the interpretation of REGEX.  If REGEX is not given, these flags are ignored.
+
+  If REGEX is given, it is a regular expression which is matched against entry
+  names.  If FRAGMENT is given, matching will be restricted to the entries
+  defined in that fragment.  Otherwise, if PARENT is given, a list of metafields
+  for the given parent will be returned otherwise top-level fields are considered.
+
+  In both cases, if TYPE is given, which should be one of the !GD.*_ENTRY constants,
+  only fields of the given type will be returned.  If /ALIASES, /SCALARS or /VECTORS
+  is specified, the TYPE parameter is ignored if it is also given.  The list returned
+  includes aliases, unless /NOALIAS is specified, but not hidden fields, unless
+  /HIDDEN is specified.  See gd_entry_list(3) and gd_match_entries(3).
+
+  This function may also be called as GD_ENTRY_LIST without change in parameters
+  or behaviour.
 
 PROCEDURE GD_METAFLUSH, dirfile_unit
 

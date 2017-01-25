@@ -359,10 +359,8 @@ Subroutines interacting with data
   should contain the string length of the field_code).  The data_type parameter
   should be one of the parameters defined in getdata.f.
 
-* GDPTST(size, dirfile_unit, field_code, field_code_len, len, data_out)
+* GDPTST(dirfile_unit, field_code, field_code_len, len, data_out)
 
-  Output:
-    INTEGER size
   Input:
     INTEGER dirfile_unit, field_code_len, len
     CHARACTER*<field_code_len> field_code
@@ -370,8 +368,7 @@ Subroutines interacting with data
 
   This wraps gd_put_string(3), with the same input arguments (field_code_len
   should contain the string length of the field_code, and len should contain the
-  string length of data_in).  The number of characters actually written is
-  returned in size.
+  string length of data_in).
 
 * GDVLDT(invalid, dirfile_unit, field_code, field_code_len)
 
@@ -445,6 +442,19 @@ Subroutines interacting with data
 Subroutines interacting with global metadata
 --------------------------------------------
 
+* GDNMAT(nentries, dirfile_unit, regex, regex_len, fragment, type, flags)
+
+  Output:
+    INTEGER nentries
+  Input:
+    INTEGER dirfile_unit, regex_len, type, flags
+    CHARACTER*<regex_len> regex
+
+  This wraps gd_match_entries(3).  It returns the number of entries in the
+  dirfile satisfying the supplied criteria.  If regex_len is zero, regex itself
+  is ignored.  To access the matched field names themselves, use GDMATN (see
+  below).
+
 * GDNENT(nentries dirfile_unit, parent, parent_len, type, flags)
 
   Output:
@@ -480,6 +490,19 @@ Subroutines interacting with global metadata
   This wraps gd_naliases(3).  It returns the number of aliases of field_code
   (including field_code itself).
 
+* GDMATX(entry_max, dirfile_unit, regex, regex_len, fragment, type, flags)
+
+  Output:
+    INTEGER entry_max
+  Input:
+    INTEGER dirfile_unit, regex_len, fragment, type, flags
+    CHARACTER*<regex_len> regex
+
+  This subroutine, which has no direct analogue in the C API, returns in
+  entry_max the length (in characters) of the longest entry name in the
+  dirfile in which satisfies the given criteria.  If regex_len is zero,
+  regex itself is ignored.  See gd_match_entries(3).
+
 * GDENTX(entry_max, dirfile_unit, parent, parent_len, type, flags)
 
   Output:
@@ -488,10 +511,9 @@ Subroutines interacting with global metadata
     INTEGER dirfile_unit, parent_len, type, flags
     CHARACTER*<parent_len> parent
  
-  This subroutine, which has no direct analogue in the C API, returns the
-  length of the longest entry name defined in the dirfile.  It returns
-  the length (in characters) of the longest entry name in the dirfile in
-  entry_max which satisfies the given criteria.  If parent_len is zero,
+  This subroutine, which has no direct analogue in the C API, returns in
+  entry_max the length (in characters) of the longest entry name in the
+  dirfile in which satisfies the given criteria.  If parent_len is zero,
   parent itself is ignored, and top-level entries are considered.
   Otherwise, meta-entries under parent are considered.
  
@@ -501,6 +523,25 @@ Subroutines interacting with global metadata
   These subroutines are special cases of GDENTX, with type and flags both
   equal to zero, and, in the case of GDFDNX, parent_len also zero.
  
+* GDMATN(name, name_len, dirfile_unit, regex, regex_len, fragment, type,
+  flags, entry_num)
+
+  Output:
+    CHARACTER*<name_len> name
+  Input/Output:
+    INTEGER name_len
+  Input:
+    INTEGER dirfile_unit, regex_len, fragment, type, flags, entry_num
+    CHARACTER*<regex_len> regex
+
+  This subroutine is the replacement for gd_match_entries(3).  It returns in
+  name a Fortran 77 string containing the entry name of the entry indexed by
+  entry_num (which is should be a number between 1 and the output of GDNMAT).
+  If the name of the field is longer than name_len, it will return the actual
+  length of the field in name_len and not modify the name argument.  If
+  entry_num is out of range, name_len will be set to zero, and name will not be
+  modified.
+
 * GDENTN(name, name_len, dirfile_unit, parent, parent_len, type, flags,
   entry_num)
 

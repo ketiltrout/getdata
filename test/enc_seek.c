@@ -45,7 +45,7 @@ int main(void)
   if (gd_system(command))
     return 1;
 
-#ifdef USE_FLAC
+#ifdef USE_ENC
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE | GD_LITTLE_ENDIAN);
 #else
   D = gd_open(filedir, GD_RDONLY | GD_LITTLE_ENDIAN);
@@ -53,7 +53,7 @@ int main(void)
   n = gd_seek(D, "data", 5, 0, GD_SEEK_SET);
   error = gd_error(D);
 
-#ifdef USE_FLAC
+#ifdef USE_ENC
   CHECKI(error, 0);
   CHECKI(n, 40);
 #else

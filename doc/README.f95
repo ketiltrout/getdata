@@ -56,8 +56,7 @@ unit numbers in place of C's DIRFILE pointers are:
 * subroutine fgd_close (dirfile_unit)
   integer, intent(in) :: dirfile
 
-* subroutine fgd_desync (dirfile_unit, flags)
-  integer :: fgd_desync
+* integer function fgd_desync (dirfile_unit, flags)
   integer, intent(in) :: dirfile, flags
 
 * subroutine fgd_discard (dirfile_unit)
@@ -92,11 +91,9 @@ unit numbers in place of C's DIRFILE pointers are:
   ind)
   integer, intent(in) :: dirfile_unit, ind
 
-* function fgd_nentries (dirfile, parent, entype, flags)
-  integer :: fgd_nentries
+* integer function fgd_nentries (dirfile, parent, entype, flags)
   integer, intent(in) :: dirfile, entype, flags
   character (len=*), intent(in) :: parent
-  integer :: parent_l
 
 * integer function fgd_nfields (dirfile_unit)
   integer, intent(in) :: dirfile_unit
@@ -144,7 +141,7 @@ unit numbers in place of C's DIRFILE pointers are:
   character (len=*), intent(in) :: field_code
   character (len=*), intent(out) :: data_out
 
-* integer function fgd_put_string (dirfile, field_code, data_in)
+* subroutine fgd_put_string (dirfile, field_code, data_in)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code, data_in
 
@@ -747,11 +744,17 @@ Otherwise, they behave the same as their C counterparts.
 
 Other procedures in the Fortran 95 bindings are:
 
-function fgd_entry_name_max (dirfile, parent, entype, flags)
-  integer :: fgd_entry_name_max
+* integer function fgd_match_entries_max (dirfile, regex, fragment, entype, flags)
+  integer, intent(in) :: dirfile, fragment, entype, flags
+  character (len=*), intent(in) :: regex
+
+  This function returns the length of the longest entry name defined in the
+  dirfile satisfying the given criteria.  The parameters are the same as they
+  are for fgd_match_entries.
+
+* integer function fgd_entry_name_max (dirfile, parent, entype, flags)
   integer, intent(in) :: dirfile, entype, flags
   character (len=*), intent(in) :: parent
-  integer :: parent_l
 
   This function returns the length of the longest entry name defined in the
   dirfile satisfying the given criteria.  The parameters are the same as they
@@ -790,13 +793,26 @@ function fgd_entry_name_max (dirfile, parent, entype, flags)
   This function returns the length of the longest alias for the given
   field_code.
 
+* integer function fgd_match_entries (entry_list, dirfile, regex, fragment,
+  entype, flags, entry_len)
+  character(len=*), dimension(:), intent(out) :: entry_list
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: regex
+  integer, intent(inout) :: entry_len
+
+  This function behave analogously to gd_match_entries(3), except that it
+  requires an additional argument, entry_len, which is the longest entry name
+  which will fit in the supplied entry_list array.  If the longest entry name in
+  the dirfile is longer than entry_len, entry_len will be set to this value
+  (which is equivalent to the return value of fgd_match_entries_max) and entry_list
+  will remain untouched.
+
 * subroutine fgd_entry_list (entry_list, dirfile, parent, entype, flags,
   entry_len)
   character(len=*), dimension(:), intent(out) :: entry_list
   integer, intent(in) :: dirfile, entype, flags
   integer, intent(inout) :: entry_len
   character (len=*), intent(in) :: parent
-  integer :: max_len, nentries, i, parent_l
 
   This subroutine behaves analogously to gd_entry_list(3), except that it
   requires an additional argument, entry_len, which is the longest entry name

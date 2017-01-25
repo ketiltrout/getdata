@@ -73,7 +73,7 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
   &_GD_GenericMove, &_GD_GenericUnlink, &_GD_GzipStrerr
 #else
 #define GD_EF_PROVIDES 0
-#define GD_INT_FUNCS GD_EF_NULL_SET
+#define GD_INT_FUNCS GD_EF_GENERICNOP_SET
 #endif
   GD_EXT_ENCODING_GENOP(GD_GZIP_ENCODED, ".gz", GD_EF_ECOR | GD_EF_OOP, "Gzip",
       "gzip"),
@@ -90,7 +90,7 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
   &_GD_Bzip2Read, &_GD_Bzip2Size, &_GD_Bzip2Write, &_GD_NopSync, \
   &_GD_GenericMove, &_GD_GenericUnlink, &_GD_Bzip2Strerr
 #else
-#define GD_INT_FUNCS GD_EF_NULL_SET
+#define GD_INT_FUNCS GD_EF_GENERICNOP_SET
 #define GD_EF_PROVIDES 0
 #endif
   GD_EXT_ENCODING_GENOP(GD_BZIP2_ENCODED, ".bz2", GD_EF_ECOR | GD_EF_OOP,
@@ -107,7 +107,7 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
   &_GD_SlimRead, &_GD_SlimSize, NULL /* WRITE */, &_GD_NopSync, \
   &_GD_GenericMove, &_GD_GenericUnlink, &_GD_SlimStrerr
 #else
-#define GD_INT_FUNCS GD_EF_NULL_SET
+#define GD_INT_FUNCS GD_EF_GENERICNOP_SET
 #define GD_EF_PROVIDES 0
 #endif
   GD_EXT_ENCODING_GENOP(GD_SLIM_ENCODED, ".slm", GD_EF_ECOR, "Slim", "slim"),
@@ -125,7 +125,7 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
   &_GD_LzmaRead, &_GD_LzmaSize, &_GD_LzmaWrite, &_GD_LzmaSync, \
   &_GD_GenericMove, &_GD_GenericUnlink, &_GD_LzmaStrerr
 #else
-#define GD_INT_FUNCS GD_EF_NULL_SET
+#define GD_INT_FUNCS GD_EF_GENERIC_SET
 #define GD_EF_PROVIDES 0
 #endif
   GD_EXT_ENCODING_GEN(GD_LZMA_ENCODED, ".xz", GD_EF_ECOR | GD_EF_OOP, "Lzma",
@@ -141,7 +141,7 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
   &_GD_LzmaRead, &_GD_LzmaSize, NULL /* WRITE */, NULL /* SYNC */, \
   &_GD_GenericMove, &_GD_GenericUnlink, &_GD_LzmaStrerr
 #else
-#define GD_INT_FUNCS GD_EF_NULL_SET
+#define GD_INT_FUNCS GD_EF_GENERIC_SET
 #define GD_EF_PROVIDES 0
 #endif
   GD_EXT_ENCODING_GEN(GD_LZMA_ENCODED, ".lzma", GD_EF_ECOR, "Lzma", "lzma"),
@@ -207,7 +207,7 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
   &_GD_FlacRead, &_GD_FlacSize, &_GD_FlacWrite, &_GD_NopSync, \
   &_GD_GenericMove, &_GD_GenericUnlink, &_GD_FlacStrerr
 #else
-#define GD_INT_FUNCS GD_EF_NULL_SET
+#define GD_INT_FUNCS GD_EF_GENERICNOP_SET
 #define GD_EF_PROVIDES 0
 #endif
   GD_EXT_ENCODING_GENOP(GD_FLAC_ENCODED, ".flac", GD_EF_SWAP | GD_EF_OOP,

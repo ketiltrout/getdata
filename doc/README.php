@@ -317,7 +317,7 @@ Some functions have several ways that they can be called.
 
       See above for a description of the returned entry array.
 
-* array gd_entry_list(resource $dirfile, [ string $parent = null,
+* array gd_entry_list(resource $dirfile, [ string $regex = null,
         int $type = GD_ALL_ENTRIES, flags = 0 ])
 
 * int gd_entry_type(resource $dirfile, string $field_code)
@@ -444,6 +444,13 @@ Some functions have several ways that they can be called.
 
 * bool gd_malter_spec(resource $dirfile, string $psec, string $parent,
         [ bool $recode = false ])
+
+* array gd_match_entries(resource $dirfile, [ string $regex = null,
+        int $fragment = GD_ALL_FRAGMENTS, int $type = GD_ALL_ENTRIES,
+        int flags = 0 ])
+
+      Returns the array of matched entry names, not the number of entries
+      matched.
 
 * array gd_mcarrays(resource $dirfile, int $return_type, [ bool $unpack ])
 

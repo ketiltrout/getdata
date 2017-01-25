@@ -1,3 +1,9 @@
+2017-01-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1148
+	* src/encoding.c: Better values for GD_INT_FUNCS when USE_<foo> is not
+	defined.
+
+	* test/enc_seek.c: Replace accidental USE_FLAC with USE_ENC.
+
 2017-01-21   D. V. Wiebe <getdata@ketiltrout.net> svn:1146
 	* test/error_verbose.c test/error_verbose_prefix.c: Use an anonymous pipe
 	instead of a named fifo.

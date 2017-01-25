@@ -261,6 +261,9 @@ are available:
     const char* target)
 * int Dirfile::MAddSpec(const char *spec, const char *parent)
 * int Dirfile::MAlterSpec(const char *line, const char *parent)
+* unsigned int MatchEntries(const char *regex = NULL,
+    int fragment = GD_ALL_FRAGMENTS, int type = 0, unsigned int flags = 0,
+    const char ***entries = NULL);
 * const gd_carray_t *Dirfile::MCarrays(GetData::DataType type = Float64)
 * const void *Dirfile::MConstants(const char *parent, GetData::DataType type)
 * int Dirfile::MetaFlush()
@@ -290,7 +293,7 @@ are available:
 * size_t Dirfile::PutData(const char *field_code, off_t first_frame,
     off_t first_sample, size_t num_frames, size_t num_samples,
     GetData::DataType type, const void *data_in)
-* size_t Dirfile::PutString(const char *field_code, const char *data_in)
+* int Dirfile::PutString(const char *field_code, const char *data_in)
 * int RawClose(const char *field_code = NULL)
 * unsigned int Dirfile::SamplesPerFrame(const char *field_code)
 * off_t Dirfile::Seek(const char *field_code, off_t frame_num, off_t sample_num,
