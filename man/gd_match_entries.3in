@@ -22,7 +22,7 @@ gd_match_entries \(em search the entry list of a Dirfile
 .SC
 .B #include <getdata.h>
 .HP
-.BI "const char **gd_match_entries(DIRFILE *" dirfile ,
+.BI "unsigned int gd_match_entries(DIRFILE *" dirfile ,
 .BI "const char *" regex ", int " fragment ", int " type ,
 .BI "unsigned int " flags ", const char ***" entries );
 .EC
@@ -157,7 +157,7 @@ Possible error codes are:
 There was an error in the supplied regular expression. See the
 .B REGULAR EXPRESSION
 section below for details.
-.B GD_E_BAD_CODE
+.DD GD_E_BAD_CODE
 The supplied parent field code was not found, or referred to a metafield itself.
 .DD GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.

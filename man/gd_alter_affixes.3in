@@ -1,6 +1,6 @@
 .\" gd_alter_affixes.3.  The gd_alter_affixes man page.
 .\"
-.\" Copyright (C) 2012, 2016 D. V. Wiebe
+.\" Copyright (C) 2012, 2016, 2017 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_affixes 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+.TH gd_alter_affixes 3 "27 January 2016" "Version 0.10.0" "GETDATA"
 
 .SH NAME
 gd_alter_affixes \(em modify the field affixes of a fragments in a Dirfile
@@ -29,8 +29,8 @@ gd_alter_affixes \(em modify the field affixes of a fragments in a Dirfile
 .SH DESCRIPTION
 The
 .FN gd_alter_affixes
-function sets the field prefix and suffix of fields defined in the format
-specification fragment given by
+function sets the root namespace, field prefix and suffix of fields defined in
+the format specification fragment given by
 .ARG fragment_index
 to
 .ARG prefix
@@ -39,11 +39,21 @@ and
 in the dirfile(5) database specified by
 .ARG dirfile .
 
-The field prefix and suffix are appended to all field codes found in the
+The
+.ARG prefix
+may contain a root namespace for the fragment, separated from the prefix by a
+dot
+.RB ( . ).
+If it does not contain a namespace, the fragment's root namespace is not
+changed.  To remove a root namespace, explicitly specify the null namespace via
+a leading dot in
+.ARG prefix .
+
+The field prefix and suffix are affixed to all field codes found in the
 specified fragment.  If the parent fragment to the modified fragment contains
 field affixes themselves, they should be included in the affixes passed to
 .FN gd_alter_affixes .
-See EXAMPLES below for further details.  If
+If
 .ARG prefix
 or
 .ARG suffix
