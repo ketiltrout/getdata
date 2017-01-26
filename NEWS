@@ -1,4 +1,4 @@
-New in version 0.10.0rc2:
+New in version 0.10.0:
 
   Dirfile Changes:
 
@@ -248,6 +248,18 @@ New in version 0.10.0rc2:
       gd_rename(), gd_rewrite_fragment(), gd_seek(), gd_spf(), gd_sync(),
       gd_tell(), gd_unhide(), gd_uninclude(), gd_validate(),
       gd_verbose_prefix()
+
+  * gd_add_indir(), gd_add_sarray(), gd_add_sindir(), gd_madd_indir(),
+    gd_madd_sarray(), gd_madd_sindir(), gd_alter_indir(),
+    gd_alter_sarray(), and gd_alter_sindir() have been added to manipulate
+    metadata of the new field types.
+
+  * gd_msarrays(), gd_get_sarray(), gd_get_sarray_slice(), gd_put_sarray(),
+    gd_put_sarray_slice(), gd_sarrays() have been added to read and write
+    SARRAY values.
+
+  * gd_fragment_namespace() and gd_include_ns() have been added to read and
+    write the root namespace of a fragment.
 
   * gd_put_string() now returns zero on success and a negative-valued error
     code on error, as well, following the lead of gd_put_constant() and

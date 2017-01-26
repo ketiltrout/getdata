@@ -1,3 +1,6 @@
+2017-01-26   D. V. Wiebe <getdata@ketiltrout.net> svn:1153
+	GetData-0.10.0 released.
+
 2017-01-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1148
 	* src/encoding.c: Better values for GD_INT_FUNCS when USE_<foo> is not
 	defined.
