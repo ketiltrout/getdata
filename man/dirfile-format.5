@@ -1306,6 +1306,27 @@ fieldname = dividend / input.
 RECIP appeared in Standards Version 8.
 .RE
 .TP
+.B SARRAY
+The SARRAY scalar field type is a list of strings fully specified in the format
+file metadata.  Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B SARRAY
+.I <string0> <string1> <string2> \fR...
+.PP
+Each
+.I string
+is a single token.  To include whitespace in a string, enclose it in quotation
+marks
+.RB ( """" ),
+or else escape the whitespace with the backslash character
+.RB ( \e ).
+No limit is placed on the number of elements in a 
+.BR SARRAY .
+SARRAY appeared in Standards Version 10.
+.RE
+.TP
 .B SBIT
 The SBIT vector field type extracts one or more bits out of an input vector
 field as a (two's-complement) signed number.  Syntax is:
@@ -1339,27 +1360,6 @@ one.)  The
 .B BIT
 field type is an unsigned version of this field type.  SBIT appeared in
 Standards Version 7.
-.RE
-.TP
-.B SARRAY
-The SARRAY scalar field type is a list of strings fully specified in the format
-file metadata.  Syntax is:
-.RS
-.IP
-.I <fieldname>
-.B SARRAY
-.I <string0> <string1> <string2> \fR...
-.PP
-Each
-.I string
-is a single token.  To include whitespace in a string, enclose it in quotation
-marks
-.RB ( """" ),
-or else escape the whitespace with the backslash character
-.RB ( \e ).
-No limit is placed on the number of elements in a 
-.BR SARRAY .
-SARRAY appeared in Standards Version 10.
 .RE
 .TP
 .B SINDIR

@@ -1,6 +1,6 @@
 .\" gd_putdata.3.  The gd_putdata man page.
 .\"
-.\" Copyright (C) 2008-2016 D. V. Wiebe
+.\" Copyright (C) 2008-2017 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_putdata 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+.TH gd_putdata 3 "25 January 2017" "Version 0.10.0" "GETDATA"
 
 .SH NAME
 gd_putdata \(em write data to a Dirfile database
@@ -166,13 +166,17 @@ was supplied.
 Either the field specified by
 .ARG field_code ,
 or one of the fields it uses for input, was of
-.B MULTIPLY
+.BR MULTIPLY ,
+.BR DIVIDE ,
+.BR WINDOW ,
+.BR INDIR ,
 or
-.B DIVIDE
-type, or
+.B SINDIR
+type, or a
 .B LINCOM
-type with more than one input fields.  In this case, GetData has no knowledge on
-how to partition the input data.  Alternately, the caller may have attempted to
+with more than one input field, or a
+.B POLYNOM
+with quadratic or higer terms.  Alternately, the caller may have attempted to
 write to the implicit INDEX field, which is not possible.
 .DD GD_E_BAD_TYPE
 An invalid
@@ -199,7 +203,7 @@ This indicates a bug in the library.  Please report the incident to the
 maintainer.
 .DD GD_E_IO
 An error occurred while trying to open, read from, or write to a file on disk
-containing a raw field or
+containing a raw field or a
 .B LINTERP
 table.
 .DD GD_E_LUT

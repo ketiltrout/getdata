@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_native_type 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+.TH gd_native_type 3 "25 January 2017" "Version 0.10.0" "GETDATA"
 
 .SH NAME
 gd_native_type \(em returns the native data type of a field in a Dirfile
@@ -76,7 +76,6 @@ otherwise:
 .BR GD_FLOAT64 ;
 .DD SARRAY SINDIR STRING
 .BR GD_STRING ;
-.TP
 .DD SBIT
 .BR GD_INT64 .
 .PP
@@ -143,10 +142,10 @@ fields was
 In GetData-0.7.0, this function was renamed to
 .FN gd_native_type .
 
-In GetData-0.10.0, the return type for
+Before GetData-0.10.0, the return type for
 .B STRING
-fields changed to
-.BR GD_STRING .
+fields was
+.BR GD_NULL .
 
 .SH SEE ALSO
 .F3 gd_error ,

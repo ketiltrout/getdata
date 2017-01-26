@@ -127,7 +127,6 @@ HTMLMANS=$(addsuffix .html,${nodist_man_MANS}) \
 
 htmlman: $(HTMLMANS)
 	for m in $(MAN3ALIASES); do \
-		echo $$m; \
 		./make_html.pl `echo $$m | $(SED) -e 's/\\(.*\\).3:.*/\\1.3in/'` \
 			> `echo $$m | $(SED) -e 's/3/3.html/g' | $(SED) -e 's/.*://'`; \
 	 done

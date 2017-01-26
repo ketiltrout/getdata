@@ -87,30 +87,32 @@ flag.  So the following:
 .BI "gd_seek(" dirfile ", " field_code ", " a ", " b ,
 .B GD_SEEK_SET | GD_SEEK_WRITE);
 .br
-.BI "gd_putdata(" dirfile ", "field_code ", GD_HERE, 0, " c ", " d ", " type ,
+.BI "gd_putdata(" dirfile ", " field_code ", GD_HERE, 0, " c ", " d ", " type ,
 .IB data );
 .EC
 .P
 is equivalent to:
 .IP
 .SC
-.BI "gd_putdata(" dirfile ", "field_code ", " a ", " b ", " c ", " d ", " type ,
-.IB data );
+.BI "gd_putdata(" dirfile ", " field_code ", " a ", " b ", " c ", " d ,
+.IB type ", " data );
+.EC
 .P
 and, similarly,
 .IP
 .SC
 .BI "gd_seek(" dirfile ", " field_code ", " a ", " b ", GD_SEEK_SET);"
 .br
-.BI "gd_getdata(" dirfile ", "field_code ", GD_HERE, 0, " c ", " d ", " type ,
+.BI "gd_getdata(" dirfile ", " field_code ", GD_HERE, 0, " c ", " d ", " type ,
 .IB data );
 .EC
 .P
 is equivalent to:
 .IP
 .SC
-.BI "gd_getdata(" dirfile ", "field_code ", " a ", " b ", " c ", " d ", " type ,
-.IB data );
+.BI "gd_getdata(" dirfile ", " field_code ", " a ", " b ", " c ", " d ,
+.IB type ", " data );
+.EC
 .P
 Only
 .B RAW
