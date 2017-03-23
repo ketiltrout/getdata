@@ -1,3 +1,12 @@
+New in version 0.10.0.1:
+
+  Miscellaneous
+
+  * "make clean" no longer accidentally deletes most of the man pages from
+    the man/ subdirectory.
+
+|=========================================================================|
+
 New in version 0.10.0:
 
   Dirfile Changes:

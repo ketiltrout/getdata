@@ -1,3 +1,6 @@
+2017-03-23   D. V. Wiebe <getdata@ketiltrout.net> svn:1155
+	* man/Makefile.am: Fix man3 distribution
+
 2017-01-26   D. V. Wiebe <getdata@ketiltrout.net> svn:1153
 	GetData-0.10.0 released.
 
