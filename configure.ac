@@ -162,7 +162,7 @@ AC_MSG_CHECKING([whether to run large tests])
 AC_MSG_RESULT([$run_large_tests])
 if test "x$run_large_tests" = "xno"; then
   AC_DEFINE([NO_LARGE_TESTS], [1], [ Define to 1 to disable tests that ]
-  [write large quantities (>1MB) of temporary data.])
+  [write large quantities (>1MB) of temporary data])
 fi
 
 dnl bindings, globally
@@ -403,7 +403,7 @@ AC_ARG_ENABLE([fast-unaligned], AS_HELP_STRING([--enable-fast-unaligned],
 m4_divert_once([HELP_ENABLE], AS_HELP_STRING([--disable-fast-unaligned],
                [don't use fast loads and stores with non-aligned data, ]dnl'
                [even if it looks like they should work.  This is always ]
-               [safe, but can result in significant slow-down.]
+               [safe, but can result in significant slow-down]
                [ [default: autodetect]]))
 
 AC_MSG_CHECKING([whether ${host} supports fast unaligned memory access])
@@ -569,7 +569,7 @@ if test "x${use_modules}" != "xno"; then
   LIBS=$saved_libs
 
   if test "x$have_ltdl" == "xno"; then
-    AC_MSG_ERROR([libltdl is required to build modules.  Please either specify the location of the libltdl library using --with-ltdl=PREFIX or else disable the building of modules by using --disable-modules.])
+    AC_MSG_ERROR([libltdl is required to build modules.  Please either specify the location of the libltdl library using --with-ltdl=PREFIX or else disable the building of modules by using --disable-modules])
   fi
 
   if test "x$ltdl_prefix" != "x"; then
@@ -669,9 +669,23 @@ dnl libraries
 echo
 echo "*** Looking for additional libraries"
 echo
+
+AC_ARG_WITH([pcre], AS_HELP_STRING([--with-pcre=PREFIX],
+            [Use the Perl-Comaptible Regular Expression Library installed ]
+            [in PREFIX]), [pcreprefix="${withval}"], [pcreprefix=yes])
+m4_divert_once([HELP_WITH], AS_HELP_STRING([--without-pcre],
+            [disable PCRE support]))
+
 AC_SEARCH_LIBS([ceil],[m])
 AC_SEARCH_LIBS([regcomp],[regex])
-AC_SEARCH_LIBS([pcre_compile],[pcre])
+if test "x${pcreprefix}" = "xyes"; then
+  AC_SEARCH_LIBS([pcre_compile],[pcre])
+elif test "x${pcreprefix}" != "xno"; then
+  saved_ldflags=$LDFLAGS
+  LDFLAGS="${LDFLAGS} -L${pcreprefix}/lib"
+  AC_CHECK_LIB([pcre], [pcre_compile], [LIBS="-lpcre ${LIBS}"],
+               [LDFLAGS=${saved_ldflags}])
+fi
 
 dnl headers
 echo
@@ -679,12 +693,22 @@ echo "*** Looking for additional header files"
 echo
 AC_CHECK_HEADERS([asm/unaligned.h Availability.h byteswap.h crtdefs.h direct.h \
                   features.h fcntl.h float.h inttypes.h io.h libgen.h \
-                  libkern/OSByteOrder.h math.h pcre.h regex.h signal.h \
+                  libkern/OSByteOrder.h math.h regex.h signal.h \
                   stddef.h stdint.h sys/endian.h sys/file.h sys/param.h \
                   sys/resource.h sys/stat.h sys/time.h sys/types.h sys/wait.h \
                   unistd.h])
 if test "x$disable_c99" = "xno"; then
-AC_CHECK_HEADERS([complex.h])
+  AC_CHECK_HEADERS([complex.h])
+fi
+if test "x${pcreprefix}" != "xno"; then
+  if test "x${pcreprefix}" != "xyes"; then
+    saved_cppflags=${CPPFLAGS}
+    CPPFLAGS="${CPPFLAGS} -I${pcreprefix}/include"
+  fi
+  AC_CHECK_HEADERS([pcre.h],,
+     [if test "x${pcreprefix}" != "xyes"; then
+        CPPFLAGS=${saved_cppflags}
+      fi])
 fi
 AC_HEADER_DIRENT
 
@@ -838,7 +862,7 @@ AC_MSG_RESULT([$gd_2arg_mkdir])
 
 if test $gd_2arg_mkdir = "no"; then
   AC_DEFINE([MKDIR_NO_MODE], [1],
-            [ Define to 1 if the `mkdir' function takes only one argument.])
+            [ Define to 1 if the `mkdir' function takes only one argument])
 fi dnl`
 
 AC_CHECK_DECLS([isfinite],,,
