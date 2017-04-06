@@ -1,6 +1,6 @@
 .\" gd_alloc_funcs.3.  The gd_alloc_funcs man page.
 .\"
-.\" Copyright (C) 2016 D. V. Wiebe
+.\" Copyright (C) 2016, 2017 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alloc_funcs 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+.TH gd_alloc_funcs 3 "5 April 2017" "Version 0.10.1" "GETDATA"
 
 .SH NAME
 gd_alloc_funcs \(em specify an alternate memory manager for GetData's use
@@ -29,8 +29,8 @@ gd_alloc_funcs \(em specify an alternate memory manager for GetData's use
 .SH DESCRIPTION
 The
 .FN gd_alloc_funcs
-allows the caller to specify an alternate memory manager for GetData to use
-when providing dynamically allocated data to the caller.  The caller should
+function allows the caller to specify an alternate memory manager for GetData to
+use when providing dynamically allocated data to the caller.  The caller should
 specify pointers to two functions which mimic the behaviour of the Standard
 Library's
 .F3 malloc
