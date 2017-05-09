@@ -2535,7 +2535,8 @@ char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *D, struct parser_state *p,
               saved_token = _GD_Strdup(D, D->error_string);
             saved_error = 1;
           }
-          /* ... and continue parsing (fallthrough) */
+          /* ... and continue parsing */
+          /* fallthrough */
         case GD_SYNTAX_IGNORE:
           _GD_ClearError(D); /* ignore this line, continue parsing */
           break;
