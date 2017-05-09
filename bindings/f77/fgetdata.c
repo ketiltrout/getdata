@@ -668,12 +668,16 @@ void F77_FUNC(gdgepn, GDGEPN) (int32_t *poly_ord, char *infield,
     switch (E.EN(polynom,poly_ord)) {
       case 5:
         *a5 = E.EN(polynom,a)[5];
+        /* Fallthrough */
       case 4:
         *a4 = E.EN(polynom,a)[4];
+        /* Fallthrough */
       case 3:
         *a3 = E.EN(polynom,a)[3];
+        /* Fallthrough */
       case 2:
         *a2 = E.EN(polynom,a)[2];
+        /* Fallthrough */
       case 1:
         *a1 = E.EN(polynom,a)[1];
         *a0 = E.EN(polynom,a)[0];
@@ -710,12 +714,16 @@ void F77_FUNC(gdgecp, GDGECP) (int32_t *poly_ord, char *infield,
     switch (E.EN(polynom,poly_ord)) {
       case 5:
         gd_cs2cp_(a5, E.EN(polynom,ca)[5]);
+        /* Fallthrough */
       case 4:
         gd_cs2cp_(a4, E.EN(polynom,ca)[4]);
+        /* Fallthrough */
       case 3:
         gd_cs2cp_(a3, E.EN(polynom,ca)[3]);
+        /* Fallthrough */
       case 2:
         gd_cs2cp_(a2, E.EN(polynom,ca)[2]);
+        /* Fallthrough */
       case 1:
         gd_cs2cp_(a1, E.EN(polynom,ca)[1]);
         gd_cs2cp_(a0, E.EN(polynom,ca)[0]);
@@ -1259,12 +1267,16 @@ void F77_FUNC(gdadpn, GDADPN) (const int32_t *dirfile, const char *field_code,
   switch (po) {
     case 5:
       a[5] = *a5;
+      /* Fallthrough */
     case 4:
       a[4] = *a4;
+      /* Fallthrough */
     case 3:
       a[3] = *a3;
+      /* Fallthrough */
     case 2:
       a[2] = *a2;
+      /* Fallthrough */
     case 1:
       a[1] = *a1;
       a[0] = *a0;
@@ -1300,12 +1312,16 @@ void F77_FUNC(gdadcp, GDADCP) (const int32_t *dirfile, const char *field_code,
   switch (po) {
     case 5:
       gd_cp2ca_(ca, 5, a5);
+      /* Fallthrough */
     case 4:
       gd_cp2ca_(ca, 4, a4);
+      /* Fallthrough */
     case 3:
       gd_cp2ca_(ca, 3, a3);
+      /* Fallthrough */
     case 2:
       gd_cp2ca_(ca, 2, a2);
+      /* Fallthrough */
     case 1:
       gd_cp2ca_(ca, 1, a1);
       gd_cp2ca_(ca, 0, a0);
@@ -1812,12 +1828,16 @@ void F77_FUNC(gdmdpn, GDMDPN) (const int32_t *dirfile, const char *parent,
   switch (po) {
     case 5:
       a[5] = *a5;
+      /* Fallthrough */
     case 4:
       a[4] = *a4;
+      /* Fallthrough */
     case 3:
       a[3] = *a3;
+      /* Fallthrough */
     case 2:
       a[2] = *a2;
+      /* Fallthrough */
     default:
       a[1] = *a1;
       a[0] = *a0;
@@ -1857,12 +1877,16 @@ void F77_FUNC(gdmdcp, GDMDCP) (const int32_t *dirfile, const char *parent,
   switch (po) {
     case 5:
       gd_cp2ca_(ca, 5, a5);
+      /* Fallthrough */
     case 4:
       gd_cp2ca_(ca, 4, a4);
+      /* Fallthrough */
     case 3:
       gd_cp2ca_(ca, 3, a3);
+      /* Fallthrough */
     case 2:
       gd_cp2ca_(ca, 2, a2);
+      /* Fallthrough */
     case 1:
       gd_cp2ca_(ca, 1, a1);
       gd_cp2ca_(ca, 0, a0);
@@ -2777,13 +2801,18 @@ void F77_FUNC(gdalpn, GDALPN) (const int32_t *dirfile, const char *field_code,
   switch (po) {
     case 5:
       a[5] = *a5;
+      /* Fallthrough */
     case 4:
       a[4] = *a4;
+      /* Fallthrough */
     case 3:
       a[3] = *a3;
+      /* Fallthrough */
     case 2:
       a[2] = *a2;
+      /* Fallthrough */
     default:
+      /* Fallthrough */
       a[1] = *a1;
       a[0] = *a0;
   }
@@ -2818,12 +2847,16 @@ void F77_FUNC(gdalcp, GDALCP) (const int32_t *dirfile, const char *field_code,
   switch (po) {
     case 5:
       gd_cp2ca_(ca, 5, a5);
+      /* Fallthrough */
     case 4:
       gd_cp2ca_(ca, 4, a4);
+      /* Fallthrough */
     case 3:
       gd_cp2ca_(ca, 3, a3);
+      /* Fallthrough */
     case 2:
       gd_cp2ca_(ca, 2, a2);
+      /* Fallthrough */
     default:
       gd_cp2ca_(ca, 1, a1);
       gd_cp2ca_(ca, 0, a0);

@@ -67,6 +67,7 @@ int Entry::CheckIndex(gd_entype_t field_type, int n_fields, int index)
     case GD_MPLEX_ENTRY:
       if (index > 2)
         return 0;
+      /* Fallthrough */
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
