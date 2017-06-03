@@ -70,15 +70,6 @@ fi
 AC_SUBST([MEX])
 ])
 
-dnl GD_MEX_VAR
-dnl ---------------------------------------------------------------
-dnl Determine a MEX variable and store it in the supplied local
-dnl variable
-AC_DEFUN([GD_MEX_VAR],
-[
-$1=`$MEX -v 2>/dev/null | ${AWK} '/$2 *=/ { print @S|@4 }'`
-])
-
 dnl GD_MATLAB_EVAL
 dnl ---------------------------------------------------------------
 dnl Evaluate something in MATLAB and store it in the supplied local
@@ -165,7 +156,7 @@ if test "x${have_matlab}" != "xno"; then
 
   dnl flags
   AC_MSG_CHECKING([MatLab CPPFLAGS])
-  GD_MEX_VAR([matlab_prefix], [MATLAB])
+  GD_MATLAB_EVAL([matlab_prefix], [matlabroot])
   MATLAB_CPPFLAGS="-I${matlab_prefix}/extern/include"
   AC_MSG_RESULT([$MATLAB_CPPFLAGS])
   AC_SUBST([MATLAB_CPPFLAGS])

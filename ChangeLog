@@ -1,3 +1,8 @@
+2017-06-02   D. V. Wiebe <getdata@ketiltrout.net> svn:1160
+	* m4/matlab.m4: Eval matlabroot to determine matlab_prefix instead
+	of using mex -v.
+	* m4/matlab.m4 (GD_MEX_VAR): Deleted.
+
 2017-03-23   D. V. Wiebe <getdata@ketiltrout.net> svn:1155
 	* man/Makefile.am: Fix man3 distribution
 
