@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test encoding */
 #include "test.h"
 
 int main(void)
@@ -34,7 +33,7 @@ int main(void)
   off_t n;
   DIRFILE *D;
 
-  memset(c, 0, 8);
+  memset(c, 0, 8 * sizeof(*c));
   rmdirfile();
   mkdir(filedir, 0700);
 

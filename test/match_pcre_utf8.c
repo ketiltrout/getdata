@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -53,9 +53,9 @@ int main(void)
     CHECKI(error, 0);
     CHECKU(n, 2);
     CHECKPN(entry_list);
-    CHECKS(entry_list[0], "a\xC2\x85""b");
-    CHECKS(entry_list[1], "a\xe2\x80\xa9""b");
-    CHECKP(entry_list[2]);
+    CHECKSA(entry_list, n, 0, "a\xC2\x85""b");
+    CHECKSA(entry_list, n, 1, "a\xe2\x80\xa9""b");
+    CHECKPA(entry_list, n, 2);
   }
 
   gd_discard(D);

@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write LINTERP */
 #include "test.h"
 
 int main(void)
@@ -31,7 +30,6 @@ int main(void)
   DIRFILE *D;
   FILE *t;
 
-  memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0700);
 

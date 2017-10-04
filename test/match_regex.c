@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -54,11 +54,11 @@ int main(void)
 
   CHECKI(error, 0);
   CHECKPN(entry_list);
-  CHECKS(entry_list[0], "ae");
-  CHECKS(entry_list[1], "abe");
-  CHECKS(entry_list[2], "ade");
-  CHECKS(entry_list[3], "abbe");
-  CHECKP(entry_list[4]);
+  CHECKSA(entry_list, n, 0, "ae");
+  CHECKSA(entry_list, n, 1, "abe");
+  CHECKSA(entry_list, n, 2, "ade");
+  CHECKSA(entry_list, n, 3, "abbe");
+  CHECKPA(entry_list, n, 4);
 
   gd_discard(D);
   unlink(format);

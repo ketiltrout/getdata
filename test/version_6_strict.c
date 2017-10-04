@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Check Standards Version 6 strictness */
 #include "test.h"
 
 int cb(gd_parser_data_t *pdata, void *ll)
@@ -38,7 +37,7 @@ int main(void)
   int n, error, m, error2, i, r = 0;
   DIRFILE *D;
 
-  memset(c, 0, 8);
+  memset(c, 0, 8 * sizeof(*c));
   rmdirfile();
   mkdir(filedir, 0700);
 

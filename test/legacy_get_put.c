@@ -33,7 +33,6 @@ int main(void)
   uint8_t c[8];
   int i, get_error, put_error, n, r = 0;
 
-  memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0700);
 

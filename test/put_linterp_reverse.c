@@ -32,7 +32,6 @@ int main(void)
   DIRFILE *D;
   FILE *t;
 
-  memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0700);
 

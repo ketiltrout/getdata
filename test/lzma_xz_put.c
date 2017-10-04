@@ -38,7 +38,6 @@ int main(void)
   int fd, i, n, e1, e2, stat_data, unlink_data, unlink_xz, r = 0;
   DIRFILE *D;
 
-  memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0700);
 

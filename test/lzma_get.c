@@ -19,6 +19,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "test.h"
+
 int main(void)
 {
 #ifndef TEST_LZMA
@@ -36,7 +37,7 @@ int main(void)
   int n, error, r = 0;
   DIRFILE *D;
 
-  memset(c, 0, 8);
+  memset(c, 0, 8 * sizeof(*c));
   rmdirfile();
   mkdir(filedir, 0700);
 

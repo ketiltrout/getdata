@@ -45,8 +45,8 @@ int main(void)
 
   CHECKPN(entry_list);
   CHECKU(n, 1);
-  CHECKP(entry_list[1]);
-  CHECKS(entry_list[0], "data3");
+  CHECKSA(entry_list, n, 0, "data3");
+  CHECKPA(entry_list, n, 1);
 
   error = gd_error(D);
 

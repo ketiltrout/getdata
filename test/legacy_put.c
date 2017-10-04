@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write UINT8 via the legacy interface*/
 #include "test.h"
 
 int main(void)
@@ -32,7 +31,6 @@ int main(void)
   uint8_t c[8], d;
   int fd, i, n, error, r = 0;
 
-  memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0700);
 

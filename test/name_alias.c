@@ -88,6 +88,7 @@ int main(void)
   fl = gd_field_list(D);
   for (i = 0; i < nf; ++i)
     CHECKSi(i, fl[i], field_list[i]);
+  CHECKP(fl[nf]);
 
   gd_entry(D, "early", &E);
   s1 = E.in_fields[0];

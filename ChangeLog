@@ -1,3 +1,97 @@
+2017-10-04   D. V. Wiebe <getdata@ketiltrout.net> svn:1161
+	* test/match_pcre_js.c: Check that PCRE behaves as expected.
+	* test/alter_entry_sarray.c test/match_fragment.c test/match_pcre.c
+	test/match_pcre_caseless.c test/match_pcre_ext.c test/match_pcre_js.c
+	test/match_pcre_utf8.c test/match_regex.c test/match_regex_ext.c
+	test/match_regex_icase.c test/name_alias.c test/name_dangle.c
+	test/name_meta2.c test/name_move.c test/name_move_alias.c test/name_name.c
+	: Fix string array checks.
+	* test/test.h (CHECKSA CHECKPA): Added.
+
+	* test/ascii_put.c test/ascii_put_here.c test/ascii_sync.c test/bzip_put.c
+	test/bzip_put_back.c test/bzip_put_endian.c test/bzip_put_get.c
+	test/bzip_put_pad.c test/bzip_put_sub.c test/bzip_sync.c test/enc_del.c
+	test/flac_put_big.c test/flac_put_complex128.c test/flac_put_float64.c
+	test/flac_put_int32.c test/flac_put_little.c test/flac_sync.c test/flush_all.c
+	test/flush_flush.c test/flush_raw_close.c test/flush_sync.c gzip_put.c
+	test/gzip_put_back.c test/gzip_put_endian.c test/gzip_put_get.c
+	test/gzip_put_pad.c test/gzip_put_sub.c test/gzip_sync.c test/legacy_get_put.c
+	test/legacy_put.c test/lzma_xz_put.c test/lzma_xz_put_back.c
+	test/lzma_xz_put_endian.c test/lzma_xz_put_get.c test/lzma_xz_put_pad.c
+	test/lzma_xz_sync.c test/put64.c test/put_char.c test/put_clincom1.c
+	test/put_complex128.c test/put_complex64.c test/put_crecip.c test/put_divide.c
+	test/put_ff.c test/put_float32.c test/put_float64.c test/put_fs.c
+	test/put_here.c test/put_heres.c test/put_indir.c test/put_int16.c
+	test/put_int32.c test/put_int64.c test/put_int8.c test/put_lincom1.c
+	test/put_lincom2.c test/put_linterp.c test/put_linterp_noin.c
+	test/put_linterp_nomono.c test/put_linterp_notab.c test/put_linterp_reverse.c
+	test/put_multiply.c test/put_off64.c test/put_phase.c test/put_phase_noin.c
+	test/put_polynom1.c test/put_polynom2.c test/put_polynom_noin.c
+	test/put_protect.c test/put_rdonly.c test/put_recip.c test/put_repr.c
+	test/put_sf.c test/put_sindir.c test/put_ss.c test/put_uint16.c
+	test/put_uint32.c test/put_uint64.c test/put_window.c: Remove unnecessary
+	memset.
+	* test/test/bzip_get.c test/bzip_get_far.c test/convert_complex128_complex64.c
+	test/convert_complex64_complex128.c test/convert_float32_complex128.c
+	test/convert_float32_complex64.c test/convert_float32_float64.c
+	test/convert_float32_int16.c test/convert_float32_int32.c
+	test/convert_float32_int64.c test/convert_float32_uint16.c
+	test/convert_float32_uint32.c test/convert_float32_uint64.c
+	test/convert_float64_complex128.c test/convert_float64_complex64.c
+	test/convert_float64_float32.c test/convert_float64_int16.c
+	test/convert_float64_int32.c test/convert_float64_uint16.c
+	test/convert_float64_uint32.c test/convert_float64_uint64.c
+	test/convert_int16_complex128.c test/convert_int16_complex64.c
+	test/convert_int16_float32.c test/convert_int16_float64.c
+	test/convert_int16_int32.c test/convert_int16_int64.c
+	test/convert_int16_uint16.c test/convert_int16_uint32.c
+	test/convert_int16_uint64.c test/convert_int32_complex128.c
+	test/convert_int32_complex64.c test/convert_int32_float32.c
+	test/convert_int32_float64.c test/convert_int32_int16.c
+	test/convert_int32_int64.c test/convert_int32_uint16.c
+	test/convert_int32_uint32.c test/convert_int32_uint64.c
+	test/convert_int64_complex128.c test/convert_int64_complex64.c
+	test/convert_int64_float32.c test/convert_int64_float64.c
+	test/convert_int64_int16.c test/convert_int64_int32.c
+	test/convert_int64_uint16.c test/convert_int64_uint32.c
+	test/convert_int64_uint64.c test/convert_int8_complex128.c
+	test/convert_int8_complex64.c test/convert_int8_float32.c
+	test/convert_int8_float64.c test/convert_int8_int16.c
+	test/convert_int8_int32.c test/convert_int8_int64.c
+	test/convert_int8_uint16.c test/convert_int8_uint32.c
+	test/convert_int8_uint64.c test/convert_uint16_complex128.c
+	test/convert_uint16_complex64.c test/convert_uint16_float32.c
+	test/convert_uint16_float64.c test/convert_uint16_int16.c
+	test/convert_uint16_int32.c test/convert_uint16_int64.c
+	test/convert_uint16_uint32.c test/convert_uint16_uint64.c
+	test/convert_uint32_complex128.c test/convert_uint32_complex64.c
+	test/convert_uint32_float32.c test/convert_uint32_float64.c
+	test/convert_uint32_int16.c test/convert_uint32_int32.c
+	test/convert_uint32_int64.c test/convert_uint32_uint16.c
+	test/convert_uint32_uint64.c test/convert_uint64_complex128.c
+	test/convert_uint64_complex64.c test/convert_uint64_float32.c
+	test/convert_uint64_float64.c test/convert_uint64_int16.c
+	test/convert_uint64_int32.c test/convert_uint64_int64.c
+	test/convert_uint64_uint16.c test/convert_uint64_uint32.c
+	test/convert_uint8_complex128.c test/convert_uint8_complex64.c
+	test/convert_uint8_float32.c test/convert_uint8_float64.c
+	test/convert_uint8_int16.c test/convert_uint8_int32.c
+	test/convert_uint8_int64.c test/convert_uint8_uint16.c
+	test/convert_uint8_uint32.c test/convert_uint8_uint64.c
+	test/encode_alter.c test/encode_recode.c test/endian_alter.c
+	test/endian_move.c test/flac_get_big.c test/flac_get_far.c
+	test/flac_get_int64.c test/flac_get_little.c test/get_complex128.c
+	test/get_complex64.c test/get_float32.c test/get_float64.c test/get_int16.c
+	test/get_int32.c test/get_int64.c test/get_uint16.c test/get_uint32.c
+	test/get_uint64.c gzip_get.c gzip_get_far.c test/lzma_get.c test/lzma_xz_get.c
+	test/lzma_xz_get_far.c test/repr_float32.c test/repr_float64.c
+	test/repr_int16.c test/repr_int32.c test/repr_int64.c test/repr_uint16.c
+	test/repr_uint32.c test/repr_uint64.c test/version_2.c test/version_3.c
+	test/version_4.c test/version_5.c test/version_5_strict.c test/version_6.c
+	test/version_6_strict.c test/version_7.c test/version_7_strict.c
+	test/version_8.c test/version_9.c test/zzip_data.c test/zzip_get.c: Fix
+	memset call.
+
 2017-06-02   D. V. Wiebe <getdata@ketiltrout.net> svn:1160
 	* m4/matlab.m4: Eval matlabroot to determine matlab_prefix instead
 	of using mex -v.

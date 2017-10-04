@@ -56,6 +56,7 @@ int main(void)
   fl = gd_field_list(D);
   for (i = 0; i < nf; ++i)
     CHECKSi(i, fl[i], field_list[i]);
+  CHECKP(fl[nf]);
 
   e2 = gd_close(D);
   CHECKI(e2, 0);

@@ -29,7 +29,7 @@ int main(void)
   int i, n, error, r = 0;
   DIRFILE *D;
 
-  memset(c, 0, 8);
+  memset(c, 0, 8 * sizeof(*c));
   rmdirfile();
   mkdir(filedir, 0700);
 

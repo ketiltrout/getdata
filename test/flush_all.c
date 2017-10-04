@@ -30,7 +30,6 @@ int main(void)
   struct stat buf;
   DIRFILE *D;
 
-  memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0700);
 

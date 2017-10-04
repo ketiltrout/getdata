@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test field modifying */
 #include "test.h"
 
 int main(void)
@@ -48,10 +47,8 @@ int main(void)
   CHECKI(error, 0);
 
   gd_get_sarray(D, "sarray", d);
-  for (i = 0; i < 6; ++i) {
-    CHECKPNi(i, d[i]);
+  for (i = 0; i < 6; ++i)
     CHECKSi(i, d[i], v[i]);
-  }
 
   gd_discard(D);
 

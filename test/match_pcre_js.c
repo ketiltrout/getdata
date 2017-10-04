@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,6 +20,12 @@
  */
 #include "test.h"
 
+#ifdef HAVE_PCRE_H
+#include <pcre.h>
+#endif
+
+#define GD_PATTERN "\\u[bcd]*e$"
+
 int main(void)
 {
 #ifdef GD_NO_PCRE
@@ -31,6 +37,24 @@ int main(void)
   const char **entry_list;
   unsigned int n;
   DIRFILE *D;
+
+  /* Test the PCRE library directly to prevent this test from failing
+   * due to PCRE issues */
+  {
+    const char *errptr;
+    int erroffset;
+
+    pcre *code = pcre_compile(GD_PATTERN, PCRE_DOLLAR_ENDONLY | PCRE_DOTALL
+        | PCRE_JAVASCRIPT_COMPAT, &errptr, &erroffset, NULL);
+
+    /* On PCRE error, skip this test */
+    if (code == NULL) {
+      fprintf(stderr, "PCRE library error: %s\nSkipping test.\n", errptr);
+      return 77;
+    }
+
+    pcre_free(code);
+  }
 
   rmdirfile();
   mkdir(filedir, 0700);
@@ -46,7 +70,7 @@ int main(void)
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   /* In Javascript-compat mode, "\u" matches a simple "u" */
-  n = gd_match_entries(D, "\\u[bcd]*e$", GD_ALL_FRAGMENTS, GD_ALL_ENTRIES,
+  n = gd_match_entries(D, GD_PATTERN, GD_ALL_FRAGMENTS, GD_ALL_ENTRIES,
       GD_REGEX_PCRE | GD_REGEX_JAVASCRIPT, &entry_list);
 
   CHECKU(n, 4);
@@ -55,11 +79,11 @@ int main(void)
 
   CHECKI(error, 0);
   CHECKPN(entry_list);
-  CHECKS(entry_list[0], "ue");
-  CHECKS(entry_list[1], "ube");
-  CHECKS(entry_list[2], "ude");
-  CHECKS(entry_list[3], "ubbe");
-  CHECKP(entry_list[4]);
+  CHECKSA(entry_list, n, 0, "ue");
+  CHECKSA(entry_list, n, 1, "ube");
+  CHECKSA(entry_list, n, 2, "ude");
+  CHECKSA(entry_list, n, 3, "ubbe");
+  CHECKPA(entry_list, n, 4);
 
   gd_discard(D);
   unlink(format);

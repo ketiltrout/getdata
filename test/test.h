@@ -189,6 +189,10 @@ int gd_system(const char* command)
     "\"%s\"","\"%s\"",(n),(v));
 #define CHECKSS(n,v)  CHECK((n == NULL) || strstr((n),(v)) == NULL,n,\
     "\"%s\"","...\"%s\"...",(n),(v));
+
+#define CHECKSA(n,i,e,v) do { if (n && (i) > e) { CHECKS(n[e],v); } } while(0)
+#define CHECKPA(n,i,e) do { if (n && (i) > e) { CHECKP(n[e]); } } while(0)
+
 #define CHECKEOS(n,v)  CHECK(strcmp((n) + strlen(n) - sizeof(v) + 1,(v)),n,\
     "...\"%s\"","\"%s\"",(n) + strlen(n) - sizeof(v) + 1,(v));
 #define CHECKU(n,v)    CHECK((n) != (v),n,"%" PRIu64,"%" PRIu64,\

@@ -77,6 +77,7 @@ int main(void)
   fl = gd_mfield_list(D, "parent");
   for (i = 0; i < nf; ++i)
     CHECKSi(i, fl[i], field_list[i]);
+  CHECKP(fl[nf]);
 
   memset(&E, 0, sizeof E);
   gd_entry(D, "parent/early", &E);
