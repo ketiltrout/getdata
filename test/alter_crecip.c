@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test field modifying */
 #include "test.h"
 
 int main(void)
@@ -30,7 +29,7 @@ int main(void)
 #ifdef GD_NO_C99_API
   double v[2] = {1093, 3290};
 #else
-  double complex v = 1093 + _Complex_I * 3290;
+  double _Complex v = 1093 + _Complex_I * 3290;
 #endif
   int i, ret, error, n, r = 0;
   DIRFILE *D;

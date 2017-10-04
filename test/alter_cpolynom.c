@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test field modifying */
 #include "test.h"
 
 int main(void)
@@ -30,8 +29,8 @@ int main(void)
   double c[16];
   const double a[] = {2, 1, 1, 2, 1, 3};
 #else
-  double complex c[8];
-  const double complex a[] = {2 + _Complex_I * 1,
+  double _Complex c[8];
+  const double _Complex a[] = {2 + _Complex_I * 1,
     1 + _Complex_I * 2, 1 + _Complex_I * 3};
 #endif
   int i, ret, error, n, r = 0;
@@ -59,7 +58,7 @@ int main(void)
     const double v[2] = {2 + x + x * x, 1 + 2 * x + 3 * x * x};
     CHECKCi(i,c + 2 * i, v);
 #else
-    const double complex v = (2 + _Complex_I * 1) + (1 + _Complex_I * 2) * x
+    const double _Complex v = (2 + _Complex_I * 1) + (1 + _Complex_I * 2) * x
       + (1 + _Complex_I * 3) * x * x;
     CHECKCi(i,c[i], v);
 #endif

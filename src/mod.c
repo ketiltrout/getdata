@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2016 D. V. Wiebe
+/* Copyright (C) 2008-2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1332,7 +1332,7 @@ int gd_alter_recip(DIRFILE* D, const char* field_code, const char* in_field,
 
 #ifndef GD_NO_C99_API
 int gd_alter_crecip(DIRFILE* D, const char* field_code, const char* in_field,
-    double complex cdividend)
+    double _Complex cdividend)
 {
   int ret;
 

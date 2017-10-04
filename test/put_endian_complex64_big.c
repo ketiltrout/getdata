@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write big-endian COMPLEX64 */
 #include "test.h"
 
 int main(void)
@@ -30,7 +29,7 @@ int main(void)
 #ifdef GD_NO_C99_API
   const float c[] = {1.5, 2.25};
 #else
-  const float complex c = 1.5 + _Complex_I * 2.25;
+  const float _Complex c = 1.5 + _Complex_I * 2.25;
 #endif
   unsigned char x[2 * sizeof(float)] = {
     0x3F, 0xC0, 0x00, 0x00, 0x40, 0x10, 0x00, 0x00

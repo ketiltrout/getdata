@@ -528,7 +528,7 @@ static size_t _GD_GetIndex(double x, const struct gd_lut_ *lut, size_t idx,
     } \
   } while (0)
 
-#define LINTERPC(t) LINTERP(complex t)
+#define LINTERPC(t) LINTERP(_Complex t)
 #endif
 
 #define RLINTERP(t) \
@@ -656,7 +656,7 @@ void _GD_LinterpData(DIRFILE *restrict D, void *restrict data, gd_type_t type,
     default: _GD_InternalError(D); \
   }
 #else
-#define LINCOMC(t) LINCOM(complex t)
+#define LINCOMC(t) LINCOM(_Complex t)
 #endif
 
 #define LINCOM(t) \
@@ -818,7 +818,7 @@ void _GD_CLincomData(DIRFILE *restrict D, int n, void *restrict data1,
     } \
   } while (0)
 #else
-#define INVERTC(t) INVERT(complex t)
+#define INVERTC(t) INVERT(_Complex t)
 #endif
 
 #define INVERT(t) for (i = 0; i < n_read; i++) \

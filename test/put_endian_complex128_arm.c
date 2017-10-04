@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write arm-endian COMPLEX128 */
 #include "test.h"
 
 int main(void)
@@ -30,7 +29,7 @@ int main(void)
 #ifdef GD_NO_C99_API
   const double c[] = {1.5, 2.25};
 #else
-  const double complex c = 1.5 + _Complex_I * 2.25;
+  const double _Complex c = 1.5 + _Complex_I * 2.25;
 #endif
   unsigned char x[2 * sizeof(double)] = {
     0x00, 0x00, 0xF8, 0x3F, 0x00, 0x00, 0x00, 0x00,

@@ -244,7 +244,7 @@ typedef gd_off64_t off64_t;
 #  define cimagp(z) cimag(*(z))
 #  define gd_cap_(a,i) (a + i)
 #  define gd_csp_(a) (&(a))
-#  define gd_ra2cs_(a,b) a = *((double complex*)(b))
+#  define gd_ra2cs_(a,b) a = *((double _Complex*)(b))
 #  define gd_cs2cs_(a,b) a = b
 #  define gd_cp2cs_(a,b) a = *(b)
 #  define gd_cs2cp_(a,b) *(a) = b
@@ -256,7 +256,7 @@ typedef gd_off64_t off64_t;
 #  define gd_po2cp_(a,r,p) *(a) = (r) * cexp(p)
 #  define gd_rs2cs_(a,b) a = b
 #  define gd_rs2cp_(a,b) *(a) = b
-#  define gd_cs2ca_(a,i,b,t) ((complex t*)a)[i] = (complex t)(b)
+#  define gd_cs2ca_(a,i,b,t) ((_Complex t*)a)[i] = (_Complex t)(b)
 #  define gd_rs2ca_(a,i,b,t) gd_cs2ca_(a,i,b,t)
 #  define gd_ccmpl_(a,x,y) (a == (x + _Complex_I * y))
 #  define gd_ccmpc_(a,b) (a == b)
@@ -268,12 +268,12 @@ typedef gd_off64_t off64_t;
  * contains built-in versions of these functions */
 #define complex _Complex
 #define _Complex_I (__extension__ 1.0iF)
-double cabs(double complex z);
-double carg(double complex z);
+double cabs(double _Complex z);
+double carg(double _Complex z);
 #define cexp(z) (exp(__real__ (z)) * (cos(__imag__ (z)) + _Complex_I \
       * sin(__imag__ (z))))
-double creal(double complex z);
-double cimag(double complex z);
+double creal(double _Complex z);
+double cimag(double _Complex z);
 #endif
 #endif
 
@@ -1245,7 +1245,7 @@ struct gd_dirfile_ {
   /* the reference field */
   gd_entry_t* reference_field;
 
-  /* directory name (this is just whatever was passed to gd_open() */
+  /* directory name (this is just whatever was passed to gd_open()) */
   char* name;
 
   /* directory list */

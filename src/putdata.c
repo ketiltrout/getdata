@@ -1,6 +1,6 @@
 /* Copyright (C) 2003-2005 C. Barth Netterfield
  * Copyright (C) 2003-2005 Theodore Kisner
- * Copyright (C) 2005-2016 D. V. Wiebe
+ * Copyright (C) 2005-2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -256,8 +256,8 @@ static size_t _GD_DoLincomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     _GD_CLincomData(D, 1, tmpbuf, data_type, NULL, NULL, cm, cb, NULL,
         num_samp);
 #else
-    double complex cm = 1 / E->EN(lincom,cm)[0];
-    double complex cb = -E->EN(lincom,cb)[0] / E->EN(lincom,cm)[0];
+    double _Complex cm = 1 / E->EN(lincom,cm)[0];
+    double _Complex cb = -E->EN(lincom,cb)[0] / E->EN(lincom,cm)[0];
     _GD_CLincomData(D, 1, tmpbuf, data_type, NULL, NULL, &cm, &cb, NULL,
         num_samp);
 #endif
@@ -468,8 +468,8 @@ static size_t _GD_DoPolynomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     _GD_CLincomData(D, 1, tmpbuf, data_type, NULL, NULL, cm, cb, NULL,
         num_samp);
 #else
-    double complex cm = 1 / E->EN(polynom,ca)[1];
-    double complex cb = -E->EN(polynom,ca)[0] / E->EN(polynom,ca)[1];
+    double _Complex cm = 1 / E->EN(polynom,ca)[1];
+    double _Complex cb = -E->EN(polynom,ca)[0] / E->EN(polynom,ca)[1];
     _GD_CLincomData(D, 1, tmpbuf, data_type, NULL, NULL, &cm, &cb, NULL,
         num_samp);
 #endif

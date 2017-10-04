@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2015 D. V. Wiebe
+/* Copyright (C) 2008-2015, 2017 D. V. Wiebe
  *
  *************************************************************************
  *
@@ -1211,8 +1211,8 @@ void F77_FUNC(gdadcl, GDADCL) (const int32_t *dirfile, const char *field_code,
   double cm[6] = {0, 0, 0, 0, 0, 0};
   double cb[6] = {0, 0, 0, 0, 0, 0};
 #else
-  double complex cm[3] = {0, 0, 0};
-  double complex cb[3] = {0, 0, 0};
+  double _Complex cm[3] = {0, 0, 0};
+  double _Complex cb[3] = {0, 0, 0};
 #endif
   const int nf = *n_fields;
 
@@ -1300,7 +1300,7 @@ void F77_FUNC(gdadcp, GDADCP) (const int32_t *dirfile, const char *field_code,
 #ifdef GD_NO_C99_API
   double ca[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #else
-  double complex ca[6] = {0, 0, 0, 0, 0, 0};
+  double _Complex ca[6] = {0, 0, 0, 0, 0, 0};
 #endif
   const int po = (*poly_ord > 5) ? 5 : *poly_ord;
 
@@ -1769,8 +1769,8 @@ void F77_FUNC(gdmdcl, GDMDCL) (const int32_t *dirfile, const char *parent,
   double cm[6] = {0, 0, 0, 0, 0, 0};
   double cb[6] = {0, 0, 0, 0, 0, 0};
 #else
-  double complex cm[3] = {0, 0, 0};
-  double complex cb[3] = {0, 0, 0};
+  double _Complex cm[3] = {0, 0, 0};
+  double _Complex cb[3] = {0, 0, 0};
 #endif
   const int nf = *n_fields;
 
@@ -1862,7 +1862,7 @@ void F77_FUNC(gdmdcp, GDMDCP) (const int32_t *dirfile, const char *parent,
 #ifdef GD_NO_C99_API
   double ca[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #else
-  double complex ca[6] = {0, 0, 0, 0, 0, 0};
+  double _Complex ca[6] = {0, 0, 0, 0, 0, 0};
 #endif
   int po = *poly_ord;
   if (po > 5)
@@ -2746,8 +2746,8 @@ void F77_FUNC(gdalcl, GDALCL) (const int32_t *dirfile, const char *field_code,
   double cm[6] = {0, 0, 0, 0, 0, 0};
   double cb[6] = {0, 0, 0, 0, 0, 0};
 #else
-  double complex cm[3] = {0, 0, 0};
-  double complex cb[3] = {0, 0, 0};
+  double _Complex cm[3] = {0, 0, 0};
+  double _Complex cb[3] = {0, 0, 0};
 #endif
   const int nf = *n_fields;
 
@@ -2835,7 +2835,7 @@ void F77_FUNC(gdalcp, GDALCP) (const int32_t *dirfile, const char *field_code,
 #ifdef GD_NO_C99_API
   double ca[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #else
-  double complex ca[6] = {0, 0, 0, 0, 0, 0};
+  double _Complex ca[6] = {0, 0, 0, 0, 0, 0};
 #endif
   const int po = (*poly_ord > 5) ? 5 : *poly_ord;
 

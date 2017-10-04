@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read POLYNOM */
 #include "test.h"
 
 int main(void)
@@ -30,8 +29,8 @@ int main(void)
   double c[2] = {0, 0};
   const double v[2] = {13, 47};
 #else
-  double complex c = 0;
-  const double complex v = 13 + _Complex_I * 47;
+  double _Complex c = 0;
+  const double _Complex v = 13 + _Complex_I * 47;
 #endif
   int n, error, r = 0;
   DIRFILE *D;

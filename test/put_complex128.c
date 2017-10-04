@@ -29,8 +29,8 @@ int main(void)
   double c[8][2], d[2];
   const double zero[] = {0, 0};
 #else
-  double complex c[8], d;
-  const double complex zero = 0;
+  double _Complex c[8], d;
+  const double _Complex zero = 0;
 #endif
   int fd, i, n, e1, e2, r = 0;
   struct stat buf;
@@ -74,7 +74,7 @@ int main(void)
 #ifdef GD_NO_C99_API
     while (read(fd, d, 2 * sizeof(double)))
 #else
-      while (read(fd, &d, sizeof(double complex)))
+      while (read(fd, &d, sizeof(double _Complex)))
 #endif
       {
         if (i < 40 || i > 48) {
@@ -83,7 +83,7 @@ int main(void)
 #ifdef GD_NO_C99_API
           double v[] = {i, i - 40};
 #else
-          double complex v = i + _Complex_I * (i - 40);
+          double _Complex v = i + _Complex_I * (i - 40);
 #endif
           CHECKCi(i,d,v);
         }

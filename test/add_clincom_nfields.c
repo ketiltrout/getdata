@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 D. V. Wiebe
+/* Copyright (C) 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -30,8 +30,8 @@ int main(void)
   const double m[4] = {1, 3.3, 0.3, 18.3};
   const double b[4] = {2, 3.8, 2.1, 9.8};
 #else
-  const double complex m[2] = {1 + _Complex_I * 3.3, 0.3 + _Complex_I * 18.3};
-  const double complex b[2] = {2 + _Complex_I * 3.8, 2.1 + _Complex_I * 9.8};
+  const double _Complex m[2] = {1 + _Complex_I * 3.3, 0.3 + _Complex_I * 18.3};
+  const double _Complex b[2] = {2 + _Complex_I * 3.8, 2.1 + _Complex_I * 9.8};
 #endif
   int error, r = 0;
 

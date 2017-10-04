@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2016 D. V. Wiebe
+/* Copyright (C) 2011-2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -357,8 +357,8 @@ static void *_GD_Duplicate(void *restrict d, const void *restrict s, size_t l,
       d = p;
     } else if (l == 16) {
 #ifndef GD_NO_C99_API
-      double complex v = *(double complex*)s;
-      double complex *p = (double complex*)d;
+      double _Complex v = *(double _Complex*)s;
+      double _Complex *p = (double _Complex*)d;
       for (i = 0; i < n; ++i)
         *(p++) = v;
 #else

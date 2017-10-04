@@ -29,7 +29,7 @@ int main(void)
   double c[2];
   const double v[2] = {1, 2};
 #else
-  complex double c;
+  _Complex double c;
 #endif
   DIRFILE *D;
 

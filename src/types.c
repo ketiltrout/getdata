@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2012, 2014, 2015, 2016 D. V. Wiebe
+ * Copyright (C) 2005-2012, 2014, 2015, 2016, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -42,13 +42,13 @@
 #define TO_COMPLEX(ot,it) \
   do { \
     for (i = 0; i < n; i++) { \
-      ((complex ot *)data_out)[i] = (complex ot)((it *)data_in)[i]; \
+      ((_Complex ot *)data_out)[i] = (_Complex ot)((it *)data_in)[i]; \
     } \
   } while (0)
 #define FROM_COMPLEX(ot,it) \
   do { \
     for (i = 0; i < n; i++) { \
-      ((ot *)data_out)[i] = (ot)((complex it *)data_in)[i]; \
+      ((ot *)data_out)[i] = (ot)((_Complex it *)data_in)[i]; \
     } \
   } while (0)
 

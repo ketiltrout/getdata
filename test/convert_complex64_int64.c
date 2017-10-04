@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read COMPLEX64 as INT64 */
 #include "test.h"
 
 int main(void)
@@ -29,7 +28,7 @@ int main(void)
 #ifdef GD_NO_C99_API
   float d[] = {8, 0};
 #else
-  float complex d = 8;
+  float _Complex d = 8;
 #endif
   int n1, n2, error, r = 0;
   DIRFILE *D;

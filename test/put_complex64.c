@@ -29,8 +29,8 @@ int main(void)
   float c[8][2], d[2];
   const float zero[] = {0, 0};
 #else
-  float complex c[8], d;
-  const float complex zero = 0;
+  float _Complex c[8], d;
+  const float _Complex zero = 0;
 #endif
   struct stat buf;
   int fd, i, n, e1, e2, r = 0;
@@ -70,7 +70,7 @@ int main(void)
 #ifdef GD_NO_C99_API
     while (read(fd, d, 2 * sizeof(float)))
 #else
-      while (read(fd, &d, sizeof(float complex)))
+      while (read(fd, &d, sizeof(float _Complex)))
 #endif
       {
         if (i < 40 || i > 48) {
@@ -79,7 +79,7 @@ int main(void)
 #ifdef GD_NO_C99_API
           float v[] = {i, i - 40};
 #else
-          float complex v = i + _Complex_I * (i - 40);
+          float _Complex v = i + _Complex_I * (i - 40);
 #endif
           CHECKCi(i,d,v);
         }

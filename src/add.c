@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2016 D. V. Wiebe
+/* Copyright (C) 2008-2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1023,7 +1023,7 @@ int gd_add_recip(DIRFILE* D, const char* field_code, const char* in_field,
 
 #ifndef GD_NO_C99_API
 int gd_add_crecip(DIRFILE* D, const char* field_code, const char* in_field,
-    double complex cdividend, int fragment_index) gd_nothrow
+    double _Complex cdividend, int fragment_index) gd_nothrow
 {
   int error;
 
@@ -1661,7 +1661,7 @@ int gd_madd_recip(DIRFILE* D, const char *parent, const char* field_code,
 
 #ifndef GD_NO_C99_API
 int gd_madd_crecip(DIRFILE* D, const char *parent, const char* field_code, const
-    char* in_field, double complex cdividend)
+    char* in_field, double _Complex cdividend)
 {
   int error;
 

@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read complex constant */
 #include "test.h"
 
 int main(void)
@@ -29,8 +28,8 @@ int main(void)
   double c[2];
   const double v[2] = {8.3, 9.2};
 #else
-  double complex c;
-  const double complex v = 8.3 + _Complex_I * 9.2;
+  double _Complex c;
+  const double _Complex v = 8.3 + _Complex_I * 9.2;
 #endif
   int n, error, r = 0;
   DIRFILE *D;

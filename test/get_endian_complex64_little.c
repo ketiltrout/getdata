@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read little-endian COMPLEX64 */
 #include "test.h"
 
 int main(void)
@@ -30,8 +29,8 @@ int main(void)
   float u[20];
   float v[20][2];
 #else
-  float complex u[10];
-  float complex v[20];
+  float _Complex u[10];
+  float _Complex v[20];
 #endif
   const unsigned char data_data[64 * 8] = {
     0x00, 0x00, 0xC0, 0x3F,  0x00, 0x00, 0x10, 0x40,

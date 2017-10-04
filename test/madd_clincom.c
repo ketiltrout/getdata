@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013, 2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,7 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Add a LINCOM field */
 #include "test.h"
 
 #include <stdlib.h>
@@ -40,8 +39,8 @@ int main(void)
   const double m[2][2] = {{1, 3.3}, {0.3, 18.3}};
   const double b[2][2] = {{2, 3.8}, {2.1, 9.8}};
 #else
-  const double complex m[2] = {1 + _Complex_I * 3.3, 0.3 + _Complex_I * 18.3};
-  const double complex b[2] = {2 + _Complex_I * 3.8, 2.1 + _Complex_I * 9.8};
+  const double _Complex m[2] = {1 + _Complex_I * 3.3, 0.3 + _Complex_I * 18.3};
+  const double _Complex b[2] = {2 + _Complex_I * 3.8, 2.1 + _Complex_I * 9.8};
 #endif
   DIRFILE *D;
 

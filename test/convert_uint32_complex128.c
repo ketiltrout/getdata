@@ -28,7 +28,7 @@ int main(void)
 #ifdef GD_NO_C99_API
   double c[16];
 #else
-  double complex c[8];
+  double _Complex c[8];
 #endif
   int i, n, error, r = 0;
   DIRFILE *D;
