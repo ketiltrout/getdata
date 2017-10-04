@@ -1,6 +1,6 @@
 .\" gd_entry_list.3.  The gd_entry_list man page.
 .\"
-.\" Copyright (C) 2012, 2016 D. V. Wiebe
+.\" Copyright (C) 2012, 2016, 2017 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_entry_list 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+.TH gd_entry_list 3 "4 October 2017" "Version 0.10.0.1" "GETDATA"
 
 .SH NAME
 gd_entry_list, gd_field_list, gd_field_list_by_type gd_mfield_list, gd_mfield_list_by_type,
@@ -181,8 +181,12 @@ is equivalent to
 .SH RETURN VALUE
 Upon successful completion, these functions returns a pointer to an array of
 strings containing the names of all the entries in the database satisfying the
-supplied criteria.  On error, they return zero and store a negative-valued
-error code in the
+supplied criteria.  The array is terminated with a NULL pointer.  If there are
+no matching entries, an array containing only the terminating NULL pointer is
+returned.
+
+On error, these functions return NULL and store a negative-valued error code in
+the
 .B DIRFILE
 object which may be retrieved by a subsequent call to
 .F3 gd_error .
