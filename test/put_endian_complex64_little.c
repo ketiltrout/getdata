@@ -29,7 +29,7 @@ int main(void)
 #ifdef GD_NO_C99_API
   const float c[] = {1.5, 2.25};
 #else
-  const float _Complex c = 1.5 + _Complex_I * 2.25;
+  const float _Complex c = CMPLX(1.5, 2.25);
 #endif
   unsigned char x[2 * sizeof(float)] = {
     0x00, 0x00, 0xC0, 0x3F, 0x00, 0x00, 0x10, 0x40

@@ -32,8 +32,8 @@ int main(void)
   const double m[4] = {1, 2, 3, 4};
   const double b[4] = {8, 7, 6, 5};
 #else
-  const double _Complex m[2] = {1 + _Complex_I * 2, 3 + _Complex_I * 4};
-  const double _Complex b[2] = {8 + _Complex_I * 7, 6 + _Complex_I * 5};
+  const double _Complex m[2] = {CMPLX(1, 2), CMPLX(3, 4)};
+  const double _Complex b[2] = {CMPLX(8, 7), CMPLX(6, 5)};
 #endif
 
   rmdirfile();

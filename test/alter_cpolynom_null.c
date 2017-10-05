@@ -60,7 +60,7 @@ int main(void)
 #ifdef GD_NO_C99_API
     CHECKCi(i,E.EN(polynom,ca)[i], a[i]);
 #else
-    CHECKCi(i,E.EN(polynom,ca)[i], i + 1 + _Complex_I * (i + 2));
+    CHECKCi(i,E.EN(polynom,ca)[i], CMPLX(i + 1, i + 2));
 #endif
   }
 

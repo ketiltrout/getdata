@@ -28,7 +28,7 @@ int main(void)
 #ifdef GD_NO_C99_API
   const double d[2] = {3.1, 4.5};
 #else
-  const double _Complex d = 3.1 + _Complex_I * 4.5;
+  const double _Complex d = CMPLX(3.1, 4.5);
 #endif
   DIRFILE *D;
   gd_entry_t E;

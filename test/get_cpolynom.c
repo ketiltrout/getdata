@@ -30,7 +30,7 @@ int main(void)
   const double v[2] = {13, 47};
 #else
   double _Complex c = 0;
-  const double _Complex v = 13 + _Complex_I * 47;
+  const double _Complex v = CMPLX(13, 47);
 #endif
   int n, error, r = 0;
   DIRFILE *D;

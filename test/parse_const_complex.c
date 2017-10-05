@@ -58,7 +58,7 @@ int main(void)
 #ifdef GD_NO_C99_API
   CHECKC(c,v);
 #else
-  CHECKC(c,1 + _Complex_I * 2);
+  CHECKC(c,CMPLX(1, 2));
 #endif
   return r;
 }

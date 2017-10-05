@@ -29,7 +29,7 @@ int main(void)
 #ifdef GD_NO_C99_API
   double v[2] = {1093, 3290};
 #else
-  double _Complex v = 1093 + _Complex_I * 3290;
+  double _Complex v = CMPLX(1093, 3290);
 #endif
   int i, ret, error, n, r = 0;
   DIRFILE *D;

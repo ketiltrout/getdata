@@ -32,9 +32,9 @@ int main(void)
     98.2, -17.3, 0.01, 82.11};
 #else
   const double _Complex a[6] = {
-    1 + _Complex_I * 29.03, 0.3 + _Complex_I * 12.34,
-    0.5 + _Complex_I * 99.55, 1.8 + _Complex_I * 45.32,
-    98.2 - _Complex_I * 17.3, 0.01 + _Complex_I * 82.11};
+    CMPLX(1, 29.03), CMPLX(0.3, 12.34),
+    CMPLX(0.5, 99.55), CMPLX(1.8, 45.32),
+    CMPLX(98.2, -17.3), CMPLX(0.01, 82.11)};
 #endif
 
   rmdirfile();

@@ -57,7 +57,7 @@ int main(void)
     double v[] = {40 + i, 40 + i};
     CHECKCi(i,c + 2 * i, v);
 #else
-    CHECKCi(i,c[i], (40 + i) * (1 + _Complex_I));
+    CHECKCi(i,c[i], CMPLX(40 + i, 40 + i));
 #endif
   }
 

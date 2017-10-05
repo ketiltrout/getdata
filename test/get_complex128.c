@@ -57,7 +57,7 @@ int main(void)
     const double v[2] = {1.5 * (40 + i), 1.5 * (40 + i)};
     CHECKCi(i, c + 2 * i, v);
 #else
-    CHECKCi(i, c[i], 1.5 * (1 + _Complex_I) * (40 + i));
+    CHECKCi(i, c[i], CMPLX(1.5 * (40 + i), 1.5 * (40 + i)));
 #endif
   }
 

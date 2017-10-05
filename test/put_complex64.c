@@ -44,7 +44,7 @@ int main(void)
     c[i][0] = 40 + i;
     c[i][1] = i;
 #else
-    c[i] = 40 + i * (1 + _Complex_I);
+    c[i] = CMPLX(40 + i, 40 + i);
 #endif
   }
 
@@ -79,7 +79,7 @@ int main(void)
 #ifdef GD_NO_C99_API
           float v[] = {i, i - 40};
 #else
-          float _Complex v = i + _Complex_I * (i - 40);
+          float _Complex v = CMPLX(i, i - 40);
 #endif
           CHECKCi(i,d,v);
         }

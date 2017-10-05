@@ -1,3 +1,22 @@
+2017-10-04   D. V. Wiebe <getdata@ketiltrout.net> svn:1164
+	* src/internal.h bindings/idl/getdata.c: Define CMPLX if necessary.
+	* src/internal.h bindings/idl/getdata.c test/add_clincom.c
+	test/add_clincom_nfields.c test/add_cpolynom.c test/add_cpolynom_order.c
+	test/add_crecip.c test/alter_clincom.c test/alter_cpolynom.c
+	test/alter_cpolynom_null.c test/alter_crecip.c test/alter_entry_scalar3c.c
+	test/convert_complex128_complex64.c test/convert_complex64_complex128.c
+	test/get_clincom.c test/get_complex128.c test/get_complex64.c
+	test/get_const_complex.c  test/get_cpolynom.c test/get_endian_complex128_arm.c
+	test/get_endian_complex128_big.c test/get_endian_complex128_little.c
+	test/get_endian_complex64_arm.c test/get_endian_complex64_big.c
+	test/get_endian_complex64_little.c test/madd_clincom.c
+	test/madd_clincom_nfields.c test/madd_cpolynom.c test/madd_cpolynom_order.c
+	test/madd_crecip.c test/parse_const_complex.c test/put_complex128.c
+	test/put_complex64.c test/put_endian_complex128_arm.c
+	test/put_endian_complex128_big.c test/put_endian_complex128_little.c
+	test/put_endian_complex64_big.c test/put_endian_complex64_little.c: Use
+	CMPLX to build up complex numbers.
+
 2017-10-04   D. V. Wiebe <getdata@ketiltrout.net> svn:1163
 	* bindings/f77/fgetdata.c src/add.c src/common.c src/internal.h src/mod.c
 	src/putdata.c src/sie.c src/types.c test/add_clincom.c

@@ -36,7 +36,7 @@ int main(void)
 #ifdef GD_NO_C99_API
   const double cdividend[2] = {33.3, 44.4};
 #else
-  const double _Complex cdividend = 33.3 + _Complex_I * 44.4;
+  const double _Complex cdividend = CMPLX(33.3, 44.4);
 #endif
   gd_entry_t e;
   DIRFILE *D;

@@ -173,6 +173,22 @@ typedef gd_off64_t off64_t;
 #define O_TRUNC _O_TRUNC
 #endif
 
+#ifdef HAVE_COMPLEX_H
+#include <complex.h>
+#elif defined HAVE_CABS && defined __GNUC__ && (__GNUC__ > 3)
+/* This is a cygwin hack: the Cygwin C library isn't C99 compliant, but gcc 3+
+ * contains built-in versions of these functions */
+#define complex _Complex
+#define _Complex_I (__extension__ 1.0iF)
+double cabs(double _Complex z);
+double carg(double _Complex z);
+#define cexp(z) (exp(__real__ (z)) * (cos(__imag__ (z)) + _Complex_I \
+      * sin(__imag__ (z))))
+double creal(double _Complex z);
+double cimag(double _Complex z);
+#endif
+#endif
+
 #ifdef GD_NO_C99_API
 /* generic dcomplex pointer for passing around malloc'd vectors */
 #  define GD_DCOMPLEXP_t double *
@@ -237,6 +253,16 @@ typedef gd_off64_t off64_t;
 /* compare a to b */
 #  define gd_ccmpc_(a,b) ((a)[0] == (b)[0] && (a)[1] == (b)[1])
 #else
+#  ifndef CMPLX
+#    ifdef _Imaginary_I
+#      define GD_IMAGINARY_I _Imaginary_I
+#    else
+#      define GD_IMAGINARY_I _Complex_I
+#    endif
+#    define CMPLX(x, y) \
+  ((double _Complex)((double)(x) + GD_IMAGINARY_I * (double)(y)))
+#  endif
+
 #  define GD_DCOMPLEXP_t double _Complex *
 #  define GD_DCOMPLEXA(v) double _Complex v
 #  define GD_DCOMPLEXV(v) double _Complex *restrict v
@@ -250,32 +276,16 @@ typedef gd_off64_t off64_t;
 #  define gd_cs2cp_(a,b) *(a) = b
 #  define gd_ca2cs_(a,b,i) a = b[i]
 #  define gd_cp2ca_(a,i,b) (a)[i] = *(b)
-#  define gd_li2cs_(a,x,y) a = (x + _Complex_I * y)
-#  define gd_li2cp_(a,x,y) *(a) = (x + _Complex_I * y)
+#  define gd_li2cs_(a,x,y) a = CMPLX(x, y)
+#  define gd_li2cp_(a,x,y) *(a) = CMPLX(x, y)
 #  define gd_po2cs_(a,r,p) a = (r) * cexp(p)
 #  define gd_po2cp_(a,r,p) *(a) = (r) * cexp(p)
 #  define gd_rs2cs_(a,b) a = b
 #  define gd_rs2cp_(a,b) *(a) = b
 #  define gd_cs2ca_(a,i,b,t) ((_Complex t*)a)[i] = (_Complex t)(b)
 #  define gd_rs2ca_(a,i,b,t) gd_cs2ca_(a,i,b,t)
-#  define gd_ccmpl_(a,x,y) (a == (x + _Complex_I * y))
+#  define gd_ccmpl_(a,x,y) (a == CMPLX(x, y))
 #  define gd_ccmpc_(a,b) (a == b)
-
-#ifdef HAVE_COMPLEX_H
-#include <complex.h>
-#elif defined HAVE_CABS && defined __GNUC__ && (__GNUC__ > 3)
-/* This is a cygwin hack: the Cygwin C library isn't C99 compliant, but gcc 3+
- * contains built-in versions of these functions */
-#define complex _Complex
-#define _Complex_I (__extension__ 1.0iF)
-double cabs(double _Complex z);
-double carg(double _Complex z);
-#define cexp(z) (exp(__real__ (z)) * (cos(__imag__ (z)) + _Complex_I \
-      * sin(__imag__ (z))))
-double creal(double _Complex z);
-double cimag(double _Complex z);
-#endif
-#endif
 
 #ifndef NAN
 # if HAVE_NAN

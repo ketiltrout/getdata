@@ -29,7 +29,7 @@ int main(void)
   const double v[2] = {8.3, 9.2};
 #else
   double _Complex c;
-  const double _Complex v = 8.3 + _Complex_I * 9.2;
+  const double _Complex v = CMPLX(8.3, 9.2);
 #endif
   int n, error, r = 0;
   DIRFILE *D;

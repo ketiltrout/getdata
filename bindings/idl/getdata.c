@@ -45,6 +45,15 @@
 # define GD_INT_TYPE ((gd_type_t)(SIZEOF_INT | GD_SIGNED))
 # define GD_UINT_TYPE ((gd_type_t)(SIZEOF_UNSIGNED_INT))
 # define gd_static_inline_ static inline
+# ifndef CMPLX
+#   ifdef _Imaginary_I
+#     define GD_IMAGINARY_I _Imaginary_I
+#   else
+#     define GD_IMAGINARY_I _Complex_I
+#   endif
+#   define CMPLX(x, y) \
+  ((double _Complex)((double)(x) + GD_IMAGINARY_I * (double)(y)))
+# endif
 #else
 # include "../../src/internal.h"
 #endif
@@ -342,10 +351,10 @@ gd_static_inline_ const void* gdidl_from_alltypes(UCHAR t, IDL_ALLTYPES* v)
     case IDL_TYP_DOUBLE:
       return &(v->d);
     case IDL_TYP_COMPLEX:
-      fc = v->cmp.r + _Complex_I * v->cmp.i;
+      fc = CMPLX(v->cmp.r, v->cmp.i);
       return &fc;
     case IDL_TYP_DCOMPLEX:
-      dc = v->dcmp.r + _Complex_I * v->dcmp.i;
+      dc = CMPLX(v->dcmp.r, v->dcmp.i);
       return &dc;
   }
 
@@ -361,7 +370,7 @@ gd_static_inline_ void gdidl_cmp_to_c99(double complex* dest, IDL_COMPLEX* src,
   size_t i;
 
   for (i = 0; i < n; ++i)
-    dest[i] = src[i].r + _Complex_I * src[i].i;
+    dest[i] = CMPLX(src[i].r, src[i].i);
 
   dreturnvoid();
 }
@@ -375,7 +384,7 @@ gd_static_inline_ void gdidl_dcmp_to_c99(double complex* dest,
   size_t i;
 
   for (i = 0; i < n; ++i)
-    dest[i] = src[i].r + _Complex_I * src[i].i;
+    dest[i] = CMPLX(src[i].r, src[i].i);
 
   dreturnvoid();
 }
@@ -429,7 +438,7 @@ static double complex gdidl_dcomplexScalar(IDL_VPTR obj)
   }
 
   dreturn("%g; %g", r, i);
-  return r + _Complex_I * i;
+  return CMPLX(r, i);
 }
 
 /* convert a gd_entry_t to an IDL GD_ENTRY struct in a temporary variable */
@@ -1837,13 +1846,13 @@ void gdidl_add_polynom(int argc, IDL_VPTR argv[], char *argk)
           break;
         case IDL_TYP_COMPLEX:
           comp_scal = 1;
-          ca[i] = ((IDL_COMPLEX*)(argv[3]->value.arr->data))[i].r
-            + _Complex_I * ((IDL_COMPLEX*)(argv[3]->value.arr->data))[i].i;
+          ca[i] = CMPLX(((IDL_COMPLEX*)(argv[3]->value.arr->data))[i].r,
+              ((IDL_COMPLEX*)(argv[3]->value.arr->data))[i].i);
           break;
         case IDL_TYP_DCOMPLEX:
           comp_scal = 1;
-          ca[i] = ((IDL_DCOMPLEX*)(argv[3]->value.arr->data))[i].r
-            + _Complex_I * ((IDL_DCOMPLEX*)(argv[3]->value.arr->data))[i].i;
+          ca[i] = CMPLX(((IDL_DCOMPLEX*)(argv[3]->value.arr->data))[i].r,
+              ((IDL_DCOMPLEX*)(argv[3]->value.arr->data))[i].i);
           break;
         default:
           GDIDL_KW_ABORT("The coeffecients must be of scalar type");
@@ -1855,12 +1864,10 @@ void gdidl_add_polynom(int argc, IDL_VPTR argv[], char *argk)
     for (i = 0; i <= poly_ord; ++i)
       if (argv[i + 3]->type == IDL_TYP_COMPLEX) {
         comp_scal = 1;
-        ca[i] = argv[i + 3]->value.cmp.r +
-          _Complex_I * argv[i + 3]->value.cmp.i;
+        ca[i] = CMPLX(argv[i + 3]->value.cmp.r, argv[i + 3]->value.cmp.i);
       } else if (argv[i + 3]->type == IDL_TYP_DCOMPLEX) {
         comp_scal = 1;
-        ca[i] = argv[i + 3]->value.dcmp.r +
-          _Complex_I * argv[i + 3]->value.dcmp.i;
+        ca[i] = CMPLX(argv[i + 3]->value.dcmp.r, argv[i + 3]->value.dcmp.i);
       } else
         ca[i] = a[i] = IDL_DoubleScalar(argv[i + 3]);
   }

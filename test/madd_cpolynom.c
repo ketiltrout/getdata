@@ -39,8 +39,8 @@ int main(void)
   const double a[4][2] = {{1, 29.03}, {0.3, 12.34}, {0.5, 99.55}, {1.8, 45.32}};
 #else
   const double _Complex a[4] = {
-    1 + _Complex_I * 29.03, 0.3 + _Complex_I * 12.34,
-    0.5 + _Complex_I * 99.55, 1.8 + _Complex_I * 45.32};
+    CMPLX(1, 29.03), CMPLX(0.3, 12.34),
+    CMPLX(0.5, 99.55), CMPLX(1.8, 45.32)};
 #endif
   DIRFILE *D;
 

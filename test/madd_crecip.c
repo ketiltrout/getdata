@@ -37,7 +37,7 @@ int main(void)
 #ifdef GD_NO_C99_API
   const double v[] = {3.2, 3.1};
 #else
-  const double _Complex v = 3.2 + _Complex_I * 3.1;
+  const double _Complex v = CMPLX(3.2, 3.1);
 #endif
   DIRFILE *D;
 

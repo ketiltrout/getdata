@@ -112,7 +112,7 @@ int main(void)
     v[i][1] = v[i - 1][1] * 2.25;
   }
 #else
-  v[0] = 1.5 + _Complex_I * 2.25;
+  v[0] = CMPLX(1.5, 2.25);
   for (i = 1; i < 20; ++i)
     v[i] = v[i - 1] * 2.25;
 #endif
