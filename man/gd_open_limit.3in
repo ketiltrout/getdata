@@ -1,0 +1,145 @@
+.\" gd_open_limit.3.  The gd_open_limit man page.
+.\"
+.\" Copyright (C) 2017 D.V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_open_limit 3 "5 October 2017" "Version 0.10.1" "GETDATA"
+
+.SH NAME
+gd_open_limit \(em set a Dirfile's allowed number of open files
+
+.SH SYNOPSIS
+.SC
+.B #include <getdata.h>
+.HP
+.BI "long gd_open_limit(DIRFILE *" dirfile ", long " limit );
+.EC
+
+.SH DESCRIPTION
+The
+.FN gd_open_limit
+function can be used to limit the number of
+.B RAW
+file descriptors which GetData simultaneously holds open in the open dirfile(5)
+database specified by
+.ARG dirfile .
+This function can also be used to report the current number of open files, or
+the current limit.  When limiting is active, to stay below the limit, GetData
+will automatically close the least recently accessed
+.B RAW
+fields (as if
+.F3 gd_raw_close
+were called), when needed.
+
+The default value for the limit is zero, indicating that limiting is disabled.
+In this case, GetData will never automatically close open
+.B RAW
+fields.  To enable limiting call this function with a positive value for
+.ARG limit .
+If limited, the minimum limit is two; if this function is passed a
+.ARG limit
+of one, it will behave as if the value 2 were passed instead.
+
+When setting a limit, this function will immediately close enough
+.B RAW
+fields to remain below the specified limit.
+
+The argument
+.ARG limit
+may alternately be one of the following special values:
+.DD "GD_OLIMIT_NONE \fR(=0)"
+Disable limiting, if it was previously active.
+.DD GD_OLIMIT_CURRENT
+Do nothing other than report the current limit.  This is equivalent to calling
+this function with
+.ARG limit
+equal to the current limit.
+.DD GD_OLIMIT_COUNT
+Instead of returning the current limit, return the current number filed
+descriptors for this dirfile.  The current limit is not changed.
+
+.SH RETURN VALUE
+
+If
+.ARG limit
+is
+.BR GD_OLIMIT_COUNT ,
+then the current number of file descriptors in use by this dirfile is returned,
+or zero if limiting is disabled (i.e. the limit is zero).
+
+For other values of
+.ARG limit ,
+if successful, this function returns the open field limit, after possibly
+modifying it.  This limit is never negative.  It will be zero if limiting is
+disabled.
+
+If
+.ARG limit
+is one of the special values
+.BR GD_OLIMIT_COUNT ,
+.BR GD_OLIMIT_CURRENT ,
+or
+.B GD_OLIMIT_NONE \fR(=0),
+then this function always succeeds.  Otherwise, on error,
+.FN gd_open_limit
+returns a negative-valued error code.  Possible error codes are:
+.DD GD_E_ALLOC
+The library was unable to allocate memory.
+.DD GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.DD GD_E_IO
+An I/O error occurred while trying to write modified data to disk as a result
+in a reduction of the open field limit.
+.PP
+The error code is also stored in the
+.B DIRFILE
+object and may be retrieved after this function returns by calling
+.F3 gd_error .
+A descriptive error string for the error may be obtained by calling
+.F3 gd_error_string .
+
+
+.SH NOTES
+The file descriptors tracked by this functionality are only those associated
+with
+.B RAW
+fields which are held open across function calls.  During the course of any
+library call, GetData may temporarily exceed a file descriptor limit set with
+this function without triggering an automatic close.  Some headroom is always a
+good idea.
+
+Furthermore, this limit is specific to the specified
+.ARG dirfile .
+It is not a global limit for the whole GetData library.  If a process has
+multiple
+.BR DIRFILE s
+open, each of them has its own limit (or is unlimited), even though they all
+draw from the same limited pool of file descriptors.
+
+In some cases, usually when writing to a compressed
+.B RAW
+field, two file descriptors may be held open for a single field.
+
+.SH HISTORY
+The
+.FN gd_open_limit
+function appeared in GetData-0.10.1.
+
+.SH SEE ALSO
+.F3 gd_error ,
+.F3 gd_error_string ,
+.F3 gd_open ,
+.F3 gd_raw_close ,
+.F3 getrlimit ,
+.F3 ulimit ,
+dirfile(5)

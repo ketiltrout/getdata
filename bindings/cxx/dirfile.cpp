@@ -462,6 +462,11 @@ const char* Dirfile::Name() const
   return gd_dirfilename(D);
 }
 
+long Dirfile::OpenLimit(long limit) const
+{
+  return gd_open_limit(D, limit);
+}
+
 int Dirfile::Standards(int version) const
 {
   return gd_dirfile_standards(D, version);

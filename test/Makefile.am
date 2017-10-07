@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2016 D. V. Wiebe
+# Copyright (C) 2008-2017 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -53,11 +53,11 @@ ADD_TESTS=add_add add_affix add_alias add_alias_affix add_alias_index \
 					add_recip_inaff add_resolv add_sarray add_sarray_dup add_sarray_nil \
 					add_sbit add_scalar add_scalar_carray add_scalar_carray_bad \
 					add_sindir add_sort add_spec add_spec_affix add_spec_directive \
-					add_spec_index \
-					add_spec_invalid add_spec_meta add_spec_nil add_spec_prot \
-					add_spec_raw_autoenc add_spec_raw_prot add_spec_raw_unkenc \
-					add_spec_resolv add_string add_string_affix add_string_dup \
-					add_string_entry add_type add_window add_window_inaff add_window_op
+					add_spec_index add_spec_invalid add_spec_meta add_spec_nil \
+					add_spec_prot add_spec_raw_autoenc add_spec_raw_prot \
+					add_spec_raw_unkenc add_spec_resolv add_string add_string_affix \
+					add_string_dup add_string_entry add_type add_window add_window_inaff \
+					add_window_op
 
 ALIAS_TESTS=alias_list alias_list_alias alias_list_missing alias_num \
 						alias_num_alias alias_num_missing alias_target alias_target_alias \
@@ -391,6 +391,10 @@ NMETA_TESTS=nmeta nmeta_hidden nmeta_invalid nmeta_parent nmeta_type \
 						nmeta_parent_meta nmeta_vectors nmeta_vectors_del \
 						nmeta_vectors_hidden nmeta_vectors_invalid nmeta_vectors_parent
 
+OLIMIT_TESTS=olimit_count olimit_count_gzip \
+						 olimit_down olimit_foffs olimit_get olimit_get_err olimit_reset \
+						 olimit_set
+
 OPEN_TESTS=open_abs open_cb_abort open_cb_cont open_cb_ignore open_cb_invalid \
 					 open_cb_rescan open_cb_rescan_alloc open_eaccess open_invalid \
 					 open_nonexistent open_notdirfile open_open open_rofs open_sym_al \
@@ -557,13 +561,13 @@ TESTS=$(ADD_TESTS)      $(ALIAS_TESTS)    $(ALLOC_TESTS)    $(ALTER_TESTS)    \
 			$(INCLUDE_TESTS)  $(INDEX_TESTS)    $(LEGACY_TESTS)   $(LEN_TESTS)      \
 			$(LZMA_TESTS)     $(MADD_TESTS)     $(MATCH_TESTS)    $(MFLUSH_TESTS)   \
 			$(MOVE_TESTS)     $(NAME_TESTS)     $(NATIVE_TESTS)   $(NENTRIES_TESTS) \
-			$(NFIELDS_TESTS)  $(NFRAMES_TESTS)  $(NMETA_TESTS)    $(OPEN_TESTS)     \
-			$(PARSE_TESTS)    $(PROTECT_TESTS)  $(PUT_TESTS)      $(REF_TESTS)      \
-			$(REPR_TESTS)     $(SALIST_TESTS)   $(SEEK_TESTS)     $(SIE_TESTS)      \
-			$(SLIM_TESTS)     $(SPF_TESTS)      $(SVLIST_TESTS)   $(TABLE_TESTS)    \
-			$(TELL_TESTS)     $(TOK_TESTS)      $(TRUNC_TESTS)    $(UNCLUDE_TESTS)  \
-			$(VALID_TESTS)    $(VERSION_TESTS)  $(VLIST_TESTS)    $(ZZIP_TESTS)     \
-			$(ZZSLIM_TESTS)
+			$(NFIELDS_TESTS)  $(NFRAMES_TESTS)  $(NMETA_TESTS)    $(OLIMIT_TESTS)   \
+			$(OPEN_TESTS)     $(PARSE_TESTS)    $(PROTECT_TESTS)  $(PUT_TESTS)      \
+			$(REF_TESTS)      $(REPR_TESTS)     $(SALIST_TESTS)   $(SEEK_TESTS)     \
+			$(SIE_TESTS)      $(SLIM_TESTS)     $(SPF_TESTS)      $(SVLIST_TESTS)   \
+			$(TABLE_TESTS)    $(TELL_TESTS)     $(TOK_TESTS)      $(TRUNC_TESTS)    \
+			$(UNCLUDE_TESTS)  $(VALID_TESTS)    $(VERSION_TESTS)  $(VLIST_TESTS)    \
+			$(ZZIP_TESTS)     $(ZZSLIM_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

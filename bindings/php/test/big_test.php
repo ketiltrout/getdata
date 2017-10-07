@@ -1916,6 +1916,25 @@ $v = gd_match_entries($D, "^lin", 0);
 check_ok2(305, 0, $D);
 check_var2(305, 1, $v, array('lincom', 'linterp'));
 
+# 360: gd_open_limit
+$v = gd_open_limit($D, GD_OLIMIT_COUNT);
+check_ok2(306, 0, $D);
+check_var2(306, 1, $v, 0);
+$v = gd_open_limit($D, 4);
+check_ok2(306, 1, $D);
+check_var2(306, 2, $v, 4);
+$v = gd_open_limit($D);
+check_ok2(306, 3, $D);
+check_var2(306, 4, $v, 4);
+$v = gd_open_limit($D, GD_OLIMIT_COUNT);
+check_ok2(306, 5, $D);
+check_var2(306, 6, $v, 1);
+$v = gd_open_limit($D, GD_OLIMIT_NONE);
+check_ok2(306, 7, $D);
+check_var2(306, 8, $v, 0);
+$v = gd_open_limit($D, GD_OLIMIT_COUNT);
+check_ok2(306, 9, $D);
+check_var2(306, 10, $v, 0);
 
 
 

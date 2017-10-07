@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2016 D. V. Wiebe
+/* Copyright (C) 2011-2017 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -247,6 +247,10 @@ off64_t _GD_DoSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
         E->e->u.raw.file + 0);
     GD_RETURN_ERROR(D);
   }
+
+  /* Update atime */
+  E->e->u.raw.atime = time(NULL);
+  D->opened_sorted = 0;
 
   dreturn("%" PRId64, (int64_t)pos);
   return pos;

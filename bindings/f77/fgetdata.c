@@ -5869,3 +5869,13 @@ void F77_FUNC(gdnmat, GDNMAT) (int32_t *nentries, const int32_t *dirfile,
   free(rx);
   dreturn("%i", *nentries);
 }
+
+/* gd_open_limit wrapper */
+void F77_FUNC(gdolim, GDOLIM) (int32_t *limit, const int32_t *dirfile)
+{
+  dtrace("%p, %i", limit, *dirfile);
+
+  *limit = gd_open_limit(_GDF_GetDirfile(*dirfile), *limit);
+
+  dreturn("%i", *limit);
+}

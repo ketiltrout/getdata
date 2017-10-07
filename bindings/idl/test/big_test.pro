@@ -1038,7 +1038,7 @@ nume += check_error2(156, 2, m, !GD.E_BAD_DIRFILE)
 gd_close, m
 
 ;  157: gd_dirfile_standards
-n = gd_dirfile_standards(d, /CURRENT)
+n = gd_dirfile_standards(d)
 nume += check_ok2(157, 1, d)
 nume += check_simple(157, n, !GD.DIRFILE_STANDARDS_VERSION)
 n = gd_dirfile_standards(d, 0)
@@ -1809,6 +1809,25 @@ n = gd_match_entries(d, fragment=0, regex="^lin")
 nume += check_ok(305, d)
 nume += check_simple(305, n, [ "lincom", "linterp" ])
 
+;  306: gd_open_limit
+n = gd_open_limit(d, /COUNT)
+nume += check_ok2(306, 0, d)
+nume += check_simple(306, 1, n, 0)
+n = gd_open_limit(d, 4)
+nume += check_ok2(306, 2, d)
+nume += check_simple(306, 3, n, 4)
+n = gd_open_limit(d)
+nume += check_ok2(306, 4, d)
+nume += check_simple(306, 5, n, 4)
+n = gd_open_limit(d, /COUNT)
+nume += check_ok2(306, 6, d)
+nume += check_simple(306, 7, n, 1)
+n = gd_open_limit(d, 0)
+nume += check_ok2(306, 8, d)
+nume += check_simple(306, 9, n, 0)
+n = gd_open_limit(d, /COUNT)
+nume += check_ok2(306, 10, d)
+nume += check_simple(306, 11, n, 0)
 
 
 

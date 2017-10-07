@@ -2340,6 +2340,44 @@ try
     ne = ne + check_ok(exc, 305);
   end
 
+  %306: gd_open_limit
+  try
+    d = gd_open_limit(D, GD.OLIMIT_COUNT)
+    ne = ne + check_num2(306, 0, d, 0)
+  catch exc
+    ne = ne + check_ok2(exc, 306, 0)
+  end
+  try
+    d = gd_open_limit(D, 4)
+    ne = ne + check_num2(306, 1, d, 4)
+  catch exc
+    ne = ne + check_ok2(exc, 306, 1)
+  end
+  try
+    d = gd_open_limit(D, GD.OLIMIT_CURRENT)
+    ne = ne + check_num2(306, 2, d, 4)
+  catch exc
+    ne = ne + check_ok2(exc, 306, 2)
+  end
+  try
+    d = gd_open_limit(D, GD.OLIMIT_COUNT)
+    ne = ne + check_num2(306, 3, d, 1)
+  catch exc
+    ne = ne + check_ok2(exc, 306, 3)
+  end
+  try
+    d = gd_open_limit(D, GD.OLIMIT_NONE)
+    ne = ne + check_num2(306, 2, d, 0)
+  catch exc
+    ne = ne + check_ok2(exc, 306, 2)
+  end
+  try
+    d = gd_open_limit(D, GD.OLIMIT_COUNT)
+    ne = ne + check_num2(306, 3, d, 0)
+  catch exc
+    ne = ne + check_ok2(exc, 306, 3)
+  end
+
 
 
 

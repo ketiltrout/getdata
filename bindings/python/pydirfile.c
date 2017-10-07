@@ -2775,6 +2775,79 @@ static PyObject *gdpy_dirfile_rename(struct gdpy_dirfile_t *self,
   return Py_None;
 }
 
+static PyObject *gdpy_dirfile_getocount(struct gdpy_dirfile_t *self,
+    void *closure)
+{
+  long limit;
+  PyObject *pyobj;
+
+  dtrace("%p, %p", self, closure);
+
+  /* Check whether descriptor limiting is enabled */
+  if (gd_open_limit(self->D, GD_OLIMIT_CURRENT) == 0) {
+    Py_INCREF(Py_None);
+    dreturn("%p", Py_None);
+    return Py_None;
+  }
+
+  limit = gd_open_limit(self->D, GD_OLIMIT_COUNT);
+
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
+
+  pyobj = gdpyint_fromlong(limit);
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static PyObject *gdpy_dirfile_getolimit(struct gdpy_dirfile_t *self,
+    void *closure)
+{
+  long limit;
+  PyObject *pyobj;
+
+  dtrace("%p, %p", self, closure);
+
+  limit = gd_open_limit(self->D, GD_OLIMIT_CURRENT);
+
+  GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
+
+  if (limit == 0) {
+    Py_INCREF(Py_None);
+    pyobj = Py_None;
+  } else
+    pyobj = gdpyint_fromlong(limit);
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static int gdpy_dirfile_setolimit(struct gdpy_dirfile_t *self,
+    PyObject *value, void *closure)
+{
+  long limit = 0;
+
+  dtrace("%p, %p, %p", self, value, closure);
+
+  /* Deleting open_limit or setting this to None is equivalent to setting it
+   * to zero */
+  if (value && value != Py_None) {
+    limit = gdpy_long_from_pyobj(value);
+
+    if (PyErr_Occurred()) {
+      dreturn("%i", -1);
+      return -1;
+    }
+  }
+
+  gd_open_limit(self->D, limit);
+
+  GDPY_CHECK_ERROR(self->D, -1, self->char_enc);
+
+  dreturn("%i", 0);
+  return 0;
+}
+
 static PyObject *gdpy_dirfile_getstandards(struct gdpy_dirfile_t *self,
     void *closure)
 {
@@ -3458,6 +3531,25 @@ static PyGetSetDef gdpy_dirfile_getset[] = {
     NULL },
   { "nframes", (getter)gdpy_dirfile_getnframes, NULL,
     "The number of frames in the dirfile.  See gd_nframes(3).", NULL },
+  { "open_count", (getter)gdpy_dirfile_getocount, NULL,
+    "The number of open file descriptors in use by the loaded dirfile.\n"
+      "This value is only tracked if descriptor limiting is enabled\n"
+      "(i.e., open_limit is non-zero).  If not being tracked, this will\n"
+      "be None.  See gd_open_limit(3).",
+    NULL },
+  { "open_limit", (getter)gdpy_dirfile_getolimit,
+    (setter)gdpy_dirfile_setolimit,
+    "The maximum number of open file descriptors allowed for this\n"
+      "dirfile.  By default, this is None, meaning file descriptor\n"
+      "limiting is disabled.  If set to a postivie number, pygetdata\n"
+      "will limit the number of open file descriptors for the dirfile\n"
+      "to this value by automatically closing open RAW files as\n"
+      "necessary.  Deleting this member or setting it to zero is the same\n"
+      "as setting it to None: descriptor limiting is disabled.  While\n"
+      "limiting is enabled, the current number of open file descriptors\n"
+      "is provided as open_count.  See gd_open_limit(3).\n",
+      /*--- handy ruler: closing quote as indicated (or earlier)---------\n" */
+    NULL },
   { "reference", (getter)gdpy_dirfile_getreference,
     (setter)gdpy_dirfile_setreference,
     "The reference field for the dirfile, which may be set to any\n"
@@ -3980,7 +4072,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   {"sarrays", (PyCFunction)gdpy_dirfile_sarrays, METH_NOARGS,
     "sarrays()\n\n"
       "Retrieve all SARRAY fields, and their values.  A list of tuples\n"
-      /*--- handy ruler: closing quote as indicated (or earlier)---------\n" */
       "will be returned, each tuple containing the name and list of\n\n"
       "values.  See gd_sarrays(3), but note that this method returns both\n"
       "names and values, unlike the C API counterpart."

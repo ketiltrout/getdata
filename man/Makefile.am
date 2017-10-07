@@ -37,13 +37,13 @@ MAN3S = gd_add.3 gd_add_alias.3 gd_add_bit.3 gd_add_spec.3 gd_alias_target.3 \
 				gd_include.3 gd_invalid_dirfile.3 gd_linterp_tablename.3 gd_madd_bit.3 \
 				gd_match_entries.3 gd_metaflush.3 gd_move.3 gd_mplex_lookback.3 \
 				gd_naliases.3 gd_native_type.3 gd_nentries.3 gd_nfragments.3 \
-				gd_nframes.3 gd_nframes64.3 gd_open.3 gd_parent_fragment.3 \
-				gd_parser_callback.3 gd_protection.3 gd_put_carray_slice.3 \
-				gd_put_sarray_slice.3 gd_put_string.3 gd_putdata.3 gd_putdata64.3 \
-				gd_raw_filename.3 gd_reference.3 gd_rename.3 gd_rewrite_fragment.3 \
-				gd_sarrays.3 gd_seek.3 gd_seek64.3 gd_spf.3 gd_strings.3 gd_strtok.3 \
-				gd_tell.3 gd_tell64.3 gd_uninclude.3 gd_validate.3 gd_verbose_prefix.3 \
-				GD_SIZE.3
+				gd_nframes.3 gd_nframes64.3 gd_open.3 gd_open_limit.3 \
+				gd_parent_fragment.3 gd_parser_callback.3 gd_protection.3 \
+				gd_put_carray_slice.3 gd_put_sarray_slice.3 gd_put_string.3 \
+				gd_putdata.3 gd_putdata64.3 gd_raw_filename.3 gd_reference.3 \
+				gd_rename.3 gd_rewrite_fragment.3 gd_sarrays.3 gd_seek.3 gd_seek64.3 \
+				gd_spf.3 gd_strings.3 gd_strtok.3 gd_tell.3 gd_tell64.3 gd_uninclude.3 \
+				gd_validate.3 gd_verbose_prefix.3 GD_SIZE.3
 
 EXTRA_DIST = header.tmac $(addsuffix in, ${MAN3S})
 

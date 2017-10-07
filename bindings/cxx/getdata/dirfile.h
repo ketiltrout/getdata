@@ -239,6 +239,8 @@ namespace GetData {
 
       unsigned int NVectors() const;
 
+      long OpenLimit(long limit = GD_OLIMIT_CURRENT) const;
+
       int PutCarray(const char *field_code, DataType type, const void *data_in,
           unsigned int start = 0, size_t len = 0) const;
 

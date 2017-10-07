@@ -2248,6 +2248,36 @@ except:
   CheckOK2(305, 0)
 CheckSimple2(305, 1, n, [ B('lincom'), B('linterp') ])
 
+# 306: gd_open_limit
+try:
+  CheckSimple2(306, 0, d.open_count, None)
+except:
+  CheckOK2(306, 0)
+try:
+  d.open_limit = 4  
+except:
+  CheckOK2(306, 1)
+try:
+  CheckSimple2(306, 2, d.open_limit, 4)
+except:
+  CheckOK2(306, 2)
+try:
+  CheckSimple2(306, 3, d.open_count, 1)
+except:
+  CheckOK2(306, 3)
+try:
+  del d.open_limit
+except:
+  CheckOK2(306, 4)
+try:
+  CheckSimple2(306, 5, d.open_limit, None)
+except:
+  CheckOK2(306, 5)
+try:
+  CheckSimple2(306, 6, d.open_count, None)
+except:
+  CheckOK2(306, 6)
+
 
 
 

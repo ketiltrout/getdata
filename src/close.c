@@ -55,6 +55,7 @@ static void _GD_FreeD(DIRFILE *D, int keep_dirfile)
     _GD_FreeE(D, D->entry[i], 1);
 
   free(D->entry);
+  free(D->opened);
   free(D->tok_base);
   free(D->error_prefix);
   free(D->error_string);

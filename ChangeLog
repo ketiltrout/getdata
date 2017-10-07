@@ -1,3 +1,40 @@
+2017-10-04   D. V. Wiebe <getdata@ketiltrout.net> svn:1165
+	* src/getdata.h.in: Define GD_OLIMIT_*
+	* src/globals.c (_GD_FindOpenFields openedcmp _GD_CloseOpenFields
+	_GD_AutoClose gd_open_limit): Added.
+	* src/internal.h (gd_private_entry_): Add u.raw.atime, u.raw.fd_count
+	* src/internal.h (gd_dirfile_): Add open_limit, open_fds, open_raws,
+	opened_sorted, opened.
+	* src/iopos.c (_GD_DoSeek): Update u.raw.atime.
+	* src/close.c (_GD_FreeD): Free D->opened.
+	* src/encoding.c (_GD_FiniRawIO): Remove closed field from D->opened.
+	* src/encoding.c (_GD_InitRawIO): Call _GD_AutoClose if limiting is active.
+	Add opened field to D->opened.
+	* man/gd_open_limit.3in: Added.
+
+	* test/test.h (MAKERAWFILE): Added.
+	* test/olimit_count.c test/olimit_count_gzip.c test/olimit_down.c
+	test/olimit_foffs.c test/olimit_get.c test/olimit_get_err.c
+	test/olimit_reset.c test/olimit_set.c: Added.
+
+	* bindings/make_parameters.c: Add GD_OLIMIT_*.  Merge GDMP_RFLAG and
+	GDMP_DESYNC flags into GDMP_FFLAG.
+	* bindings/cxx/dirfile.cpp (Dirfile::OpenLimit) bindings/f77/fgetdata.c
+	(GDOLIM) bindings/f77/getdata.f90.in (fgd_open_limit) bindings/idl/getdata.c
+	(gdidl_open_limit) bindings/matlab/gd_open_limit.c
+	bindings/perl/simple_funcs.xsin (open_limit) bindings/php/getdata.c
+	(gd_open_limit) bindings/python/pydirfile.c (gdpy_dirfile_getocount
+	gdpy_dirfile_getolimit gdpy_dirfile_setolimit): Added.
+	* bindings/perl/simple_funcs.pl: Handle (signed) long.
+	* bindings/cxx/test/big_test.cpp bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro
+	bindings/matlab/test/big_test.m bindings/perl/t/big_test.t
+	bindings/php/test/big_test.php bindings/python/test/big_test.py: Added test
+	306.
+
+	* bindings/idl/getdata.c (gdidl_dirfile_standards): Remove unnecessary,
+	undocumented /CURRENT flag.
+
 2017-10-04   D. V. Wiebe <getdata@ketiltrout.net> svn:1164
 	* src/internal.h bindings/idl/getdata.c: Define CMPLX if necessary.
 	* src/internal.h bindings/idl/getdata.c test/add_clincom.c
@@ -55,8 +92,8 @@
 	test/match_pcre_caseless.c test/match_pcre_ext.c test/match_pcre_js.c
 	test/match_pcre_utf8.c test/match_regex.c test/match_regex_ext.c
 	test/match_regex_icase.c test/name_alias.c test/name_dangle.c
-	test/name_meta2.c test/name_move.c test/name_move_alias.c test/name_name.c
-	: Fix string array checks.
+	test/name_meta2.c test/name_move.c test/name_move_alias.c test/name_name.c:
+	Fix string array checks.
 	* test/test.h (CHECKSA CHECKPA): Added.
 
 	* test/ascii_put.c test/ascii_put_here.c test/ascii_sync.c test/bzip_put.c

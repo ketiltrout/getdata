@@ -3131,6 +3131,28 @@ PHP_FUNCTION(gd_desync)
   GDPHP_RETURN_BOOL(!r);
 }
 
+PHP_FUNCTION(gd_open_limit)
+{
+  zval *zlimit = NULL;
+
+  long limit;
+  DIRFILE *D;
+
+  dtracephp();
+
+  GDPHP_PARSED("|z", &zlimit);
+
+  limit = gdphp_long_from_zval_null(zlimit, GD_VERSION_CURRENT);
+
+  limit = gd_open_limit(D, limit);
+
+  if (limit < 0)
+    GDPHP_RETURN_F;
+
+  dreturn("%li", limit);
+  RETURN_LONG(limit);
+}
+
 PHP_FUNCTION(gd_dirfile_standards)
 {
   zval *zversion = NULL;
@@ -5483,6 +5505,7 @@ static const zend_function_entry getdata_functions[] = {
     PHP_FE(gd_nmvectors, NULL)
     PHP_FE(gd_nvectors, NULL)
     PHP_FE(gd_open, NULL)
+    PHP_FE(gd_open_limit, NULL)
     PHP_FE(gd_parent_fragment, NULL)
     PHP_FE(gd_popen, NULL)
     PHP_FE(gd_protection, NULL)

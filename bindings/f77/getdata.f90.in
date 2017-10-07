@@ -3345,4 +3345,13 @@ function fgd_match_entries (entry_list, dirfile, regex, fragment, entype, &
   end if
 end function
 
+function fgd_open_limit (dirfile, limit)
+  integer :: fgd_open_limit
+  integer, intent(in) :: dirfile, limit
+
+  fgd_open_limit = limit
+
+  call gdolim(fgd_open_limit, dirfile)
+end function
+
 end module

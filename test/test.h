@@ -118,22 +118,20 @@ int gd_system(const char* command)
         __VA_ARGS__); } \
   } while(0)
 
-/* Create an empty file with mode m */
-#define MAKEEMPTYFILE(f,m) \
+/* Write data at pointer p of length z to file f. */
+#define MAKERAWFILE(f,p,z) \
   do { \
-    int fd = open(f, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, m); \
+    int fd = open(f, O_BINARY | O_CREAT | O_EXCL | O_WRONLY, 0666); \
     if (fd < 0) { perror("open"); exit(1); } \
+    if (write(fd, p, z) < 0) { perror("write"); exit(1); } \
     if (close(fd)) { perror("close"); exit(1); } \
   } while (0)
 
+/* Create an empty file with mode m */
+#define MAKEEMPTYFILE(f,m) MAKERAWFILE(f,NULL,0)
+
 /* Write string literal t to format file f. */
-#define MAKEFORMATFILE(f,t) \
-  do { \
-    int fd = open(f, O_CREAT | O_EXCL | O_WRONLY, 0666); \
-    if (fd < 0) { perror("open"); exit(1); } \
-    if (write(fd, t, -1 + sizeof t) < 0) { perror("write"); exit(1); } \
-    if (close(fd)) { perror("close"); exit(1); } \
-  } while (0)
+#define MAKEFORMATFILE(f,t) MAKERAWFILE(f,t,-1 + sizeof t)
 
 /* Write n data of type t initialialised with expression expr to file f. */
 #define MAKEDATAFILE(f,t,expr,n) \
@@ -142,12 +140,9 @@ int gd_system(const char* command)
     t *data_data = malloc(sizeof(*data_data) * n); \
     if (data_data == NULL) { perror("malloc"); exit(1); } \
     for (i = 0; i < n; ++i) data_data[i] = (t)(expr); \
-    i = open(f, O_BINARY | O_CREAT | O_EXCL | O_WRONLY, 0666); \
-    if (i < 0) { perror("open"); exit(1); } \
-    if (write(i, data_data, sizeof(t) * n) < 0) { perror("write"); exit(1); } \
-    if (close(i)) { perror("close"); exit(1); } \
+    MAKERAWFILE(f, data_data, n * sizeof(t)); \
     free(data_data); \
-  } while(0)
+  } while (0)
 
 #ifdef GD_NO_C99_API
 #define CHECKC(n,v)    CHECK(sqrt(((n)[0]-(v)[0])*((n)[0]-(v)[0]) + \

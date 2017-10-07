@@ -38,7 +38,7 @@ subroutine check_err2(ne, t, i, d, v)
 
   if (e .ne. v) then
     ne = ne + 1
-    write(*, 9006), i, t, e, v
+    write(*, 9006) i, t, e, v
   end if
 9006 format('e(', i0, ')[', i0, '] = ', i0, ', expected ', i0)
 end subroutine 
@@ -55,7 +55,7 @@ subroutine check_int2(ne, t, i, n, v)
 
   if (n .ne. v) then
     ne = ne + 1
-    write(*, 9007), i, t, n, v
+    write(*, 9007) i, t, n, v
   end if
 9007 format('n(', i0, ')[', i0, '] = ', i0, ', expected ', i0)
 end subroutine 
@@ -73,7 +73,7 @@ subroutine check_str2(ne, t, i, n, v)
 
   if (n .ne. v) then
     ne = ne + 1
-    write(*, 9008), i, t, n, v
+    write(*, 9008) i, t, n, v
   end if
 9008 format('s(', i0, ')[', i0, '] = "', a, '", expected "', a, '"')
 end subroutine 
@@ -93,7 +93,7 @@ subroutine check_dbl2(ne, t, i, n, v)
   ! this is good to single precision
   if (abs(n - v) .gt. 1e-7) then
     ne = ne + 1
-    write(*, 9010), i, t, n, v
+    write(*, 9010) i, t, n, v
   end if
 9010 format('r(', i0, ')[', i0, '] = ', d16.10, ', expected ', d16.10)
 end subroutine 
@@ -113,7 +113,7 @@ subroutine check_cpx2(ne, t, i, n, v)
   ! this is good to single precision
   if (abs(n - v) .gt. 1e-7) then
     ne = ne + 1
-    write(*, 9011), i, t, real(real(n)), real(aimag(n)), &
+    write(*, 9011) i, t, real(real(n)), real(aimag(n)), &
     real(real(v)), real(aimag(v))
   end if
 9011 format('x(', i0, ')[', i0, '] = ', d16.10, ';', d16.10, ', expected ', &
@@ -3377,6 +3377,25 @@ program big_test
   call check_str2(ne, 305, 6, flist(2), "linterp")
   call check_int2(ne, 305, 7, l, flen)
 
+! 306: fgd_open_limit
+  n = fgd_open_limit(d, GD_OLIMIT_COUNT)
+  call check_ok2(ne, 306, 0, d)
+  call check_int2(ne, 306, 1, n, 0)
+  n = fgd_open_limit(d, 4)
+  call check_ok2(ne, 306, 2, d)
+  call check_int2(ne, 306, 3, n, 4)
+  n = fgd_open_limit(d, GD_OLIMIT_CURRENT)
+  call check_ok2(ne, 306, 4, d)
+  call check_int2(ne, 306, 5, n, 4)
+  n = fgd_open_limit(d, GD_OLIMIT_COUNT)
+  call check_ok2(ne, 306, 6, d)
+  call check_int2(ne, 306, 7, n, 1)
+  n = fgd_open_limit(d, GD_OLIMIT_NONE)
+  call check_ok2(ne, 306, 8, d)
+  call check_int2(ne, 306, 9, n, 0)
+  n = fgd_open_limit(d, GD_OLIMIT_COUNT)
+  call check_ok2(ne, 306, 10, d)
+  call check_int2(ne, 306, 11, n, 0)
 
 
 

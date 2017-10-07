@@ -3234,6 +3234,32 @@ C     305: GDMATN, GDMATX, GDNMAT checks
       CALL CHKIN2(ne, 305, 7, l, flen)
       CALL CHKST2(ne, 305, 8, fn, "linterp")
 
+C     306: GDOLIM checks
+      n = GDOL_N
+      CALL GDOLIM(n, d)
+      CALL CHKOK2(ne, 306, 0, d)
+      CALL CHKIN2(ne, 306, 1, n, 0)
+      n = 4
+      CALL GDOLIM(n, d)
+      CALL CHKOK2(ne, 306, 2, d)
+      CALL CHKIN2(ne, 306, 3, n, 4)
+      n = GDOL_L
+      CALL GDOLIM(n, d)
+      CALL CHKOK2(ne, 306, 4, d)
+      CALL CHKIN2(ne, 306, 5, n, 4)
+C At this point, the only file open is "data"
+      n = GDOL_N
+      CALL GDOLIM(n, d)
+      CALL CHKOK2(ne, 306, 6, d)
+      CALL CHKIN2(ne, 306, 7, n, 1)
+      n = 0
+      CALL GDOLIM(n, d)
+      CALL CHKOK2(ne, 306, 8, d)
+      CALL CHKIN2(ne, 306, 9, n, 0)
+      n = GDOL_N
+      CALL GDOLIM(n, d)
+      CALL CHKOK2(ne, 306, 10, d)
+      CALL CHKIN2(ne, 306, 11, n, 0)
 
 
 

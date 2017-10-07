@@ -2023,6 +2023,26 @@ void run_tests(void)
   CHECK_STRINGi(287, 1, list[1],  "linterp");
 #endif
 
+  // 306: gd_open_limit
+  n = d->OpenLimit(GD_OLIMIT_COUNT);
+  CHECK_OK2(306,0);
+  CHECK_INT2(306,1,n,0);
+  n = d->OpenLimit(4);
+  CHECK_OK2(306,2);
+  CHECK_INT2(306,3,n,4);
+  n = d->OpenLimit();
+  CHECK_OK2(306,4);
+  CHECK_INT2(306,5,n,4);
+  n = d->OpenLimit(GD_OLIMIT_COUNT);
+  CHECK_OK2(306,4);
+  CHECK_INT2(306,5,n,1);
+  n = d->OpenLimit(GD_OLIMIT_NONE);
+  CHECK_OK2(306,4);
+  CHECK_INT2(306,5,n,0);
+  n = d->OpenLimit(GD_OLIMIT_COUNT);
+  CHECK_OK2(306,4);
+  CHECK_INT2(306,5,n,0);
+
 
 
 

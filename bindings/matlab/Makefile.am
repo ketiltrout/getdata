@@ -66,7 +66,7 @@ mexfiles=gd_add gd_add_alias \
 				 gd_malter_spec gd_match_entries gd_mcarrays \
 				 gd_mconstants gd_metaflush gd_move gd_mplex_lookback gd_msarrays \
 				 gd_mstrings gd_naliases gd_native_type gd_nentries gd_nfragments \
-				 gd_nframes gd_open gd_parent_fragment gd_protection \
+				 gd_nframes gd_open gd_open_limit gd_parent_fragment gd_protection \
 				 gd_put_carray_slice \
 				 gd_putdata gd_put_sarray_slice \
 				 gd_put_string gd_raw_close gd_raw_filename \

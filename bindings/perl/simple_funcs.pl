@@ -77,6 +77,8 @@ sub printfmt {
     return "%i";
   } elsif ($_ eq "gd_off64_t") {
     return "%\" PRId64 \"";
+  } elsif ($_ eq "long") {
+    return "%li";
   } elsif ($_ eq "size_t") {
     return "%\" PRIuSIZE \"";
   } elsif ($_ eq "unsigned int") {

@@ -36,7 +36,7 @@
 #define GDMP_OFLAG_L 0x00000008 /* open flags represented as LONG in IDL */
 #define GDMP_ENTYPE  0x00000010 /* entry types */
 #define GDMP_DTYPE   0x00000020 /* data types */
-#define GDMP_RFLAG   0x00000040 /* delete and rename flags (not in IDL) */
+#define GDMP_FFLAG   0x00000040 /* various function flags not in IDL */
 #define GDMP_PROT    0x00000080 /* protection levels */
 #define GDMP_CALLBAK 0x00000100 /* callback actions (not in IDL) */
 #define GDMP_FORMAT  0x00000200 /* GD_E_FORMAT suberrors (not in IDL) */
@@ -44,7 +44,7 @@
 #define GDMP_WHENCE  0x00000800 /* gd_seek whence values */
 #define GDMP_SEEK    0x00001000 /* gd_seek flags (not in IDL) */
 #define GDMP_WINDOP  0x00002000 /* window operations */
-#define GDMP_DESYNC  0x00004000 /* desync flags (not in IDL) */
+/*                   0x00004000 UNUSED */
 #define GDMP_ENLIST  0x00008000 /* entry_list constants (not in IDL) */
 #define GDMP_EFLAG   0x00010000 /* entry flags */
 #define GDMP_MISC_I  0x00020000 /* miscellaneous constants not in IDL */
@@ -169,14 +169,17 @@ static struct {
   CONSTANT(COMPLEX128,       "GDC128", GDMP_DTYPE),
   CONSTANT(STRING,           "GD_STR", GDMP_DTYPE),
 
-  CONSTANT(DEL_META,         "GDD_MT", GDMP_RFLAG),
-  CONSTANT(DEL_DATA,         "GDD_DT", GDMP_RFLAG),
-  CONSTANT(DEL_DEREF,        "GDD_DR", GDMP_RFLAG),
-  CONSTANT(DEL_FORCE,        "GDD_FO", GDMP_RFLAG),
-  CONSTANT(REN_DATA,         "GDR_DT", GDMP_RFLAG),
-  CONSTANT(REN_UPDB,         "GDR_UP", GDMP_RFLAG),
-  CONSTANT(REN_DANGLE,       "GDR_DL", GDMP_RFLAG),
-  CONSTANT(REN_FORCE,        "GDR_FO", GDMP_RFLAG),
+  CONSTANT(DEL_META,         "GDD_MT", GDMP_FFLAG),
+  CONSTANT(DEL_DATA,         "GDD_DT", GDMP_FFLAG),
+  CONSTANT(DEL_DEREF,        "GDD_DR", GDMP_FFLAG),
+  CONSTANT(DEL_FORCE,        "GDD_FO", GDMP_FFLAG),
+  CONSTANT(REN_DATA,         "GDR_DT", GDMP_FFLAG),
+  CONSTANT(REN_UPDB,         "GDR_UP", GDMP_FFLAG),
+  CONSTANT(REN_DANGLE,       "GDR_DL", GDMP_FFLAG),
+  CONSTANT(REN_FORCE,        "GDR_FO", GDMP_FFLAG),
+  CONSTANT(OLIMIT_NONE,      "GDOL_D", GDMP_FFLAG),
+  CONSTANT(OLIMIT_CURRENT,   "GDOL_L", GDMP_FFLAG),
+  CONSTANT(OLIMIT_COUNT,     "GDOL_N", GDMP_FFLAG),
 
   CONSTANT(PROTECT_NONE,     "GDPR_N", GDMP_PROT),
   CONSTANT(PROTECT_FORMAT,   "GDPR_F", GDMP_PROT),
@@ -231,8 +234,8 @@ static struct {
   CONSTANT(WINDOP_SET,       "GDW_ST", GDMP_WINDOP),
   CONSTANT(WINDOP_CLR,       "GDW_CL", GDMP_WINDOP),
 
-  CONSTANT(DESYNC_PATHCHECK, "GDDS_P", GDMP_DESYNC),
-  CONSTANT(DESYNC_REOPEN,    "GDDS_O", GDMP_DESYNC),
+  CONSTANT(DESYNC_PATHCHECK, "GDDS_P", GDMP_FFLAG),
+  CONSTANT(DESYNC_REOPEN,    "GDDS_O", GDMP_FFLAG),
 
   CONSTANT(ALL_ENTRIES,      "GDEN_X", GDMP_ENLIST),
   CONSTANT(VECTOR_ENTRIES,   "GDEN_V", GDMP_ENLIST),
@@ -323,10 +326,10 @@ void Fortran(void)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
-    printf("\\\n%c Delete and Rename flags\\\n", c);
+    printf("\\\n%c Function-specific flags\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == GDMP_RFLAG)
+      if (constant_list[j].type == GDMP_FFLAG)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
@@ -369,13 +372,6 @@ void Fortran(void)
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
       if (constant_list[j].type == GDMP_WINDOP)
-        parameter(constant_list[j].lname, constant_list[j].fname,
-            constant_list[j].value, i);
-
-    printf("\\\n%c Desync flags\\\n", c);
-
-    for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == GDMP_DESYNC)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 

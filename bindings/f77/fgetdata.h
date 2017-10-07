@@ -1104,6 +1104,8 @@ void F77_FUNC(gdnmat, GDNMAT) (int32_t *nentries, const int32_t *dirfile,
     const char *regex, const int32_t *regex_l, const int32_t *fragment,
     const int32_t *type, const int32_t *flags);
 
+void F77_FUNC(gdolim, GDOLIM) (int32_t *limit, const int32_t *dirfile);
+
 #ifdef __cplusplus
 }
 #endif

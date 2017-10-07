@@ -423,7 +423,8 @@ static int _GD_MoveOver(DIRFILE *restrict D, int fragment,
 }
 
 /* Close a raw file, taking care of cleaning-up out-of-place writes, and
- * discarding temporary files */
+ * discarding temporary files.  When we're moving an entry to a new fragment,
+ * fragment != E->fragment_index */
 int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
 {
   const int clotemp = (flags & GD_FINIRAW_CLOTEMP) ? 1 : 0;
@@ -521,6 +522,23 @@ int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
     E->e->u.raw.file[1].name = NULL;
   }
 
+  /* Clear atime */
+  E->e->u.raw.atime = 0;
+
+  /* Delete this entry from the opened list if it's there */
+  if (D->open_limit) {
+    long i;
+    
+    for (i = 0; i < D->open_raws; ++i)
+      if (D->opened[i] == E) {
+        memmove(D->opened + i, D->opened + i + 1,
+            sizeof(D->opened[0]) * (D->open_raws - i - 1));
+        D->open_raws--;
+        D->open_fds -= E->e->u.raw.fd_count;
+        break;
+      }
+  }
+
   dreturn("%i", 0);
   return 0;
 }
@@ -556,9 +574,9 @@ ssize_t _GD_WriteOut(const gd_entry_t *E, const struct encoding_t *enc,
 }
 
 /* Open a raw file, if necessary; also check for required functions */
-int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
-    int fragment, const struct encoding_t *enc, unsigned int funcs,
-    unsigned int mode, int swap)
+int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase, int fragment,
+    const struct encoding_t *enc, unsigned int funcs, unsigned int mode,
+    int swap)
 {
   const int touch = mode & GD_FILE_TOUCH;
   int oop_write = 0;
@@ -568,6 +586,16 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
 
   if (mode & (GD_FILE_WRITE | GD_FILE_TOUCH))
     funcs |= GD_EF_WRITE;
+
+	/* If this is a temp file or we're just touching it, we don't register
+	 * it in the open field list, otherwise, try autoclosing first */
+  if (!(mode & (GD_FILE_TEMP | GD_FILE_TOUCH))) {
+    E->e->u.raw.fd_count = 1;
+    if (_GD_AutoClose(D, 1)) {
+      dreturn("%i", 1);
+      return 1;
+    }
+  }
 
   mode &= ~GD_FILE_TOUCH;
 
@@ -579,6 +607,15 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
 
     enc = _GD_ef + E->e->u.raw.file[0].subenc;
     oop_write = ((enc->flags & GD_EF_OOP) && mode == GD_FILE_WRITE) ? 1 : 0;
+
+    /* In this case, we need two free descriptors */
+    if (oop_write) {
+      E->e->u.raw.fd_count = 2;
+      if (_GD_AutoClose(D, 2)) {
+        dreturn("%i", 1);
+        return 1;
+      }
+    }
 
     /* Do nothing, if possible */
     if (!touch && (((mode & GD_FILE_READ) && (E->e->u.raw.file[0].idata >= 0)
@@ -661,6 +698,17 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
 
   if (touch)
     _GD_FiniRawIO(D, E, fragment, GD_FINIRAW_KEEP);
+  else {
+    E->e->u.raw.atime = time(NULL);
+    if (D->open_limit > 0 && !(mode & GD_FILE_TEMP)) {
+      /* Add this file to the top of the opened list.  This keeps the list
+       * sorted if it was already */
+      memmove(D->opened + 1, D->opened, sizeof(D->opened[0]) * D->open_raws);
+      D->opened[0] = E;
+      D->open_raws++;
+      D->open_fds += E->e->u.raw.fd_count;
+    }
+  }
 
   dreturn("%i", 0);
   return 0;

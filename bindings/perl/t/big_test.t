@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1754;
+use Test::More tests => 1766;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -2284,6 +2284,30 @@ CheckNum2(305, 1, $s, 2);
 CheckOK2(305, 2);
 CheckSArray2(292, 3, \@a, qw(lincom linterp));
 
+# 306: open_limit
+$s = $_->open_limit($GetData::OLIMIT_COUNT);
+CheckOK2(306, 0);
+CheckNum2(306, 1, $s, 0);
+
+$s = $_->open_limit(4);
+CheckOK2(306, 2);
+CheckNum2(306, 3, $s, 4);
+
+$s = $_->open_limit();
+CheckOK2(306, 4);
+CheckNum2(306, 5, $s, 4);
+
+$s = $_->open_limit($GetData::OLIMIT_COUNT);
+CheckOK2(306, 6);
+CheckNum2(306, 7, $s, 1);
+
+$s = $_->open_limit($GetData::OLIMIT_NONE);
+CheckOK2(306, 8);
+CheckNum2(306, 9, $s, 0);
+
+$s = $_->open_limit($GetData::OLIMIT_COUNT);
+CheckOK2(306, 10);
+CheckNum2(306, 11, $s, 0);
 
 
 

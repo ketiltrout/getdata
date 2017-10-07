@@ -521,6 +521,11 @@ typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 #define GD_DESYNC_PATHCHECK 0x1
 #define GD_DESYNC_REOPEN    0x2
 
+/* open_limit special values */
+#define GD_OLIMIT_NONE    0
+#define GD_OLIMIT_CURRENT (-1)
+#define GD_OLIMIT_COUNT   (-2)
+
 void gd_alloc_funcs(void *(*malloc_func)(size_t),
     void (*free_func)(void*)) gd_nothrow;
 
@@ -1075,6 +1080,8 @@ extern int gd_move(DIRFILE *dirfile, const char *field_code, int new_fragment,
 
 extern DIRFILE *gd_open(const char *dirfilename,
     unsigned long int flags) gd_nonnull ((1));
+
+extern long gd_open_limit(DIRFILE *dirfile, long new_limit) gd_nonnull ((1));
 
 extern int gd_raw_close(DIRFILE *dirfile,
     const char *field_code) gd_nonnull ((1));

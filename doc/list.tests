@@ -231,6 +231,7 @@
 230 F9CIpPmh gd_madd_mplex
 231 F9CIpPmh gd_alter_mplex
 232 F9CIpPmh gd_strtok
+306 F9CIpPmh gd_open_limit
 233 F9CIpPmh gd_raw_close
 234 F9CIpPmh gd_desync
 235 F9CIpPmh gd_flags

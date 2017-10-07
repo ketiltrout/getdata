@@ -5028,6 +5028,47 @@ IDL_VPTR gdidl_invalid_dirfile(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
+/* @@DLM: F gdidl_open_limit GD_OPEN_LIMIT 1 2 KEYWORDS */
+IDL_VPTR gdidl_open_limit(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    int count;
+  } KW_RESULT;
+  KW_RESULT kw;
+  long limit = GD_OLIMIT_CURRENT;
+
+  kw.count = 0;
+  GDIDL_KW_INIT_ERROR;
+
+  static IDL_KW_PAR kw_pars[] = {
+    { "COUNT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(count) },
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { NULL }
+  };
+
+  argc = IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE *D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+
+  if (argc > 1)
+    limit = IDL_LongScalar(argv[1]);
+
+  limit = gd_open_limit(D, kw.count ? GD_OLIMIT_COUNT : limit);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r = IDL_GettmpLong(limit);
+  dreturn("%p", r);
+  return r;
+}
+
 /* @@DLM: F gdidl_dirfile_standards GD_DIRFILE_STANDARDS 1 2 KEYWORDS */
 IDL_VPTR gdidl_dirfile_standards(int argc, IDL_VPTR argv[], char *argk)
 {
@@ -5037,17 +5078,15 @@ IDL_VPTR gdidl_dirfile_standards(int argc, IDL_VPTR argv[], char *argk)
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
     int earliest;
-    int current;
     int latest;
   } KW_RESULT;
   KW_RESULT kw;
-  int vers = 16384;
+  int vers = GD_VERSION_CURRENT;
 
-  kw.earliest = kw.current = kw.latest = 0;
+  kw.earliest = kw.latest = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
-    { "CURRENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(current) },
     { "EARLIEST", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(earliest) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
@@ -5062,9 +5101,8 @@ IDL_VPTR gdidl_dirfile_standards(int argc, IDL_VPTR argv[], char *argk)
   if (argc > 1)
     vers = IDL_LongScalar(argv[1]);
 
-  vers = gd_dirfile_standards(D, (vers != 16384) ? vers :
-      kw.current ? GD_VERSION_CURRENT : kw.latest ? GD_VERSION_LATEST :
-      kw.earliest ? GD_VERSION_EARLIEST : 16384);
+  vers = gd_dirfile_standards(D, kw.latest ? GD_VERSION_LATEST :
+      kw.earliest ? GD_VERSION_EARLIEST : vers);
 
   GDIDL_SET_ERROR(D);
 

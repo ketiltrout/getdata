@@ -187,7 +187,6 @@ double carg(double _Complex z);
 double creal(double _Complex z);
 double cimag(double _Complex z);
 #endif
-#endif
 
 #ifdef GD_NO_C99_API
 /* generic dcomplex pointer for passing around malloc'd vectors */
@@ -286,6 +285,7 @@ double cimag(double _Complex z);
 #  define gd_rs2ca_(a,i,b,t) gd_cs2ca_(a,i,b,t)
 #  define gd_ccmpl_(a,x,y) (a == CMPLX(x, y))
 #  define gd_ccmpc_(a,b) (a == b)
+#endif
 
 #ifndef NAN
 # if HAVE_NAN
@@ -1039,7 +1039,9 @@ struct gd_private_entry_ {
   union {
     struct { /* RAW */
       char* filebase;
-      size_t size;
+      size_t size; /* Data type size */
+      time_t atime; /* Access time, with second resolution */
+      int fd_count; /* Number of open files */
       struct gd_raw_file_ file[2]; /* encoding framework data */
     } raw;
     struct { /* LINTERP */
@@ -1242,6 +1244,11 @@ struct gd_dirfile_ {
   int n_error;
   int lookback;
 
+  /* for TMOF avoidance */
+  long open_limit, open_fds, open_raws;
+  int opened_sorted;
+  gd_entry_t **opened;
+
   /* for the public tokeniser */
   char *tok_base;
   const char *tok_pos;
@@ -1324,6 +1331,7 @@ int _GD_MakeTempFile(const DIRFILE*, int, char*);
 
 /* forward declarations */
 void *_GD_Alloc(DIRFILE*, gd_type_t, size_t) __attribute_malloc__;
+int _GD_AutoClose(DIRFILE*, int);
 
 #define _GD_BadWindop(op) \
   ( \
@@ -1394,7 +1402,7 @@ int _GD_GrabDir(DIRFILE*, int, const char *restrict, int);
 int _GD_Include(DIRFILE*, struct parser_state *restrict, const char *restrict,
     char **restrict, int, const char *restrict, const char *restrict, int);
 void _GD_InitialiseFramework(void);
-int _GD_InitRawIO(DIRFILE*, const gd_entry_t*, const char*, int,
+int _GD_InitRawIO(DIRFILE*, gd_entry_t*, const char*, int,
     const struct encoding_t*, unsigned int, unsigned int, int);
 void _GD_InvertData(DIRFILE *restrict, void *restrict, gd_type_t return_type,
     double dividend, size_t n_read);

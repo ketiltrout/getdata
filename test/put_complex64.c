@@ -44,7 +44,7 @@ int main(void)
     c[i][0] = 40 + i;
     c[i][1] = i;
 #else
-    c[i] = CMPLX(40 + i, 40 + i);
+    c[i] = CMPLX(40 + i, i);
 #endif
   }
 
