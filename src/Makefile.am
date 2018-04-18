@@ -83,6 +83,7 @@ ZZSLIM_C=zzslim.c
 endif
 endif
 
+MODULE_LIBS=-lgetdata
 if USE_MODULES
 EXPORT_DYNAMIC=-export-dynamic
 DGETDATA_MODULEDIR=-DGETDATA_MODULEDIR="\"$(moduledir)\""
@@ -149,38 +150,38 @@ libgetdata_la_LIBADD = $(LIBLTDL) $(DLOPEN_LIBGETDATABZIP2_LA) \
 
 libgetdataslim_la_SOURCES = slim.c
 libgetdataslim_la_LDFLAGS = $(SLIM_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
-														-module $(SLIM_LIBS)
+														-module $(SLIM_LIBS) $(MODULE_LIBS)
 libgetdataslim_la_CPPFLAGS = $(AM_CPPFLAGS) $(SLIM_CPPFLAGS)
 
 libgetdataflac_la_SOURCES = flac.c
 libgetdataflac_la_LDFLAGS = $(FLAC_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
-														-module $(FLAC_LIBS)
+														-module $(FLAC_LIBS) $(MODULE_LIBS)
 libgetdataflac_la_CPPFLAGS = $(AM_CPPFLAGS) $(FLAC_CPPFLAGS)
 
 libgetdatagzip_la_SOURCES = gzip.c
 libgetdatagzip_la_LDFLAGS = $(GZIP_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
-														-module $(GZIP_LIBS)
+														-module $(GZIP_LIBS) $(MODULE_LIBS)
 libgetdatagzip_la_CPPFLAGS = $(AM_CPPFLAGS) $(GZIP_CPPFLAGS)
 
 libgetdatabzip2_la_SOURCES = bzip.c
 libgetdatabzip2_la_LDFLAGS = $(BZIP2_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
-														 -module $(BZIP2_LIBS)
+														 -module $(BZIP2_LIBS) $(MODULE_LIBS)
 libgetdatabzip2_la_CPPFLAGS = $(AM_CPPFLAGS) $(BZIP2_CPPFLAGS)
 
 libgetdatalzma_la_SOURCES = lzma.c
 libgetdatalzma_la_LDFLAGS = $(LZMA_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
-														 -module $(LZMA_LIBS)
+														 -module $(LZMA_LIBS) $(MODULE_LIBS)
 libgetdatalzma_la_CPPFLAGS = $(AM_CPPFLAGS) $(LZMA_CPPFLAGS)
 
 libgetdatazzip_la_SOURCES = zzip.c
 libgetdatazzip_la_LDFLAGS = $(ZZIP_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
-														 -module $(ZZIP_LIBS)
+														 -module $(ZZIP_LIBS) $(MODULE_LIBS)
 libgetdatazzip_la_CPPFLAGS = $(AM_CPPFLAGS) $(ZZIP_CPPFLAGS)
 
 libgetdatazzslim_la_SOURCES = zzslim.c
 libgetdatazzslim_la_LDFLAGS = $(SLIM_LDFLAGS) $(ZZIP_LDFLAGS) \
 														-release $(GETDATA_LIB_VERSION) -module \
-														$(SLIM_LIBS) $(ZZIP_LIBS)
+														$(SLIM_LIBS) $(ZZIP_LIBS) $(MODULE_LIBS)
 libgetdatazzslim_la_CPPFLAGS = $(AM_CPPFLAGS) $(SLIM_CPPFLAGS) $(ZZIP_CPPFLAGS)
 
 clean-local:

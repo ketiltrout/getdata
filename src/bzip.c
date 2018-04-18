@@ -106,7 +106,6 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct gd_raw_file_* file,
 
   ptr->pos = ptr->end = 0;
   ptr->base = 0;
-  file->pos = 0;
 
   dreturn("%p", ptr);
   return ptr;
@@ -125,6 +124,7 @@ int _GD_Bzip2Open(int dirfd, struct gd_raw_file_* file,
     return 1;
   }
 
+  file->pos = 0;
   file->mode = mode;
   file->idata = 0;
   dreturn("%i", 0);

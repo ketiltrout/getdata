@@ -1,3 +1,13 @@
+2018-04-18   D. V. Wiebe <getdata@ketiltrout.net> svn:1172
+	* src/Makefile.am: Add -lgetdata to the module link line.
+	
+	* src/bzip.c (_GD_Bzip2DoOpen _GD_Bzip2Open): Zero file->pos in
+	_GD_Bzip2Open not _GD_Bzip2DoOpen so that mixing gd_nframes calls
+	with data reads of a bzipped REFERENCE field doesn't mess things up.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getdata): Fix read-past-end
+	check.  Patch from Matthew Petroff.
+
 2017-10-04   D. V. Wiebe <getdata@ketiltrout.net> svn:1165
 	* src/getdata.h.in: Define GD_OLIMIT_*
 	* src/globals.c (_GD_FindOpenFields openedcmp _GD_CloseOpenFields

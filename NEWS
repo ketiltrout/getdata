@@ -1,9 +1,25 @@
 New in version 0.10.1a:
 
+  Library Changes:
+
+  * BUG FIX: When using a bzipped /REFERENCE field, mixing gd_nframes()
+    calls with reads of data from that field no longer results in
+    subsequents reads to occur in the wrong place.  Reported by Matthew
+    Petroff.
+
+  Bindings Changes:
+
+  * PYTHON BUG FIX: When first_sample is non-zero, and neither num_frames
+    nor num_samples is indicated dirfile.getdata() no longer attempts to
+    read past the end of the data file.  Patch from Matthew Petroff.
+
   Miscellaneous
 
   * "make clean" no longer accidentally deletes most of the man pages from
     the man/ subdirectory.
+
+  * modules now link to the main getdata library to avoid the potential for
+    symbol look-up errors on load.  Reported by Matthew Petroff.
 
 |=========================================================================|
 

@@ -951,7 +951,7 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
       GDPY_CHECK_ERROR2(self->D, NULL, PyMem_Free(field_code), self->char_enc);
 
       /* don't read past the frame indicated by nframes */
-      num_samples -= first_frame * spf - first_sample;
+      num_samples -= first_frame * spf + first_sample;
       if (num_samples < 0)
         num_samples = 0;
     } else
