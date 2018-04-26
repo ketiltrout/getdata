@@ -1,3 +1,25 @@
+2018-04-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1174
+	* bindings/php/getdata.c (gdphp_to_datum): Handle GD_STRING.
+	
+	* bindings/php/getdata.c (gdphp_convert_cmparray): Fix error string.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getsarray gdpy_dirfile_getdata):
+	Check for overflow of returned string array data.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_putsarray): Use size_t for len.
+
+2018-04-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1173
+	* configure.ac: Look for install_name_tool
+	* bindings/perl/Makefile.am bindings/python/Makefile.am src/Makefile.am:
+	Use install_name_tool to mangle library paths on MacOS.
+
+	* src/Makefile.am: Drop all the -dlopen options from libgetdata.la.  Link
+	all the modules to libgetdata.la.
+
+	* m4/perl.m4 (GD_PERL_MAKEMAKER_CONFIG): Replaced GD_PERL_MAN3EXT.
+	Determine DLEXT from ExtUtils::MakeMaker
+	* bindings/perl/Makefile.am: Use correct dlext.
+
 2018-04-18   D. V. Wiebe <getdata@ketiltrout.net> svn:1172
 	* src/Makefile.am: Add -lgetdata to the module link line.
 	

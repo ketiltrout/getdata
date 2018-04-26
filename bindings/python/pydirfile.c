@@ -602,18 +602,23 @@ static PyObject *gdpy_dirfile_getsarray(struct gdpy_dirfile_t *self,
       len -= start;
     else
       len = 0;
+  } else if (len > GD_SIZE_T_MAX / sizeof(const char *)) {
+    PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.get_sarray(): "
+        "array is too big");
+    dreturn("%p", NULL);
+    return NULL;
   }
 
   if (len == 0)
     pyobj = Py_BuildValue("[]");
   else {
-    const char **data = PyMem_Malloc(len * sizeof(*data));
+    const char **data = PyMem_Malloc((size_t)len * sizeof(*data));
 
     gd_get_sarray_slice(self->D, field_code, start, (size_t)len, data);
 
     GDPY_CHECK_ERROR2(self->D, NULL, PyMem_Free(data), self->char_enc);
 
-    pyobj = gdpyobj_from_strarr_len(data, len, self->char_enc);
+    pyobj = gdpyobj_from_strarr_len(data, (size_t)len, self->char_enc);
 
     PyMem_Free(data);
   }
@@ -913,7 +918,7 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
       dreturn("%p", NULL);
       return NULL;
     } else if (num_frames < 0) {
-      PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.gd_getdata(): "
+      PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.getdata(): "
           "num_frames must be non-negative");
       PyMem_Free(field_code);
       dreturn("%p", NULL);
@@ -928,7 +933,7 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
       dreturn("%p", NULL);
       return NULL;
     } else if (num_samples < 0) {
-      PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.gd_getdata(): "
+      PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.getdata(): "
           "num_samples must be non-negative");
       PyMem_Free(field_code);
       dreturn("%p", NULL);
@@ -975,7 +980,14 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
     else
       pyobj = Py_BuildValue("[]");
   } else if (is_sindir) {
-    const char** data = PyMem_Malloc(num_samples * sizeof(*data));
+    const char** data;
+
+    if (num_samples / sizeof(*data) > GD_SIZE_T_MAX) {
+      PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.getdata(): "
+          "array is too big");
+    }
+
+    data = PyMem_Malloc((size_t)num_samples * sizeof(*data));
 
     ns = gd_getdata(self->D, field_code, first_frame, first_sample, 0,
         (size_t)num_samples, return_type, data);
@@ -2381,7 +2393,8 @@ static PyObject *gdpy_dirfile_putsarray(struct gdpy_dirfile_t *self,
 {
   char *keywords[] = { "field_code", "data", "start", NULL };
   const char *field_code;
-  unsigned int start = 0, len = 1, i;
+  unsigned int start = 0;
+  size_t len = 1, i;
   PyObject *pyobj;
 
   dtrace("%p, %p, %p", self, args, keys);

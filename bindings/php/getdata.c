@@ -785,7 +785,9 @@ static int gdphp_to_datum(void *dst, gd_type_t type, zval *src, int complain,
   dtracectx("%p, 0x%X, %p, %i", dst, type, src, complain);
 
   switch (type) {
-    case GD_NULL: case GD_UNKNOWN:               break;
+    case GD_NULL:
+    case GD_UNKNOWN:
+    case GD_STRING:                              break;
     case GD_UINT8:       CONVERT_ZVAL( uint8_t); break;
     case GD_INT8:        CONVERT_ZVAL(  int8_t); break;
     case GD_UINT16:      CONVERT_ZVAL(uint16_t); break;
@@ -911,7 +913,7 @@ static int gdphp_convert_cmparray(double *out, zval *z, int min, int max,
     if (GDPHP_HASH_GET_CURRENT_KEY(a, key, index, i) == HASH_KEY_IS_STRING) {
       GDPHP_DIE(ctx, "cannot use associative array");
     } else if (index >= max)
-      GDPHP_DIE2(ctx, "bad array index (%lu/%lu)", index, max);
+      GDPHP_DIE2(ctx, "bad array index (%lu/%i)", index, max);
 
     if (!have[index]) {
       gdphp_to_datum(out + index * 2, GD_COMPLEX128, ZP(d), 1, ctx);
