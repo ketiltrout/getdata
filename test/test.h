@@ -121,14 +121,18 @@ int gd_system(const char* command)
 /* Write data at pointer p of length z to file f. */
 #define MAKERAWFILE(f,p,z) \
   do { \
-    int fd = open(f, O_BINARY | O_CREAT | O_EXCL | O_WRONLY, 0666); \
+    int fd = open(f, O_BINARY | O_CREAT | O_EXCL | O_WRONLY, 0600); \
     if (fd < 0) { perror("open"); exit(1); } \
     if (write(fd, p, z) < 0) { perror("write"); exit(1); } \
     if (close(fd)) { perror("close"); exit(1); } \
   } while (0)
 
 /* Create an empty file with mode m */
-#define MAKEEMPTYFILE(f,m) MAKERAWFILE(f,NULL,0)
+#define MAKEEMPTYFILE(f,m) \
+  do { \
+    MAKERAWFILE(f,NULL,0); \
+    if (chmod(f, m) < 0) { perror("chmod"); exit(1); } \
+  } while (0)
 
 /* Write string literal t to format file f. */
 #define MAKEFORMATFILE(f,t) MAKERAWFILE(f,t,-1 + sizeof t)
