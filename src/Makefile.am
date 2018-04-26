@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2013, 2015, 2016 D. V. Wiebe
+# Copyright (C) 2008-2013, 2015, 2016, 2018 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -23,7 +23,6 @@ AUTOMAKE_OPTIONS = foreign
 if USE_SLIM
 if USE_MODULES
 LIBGETDATASLIM_LA=libgetdataslim.la
-DLOPEN_LIBGETDATASLIM_LA=-dlopen libgetdataslim.la
 else
 SLIM_C=slim.c
 endif
@@ -32,7 +31,6 @@ endif
 if USE_FLAC
 if USE_MODULES
 LIBGETDATAFLAC_LA=libgetdataflac.la
-DLOPEN_LIBGETDATAFLAC_LA=-dlopen libgetdataflac.la
 else
 FLAC_C=flac.c
 endif
@@ -41,7 +39,6 @@ endif
 if USE_GZIP
 if USE_MODULES
 LIBGETDATAGZIP_LA=libgetdatagzip.la
-DLOPEN_LIBGETDATAGZIP_LA=-dlopen libgetdatagzip.la
 else
 GZIP_C=gzip.c
 endif
@@ -50,7 +47,6 @@ endif
 if USE_BZIP2
 if USE_MODULES
 LIBGETDATABZIP2_LA=libgetdatabzip2.la
-DLOPEN_LIBGETDATABZIP2_LA=-dlopen libgetdatabzip2.la
 else
 BZIP2_C=bzip.c
 endif
@@ -59,7 +55,6 @@ endif
 if USE_LZMA
 if USE_MODULES
 LIBGETDATALZMA_LA=libgetdatalzma.la
-DLOPEN_LIBGETDATALZMA_LA=-dlopen libgetdatalzma.la
 else
 LZMA_C=lzma.c
 endif
@@ -68,7 +63,6 @@ endif
 if USE_ZZIP
 if USE_MODULES
 LIBGETDATAZZIP_LA=libgetdatazzip.la
-DLOPEN_LIBGETDATAZZIP_LA=-dlopen libgetdatazzip.la
 else
 ZZIP_C=zzip.c
 endif
@@ -77,13 +71,12 @@ endif
 if USE_ZZSLIM
 if USE_MODULES
 LIBGETDATAZZSLIM_LA=libgetdatazzslim.la
-DLOPEN_LIBGETDATAZZSLIM_LA=-dlopen libgetdatazzslim.la
 else
 ZZSLIM_C=zzslim.c
 endif
 endif
 
-MODULE_LIBS=-lgetdata
+MODULE_LIBS=libgetdata.la
 if USE_MODULES
 EXPORT_DYNAMIC=-export-dynamic
 DGETDATA_MODULEDIR=-DGETDATA_MODULEDIR="\"$(moduledir)\""
@@ -139,50 +132,76 @@ libgetdata_la_SOURCES = add.c ascii.c ${BZIP2_C} close.c common.c compat.c \
 libgetdata_la_LDFLAGS = $(EXPORT_DYNAMIC) -export-symbols-regex '^[^_]' \
 												-version-info \
 												${GETDATA_IFACE_VERSION}:${GETDATA_IMPL_REVISION}:${GETDATA_IFACE_AGE} \
-												$(EXTERNAL_LDFLAGS) $(EXTERNAL_LIBS)
-libgetdata_la_LIBADD = $(LIBLTDL) $(DLOPEN_LIBGETDATABZIP2_LA) \
-											 $(DLOPEN_LIBGETDATAFLAC_LA) \
-											 $(DLOPEN_LIBGETDATAGZIP_LA) \
-											 $(DLOPEN_LIBGETDATALZMA_LA) \
-											 $(DLOPEN_LIBGETDATASLIM_LA) \
-											 $(DLOPEN_LIBGETDATAZZIP_LA) \
-											 $(DLOPEN_LIBGETDATAZZSLIM_LA)
+												$(EXTERNAL_LDFLAGS)
+libgetdata_la_LIBADD = $(LIBLTDL) $(EXTERNAL_LIBS)
 
 libgetdataslim_la_SOURCES = slim.c
 libgetdataslim_la_LDFLAGS = $(SLIM_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
-														-module $(SLIM_LIBS) $(MODULE_LIBS)
+														-module
+libgetdataslim_la_LIBADD = $(SLIM_LIBS) $(MODULE_LIBS)
 libgetdataslim_la_CPPFLAGS = $(AM_CPPFLAGS) $(SLIM_CPPFLAGS)
 
 libgetdataflac_la_SOURCES = flac.c
 libgetdataflac_la_LDFLAGS = $(FLAC_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
-														-module $(FLAC_LIBS) $(MODULE_LIBS)
+														-module
+libgetdataflac_la_LIBADD = $(FLAC_LIBS) $(MODULE_LIBS)
 libgetdataflac_la_CPPFLAGS = $(AM_CPPFLAGS) $(FLAC_CPPFLAGS)
 
 libgetdatagzip_la_SOURCES = gzip.c
 libgetdatagzip_la_LDFLAGS = $(GZIP_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
-														-module $(GZIP_LIBS) $(MODULE_LIBS)
+														-module
+libgetdatagzip_la_LIBADD = $(GZIP_LIBS) $(MODULE_LIBS)
 libgetdatagzip_la_CPPFLAGS = $(AM_CPPFLAGS) $(GZIP_CPPFLAGS)
 
 libgetdatabzip2_la_SOURCES = bzip.c
 libgetdatabzip2_la_LDFLAGS = $(BZIP2_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
-														 -module $(BZIP2_LIBS) $(MODULE_LIBS)
+														 -module
+libgetdatabzip2_la_LIBADD = $(BZIP2_LIBS) $(MODULE_LIBS)
 libgetdatabzip2_la_CPPFLAGS = $(AM_CPPFLAGS) $(BZIP2_CPPFLAGS)
 
 libgetdatalzma_la_SOURCES = lzma.c
 libgetdatalzma_la_LDFLAGS = $(LZMA_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
-														 -module $(LZMA_LIBS) $(MODULE_LIBS)
+														 -module
+libgetdatalzma_la_LIBADD = $(LZMA_LIBS) $(MODULE_LIBS)
 libgetdatalzma_la_CPPFLAGS = $(AM_CPPFLAGS) $(LZMA_CPPFLAGS)
 
 libgetdatazzip_la_SOURCES = zzip.c
 libgetdatazzip_la_LDFLAGS = $(ZZIP_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
-														 -module $(ZZIP_LIBS) $(MODULE_LIBS)
+														 -module
+libgetdatazzip_la_LIBADD = $(ZZIP_LIBS) $(MODULE_LIBS)
 libgetdatazzip_la_CPPFLAGS = $(AM_CPPFLAGS) $(ZZIP_CPPFLAGS)
 
 libgetdatazzslim_la_SOURCES = zzslim.c
 libgetdatazzslim_la_LDFLAGS = $(SLIM_LDFLAGS) $(ZZIP_LDFLAGS) \
-														-release $(GETDATA_LIB_VERSION) -module \
-														$(SLIM_LIBS) $(ZZIP_LIBS) $(MODULE_LIBS)
+														-release $(GETDATA_LIB_VERSION) -module
+libgetdatazzslim_la_LIBADD = $(SLIM_LIBS) $(ZZIP_LIBS) $(MODULE_LIBS)
 libgetdatazzslim_la_CPPFLAGS = $(AM_CPPFLAGS) $(SLIM_CPPFLAGS) $(ZZIP_CPPFLAGS)
 
+# Handle MacOS >=10.11 embedding install paths in .so files
+if USE_INSTALL_NAME_TOOL
+if USE_MODULES
+nodist_noinst_DATA = libpath_mangled
+
+# Change, say /usr/local/lib/libgetdata.#.dylib, into .libs/libgetdata.#.dylib
+libpath_mangled: ${nodist_python_SCRIPTS}
+	for m in ${module_LTLIBRARIES}; do \
+		${INSTALL_NAME_TOOL} -change \
+		${libdir}/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
+		${abs_top_builddir}/src/.libs/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
+		.libs/`basename $$m .la`-${GETDATA_LIB_VERSION}.so; \
+		done
+	touch $@
+
+# Change mangled path into install path again
+install-data-hook:
+	for m in ${module_LTLIBRARIES}; do \
+		${INSTALL_NAME_TOOL} -change \
+		${abs_top_builddir}/src/.libs/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
+		${libdir}/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
+		${DESTDIR}${moduledir}/`basename $$m .la`-${GETDATA_LIB_VERSION}.so; \
+		done
+endif
+endif
+
 clean-local:
-	rm -rf *~ getdata.pc *.gcno
+	rm -rf *~ getdata.pc *.gcno ${nodist_noinst_DATA}

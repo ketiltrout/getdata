@@ -360,6 +360,9 @@ AC_CHECK_PROGS([DATE], [date], [not found])
 AC_ARG_VAR([DIFF], [a POSIX-compatible diff])
 AC_CHECK_PROGS([DIFF], [diff], [])
 
+AC_ARG_VAR([INSTALL_NAME_TOOL], [the MacOS install_name_tool utility])
+AC_CHECK_PROGS([INSTALL_NAME_TOOL], [install_name_tool], [not found])
+
 AC_ARG_VAR([JOT], [a BSD-style jot;]
 [SysV-derived systems (like GNU/Linux) may find it easier to use SEQ (q.v.)])
 AC_CHECK_PROGS([JOT], [jot], [not found])
@@ -368,7 +371,7 @@ AC_ARG_VAR([PRINTF], [a POSIX-compatible printf])
 AC_CHECK_PROGS([PRINTF], [printf], [not found])
 
 AC_ARG_VAR([SEQ], [a SysV-style seq;]
-[BSD-derived systems (like MacOS X) may find it easier to use JOT (q.v.)])
+[BSD-derived systems (like MacOS) may find it easier to use JOT (q.v.)])
 AC_CHECK_PROGS([SEQ], [seq], [not found])
 
 GD_MSYS_SHELL
@@ -1213,6 +1216,7 @@ AM_CONDITIONAL(MAKE_MATLABBINDINGS, [test "x$make_matlabbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_PHPBINDINGS, [test "x$make_phpbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_UTIL, [test "x$make_util" = "xyes"])
 AM_CONDITIONAL(USE_MODULES, [test "x$use_modules" != "xno"])
+AM_CONDITIONAL(USE_INSTALL_NAME_TOOL, [test "x$INSTALL_NAME_TOOL" != "xnot found"])
 AM_CONDITIONAL(TEST_PYTHON, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(TEST_IDL, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(TEST_PERL, [test "x$HAVE_Test__Harness" = "xyes"])

@@ -1,4 +1,4 @@
-# Copyright (C) 2009, 2013, 2014, 2016 D. V. Wiebe
+# Copyright (C) 2009, 2013, 2014, 2016, 2018 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -50,7 +50,26 @@ clean-local:
 if MAKE_PYBINDINGS
 	test ! -f setup.py || ${PYTHON} setup.py clean
 endif
-	rm -rf build pygetdata${PYTHON_OBJECT_SUFFIX} ${BUILT_SOURCES} debug.c *~ 
+	rm -rf build pygetdata${PYTHON_OBJECT_SUFFIX} ${BUILT_SOURCES} debug.c *~ libpath_mangled
+
+# Handle MacOS >=10.11 embedding install paths in .so files
+if USE_INSTALL_NAME_TOOL
+nodist_noinst_DATA = libpath_mangled
+
+# Change, say /usr/local/lib/libgetdata.#.dylib, into .libs/libgetdata.#.dylib
+libpath_mangled: ${nodist_python_SCRIPTS}
+	${INSTALL_NAME_TOOL} -change \
+		${libdir}/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
+		${abs_top_builddir}/src/.libs/libgetdata.${GETDATA_IFACE_VERSION}.dylib $<
+	touch $@
+
+# Change mangled path into install path again
+install-exec-hook:
+	${INSTALL_NAME_TOOL} -change \
+		${abs_top_builddir}/src/.libs/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
+		${libdir}/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
+		${DESTDIR}${pythondir}/pygetdata${PYTHON_OBJECT_SUFFIX}
+endif
 
 # Avoid a race condition from distclean deleting setup.py between the test and
 # the ${PYTHON} in the clean-local rule.  The variable shennanigans here are to

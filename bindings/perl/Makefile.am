@@ -1,4 +1,4 @@
-# Copyright (C) 2011, 2012, 2013, 2015, 2016 D. V. Wiebe
+# Copyright (C) 2011, 2012, 2013, 2015, 2016, 2018 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -32,12 +32,12 @@ EXTRA_DIST=funclist.pl simple_funcs.pl simple_funcs.xsin GetData.pm.in \
 					 src/typemap src/GetData.xs ${plTESTS}
 
 man3dir=${perlmandir}
-nodist_man3_MANS=${blibdir}/man3/GetData.$(PERL_MAN3EXT)
+nodist_man3_MANS=${blibdir}/man3/GetData.$(PERL_man3ext)
 
 nodist_perl_SCRIPTS=${blibdir}/lib/GetData.pm
 
 perlautogetdatadir=${perldir}/auto/GetData
-nodist_perlautogetdata_SCRIPTS=${blibdir}/arch/auto/GetData/GetData.so
+nodist_perlautogetdata_SCRIPTS=${blibdir}/arch/auto/GetData/GetData.${PERL_dlext}
 
 src/Makefile.PL: src/Makefile.PL.in $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
@@ -84,8 +84,8 @@ build/lib/GetData.pm: GetData.pm.in make_parameters.sed funclist.pl \
 
 # The make.stamp rule here is to avoid running this recipe separately
 # for each target
-${blibdir}/arch/auto/GetData/GetData.so ${blibdir}/lib/GetData.pm \
-	${blibdir}/man3/GetData.$(PERL_MAN3EXT): build/make.stamp
+${blibdir}/arch/auto/GetData/GetData.${PERL_dlext} ${blibdir}/lib/GetData.pm \
+	${blibdir}/man3/GetData.$(PERL_man3ext): build/make.stamp
 	
 build/make.stamp: build/Makefile
 	cd build && ${MAKE}
@@ -93,8 +93,27 @@ build/make.stamp: build/Makefile
 
 clean-local: 
 	rm -rf build
-	rm -f $(BUILT_SOURCES) make_parameters.sed src/Makefile.PL
+	rm -f $(BUILT_SOURCES) make_parameters.sed src/Makefile.PL libpath_mangled
 	rm -rf src/*~ t/*~ *~
+
+# Handle MacOS >=10.11 embedding install paths in .so files
+if USE_INSTALL_NAME_TOOL
+nodist_noinst_DATA = libpath_mangled
+
+# Change, say /usr/local/lib/libgetdata.#.dylib, into .libs/libgetdata.#.dylib
+libpath_mangled: ${nodist_perlautogetdata_SCRIPTS}
+	${INSTALL_NAME_TOOL} -change \
+		${libdir}/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
+		${abs_top_builddir}/src/.libs/libgetdata.${GETDATA_IFACE_VERSION}.dylib $<
+	touch $@
+
+# Change mangled path into install path again
+install-exec-hook:
+	${INSTALL_NAME_TOOL} -change \
+		${abs_top_builddir}/src/.libs/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
+		${libdir}/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
+		${DESTDIR}${perlautogetdatadir}/GetData.${PERL_dlext}
+endif
 
 uninstall-hook:
 	rmdir $(DESTDIR)${perlautogetdatadir}

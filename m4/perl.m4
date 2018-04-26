@@ -1,4 +1,4 @@
-dnl Copyright (C) 2011-2013, 2015, 2016 D. V. Wiebe
+dnl Copyright (C) 2011-2013, 2015, 2016, 2018 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -45,17 +45,16 @@ else
 fi
 ])
 
-dnl GD_PERL_MAN3EXT
+dnl GD_PERL_MAKEMAKER_CONFIG
 dnl ---------------------------------------------------------------
-dnl Define PERL_MAN3EXT to the section 3 manual extension used by
-dnl ExtUtils::MakeMaker
-AC_DEFUN([GD_PERL_MAN3EXT],
+dnl Get the value of a ExtUtils::MakeMaker::Config variable
+AC_DEFUN([GD_PERL_MAKEMAKER_CONFIG],
 [
-AC_MSG_CHECKING([for the section 3 manual page extension])
-PERL_MAN3EXT=`$PERL -MExtUtils::MakeMaker::Config -e 'print "\n>>GD ", \
-  @S|@Config{man3ext}, " GD<<";' | $AWK '/>>GD .* GD<</ { print @S|@2 }'`
-AC_MSG_RESULT([.$PERL_MAN3EXT])
-AC_SUBST([PERL_MAN3EXT])
+AC_MSG_CHECKING($1)
+AS_TR_SH([PERL_$2])=`$PERL -MExtUtils::MakeMaker::Config -e 'print "\n>>GD ", \
+  @S|@Config{$2}, " GD<<";' | $AWK '/>>GD .* GD<</ { print @S|@2 }'`
+AC_MSG_RESULT([@S|@AS_TR_SH([PERL_$2])])
+AC_SUBST(AS_TR_SH([PERL_$2]))
 ])
 
 dnl GD_PERL_CHECK_MODULE
@@ -212,6 +211,7 @@ if test "x${have_perl}" != "xno"; then
   AC_SUBST([perlmandir])
   AC_MSG_RESULT([$perlmandir])
 
-  GD_PERL_MAN3EXT
+  GD_PERL_MAKEMAKER_CONFIG([for the section 3 manual page extension], [man3ext])
+  GD_PERL_MAKEMAKER_CONFIG([for the loadable object suffix], [dlext])
 fi
 ])
