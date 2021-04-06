@@ -253,14 +253,14 @@ int _GD_Include(DIRFILE *D, struct parser_state *p, const char *ename,
 
   /* Open the containing directory */
   dirfd = _GD_GrabDir(D, D->fragment[parent].dirfd, temp_buf1, 1);
-  if (dirfd == -1 && D->error == GD_E_OK)
+  if (dirfd == -1 && D->error == GD_E_OK && !D->zzip_dir)
     _GD_SetError(D, GD_E_IO, GD_E_IO_INCL, p->file, p->line, ename);
   if (D->error)
     goto include_error;
 
   /* Reject weird stuff */
   if (gd_StatAt(D, dirfd, base, &statbuf, 0)) {
-    if (!(p->flags & GD_CREAT)) {
+    if (!(p->flags & GD_CREAT) && !D->zzip_dir) {
       _GD_SetError(D, GD_E_IO, GD_E_IO_INCL, p->file, p->line, temp_buf1);
       _GD_ReleaseDir(D, dirfd);
       goto include_error;
@@ -280,11 +280,15 @@ int _GD_Include(DIRFILE *D, struct parser_state *p, const char *ename,
   }
 
   /* Try to open the file */
-  i = gd_OpenAt(D, dirfd, base,
-      ((p->flags & (GD_CREAT | GD_TRUNC)) ? O_RDWR : O_RDONLY) |
-      ((p->flags & GD_CREAT) ? O_CREAT : 0) |
-      ((p->flags & GD_TRUNC) ? O_TRUNC : 0) |
-      ((p->flags & GD_EXCL) ? O_EXCL : 0) | O_BINARY, 0666);
+  if (D->zzip_dir) {
+    i = open(D->name, O_RDONLY | O_BINARY);
+  } else {
+    i = gd_OpenAt(D, dirfd, base,
+        ((p->flags & (GD_CREAT | GD_TRUNC)) ? O_RDWR : O_RDONLY) |
+        ((p->flags & GD_CREAT) ? O_CREAT : 0) |
+        ((p->flags & GD_TRUNC) ? O_TRUNC : 0) |
+        ((p->flags & GD_EXCL) ? O_EXCL : 0) | O_BINARY, 0666);
+  }
 
   if (i < 0) {
     _GD_SetError(D, GD_E_IO, GD_E_IO_INCL, p->file, p->line, temp_buf1);
@@ -292,7 +296,17 @@ int _GD_Include(DIRFILE *D, struct parser_state *p, const char *ename,
     goto include_error;
   }
 
-  new_fp = fdopen(i, (p->flags & (GD_CREAT | GD_TRUNC)) ? "rb+" : "rb");
+  if (!D->zzip_dir) {
+    new_fp = fdopen(i, (p->flags & (GD_CREAT | GD_TRUNC)) ? "rb+" : "rb");
+  } else {
+    if (!gd_zip_read_file(D, dirfd, base, &new_fp)) {
+      _GD_SetError(D, GD_E_IO, GD_E_IO_INCL, p->file, p->line, temp_buf1);
+      _GD_ReleaseDir(D, dirfd);
+      close(i);
+      goto include_error;
+    }
+    close(i);
+  }
 
   /* If opening the file failed, set the error code and abort parsing. */
   if (new_fp == NULL) {

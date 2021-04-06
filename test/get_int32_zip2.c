@@ -1,4 +1,5 @@
-/* Copyright (C) 2016, 2017 D.V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
+ * Copyright (C) 2019 Matthew Petroff
  *
  ***************************************************************************
  *
@@ -20,49 +21,49 @@
  */
 #include "test.h"
 
-void *cb_ptr = NULL;
-int good_ptr = 0;
-
-void free_function(void *ptr)
-{
-  if (ptr == cb_ptr)
-    good_ptr = 1;
-}
-
-int callback(gd_parser_data_t *pdata, void *extra gd_unused_)
-{
-  pdata->line = cb_ptr = strdup("/VERSION 10\n");
-
-  return GD_SYNTAX_RESCAN;
-}
-
 int main(void)
 {
+#ifdef HAVE_ZZIP_LIB_H
   const char *filedir = "dirfile";
+  const char *filedirzip = "dirfile.zip";
   const char *format = "dirfile/format";
-  int e1, r = 0;
+  const char *data = "dirfile/data";
+  /* DEFLATE compress format file but STORE data */
+  const char *command = "zip -jqn data dirfile.zip dirfile/format dirfile/data";
+  int32_t c[8];
+  int i, n, error, r = 0;
   DIRFILE *D;
 
+  memset(c, 0, 8 * sizeof(*c));
   rmdirfile();
+  unlink(filedirzip);
   mkdir(filedir, 0700);
 
-  gd_alloc_funcs(NULL, free_function);
+  MAKEFORMATFILE(format, "/ENCODING none\ndata RAW INT32 8\n");
+  MAKEDATAFILE(data, int32_t, i * (0x02000001) * (2 * (i % 2) - 1), 64);
 
-  MAKEFORMATFILE(format, "Syntax error\n");
+  if (gd_system(command))
+    return 1;
 
-  D = gd_cbopen(filedir, GD_RDONLY, callback, NULL);
-  e1 = gd_error(D);
-  CHECKI(e1, 0);
+  D = gd_open(filedirzip, GD_RDONLY | GD_VERBOSE);
+  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_INT32, c);
 
-  if (good_ptr)
-    free(cb_ptr);
-  else
-    CHECKI(good_ptr, 1);
+  error = gd_error(D);
+  CHECKI(error, 0);
+  CHECKI(n, 8);
+
+  for (i = 0; i < 8; ++i)
+    CHECKIi(i, c[i], (0x50000028 + i * 0x02000001)  * (2 * (i % 2) - 1));
 
   gd_discard(D);
 
+  unlink(data);
   unlink(format);
   rmdir(filedir);
+  unlink(filedirzip);
 
   return r;
+#else
+  return 77;
+#endif
 }

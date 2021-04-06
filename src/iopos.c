@@ -415,5 +415,112 @@ off_t gd_seek(DIRFILE *D, const char *field_code, off_t frame_num,
 {
   return (off_t)gd_seek64(D, field_code, frame_num, sample_num, whence);
 }
+
+int gd_openat_wrapper(const DIRFILE *D, int dirfd, const char *name, int flags,
+    mode_t mode)
+{
+  int ret;
+  const char *dir = NULL;
+  const char *p1, *p2, *p;
+  char *newp;
+#ifdef HAVE_ZZIP_LIB_H
+  ZZIP_FILE *zzip_file;
+#endif
+
+  dtrace("%p, %i, \"%s\", 0x%X, 0%o", D, dirfd, name, flags, mode);
+
+#ifdef HAVE_ZZIP_LIB_H
+  if (!D->zzip_dir) {
+#endif
+    ret = gd_OpenAt(D, dirfd, name, flags, mode);
+#ifdef HAVE_ZZIP_LIB_H
+  } else {
+    dir = _GD_DirName(D, dirfd);
+    /* find where zip file and desired file's absolute paths differ */
+    for (p1 = dir, p2 = D->dir[0].path; *p1 && *p1 == *p2; p1++, p2++);
+    p = *(p1) && *(p1+1) ? p1+1 : NULL;
+    if (p) {
+      /* if paths differ (i.e. not root of zip), construct relative path */
+      newp = malloc(strlen(p) + 1 + strlen(name) + 1);
+      strcpy(newp, p);
+      newp[strlen(p)] = '/';
+      strcpy(newp + strlen(p) + 1, name);
+      zzip_file = zzip_file_open(D->zzip_dir, newp, flags | O_BINARY);
+      free(newp);
+    } else {
+      /* root of zip */
+      zzip_file = zzip_file_open(D->zzip_dir, name, flags | O_BINARY);
+    }
+    if (zzip_file && zzip_file->method == 0) {
+      lseek64(dirfd, zzip_file->dataoffset, SEEK_SET);
+      zzip_file_close(zzip_file);
+      ret = dup(dirfd);
+    } else {
+      ret = EACCES;
+    }
+  }
+#endif
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int gd_zip_read_file(const DIRFILE *D, int dirfd, const char *name, FILE **fp)
+{
+  int ret;
+  const char *p1, *p2, *p;
+  char *newp;
+#ifdef HAVE_ZZIP_LIB_H
+  ZZIP_FILE *zzip_file;
+#endif
+  const char *dir = NULL;
+
+  dtrace("%p, %i, \"%s\", %p", D, dirfd, name, fp);
+
+#ifdef HAVE_ZZIP_LIB_H
+  dir = _GD_DirName(D, dirfd);
+  /* find where zip file and desired file's absolute paths differ */
+  if (D->ndir > 0) {
+    for (p1 = dir, p2 = D->dir[0].path; *p1 && *p1 == *p2; p1++, p2++);
+    p = *(p1) && *(p1+1) ? p1+1 : NULL;
+  } else {
+    p = NULL;
+  }
+  if (p) {
+    /* if paths differ (i.e. not root of zip), construct relative path */
+    newp = malloc(strlen(p) + 1 + strlen(name) + 1);
+    strcpy(newp, p);
+    newp[strlen(p)] = '/';
+    strcpy(newp + strlen(p) + 1, name);
+    zzip_file = zzip_file_open(D->zzip_dir, newp, O_RDONLY | O_BINARY);
+    free(newp);
+  } else {
+    /* root of zip */
+    zzip_file = zzip_file_open(D->zzip_dir, name, O_RDONLY | O_BINARY);
+  }
+  if (zzip_file /*&& zzip_file->method == 0*/) {
+    char *contents = malloc(zzip_file->usize + 1);
+    if (!zzip_file_read(zzip_file, contents, zzip_file->usize)) {
+      dreturn("%i", 0);
+      return 0;
+    }
+    contents[zzip_file->usize] = 0;
+    *fp = fmemopen(NULL, zzip_file->usize + 1, "r+");
+    fwrite(contents, 1, zzip_file->usize + 1, *fp);
+    rewind(*fp);
+    free(contents);
+    zzip_file_close(zzip_file);
+    ret = 1;
+  } else {
+    ret = 0;
+  }
+
+  dreturn("%i", ret);
+  return ret;
+#else
+  dreturn("%i", 0);
+  return 0;
+#endif
+}
 /* vim: ts=2 sw=2 et tw=80
 */

@@ -113,6 +113,10 @@
 #include <regex.h>
 #endif
 
+#ifdef HAVE_ZZIP_LIB_H
+#include <zzip/lib.h>
+#include <zzip/file.h>
+#endif
 
 /* MSCVRT defines size_t but not ssize_t */
 #ifdef __MSVCRT__
@@ -994,6 +998,7 @@ struct gd_raw_file_ {
   DIRFILE *D;
   unsigned int mode;
   off64_t pos;
+  off64_t start_offset;
 };
 
 /* linterp table datum */
@@ -1283,6 +1288,13 @@ struct gd_dirfile_ {
   /* syntax error callback */
   gd_parser_callback_t sehandler;
   void* sehandler_extra;
+
+  /* for zipped Dirfile support */
+#ifdef HAVE_ZZIP_LIB_H
+  ZZIP_DIR *zzip_dir;
+#else
+  void *zzip_dir;
+#endif
 };
 
 /* The caller's preferred memory manager */
@@ -1434,6 +1446,9 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict,
 char *_GD_ParseFragment(FILE *restrict, DIRFILE*, struct parser_state *restrict,
     int, int);
 void _GD_PerformRename(DIRFILE *restrict, struct gd_rename_data_ *restrict);
+int gd_openat_wrapper(const DIRFILE *D, int dirfd, const char *name, int flags,
+    mode_t mode);
+int gd_zip_read_file(const DIRFILE *D, int dirfd, const char *name, FILE **fp);
 struct gd_rename_data_ *_GD_PrepareRename(DIRFILE *restrict, char *restrict,
     size_t, gd_entry_t *restrict, int, unsigned);
 int _GD_ReadLinterpFile(DIRFILE *restrict, gd_entry_t *restrict);

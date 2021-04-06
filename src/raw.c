@@ -32,8 +32,8 @@ int _GD_RawOpen(int fd, struct gd_raw_file_* file,
     } else if (file->idata >= 0)
       close(file->idata);
 
-    file->idata = gd_OpenAt(file->D, fd, file->name, ((mode & GD_FILE_WRITE) ?
-          (O_RDWR | O_CREAT) : O_RDONLY) | O_BINARY, 0666);
+    file->idata = gd_openat_wrapper(file->D, fd, file->name, O_BINARY
+        | ((mode & GD_FILE_WRITE) ? (O_RDWR | O_CREAT) : O_RDONLY), 0666);
 
   } else {
     file->idata = _GD_MakeTempFile(file->D, fd, file->name);
@@ -46,6 +46,7 @@ int _GD_RawOpen(int fd, struct gd_raw_file_* file,
 
   file->pos = 0;
   file->mode = mode | GD_FILE_READ;
+  file->start_offset = lseek64(file->idata, 0, SEEK_CUR);
 
   dreturn("%i", 0);
   return 0;
@@ -64,7 +65,8 @@ off64_t _GD_RawSeek(struct gd_raw_file_* file, off64_t count,
     return count;
   }
 
-  pos = lseek64(file->idata, count * GD_SIZE(data_type), SEEK_SET);
+  pos = lseek64(file->idata, file->start_offset + count * GD_SIZE(data_type),
+                SEEK_SET) - file->start_offset;
 
   /* If we've landed in the middle of a sample, we have to back up */
   if (pos > 0 && (pos % GD_SIZE(data_type)))
@@ -153,10 +155,25 @@ off64_t _GD_RawSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 
   dtrace("%i, %p, 0x%X, <unused>", dirfd, file, data_type);
 
-  if (gd_StatAt64(file->D, dirfd, file->name, &statbuf, 0) < 0)  {
-    dreturn("%i", -1);
-    return -1;
+#ifdef HAVE_ZZIP_LIB_H
+  if (file->D->zzip_dir) {
+    ZZIP_FILE *zzip_file = zzip_file_open(file->D->zzip_dir, file->name, 0);
+    if (zzip_file && zzip_file->method == 0) {
+      statbuf.st_size = zzip_file->csize;
+      zzip_file_close(zzip_file);
+    } else {
+      dreturn("%i", -1);
+      return -1;
+    }
+  } else {
+#endif
+    if (gd_StatAt64(file->D, dirfd, file->name, &statbuf, 0) < 0)  {
+      dreturn("%i", -1);
+      return -1;
+    }
+#ifdef HAVE_ZZIP_LIB_H
   }
+#endif
 
   dreturn("%" PRId64, (int64_t)statbuf.st_size);
   return statbuf.st_size / GD_SIZE(data_type);

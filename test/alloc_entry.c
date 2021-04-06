@@ -37,7 +37,7 @@ static void *malloc_func(size_t len)
   return malloc_ptr[malloc_count++];
 }
 
-static void free_func(void *ptr)
+static void free_function(void *ptr)
 {
   ptr = ptr;
   free_count++;
@@ -71,7 +71,7 @@ int main(void)
       "mplex   MPLEX   Ut enim as minim\n"
       );
 
-  gd_alloc_funcs(malloc_func, free_func);
+  gd_alloc_funcs(malloc_func, free_function);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 

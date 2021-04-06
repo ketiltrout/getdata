@@ -76,6 +76,11 @@ static void _GD_FreeD(DIRFILE *D, int keep_dirfile)
   }
   free(D->dir);
 
+#ifdef HAVE_ZZIP_LIB_H
+  if (D->zzip_dir)
+    zzip_dir_close(D->zzip_dir);
+#endif
+
   if (!keep_dirfile)
     free(D);
 

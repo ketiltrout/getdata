@@ -151,7 +151,7 @@ static struct gd_flacdata *_GD_FlacDoOpen(int dirfd, struct gd_raw_file_* file,
   dtrace("%i, %p, 0x%X, %i, 0x%X", dirfd, file, data_type, swap, mode);
 
   if (mode & GD_FILE_READ) {
-    fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666);
+    fd = gd_openat_wrapper(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666);
   } else if (mode & GD_FILE_TEMP) {
     fd = _GD_MakeTempFile(file->D, dirfd, file->name);
     fdmode = "wb";

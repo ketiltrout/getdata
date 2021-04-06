@@ -69,7 +69,15 @@ static struct gd_slimdata *GD_SLIM(DoOpen)(int dirfd, struct gd_raw_file_* file)
     }
 
     /* this is easily broken, but the best we can do in this case */
-    gdsl->filepath = gd_MakeFullPathOnly(file->D, dirfd, file->name);
+    if (!file->D->zzip_dir) {
+        gdsl->filepath = gd_MakeFullPathOnly(file->D, dirfd, file->name);
+    } else {
+        /* this assumes the zip file has a ".zip" extension */
+        gdsl->filepath = malloc(strlen(file->D->dir[0].path) - 4 + 1 + strlen(file->name) + 1);
+        strcpy(gdsl->filepath, file->D->dir[0].path);
+        gdsl->filepath[strlen(file->D->dir[0].path) - 4] = '/';
+        strcpy(gdsl->filepath + strlen(file->D->dir[0].path) - 4 + 1, file->name);
+    }
     if (gdsl->filepath == NULL) {
       file->error = errno;
       free(gdsl);
@@ -193,11 +201,22 @@ off64_t GD_SLIM(Size)(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 #else
   {
     /* this is easily broken, but the best we can do in this case */
-    char *filepath = gd_MakeFullPathOnly(file->D, dirfd, file->name);
+    char *filepath;
+    if (!file->D->zzip_dir) {
+        filepath = gd_MakeFullPathOnly(file->D, dirfd, file->name);
+    } else {
+        /* this assumes the zip file has a ".zip" extension */
+        filepath = malloc(strlen(file->D->dir[0].path) - 4 + 1 + strlen(file->name) + 1);
+        strcpy(filepath, file->D->dir[0].path);
+        filepath[strlen(file->D->dir[0].path) - 4] = '/';
+        strcpy(filepath + strlen(file->D->dir[0].path) - 4 + 1, file->name);
+    }
+    
     if (filepath == NULL) {
       dreturn("%i", -1);
       return -1;
     }
+    dtrace("\"%s\"", filepath);
 
     size = slimrawsize(filepath);
     free(filepath);

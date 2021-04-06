@@ -28,7 +28,7 @@ int _GD_AsciiOpen(int fd, struct gd_raw_file_* file, gd_type_t type gd_unused_,
   dtrace("%i, %p, <unused>, <unused>, %u", fd, file, mode);
 
   if (!(mode & GD_FILE_TEMP))
-    file->idata = gd_OpenAt(file->D, fd, file->name, ((mode & GD_FILE_WRITE)
+    file->idata = gd_openat_wrapper(file->D, fd, file->name, ((mode & GD_FILE_WRITE)
           ? (O_RDWR | O_CREAT) : O_RDONLY) | O_BINARY, 0666);
   else
     file->idata = _GD_MakeTempFile(file->D, fd, file->name);
@@ -49,6 +49,7 @@ int _GD_AsciiOpen(int fd, struct gd_raw_file_* file, gd_type_t type gd_unused_,
 
   file->mode = mode | GD_FILE_READ;
   file->pos = 0;
+  file->start_offset = ftello64(file->edata);
   dreturn("%i", 0);
   return 0;
 }
@@ -61,7 +62,7 @@ off64_t _GD_AsciiSeek(struct gd_raw_file_* file, off64_t count,
   dtrace("%p, %" PRId64 ", <unused>, 0x%X", file, (int64_t)count, mode);
 
   if (count < file->pos) {
-    rewind((FILE *)file->edata);
+    fseeko64((FILE *)file->edata, file->start_offset, SEEK_SET); /* rewind */
     file->pos = 0;
   }
 
@@ -285,7 +286,7 @@ off64_t _GD_AsciiSize(int dirfd, struct gd_raw_file_* file,
 
   dtrace("%i, %p, <unused>, <unused>", dirfd, file);
 
-  fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY, 0666);
+  fd = gd_openat_wrapper(file->D, dirfd, file->name, O_RDONLY, 0666);
   if (fd < 0) {
     dreturn("%i", -1);
     return -1;

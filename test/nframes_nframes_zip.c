@@ -1,4 +1,5 @@
-/* Copyright (C) 2016, 2017 D.V. Wiebe
+/* Copyright (C) 2008-2011, 2013, 2017 D.V. Wiebe
+ * Copyright (C) 2019 Matthew Petroff
  *
  ***************************************************************************
  *
@@ -18,51 +19,50 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+/* Retreiving the number of frames should succeed cleanly */
 #include "test.h"
-
-void *cb_ptr = NULL;
-int good_ptr = 0;
-
-void free_function(void *ptr)
-{
-  if (ptr == cb_ptr)
-    good_ptr = 1;
-}
-
-int callback(gd_parser_data_t *pdata, void *extra gd_unused_)
-{
-  pdata->line = cb_ptr = strdup("/VERSION 10\n");
-
-  return GD_SYNTAX_RESCAN;
-}
 
 int main(void)
 {
+#ifdef HAVE_ZZIP_LIB_H
   const char *filedir = "dirfile";
+  const char *filedirzip = "dirfile.zip";
   const char *format = "dirfile/format";
-  int e1, r = 0;
+  const char *data = "dirfile/data";
+  const char *command = "zip -jq0 dirfile.zip dirfile/format dirfile/data";
+  int fd, error, r = 0;
+  const size_t len = strlen(data);
+  off_t n;
   DIRFILE *D;
 
   rmdirfile();
+  unlink(filedirzip);
   mkdir(filedir, 0700);
 
-  gd_alloc_funcs(NULL, free_function);
+  MAKEFORMATFILE(format, "/ENCODING none\ndata RAW UINT16 1\n");
 
-  MAKEFORMATFILE(format, "Syntax error\n");
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
+  write(fd, data, len);
+  close(fd);
 
-  D = gd_cbopen(filedir, GD_RDONLY, callback, NULL);
-  e1 = gd_error(D);
-  CHECKI(e1, 0);
+  if (gd_system(command))
+    return 1;
 
-  if (good_ptr)
-    free(cb_ptr);
-  else
-    CHECKI(good_ptr, 1);
-
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_nframes(D);
+  error = gd_error(D);
   gd_discard(D);
 
+  unlink(data);
   unlink(format);
   rmdir(filedir);
+  unlink(filedirzip);
+
+  CHECKI(error, 0);
+  CHECKI(n, (off_t)len / 2);
 
   return r;
+#else
+  return 77;
+#endif
 }
