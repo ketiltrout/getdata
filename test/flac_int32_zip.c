@@ -1,4 +1,5 @@
-/* Copyright (C) 2016, 2017 D.V. Wiebe
+/* Copyright (C) 2016 D. V. Wiebe
+ * Copyright (C) 2019 Matthew Petroff
  *
  ***************************************************************************
  *
@@ -20,49 +21,11 @@
  */
 #include "test.h"
 
-void *cb_ptr = NULL;
-int good_ptr = 0;
+#if !defined TEST_FLAC || !defined USE_FLAC
+#define ENC_SKIP_TEST 1
+#endif
 
-void free_function(void *ptr)
-{
-  if (ptr == cb_ptr)
-    good_ptr = 1;
-}
+#define ENC_SUFFIX ".flac"
+#define GD_ENC_ENCODED GD_FLAC_ENCODED
 
-int callback(gd_parser_data_t *pdata, void *extra gd_unused_)
-{
-  pdata->line = cb_ptr = strdup("/VERSION 10\n");
-
-  return GD_SYNTAX_RESCAN;
-}
-
-int main(void)
-{
-  const char *filedir = "dirfile";
-  const char *format = "dirfile/format";
-  int e1, r = 0;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0700);
-
-  gd_alloc_funcs(NULL, free_function);
-
-  MAKEFORMATFILE(format, "Syntax error\n");
-
-  D = gd_cbopen(filedir, GD_RDONLY, callback, NULL);
-  e1 = gd_error(D);
-  CHECKI(e1, 0);
-
-  if (good_ptr)
-    free(cb_ptr);
-  else
-    CHECKI(good_ptr, 1);
-
-  gd_discard(D);
-
-  unlink(format);
-  rmdir(filedir);
-
-  return r;
-}
+#include "enc_int32_zip.c"

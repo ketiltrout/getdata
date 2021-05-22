@@ -29,7 +29,7 @@ EXTRA_DIST=test.h enc_add.c enc_complex64.c enc_complex128.c enc_del.c \
 					 enc_enoent.c enc_float32.c enc_float64.c enc_get_cont.c enc_int8.c \
 					 enc_int16.c enc_int32.c enc_int64.c enc_move_from.c enc_nframes.c \
 					 enc_put_offs.c enc_seek.c enc_uint8.c enc_uint16.c enc_uint32.c \
-					 enc_uint64.c
+					 enc_uint64.c enc_int32_zip.c
 
 ADD_TESTS=add_add add_affix add_alias add_alias_affix add_alias_index \
 					add_alias_meta add_alias_name add_alias_ns add_alias_prot \
@@ -100,7 +100,7 @@ ASCII_TESTS=ascii_add ascii_complex64 ascii_complex128 ascii_get \
 						ascii_get_here ascii_get_sub ascii_int8 ascii_int16 ascii_int32 \
 						ascii_int64 ascii_nframes ascii_put ascii_put_here ascii_seek \
 						ascii_seek_far ascii_sync ascii_uint8 ascii_uint16 ascii_uint32 \
-						ascii_uint64
+						ascii_uint64 ascii_int32_zip
 
 BOF_TESTS=bof bof_bit bof_bit_code bof_code bof_const bof_index bof_lincom \
 					bof_lincom_code bof_phase bof_phase_code bof_phase_neg bof_recurse
@@ -111,7 +111,7 @@ BZIP_TESTS=bzip_add bzip_complex64 bzip_complex128 bzip_del bzip_enoent \
 					 bzip_int32 bzip_int64 bzip_move_from bzip_move_to bzip_nframes \
 					 bzip_put bzip_put_back bzip_put_endian bzip_put_get bzip_put_offs \
 					 bzip_put_pad bzip_put_sub bzip_seek bzip_seek_far bzip_sync \
-					 bzip_uint8 bzip_uint16 bzip_uint32 bzip_uint64
+					 bzip_uint8 bzip_uint16 bzip_uint32 bzip_uint64 bzip_int32_zip
 
 CALIST_TESTS=calist calist0 calist_free calist_hidden calist_long calist_meta \
 						 calist_meta0 calist_meta_free calist_meta_hidden calist_meta_meta \
@@ -219,7 +219,7 @@ FLAC_TESTS=flac_add flac_complex64 flac_complex128 flac_del flac_enoent \
 					 flac_put_big flac_put_complex128 flac_put_float64 \
 					 flac_put_int32 flac_put_little flac_put_offs flac_seek \
 					 flac_seek_far flac_sync flac_uint8 flac_uint16 flac_uint32 \
-					 flac_uint64
+					 flac_uint64 flac_int32_zip
 
 FLIST_TESTS=flist flist0 flist2 flist_hidden flist_invalid flist_meta \
 						flist_meta2 flist_meta_hidden flist_meta_invalid flist_type \
@@ -284,7 +284,8 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_bad \
 					get_type get_uint16 get_uint32 get_uint64 get_window get_window_clr \
 					get_window_complex get_window_ge get_window_gt get_window_le \
 					get_window_lt get_window_ne get_window_s get_window_set get_zero \
-					get_zero_complex get_zero_float
+					get_zero_complex get_zero_float get_int32_zip get_int32_zip2 \
+					get_linterp_zip get_linterp_zip2
 
 GLOBAL_TESTS=global_flags global_name
 
@@ -295,7 +296,7 @@ GZIP_TESTS=gzip_add gzip_complex64 gzip_complex128 gzip_del gzip_enoent \
 					 gzip_put gzip_put_back gzip_put_endian gzip_put_get \
 					 gzip_put_nframes gzip_put_off gzip_put_offs gzip_put_pad \
 					 gzip_put_sub gzip_seek gzip_seek_far gzip_seek_put gzip_sync \
-					 gzip_uint8 gzip_uint16 gzip_uint32 gzip_uint64
+					 gzip_uint8 gzip_uint16 gzip_uint32 gzip_uint64 gzip_int32_zip
 
 HEADER_TESTS=header_complex header_off64t
 
@@ -331,7 +332,7 @@ LZMA_TESTS=lzma_enoent lzma_get lzma_nframes lzma_put lzma_xz_add \
 					 lzma_xz_put_back lzma_xz_put_endian lzma_xz_put_get \
 					 lzma_xz_put_offs lzma_xz_put_pad lzma_xz_seek lzma_xz_seek_far \
 					 lzma_xz_sync lzma_xz_uint8 lzma_xz_uint16 lzma_xz_uint32 \
-					 lzma_xz_uint64
+					 lzma_xz_uint64 lzma_xz_int32_zip
 
 MADD_TESTS=madd madd_affix madd_alias madd_aliasmeta madd_alias_affix \
 					 madd_alias_alias madd_alias_subsub madd_bit madd_bit_invalid \
@@ -384,7 +385,7 @@ NFIELDS_TESTS=nfields_hidden nfields_invalid nfields_nfields nfields_type \
 							nfields_vector_hidden nfields_vector_invalid
 
 NFRAMES_TESTS=nframes64 nframes_empty nframes_invalid nframes_nframes \
-							nframes_off64 nframes_spf
+							nframes_off64 nframes_spf nframes_nframes_zip
 
 NMETA_TESTS=nmeta nmeta_hidden nmeta_invalid nmeta_parent nmeta_type \
 						nmeta_type_hidden nmeta_type_invalid nmeta_type_parent \
@@ -511,7 +512,7 @@ SIE_TESTS=sie_err_open sie_get_big sie_get_header sie_get_little sie_move_from \
 					sie_put_append2 sie_put_back sie_put_big sie_put_header \
 					sie_put_little sie_put_many sie_put_newo sie_put_newo0 sie_put_pad \
 					sie_put_pad0 sie_put_trunc sie_put_trunc2 sie_put_trunc_nf sie_seek \
-					sie_seek_far sie_sync
+					sie_seek_far sie_sync sie_get_little_zip
 
 SLIM_TESTS=slim_get slim_nframes slim_seek slim_seek_far
 

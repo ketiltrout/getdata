@@ -309,6 +309,7 @@ test/ascii_get_here
 test/ascii_get_sub
 test/ascii_int16
 test/ascii_int32
+test/ascii_int32_zip
 test/ascii_int64
 test/ascii_int8
 test/ascii_nframes
@@ -348,6 +349,7 @@ test/bzip_get_get2
 test/bzip_get_put
 test/bzip_int16
 test/bzip_int32
+test/bzip_int32_zip
 test/bzip_int64
 test/bzip_int8
 test/bzip_move_from
@@ -642,6 +644,7 @@ test/flac_get_little
 test/flac_get_long
 test/flac_int16
 test/flac_int32
+test/flac_int32_zip
 test/flac_int64
 test/flac_int8
 test/flac_move_from
@@ -794,6 +797,8 @@ test/get_indir
 test/get_indir_typein
 test/get_int16
 test/get_int32
+test/get_int32_zip
+test/get_int32_zip2
 test/get_int64
 test/get_int8
 test/get_invalid
@@ -817,6 +822,8 @@ test/get_linterp_nodir
 test/get_linterp_noin
 test/get_linterp_notab
 test/get_linterp_sort
+test/get_linterp_zip
+test/get_linterp_zip2
 test/get_mplex
 test/get_mplex_bof
 test/get_mplex_complex
@@ -902,6 +909,7 @@ test/gzip_get_get2
 test/gzip_get_put
 test/gzip_int16
 test/gzip_int32
+test/gzip_int32_zip
 test/gzip_int64
 test/gzip_int8
 test/gzip_move_from
@@ -993,6 +1001,7 @@ test/lzma_xz_get_get2
 test/lzma_xz_get_put
 test/lzma_xz_int16
 test/lzma_xz_int32
+test/lzma_xz_int32_zip
 test/lzma_xz_int64
 test/lzma_xz_int8
 test/lzma_xz_move_from
@@ -1186,6 +1195,7 @@ test/nframes64
 test/nframes_empty
 test/nframes_invalid
 test/nframes_nframes
+test/nframes_nframes_zip
 test/nframes_off64
 test/nframes_spf
 test/nmeta
@@ -1607,6 +1617,7 @@ test/sie_err_open
 test/sie_get_big
 test/sie_get_header
 test/sie_get_little
+test/sie_get_little_zip
 test/sie_move_from
 test/sie_move_to
 test/sie_nframes_big

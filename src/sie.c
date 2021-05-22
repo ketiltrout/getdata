@@ -66,7 +66,7 @@ struct gd_siedata {
 /* correct for byte sex */
 #define FIXSEX(swap,v) ((swap) ? (int64_t)gd_swap64(v) : (v))
 
-static int _GD_SampIndDiscardHeader(FILE *stream)
+static int _GD_SampIndDiscardHeader(FILE *stream, struct gd_raw_file_ *file)
 {
   int have = 0;
   unsigned char header[HEADSIZE];
@@ -96,7 +96,7 @@ static int _GD_SampIndDiscardHeader(FILE *stream)
         dreturn("%i", -1);
         return -1;
       } /* not a header; rewind so we can read it again */
-      rewind(stream);
+      fseeko64(stream, file->start_offset, SEEK_SET); /* rewind */
     } else { /* trailing data, unget it so it's available for the first read */
       if (ungetc(c, stream) == EOF) {
         dreturn("%i", -1);
@@ -105,7 +105,7 @@ static int _GD_SampIndDiscardHeader(FILE *stream)
       have = 1;
     }
   } else /* Bad header magic = no header: rewind */
-    rewind(stream);
+    fseeko64(stream, file->start_offset, SEEK_SET); /* rewind */
 
   dreturn("%i", have);
   return have;
@@ -120,7 +120,7 @@ static int _GD_SampIndDoOpen(int fdin, struct gd_raw_file_ *file,
   dtrace("%i, %p, %i, 0x%X", fdin, file, swap, mode);
 
   if (!(mode & GD_FILE_TEMP)) {
-    fd = gd_OpenAt(file->D, fdin, file->name, ((mode & GD_FILE_WRITE) ?
+    fd = gd_openat_wrapper(file->D, fdin, file->name, ((mode & GD_FILE_WRITE) ?
           (O_RDWR | O_CREAT) : O_RDONLY) | O_BINARY, 0666);
   } else {
     fd = _GD_MakeTempFile(file->D, fdin, file->name);
@@ -138,8 +138,10 @@ static int _GD_SampIndDoOpen(int fdin, struct gd_raw_file_ *file,
     return -1;
   }
 
+  file->start_offset = ftello64(stream);
+
   if (!(mode & GD_FILE_WRITE)) {
-    f->header = _GD_SampIndDiscardHeader(stream);
+    f->header = _GD_SampIndDiscardHeader(stream, file);
     if (f->header < 0) {
       fclose(stream);
       dreturn("%i", -1);
@@ -248,7 +250,7 @@ off64_t _GD_SampIndSeek(struct gd_raw_file_ *file, off64_t sample,
   if (sample < f->p) {
     /* seek backwards -- reading a file backwards doesn't necessarily work
      * that well.  So, let's just rewind to the beginning and try again. */
-    rewind(f->fp);
+    fseeko64(f->fp, file->start_offset, SEEK_SET); /* rewind */
 
     /* Advance past header if necessary */
     if (f->header) {
@@ -440,6 +442,27 @@ static ssize_t _GD_GetNRec(struct gd_siedata *f, size_t size)
   dreturn("%" PRIdSIZE, (ssize_t)(statbuf.st_size / size));
   return (ssize_t)(statbuf.st_size / size);
 }
+static ssize_t _GD_GetNRec_zip(struct gd_raw_file_ *restrict file, size_t size)
+{
+  gd_stat64_t statbuf;
+  dtrace("%p, %" PRIuSIZE, file, size);
+
+#ifdef HAVE_ZZIP_LIB_H
+  ZZIP_FILE *zzip_file = zzip_file_open(file->D->zzip_dir, file->name, 0);
+  if (zzip_file && zzip_file->method == 0) {
+    statbuf.st_size = zzip_file->csize;
+    zzip_file_close(zzip_file);
+  } else {
+#endif
+    dreturn("%i", -1);
+    return -1;
+#ifdef HAVE_ZZIP_LIB_H
+  }
+
+  dreturn("%" PRIdSIZE, (ssize_t)(statbuf.st_size / size));
+  return (ssize_t)(statbuf.st_size / size);
+#endif
+}
 
 ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
     const void *restrict ptr, gd_type_t data_type, size_t nelem)
@@ -458,7 +481,8 @@ ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
   const size_t size = sizeof(int64_t) + dlen;
   dtrace("%p, %p, 0x%03x, %" PRIuSIZE, file, ptr, data_type, nelem);
 
-  if ((nrec = _GD_GetNRec(f, size)) < 0) {
+  if ((nrec = file->D->zzip_dir ? _GD_GetNRec_zip(file, size)
+      : _GD_GetNRec(f, size)) < 0) {
     dreturn("%i", -1);
     return -1;
   }
@@ -736,14 +760,31 @@ off64_t _GD_SampIndSize(int dirfd, struct gd_raw_file_* file,
   }
 
   /* find the last record */
-  last_rec = _GD_GetNRec(&f, size) - 1;
+  last_rec = (file->D->zzip_dir ? _GD_GetNRec_zip(file, size)
+      : _GD_GetNRec(&f, size)) - 1;
 
   /* seek to this record */
-  if (fseeko64(f.fp, last_rec * size, SEEK_SET)) {
-    fclose(f.fp);
-    dreturn("%i", -1);
-    return -1;
+#ifdef HAVE_ZZIP_LIB_H
+  if (file->D->zzip_dir) {
+    ZZIP_FILE *zzip_file = zzip_file_open(file->D->zzip_dir, file->name, 0);
+    if (zzip_file && zzip_file->method == 0) {
+      fseeko64(f.fp, zzip_file->dataoffset + last_rec * size, SEEK_SET);
+      zzip_file_close(zzip_file);
+    } else {
+      fclose(f.fp);
+      dreturn("%i", -1);
+      return -1;
+    }
+  } else {
+#endif
+    if (fseeko64(f.fp, last_rec * size, SEEK_SET)) {
+      fclose(f.fp);
+      dreturn("%i", -1);
+      return -1;
+    }
+#ifdef HAVE_ZZIP_LIB_H
   }
+#endif
 
   /* read the sample index */
   if (fread(&n, sizeof(uint64_t), 1, f.fp) != 1) {

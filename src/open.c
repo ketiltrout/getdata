@@ -210,18 +210,28 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   /* naively try to open the format file */
   if (dirfd < 0)
     ; /* Directory error */
-  else if ((fd = gd_OpenAt(D, dirfd, "format", O_RDONLY | O_BINARY, 0666)) < 0)
+  else if ((fd = gd_openat_wrapper(D, dirfd, "format", O_RDONLY | O_BINARY, 0666)) < 0)
   {
-    format_error = errno;
-
-    /* in the non-POSIX case, this has already been done. */
-#ifndef GD_NO_DIR_OPEN
-    /* open failed, try to stat the directory itself */
-    if (fstat(dirfd, &statbuf))
-      dir_error = errno;
-    else if (!S_ISDIR(statbuf.st_mode))
-      dir_error = ENOTDIR;
+    if (!(D->flags & GD_CREAT))
+      D->zzip_dir = NULL;
+#ifdef HAVE_ZZIP_LIB_H
+    if (!D->zzip_dir && !(D->flags & GD_CREAT))
+      D->zzip_dir = zzip_dir_fdopen(dup(dirfd), 0);
 #endif
+    if (D->zzip_dir) {
+      fd = open(D->name, O_RDONLY | O_BINARY);
+    } else {
+      format_error = errno;
+
+      /* in the non-POSIX case, this has already been done. */
+#ifndef GD_NO_DIR_OPEN
+      /* open failed, try to stat the directory itself */
+      if (fstat(dirfd, &statbuf))
+        dir_error = errno;
+      else if (!S_ISDIR(statbuf.st_mode))
+        dir_error = ENOTDIR;
+#endif
+    }
   } else
     dir_error = 0;
 
@@ -340,8 +350,12 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
       D->flags = (D->flags & ~GD_ENCODING) | GD_UNENCODED;
   }
 
-  /* associate a stream with the format file */
-  if ((fp = fdopen(fd, "rb")) == NULL) {
+  if (!D->zzip_dir) {
+    /* associate a stream with the format file */
+    fp = fdopen(fd, "rb");
+  }
+
+  if ((D->zzip_dir && !gd_zip_read_file(D, dirfd, "format", &fp)) || fp == NULL) {
     char *format_file = malloc(strlen(dirfile) + 8);
     sprintf(format_file, "%s/format", dirfile);
     _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, 0, NULL);
@@ -366,6 +380,9 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   /* get the mtime */
   if (fstat(fd, &statbuf) == 0)
     *mtime = statbuf.st_mtime;
+
+  if (D->zzip_dir)
+    close(fd);
 
   dreturn("%p", fp);
   return fp;
@@ -430,7 +447,10 @@ static DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
     if (gd_stat64(dirfile, &statbuf))
       dirfd_error = errno;
     else if (!S_ISDIR(statbuf.st_mode))
-      dirfd_error = ENOTDIR;
+#ifdef HAVE_ZZIP_LIB_H
+      if (!zzip_dir_fdopen(dup(dirfd), 0))
+#endif
+        dirfd_error = ENOTDIR;
     else
       dirfd = 0;
 #else
@@ -544,7 +564,10 @@ static DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
     return D;
   }
 
-  D->fragment[0].cname = _GD_CanonicalPath(dirfile, "format");
+  if (D->zzip_dir)
+    D->fragment[0].cname = strdup(dirfile);
+  else
+    D->fragment[0].cname = _GD_CanonicalPath(dirfile, "format");
   if (D->fragment[0].cname == NULL) {
     if (errno == ENOMEM)
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);

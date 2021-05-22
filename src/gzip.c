@@ -46,7 +46,7 @@ int _GD_GzipOpen(int fd, struct gd_raw_file_* file,
   dtrace("%i, %p, <unused>, <unused>, 0x%X", fd, file, mode);
 
   if (mode & GD_FILE_READ) {
-    file->idata = gd_OpenAt(file->D, fd, file->name, O_RDONLY | O_BINARY, 0666);
+    file->idata = gd_openat_wrapper(file->D, fd, file->name, O_RDONLY | O_BINARY, 0666);
     gzmode = "r";
   } else if (mode & GD_FILE_TEMP) {
     file->idata = _GD_MakeTempFile(file->D, fd, file->name);
@@ -185,17 +185,32 @@ off64_t _GD_GzipSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
 
   dtrace("%i, %p, 0x%X, <unused>", dirfd, file, data_type);
 
-  fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666);
+  fd = gd_openat_wrapper(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666);
   if (fd < 0) {
     dreturn("%i", -1);
     return -1;
   }
 
   /* seek to the end */
-  if (lseek64(fd, -4, SEEK_END) == -1) {
-    dreturn("%i", -1);
-    return -1;
+#ifdef HAVE_ZZIP_LIB_H
+  if (file->D->zzip_dir) {
+    ZZIP_FILE *zzip_file = zzip_file_open(file->D->zzip_dir, file->name, O_RDONLY | O_BINARY);
+    if (zzip_file && zzip_file->method == 0) {
+      lseek64(dirfd, zzip_file->dataoffset + zzip_file->csize - 4, SEEK_SET);
+      zzip_file_close(zzip_file);
+    } else {
+      dreturn("%i", -1);
+      return -1;
+    }
+  } else {
+#endif
+    if (lseek64(fd, -4, SEEK_END) == -1) {
+      dreturn("%i", -1);
+      return -1;
+    }
+#ifdef HAVE_ZZIP_LIB_H
   }
+#endif
   if (read(fd, &size, 4) < 4) {
     dreturn("%i", -1);
     return -1;

@@ -346,7 +346,7 @@ static int lutcmp(const void* a, const void* b)
 */
 int _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
 {
-  FILE *fp;
+  FILE *fp = NULL;
   struct gd_lut_ *ptr;
   int i, fd;
   int dir = -1;
@@ -364,15 +364,23 @@ int _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
       return 1;
     }
 
-  fd = gd_OpenAt(D, E->e->u.linterp.table_dirfd, E->e->u.linterp.table_file,
-      O_RDONLY, 0666);
-  if (fd == -1) {
-    _GD_SetError(D, GD_E_IO, GD_E_IO_OPEN, E->EN(linterp,table), 0, NULL);
-    dreturn("%i", 1);
-    return 1;
+  if (!D->zzip_dir) {
+    fd = gd_openat_wrapper(D, E->e->u.linterp.table_dirfd, E->e->u.linterp.table_file,
+        O_RDONLY, 0666);
+    if (fd == -1) {
+      _GD_SetError(D, GD_E_IO, GD_E_IO_OPEN, E->EN(linterp,table), 0, NULL);
+      dreturn("%i", 1);
+      return 1;
+    }
+    fp = fdopen(fd, "rb");
+  } else {
+    if (!gd_zip_read_file(D, E->e->u.linterp.table_dirfd, E->e->u.linterp.table_file, &fp)) {
+      _GD_SetError(D, GD_E_IO, GD_E_IO_OPEN, E->EN(linterp,table), 0, NULL);
+      dreturn("%i", 1);
+      return 1;
+    }
   }
 
-  fp = fdopen(fd, "rb");
   if (fp == NULL) {
     _GD_SetError(D, GD_E_IO, GD_E_IO_OPEN, E->EN(linterp,table), 0, NULL);
     dreturn("%i", 1);
@@ -1430,9 +1438,13 @@ int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name, int canonical)
   free(path);
 
   if (D->dir[D->ndir].fd == -1) {
-    free(D->dir[D->ndir].path);
-    dreturn("%i", -1);
-    return -1;
+    if (D->zzip_dir) {
+      D->dir[D->ndir].fd = dup(dirfd);
+    } else {
+      free(D->dir[D->ndir].path);
+      dreturn("%i", -1);
+      return -1;
+    }
   }
 #endif
   D->ndir++;

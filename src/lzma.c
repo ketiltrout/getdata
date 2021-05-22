@@ -70,7 +70,7 @@ static struct gd_lzmadata *_GD_LzmaDoOpen(int dirfd, struct gd_raw_file_* file,
   dtrace("%i, %p, %i", dirfd, file, mode);
 
   if (mode & GD_FILE_READ) {
-    fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666);
+    fd = gd_openat_wrapper(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666);
   } else if (mode & GD_FILE_TEMP) {
     fd = _GD_MakeTempFile(file->D, dirfd, file->name);
     fdmode = "wb";
@@ -90,6 +90,8 @@ static struct gd_lzmadata *_GD_LzmaDoOpen(int dirfd, struct gd_raw_file_* file,
     dreturn("%p", NULL);
     return NULL;
   }
+
+  file->start_offset = ftello64(stream);
 
   if ((lzd = (struct gd_lzmadata *)malloc(sizeof(struct gd_lzmadata))) == NULL)
   {
@@ -327,7 +329,7 @@ off64_t _GD_LzmaSeek(struct gd_raw_file_* file, off64_t count,
         dreturn("%i", 1);
         return 1;
       }
-      rewind(lzd->stream);
+      fseeko64(lzd->stream, file->start_offset, SEEK_SET); /* rewind */
       lzd->input_eof = lzd->stream_end = 0;
     }
 
