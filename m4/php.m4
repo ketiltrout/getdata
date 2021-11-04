@@ -71,6 +71,9 @@ if test "x${have_php}" != "xno"; then
   AC_MSG_RESULT([$PHP])
 fi
 
+dnl check for devel install
+AC_CHECK_HEADER([php.h],,[have_php=no])
+
 dnl extension dir
 AC_ARG_WITH([php-dir], AS_HELP_STRING([--with-php-dir=DIR],
       [install the GetData PHP extension into DIR [default: autodetect]]),
