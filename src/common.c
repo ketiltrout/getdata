@@ -573,8 +573,8 @@ static size_t _GD_GetIndex(double x, const struct gd_lut_ *lut, size_t idx,
 
 /* _GD_LinterpData: calibrate data using lookup table lut
 */
-void _GD_LinterpData(DIRFILE *restrict D, void *restrict data, gd_type_t type,
-    int complex_table, const double *restrict data_in, size_t npts,
+void _GD_LinterpData(DIRFILE *restrict D, void *data, gd_type_t type,
+    int complex_table, const double *data_in, size_t npts,
     const struct gd_lut_ *restrict lut, size_t n_ln)
 {
   int idx = 0;

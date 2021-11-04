@@ -3,6 +3,14 @@
 	fails, and it was stored as D->reference_field, NULLify
 	D->reference_field when destroying the bad RAW entry.
 	(Fixes CVE-2021-20204.)
+
+	* src/common.c (_GD_LinterpData): Remove restrict from
+	input and output buffers (which may be the same for
+	in-place processing).
+
+	* m4/php.m4 (GD_PHP): Disable PHP bindings if a check
+	for php.h fails.
+
 	* test/olimit_count_gzip.c: Fix skip condition.
 
 2021-11-03   D. V. Wiebe <getata@ketiltrout.net>

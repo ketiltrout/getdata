@@ -1417,8 +1417,8 @@ void _GD_LincomData(DIRFILE *restrict, int n, void *restrict,
     gd_type_t return_type, const double *restrict, const double *restrict,
     const double *restrict, const double *restrict,
     const unsigned int *restrict, size_t);
-void _GD_LinterpData(DIRFILE *restrict, void *restrict, gd_type_t, int,
-    const double *restrict, size_t, const struct gd_lut_ *restrict, size_t);
+void _GD_LinterpData(DIRFILE *restrict, void*, gd_type_t, int,
+    const double*, size_t, const struct gd_lut_ *restrict, size_t);
 int _GD_ListEntry(const gd_entry_t*, int, int, int, int, int, gd_entype_t);
 char *_GD_MakeFullPath(DIRFILE *restrict, int, const char *restrict, int);
 void *_GD_Malloc(DIRFILE *D, size_t size) __attribute_malloc__;
