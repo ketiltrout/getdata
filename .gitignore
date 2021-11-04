@@ -60,6 +60,7 @@ src/gd_config.h.in
 src/getdata.h
 src/getdata.h.in2
 src/getdata.pc
+src/libpath_mangled
 src/stamp-h1
 src/stamp-h2
 util/checkdirfile
@@ -937,6 +938,7 @@ test/include_affix
 test/include_affix_ns
 test/include_auto
 test/include_cb
+test/include_cve-2021-20204
 test/include_creat
 test/include_format
 test/include_ignore
@@ -1256,6 +1258,8 @@ test/parse_const
 test/parse_const_complex
 test/parse_const_ncols
 test/parse_const_type
+test/parse_cve-2021-20204_a
+test/parse_cve-2021-20204_b
 test/parse_divide
 test/parse_double
 test/parse_duplicate

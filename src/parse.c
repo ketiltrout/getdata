@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2016 D. V. Wiebe
+ * Copyright (C) 2005-2016, 2021 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1764,6 +1764,10 @@ NO_MATCH:
       if (~p->flags & GD_IGNORE_DUPS)
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_DUPLICATE, p->file, p->line,
             E->field);
+      /* If this was the first RAW field, but it ended up being a duplicate,
+       * then throw it out (fixes CVE-2021-20204) */
+      if (D->reference_field == E)
+        D->reference_field = NULL;
       _GD_FreeE(D, E, 1);
       dreturn("%p", NULL);
       return NULL;

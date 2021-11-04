@@ -22,7 +22,7 @@
 
 int main(void)
 {
-#ifndef TEST_GZIP
+#if !defined(TEST_GZIP) || !defined(USE_GZIP)
   return 77;
 #else
   const char *filedir = "dirfile";

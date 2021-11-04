@@ -303,7 +303,8 @@ HIDE_TESTS=hide hide_bad hide_hidden hide_hidden_bad hide_unhide \
 					 hide_unhide_bad
 
 INCLUDE_TESTS=include_accmode include_affix include_affix_ns include_auto \
-							include_cb include_creat include_format include_ignore \
+							include_cb include_cve-2021-20204 include_creat include_format \
+							include_ignore \
 							include_include include_index include_invalid \
 							include_nonexistent include_ndotdots include_ndots include_ns \
 							include_ns_dot include_ns_dotdot include_ns_dotns include_ns_nil \
@@ -407,7 +408,8 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_loop \
 						parse_bit_bitsize parse_bit_ncols parse_bit_numbits \
 						parse_bit_scalar parse_carray parse_carray_long parse_carray_ncols \
 						parse_carray_type parse_const parse_const_complex \
-						parse_const_ncols parse_const_type parse_divide parse_double \
+						parse_const_ncols parse_const_type parse_cve-2021-20204_a \
+						parse_cve-2021-20204_b parse_divide parse_double \
 						parse_duplicate parse_duplicate_ignore parse_endian_bad \
 						parse_endian_bad2 parse_endian_big parse_endian_force \
 						parse_endian_little parse_endian_slash parse_eol parse_esc \
