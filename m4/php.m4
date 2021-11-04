@@ -71,9 +71,6 @@ if test "x${have_php}" != "xno"; then
   AC_MSG_RESULT([$PHP])
 fi
 
-dnl check for devel install
-AC_CHECK_HEADER([php.h],,[have_php=no])
-
 dnl extension dir
 AC_ARG_WITH([php-dir], AS_HELP_STRING([--with-php-dir=DIR],
       [install the GetData PHP extension into DIR [default: autodetect]]),
@@ -106,6 +103,12 @@ if test "x${have_php}" != "xno"; then
   GD_PHP_CONFIG([PHP_CPPFLAGS], [includes])
   AC_MSG_RESULT([$PHP_CPPFLAGS])
   AC_SUBST([PHP_CPPFLAGS])
+
+  dnl check for devel install
+  gd_saved_CPPFLAGS=$CPPFLAGS
+  CPPFLAGS="$CPPFLAGS $PHP_CPPFLAGS"
+  AC_CHECK_HEADER([php.h],,[have_php=no])
+  CPPFLAGS=$gd_saved_CPPFLAGS
 
   AC_MSG_CHECKING([PHP LDFLAGS])
   GD_PHP_CONFIG([PHP_LDFLAGS], [ldflags])
