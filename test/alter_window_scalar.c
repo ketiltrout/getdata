@@ -43,7 +43,7 @@ int main(void)
   CHECKI(e1, 0);
 
   gd_entry(D, "window", &E1);
-  CHECKF(E1.EN(window,threshold.i), 2);
+  CHECKI(E1.EN(window,threshold.i), 2);
   CHECKS(E1.scalar[0], "c2");
   gd_free_entry_strings(&E1);
 
@@ -51,7 +51,7 @@ int main(void)
   CHECKI(e2, 0);
 
   gd_entry(D, "window", &E2);
-  CHECKF(E2.EN(window,threshold.i), 3);
+  CHECKI(E2.EN(window,threshold.i), 3);
   CHECKP(E2.scalar[0]);
   gd_free_entry_strings(&E2);
 

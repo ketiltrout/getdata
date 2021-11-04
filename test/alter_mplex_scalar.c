@@ -44,8 +44,8 @@ int main(void)
   CHECKI(e1, 0);
 
   gd_entry(D, "mplex", &E1);
-  CHECKF(E1.EN(mplex,count_val), 4);
-  CHECKF(E1.EN(mplex,period), 3);
+  CHECKI(E1.EN(mplex,count_val), 4);
+  CHECKI(E1.EN(mplex,period), 3);
   CHECKP(E1.scalar[0]);
   CHECKS(E1.scalar[1], "c3");
   gd_free_entry_strings(&E1);
@@ -54,8 +54,8 @@ int main(void)
   CHECKI(e2, 0);
 
   gd_entry(D, "mplex", &E2);
-  CHECKF(E2.EN(mplex,count_val), 2);
-  CHECKF(E2.EN(mplex,period), 5);
+  CHECKI(E2.EN(mplex,count_val), 2);
+  CHECKI(E2.EN(mplex,period), 5);
   CHECKS(E2.scalar[0], "c2");
   CHECKP(E2.scalar[1]);
   gd_free_entry_strings(&E2);
