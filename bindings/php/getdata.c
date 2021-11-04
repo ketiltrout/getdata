@@ -152,7 +152,7 @@ ZEND_DECLARE_MODULE_GLOBALS(getdata)
 
 #ifdef ZTS
 # define GDPHP_G(v) TSRMG(getdata_globals_id, zend_getdata_globals *, v)
-# define dtracetsrm(fmt, ...)  dtrace(fmt ", %p", __VA_ARGS__, tsrm_ls)
+# define dtracetsrm(fmt, ...)  dtrace(fmt ", %p", __VA_ARGS__ TSRMLS_CC)
 #else
 # define GDPHP_G(v) (getdata_globals.v)
 # define dtracetsrm dtrace

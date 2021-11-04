@@ -28,7 +28,7 @@ F95_INC=getdata.mod
 F95_LIB=libf95getdata.la
 endif
 
-FCFLAGS += $(GD_FC_WALL) $(GD_FC_WEXTRA)
+FCFLAGS += $(GD_FC_WALL) $(GD_FC_WEXTRA) $(GD_FC_ARG_MISMATCH)
 EXTRA_DIST=getdata.f.in getdata.f90.in
 
 SUBDIRS = test

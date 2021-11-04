@@ -1330,13 +1330,11 @@ subroutine fgd_madd (dirfile, parent, field_code, ent)
     then
       call gdmdwd(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
       LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
-      TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%windop, ent%ithreshold, &
-      ent%fragment_index)
+      TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%windop, ent%ithreshold)
     else
       call gdmdwd(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
       LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
-      TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%windop, ent%rthreshold, &
-      ent%fragment_index)
+      TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%windop, ent%rthreshold)
     end if
   else if (ent%field_type .EQ. GD_MPLEX_ENTRY) then
     call gdmdmx(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
@@ -2743,7 +2741,7 @@ subroutine fgd_add_window_r (dirfile, field_code, in_field, check_field, &
   else
     call gdadwd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(in_field), LEN_TRIM(in_field), TRIM(check_field), &
-    LEN_TRIM(check_field), windop, threshold, INT(fragment_index))
+    LEN_TRIM(check_field), windop, INT(threshold), fragment_index)
   end if
 end subroutine
 
@@ -3334,6 +3332,7 @@ function fgd_match_entries (entry_list, dirfile, regex, fragment, entype, &
 
   if (entry_len .lt. max_len) then
     entry_len = max_len
+    fgd_match_entries = 0
   else
     call gdnmat(fgd_match_entries, dirfile, TRIM(regex), regex_l, fragment, &
       entype, flags)

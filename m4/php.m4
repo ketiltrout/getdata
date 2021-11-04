@@ -54,7 +54,7 @@ AC_ARG_WITH([php-config], AS_HELP_STRING([--with-php-config=PATH],
 
 if test "x${have_php}" != "xno"; then
   dnl try to find php
-  AC_PATH_PROGS(PHP_CONFIG, [$user_php_config php5-config php-config],
+  AC_PATH_PROGS(PHP_CONFIG, [$user_php_config php7-config php5-config php-config],
   [not found])
 
   if test "x$PHP_CONFIG" = "xnot found"; then

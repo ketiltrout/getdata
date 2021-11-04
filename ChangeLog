@@ -1,3 +1,27 @@
+2021-11-03   D. V. Wiebe <getata@ketiltrout.net>
+	* bindings/f77/Makefile.am bindings/f77/test/Makefile.am:
+	Add -std=legacy to FFLAGS and -fallow-argument-mismatch to
+	FCFLAGS for modern gfortran support.
+	* configure.ac: Check for the above compiler flags.
+
+	* bindings/f77/getdata.f90.in (fgd_madd): Remove extra
+	parameters in gdadwd calls.
+
+	* bindings/f77/getdata.f90.in (fgd_add_window_r): Fix
+	int-ification of threshold.
+
+	* bindings/f77/getdata.f90.in (fgd_match_entries): Ensure
+	return value is initialised.
+
+	* bindings/php/getdata.c: Fix definition of dtracetsrm.
+
+	* m4/compiler.m4 configure.ac: Combine all the compiler
+	flag checking macros into one per language:
+	GD_PROG_CC_ARG. GD_PROG_CXX_ARG, GD_PROG_F77_ARG,
+	GG_PROG_FC_ARG
+
+	* m4/php.m4 (PHP_CONFIG): Try php7-config, too.
+
 2018-04-25   D. V. Wiebe <getdata@ketiltrout.net> svn:1174
 	* bindings/php/getdata.c (gdphp_to_datum): Handle GD_STRING.
 	

@@ -26,8 +26,8 @@ endif
 
 BUILT_SOUCES = test_getdata.f
 
-FFLAGS += -I. -I.. $(GD_F77_WALL) $(GD_F77_WEXTRA)
-FCFLAGS += -I. -I.. $(GD_F77_WALL) $(GD_FC_WEXTRA)
+FFLAGS += -I. -I.. $(GD_F77_WALL) $(GD_F77_WEXTRA) $(GD_F77_STD_LEGACY)
+FCFLAGS += -I. -I.. $(GD_FC_WALL) $(GD_FC_WEXTRA) $(GD_FC_ARG_MISMATCH)
 F95LDADD=../libf95getdata.la $(F77LDADD)
 F77LDADD=../libfgetdata.la
 AM_LDFLAGS = -L..

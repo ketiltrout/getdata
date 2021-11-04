@@ -623,17 +623,18 @@ echo
 AC_C_INLINE
 AC_C_RESTRICT
 GD_C_RESTRICT_ARRAY
-GD_PROG_CC_WALL
-GD_PROG_CC_WEXTRA
+GD_PROG_CC_ARG([GD_CC_WALL],[-Wall])
+GD_PROG_CC_ARG([GD_CC_WEXTRA],[-Wextra])
 
 if test "x$make_cxxbindings" != "xno"; then
-  GD_PROG_CXX_WALL
-  GD_PROG_CXX_WEXTRA
+  GD_PROG_CXX_ARG([GD_CXX_WALL],[-Wall])
+  GD_PROG_CXX_ARG([GD_CXX_WEXTRA],[-Wextra])
 fi
 
 if test "x$make_f77bindings" != "xno"; then
-  GD_PROG_F77_WALL
-  GD_PROG_F77_WEXTRA
+  GD_PROG_F77_ARG([GD_F77_WALL],[-Wall])
+  GD_PROG_F77_ARG([GD_F77_WEXTRA],[-Wextra])
+  GD_PROG_F77_ARG([GD_F77_STD_LEGACY],[-std=legacy])
   GD_LANG_F77_COMPILER_INTEL
 fi
 
@@ -647,8 +648,9 @@ if test "x$make_f77bindings" != "xno"; then
 fi
 
 if test "x$make_f95bindings" != "xno"; then
-  GD_PROG_FC_WALL
-  GD_PROG_FC_WEXTRA
+  GD_PROG_FC_ARG([GD_FC_WALL],[-Wall])
+  GD_PROG_FC_ARG([GD_FC_WEXTRA],[-Wextra])
+  GD_PROG_FC_ARG([GD_FC_ARG_MISMATCH],[-fallow-argument-mismatch])
   GD_LANG_FC_COMPILER_INTEL
 fi
 

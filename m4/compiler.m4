@@ -94,150 +94,86 @@ gd_cv_fc_compiler_intel=no
 fi
 ])])
 
-dnl GD_PROG_CC_WEXTRA
+
+dnl GD_PROG_F77_ARG
 dnl -------------------------------------------------------------
-dnl Check whether the C compiler accepts -Wextra
-AC_DEFUN([GD_PROG_CC_WEXTRA],
-[gd_saved_CFLAGS=$CFLAGS
-AC_CACHE_CHECK([whether $CC accepts -Wextra], gd_cv_prog_cc_wextra,
-[CFLAGS="-Wextra"
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_cc_wextra=yes],
-[gd_cv_prog_cc_wextra=no])])
-CFLAGS=$gd_saved_CFLAGS
-if test "x$gd_cv_prog_cc_wextra" = "xyes"; then
-  GD_CC_WEXTRA=-Wextra
-fi
-AC_SUBST([GD_CC_WEXTRA])
-])
-
-
-dnl GD_PROG_CXX_WEXTRA
-dnl -------------------------------------------------------------
-dnl Check whether the C++ compiler accepts -Wextra
-AC_DEFUN([GD_PROG_CXX_WEXTRA],
-[gd_saved_CXXFLAGS=$CXXFLAGS
-AC_CACHE_CHECK([whether $CXX accepts -Wextra], gd_cv_prog_cxx_wextra,
-[CXXFLAGS="-Wextra"
-AC_LANG_PUSH([C++])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_cxx_wextra=yes],
-[gd_cv_prog_cxx_wextra=no])
-AC_LANG_POP([C++])])
-CXXFLAGS=$gd_saved_CXXFLAGS
-if test "x$gd_cv_prog_cxx_wextra" = "xyes"; then
-  GD_CXX_WEXTRA=-Wextra
-fi
-AC_SUBST([GD_CXX_WEXTRA])
-])
-
-
-dnl GD_PROG_F77_WEXTRA
-dnl -------------------------------------------------------------
-dnl Check whether the Fotran-77 compiler accepts -Wextra
-AC_DEFUN([GD_PROG_F77_WEXTRA],
+dnl Check whether the Fortran-77 compiler accepts $2 as an argument
+dnl If it does, set $1 to $2 and AC_SUBST it.
+AC_DEFUN([GD_PROG_F77_ARG],
 [gd_saved_FFLAGS=$FFLAGS
-AC_CACHE_CHECK([whether $F77 accepts -Wextra], gd_cv_prog_f77_wextra,
-[FFLAGS="-Wextra"
+m4_define([cachevar], [AS_TR_SH(gd_cv_prog_f77_[$2])])
+AC_CACHE_CHECK([whether $F77 accepts $2], cachevar,
+[FFLAGS="$2"
 AC_LANG_PUSH([Fortran 77])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_f77_wextra=yes],
-[gd_cv_prog_f77_wextra=no])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [cachevar=yes],
+[cachevar=no])
 AC_LANG_POP([Fortran 77])])
 FFLAGS=$gd_saved_FFLAGS
-if test "x$gd_cv_prog_f77_wextra" = "xyes"; then
-  GD_F77_WEXTRA=-Wextra
+if test "x$cachevar" = "xyes"; then
+  $1=$2
 fi
-AC_SUBST([GD_F77_WEXTRA])
+AC_SUBST($1)
 ])
 
 
-dnl GD_PROG_FC_WEXTRA
+dnl GD_PROG_FC_ARG
 dnl -------------------------------------------------------------
-dnl Check whether the free-form Fotran compiler accepts -Wextra
-AC_DEFUN([GD_PROG_FC_WEXTRA],
+dnl Check whether the Fortran compiler accepts $2 as an argument
+dnl If it does, set $1 to $2 and AC_SUBST it.
+AC_DEFUN([GD_PROG_FC_ARG],
 [gd_saved_FCFLAGS=$FCFLAGS
-AC_CACHE_CHECK([whether $FC accepts -Wextra], gd_cv_prog_fc_wextra,
-[FCFLAGS="-Wextra"
-AC_LANG_PUSH([Fortran 77])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_fc_wextra=yes],
-[gd_cv_prog_fc_wextra=no])
-AC_LANG_POP([Fortran 77])])
+m4_define([cachevar], [AS_TR_SH(gd_cv_prog_fc_[$2])])
+AC_CACHE_CHECK([whether $FC accepts $2], cachevar,
+[FCFLAGS="$2"
+AC_LANG_PUSH([Fortran])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [cachevar=yes],
+[cachevar=no])
+AC_LANG_POP([Fortran])])
 FCFLAGS=$gd_saved_FCFLAGS
-if test "x$gd_cv_prog_fc_wextra" = "xyes"; then
-  GD_FC_WEXTRA=-Wextra
+if test "x$cachevar" = "xyes"; then
+  $1=$2
 fi
-AC_SUBST([GD_FC_WEXTRA])
-])
-
-dnl GD_PROG_CC_WALL
-dnl -------------------------------------------------------------
-dnl Check whether the C compiler accepts -Wall
-AC_DEFUN([GD_PROG_CC_WALL],
-[gd_saved_CFLAGS=$CFLAGS
-AC_CACHE_CHECK([whether $CC accepts -Wall], gd_cv_prog_cc_wall,
-[CFLAGS="-Wall"
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_cc_wall=yes],
-[gd_cv_prog_cc_wall=no])])
-CFLAGS=$gd_saved_CFLAGS
-if test "x$gd_cv_prog_cc_wall" = "xyes"; then
-  GD_CC_WALL=-Wall
-fi
-AC_SUBST([GD_CC_WALL])
+AC_SUBST($1)
 ])
 
 
-dnl GD_PROG_CXX_WALL
+dnl GD_PROG_CXX_ARG
 dnl -------------------------------------------------------------
-dnl Check whether the C++ compiler accepts -Wall
-AC_DEFUN([GD_PROG_CXX_WALL],
+dnl Check whether the C++ compiler accepts $2 as an argument
+dnl If it does, set $1 to $2 and AC_SUBST it.
+AC_DEFUN([GD_PROG_CXX_ARG],
 [gd_saved_CXXFLAGS=$CXXFLAGS
-AC_CACHE_CHECK([whether $CXX accepts -Wall], gd_cv_prog_cxx_wall,
-[CXXFLAGS="-Wall"
+m4_define([cachevar], [AS_TR_SH(gd_cv_prog_cxx_[$2])])
+AC_CACHE_CHECK([whether $CXX accepts $2], cachevar,
+[CXXFLAGS="$2"
 AC_LANG_PUSH([C++])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_cxx_wall=yes],
-[gd_cv_prog_cxx_wall=no])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [cachevar=yes],
+[cachevar=no])
 AC_LANG_POP([C++])])
 CXXFLAGS=$gd_saved_CXXFLAGS
-if test "x$gd_cv_prog_cxx_wall" = "xyes"; then
-  GD_CXX_WALL=-Wall
+if test "x$cachevar" = "xyes"; then
+  $1=$2
 fi
-AC_SUBST([GD_CXX_WALL])
+AC_SUBST($1)
 ])
 
 
-dnl GD_PROG_F77_WALL
+dnl GD_PROG_CC_ARG
 dnl -------------------------------------------------------------
-dnl Check whether the Fotran-77 compiler accepts -Wall
-AC_DEFUN([GD_PROG_F77_WALL],
-[gd_saved_FFLAGS=$FFLAGS
-AC_CACHE_CHECK([whether $F77 accepts -Wall], gd_cv_prog_f77_wall,
-[FFLAGS="-Wall"
-AC_LANG_PUSH([Fortran 77])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_f77_wall=yes],
-[gd_cv_prog_f77_wall=no])
-AC_LANG_POP([Fortran 77])])
-FFLAGS=$gd_saved_FFLAGS
-if test "x$gd_cv_prog_f77_wall" = "xyes"; then
-  GD_F77_WALL=-Wall
+dnl Check whether the C compiler accepts $2 as an argument
+dnl If it does, set $1 to $2 and AC_SUBST it.
+AC_DEFUN([GD_PROG_CC_ARG],
+[gd_saved_CFLAGS=$CFLAGS
+m4_define([cachevar], [AS_TR_SH(gd_cv_prog_cc_[$2])])
+AC_CACHE_CHECK([whether $CC accepts $2], cachevar,
+[CFLAGS="$2"
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [cachevar=yes],
+[cachevar=no])])
+CFLAGS=$gd_saved_CFLAGS
+if test "x$cachevar" = "xyes"; then
+  $1=$2
 fi
-AC_SUBST([GD_F77_WALL])
-])
-
-
-dnl GD_PROG_FC_WALL
-dnl -------------------------------------------------------------
-dnl Check whether the free-form Fotran compiler accepts -Wall
-AC_DEFUN([GD_PROG_FC_WALL],
-[gd_saved_FCFLAGS=$FCFLAGS
-AC_CACHE_CHECK([whether $FC accepts -Wall], gd_cv_prog_fc_wall,
-[FCFLAGS="-Wall"
-AC_LANG_PUSH([Fortran 77])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_fc_wall=yes],
-[gd_cv_prog_fc_wall=no])
-AC_LANG_POP([Fortran 77])])
-FCFLAGS=$gd_saved_FCFLAGS
-if test "x$gd_cv_prog_fc_wall" = "xyes"; then
-  GD_FC_WALL=-Wall
-fi
-AC_SUBST([GD_FC_WALL])
+AC_SUBST($1)
 ])
 
 
