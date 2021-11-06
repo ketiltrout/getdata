@@ -158,9 +158,6 @@ extern "C" {
 #define GD_N_ERROR_CODES      31 /* including GD_E_OK and unused codes */
 
 /* Deprecated error codes */
-#define GD_E_BAD_ENDIANNESS   GD_E_ARGUMENT /* Deprecated in 0.8 */
-#define GD_E_BAD_PROTECTION   GD_E_ARGUMENT /* Deprecated in 0.8 */
-#define GD_E_BAD_VERSION      GD_E_ARGUMENT /* Deprecated in 0.8 */
 #define GD_E_BAD_REPR         GD_E_BAD_CODE /* Deprecated in 0.9 */
 #define GD_E_OPEN_LINFILE     GD_E_LUT      /* Deprecated in 0.9 */
 #define GD_E_FLUSH            GD_E_IO       /* Deprecated in 0.9 */
@@ -200,9 +197,6 @@ extern "C" {
 #define GD_E_FORMAT_META_META 21
 #define GD_E_FORMAT_ALIAS     22
 #define GD_E_FORMAT_MPLEXVAL  23
-
-/* deprecated syntax suberrors */
-#define GD_E_FORMAT_NO_PARENT GD_E_FORMAT_NO_FIELD
 
 /* parser callback return values */
 #define GD_SYNTAX_ABORT    0
@@ -296,11 +290,7 @@ typedef enum {
 # define GD_DCOMPLEXP(v) double *v
 #endif
 
-typedef gd_int64_t gd_shift_t; /* This type is deprecated */
-
-/* Types deprecated in GetData-0.8 */
-typedef int gd_bit_t;
-typedef unsigned int gd_spf_t;
+typedef gd_int64_t gd_shift_t; /* Deprecated in 0.10 */
 
 /* Data types -- No valid type may set 0x40 */
 #define GD_SIZE8     0x001
@@ -333,10 +323,6 @@ typedef enum {
   GD_STRING     = GD_CHAR | (sizeof(char*))
 } gd_type_t;
 
-
-/* Type aliases deprecated in GetData-0.8 */
-#define GD_FLOAT     GD_FLOAT32
-#define GD_DOUBLE    GD_FLOAT64
 
 /* Window operations */
 typedef enum {
@@ -592,7 +578,7 @@ extern int gd_add_multiply(DIRFILE *dirfile, const char *field_code,
 gd_nothrow gd_nonnull ((1,2,3,4));
 
 extern int gd_add_phase(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, gd_shift_t shift, int fragment_index) gd_nothrow
+    const char *in_field, gd_int64_t shift, int fragment_index) gd_nothrow
 gd_nonnull ((1,2,3));
 
 extern int gd_add_polynom(DIRFILE *dirfile, const char *field_code,
@@ -680,7 +666,7 @@ extern int gd_alter_multiply(DIRFILE *dirfile, const char *field_code,
     const char *in_field1, const char *in_field2) gd_nothrow gd_nonnull((1,2));
 
 extern int gd_alter_phase(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, gd_shift_t shift) gd_nothrow gd_nonnull((1,2));
+    const char *in_field, gd_int64_t shift) gd_nothrow gd_nonnull((1,2));
 
 extern int gd_alter_polynom(DIRFILE *dirfile, const char *field_code,
     int poly_ord, const char *in_field, const double *a) gd_nothrow
@@ -859,7 +845,7 @@ extern int gd_madd_multiply(DIRFILE *dirfile, const char *parent,
 gd_nothrow gd_nonnull ((1,2,3,4,5));
 
 extern int gd_madd_phase(DIRFILE *dirfile, const char *parent,
-    const char *field_code, const char *in_field, gd_shift_t shift)
+    const char *field_code, const char *in_field, gd_int64_t shift)
 gd_nothrow gd_nonnull ((1,2,3,4));
 
 extern int gd_madd_polynom(DIRFILE *dirfile, const char *parent,

@@ -1424,7 +1424,7 @@ int gd_alter_sindir(DIRFILE* D, const char* field_code, const char* in_field1,
 }
 
 int gd_alter_phase(DIRFILE* D, const char* field_code, const char* in_field,
-    gd_shift_t shift) gd_nothrow
+    gd_int64_t shift) gd_nothrow
 {
   int ret;
   gd_entry_t N;

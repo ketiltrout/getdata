@@ -1,4 +1,4 @@
-dnl Copyright (C) 2011-2017 D. V. Wiebe
+dnl Copyright (C) 2011-2017, 2021 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -19,9 +19,9 @@ dnl along with GetData; if not, write to the Free Software Foundation, Inc.,
 dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 m4_define(getdata_major,    0)
-m4_define(getdata_minor,    10)
-m4_define(getdata_revision, 1)
-m4_define(getdata_extra,    [a])
+m4_define(getdata_minor,    11)
+m4_define(getdata_revision, 0)
+m4_define(getdata_extra,    [rc1])
 m4_define(getdata_pkg_extra,[])
 m4_define(getdata_version,
           getdata_major.getdata_minor.getdata_revision[]getdata_extra)

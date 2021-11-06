@@ -13,6 +13,11 @@
 
 	* test/olimit_count_gzip.c: Fix skip condition.
 
+	* src/getdata.h.in bindings/make_parameters.c: Remove symbols:
+	GD_FLOAT GD_DOUBLE GD_E_BAD_ENDIANNESS GD_E_BAD_PROTECTION
+	GD_E_BAD_VERSION GD_E_FORMAT_NO_PARENT gd_bit_t gd_spf_t
+	all deprecated in GetData-0.8.
+
 2021-11-03   D. V. Wiebe <getata@ketiltrout.net>
 	* bindings/f77/Makefile.am bindings/f77/test/Makefile.am:
 	Add -std=legacy to FFLAGS and -fallow-argument-mismatch to

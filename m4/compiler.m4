@@ -1,4 +1,4 @@
-dnl Copyright (C) 2008-2010, 2012, 2013, 2015, 2016 D. V. Wiebe
+dnl Copyright (C) 2008-2010, 2012, 2013, 2015, 2016, 2021 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl

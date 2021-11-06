@@ -22,6 +22,7 @@ Makefile.in
 /config.sub
 /configure
 /depcomp
+/getdata-*
 /install-sh
 /libtool
 /ltmain.sh
