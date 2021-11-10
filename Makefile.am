@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2015 D. V. Wiebe
+# Copyright (C) 2008-2015, 2021 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -55,10 +55,10 @@ $(distdir)/_inst/lib/pkgconfig: $(distdir).tar.gz
 # matlab-only package
 matlab_$(distdir).tar.gz: matlabdist
 matlabdist: $(DISTFILES) $(distdir)/_inst/lib/pkgconfig
-	rm -rf svn_export
-	svn export $(top_srcdir) svn_export
+	rm -rf export
+	git checkout-index -a --prefix=export/
 	PKG_CONFIG_PATH=`pwd`/$(distdir)/_inst/lib/pkgconfig && \
-	( cd svn_export && \
+	( cd export && \
 		mkdir matlab_getdata && \
 		mkdir matlab_getdata/m4 && \
 		mkdir matlab_getdata/src && \
@@ -82,7 +82,7 @@ matlabdist: $(DISTFILES) $(distdir)/_inst/lib/pkgconfig
 		${MAKE} dist && \
 		cp matlab_${distdir}* ../.. \
 		) )
-	rm -rf svn_export
+	rm -rf export
 
 matlabdistcheck: matlab_$(distdir).tar.gz $(distdir)/_inst/lib/pkgconfig
 	if [ -e matlab_$(distdir) ]; then \
@@ -98,10 +98,10 @@ matlabdistcheck: matlab_$(distdir).tar.gz $(distdir)/_inst/lib/pkgconfig
 # idl-only package
 idl_$(distdir).tar.gz: idldist
 idldist: $(DISTFILES) $(distdir)/_inst/lib/pkgconfig
-	rm -rf svn_export
-	svn export $(top_srcdir) svn_export
+	rm -rf export
+	git checkout-index -a --prefix=export/
 	PKG_CONFIG_PATH=`pwd`/$(distdir)/_inst/lib/pkgconfig && \
-	( cd svn_export && \
+	( cd export && \
 		mkdir idl_getdata && \
 		mkdir idl_getdata/m4 && \
 		mkdir idl_getdata/src && \
@@ -122,7 +122,7 @@ idldist: $(DISTFILES) $(distdir)/_inst/lib/pkgconfig
 		${MAKE} dist && \
 		cp idl_${distdir}* ../.. \
 		) )
-	rm -rf svn_export
+	rm -rf export
 
 idldistcheck: idl_$(distdir).tar.gz $(distdir)/_inst/lib/pkgconfig
 	if [ -e idl_$(distdir) ]; then \
@@ -137,10 +137,10 @@ idldistcheck: idl_$(distdir).tar.gz $(distdir)/_inst/lib/pkgconfig
 
 # windows source package
 windist: $(DISTFILES)
-	rm -rf crlf_export
+	rm -rf export
 	cd man && $(MAKE) htmlman
-	svn --native-eol CRLF export $(top_srcdir) crlf_export
-	( cd crlf_export && \
+	git checkout-index -a --prefix=export/
+	( cd export && \
 		mkdir $(distdir) && \
 		mkdir $(distdir)/bindings && \
 		mkdir $(distdir)/doc && \
@@ -158,7 +158,7 @@ windist: $(DISTFILES)
 		zip -rq getdata_win-$(PACKAGE_VERSION).zip $(distdir) && \
 		cp getdata_win*.zip .. \
 	)
-	rm -rf crlf_export
+	rm -rf export
 
 # coverity scan target
 cov-scan:
