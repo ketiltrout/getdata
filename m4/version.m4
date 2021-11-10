@@ -21,7 +21,7 @@ dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 m4_define(getdata_major,    0)
 m4_define(getdata_minor,    11)
 m4_define(getdata_revision, 0)
-m4_define(getdata_extra,    [rc1])
+m4_define(getdata_extra,    [])
 m4_define(getdata_pkg_extra,[])
 m4_define(getdata_version,
           getdata_major.getdata_minor.getdata_revision[]getdata_extra)
@@ -29,22 +29,22 @@ m4_define(getdata_pkg_version,
           getdata_version[]getdata_pkg_extra)
 
 dnl libgetdata current interface version
-m4_define(getdata_iface_version,    8)
+m4_define(getdata_iface_version,    9)
 dnl libgetdata current interface implementation revision
 m4_define(getdata_impl_revision,    0)
 dnl libgetdata interface age (current interface - oldest supported interface)
-m4_define(getdata_iface_age,        0)
+m4_define(getdata_iface_age,        1)
 
 dnl The rest of these are all CURRENT:REVISION:AGE
 
 dnl libgetdata++ interface version info
-m4_define(getdataxx_version, 7:0:0)
+m4_define(getdataxx_version, 8:0:1)
 
 dnl libfgetdata interface version info
-m4_define(fgetdata_version, 6:0:0)
+m4_define(fgetdata_version, 7:0:1)
 
 dnl libf95getdata interface version info
-m4_define(f95getdata_version, 7:0:0)
+m4_define(f95getdata_version, 8:0:1)
 
 dnl libgetdata-matlab interface version info
-m4_define(matlabgetdata_version, 2:0:2)
+m4_define(matlabgetdata_version, 3:0:3)
