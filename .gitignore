@@ -12,6 +12,9 @@ libpath_mangled
 Makefile
 Makefile.in
 
+/*.zip
+/*.tar.*
+/*.sig
 /aclocal.m4
 /autom4te.cache
 /compile
