@@ -4,7 +4,7 @@ New in version 0.11.0:
 
   * BUG FIX: When using a bzipped /REFERENCE field, mixing gd_nframes()
     calls with reads of data from that field no longer results in
-    subsequents reads to occur in the wrong place.  Reported by Matthew
+    subsequent reads to occur in the wrong place.  Reported by Matthew
     Petroff.
 
   * BUG FIX FOR CVE-2021-20204: The first RAW field in a Dirfile having
