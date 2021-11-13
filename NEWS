@@ -1,4 +1,4 @@
-New in version 0.11.0rc1:
+New in version 0.11.0:
 
   Library Changes:
 
@@ -68,6 +68,9 @@ New in version 0.11.0rc1:
 
   * Running "make clean" no longer accidentally deletes most of the man pages
     from the man/ subdirectory.
+
+  * New options --with-pcre and --without-pcre have been added to ./configure
+    to adjust how the PCRE library is (or is not) used.
 
   * Modules now link to the main getdata library to avoid the potential for
     symbol look-up errors on load.  Reported by Matthew Petroff.
