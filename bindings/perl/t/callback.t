@@ -36,11 +36,10 @@ sub callback {
 }
 
 # create the dirfile
-system "rm -rf dirfile" if (-e "dirfile" and not -d "dirfile");
-print "\n";
+system "rm -rf dirfile" if (-e "dirfile");
 ok(-e "dirfile" or mkdir "dirfile");
 
-open GLOB, ">dirfile/format" or die;
+open GLOB, ">dirfile/format" or die "Unable to create format file: $!";
 print GLOB "data RAW UINT16 8\nbad line\n" or die;
 close GLOB or die;
 

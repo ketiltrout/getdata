@@ -150,12 +150,12 @@ my @fields = (qw(bit div data mult sbit INDEX alias const indir mplex phase
 
 #create the dirfile
 system "rm -rf dirfile" if (-e "dirfile");
-(mkdir "dirfile" or die) unless -e "dirfile";
+mkdir "dirfile" or die "Unable to create dirfile: $!";
 
-open GLOB, ">dirfile/data" or die;
+open GLOB, ">dirfile/data" or die "Unable to create data file: $!";
 print GLOB map chr, 1 .. 81;
 
-open GLOB, ">dirfile/format" or die;
+open GLOB, ">dirfile/format" or die "Unable to create format file: $!";
 print GLOB <<EOF
 /ENDIAN little
 data RAW INT8 8
