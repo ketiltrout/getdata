@@ -108,7 +108,7 @@ libpath_mangled: ${nodist_perlautogetdata_SCRIPTS}
 	touch $@
 
 # Change mangled path into install path again
-install-exec-hook:
+install-exec-hook: install-data-am
 	${INSTALL_NAME_TOOL} -change \
 		${abs_top_builddir}/src/.libs/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
 		${libdir}/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
