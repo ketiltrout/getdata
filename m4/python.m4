@@ -161,7 +161,7 @@ AC_MSG_CHECKING([if we're using a Python3 interpreter])
 AC_MSG_RESULT([$have_python3])
 
 AC_MSG_CHECKING([$PYTHON version])
-PYTHON_VERSION=`$PYTHON -c "import sys; print (sys.version[[:3]])"`
+PYTHON_VERSION=`$PYTHON -c "import sys; print('{v[[0]]}.{v[[1]]}'.format(v=sys.version_info))"`
 AC_MSG_RESULT([$PYTHON_VERSION])
 AC_SUBST([PYTHON_VERSION])
 
