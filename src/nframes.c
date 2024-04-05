@@ -73,10 +73,12 @@ off64_t gd_nframes64(DIRFILE* D)
   return nf;
 }
 
+#if !(defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64)
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */
 off_t gd_nframes(DIRFILE* D)
 {
   return (off_t)gd_nframes64(D);
 }
+#endif
 /* vim: ts=2 sw=2 et tw=80
 */
