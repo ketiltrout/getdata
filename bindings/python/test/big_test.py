@@ -1882,7 +1882,7 @@ CheckSimple2(231, 5, ent.period, 7)
 
 # 232: gd_strtok check
 try:
-  str = d.strtok("\"test1 test2\" test3\ test4")
+  str = d.strtok("\"test1 test2\" test3\\ test4")
 except:
   CheckOK2(232, 1)
 CheckSimple2(232, 2, str, B("test1 test2"))
