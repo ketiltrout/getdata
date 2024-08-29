@@ -20,7 +20,14 @@ jobs:
     - name: Install build dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential autoconf libpcre2-dev libpython3-dev liblzma-dev wget
+        sudo apt-get install -y             \
+                autoconf                    \
+                build-essential             \
+                liblzma-dev                 \
+                libpcre2-dev                \
+                libpython3-dev              \
+                python3-numpy-dev           \
+                wget
 
     - name: Configure
       run: |
