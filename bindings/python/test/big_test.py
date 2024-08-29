@@ -2027,7 +2027,7 @@ try:
 except:
   CheckOK(278)
 
-CheckSimple(278,n,['one', 'two', 'three', 'four', 'five', 'six', 'seven'])
+CheckSimple(278,n,[B('one'), B('two'), B('three'), B('four'), B('five'), B('six'), B('seven')])
 
 # 279: gd_get_sarray_slice
 try:
@@ -2035,7 +2035,7 @@ try:
 except:
   CheckOK(279)
 
-CheckSimple(279,n,['three', 'four'])
+CheckSimple(279,n,[B('three'), B('four')])
 
 # 280: gd_sarrays
 try:
@@ -2044,13 +2044,13 @@ except:
   CheckOK(280)
 
 CheckSimple2(280,1,len(n),1)
-CheckSimple2(280,2,n,[("sarray",
-  ['one', 'two', 'three', 'four', 'five', 'six', 'seven'])])
+CheckSimple2(280,2,n,[(B("sarray"),
+  [B('one'), B('two'), B('three'), B('four'), B('five'), B('six'), B('seven')])])
 
 # 281: gd_put_sarray
 try:
   d.put_sarray("sarray",
-      ['eka', 'dvi', 'tri', 'catur', 'panca', 'sas', 'sapta'])
+      [B('eka'), B('dvi'), B('tri'), B('catur'), B('panca'), B('sas'), B('sapta')])
 except:
   CheckOK2(281,1)
 
@@ -2059,7 +2059,7 @@ try:
 except:
   CheckOK2(281,2)
 
-CheckSimple(281,n,['eka', 'dvi', 'tri', 'catur', 'panca', 'sas', 'sapta'])
+CheckSimple(281,n,[B('eka'), B('dvi'), B('tri'), B('catur'), B('panca'), B('sas'), B('sapta')])
 
 # 282: gd_put_sarray_slice
 try:
@@ -2072,7 +2072,7 @@ try:
 except:
   CheckOK2(282,2)
 
-CheckSimple(282,n,['eka', 'dvi', 'asta', 'nava', 'panca', 'sas', 'sapta'])
+CheckSimple(282,n,[B('eka'), B('dvi'), B('asta'), B('nava'), B('panca'), B('sas'), B('sapta')])
 
 # 283: gd_add_sarray
 ent = pygetdata.entry(pygetdata.SARRAY_ENTRY, "new283", 0, (2,))
@@ -2114,8 +2114,8 @@ except:
 
 CheckSimple2(287,1,len(n),2)
 CheckSimple2(287,2,n,[
-  ("msarray", ['eight', 'nine', 'ten', 'eleven', 'twelve']),
-  ("mnew285", ['', ''])])
+  (B("msarray"), [B('eight'), B('nine'), B('ten'), B('eleven'), B('twelve')]),
+  (B("mnew285"), [B(''), B('')])])
 
 # 288: entry (indir) check
 try:
@@ -2125,10 +2125,10 @@ except:
 CheckSimple2(288,1,ent.field_type,pygetdata.INDIR_ENTRY)
 CheckSimple2(288,2,ent.field_type_name,"INDIR_ENTRY")
 CheckSimple2(288,3,ent.fragment,0)
-CheckSimple2(288,4,ent.in_fields,( "data", "carray"))
+CheckSimple2(288,4,ent.in_fields,( B("data"), B("carray")))
 
 # 289: add / entry (indir) check
-ent = pygetdata.entry(pygetdata.INDIR_ENTRY, "new289", 0, ("in1", "in2"))
+ent = pygetdata.entry(pygetdata.INDIR_ENTRY, B("new289"), 0, (B("in1"), B("in2")))
 try:
   d.add(ent)
 except:
@@ -2140,7 +2140,7 @@ except:
   CheckOK2(289,2)
 CheckSimple2(289,1,ent.field_type,pygetdata.INDIR_ENTRY)
 CheckSimple2(289,2,ent.fragment,0)
-CheckSimple2(289,3,ent.in_fields,( "in1", "in2"))
+CheckSimple2(289,3,ent.in_fields,( B("in1"), B("in2")))
 
 # 290: madd / entry (indir) check
 ent = pygetdata.entry(pygetdata.INDIR_ENTRY, "mnew290", 0,
@@ -2156,7 +2156,7 @@ except:
   CheckOK2(290,2)
 CheckSimple2(290,1,ent.field_type,pygetdata.INDIR_ENTRY)
 CheckSimple2(290,2,ent.fragment,0)
-CheckSimple2(290,3,ent.in_fields,( "in3", "in2"))
+CheckSimple2(290,3,ent.in_fields,( B("in3"), B("in2")))
 
 # 292: entry (sindir) check
 try:
@@ -2166,7 +2166,7 @@ except:
 CheckSimple2(292,1,ent.field_type,pygetdata.SINDIR_ENTRY)
 CheckSimple2(292,2,ent.field_type_name,"SINDIR_ENTRY")
 CheckSimple2(292,3,ent.fragment,0)
-CheckSimple2(292,4,ent.in_fields,( "data", "sarray"))
+CheckSimple2(292,4,ent.in_fields,( B("data"), B("sarray")))
 
 # 293: add / entry (dindir) check
 ent = pygetdata.entry(pygetdata.SINDIR_ENTRY, "new293", 0, ("in1", "in2"))
@@ -2181,7 +2181,7 @@ except:
   CheckOK2(293,2)
 CheckSimple2(293,1,ent.field_type,pygetdata.SINDIR_ENTRY)
 CheckSimple2(293,2,ent.fragment,0)
-CheckSimple2(293,3,ent.in_fields,( "in1", "in2"))
+CheckSimple2(293,3,ent.in_fields,( B("in1"), B("in2")))
 
 # 294: madd / entry (sindir) check
 ent = pygetdata.entry(pygetdata.SINDIR_ENTRY, "mnew294", 0,
@@ -2197,14 +2197,14 @@ except:
   CheckOK2(294,2)
 CheckSimple2(294,1,ent.field_type,pygetdata.SINDIR_ENTRY)
 CheckSimple2(294,2,ent.fragment,0)
-CheckSimple2(294,3,ent.in_fields,( "in3", "in2"))
+CheckSimple2(294,3,ent.in_fields,( B("in3"), B("in2")))
 
 # 296: getstrdata
 try:
   n = d.getdata("sindir", num_frames=1)
 except:
   CheckOK(296)
-CheckSimple(296,n,[ "eka", "eka", "eka", "eka", "eka", "eka", "eka", "eka"])
+CheckSimple(296,n,[ B("eka"), B("eka"), B("eka"), B("eka"), B("eka"), B("eka"), B("eka"), B("eka")])
 
 # 302: gd_include_affix check
 try:
