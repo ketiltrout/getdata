@@ -24,6 +24,7 @@ import re
 import array
 import pygetdata
 import numpy
+import warnings
 
 # These two functions abstractify differences between Python2 and 3.
 def L(n):
@@ -1480,7 +1481,9 @@ CheckNumpy(176,n,numpy.array([9,8,176,176,5,4]))
 
 # 177: gd_carray_len
 try:
-  n = d.carray_len("carray")
+  with warnings.catch_warnings():
+    warnings.simplefilter("ignore")  # carray_len causes DeprecationWarning
+    n = d.carray_len("carray")
 except:
   CheckOK(177)
 
