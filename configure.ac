@@ -21,7 +21,7 @@ dnl
 
 m4_include([m4/version.m4])
 
-AC_INIT([GetData],[getdata_pkg_version],[getdata-devel@lists.sourceforge.net],,
+AC_INIT([GetData],[getdata_pkg_version],[getdata-devel@lists.sourceforge.net],[],
         [http://getdata.sourceforge.net/])
 
 AC_COPYRIGHT(
@@ -45,7 +45,7 @@ AC_SUBST([GETDATA_REVISION], [getdata_revision])
 AC_SUBST([GETDATA_VERSION_SUFFIX], [getdata_extra])
 AC_SUBST([GETDATA_LIB_VERSION], [getdata_version])
 
-AC_PREREQ([2.65])
+AC_PREREQ([2.72])
 AC_CONFIG_MACRO_DIR([m4])
 
 LT_PREREQ([2.2.7b])
@@ -64,10 +64,10 @@ AC_SUBST(F95GETDATA_VERSION, [f95getdata_version])
 AC_SUBST(MATLABGETDATA_VERSION, [matlabgetdata_version])
 
 AC_CONFIG_SRCDIR([src/getdata.c])
-AC_CONFIG_HEADER([src/gd_config.h])
+AC_CONFIG_HEADERS([src/gd_config.h])
 
 dnl Features
-BUINDINGS_BUILT=
+BINDINGS_BUILT=
 BINDINGS_LEFT=
 ENCODINGS_BUILT=" raw ascii sie"
 ENCODINGS_LEFT=
@@ -475,16 +475,12 @@ AC_SUBST([DL_LIBRARY_PATH])
 echo
 echo "*** Checking C compiler characteristics"
 echo
-AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC
-AC_PROG_CC_C_O
-
-if test "x$disable_c99" != "xyes"; then
-  AC_PROG_CC_C99
-  if test "x$ac_cv_prog_cc_c99" = "xno"; then
-    disable_c99="yes"
-  fi
+dnl AC_PROG_CC sets this to "no" if C99 is not supported
+if test "x$ac_cv_prog_cc_c99" = "xno"; then
+  disable_c99="yes"
 fi
+
 if test "x$disable_c99" = "xyes"; then
   DEFINE_GD_NO_C99_API="#define GD_NO_C99_API"
 else
@@ -492,8 +488,13 @@ else
 fi
 AC_SUBST([DEFINE_GD_NO_C99_API])
 
-AC_HEADER_STDC
 AM_PROG_AS
+AC_PROG_CC_C_O
+
+dnl as a side-effect, this runs AC_CHECK_HEADERS for:
+dnl   inttypes.h minix/config.h stdint.h stdio.h stdlib.h string.h
+dnl   strings.h sys/stat.h sys/types.h unistd.h vfork.h wchar.h
+AC_USE_SYSTEM_EXTENSIONS
 
 echo
 echo "*** Checking C++ compiler characteristics"
@@ -696,12 +697,11 @@ dnl headers
 echo
 echo "*** Looking for additional header files"
 echo
-AC_CHECK_HEADERS([asm/unaligned.h Availability.h byteswap.h crtdefs.h direct.h \
-                  features.h fcntl.h float.h inttypes.h io.h libgen.h \
-                  libkern/OSByteOrder.h math.h regex.h signal.h \
-                  stddef.h stdint.h sys/endian.h sys/file.h sys/param.h \
-                  sys/resource.h sys/stat.h sys/time.h sys/types.h sys/wait.h \
-                  unistd.h])
+AC_CHECK_HEADERS([asm/unaligned.h Availability.h byteswap.h crtdefs.h ctype.h direct.h \
+                  errno.h features.h fcntl.h float.h inttypes.h io.h libgen.h \
+                  libkern/OSByteOrder.h limits.h math.h regex.h signal.h stddef.h \
+                  stdint.h sys/endian.h sys/file.h sys/param.h sys/resource.h \
+                  sys/stat.h sys/time.h sys/types.h sys/wait.h time.h unistd.h])
 if test "x$disable_c99" = "xno"; then
   AC_CHECK_HEADERS([complex.h])
 fi
@@ -876,12 +876,7 @@ AC_CHECK_DECLS([isfinite],,,
 #include <math.h>
 #endif
 ])
-AC_CHECK_DECLS([_strtoi64, _strtoui64],,,
-               [
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#endif
-])
+AC_CHECK_DECLS([_strtoi64, _strtoui64],,,[#include <stdlib.h>])
 
 AC_CHECK_DECLS([bswap16, bswap_16, OSSwapInt16],,,
               [

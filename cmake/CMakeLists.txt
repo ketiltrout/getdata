@@ -86,7 +86,6 @@ if(MSVC)
     -Drestrict=
     -DSIZEOF_INT=4
     -DSIZEOF_UNSIGNED_INT=4
-    -DSTDC_HEADERS
     )
   set(CMAKE_DEBUG_POSTFIX d)
 

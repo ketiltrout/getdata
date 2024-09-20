@@ -64,15 +64,22 @@
 #include <sys/types.h>
 #endif
 
-#ifdef STDC_HEADERS
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <stddef.h>
+#ifdef HAVE_ERRNO_H
 #include <errno.h>
+#endif
+#ifdef HAVE_CTYPE_H
 #include <ctype.h>
+#endif
+#ifdef HAVE_LIMITS_H
 #include <limits.h>
+#endif
+#ifdef HAVE_MATH_H
 #include <math.h>
+#endif
+#ifdef HAVE_TIME_H
 #include <time.h>
 #endif
 
