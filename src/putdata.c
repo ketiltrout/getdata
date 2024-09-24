@@ -816,6 +816,7 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
   return n_wrote;
 }
 
+#if !(defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64)
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */
 size_t gd_putdata(DIRFILE* D, const char *field_code, off_t first_frame,
     off_t first_samp, size_t num_frames, size_t num_samp, gd_type_t data_type,
@@ -824,5 +825,6 @@ size_t gd_putdata(DIRFILE* D, const char *field_code, off_t first_frame,
   return gd_putdata64(D, field_code, first_frame, first_samp, num_frames,
       num_samp, data_type, data_in);
 }
+#endif
 /* vim: ts=2 sw=2 et
 */

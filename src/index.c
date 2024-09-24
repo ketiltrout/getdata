@@ -255,6 +255,7 @@ double gd_framenum_subset64(DIRFILE* D, const char* field_code, double value,
   return frame;
 }
 
+#if !(defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64)
 double gd_framenum_subset(DIRFILE* D, const char* field_code, double value,
     off_t field_start, off_t field_end)
 {
@@ -269,6 +270,7 @@ double gd_framenum_subset(DIRFILE* D, const char* field_code, double value,
   dreturn("%.15g", frame);
   return frame;
 }
+#endif
 
 double gd_framenum(DIRFILE* D, const char* field_code, double value)
 {
