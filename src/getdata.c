@@ -2051,6 +2051,7 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
   return n_read;
 }
 
+#if !(defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64)
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */
 size_t gd_getdata(DIRFILE* D, const char *field_code, off_t first_frame,
     off_t first_samp, size_t num_frames, size_t num_samp,
@@ -2059,5 +2060,6 @@ size_t gd_getdata(DIRFILE* D, const char *field_code, off_t first_frame,
   return gd_getdata64(D, field_code, first_frame, first_samp, num_frames,
       num_samp, return_type, data_out);
 }
+#endif
 /* vim: ts=2 sw=2 et tw=80
 */

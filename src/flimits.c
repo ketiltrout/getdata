@@ -130,6 +130,7 @@ off64_t gd_frameoffset64(DIRFILE* D, int fragment)
   return D->fragment[fragment].frame_offset;
 }
 
+#if !(defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64)
 /* 32(ish)-bit wrappers for the 64-bit versions, when needed */
 int gd_alter_frameoffset(DIRFILE* D, off_t offset, int fragment, int move)
 {
@@ -140,6 +141,7 @@ off_t gd_frameoffset(DIRFILE* D, int fragment) gd_nothrow
 {
   return gd_frameoffset64(D, fragment);
 }
+#endif
 
 off64_t _GD_GetEOF(DIRFILE *restrict D, gd_entry_t *restrict E,
     const char *restrict parent, int *restrict is_index)
@@ -340,11 +342,13 @@ off64_t gd_eof64(DIRFILE* D, const char *field_code)
   return ns;
 }
 
+#if !(defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64)
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */
 off_t gd_eof(DIRFILE* D, const char *field_code)
 {
   return (off_t)gd_eof64(D, field_code);
 }
+#endif
 
 static off64_t _GD_GetBOF(DIRFILE *restrict D, gd_entry_t *restrict E,
     const char *restrict parent, unsigned int *restrict spf,
@@ -510,10 +514,12 @@ off64_t gd_bof64(DIRFILE* D, const char *field_code) gd_nothrow
   return bof;
 }
 
+#if !(defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64)
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */
 off_t gd_bof(DIRFILE* D, const char *field_code) gd_nothrow
 {
   return (off_t)gd_bof64(D, field_code);
 }
+#endif
 /* vim: ts=2 sw=2 et tw=80
 */

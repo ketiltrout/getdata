@@ -136,10 +136,12 @@ off64_t gd_tell64(DIRFILE *D, const char *field_code) gd_nothrow
   return pos;
 }
 
+#if !(defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64)
 off_t gd_tell(DIRFILE *D, const char *field_code) gd_nothrow
 {
   return (off_t)gd_tell64(D, field_code);
 }
+#endif
 
 off64_t _GD_DoSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
     off64_t offset, unsigned int mode)
@@ -410,10 +412,12 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code, off64_t frame_num,
   return pos;
 }
 
+#if !(defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64)
 off_t gd_seek(DIRFILE *D, const char *field_code, off_t frame_num,
     off_t sample_num, int whence)
 {
   return (off_t)gd_seek64(D, field_code, frame_num, sample_num, whence);
 }
+#endif
 /* vim: ts=2 sw=2 et tw=80
 */
