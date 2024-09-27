@@ -33,12 +33,8 @@ BUILT_SOURCES = pyconstants.c
 
 EXTRA_DIST = pydirfile.c pygetdata.c pyentry.c gdpy_intern.h pyfragment.c
 
-distutils_path=build/lib.${PYTHON_PLATFORM}-${PYTHON_VERSION}
-pygetdata${PYTHON_OBJECT_SUFFIX}: ${distutils_path}/pygetdata${PYTHON_OBJECT_SUFFIX}
-	cp $< $@
-
-${distutils_path}/pygetdata${PYTHON_OBJECT_SUFFIX}: setup.py ${BUILT_SOURCES} ${EXTRA_DIST}
-	${PYTHON} setup.py build
+pygetdata${PYTHON_OBJECT_SUFFIX}: setup.py ${BUILT_SOURCES} ${EXTRA_DIST}
+	${PYTHON} setup.py build_ext --inplace
 
 pyconstants.c: ../make_parameters
 	../make_parameters p > $@
