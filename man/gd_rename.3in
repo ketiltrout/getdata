@@ -1,6 +1,6 @@
 .\" gd_rename.3.  The gd_rename man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016 D. V. Wiebe
+.\" Copyright (C) 2008-2014, 2016, 2024 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_rename 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+.TH gd_rename 3 "2 October 2024" "Version 0.11.1" "GETDATA"
 
 .SH NAME
 gd_rename \(em change the name of a Dirfile field or alias
@@ -73,7 +73,7 @@ specifies a
 .B RAW
 field, the binary file associated with the field will be renamed as well.
 Without this flag, no changes are made to the binary file.  In this case, the
-field's I/O pointer will be reset to the beginning-of-frame.  If
+field's I/O pointer will be reset to the beginning-of-field.  If
 .I field_code
 specifies a field of type other than
 .BR RAW ,

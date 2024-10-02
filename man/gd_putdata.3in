@@ -1,6 +1,6 @@
 .\" gd_putdata.3.  The gd_putdata man page.
 .\"
-.\" Copyright (C) 2008-2017 D. V. Wiebe
+.\" Copyright (C) 2008-2017, 2024 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_putdata 3 "25 January 2017" "Version 0.10.0" "GETDATA"
+.TH gd_putdata 3 "2 October 2024" "Version 0.11.1" "GETDATA"
 
 .SH NAME
 gd_putdata \(em write data to a Dirfile database
@@ -203,7 +203,7 @@ This indicates a bug in the library.  Please report the incident to the
 maintainer.
 .DD GD_E_IO
 An error occurred while trying to open, read from, or write to a file on disk
-containing a raw field or a
+containing a RAW field or a
 .B LINTERP
 table.
 .DD GD_E_LUT
@@ -217,10 +217,10 @@ field backing
 .ARG field_code
 was protected from change by a /PROTECT directive.
 .DD GD_E_RANGE
-An attempt was made to write data either before the beginning-of-frame marker
+An attempt was made to write data either before the beginning-of-field marker
 for
 .ARG field_code ,
-or the raw field it depends on, or else outside the addressable Dirfile range
+or the RAW field it depends on, or else outside the addressable Dirfile range
 (more than 2**63 samples beyond the start of the Dirfile).
 .DD GD_E_RECURSE_LEVEL
 Too many levels of recursion were encountered while trying to resolve
@@ -259,7 +259,7 @@ The
 function appeared in GetData-0.3.0.
 
 In GetData-0.7.0, this function was renamed to
-.FN gd_getdata .
+.FN gd_putdata .
 
 The
 .B GD_HERE

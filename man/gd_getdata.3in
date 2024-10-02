@@ -1,6 +1,6 @@
 .\" gd_getdata.3.  The gd_getdata man page.
 .\"
-.\" Copyright (C) 2008-2016 D. V. Wiebe
+.\" Copyright (C) 2008-2016, 2024 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_getdata 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+.TH gd_getdata 3 "2 October 2024" "Version 0.11.1" "GETDATA"
 
 .SH NAME
 gd_getdata \(em retrieve data from a Dirfile database
@@ -268,9 +268,9 @@ point return types.
 .SH RETURN VALUE
 In all cases,
 .FN gd_getdata
-returns the number of samples (not bytes) successfully read from the database.
-If the end-of-field is encountered before the requested number of samples have
-been read, a short count will result.  this is not an error.
+returns the number of samples (not bytes; not frames) successfully read from the
+database.  If the end-of-field is encountered before the requested number of
+samples have been read, a short count will result.  This is not an error.
 
 Requests for data before the beginning-of-field marker, which may have
 been shifted from frame zero by a
@@ -278,7 +278,7 @@ been shifted from frame zero by a
 field or
 .B /FRAMEOFFSET
 directive, will result in the the data being padded at the front by NaN or zero,
-depending on whether the return type is of floating point or integral type.
+depending on whether the return type is of floating point or integer type.
 
 On error, this function returns zero and stores a negative-valued error code in
 the
@@ -328,8 +328,8 @@ An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
 .DD GD_E_IO
-An error occurred while trying to open or read from a file on disk containing
-a raw field or LINTERP table.
+A system error occurred while trying to open or read from a file on disk
+containing a RAW field or LINTERP table.
 .DD GD_E_LUT
 A LINTERP table was malformed.
 .DD GD_E_RANGE
@@ -344,10 +344,9 @@ dirfile.
 The encoding scheme of a RAW field could not be determined.  This may also
 indicate that the binary file associated with the RAW field could not be found.
 .DD GD_E_UNSUPPORTED
-Reading from dirfiles with the encoding scheme of the specified dirfile is not
-supported by the library.  See
-dirfile-encoding(5)
-for details on dirfile encoding schemes.
+A RAW field couldn't be read because the encoding scheme used by it is not
+supported by the library.  See dirfile-encoding(5) for details on dirfile
+encoding schemes.
 .PP
 A descriptive error string for the error may be obtained by calling
 .F3 gd_error_string .
@@ -378,18 +377,19 @@ is
 .IR N -bytes
 wide, a single call of
 .FN gd_getdata
-will never return more than (2**(\fIN\fR-1) - 1) samples.  The request will
-be truncated at (2**(\fIN\fR-\fIM\fR) - 1) samples, where \fIM\fR is the size,
-in bytes, of the largest data type used to calculate the returned field.  If a
-larger request is specified, less data than requested will be returned, without
-raising an error.  This limit is imposed even when 
+will never return more than (2**(\fIN\fR-\fIM\fR) - 1) samples, where
+2**\fIM\fR is the size, in bytes, of the largest data type used to calculate the
+returned field.  (Most derived fields use double values (or complex doubles) for
+intermediate calculations.) If more samples are requested, less data than
+requested will be returned, without raising an error.  This limit is imposed
+even when 
 .ARG return_type
 is
 .B GD_NULL
 or when reading from the
 .I INDEX
 field (i.e., even when no actual I/O or calculation occurs).  In all cases, the
-actual amount of data is returned.
+return value indicates actual amount of data returned.
 
 .SH GETDATA I/O POINTERS
 This is a general discussion of field I/O pointers in the GetData library, and
@@ -469,8 +469,7 @@ manipulated at the same time.
 
 When a Dirfile is first opened, the I/O pointer of every
 .B RAW
-field is set to the beginning-of-frame
-(the value returned by
+field is set to the beginning-of-field (the value returned by
 .F3 gd_bof ),
 as is the I/O pointer of any newly-created
 .B RAW

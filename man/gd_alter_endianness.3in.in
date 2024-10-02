@@ -2,7 +2,7 @@
 .\"
 .\" @configure_input@
 .\"
-.\" Copyright (C) 2008, 2010, 2012, 2014, 2016 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2012, 2014, 2016, 2024 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -15,7 +15,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_endianness 3 "25 December 2016" "Version 0.10.0" "GETDATA"
+.TH gd_alter_endianness 3 "2 October 2024" "Version 0.11.1" "GETDATA"
 
 .SH NAME
 gd_alter_endianness \(em modify the byte sex of fields in a Dirfile
@@ -83,7 +83,7 @@ fields to account for the change in byte sex.  If the encoding of the
 fragment is endianness insensitive, or if the data type is only one byte in
 size, no change is made.  The I/O pointer of all affected
 .B RAW
-fields is reset to the beginning-of-frame.
+fields is reset to the beginning-of-field.
 
 If
 .ARG recode
