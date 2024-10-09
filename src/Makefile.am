@@ -186,8 +186,8 @@ nodist_noinst_DATA = libpath_mangled
 libpath_mangled: ${nodist_python_SCRIPTS}
 	for m in ${module_LTLIBRARIES}; do \
 		${INSTALL_NAME_TOOL} -change \
-		${libdir}/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
-		${abs_top_builddir}/src/.libs/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
+		${libdir}/libgetdata.${GETDATA_MIN_IFACE}.dylib \
+		${abs_top_builddir}/src/.libs/libgetdata.${GETDATA_MIN_IFACE}.dylib \
 		.libs/`basename $$m .la`-${GETDATA_LIB_VERSION}.so; \
 		done
 	touch $@
@@ -196,8 +196,8 @@ libpath_mangled: ${nodist_python_SCRIPTS}
 install-data-hook:
 	for m in ${module_LTLIBRARIES}; do \
 		${INSTALL_NAME_TOOL} -change \
-		${abs_top_builddir}/src/.libs/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
-		${libdir}/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
+		${abs_top_builddir}/src/.libs/libgetdata.${GETDATA_MIN_IFACE}.dylib \
+		${libdir}/libgetdata.${GETDATA_MIN_IFACE}.dylib \
 		${DESTDIR}${moduledir}/`basename $$m .la`-${GETDATA_LIB_VERSION}.so; \
 		done
 endif

@@ -58,6 +58,8 @@ dnl export version information from m4/version.m4
 AC_SUBST(GETDATA_IFACE_VERSION, [getdata_iface_version])
 AC_SUBST(GETDATA_IMPL_REVISION, [getdata_impl_revision])
 AC_SUBST(GETDATA_IFACE_AGE, [getdata_iface_age])
+getdata_min_iface=`expr ${GETDATA_IFACE_VERSION} - ${GETDATA_IFACE_AGE}`
+AC_SUBST(GETDATA_MIN_IFACE, [$getdata_min_iface])
 AC_SUBST(GETDATAXX_VERSION, [getdataxx_version])
 AC_SUBST(FGETDATA_VERSION, [fgetdata_version])
 AC_SUBST(F95GETDATA_VERSION, [f95getdata_version])
@@ -418,7 +420,7 @@ elif test "x$gd_unaligned_override" = "xno"; then
   AC_MSG_RESULT([no (forced)])
 else
   case "${host}" in
-    i?86-*-*|powerpc*-*-*|x86_64-*-*|armv[6789]*-*-*) gd_unaligned_ok=yes ;;
+    i?86-*-*|powerpc*-*-*|x86_64-*-*|armv[6789]*-*-*|aarch64-*-*) gd_unaligned_ok=yes ;;
   *) gd_unaligned_ok=no ;;
   esac
   AC_MSG_RESULT([$gd_unaligned_ok])
