@@ -103,15 +103,15 @@ nodist_noinst_DATA = libpath_mangled
 # Change, say /usr/local/lib/libgetdata.#.dylib, into .libs/libgetdata.#.dylib
 libpath_mangled: ${nodist_perlautogetdata_SCRIPTS}
 	${INSTALL_NAME_TOOL} -change \
-		${libdir}/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
-		${abs_top_builddir}/src/.libs/libgetdata.${GETDATA_IFACE_VERSION}.dylib $<
+		${libdir}/libgetdata.${GETDATA_MIN_IFACE}.dylib \
+		${abs_top_builddir}/src/.libs/libgetdata.${GETDATA_MIN_IFACE}.dylib $<
 	touch $@
 
 # Change mangled path into install path again
-install-exec-hook:
+install-data-hook:
 	${INSTALL_NAME_TOOL} -change \
-		${abs_top_builddir}/src/.libs/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
-		${libdir}/libgetdata.${GETDATA_IFACE_VERSION}.dylib \
+		${abs_top_builddir}/src/.libs/libgetdata.${GETDATA_MIN_IFACE}.dylib \
+		${libdir}/libgetdata.${GETDATA_MIN_IFACE}.dylib \
 		${DESTDIR}${perlautogetdatadir}/GetData.${PERL_dlext}
 endif
 
