@@ -18,7 +18,7 @@
 # along with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-AUTOMAKE_OPTIONS = foreign dist-xz check-news 1.13
+AUTOMAKE_OPTIONS = foreign dist-xz check-news 1.16
 
 EXTRA_DIST = ChangeLog
 
