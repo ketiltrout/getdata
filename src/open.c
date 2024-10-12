@@ -29,7 +29,6 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
   struct dirent *result;
   struct dirent unused;
   struct stat statbuf;
-  size_t dirent_len = offsetof(struct dirent, d_name);
   size_t dirfile_len = strlen(dirfile);
 
   dtrace("%p, %i, \"%s\", %i", D, dirfd, dirfile, root);
@@ -45,25 +44,10 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
       return -1;
     }
     dir = fdopendir(fd);
-
-#ifdef HAVE_FPATHCONF
-    dirent_len += fpathconf(fd, _PC_NAME_MAX) + 1;
-#elif defined HAVE_PATHCONF
-    dirent_len += pathconf(dirfile, _PC_NAME_MAX) + 1;
-#else
-    dirent_len += FILENAME_MAX;
-#endif
   }
 
 #else
   dir = opendir(dirfile);
-
-#ifdef HAVE_PATHCONF
-  dirent_len += pathconf(dirfile, _PC_NAME_MAX) + 1;
-#else
-  dirent_len += FILENAME_MAX;
-#endif
-
 #endif
 
   if (dir == NULL) {
