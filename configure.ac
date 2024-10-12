@@ -21,7 +21,8 @@ dnl
 
 m4_include([m4/version.m4])
 
-AC_INIT([GetData],[getdata_pkg_version],[getdata-devel@lists.sourceforge.net],[],
+AC_INIT([GetData],[getdata_pkg_version],
+        [https://github.com/ketiltrout/getdata/issues],[],
         [http://getdata.sourceforge.net/])
 
 AC_COPYRIGHT(

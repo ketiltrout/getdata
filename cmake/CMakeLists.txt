@@ -28,7 +28,7 @@ add_definitions(
   -DPACKAGE_NAME=\"GetData\"
   -DPACKAGE_VERSION=\"0.10.x\"
   -DGETDATA_LIB_VERSION=\"0.10.x\"
-  -DPACKAGE_BUGREPORT=\"getdata-devel@lists.sourceforge.net\"
+  -DPACKAGE_BUGREPORT=\"https://github.com/ketiltrout/getdata/issues\"
   -DUNALIGNED_ACCESS_OK
   )
 
