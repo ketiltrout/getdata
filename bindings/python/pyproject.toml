@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm", "wheel", "oldest-supported-numpy"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pygetdata"
+dependencies = ["numpy<2.0"]
+dynamic = ["version"]
+
+[tool.setuptools]
+script-files = ["../../util/dirfile2ascii", "../../util/checkdirfile"]
+
+[tool.setuptools_scm]
+version_scheme = "only-version"
+local_scheme = "no-local-version"
+
