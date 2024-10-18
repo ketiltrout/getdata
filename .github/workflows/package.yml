@@ -106,11 +106,11 @@ jobs:
           CIBW_BUILD: ${{ matrix.build }}
           CIBW_SKIP: cp36* cp37* cp313*
           CIBW_BEFORE_ALL_LINUX: >
-            yum install -y bzip2-devel flac-devel xz-devel pcre-devel &&
+            yum install -y bzip2-devel flac-devel xz-devel pcre-devel zziplib-devel &&
             .github/workflows/bootstrap.sh --disable-python &&
             make
           CIBW_BEFORE_ALL_MACOS: >
-            brew install bzip2 flac xz pcre &&
+            brew install bzip2 flac xz pcre libzzip &&
             .github/workflows/bootstrap.sh --disable-python &&
             make
           CIBW_BEFORE_BUILD: >
