@@ -24,21 +24,22 @@ jobs:
         sudo apt-get install -y             \
                 autoconf                    \
                 build-essential             \
+                libltdl-dev                 \
                 liblzma-dev                 \
                 libflac-dev                 \
                 libpcre2-dev                \
                 libpython3-dev              \
                 python3-numpy-dev           \
                 wget
-        echo CC=gcc-10 >> $GITHUB_ENV
-        echo CXX=g++-10 >> $GITHUB_ENV
+        echo CC=gcc-14 >> $GITHUB_ENV
+        echo CXX=g++-14 >> $GITHUB_ENV
         echo PREFIX=/usr >> $GITHUB_ENV
 
     - name: Install build dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install automake libtool gcc pcre pcre2 xz flac python3
-        pip3 install setuptools "numpy<2" --break-system-packages
+        brew install automake libtool gcc pcre pcre2 xz flac python@3.12
+        pip3.12 install setuptools "numpy<2" --break-system-packages
         echo CC=gcc-14 >> $GITHUB_ENV
         echo CXX=g++-14 >> $GITHUB_ENV
         echo FC=gfortran-14 >> $GITHUB_ENV
@@ -48,7 +49,7 @@ jobs:
     - name: Configure
       run: |
         autoreconf -i
-        ./configure --disable-php --with-python=`which python3` \
+        ./configure --disable-php --with-python=`which python3.12` \
             --with-ltdl=$PREFIX \
             --with-liblzma=$PREFIX \
             --with-libFLAC=$PREFIX \
