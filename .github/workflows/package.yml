@@ -17,12 +17,6 @@ jobs:
         include:
           # macos-15-intel for x86_64 (min macOS 15.0), macos-14 for ARM (min macOS 14.0)
           - os: macos-15-intel
-            python: '3.8'
-            build: 'cp38-macosx_x86_64'
-            target: '15.0'
-            prefix: /usr/local
-
-          - os: macos-15-intel
             python: '3.9'
             build: 'cp39-macosx_x86_64'
             target: '15.0'
@@ -104,7 +98,7 @@ jobs:
         run: python -m cibuildwheel --output-dir wheelhouse bindings/python
         env:
           CIBW_BUILD: ${{ matrix.build }}
-          CIBW_SKIP: cp36* cp37* cp313*
+          CIBW_SKIP: cp36* cp37* cp38*
           CIBW_BEFORE_ALL_LINUX: >
             yum install -y bzip2-devel flac-devel xz-devel pcre-devel zziplib-devel &&
             .github/workflows/bootstrap.sh --disable-python &&
