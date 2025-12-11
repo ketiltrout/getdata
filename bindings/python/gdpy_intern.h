@@ -30,8 +30,12 @@
 
 #ifdef GDPY_INCLUDE_NUMPY
 # ifdef HAVE_NUMPY_ARRAYOBJECT_H
+#  define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #  define PY_ARRAY_UNIQUE_SYMBOL gdpy_array_api
 #  include <numpy/arrayobject.h>
+#  if NPY_ABI_VERSION < 0x02000000
+#   error "NumPy 2.0 or later is required. Please upgrade NumPy: pip install 'numpy>=2.0'"
+#  endif
 # endif
 #endif
 
