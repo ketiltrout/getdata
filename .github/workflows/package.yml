@@ -114,7 +114,7 @@ jobs:
             .github/workflows/bootstrap.sh --disable-python &&
             make
           CIBW_BEFORE_BUILD: >
-            python -m pip install oldest-supported-numpy &&
+            python -m pip install "numpy>=2.0" &&
             .github/workflows/bootstrap.sh &&
             make -C bindings/python pyconstants.c
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >

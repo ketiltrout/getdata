@@ -29,8 +29,9 @@ jobs:
                 libflac-dev                 \
                 libpcre2-dev                \
                 libpython3-dev              \
-                python3-numpy-dev           \
+                python3-pip                 \
                 wget
+        pip3 install --break-system-packages "numpy>=2.0"
         echo CC=gcc-14 >> $GITHUB_ENV
         echo CXX=g++-14 >> $GITHUB_ENV
         echo PREFIX=/usr >> $GITHUB_ENV
@@ -39,7 +40,7 @@ jobs:
       if: runner.os == 'macOS'
       run: |
         brew install automake libtool gcc pcre pcre2 xz flac python@3.12
-        pip3.12 install setuptools "numpy<2" --break-system-packages
+        pip3.12 install setuptools "numpy>=2.0" --break-system-packages
         echo CC=gcc-14 >> $GITHUB_ENV
         echo CXX=g++-14 >> $GITHUB_ENV
         echo FC=gfortran-14 >> $GITHUB_ENV
