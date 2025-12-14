@@ -24,7 +24,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #define GD_NO_LEGACY_API
 #include "getdata.h"
