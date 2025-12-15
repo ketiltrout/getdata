@@ -129,6 +129,8 @@ foreach(_test ${gd_sources})
     target_link_libraries(${testname} ${PCRE_LIBRARIES})
   endif()
   add_test(NAME ${testname} COMMAND ${testname})
+  # Exit code 77 means "test skipped" in autotools convention
+  set_tests_properties(${testname} PROPERTIES SKIP_RETURN_CODE 77)
 endforeach()
 
 # Python tests
