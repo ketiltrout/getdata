@@ -1,16 +1,15 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm", "wheel", "numpy>=2.0"]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core>=0.5", "numpy>=2.0"]
+build-backend = "scikit_build_core.build"
 
 [project]
 name = "pygetdata"
 dependencies = ["numpy>=1.7"]
 dynamic = ["version"]
 
-[tool.setuptools]
-script-files = ["../../util/dirfile2ascii", "../../util/checkdirfile"]
-
-[tool.setuptools_scm]
-version_scheme = "only-version"
-local_scheme = "no-local-version"
+[tool.scikit-build]
+cmake.source-dir = "../../cmake"
+cmake.build-type = "Release"
+cmake.args = ["-DBUILD_PYTHON=ON", "-DGD_TEST=OFF", "-DGD_UTIL=OFF"]
+wheel.install-dir = "."
 
