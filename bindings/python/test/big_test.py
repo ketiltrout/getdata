@@ -43,12 +43,12 @@ def B(s):
 def CheckOK(t):
   global ne
   ne+=1
-  print ("e[", t, "] =", sys.exc_info()[0], sys.exc_value)
+  print ("e[", t, "] =", sys.exc_info()[0], sys.exc_info()[1])
 
 def CheckOK2(t,m):
   global ne
   ne+=1
-  print ("e[", t, ",", m, "] =", sys.exc_info()[0], sys.exc_value)
+  print ("e[", t, ",", m, "] =", sys.exc_info()[0], sys.exc_info()[1])
 
 def CheckException(t,g):
   global ne
