@@ -12,6 +12,9 @@ libpath_mangled
 Makefile
 Makefile.in
 
+CMakeFiles
+CMakeCache.txt
+
 /*.zip
 /*.tar.*
 /*.sig
