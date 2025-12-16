@@ -2247,9 +2247,9 @@ CheckSimple2(304, 5, n, B(""))
 # 305: gd_match_entries
 try:
   n = d.match_entries(regex='^lin', fragment=0)
+  CheckSimple2(305, 1, n, [ B('lincom'), B('linterp') ])
 except:
-  CheckOK2(305, 0)
-CheckSimple2(305, 1, n, [ B('lincom'), B('linterp') ])
+  CheckException2(305, 0, pygetdata.UnsupportedError)  # Expected when regex unsupported
 
 # 306: gd_open_limit
 try:
