@@ -641,7 +641,7 @@ try:
   f = d.fragment(0)
 except:
   CheckOK(64)
-CheckEOS(64,f.name,"dirfile/format")
+CheckEOS(64,f.name,os.path.join("dirfile","format"))
 
 # 65: nfragments check
 try:
@@ -1053,7 +1053,7 @@ try:
   n = d.raw_filename("data")
 except:
   CheckOK(116)
-CheckEOS(116,n,"dirfile/data")
+CheckEOS(116,n,os.path.join("dirfile","data"))
 
 # 117: reference check
 try:
@@ -1976,7 +1976,7 @@ try:
   n = d.linterp_tablename("linterp")
 except:
   CheckOK(241)
-CheckEOS(241,n,"dirfile/lut")
+CheckEOS(241,n,os.path.join("dirfile","lut"))
 
 # 242: mcarrays
 try:
