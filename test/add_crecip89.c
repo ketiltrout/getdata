@@ -18,7 +18,9 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#define GD_C89_API
+#ifndef GD_C89_API
+# define GD_C89_API
+#endif
 #include "test.h"
 
 #include <stdlib.h>

@@ -19,7 +19,9 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 /* Check if GD_C89_API produces a useable API */
-#define GD_C89_API
+#ifndef GD_C89_API
+# define GD_C89_API
+#endif
 #include "test.h"
 
 int main(void)
