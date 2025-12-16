@@ -69,6 +69,11 @@ jobs:
             build: 'cp*-manylinux_x86_64'
             prefix: /usr
 
+          - os: windows-latest
+            python: '3.12'
+            build: 'cp*-win_amd64'
+            prefix: 'C:\Program Files'
+
     steps:
       - name: Setup environment
         run: echo "PREFIX=${{ matrix.prefix }}" >> $GITHUB_ENV
@@ -87,9 +92,7 @@ jobs:
       - name: Setup macOS environment
         if: runner.os == 'macOS'
         run: |
-          brew install automake libtool
           echo "MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}" >> $GITHUB_ENV
-          echo CPPFLAGS="`python3-config --includes`" >> $GITHUB_ENV
 
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel==2.21.3
@@ -100,25 +103,26 @@ jobs:
           CIBW_BUILD: ${{ matrix.build }}
           CIBW_SKIP: cp36* cp37* cp38*
           CIBW_BEFORE_ALL_LINUX: >
-            yum install -y bzip2-devel flac-devel xz-devel pcre-devel zziplib-devel &&
-            .github/workflows/bootstrap.sh --disable-python &&
-            make
+            yum install -y cmake bzip2-devel flac-devel xz-devel pcre-devel zziplib-devel
           CIBW_BEFORE_ALL_MACOS: >
-            brew install bzip2 flac xz pcre libzzip &&
-            .github/workflows/bootstrap.sh --disable-python &&
-            make
+            brew install --quiet cmake bzip2 flac xz pcre libzzip
+          CIBW_BEFORE_ALL_WINDOWS: >
+            choco install cmake --no-progress
           CIBW_BEFORE_BUILD: >
-            python -m pip install "numpy>=2.0" &&
-            .github/workflows/bootstrap.sh &&
-            make -C bindings/python pyconstants.c
-          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-            LD_LIBRARY_PATH=$PWD/src/.libs auditwheel repair -w {dest_dir} {wheel}
-          CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
-            DYLD_LIBRARY_PATH=$PWD/src/.libs delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
+            python -m pip install "scikit-build-core>=0.5" "numpy>=2.0"
           CIBW_BUILD_VERBOSITY: 1
-          CIBW_TEST_COMMAND: >
-            cd {package}/test &&
-            PYTHONPATH=`python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'`:$PYTHONPATH make check
+          CIBW_TEST_COMMAND_LINUX: >
+            python -c "import pygetdata; print(f'pygetdata version: {pygetdata.__version__}')" &&
+            cd {project}/bindings/python/test &&
+            python big_test.py
+          CIBW_TEST_COMMAND_MACOS: >
+            python -c "import pygetdata; print(f'pygetdata version: {pygetdata.__version__}')" &&
+            cd {project}/bindings/python/test &&
+            python big_test.py
+          CIBW_TEST_COMMAND_WINDOWS: >
+            python -c "import pygetdata; print(f'pygetdata version: {pygetdata.__version__}')" &&
+            cd /d {project}\bindings\python\test &&
+            python big_test.py
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
