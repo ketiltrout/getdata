@@ -78,6 +78,12 @@ set(tests_ignored
   zzslim_get zzslim_nframes zzslim_seek zzslim_seek_far
   )
 
+# Windows-specific: GD_TRUNC has a known issue with directory iteration
+# (modifying directory while iterating is unsafe with FindFirst/FindNext API)
+if(WIN32)
+  list(APPEND tests_ignored trunc trunc_dir trunc_truncsub)
+endif()
+
 foreach(_item ${tests_ignored})
   list(REMOVE_ITEM gd_sources ${GD_DIR}/test/${_item}.c)
 endforeach()

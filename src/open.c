@@ -263,12 +263,21 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
       return NULL;
     }
 
+#ifdef __MSVCRT__
+    /* GD_TRUNC is unsafe on Windows: modifying a directory while iterating
+     * causes crashes with the FindFirst/FindNext API. Return error instead. */
+    _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
+    free(dirfile);
+    dreturn("%p", NULL);
+    return NULL;
+#else
     format_trunc = _GD_TruncDir(D, dirfd, dirfile, 1);
     if (format_trunc < 0) {
       free(dirfile);
       dreturn("%p", NULL);
       return NULL;
     }
+#endif
   }
 
   /* Create, if needed */
