@@ -88,7 +88,7 @@ def CheckSimple2(t,m,v,g):
 
 def CheckEOS(t,v,g):
   global ne
-  if (re.search(g + "$", v) == None):
+  if (re.search(re.escape(g) + "$", v) == None):
     ne+=1
     print ("n[", t, "] =", v, "expected", g)
 
