@@ -26,7 +26,6 @@ target_include_directories(pygetdata PRIVATE
 # Link against static library for self-contained wheels
 target_link_libraries(pygetdata PRIVATE getdata_static)
 
-target_compile_definitions(pygetdata PRIVATE HAVE_CONFIG_H)
 
 # Remove 'lib' prefix on Unix-like systems
 set_target_properties(pygetdata PROPERTIES PREFIX "")

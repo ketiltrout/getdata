@@ -53,7 +53,6 @@ set_target_properties(getdata PROPERTIES
   VERSION 11.0.0
   SOVERSION 11
 )
-target_compile_definitions(getdata PRIVATE HAVE_CONFIG_H)
 
 # Build static library (parallel to autotools .a)
 add_library(getdata_static STATIC ${gd_sources} ${gd_headers} ${CMAKE_BINARY_DIR}/getdata.h)
@@ -61,7 +60,6 @@ set_target_properties(getdata_static PROPERTIES
   OUTPUT_NAME getdata
   POSITION_INDEPENDENT_CODE ON
 )
-target_compile_definitions(getdata_static PRIVATE HAVE_CONFIG_H)
 
 # Macro to configure both shared and static libraries with the same dependencies
 macro(configure_getdata_target target)
