@@ -600,40 +600,40 @@ int gdpy_npytype_from_type(gd_type_t type)
   switch(type)
   {
     case GD_UINT8:
-      npytype = PyArray_UINT8;
+      npytype = NPY_UINT8;
       break;
     case GD_INT8:
-      npytype = PyArray_INT8;
+      npytype = NPY_INT8;
       break;
     case GD_UINT16:
-      npytype = PyArray_UINT16;
+      npytype = NPY_UINT16;
       break;
     case GD_INT16:
-      npytype = PyArray_INT16;
+      npytype = NPY_INT16;
       break;
     case GD_UINT32:
-      npytype = PyArray_UINT32;
+      npytype = NPY_UINT32;
       break;
     case GD_INT32:
-      npytype = PyArray_INT32;
+      npytype = NPY_INT32;
       break;
     case GD_UINT64:
-      npytype = PyArray_UINT64;
+      npytype = NPY_UINT64;
       break;
     case GD_INT64:
-      npytype = PyArray_INT64;
+      npytype = NPY_INT64;
       break;
     case GD_FLOAT32:
-      npytype = PyArray_FLOAT32;
+      npytype = NPY_FLOAT32;
       break;
     case GD_FLOAT64:
-      npytype = PyArray_FLOAT64;
+      npytype = NPY_FLOAT64;
       break;
     case GD_COMPLEX64:
-      npytype = PyArray_COMPLEX64;
+      npytype = NPY_COMPLEX64;
       break;
     case GD_COMPLEX128:
-      npytype = PyArray_COMPLEX128;
+      npytype = NPY_COMPLEX128;
       break;
     default:
       npytype = NPY_NOTYPE;

@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm", "wheel", "oldest-supported-numpy"]
+requires = ["setuptools", "setuptools-scm", "wheel", "numpy>=2.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "pygetdata"
-dependencies = ["numpy<2.0"]
+dependencies = ["numpy>=1.7"]
 dynamic = ["version"]
 
 [tool.setuptools]

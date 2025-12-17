@@ -132,7 +132,7 @@ static int gdpy_callback_func(gd_parser_data_t *pdata, void *extra)
       return GD_SYNTAX_ABORT;
     }
 
-    result = PyEval_CallObject(self->callback, arglist);
+    result = PyObject_CallObject(self->callback, arglist);
     Py_DECREF(arglist);
 
     /* result may be:
@@ -555,7 +555,7 @@ static PyObject *gdpy_dirfile_getcarray(struct gdpy_dirfile_t *self,
     if (!as_list) {
       dims[0] = (npy_intp)len;
       pyobj = PyArray_SimpleNew(1, dims, gdpy_npytype_from_type(return_type));
-      data = PyArray_DATA(pyobj);
+      data = PyArray_DATA((PyArrayObject *)pyobj);
     } else
       data = PyMem_Malloc((size_t)len * GD_SIZE(return_type));
 
@@ -750,7 +750,7 @@ static PyObject *gdpy_dirfile_carrays(struct gdpy_dirfile_t *self,
     } else if (!as_list) {
       dims[0] = (npy_intp)carrays[i].n;
       pydata = PyArray_SimpleNew(1, dims, gdpy_npytype_from_type(return_type));
-      memcpy(PyArray_DATA(pydata), carrays[i].d, GD_SIZE(return_type) *
+      memcpy(PyArray_DATA((PyArrayObject *)pydata), carrays[i].d, GD_SIZE(return_type) *
           carrays[i].n);
     } else
       pydata = gdpy_convert_to_pylist(carrays[i].d, return_type, carrays[i].n);
@@ -1000,7 +1000,7 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
     if (!as_list) {
       dims[0] = (npy_intp)num_samples;
       pyobj = PyArray_SimpleNew(1, dims, gdpy_npytype_from_type(return_type));
-      data = PyArray_DATA(pyobj);
+      data = PyArray_DATA((PyArrayObject *)pyobj);
     } else
       data = PyMem_Malloc((size_t)num_samples * GD_SIZE(return_type));
 
@@ -1534,7 +1534,7 @@ static PyObject *gdpy_dirfile_mcarrays(struct gdpy_dirfile_t *self,
     } else if (!as_list) {
       dims[0] = (npy_intp)carrays[i].n;
       pydata = PyArray_SimpleNew(1, dims, gdpy_npytype_from_type(return_type));
-      memcpy(PyArray_DATA(pydata), carrays[i].d, GD_SIZE(return_type) *
+      memcpy(PyArray_DATA((PyArrayObject *)pydata), carrays[i].d, GD_SIZE(return_type) *
           carrays[i].n);
     } else
       pydata = gdpy_convert_to_pylist(carrays[i].d, return_type, carrays[i].n);
@@ -2307,7 +2307,8 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
 
   /* we only handle list or ndarray data */
   if (PyArray_Check(pyobj)) {
-    if (PyArray_NDIM(pyobj) != 1) {
+    PyArrayObject *pyarr = (PyArrayObject *)pyobj;
+    if (PyArray_NDIM(pyarr) != 1) {
       PyErr_SetString(PyExc_ValueError,
           "pygetdata.dirfile.put_carray() argument 2 must be one dimensional");
       PyMem_Free(field_code);
@@ -2315,7 +2316,7 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
       return NULL;
     }
     have_ndarray = 1;
-    len = (size_t)PyArray_DIM(pyobj, 0);
+    len = (size_t)PyArray_DIM(pyarr, 0);
   } else {
     if (!PyList_Check(pyobj)) {
       PyErr_SetString(PyExc_TypeError,
@@ -2333,7 +2334,8 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
     void *data;
 
     if (have_ndarray) {
-      type = gdpy_type_from_npytype(PyArray_TYPE(pyobj));
+      PyArrayObject *pyarr = (PyArrayObject *)pyobj;
+      type = gdpy_type_from_npytype(PyArray_TYPE(pyarr));
 
       if (type == GD_UNKNOWN) {
         PyErr_SetString(PyExc_ValueError,
@@ -2343,7 +2345,7 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
         return NULL;
       }
 
-      if (!(PyArray_FLAGS(pyobj) & NPY_ALIGNED)) {
+      if (!(PyArray_FLAGS(pyarr) & NPY_ARRAY_ALIGNED)) {
         PyErr_SetString(PyExc_ValueError,
             "pygetdata.dirfile.put_carray() argument 2 must be aligned.");
         PyMem_Free(field_code);
@@ -2351,7 +2353,7 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
         return NULL;
       }
 
-      if (!(PyArray_FLAGS(pyobj) & NPY_C_CONTIGUOUS)) {
+      if (!(PyArray_FLAGS(pyarr) & NPY_ARRAY_C_CONTIGUOUS)) {
         PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.put_carray()"
             " argument 2 must be C-style contiguous.");
         PyMem_Free(field_code);
@@ -2359,7 +2361,7 @@ static PyObject *gdpy_dirfile_putcarray(struct gdpy_dirfile_t *self,
         return NULL;
       }
 
-      data = PyArray_DATA(pyobj);
+      data = PyArray_DATA(pyarr);
     } else {
       data = PyMem_Malloc(len * 16);
       type = gdpy_convert_from_pylist(pyobj, data, type, len);
@@ -2474,7 +2476,8 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
 
   /* we only handle list or ndarray data */
   if (PyArray_Check(pyobj)) {
-    if (PyArray_NDIM(pyobj) != 1) {
+    PyArrayObject *arr = (PyArrayObject *)pyobj;
+    if (PyArray_NDIM(arr) != 1) {
       PyErr_SetString(PyExc_ValueError,
           "pygetdata.dirfile.putdata() argument 2 must be one dimensional");
       PyMem_Free(field_code);
@@ -2482,7 +2485,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
       return NULL;
     }
     have_ndarray = 1;
-    ns = PyArray_DIM(pyobj, 0);
+    ns = PyArray_DIM(arr, 0);
   } else {
     if (!PyList_Check(pyobj)) {
       PyErr_SetString(PyExc_TypeError,
@@ -2500,7 +2503,8 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
     void *data;
 
     if (have_ndarray) {
-      type = gdpy_type_from_npytype(PyArray_TYPE(pyobj));
+      PyArrayObject *arr = (PyArrayObject *)pyobj;
+      type = gdpy_type_from_npytype(PyArray_TYPE(arr));
 
       if (type == GD_UNKNOWN) {
         PyErr_SetString(PyExc_ValueError,
@@ -2510,7 +2514,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
         return NULL;
       }
 
-      if (!(PyArray_FLAGS(pyobj) & NPY_ALIGNED)) {
+      if (!(PyArray_FLAGS(arr) & NPY_ARRAY_ALIGNED)) {
         PyErr_SetString(PyExc_ValueError,
             "pygetdata.dirfile.putdata() argument 2 must be aligned.");
         PyMem_Free(field_code);
@@ -2518,7 +2522,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
         return NULL;
       }
 
-      if (!(PyArray_FLAGS(pyobj) & NPY_C_CONTIGUOUS)) {
+      if (!(PyArray_FLAGS(arr) & NPY_ARRAY_C_CONTIGUOUS)) {
         PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.putdata()"
             " argument 2 must be C-style contiguous.");
         PyMem_Free(field_code);
@@ -2526,7 +2530,7 @@ static PyObject *gdpy_dirfile_putdata(struct gdpy_dirfile_t *self,
         return NULL;
       }
 
-      data = PyArray_DATA(pyobj);
+      data = PyArray_DATA(arr);
     } else {
       data = PyMem_Malloc(ns * 16);
       type = gdpy_convert_from_pylist(pyobj, data, type, ns);
