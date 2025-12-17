@@ -65,7 +65,7 @@ jobs:
         run: python -m cibuildwheel --output-dir wheelhouse bindings/python
         env:
           CIBW_BUILD: ${{ matrix.build }}
-          CIBW_SKIP: cp36* cp37* cp38*
+          CIBW_SKIP: cp38*
           CIBW_BEFORE_ALL_LINUX: >
             yum install -y cmake bzip2-devel flac-devel xz-devel pcre-devel zziplib-devel
           CIBW_BEFORE_ALL_MACOS: >
