@@ -20,7 +20,6 @@
 
 import sys
 import os
-import re
 import array
 import pygetdata
 
@@ -42,7 +41,8 @@ def parser_callback(pdata, extra):
     print ("linenum =", pdata["linenum"])
     sys.exit(1)
 
-  if (re.search("dirfile/format$", pdata["filename"]) == None):
+  path = os.path.join("dirfile", "format")
+  if not pdata["filename"].endswith(path):
     print ("filename =", pdata["filename"])
     sys.exit(1)
 
@@ -52,12 +52,12 @@ def parser_callback(pdata, extra):
 data=array.array("H",range(3,7000,7))
 os.system("rm -rf dirfile")
 os.mkdir("dirfile")
-file=open("dirfile/data", 'wb')
+file=open(os.path.join("dirfile", "data"), 'wb')
 data.tofile(file)
 file.close()
 
-file=open("dirfile/format", "w")
-file.write("data RAW UINT16 8\nbad line\n")
+file=open(os.path.join("dirfile", "format"), "wb")
+file.write(b"data RAW UINT16 8\nbad line\n")
 file.close()
 
 d=pygetdata.dirfile("dirfile", pygetdata.RDONLY, callback=parser_callback,
