@@ -52,6 +52,7 @@ add_library(getdata SHARED ${gd_sources} ${gd_headers} ${CMAKE_BINARY_DIR}/getda
 set_target_properties(getdata PROPERTIES
   VERSION 11.0.0
   SOVERSION 11
+  WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
 # Build static library (parallel to autotools .a)

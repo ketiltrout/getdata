@@ -23,11 +23,23 @@ target_include_directories(pygetdata PRIVATE
   ${Python3_NumPy_INCLUDE_DIRS}
 )
 
-# Link against static library for self-contained wheels
-target_link_libraries(pygetdata PRIVATE getdata_static)
-
+# Link against shared library - wheel repair tools will bundle it
+target_link_libraries(pygetdata PRIVATE getdata)
 
 # Remove 'lib' prefix on Unix-like systems
 set_target_properties(pygetdata PROPERTIES PREFIX "")
+
+# For wheel builds, set RPATH so repair tools can find the library
+if(SKBUILD)
+  if(APPLE)
+    set_target_properties(pygetdata PROPERTIES
+      INSTALL_RPATH "@loader_path/lib"
+      BUILD_WITH_INSTALL_RPATH FALSE)
+  else()
+    set_target_properties(pygetdata PROPERTIES
+      INSTALL_RPATH "$ORIGIN/lib"
+      BUILD_WITH_INSTALL_RPATH FALSE)
+  endif()
+endif()
 
 install(TARGETS pygetdata LIBRARY DESTINATION .)

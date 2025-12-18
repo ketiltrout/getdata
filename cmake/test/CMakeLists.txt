@@ -150,8 +150,15 @@ if(BUILD_PYTHON)
     )
     # Set PYTHONPATH to find pygetdata module
     # $<CONFIG> is Release/Debug on multi-config (Windows), empty on single-config (Unix)
-    set_tests_properties(python_${testname} PROPERTIES
-      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib/$<CONFIG>"
-    )
+    # On Windows, also add DLL directory to PATH so getdata.dll can be found
+    if(WIN32)
+      set_tests_properties(python_${testname} PROPERTIES
+        ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib/$<CONFIG>;PATH=${CMAKE_BINARY_DIR}/bin/$<CONFIG>;$ENV{PATH}"
+      )
+    else()
+      set_tests_properties(python_${testname} PROPERTIES
+        ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib/$<CONFIG>"
+      )
+    endif()
   endforeach()
 endif()

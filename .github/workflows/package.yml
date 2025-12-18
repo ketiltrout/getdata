@@ -74,6 +74,10 @@ jobs:
             choco install cmake --no-progress
           CIBW_BEFORE_BUILD: >
             python -m pip install "scikit-build-core>=0.5" "numpy>=2.0"
+          CIBW_BEFORE_BUILD_WINDOWS: >
+            pip install delvewheel "scikit-build-core>=0.5" "numpy>=2.0"
+          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: >
+            delvewheel repair --extract-dir {dest_dir}\..\extract --add-path {dest_dir}\..\extract\bin -vv -w {dest_dir} {wheel}
           CIBW_BUILD_VERBOSITY: 1
           CIBW_TEST_COMMAND_LINUX: >
             python -c "import pygetdata; print(f'pygetdata version: {pygetdata.__version__}')" &&
