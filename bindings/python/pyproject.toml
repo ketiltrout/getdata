@@ -10,7 +10,7 @@ dynamic = ["version"]
 [tool.scikit-build]
 cmake.source-dir = "../../cmake"
 cmake.build-type = "Release"
-cmake.args = ["-DBUILD_PYTHON=ON", "-DGD_TEST=OFF", "-DGD_UTIL=OFF"]
+cmake.args = ["-DBUILD_PYTHON=ON", "-DGD_TEST=OFF", "-DGD_UTIL=ON"]
 wheel.install-dir = "."
 
 [tool.scikit-build.metadata.version]
