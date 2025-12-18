@@ -1,5 +1,7 @@
 
-add_subdirectory(cxx)
+if(BUILD_CXX)
+  add_subdirectory(cxx)
+endif()
 
 if(BUILD_PYTHON)
   # Build make_parameters utility for generating pyconstants.c

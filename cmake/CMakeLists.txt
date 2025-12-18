@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 project(getdata)
 
 option(BUILD_PYTHON "Build Python bindings" ON)
+option(BUILD_CXX "Build C++ bindings" ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY  ${CMAKE_BINARY_DIR}/lib)
