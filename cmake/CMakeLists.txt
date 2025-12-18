@@ -167,7 +167,8 @@ check_function_exists(readdir_r HAVE_READDIR_R)
 check_function_exists(readlink HAVE_READLINK)
 check_function_exists(regcomp HAVE_REGCOMP)
 check_function_exists(renameat HAVE_RENAMEAT)
-check_function_exists(snprintf HAVE_SNPRINTF)
+check_symbol_exists(snprintf "stdio.h" HAVE_SNPRINTF)
+check_function_exists(_snprintf HAVE__SNPRINTF)
 check_function_exists(strtoll HAVE_STRTOLL)
 check_function_exists(strtoull HAVE_STRTOULL)
 check_function_exists(symlink HAVE_SYMLINK)
@@ -263,7 +264,6 @@ if(MSVC)
     -DHAVE__ISNAN
     -DHAVE__MKDIR
     -DHAVE__RMDIR
-    -DHAVE__SNPRINTF
     -DHAVE__STAT64
     -DHAVE__STRTOI64
     -DHAVE__STRTOUI64
@@ -320,7 +320,6 @@ elseif(MINGW)
     -DHAVE__OPEN
     -DHAVE__READ
     -DHAVE__RMDIR
-    -DHAVE__SNPRINTF
     -DHAVE__STAT64
     -DHAVE__STRTOI64
     -DHAVE__STRTOUI64
