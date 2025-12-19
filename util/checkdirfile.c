@@ -16,15 +16,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef HAVE_CONFIG_H
 #include "gd_config.h"
-#endif
-
-#ifndef HAVE_SNPRINTF
-#ifdef HAVE__SNPRINTF
-#define snprintf _snprintf
-#endif
-#endif
 
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
@@ -34,6 +26,12 @@
 #include <string.h>
 #include <stdio.h>
 #include "getdata.h"
+
+#ifndef HAVE_SNPRINTF
+#ifdef HAVE__SNPRINTF
+#define snprintf _snprintf
+#endif
+#endif
 
 #ifndef PACKAGE_STRING
 #define PACKAGE_STRING PACKAGE_NAME " " PACKAGE_VERSION

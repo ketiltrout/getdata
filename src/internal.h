@@ -26,9 +26,7 @@
 #define _LARGEFILE64_SOURCE
 #endif
 
-#ifdef HAVE_CONFIG_H
 #include "gd_config.h"
-#endif
 
 #define GD_64BIT_API
 #include "getdata.h"

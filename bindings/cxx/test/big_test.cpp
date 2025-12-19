@@ -18,9 +18,7 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-#ifdef HAVE_CONFIG_H
 #include "gd_config.h"
-#endif
 #undef GETDATA_LEGACY_API
 
 #include "getdata/dirfile.h"

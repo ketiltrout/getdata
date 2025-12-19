@@ -43,12 +43,12 @@ def B(s):
 def CheckOK(t):
   global ne
   ne+=1
-  print ("e[", t, "] =", sys.exc_info()[0], sys.exc_value)
+  print ("e[", t, "] =", sys.exc_info()[0], sys.exc_info()[1])
 
 def CheckOK2(t,m):
   global ne
   ne+=1
-  print ("e[", t, ",", m, "] =", sys.exc_info()[0], sys.exc_value)
+  print ("e[", t, ",", m, "] =", sys.exc_info()[0], sys.exc_info()[1])
 
 def CheckException(t,g):
   global ne
@@ -88,7 +88,7 @@ def CheckSimple2(t,m,v,g):
 
 def CheckEOS(t,v,g):
   global ne
-  if (re.search(g + "$", v) == None):
+  if (re.search(re.escape(g) + "$", v) == None):
     ne+=1
     print ("n[", t, "] =", v, "expected", g)
 
@@ -641,7 +641,7 @@ try:
   f = d.fragment(0)
 except:
   CheckOK(64)
-CheckEOS(64,f.name,"dirfile/format")
+CheckEOS(64,f.name,os.path.join("dirfile","format"))
 
 # 65: nfragments check
 try:
@@ -1053,7 +1053,7 @@ try:
   n = d.raw_filename("data")
 except:
   CheckOK(116)
-CheckEOS(116,n,"dirfile/data")
+CheckEOS(116,n,os.path.join("dirfile","data"))
 
 # 117: reference check
 try:
@@ -1976,7 +1976,7 @@ try:
   n = d.linterp_tablename("linterp")
 except:
   CheckOK(241)
-CheckEOS(241,n,"dirfile/lut")
+CheckEOS(241,n,os.path.join("dirfile","lut"))
 
 # 242: mcarrays
 try:
@@ -2247,9 +2247,9 @@ CheckSimple2(304, 5, n, B(""))
 # 305: gd_match_entries
 try:
   n = d.match_entries(regex='^lin', fragment=0)
+  CheckSimple2(305, 1, n, [ B('lincom'), B('linterp') ])
 except:
-  CheckOK2(305, 0)
-CheckSimple2(305, 1, n, [ B('lincom'), B('linterp') ])
+  CheckException2(305, 0, pygetdata.UnsupportedError)  # Expected when regex unsupported
 
 # 306: gd_open_limit
 try:

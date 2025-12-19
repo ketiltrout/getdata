@@ -18,9 +18,7 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-#ifdef HAVE_CONFIG_H
 #include "gd_config.h"
-#endif
 
 /* To avoid including stuff out of tree, we include everything here,
  * even though getdata/dirfile.h will try to include it again.

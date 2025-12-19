@@ -28,9 +28,7 @@
 #undef _POSIX_C_SOURCE
 #undef _SVID_SOURCE
 
-#ifdef HAVE_CONFIG_H
-# include "gd_config.h"
-#endif
+#include "gd_config.h"
 
 #ifdef GD_EXTERNAL
 # include <complex.h>

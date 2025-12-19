@@ -19,9 +19,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef HAVE_CONFIG_H
 #include "gd_config.h"
-#endif
 
 #ifdef GD_EXTERNAL
 # define GD_C89_API

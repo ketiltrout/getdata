@@ -33,16 +33,21 @@ int main(void)
   rmdirfile();
   mkdir(filedir, 0700);
 
+#ifdef WORDS_BIGENDIAN
   MAKEFORMATFILE(format,
     "/VERSION 5\n"
-#ifdef WORDS_BIGENDIAN
     "/ENDIAN little\n"
-#else
-    "/ENDIAN big\n"
-#endif
     "a.r RAW UINT8 8\n"
     "ENCODING PHASE a.r 0\n"
   );
+#else
+  MAKEFORMATFILE(format,
+    "/VERSION 5\n"
+    "/ENDIAN big\n"
+    "a.r RAW UINT8 8\n"
+    "ENCODING PHASE a.r 0\n"
+  );
+#endif
   MAKEDATAFILE(data, unsigned char, i, 256);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);

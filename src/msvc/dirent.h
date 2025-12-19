@@ -20,7 +20,9 @@
 #include <io.h>
 
 //<getdata>
+#ifndef FILENAME_MAX
 #define FILENAME_MAX _MAX_FNAME
+#endif
 #define __MINGW_NOTHROW
 //</getdata>
 
