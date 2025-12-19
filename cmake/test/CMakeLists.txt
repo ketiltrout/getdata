@@ -149,11 +149,11 @@ if(BUILD_PYTHON)
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bindings/python
     )
     # Set PYTHONPATH to find pygetdata module
+    # Windows: in bin/ (with DLLs), Unix: in lib/ (with shared libraries)
     # $<CONFIG> is Release/Debug on multi-config (Windows), empty on single-config (Unix)
-    # On Windows, also add DLL directory to PATH so getdata.dll can be found
     if(WIN32)
       set_tests_properties(python_${testname} PROPERTIES
-        ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib/$<CONFIG>;PATH=${CMAKE_BINARY_DIR}/bin/$<CONFIG>;$ENV{PATH}"
+        ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/bin/$<CONFIG>"
       )
     else()
       set_tests_properties(python_${testname} PROPERTIES
