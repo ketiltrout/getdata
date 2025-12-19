@@ -5,8 +5,8 @@
 
 /* Package information */
 #define PACKAGE_NAME "GetData"
-#define PACKAGE_VERSION "0.11.0"
-#define PACKAGE_STRING "GetData 0.11.0"
+#define PACKAGE_VERSION "@GETDATA_VERSION_STRING@"
+#define PACKAGE_STRING "GetData @GETDATA_VERSION_STRING@"
 #define PACKAGE_BUGREPORT "https://github.com/ketiltrout/getdata/issues"
 
 /* Headers */
@@ -118,10 +118,10 @@
 #cmakedefine HAVE_LSEEK64 1
 
 /* Version macros */
-#define GETDATA_MAJOR 0
-#define GETDATA_MINOR 11
-#define GETDATA_REVISION 0
-#define GETDATA_VERSION_SUFFIX ""
+#define GETDATA_MAJOR @PROJECT_VERSION_MAJOR@
+#define GETDATA_MINOR @PROJECT_VERSION_MINOR@
+#define GETDATA_REVISION @PROJECT_VERSION_PATCH@
+#define GETDATA_VERSION_SUFFIX "@GETDATA_VERSION_SUFFIX@"
 
 /* Feature flags */
 #define STDC_HEADERS 1

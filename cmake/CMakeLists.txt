@@ -1,6 +1,27 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(getdata)
+if(NOT GD_DIR)
+  set(GD_DIR ${CMAKE_SOURCE_DIR}/..)
+endif()
+
+# Parse version from m4/version.m4
+file(STRINGS "${GD_DIR}/m4/version.m4" VERSION_M4)
+foreach(line ${VERSION_M4})
+  if(line MATCHES "^m4_define\\(getdata_major,[ ]*([0-9]+)\\)")
+    set(GETDATA_MAJOR ${CMAKE_MATCH_1})
+  elseif(line MATCHES "^m4_define\\(getdata_minor,[ ]*([0-9]+)\\)")
+    set(GETDATA_MINOR ${CMAKE_MATCH_1})
+  elseif(line MATCHES "^m4_define\\(getdata_revision,[ ]*([0-9]+)\\)")
+    set(GETDATA_REVISION ${CMAKE_MATCH_1})
+  elseif(line MATCHES "^m4_define\\(getdata_extra,[ ]*\\[([^]]*)\\]\\)")
+    set(GETDATA_VERSION_SUFFIX "${CMAKE_MATCH_1}")
+  endif()
+endforeach()
+if(NOT DEFINED GETDATA_MAJOR OR NOT DEFINED GETDATA_MINOR OR NOT DEFINED GETDATA_REVISION)
+  message(FATAL_ERROR "Failed to parse version from ${GD_DIR}/m4/version.m4")
+endif()
+
+project(getdata VERSION ${GETDATA_MAJOR}.${GETDATA_MINOR}.${GETDATA_REVISION})
 
 option(BUILD_PYTHON "Build Python bindings" ON)
 option(BUILD_CXX "Build C++ bindings" ON)
@@ -83,11 +104,6 @@ if(PCRE_FOUND)
   endif()
 endif()
 
-if(NOT GD_DIR)
-  set(GD_DIR ${CMAKE_SOURCE_DIR}/..)
-endif()
-
-
 macro(GD_FILES name folder)
   file(GLOB ${name}_folder_sources ${GD_DIR}/${folder}/*.c) 
   file(GLOB ${name}_folder_sources_cpp ${GD_DIR}/${folder}/*.cpp)
@@ -104,9 +120,17 @@ add_definitions(
 # kst2 doesn't need the legacy API
 set(DEFINE_GD_LEGACY_API "/* #undef GD_LEGACY_API */")
 
-# Version macros
-set(DEFINE_GD_GETDATA_VERSION  "#define GD_GETDATA_VERSION \"0.11.0\"")
-set(DEFINE_GD_GETDATA_INT_VERSION  "#define GD_GETDATA_INT_VERSION 1100")
+# Build version string
+set(GETDATA_VERSION_STRING "${PROJECT_VERSION}${GETDATA_VERSION_SUFFIX}")
+set(DEFINE_GD_GETDATA_VERSION "#define GD_GETDATA_VERSION \"${GETDATA_VERSION_STRING}\"")
+
+# Compute integer version (matches configure.ac:383)
+if(PROJECT_VERSION_MAJOR EQUAL 0)
+  math(EXPR GETDATA_INT_VERSION "${PROJECT_VERSION_MINOR} * 100 + ${PROJECT_VERSION_PATCH}")
+else()
+  math(EXPR GETDATA_INT_VERSION "${PROJECT_VERSION_MAJOR} * 10000 + ${PROJECT_VERSION_MINOR} * 100 + ${PROJECT_VERSION_PATCH}")
+endif()
+set(DEFINE_GD_GETDATA_INT_VERSION "#define GD_GETDATA_INT_VERSION ${GETDATA_INT_VERSION}")
 
 # Platform-independent configuration checks
 include(CheckIncludeFile)
@@ -369,9 +393,9 @@ add_definitions(
   -DSIZEOF_UNSIGNED_INT=${SIZEOF_UNSIGNED_INT}
   -DSIZEOF_SIZE_T=${SIZEOF_SIZE_T}
   -DSIZEOF_VOID_P=${SIZEOF_VOID_P}
-  -DGETDATA_MAJOR=0
-  -DGETDATA_MINOR=11
-  -DGETDATA_REVISION=0
+  -DGETDATA_MAJOR=${PROJECT_VERSION_MAJOR}
+  -DGETDATA_MINOR=${PROJECT_VERSION_MINOR}
+  -DGETDATA_REVISION=${PROJECT_VERSION_PATCH}
   -DSTDC_HEADERS
   -DGD_RESTRICT_ARRAY_OK=1
 )
