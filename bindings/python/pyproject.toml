@@ -6,6 +6,7 @@ build-backend = "scikit_build_core.build"
 name = "pygetdata"
 dependencies = ["numpy>=1.7"]
 dynamic = ["version"]
+readme = {file = "README", content-type = "text/plain"}
 
 [tool.scikit-build]
 cmake.source-dir = "../../cmake"
