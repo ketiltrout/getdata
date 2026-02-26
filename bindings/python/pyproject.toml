@@ -4,9 +4,14 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "pygetdata"
+description = "The GetData Project is the reference implementation of the Dirfile Standards, a filesystem-based, column-oriented database format for time-ordered binary data."
 dependencies = ["numpy>=1.7"]
 dynamic = ["version"]
 readme = {file = "README", content-type = "text/plain"}
+authors = [
+    {name = "D. V. Wiebe", email = "dvw@ketiltrout.net"},
+    {name = "C. B. Netterfield", email = "netterfield@astro.utoronto.ca"},
+]
 
 [tool.scikit-build]
 cmake.source-dir = "../../cmake"
