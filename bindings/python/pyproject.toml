@@ -8,6 +8,7 @@ description = "The GetData Project is the reference implementation of the Dirfil
 dependencies = ["numpy>=1.7"]
 dynamic = ["version"]
 readme = {file = "README", content-type = "text/plain"}
+license = "LGPL-2.1-or-later"
 authors = [
     {name = "D. V. Wiebe", email = "dvw@ketiltrout.net"},
     {name = "C. B. Netterfield", email = "netterfield@astro.utoronto.ca"},
