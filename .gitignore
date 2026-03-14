@@ -34,6 +34,7 @@ CMakeCache.txt
 /libtool
 /ltmain.sh
 /missing
+/test-driver
 /README.txt
 
 m4/libtool.m4
@@ -192,5 +193,3 @@ src/stamp-h2
 
 util/checkdirfile
 util/dirfile2ascii
-
-test/[a-z0-9_]*

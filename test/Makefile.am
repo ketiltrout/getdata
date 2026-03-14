@@ -20,6 +20,11 @@
 #
 AUTOMAKE_OPTIONS = foreign serial-tests
 
+# Build test binaries with a distinguishing extension (.test, or .test.exe
+# on Windows), so that in-tree build products can be .gitignore'd by
+# pattern.
+EXEEXT = @TEST_EXEEXT@
+
 LDADD=../src/libgetdata.la
 AM_CPPFLAGS=${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
 
