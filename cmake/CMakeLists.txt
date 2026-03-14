@@ -74,6 +74,7 @@ if(PKG_CONFIG_FOUND)
   pkg_check_modules(PCRE libpcre)
   pkg_check_modules(FLAC flac)
   pkg_check_modules(ZZIP zziplib)
+  pkg_check_modules(ZSTD libzstd)
 endif()
 
 # vcpkg (Windows) ships no zziplib.pc, but exports a CMake config package
@@ -96,6 +97,7 @@ find_program(FLAC flac)
 find_program(GZIP gzip)
 find_program(UNZIP unzip)
 find_program(XZ xz)
+find_program(ZSTD zstd)
 find_program(ZIP zip)
 
 if(BZIP2_FOUND)
@@ -141,6 +143,29 @@ if(ZZIP_FOUND)
   unset(CMAKE_REQUIRED_INCLUDES)
   if(NOT HAVE_ZZIP_LIB_H)
     set(ZZIP_FOUND FALSE)
+  endif()
+endif()
+
+if(ZSTD_FOUND)
+  include(CheckCSourceCompiles)
+  set(CMAKE_REQUIRED_INCLUDES ${ZSTD_INCLUDE_DIRS})
+  check_include_file(zstd.h HAVE_ZSTD_H)
+  # Reject libzstd too old for the zstd encoding: it needs the stable
+  # advanced API (zstd >= 1.4.0) plus two format-fixed size macros from the
+  # static-linking-only section of the header
+  check_c_source_compiles("
+#define ZSTD_STATIC_LINKING_ONLY
+#include <zstd.h>
+int main(void)
+{
+  ZSTD_cParameter param = ZSTD_c_checksumFlag;
+  char buf[ZSTD_FRAMEHEADERSIZE_MAX + ZSTD_SKIPPABLEHEADERSIZE];
+  (void)param; (void)buf;
+  return 0;
+}" ZSTD_HAS_STATIC_API)
+  unset(CMAKE_REQUIRED_INCLUDES)
+  if(NOT HAVE_ZSTD_H OR NOT ZSTD_HAS_STATIC_API)
+    set(ZSTD_FOUND FALSE)
   endif()
 endif()
 

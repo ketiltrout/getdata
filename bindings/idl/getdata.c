@@ -1173,6 +1173,8 @@ unsigned long gdidl_convert_encoding(IDL_VPTR idl_enc)
       encoding = GD_SIE_ENCODED;
     else if (strcasecmp(enc, "TEXT"))
       encoding = GD_TEXT_ENCODED;
+    else if (strcasecmp(enc, "ZSTD"))
+      encoding = GD_ZSTD_ENCODED;
     else if (strcasecmp(enc, "ZZIP"))
       encoding = GD_ZZIP_ENCODED;
     else if (strcasecmp(enc, "ZZSLIM"))

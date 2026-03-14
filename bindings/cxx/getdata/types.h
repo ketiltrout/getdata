@@ -51,6 +51,7 @@ namespace GetData {
     SieEncoding    = GD_SIE_ENCODED,
     SlimEncoding   = GD_SLIM_ENCODED,
     TextEncoding   = GD_TEXT_ENCODED,
+    ZstdEncoding   = GD_ZSTD_ENCODED,
     ZzipEncoding   = GD_ZZIP_ENCODED,
     ZzslimEncoding = GD_ZZSLIM_ENCODED,
     UnsupportedEncoding = GD_ENC_UNSUPPORTED

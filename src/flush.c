@@ -1065,6 +1065,10 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
       case GD_FLAC_ENCODED:
         encoding = "flac";
         break;
+      case GD_ZSTD_ENCODED:
+        encoding = "zstd";
+        use_encdat = 1;
+        break;
       case GD_AUTO_ENCODED: /* an unresolved, auto-encoded fragment */
         break;
       default:

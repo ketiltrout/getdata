@@ -1102,7 +1102,7 @@ struct gd_private_entry_ {
 #define GD_FINIRAW_CLOTEMP   0x4
 
 /* number of subencodings (ie. the length of the _GD_ef array */
-#define GD_N_SUBENCODINGS 12
+#define GD_N_SUBENCODINGS 13
 
 /* the last record of the _GD_ef array is always the unknown encoding */
 #define GD_ENC_UNKNOWN (GD_N_SUBENCODINGS - 1)
@@ -1602,6 +1602,15 @@ off64_t _GD_SampIndSize(int, struct gd_raw_file_* file, gd_type_t data_type,
 #define _GD_ZzslimSize lt_libgetdatazzslim_LTX_GD_ZzslimSize
 #define _GD_ZzslimStrerr lt_libgetdatazzslim_LTX_GD_ZzslimStrerr
 
+#define _GD_ZstdOpen lt_libgetdatazstd_LTX_GD_ZstdOpen
+#define _GD_ZstdSeek lt_libgetdatazstd_LTX_GD_ZstdSeek
+#define _GD_ZstdRead lt_libgetdatazstd_LTX_GD_ZstdRead
+#define _GD_ZstdWrite lt_libgetdatazstd_LTX_GD_ZstdWrite
+#define _GD_ZstdSync lt_libgetdatazstd_LTX_GD_ZstdSync
+#define _GD_ZstdClose lt_libgetdatazstd_LTX_GD_ZstdClose
+#define _GD_ZstdSize lt_libgetdatazstd_LTX_GD_ZstdSize
+#define _GD_ZstdStrerr lt_libgetdatazstd_LTX_GD_ZstdStrerr
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -1633,6 +1642,21 @@ int _GD_FlacClose(struct gd_raw_file_* file);
 off64_t _GD_FlacSize(int, struct gd_raw_file_* file, gd_type_t data_type,
     int swap);
 int _GD_FlacStrerr(const struct gd_raw_file_*, char*, size_t);
+
+/* zstd I/O methods */
+int _GD_ZstdOpen(int, struct gd_raw_file_*, const char*, gd_type_t, int,
+    unsigned int);
+off64_t _GD_ZstdSeek(struct gd_raw_file_* file, off64_t count,
+    gd_type_t data_type, unsigned int);
+ssize_t _GD_ZstdRead(struct gd_raw_file_ *restrict, void *restrict, gd_type_t,
+    size_t);
+ssize_t _GD_ZstdWrite(struct gd_raw_file_ *restrict, const void *restrict,
+    gd_type_t, size_t);
+int _GD_ZstdSync(struct gd_raw_file_* file);
+int _GD_ZstdClose(struct gd_raw_file_* file);
+off64_t _GD_ZstdSize(int, struct gd_raw_file_* file, gd_type_t data_type,
+    int swap);
+int _GD_ZstdStrerr(const struct gd_raw_file_*, char*, size_t);
 
 /* gzip I/O methods */
 int _GD_GzipOpen(int, struct gd_raw_file_*, const char*, gd_type_t, int,

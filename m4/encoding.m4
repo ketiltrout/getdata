@@ -72,6 +72,16 @@ dnl search for header
     CPPFLAGS="$CPPFLAGS -I$gd_encoding[]_prefix/include"
   fi
   AC_CHECK_HEADERS([$4],[have_this_header=yes])
+ifelse(`x$8', `x',,[
+dnl verify additional compile-time requirements (e.g. a minimum library
+dnl version), by attempting to compile the supplied test program
+  if test "x$have_this_header" = "xyes"; then
+    AC_MSG_CHECKING([whether $4 is usable for the ]gd_encoding[ encoding])
+    AC_COMPILE_IFELSE([AC_LANG_SOURCE([$8])],
+      [AC_MSG_RESULT([yes])],
+      [AC_MSG_RESULT([no]); have_this_header=])
+  fi
+])
   CPPFLAGS=$saved_cppflags
 fi
 

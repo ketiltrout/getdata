@@ -90,7 +90,7 @@ NUMPY_TYPE = {
 # not something for this test to paper over.
 WRITABLE_ENCODINGS = [
     gd.UNENCODED, gd.GZIP_ENCODED, gd.BZIP2_ENCODED, gd.LZMA_ENCODED,
-    gd.TEXT_ENCODED, gd.SIE_ENCODED,
+    gd.TEXT_ENCODED, gd.SIE_ENCODED, gd.ZSTD_ENCODED,
 ]
 
 # Field codes.  The Dirfile standard forbids several characters in field names
@@ -100,6 +100,17 @@ WRITABLE_ENCODINGS = [
 FIELD_CODES = st.from_regex(r"\A[A-Za-z][A-Za-z0-9_]{0,7}\Z").filter(
     lambda s: s != "INDEX"
 )
+
+# Encodings for which a *persistent* read-only handle tracks a writer's
+# flushed state.  True for raw (page cache) and zstd (the reader rebuilds its
+# frame index when an in-place rewrite invalidates it).  False by design for
+# the out-of-place encodings, whose writers finalize via rename: an old
+# reader handle keeps the dead inode.  TEXT and SIE readers hold buffered
+# stdio streams with no invalidation, so they are excluded pending
+# investigation.  The same set gates unflushed same-handle reads, which the
+# out-of-place encodings route through the finalized file rather than the
+# pending temporary.
+COHERENT_READ_ENCODINGS = (gd.UNENCODED, gd.ZSTD_ENCODED)
 
 
 @st.composite
@@ -134,15 +145,31 @@ def decode(s):
     return s.decode() if isinstance(s, bytes) else s
 
 
-class Dirfile:
-    """A dirfile in a scratch directory, cleaned up on exit."""
+# /ENCODING directive names, for authoring format files by hand.  The C API
+# offers no other way to set an encoding's enc_data parameters.
+ENCODING_FFNAME = {gd.ZSTD_ENCODED: "zstd"}
 
-    def __init__(self, encoding=None):
+
+class Dirfile:
+    """A dirfile in a scratch directory, cleaned up on exit.
+
+    encdata, when given, is written into a hand-authored /ENCODING directive
+    (gd_alter_encoding() cannot set it).
+    """
+
+    def __init__(self, encoding=None, encdata=None):
         self.root = tempfile.mkdtemp(prefix="gd_torture_")
         self.path = os.path.join(self.root, "dirfile")
-        self.D = gd.dirfile(self.path, gd.CREAT | gd.EXCL | gd.RDWR)
-        if encoding is not None and encoding != gd.UNENCODED:
-            self.D.fragment(0).alter_encoding(encoding, recode=1)
+        if encdata is not None:
+            os.mkdir(self.path)
+            with open(os.path.join(self.path, "format"), "w") as f:
+                f.write("/ENCODING %s %s\n"
+                        % (ENCODING_FFNAME[encoding], encdata))
+            self.D = gd.dirfile(self.path, gd.RDWR)
+        else:
+            self.D = gd.dirfile(self.path, gd.CREAT | gd.EXCL | gd.RDWR)
+            if encoding is not None and encoding != gd.UNENCODED:
+                self.D.fragment(0).alter_encoding(encoding, recode=1)
 
     def reopen(self, mode=gd.RDONLY):
         """Close the current handle and return a freshly parsed one."""
@@ -884,17 +911,24 @@ class SparseWriteModel(RuleBasedStateMachine):
     def __init__(self):
         super().__init__()
         self.df = None
+        self.reader = None
         self.model = numpy.zeros(0, dtype=numpy.int64)
 
     @initialize(spf=st.integers(min_value=1, max_value=4),
                 encoding=st.sampled_from(WRITABLE_ENCODINGS))
     def create(self, spf, encoding):
         self.df = Dirfile(encoding=encoding)
+        self.encoding = encoding
         self.spf = spf
         self.df.D.add(gd.entry(gd.RAW_ENTRY, "r", 0,
                                dict(type=gd.INT32, spf=spf)))
 
     def teardown(self):
+        if self.reader is not None:
+            try:
+                self.reader.close()
+            except Exception:
+                pass
         if self.df is not None:
             self.df.__exit__(None, None, None)
 
@@ -924,6 +958,59 @@ class SparseWriteModel(RuleBasedStateMachine):
     @rule()
     def reopen(self):
         self.df.reopen(gd.RDWR)
+
+    @precondition(lambda self: self.reader is None and len(self.model)
+                  and self.encoding in COHERENT_READ_ENCODINGS)
+    @rule()
+    def open_reader(self):
+        """A second, persistent read-only handle, opened mid-history.
+
+        It is never reopened, so any index or cache it builds goes stale
+        whenever the writer rewrites the file in place -- which is exactly
+        the state the reader-recovery paths exist for.
+        """
+        self.df.D.flush()  # metadata and data must be on disk to parse
+        self.reader = gd.dirfile(self.df.path, gd.RDONLY)
+
+    @precondition(lambda self: self.reader is not None and len(self.model))
+    @rule(data=st.data())
+    def reader_agrees(self, data):
+        """The persistent reader sees the writer's flushed state.
+
+        No eof/nframes assertion here: after an in-place rewrite that leaves
+        the file the same size or larger, a stale reader has no signal to
+        rebuild its index until a read fails, so frame counts may lag.  That
+        becomes testable once the on-disk index carries a generation
+        counter.
+        """
+        self.df.D.flush()
+        first = data.draw(st.integers(min_value=0,
+                                      max_value=len(self.model) - 1))
+        count = data.draw(st.integers(min_value=1,
+                                      max_value=len(self.model) - first))
+        out = self.reader.getdata("r", gd.INT32, first_sample=first,
+                                  num_samples=count)
+        assert numpy.array_equal(out, self.model[first:first + count]), (
+            first, count, out, self.model[first:first + count])
+
+    @precondition(lambda self: len(self.model)
+                  and self.encoding in COHERENT_READ_ENCODINGS)
+    @rule(data=st.data())
+    def read_unflushed(self, data):
+        """The writing handle serves its own unflushed data.
+
+        Deliberately does not flush: this is the only rule that reaches the
+        pending-write buffer in the read path (every invariant flushes
+        before it looks).
+        """
+        first = data.draw(st.integers(min_value=0,
+                                      max_value=len(self.model) - 1))
+        count = data.draw(st.integers(min_value=1,
+                                      max_value=len(self.model) - first))
+        out = self.df.D.getdata("r", gd.INT32, first_sample=first,
+                                num_samples=count)
+        assert numpy.array_equal(out, self.model[first:first + count]), (
+            first, count, out, self.model[first:first + count])
 
     @precondition(lambda self: len(self.model))
     @rule(data=st.data())
@@ -960,6 +1047,137 @@ class SparseWriteModel(RuleBasedStateMachine):
         self.df.D.flush()
         assert self.df.D.eof("r") == len(self.model)
         assert self.df.D.nframes == len(self.model) // self.spf
+
+
+class AppendModel(RuleBasedStateMachine):
+    """Stream appends through a writer while a persistent reader follows.
+
+    This is the acquisition scenario: append-only writes in generated chunk
+    sizes, over generated storage geometries (spf, and for zstd a generated
+    frame size small enough that a short run crosses many frame boundaries
+    -- frame count relative to data is what distinguishes a long acquisition,
+    so shrinking the frames simulates months in milliseconds).
+
+    Because nothing here ever rewrites history, the invariants are stronger
+    than SparseWriteModel can carry: a persistent reader must track not just
+    flushed *content* but flushed *extent* (eof and nframes), since appends
+    never invalidate a reader's view.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.df = None
+        self.reader = None
+        self.model = numpy.zeros(0, dtype=numpy.int64)
+
+    @initialize(spf=st.integers(min_value=1, max_value=4),
+                encoding=st.sampled_from(WRITABLE_ENCODINGS),
+                frame_size=st.integers(min_value=16, max_value=64))
+    def create(self, spf, encoding, frame_size):
+        if encoding == gd.ZSTD_ENCODED:
+            self.df = Dirfile(encoding, encdata="size=%d" % frame_size)
+        else:
+            self.df = Dirfile(encoding)
+        self.encoding = encoding
+        self.spf = spf
+        self.df.D.add(gd.entry(gd.RAW_ENTRY, "r", 0,
+                               dict(type=gd.INT32, spf=spf)))
+
+    def teardown(self):
+        if self.reader is not None:
+            try:
+                self.reader.close()
+            except Exception:
+                pass
+        if self.df is not None:
+            self.df.__exit__(None, None, None)
+
+    @rule(values=st.lists(st.integers(min_value=-(2**20), max_value=2**20),
+                          min_size=1, max_size=64))
+    def append(self, values):
+        """Append a chunk at the end of the field."""
+        v = numpy.array(values, dtype=numpy.int64)
+        assert self.df.D.putdata(
+            "r", v.astype(numpy.float64),
+            first_sample=len(self.model)) == len(v)
+        self.model = numpy.concatenate([self.model, v])
+
+    @rule()
+    def flush(self):
+        self.df.D.flush()
+
+    @precondition(lambda self: len(self.model))
+    @rule()
+    def reopen(self):
+        self.df.reopen(gd.RDWR)
+
+    @precondition(lambda self: self.reader is None and len(self.model)
+                  and self.encoding in COHERENT_READ_ENCODINGS)
+    @rule()
+    def open_reader(self):
+        self.df.D.flush()  # metadata and data must be on disk to parse
+        self.reader = gd.dirfile(self.df.path, gd.RDONLY)
+
+    @precondition(lambda self: len(self.model)
+                  and self.encoding in COHERENT_READ_ENCODINGS)
+    @rule(data=st.data())
+    def read_unflushed(self, data):
+        """The writing handle serves its own unflushed data."""
+        first = data.draw(st.integers(min_value=0,
+                                      max_value=len(self.model) - 1))
+        count = data.draw(st.integers(min_value=1,
+                                      max_value=len(self.model) - first))
+        out = self.df.D.getdata("r", gd.INT32, first_sample=first,
+                                num_samples=count)
+        assert numpy.array_equal(out, self.model[first:first + count]), (
+            first, count, out, self.model[first:first + count])
+
+    @precondition(lambda self: self.reader is not None and len(self.model))
+    @rule(count=st.integers(min_value=1, max_value=64))
+    def reader_tails(self, count):
+        """The persistent reader can read up to the flushed end of data."""
+        self.df.D.flush()
+        count = min(count, len(self.model))
+        first = len(self.model) - count
+        out = self.reader.getdata("r", gd.INT32, first_sample=first,
+                                  num_samples=count)
+        assert numpy.array_equal(out, self.model[first:]), (
+            first, count, out, self.model[first:])
+
+    @invariant()
+    def whole_field_agrees(self):
+        if self.df is None or not len(self.model):
+            return
+        self.df.D.flush()
+        out = self.df.D.getdata("r", gd.INT32, first_sample=0,
+                                num_samples=len(self.model))
+        assert numpy.array_equal(out, self.model), (out, self.model)
+
+    @invariant()
+    def eof_tracks_appends(self):
+        if self.df is None or not len(self.model):
+            return
+        self.df.D.flush()
+        assert self.df.D.eof("r") == len(self.model)
+        assert self.df.D.nframes == len(self.model) // self.spf
+
+    @invariant()
+    def reader_extent_tracks_appends(self):
+        """Append-only: a persistent reader also tracks the flushed extent.
+
+        This is the strong form deferred in SparseWriteModel: without
+        rewrites, nothing ever invalidates the reader's index, so its frame
+        counts must not lag.
+        """
+        if self.reader is None or not len(self.model):
+            return
+        self.df.D.flush()
+        assert self.reader.eof("r") == len(self.model)
+        assert self.reader.nframes == len(self.model) // self.spf
+
+
+TestAppendModel = AppendModel.TestCase
+TestAppendModel.settings = fuzzer
 
 
 TestSparseWriteModel = SparseWriteModel.TestCase
