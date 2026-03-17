@@ -180,7 +180,9 @@ bindings/python/pyconstants.c
 bindings/python/setup.py
 
 man/*.3
-man/*.3in
+man/gd_alter_encoding.3in
+man/gd_alter_endianness.3in
+man/gd_alter_frameoffset.3in
 man/*.html
 
 src/gd_config.h
