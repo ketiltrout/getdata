@@ -30,6 +30,7 @@ jobs:
                 libflac-dev                 \
                 libpcre2-dev                \
                 libpython3-dev              \
+                libzstd-dev                 \
                 libzzip-dev                 \
                 python3-pip                 \
                 wget
@@ -42,8 +43,8 @@ jobs:
     - name: Install build dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install automake libtool gcc pcre pcre2 xz flac python@3.12 \
-            bzip2 libzzip
+        brew install automake libtool gcc pcre pcre2 xz flac zstd \
+            python@3.12 bzip2 libzzip
         pip3.12 install setuptools "numpy>=2.0" hypothesis pytest \
             --break-system-packages
         echo CC=gcc-14 >> $GITHUB_ENV

@@ -15,11 +15,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            deps: sudo apt-get update && sudo apt-get install -y cmake bzip2 gzip xz-utils flac zip unzip libbz2-dev liblzma-dev libflac-dev libpcre3-dev libzzip-dev
+            deps: sudo apt-get update && sudo apt-get install -y cmake bzip2 gzip xz-utils flac zip unzip libbz2-dev liblzma-dev libflac-dev libpcre3-dev libzzip-dev libzstd-dev
           - os: macos-latest
-            deps: brew install --quiet cmake bzip2 flac xz pcre libzzip
+            deps: brew install --quiet cmake bzip2 flac xz pcre libzzip zstd
           - os: windows-latest
-            deps: vcpkg install bzip2 zlib liblzma libflac zziplib pcre --triplet x64-windows-static-md && choco install pkgconfiglite -y --no-progress
+            deps: vcpkg install bzip2 zlib liblzma libflac zziplib pcre zstd --triplet x64-windows-static-md && choco install pkgconfiglite -y --no-progress
 
     steps:
       - name: Checkout
