@@ -1011,7 +1011,7 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
     if (!as_list) {
       GDPY_CHECK_ERROR(self->D, NULL, self->char_enc);
       /* resize, if necessary */
-      if (ns < num_samples) {
+      if ((PY_LONG_LONG)ns < num_samples) {
         PyObject *check;
         PyArray_Dims new_dims;
 
