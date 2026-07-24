@@ -608,31 +608,48 @@ void _GD_LinterpData(DIRFILE *restrict D, void *data, gd_type_t type,
 #define LINCOM1(t) for (i = 0; i < n_read; i++) \
                             ((t *)data1)[i] = (t)(((t *)data1)[i] * m[0] + b[0])
 
-#define LINCOM2(t) for (i = 0; i < n_read; i++) \
-                            ((t *)data1)[i] = (t)(((t *)data1)[i] * m[0] + \
-                              (data2[i * spf[1] / spf[0]] * m[1] + b[0] + b[1]))
+#define LINCOM2(tout, tin) \
+  do { \
+    const tin *in2 = (const tin *)data2; \
+    for (i = 0; i < n_read; i++) \
+      ((tout *)data1)[i] = (tout)(((tout *)data1)[i] * m[0] + \
+          (in2[i * spf[1] / spf[0]] * m[1] + b[0] + b[1])); \
+  } while (0)
 
-#define LINCOM3(t) for (i = 0; i < n_read; i++) \
-                            ((t *)data1)[i] = (t)(((t *)data1)[i] * m[0] + \
-                              (data2[i * spf[1] / spf[0]] * m[1] + \
-                               data3[i * spf[2] / spf[0]] * m[2] + \
-                               b[0] + b[1] + b[2]))
+#define LINCOM3(tout, tin) \
+  do { \
+    const tin *in2 = (const tin *)data2; \
+    const tin *in3 = (const tin *)data3; \
+    for (i = 0; i < n_read; i++) \
+      ((tout *)data1)[i] = (tout)(((tout *)data1)[i] * m[0] + \
+          (in2[i * spf[1] / spf[0]] * m[1] + \
+           in3[i * spf[2] / spf[0]] * m[2] + \
+           b[0] + b[1] + b[2])); \
+  } while (0)
 
 #ifdef GD_NO_C99_API
+
+/* In the complex-valued LINCOMC macros below, data1 contains complex data
+ * of the return type (which the first field was read as), but data2 and
+ * data3, although declared double*, contain GD_COMPLEX128 data (which is
+ * how _GD_DoLincom reads subsequent input fields when the return type is
+ * complex). */
 #define LINCOMC1(t) \
   do { \
     for (i = 0; i < n_read; i++) { \
-      ((t *)data1)[2 * i] = (t)(((t *)data1)[i] * m[0] + b[0]); \
-      ((t *)data1)[2 * i + 1] = 0; \
+      ((t *)data1)[2 * i] = (t)(((t *)data1)[2 * i] * m[0] + b[0]); \
+      ((t *)data1)[2 * i + 1] = (t)(((t *)data1)[2 * i + 1] * m[0]); \
     } \
   } while (0)
 
 #define LINCOMC2(t) \
   do { \
     for (i = 0; i < n_read; i++) { \
-      ((t *)data1)[2 * i] = (t)(((t *)data1)[i] * m[0] + \
-        (data2[i * spf[1] / spf[0]] * m[1] + b[0] + b[1])); \
-      ((t *)data1)[2 * i + 1] = 0; \
+      const int i2 = 2 * (i * spf[1] / spf[0]); \
+      ((t *)data1)[2 * i] = (t)(((t *)data1)[2 * i] * m[0] + \
+        (data2[i2] * m[1] + b[0] + b[1])); \
+      ((t *)data1)[2 * i + 1] = (t)(((t *)data1)[2 * i + 1] * m[0] + \
+        data2[i2 + 1] * m[1]); \
     } \
   } while (0)
 
@@ -640,13 +657,22 @@ void _GD_LinterpData(DIRFILE *restrict D, void *data, gd_type_t type,
 #define LINCOMC3(t) \
   do { \
     for (i = 0; i < n_read; i++) { \
-      ((t *)data1)[2 * i] = (t)(((t *)data1)[i] * m[0] + \
-        (data2[i * spf[1] / spf[0]] * m[1] + \
-         data3[i * spf[2] / spf[0]] * m[2] + \
+      const int i2 = 2 * (i * spf[1] / spf[0]); \
+      const int i3 = 2 * (i * spf[2] / spf[0]); \
+      ((t *)data1)[2 * i] = (t)(((t *)data1)[2 * i] * m[0] + \
+        (data2[i2] * m[1] + \
+         data3[i3] * m[2] + \
          b[0] + b[1] + b[2])); \
-      ((t *)data1)[2 * i + 1] = 0; \
+      ((t *)data1)[2 * i + 1] = (t)(((t *)data1)[2 * i + 1] * m[0] + \
+        data2[i2 + 1] * m[1] + \
+        data3[i3 + 1] * m[2]); \
     } \
   } while (0)
+#else
+#define LINCOMC1(t) LINCOM1(t _Complex)
+#define LINCOMC2(t) LINCOM2(t _Complex, double _Complex)
+#define LINCOMC3(t) LINCOM3(t _Complex, double _Complex)
+#endif
 
 #define LINCOMC(t) \
   switch (n) { \
@@ -655,15 +681,12 @@ void _GD_LinterpData(DIRFILE *restrict D, void *data, gd_type_t type,
     case 3: LINCOMC3(t); break; \
     default: _GD_InternalError(D); \
   }
-#else
-#define LINCOMC(t) LINCOM(_Complex t)
-#endif
 
-#define LINCOM(t) \
+#define LINCOM(tout, tin) \
   switch (n) { \
-    case 1: LINCOM1(t); break; \
-    case 2: LINCOM2(t); break; \
-    case 3: LINCOM3(t); break; \
+    case 1: LINCOM1(tout); break; \
+    case 2: LINCOM2(tout, tin); break; \
+    case 3: LINCOM3(tout, tin); break; \
     default: _GD_InternalError(D); \
   }
 
@@ -679,19 +702,19 @@ void _GD_LincomData(DIRFILE *restrict D, int n, void *restrict data1,
       return_type, data2, data3, m, b, spf, n_read);
 
   switch(return_type) {
-    case GD_NULL:                         break;
-    case GD_UINT8:      LINCOM(uint8_t);  break;
-    case GD_INT8:       LINCOM(int8_t);   break;
-    case GD_UINT16:     LINCOM(uint16_t); break;
-    case GD_INT16:      LINCOM(int16_t);  break;
-    case GD_UINT32:     LINCOM(uint32_t); break;
-    case GD_INT32:      LINCOM(int32_t);  break;
-    case GD_UINT64:     LINCOM(uint64_t); break;
-    case GD_INT64:      LINCOM(int64_t);  break;
-    case GD_FLOAT32:    LINCOM(float);    break;
-    case GD_FLOAT64:    LINCOM(double);   break;
-    case GD_COMPLEX64:  LINCOMC(float);   break;
-    case GD_COMPLEX128: LINCOMC(double);  break;
+    case GD_NULL:                                 break;
+    case GD_UINT8:      LINCOM(uint8_t,  double); break;
+    case GD_INT8:       LINCOM(int8_t,   double); break;
+    case GD_UINT16:     LINCOM(uint16_t, double); break;
+    case GD_INT16:      LINCOM(int16_t,  double); break;
+    case GD_UINT32:     LINCOM(uint32_t, double); break;
+    case GD_INT32:      LINCOM(int32_t,  double); break;
+    case GD_UINT64:     LINCOM(uint64_t, double); break;
+    case GD_INT64:      LINCOM(int64_t,  double); break;
+    case GD_FLOAT32:    LINCOM(float,    double); break;
+    case GD_FLOAT64:    LINCOM(double,   double); break;
+    case GD_COMPLEX64:  LINCOMC(float);           break;
+    case GD_COMPLEX128: LINCOMC(double);          break;
     default:            _GD_InternalError(D);
   }
 
@@ -707,26 +730,28 @@ void _GD_LincomData(DIRFILE *restrict D, int n, void *restrict data1,
 #undef LINCOMC2
 #undef LINCOMC3
 
+/* In these C89 versions, the input buffers always hold complex data as
+ * interleaved real/imaginary pairs, so tin is unused. */
 #define LINCOM1(t) for (i = 0; i < n_read; i++) \
                             ((t *)data1)[i] = (t)(((t *)data1)[i] * m[0][0] + \
                               b[0][0])
 
-#define LINCOM2(t) \
+#define LINCOM2(tout, tin) \
   do { \
     for (i = 0; i < n_read; i++) { \
       const int i2 = 2 * (i * spf[1] / spf[0]); \
-      ((t *)data1)[i] = (t)(((t *)data1)[i] * m[0][0] + \
+      ((tout *)data1)[i] = (tout)(((tout *)data1)[i] * m[0][0] + \
         (data2[i2] * m[1][0] - data2[i2 + 1] * m[1][1] + b[0][0] + b[1][0])); \
     } \
   } while (0)
 
 
-#define LINCOM3(t) \
+#define LINCOM3(tout, tin) \
   do { \
     for (i = 0; i < n_read; i++) { \
       const int i2 = 2 * (i * spf[1] / spf[0]); \
       const int i3 = 2 * (i * spf[2] / spf[0]); \
-      ((t *)data1)[i] = (t)(((t *)data1)[i] * m[0][0] + \
+      ((tout *)data1)[i] = (tout)(((tout *)data1)[i] * m[0][0] + \
         (data2[i2] * m[1][0] - data2[i2 + 1] * m[1][1] + \
          data3[i3] * m[2][0] - data3[i3 + 1] * m[2][1] + \
          b[0][0] + b[1][0] + b[2][0])); \
@@ -788,19 +813,19 @@ void _GD_CLincomData(DIRFILE *restrict D, int n, void *restrict data1,
       return_type, data2, data3, m, b, spf, n_read);
 
   switch(return_type) {
-    case GD_NULL:                         break;
-    case GD_UINT8:      LINCOM(uint8_t);  break;
-    case GD_INT8:       LINCOM(int8_t);   break;
-    case GD_UINT16:     LINCOM(uint16_t); break;
-    case GD_INT16:      LINCOM(int16_t);  break;
-    case GD_UINT32:     LINCOM(uint32_t); break;
-    case GD_INT32:      LINCOM(int32_t);  break;
-    case GD_UINT64:     LINCOM(uint64_t); break;
-    case GD_INT64:      LINCOM(int64_t);  break;
-    case GD_FLOAT32:    LINCOM(float);    break;
-    case GD_FLOAT64:    LINCOM(double);   break;
-    case GD_COMPLEX64:  LINCOMC(float);   break;
-    case GD_COMPLEX128: LINCOMC(double);  break;
+    case GD_NULL:                                          break;
+    case GD_UINT8:      LINCOM(uint8_t,  double _Complex); break;
+    case GD_INT8:       LINCOM(int8_t,   double _Complex); break;
+    case GD_UINT16:     LINCOM(uint16_t, double _Complex); break;
+    case GD_INT16:      LINCOM(int16_t,  double _Complex); break;
+    case GD_UINT32:     LINCOM(uint32_t, double _Complex); break;
+    case GD_INT32:      LINCOM(int32_t,  double _Complex); break;
+    case GD_UINT64:     LINCOM(uint64_t, double _Complex); break;
+    case GD_INT64:      LINCOM(int64_t,  double _Complex); break;
+    case GD_FLOAT32:    LINCOM(float,    double _Complex); break;
+    case GD_FLOAT64:    LINCOM(double,   double _Complex); break;
+    case GD_COMPLEX64:  LINCOMC(float);                    break;
+    case GD_COMPLEX128: LINCOMC(double);                   break;
     default:            _GD_InternalError(D);
   }
 
