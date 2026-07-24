@@ -76,16 +76,17 @@ if(PKG_CONFIG_FOUND)
   pkg_check_modules(ZZIP zziplib)
 endif()
 
-# Fallback: find zziplib manually when pkg-config fails (e.g. vcpkg on Windows,
-# where the zziplib port doesn't generate .pc files)
+# vcpkg (Windows) ships no zziplib.pc, but exports a CMake config package
+# whose target carries zziplib's zlib dependency.  This requires the vcpkg
+# toolchain file, so that the config's find_dependency(ZLIB) can resolve.
 if(NOT ZZIP_FOUND)
-  find_path(ZZIP_MANUAL_INCLUDE_DIR NAMES zzip/lib.h)
-  find_library(ZZIP_MANUAL_LIBRARY NAMES zzip zzip-0)
-  if(ZZIP_MANUAL_INCLUDE_DIR AND ZZIP_MANUAL_LIBRARY)
+  find_package(zziplib CONFIG QUIET)
+  if(zziplib_FOUND)
     set(ZZIP_FOUND TRUE)
-    set(ZZIP_INCLUDE_DIRS ${ZZIP_MANUAL_INCLUDE_DIR})
-    set(ZZIP_LINK_LIBRARIES ${ZZIP_MANUAL_LIBRARY})
-    set(ZZIP_LIBRARIES ${ZZIP_MANUAL_LIBRARY})
+    set(ZZIP_LINK_LIBRARIES zziplib::libzzip)
+    get_target_property(ZZIP_INCLUDE_DIRS zziplib::libzzip
+      INTERFACE_INCLUDE_DIRECTORIES)
+    message(STATUS "Found zziplib: ${ZZIP_LINK_LIBRARIES}")
   endif()
 endif()
 

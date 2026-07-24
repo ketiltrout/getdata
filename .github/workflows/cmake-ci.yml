@@ -44,8 +44,21 @@ jobs:
           echo "CMAKE_PREFIX_PATH=$VCPKG_INSTALLATION_ROOT/installed/x64-windows-static-md" >> $GITHUB_ENV
 
       - name: Configure CMake
+        if: runner.os != 'Windows'
         working-directory: cmake
         run: cmake -B build -DBUILD_PYTHON=ON -DGD_TEST=ON
+
+      # The vcpkg toolchain file is required for find_package(ZLIB) to work:
+      # vcpkg's static zlib does not match FindZLIB's library names, and is
+      # instead resolved by the vcpkg-cmake-wrapper the toolchain provides.
+      - name: Configure CMake (Windows)
+        if: runner.os == 'Windows'
+        working-directory: cmake
+        shell: bash
+        run: >
+          cmake -B build -DBUILD_PYTHON=ON -DGD_TEST=ON
+          -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+          -DVCPKG_TARGET_TRIPLET=x64-windows-static-md
 
       - name: Build
         working-directory: cmake
