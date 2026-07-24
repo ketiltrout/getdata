@@ -265,7 +265,8 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_bad \
 					get_foffs2 get_fs get_here get_here_foffs get_heres \
 					get_index_complex get_index_type get_indir get_indir_typein get_int8 \
 					get_int16 get_int32 get_int64 get_invalid get_lincom1 get_lincom2 \
-					get_lincom2s get_lincom3 get_lincom3s get_lincom_mdt get_lincom_noin \
+					get_lincom2s get_lincom3 get_lincom3s get_lincom_complex \
+					get_lincom_mdt get_lincom_noin \
 					get_lincom_non get_lincom_null get_lincom_spf get_lincom_code \
 					get_linterp get_linterp1 get_linterp_abs get_linterp_complex \
 					get_linterp_empty get_linterp_nodir get_linterp_noin \
