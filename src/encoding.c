@@ -659,7 +659,8 @@ int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase, int fragment,
       dreturn("%i", 1);
       return 1;
     } else if ((*enc->open)(D->fragment[fragment].dirfd, E->e->u.raw.file + 1,
-          E->EN(raw,data_type), swap, GD_FILE_WRITE | GD_FILE_TEMP))
+          (const char*)D->fragment[fragment].enc_data, E->EN(raw,data_type),
+          swap, GD_FILE_WRITE | GD_FILE_TEMP))
     {
       _GD_SetEncIOError(D, GD_E_IO_OPEN, E->e->u.raw.file + 1);
       dreturn("%i", 1);
@@ -684,7 +685,8 @@ int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase, int fragment,
       dreturn("%i", 1);
       return 1;
     } else if ((*enc->open)(D->fragment[fragment].dirfd, E->e->u.raw.file,
-          E->EN(raw,data_type), swap, mode))
+          (const char*)D->fragment[fragment].enc_data, E->EN(raw,data_type),
+          swap, mode))
     {
       /* In oop_write mode, it doesn't matter if the old file doesn't exist */
       if (!oop_write || errno != ENOENT) {
