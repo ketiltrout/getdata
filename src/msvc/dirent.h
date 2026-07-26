@@ -55,8 +55,8 @@ typedef struct
 	 * a time) */
 	struct dirent		dd_dir;
 
-	/* _findnext handle */
-	long			dd_handle;
+	/* _findnext handle (intptr_t: 64-bit on x64 Windows) */
+	intptr_t		dd_handle;
 
 	/*
          * Status of search:
@@ -102,8 +102,8 @@ typedef struct
 	 * a time) */
 	struct _wdirent		dd_dir;
 
-	/* _findnext handle */
-	long			dd_handle;
+	/* _findnext handle (intptr_t: 64-bit on x64 Windows) */
+	intptr_t		dd_handle;
 
 	/*
          * Status of search:

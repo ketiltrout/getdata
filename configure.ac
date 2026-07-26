@@ -494,6 +494,10 @@ AC_SUBST([DEFINE_GD_NO_C99_API])
 AM_PROG_AS
 AC_PROG_CC_C_O
 
+dnl Used to give test binaries a distinguishing ".test" extension
+TEST_EXEEXT=".test$EXEEXT"
+AC_SUBST([TEST_EXEEXT])
+
 dnl as a side-effect, this runs AC_CHECK_HEADERS for:
 dnl   inttypes.h minix/config.h stdint.h stdio.h stdlib.h string.h
 dnl   strings.h sys/stat.h sys/types.h unistd.h vfork.h wchar.h

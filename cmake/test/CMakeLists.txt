@@ -137,7 +137,9 @@ foreach(_test ${gd_sources})
     target_link_directories(${testname} PRIVATE ${PCRE_LIBRARY_DIRS})
     target_link_libraries(${testname} ${PCRE_LIBRARIES})
   endif()
-  add_test(NAME ${testname} COMMAND ${testname})
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${testname})
+  add_test(NAME ${testname} COMMAND ${testname}
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${testname})
   # Exit code 77 means "test skipped" in autotools convention
   set_tests_properties(${testname} PROPERTIES SKIP_RETURN_CODE 77)
 endforeach()
@@ -152,10 +154,11 @@ if(BUILD_PYTHON)
   endif()
   foreach(_test ${python_tests})
     get_filename_component(testname ${_test} NAME_WE)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bindings/python/${testname})
     add_test(
       NAME python_${testname}
       COMMAND ${Python3_EXECUTABLE} ${GD_DIR}/bindings/python/test/${_test}
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bindings/python
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bindings/python/${testname}
     )
     # Set PYTHONPATH to find pygetdata module
     # Windows: in bin/ (with DLLs), Unix: in lib/ (with shared libraries)

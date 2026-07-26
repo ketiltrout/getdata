@@ -34,6 +34,7 @@ CMakeCache.txt
 /libtool
 /ltmain.sh
 /missing
+/test-driver
 /README.txt
 
 m4/libtool.m4
@@ -179,7 +180,9 @@ bindings/python/pyconstants.c
 bindings/python/setup.py
 
 man/*.3
-man/*.3in
+man/gd_alter_encoding.3in
+man/gd_alter_endianness.3in
+man/gd_alter_frameoffset.3in
 man/*.html
 
 src/gd_config.h
@@ -192,5 +195,3 @@ src/stamp-h2
 
 util/checkdirfile
 util/dirfile2ascii
-
-test/[a-z0-9_]*

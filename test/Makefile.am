@@ -18,14 +18,24 @@
 # along with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-AUTOMAKE_OPTIONS = foreign serial-tests
+AUTOMAKE_OPTIONS = foreign parallel-tests
+
+# Run each test in its own scratch directory (test_output/<name>), so that
+# tests -- most of which create a "dirfile" in their working directory --
+# don't clash when run in parallel (make -jN check).
+LOG_COMPILER = $(SHELL) $(srcdir)/run_test.sh
+
+# Build test binaries with a distinguishing extension (.test, or .test.exe
+# on Windows), so that in-tree build products can be .gitignore'd by
+# pattern.
+EXEEXT = @TEST_EXEEXT@
 
 LDADD=../src/libgetdata.la
 AM_CPPFLAGS=${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
 
 # The enc_*.c files aren't directly used as tests.  They're included by
 # corresponding encoding tests.
-EXTRA_DIST=test.h enc_add.c enc_complex64.c enc_complex128.c enc_del.c \
+EXTRA_DIST=run_test.sh test.h enc_add.c enc_complex64.c enc_complex128.c enc_del.c \
 					 enc_enoent.c enc_float32.c enc_float64.c enc_get_cont.c enc_int8.c \
 					 enc_int16.c enc_int32.c enc_int64.c enc_move_from.c enc_nframes.c \
 					 enc_put_offs.c enc_seek.c enc_uint8.c enc_uint16.c enc_uint32.c \
@@ -593,7 +603,7 @@ check-local: check-TESTS
 	$(MAKE) getdata-clean-dir
 
 getdata-clean-dir:
-	rm -rf dirfile
+	rm -rf dirfile test_output
 
 clean-local:
 	$(MAKE) getdata-clean-dir
