@@ -695,6 +695,29 @@ int gd_StatAt64(const DIRFILE*, int, const char*, gd_stat64_t*, int);
 int gd_OpenAt(const DIRFILE*, int, const char*, int, mode_t);
 #endif
 
+/* Positional I/O: gd_PRead/gd_PWrite never move the file cursor when the
+ * platform provides pread/pwrite, but the compat.c fallback emulates them
+ * with a seek, which does.  Since cursor behaviour differs by platform,
+ * callers must not depend on the cursor at all: descriptors accessed through
+ * these wrappers must use positional I/O exclusively (no bare read()/write()
+ * or SEEK_CUR).  Note also that pwrite is useless on O_APPEND descriptors
+ * (POSIX appends regardless of the supplied offset). */
+#ifdef HAVE_PREAD64
+# define gd_PRead pread64
+#elif defined HAVE_PREAD
+# define gd_PRead(fd,buf,count,offset) pread(fd,buf,count,(off_t)(offset))
+#else
+ssize_t gd_PRead(int, void*, size_t, off64_t);
+#endif
+
+#ifdef HAVE_PWRITE64
+# define gd_PWrite pwrite64
+#elif defined HAVE_PWRITE
+# define gd_PWrite(fd,buf,count,offset) pwrite(fd,buf,count,(off_t)(offset))
+#else
+ssize_t gd_PWrite(int, const void*, size_t, off64_t);
+#endif
+
 #ifdef HAVE_FSTATAT
 # define gd_StatAt(d,...) fstatat(__VA_ARGS__)
 #else
