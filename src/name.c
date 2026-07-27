@@ -1109,6 +1109,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
 {
   gd_entry_t *Q;
   char *name;
+  int i;
   size_t len = strlen(new_name);
   struct gd_rename_data_ *rdat = NULL;
 
@@ -1238,6 +1239,27 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
   }
 
   D->fragment[E->fragment_index].modified = 1;
+
+  /* If this field is a fragment's reference field, the /REFERENCE directive
+   * names it by code, so it has to follow the rename; otherwise we'd write out
+   * a format file naming a field which no longer exists.  (rdat only tracks
+   * field codes stored in entries, not in fragments.) */
+  for (i = 0; i < D->n_fragment; ++i) {
+    if (D->fragment[i].ref_name != NULL &&
+        strcmp(D->fragment[i].ref_name, E->field) == 0)
+    {
+      char *new_ref = _GD_Strdup(D, name);
+
+      if (new_ref == NULL) {
+        _GD_CleanUpRename(rdat, 1);
+        GD_RETURN_ERROR(D);
+      }
+
+      free(D->fragment[i].ref_name);
+      D->fragment[i].ref_name = new_ref;
+      D->fragment[i].modified = 1;
+    }
+  }
 
   /* Update database metadata */
   _GD_PerformRename(D, rdat);
