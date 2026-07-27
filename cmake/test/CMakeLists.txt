@@ -146,7 +146,8 @@ endforeach()
 
 # Python tests
 if(BUILD_PYTHON)
-  set(python_tests callback.py char_enc1.py char_enc2.py char_enc3.py big_test.py)
+  set(python_tests callback.py char_enc1.py char_enc2.py char_enc3.py big_test.py
+    fuzzer.py)
   if(WIN32)
     # char_enc tests are invalid on win32 platforms (koi8-r fails to fsdecode())
     list(REMOVE_ITEM python_tests
@@ -160,6 +161,9 @@ if(BUILD_PYTHON)
       COMMAND ${Python3_EXECUTABLE} ${GD_DIR}/bindings/python/test/${_test}
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bindings/python/${testname}
     )
+    # Exit code 77 means "test skipped" in autotools convention; the fuzzer
+    # uses it when hypothesis isn't installed.
+    set_tests_properties(python_${testname} PROPERTIES SKIP_RETURN_CODE 77)
     # Set PYTHONPATH to find pygetdata module
     # Windows: in bin/ (with DLLs), Unix: in lib/ (with shared libraries)
     # $<CONFIG> is Release/Debug on multi-config (Windows), empty on single-config (Unix)
