@@ -347,6 +347,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       }
 
       E->EN(raw,data_type) = entry->EN(raw,data_type);
+      E->e->u.raw.size = GD_SIZE(entry->EN(raw,data_type));
       E->e->u.raw.file[0].idata = E->e->u.raw.file[1].idata = -1;
       E->e->u.raw.file[0].subenc = GD_ENC_UNKNOWN;
 

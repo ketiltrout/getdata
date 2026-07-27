@@ -24,14 +24,17 @@ jobs:
         sudo apt-get install -y             \
                 autoconf                    \
                 build-essential             \
+                libbz2-dev                  \
                 libltdl-dev                 \
                 liblzma-dev                 \
                 libflac-dev                 \
                 libpcre2-dev                \
                 libpython3-dev              \
+                libzzip-dev                 \
                 python3-pip                 \
                 wget
-        pip3 install --break-system-packages "setuptools[core]>=77" "numpy>=2.0"
+        pip3 install --break-system-packages "setuptools[core]>=77" "numpy>=2.0" \
+            hypothesis pytest
         echo CC=gcc-14 >> $GITHUB_ENV
         echo CXX=g++-14 >> $GITHUB_ENV
         echo PREFIX=/usr >> $GITHUB_ENV
@@ -39,8 +42,10 @@ jobs:
     - name: Install build dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install automake libtool gcc pcre pcre2 xz flac python@3.12
-        pip3.12 install setuptools "numpy>=2.0" --break-system-packages
+        brew install automake libtool gcc pcre pcre2 xz flac python@3.12 \
+            bzip2 libzzip
+        pip3.12 install setuptools "numpy>=2.0" hypothesis pytest \
+            --break-system-packages
         echo CC=gcc-14 >> $GITHUB_ENV
         echo CXX=g++-14 >> $GITHUB_ENV
         echo FC=gfortran-14 >> $GITHUB_ENV
