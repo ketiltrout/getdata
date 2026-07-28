@@ -1,4 +1,4 @@
-/* Copyright (C) 2014, 2017 D.V. Wiebe
+/* Copyright (C) 2026 G. Smecher
  *
  ***************************************************************************
  *
@@ -20,58 +20,16 @@
  */
 #include "test.h"
 
-int main(void)
-{
-#if !defined USE_LZMA || !defined TEST_LZMA
-  return 77; /* skip test */
-#else
-  const char *filedir = "dirfile";
-  const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  const char *xzdata = "dirfile/data.xz";
-  uint16_t c1[8], c2[8];
-  char command[4096];
-  int i, n1, e1, e2, n2, e3, r = 0;
-  DIRFILE *D;
-
-  memset(c1, 0, 16);
-  memset(c2, 0, 16);
-  rmdirfile();
-  mkdir(filedir, 0700);
-
-  MAKEFORMATFILE(format, "data RAW UINT16 8\n");
-  MAKEDATAFILE(data, uint16_t, i, 256);
-
-  /* compress */
-  snprintf(command, 4096, "\"%s\" -f %s > %s", XZ, data, NULL_DEVICE);
-  if (gd_system(command))
-    return 1;
-
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  n1 = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c1);
-  CHECKI(n1, 8);
-  e1 = gd_error(D);
-  CHECKI(e1, 0);
-
-  e2 = gd_close(D);
-  CHECKI(e2, 0);
-
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  n2 = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c2);
-  e3 = gd_error(D);
-  CHECKI(e3, 0);
-  CHECKI(n2, 8);
-  for (i = 0; i < 8; ++i) {
-    CHECKIi(i,c1[i], 40 + i);
-    CHECKIi(i,c2[i], 40 + i);
-  }
-
-  gd_discard(D);
-
-  unlink(xzdata);
-  unlink(format);
-  rmdir(filedir);
-
-  return r;
+#ifndef TEST_LZMA
+#define ENC_SKIP_TEST 1
 #endif
-}
+
+#ifdef USE_LZMA
+#define USE_ENC 1
+#endif
+
+#define ENC_SUFFIX ".xz"
+#define ENC_COMPRESS \
+  snprintf(command, 4096, "\"%s\" -f %s > %s", XZ, data, NULL_DEVICE)
+
+#include "enc_get_get.c"

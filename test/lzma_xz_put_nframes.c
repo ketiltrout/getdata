@@ -20,10 +20,6 @@
  */
 #include "test.h"
 
-#ifndef TEST_LZMA
-#define ENC_SKIP_TEST 1
-#endif
-
 #ifdef USE_LZMA
 #define USE_ENC 1
 #endif
@@ -31,4 +27,4 @@
 #define ENC_SUFFIX ".xz"
 #define ENC_ENCODING GD_LZMA_ENCODED
 
-#include "enc_put_get.c"
+#include "enc_put_nframes.c"

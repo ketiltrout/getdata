@@ -1,4 +1,4 @@
-/* Copyright (C) 2014, 2017 D.V. Wiebe
+/* Copyright (C) 2026 G. Smecher
  *
  ***************************************************************************
  *
@@ -20,70 +20,17 @@
  */
 #include "test.h"
 
-int main(void)
-{
-#if !defined TEST_BZIP2 || !defined USE_BZIP2
-  return 77;
-#else
-  const char *filedir = "dirfile";
-  const char *format = "dirfile/format";
-  const char *data_bz2 = "dirfile/data.bz2";
-  const char *data = "dirfile/data";
-  uint8_t c[8];
-  char command[4096];
-  uint8_t d;
-  struct stat buf;
-  int fd, i, n, e1, e2, stat_data, r = 0;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0700);
-
-  for (i = 0; i < 8; ++i)
-    c[i] = (uint8_t)(40 + i);
-
-  MAKEFORMATFILE(format, "data RAW UINT8 8\n");
-
-  D = gd_open(filedir, GD_RDWR | GD_BZIP2_ENCODED | GD_VERBOSE);
-  gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  n = gd_flush(D, "data");
-  e1 = gd_error(D);
-  CHECKI(e1, GD_E_OK);
-  CHECKI(n, 0);
-
-  e2 = gd_close(D);
-  CHECKI(e2, 0);
-
-  stat_data = stat(data_bz2, &buf);
-  if (stat_data) {
-    perror("stat");
-  }
-  CHECKI(stat_data, 0);
-
-  /* uncompress */
-  snprintf(command, 4096, "\"%s\" -df %s > %s", BZIP2, data_bz2, NULL_DEVICE);
-  if (gd_system(command)) {
-    r = 1;
-  } else {
-    fd = open(data, O_RDONLY | O_BINARY);
-    if (fd >= 0) {
-      i = 0;
-      while (read(fd, &d, sizeof(uint8_t))) {
-        if (i < 40 || i > 48) {
-          CHECKIi(i, d, 0);
-        } else
-          CHECKIi(i, d, i);
-        i++;
-      }
-      CHECKI(i, 48);
-      close(fd);
-    }
-  }
-
-  unlink(data);
-  unlink(format);
-  rmdir(filedir);
-
-  return r;
+#ifndef TEST_BZIP2
+#define ENC_SKIP_TEST 1
 #endif
-}
+
+#ifdef USE_BZIP2
+#define USE_ENC 1
+#endif
+
+#define ENC_SUFFIX ".bz2"
+#define ENC_ENCODING GD_BZIP2_ENCODED
+#define ENC_COMPRESS \
+  snprintf(command, 4096, "\"%s\" -df %s > %s", BZIP2, encdata, NULL_DEVICE)
+
+#include "enc_sync.c"

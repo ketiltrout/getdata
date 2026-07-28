@@ -36,7 +36,10 @@ AM_CPPFLAGS=${GD_CC_WALL} $(GD_CC_WEXTRA) -I$(top_srcdir)/src
 # The enc_*.c files aren't directly used as tests.  They're included by
 # corresponding encoding tests.
 EXTRA_DIST=run_test.sh test.h enc_add.c enc_complex64.c enc_complex128.c enc_del.c \
-					 enc_enoent.c enc_float32.c enc_float64.c enc_get_cont.c enc_int8.c \
+					 enc_enoent.c enc_get_far.c enc_get_get.c \
+					 enc_get_get2.c enc_move_to.c enc_put.c enc_put_back.c \
+					 enc_put_endian.c enc_put_get.c enc_put_nframes.c enc_put_pad.c \
+					 enc_put_sub.c enc_sync.c enc_float32.c enc_float64.c enc_get_cont.c enc_int8.c \
 					 enc_int16.c enc_int32.c enc_int64.c enc_move_from.c enc_nframes.c \
 					 enc_put_offs.c enc_seek.c enc_uint8.c enc_uint16.c enc_uint32.c \
 					 enc_uint64.c
@@ -105,7 +108,7 @@ ALTER_TESTS=alter_bit_bitnum alter_bit_in alter_bit_numbits alter_bit_scalar \
 						alter_spec_polynom alter_spec_prot alter_spec_rdonly alter_window \
 						alter_window_in alter_window_op alter_window_scalar
 
-ASCII_TESTS=ascii_add ascii_complex64 ascii_complex128 ascii_get \
+ASCII_TESTS=ascii_add ascii_complex64 ascii_complex128 ascii_get ascii_put_back \
 						ascii_get_complex ascii_float32 ascii_float64 ascii_get_get \
 						ascii_get_here ascii_get_sub ascii_int8 ascii_int16 ascii_int32 \
 						ascii_int64 ascii_nframes ascii_put ascii_put_here ascii_seek \
@@ -119,7 +122,7 @@ BZIP_TESTS=bzip_add bzip_complex64 bzip_complex128 bzip_del bzip_enoent \
 					 bzip_float32 bzip_float64 bzip_get bzip_get_cont bzip_get_far \
 					 bzip_get_get bzip_get_get2 bzip_get_put bzip_int8 bzip_int16 \
 					 bzip_int32 bzip_int64 bzip_move_from bzip_move_to bzip_nframes \
-					 bzip_put bzip_put_back bzip_put_endian bzip_put_get bzip_put_offs \
+					 bzip_put bzip_put_nframes bzip_put_back bzip_put_endian bzip_put_get bzip_put_offs \
 					 bzip_put_pad bzip_put_sub bzip_seek bzip_seek_far bzip_sync \
 					 bzip_uint8 bzip_uint16 bzip_uint32 bzip_uint64
 
@@ -227,7 +230,7 @@ FLAC_TESTS=flac_add flac_complex64 flac_complex128 flac_del flac_enoent \
 					 flac_get_int64 flac_get_little flac_get_long flac_int8 \
 					 flac_int16 flac_int32 flac_int64 flac_move_from flac_nframes \
 					 flac_put_big flac_put_complex128 flac_put_float64 \
-					 flac_put_int32 flac_put_little flac_put_offs flac_seek \
+					 flac_put_int32 flac_put_little flac_put_nframes flac_put_offs flac_seek \
 					 flac_seek_far flac_sync flac_uint8 flac_uint16 flac_uint32 \
 					 flac_uint64
 
@@ -339,7 +342,7 @@ LZMA_TESTS=lzma_enoent lzma_get lzma_nframes lzma_put lzma_xz_add \
 					 lzma_xz_float64 lzma_xz_get lzma_xz_get_cont lzma_xz_get_far \
 					 lzma_xz_get_get lzma_xz_get_get2 lzma_xz_get_put lzma_xz_int8 \
 					 lzma_xz_int16 lzma_xz_int32 lzma_xz_int64 lzma_xz_move_from \
-					 lzma_xz_move_to lzma_xz_nframes lzma_xz_offs_clear lzma_xz_put \
+					 lzma_xz_move_to lzma_xz_nframes lzma_xz_offs_clear lzma_xz_put lzma_xz_put_nframes \
 					 lzma_xz_put_back lzma_xz_put_endian lzma_xz_put_get \
 					 lzma_xz_put_offs lzma_xz_put_pad lzma_xz_seek lzma_xz_seek_far \
 					 lzma_xz_sync lzma_xz_uint8 lzma_xz_uint16 lzma_xz_uint32 \

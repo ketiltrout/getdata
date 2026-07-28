@@ -20,59 +20,11 @@
  */
 #include "test.h"
 
-uint32_t d[100];
-
-int main(void)
-{
-#ifndef USE_GZIP
-  return 77;
-#else
-  const char *filedir = "dirfile";
-  const char *format = "dirfile/format";
-  const char *data = "dirfile/data.gz";
-  int i, e1, e2, r = 0;
-  size_t n1, n2;
-  off_t nf1, nf2;
-  DIRFILE *D;
-
-  for (i = 0; i < 100; ++i)
-    d[i] = i;
-
-  rmdirfile();
-
-  D = gd_open(filedir,
-      GD_RDWR | GD_GZIP_ENCODED | GD_CREAT | GD_EXCL | GD_VERBOSE);
-
-  gd_add_raw(D, "data", GD_UINT32, 1, 0);
-
-  n1 = gd_putdata(D, "data", 0, 0, 0, 100, GD_UINT32, d);
-  CHECKU(n1, 100);
-
-  e1 = gd_error(D);
-  CHECKI(e1, GD_E_OK);
-
-  nf1 = gd_nframes(D);
-  CHECKU(nf1, 100);
-
-  gd_close(D);
-
-  D = gd_open(filedir, GD_RDWR | GD_GZIP_ENCODED | GD_VERBOSE);
-
-  n2 = gd_putdata(D, "data", 0, 100, 0, 100, GD_UINT32, d);
-  CHECKU(n2, 100);
-
-  e2 = gd_error(D);
-  CHECKI(e2, GD_E_OK);
-
-  nf2 = gd_nframes(D);
-  CHECKU(nf2, 200);
-
-  gd_discard(D);
-
-  unlink(data);
-  unlink(format);
-  rmdir(filedir);
-
-  return r;
+#ifdef USE_GZIP
+#define USE_ENC 1
 #endif
-}
+
+#define ENC_SUFFIX ".gz"
+#define ENC_ENCODING GD_GZIP_ENCODED
+
+#include "enc_put_nframes.c"
