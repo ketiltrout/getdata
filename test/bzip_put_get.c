@@ -1,4 +1,4 @@
-/* Copyright (C) 2014, 2017 D.V. Wiebe
+/* Copyright (C) 2026 G. Smecher
  *
  ***************************************************************************
  *
@@ -20,60 +20,15 @@
  */
 #include "test.h"
 
-int main(void)
-{
 #ifndef TEST_BZIP2
-  return 77;
-#else
-  const char *filedir = "dirfile";
-  const char *format = "dirfile/format";
-  const char *data = "dirfile/data.bz2";
-  uint8_t c[8], d[8];
-  int i, m, n, e1, e2, e3, unlink_data, r = 0;
-  DIRFILE *D;
-
-  rmdirfile();
-  mkdir(filedir, 0700);
-
-  for (i = 0; i < 8; ++i)
-    c[i] = (uint8_t)(40 + i);
-
-  MAKEFORMATFILE(format, "data RAW UINT8 8\n");
+#define ENC_SKIP_TEST 1
+#endif
 
 #ifdef USE_BZIP2
-  D = gd_open(filedir, GD_RDWR | GD_BZIP2_ENCODED | GD_VERBOSE);
-#else
-  D = gd_open(filedir, GD_RDWR | GD_BZIP2_ENCODED);
+#define USE_ENC 1
 #endif
-  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  e1 = gd_error(D);
-  m = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, d);
-  e2 = gd_error(D);
 
-  for (i = 0; i < m; ++i)
-    CHECKIi(i, d[i], c[i]);
+#define ENC_SUFFIX ".bz2"
+#define ENC_ENCODING GD_BZIP2_ENCODED
 
-  e3 = gd_close(D);
-  CHECKI(e3, 0);
-
-  unlink_data = unlink(data);
-  unlink(format);
-  rmdir(filedir);
-
-#ifdef USE_BZIP2
-  CHECKI(unlink_data, 0);
-  CHECKI(e1, GD_E_OK);
-  CHECKI(e2, GD_E_OK);
-  CHECKI(n, 8);
-  CHECKI(m, 8);
-#else
-  CHECKI(unlink_data, -1);
-  CHECKI(e1, GD_E_UNSUPPORTED);
-  CHECKI(e2, GD_E_UNSUPPORTED);
-  CHECKI(n, 0);
-  CHECKI(m, 0);
-#endif
-  
-  return r;
-#endif
-}
+#include "enc_put_get.c"

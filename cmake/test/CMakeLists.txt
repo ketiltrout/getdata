@@ -24,7 +24,9 @@ set(tests_ignored
   # Helper files (not standalone tests - included by encoding tests)
   enc_add enc_complex128 enc_complex64 enc_del enc_enoent enc_float32
   enc_float64 enc_get_cont enc_int16 enc_int32 enc_int64 enc_int8
-  enc_move_from enc_nframes enc_put_offs enc_seek enc_uint16 enc_uint32
+  enc_get_far enc_get_get enc_get_get2 enc_move_from enc_move_to
+  enc_nframes enc_put enc_put_back enc_put_endian enc_put_get
+  enc_put_nframes enc_put_offs enc_put_pad enc_put_sub enc_seek enc_sync enc_uint16 enc_uint32
   enc_uint64 enc_uint8
 
   desync_path
@@ -49,7 +51,7 @@ if(NOT BZIP2_FOUND OR NOT BZIP2)
     bzip_add bzip_complex128 bzip_complex64 bzip_del bzip_enoent bzip_float32
     bzip_float64 bzip_get bzip_get_cont bzip_get_far bzip_get_get bzip_get_get2
     bzip_get_put bzip_int16 bzip_int32 bzip_int64 bzip_int8 bzip_move_from
-    bzip_move_to bzip_nframes bzip_put bzip_put_back bzip_put_endian bzip_put_get
+    bzip_move_to bzip_nframes bzip_put bzip_put_nframes bzip_put_back bzip_put_endian bzip_put_get
     bzip_put_offs bzip_put_pad bzip_put_sub bzip_seek bzip_seek_far bzip_sync
     bzip_uint16 bzip_uint32 bzip_uint64 bzip_uint8)
 endif()
@@ -73,7 +75,7 @@ if(NOT FLAC_FOUND OR NOT FLAC)
     flac_get_get2 flac_get_int64 flac_get_int8 flac_get_little flac_get_long
     flac_int16 flac_int32 flac_int64 flac_int8 flac_move_from flac_nframes
     flac_put_big flac_put_complex128 flac_put_float64 flac_put_int32
-    flac_put_little flac_put_offs flac_seek flac_seek_far flac_sync flac_uint16
+    flac_put_little flac_put_nframes flac_put_offs flac_seek flac_seek_far flac_sync flac_uint16
     flac_uint32 flac_uint64 flac_uint8)
 endif()
 
@@ -84,7 +86,7 @@ if(NOT LIBLZMA_FOUND OR NOT XZ)
     lzma_xz_get_cont lzma_xz_get_far lzma_xz_get_get lzma_xz_get_get2
     lzma_xz_get_put lzma_xz_int16 lzma_xz_int32 lzma_xz_int64 lzma_xz_int8
     lzma_xz_move_from lzma_xz_move_to lzma_xz_nframes lzma_xz_offs_clear
-    lzma_xz_put lzma_xz_put_back lzma_xz_put_endian lzma_xz_put_get
+    lzma_xz_put lzma_xz_put_nframes lzma_xz_put_back lzma_xz_put_endian lzma_xz_put_get
     lzma_xz_put_offs lzma_xz_put_pad lzma_xz_seek lzma_xz_seek_far lzma_xz_sync
     lzma_xz_uint16 lzma_xz_uint32 lzma_xz_uint64 lzma_xz_uint8)
 endif()

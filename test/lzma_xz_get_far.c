@@ -1,4 +1,4 @@
-/* Copyright (C) 2014, 2017 D.V. Wiebe
+/* Copyright (C) 2026 G. Smecher
  *
  ***************************************************************************
  *
@@ -20,53 +20,16 @@
  */
 #include "test.h"
 
-int main(void)
-{
 #ifndef TEST_LZMA
-  return 77;
-#else
-  const char *filedir = "dirfile";
-  const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  const char *xzdata = "dirfile/data.xz";
-  uint16_t c[8];
-  char command[4096];
-  int n, error, r = 0;
-  DIRFILE *D;
-
-  memset(c, 0, 8 * sizeof(*c));
-  rmdirfile();
-  mkdir(filedir, 0700);
-
-  MAKEFORMATFILE(format, "data RAW UINT16 8\n");
-  MAKEDATAFILE(data, uint16_t, i, 256);
-
-  /* compress */
-  snprintf(command, 4096, "\"%s\" -f %s > %s", XZ, data, NULL_DEVICE);
-  if (gd_system(command))
-    return 1;
+#define ENC_SKIP_TEST 1
+#endif
 
 #ifdef USE_LZMA
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-#else
-  D = gd_open(filedir, GD_RDONLY);
+#define USE_ENC 1
 #endif
-  n = gd_getdata(D, "data", 1000, 0, 1, 0, GD_UINT16, c);
-  error = gd_error(D);
 
-  gd_discard(D);
+#define ENC_SUFFIX ".xz"
+#define ENC_COMPRESS \
+  snprintf(command, 4096, "\"%s\" -f %s > %s", XZ, data, NULL_DEVICE)
 
-  unlink(xzdata);
-  unlink(format);
-  rmdir(filedir);
-
-#ifdef USE_LZMA
-  CHECKI(error, 0);
-#else
-  CHECKI(error, GD_E_UNSUPPORTED);
-#endif
-  CHECKI(n, 0);
-
-  return r;
-#endif
-}
+#include "enc_get_far.c"

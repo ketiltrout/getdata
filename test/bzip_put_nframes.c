@@ -20,15 +20,11 @@
  */
 #include "test.h"
 
-#ifndef TEST_LZMA
-#define ENC_SKIP_TEST 1
-#endif
-
-#ifdef USE_LZMA
+#ifdef USE_BZIP2
 #define USE_ENC 1
 #endif
 
-#define ENC_SUFFIX ".xz"
-#define ENC_ENCODING GD_LZMA_ENCODED
+#define ENC_SUFFIX ".bz2"
+#define ENC_ENCODING GD_BZIP2_ENCODED
 
-#include "enc_put_get.c"
+#include "enc_put_nframes.c"
