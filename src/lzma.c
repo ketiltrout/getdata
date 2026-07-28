@@ -458,6 +458,7 @@ int _GD_LzmaClose(struct gd_raw_file_ *file)
   }
 
   file->idata = -1;
+  file->mode = 0;
   free(file->edata);
   file->edata = NULL;
   dreturn("%i", 0);

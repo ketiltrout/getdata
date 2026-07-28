@@ -510,7 +510,7 @@ int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
         dreturn("%i", -1);
         return -1;
       }
-    } else {
+    } else if (E->e->u.raw.file[1].name != NULL) {
       /* Move the old file over the new file */
       if (_GD_MoveOver(D, fragment, E->e->u.raw.file)) {
         dreturn("%i", -1);
