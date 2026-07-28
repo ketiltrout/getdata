@@ -108,7 +108,7 @@ ALTER_TESTS=alter_bit_bitnum alter_bit_in alter_bit_numbits alter_bit_scalar \
 						alter_spec_polynom alter_spec_prot alter_spec_rdonly alter_window \
 						alter_window_in alter_window_op alter_window_scalar
 
-ASCII_TESTS=ascii_add ascii_complex64 ascii_complex128 ascii_get \
+ASCII_TESTS=ascii_add ascii_complex64 ascii_complex128 ascii_get ascii_put_back \
 						ascii_get_complex ascii_float32 ascii_float64 ascii_get_get \
 						ascii_get_here ascii_get_sub ascii_int8 ascii_int16 ascii_int32 \
 						ascii_int64 ascii_nframes ascii_put ascii_put_here ascii_seek \

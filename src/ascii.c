@@ -63,6 +63,12 @@ off64_t _GD_AsciiSeek(struct gd_raw_file_* file, off64_t count,
   if (count < file->pos) {
     rewind((FILE *)file->edata);
     file->pos = 0;
+  } else if (count > file->pos) {
+    /* reposition between output and input on the update stream */
+    if (fseeko64((FILE *)file->edata, 0, SEEK_CUR)) {
+      dreturn("%i", -1);
+      return -1;
+    }
   }
 
   for (; count > file->pos; ++file->pos)
@@ -71,6 +77,11 @@ off64_t _GD_AsciiSeek(struct gd_raw_file_* file, off64_t count,
 
   if (mode & GD_FILE_WRITE && count > file->pos) {
     strcpy(line, "0\n");
+    /* reposition between input and output on the update stream */
+    if (fseeko64((FILE *)file->edata, 0, SEEK_CUR)) {
+      dreturn("%i", -1);
+      return -1;
+    }
     for (; count > file->pos; ++file->pos)
       fputs(line, (FILE *)file->edata);
   }
@@ -213,9 +224,76 @@ ssize_t _GD_AsciiRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
 ssize_t _GD_AsciiWrite(struct gd_raw_file_ *restrict file,
     const void *restrict ptr, gd_type_t data_type, size_t nmemb)
 {
+  FILE *stream = (FILE *)file->edata;
   ssize_t n = -1;
+  char *tail = NULL;
+  size_t i, tail_len = 0;
+  off64_t start;
+  char line[64];
 
   dtrace("%p, %p, 0x%X, %" PRIuSIZE, file, ptr, data_type, nmemb);
+
+  /* Samples are stored as variable-width lines, so they cannot be
+   * overwritten in place: rewriting a line with a value of a different
+   * width corrupts the lines that follow.  If this write lands on existing
+   * lines, buffer everything following the replaced range, then write it
+   * back after the new samples and truncate. This is inefficient but
+   * maximally consistent with other plugins (and ASCII encodings were
+   * already inefficient.) */
+
+  /* reposition between output and input on the update stream: ftello()
+   * is not a file-positioning function */
+  if (fseeko64(stream, 0, SEEK_CUR)) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  start = ftello64(stream);
+  if (start == -1) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  for (i = 0; i < nmemb; ++i) {
+    /* consume one full line per sample; a line too long for the buffer
+     * (not something getdata writes, but the file is plain text) takes
+     * several reads */
+    char *p;
+    do
+      p = fgets(line, sizeof(line), stream);
+    while (p != NULL && strchr(line, '\n') == NULL);
+    if (p == NULL)
+      break;
+  }
+
+  if (i == nmemb) {
+    /* the write replaces existing lines; preserve what follows them */
+    char buffer[4096];
+    size_t n_read;
+
+    while ((n_read = fread(buffer, 1, sizeof(buffer), stream)) > 0) {
+      char *new_tail = realloc(tail, tail_len + n_read);
+      if (new_tail == NULL) {
+        free(tail);
+        dreturn("%i", -1);
+        return -1;
+      }
+      memcpy(new_tail + tail_len, buffer, n_read);
+      tail = new_tail;
+      tail_len += n_read;
+    }
+    if (ferror(stream)) {
+      free(tail);
+      dreturn("%i", -1);
+      return -1;
+    }
+  }
+
+  if (fseeko64(stream, start, SEEK_SET)) {
+    free(tail);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   switch (data_type) {
     case GD_UINT8:       WRITE_ASCII(PRIu8 ,  uint8_t); break;
@@ -232,7 +310,19 @@ ssize_t _GD_AsciiWrite(struct gd_raw_file_ *restrict file,
     case GD_COMPLEX128: WRITE_CASCII(".16g",   double); break;
     default:                            errno = EINVAL; break;
   }
-  
+
+  if (n >= 0 && (i > 0 || tail_len > 0)) {
+    /* replace the tail displaced by the overwrite, and discard whatever
+     * remains of the old lines */
+    if (tail_len > 0 && fwrite(tail, 1, tail_len, stream) != tail_len)
+      n = -1;
+    else if (fflush(stream))
+      n = -1;
+    else if (gd_truncate(fileno(stream), ftello64(stream)))
+      n = -1;
+  }
+  free(tail);
+
   file->pos += nmemb;
 
   dreturn("%" PRIdSIZE, n);
@@ -285,7 +375,7 @@ off64_t _GD_AsciiSize(int dirfd, struct gd_raw_file_* file,
 
   dtrace("%i, %p, <unused>, <unused>", dirfd, file);
 
-  fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY, 0666);
+  fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666);
   if (fd < 0) {
     dreturn("%i", -1);
     return -1;
