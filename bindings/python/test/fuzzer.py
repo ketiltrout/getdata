@@ -872,6 +872,9 @@ class SparseWriteModel(RuleBasedStateMachine):
     The states worth reaching are combinations -- write past the end to open a
     hole, overwrite backwards across the hole's edge, extend again -- which is
     what a sequence of generated writes explores and a fixed test does not.
+
+    The machine runs over every writable encoding to ensure consistent
+    semantics on top of different plugins.
     """
 
     # Small, so that writes collide often rather than scattering into disjoint
@@ -883,9 +886,10 @@ class SparseWriteModel(RuleBasedStateMachine):
         self.df = None
         self.model = numpy.zeros(0, dtype=numpy.int64)
 
-    @initialize(spf=st.integers(min_value=1, max_value=4))
-    def create(self, spf):
-        self.df = Dirfile()
+    @initialize(spf=st.integers(min_value=1, max_value=4),
+                encoding=st.sampled_from(WRITABLE_ENCODINGS))
+    def create(self, spf, encoding):
+        self.df = Dirfile(encoding=encoding)
         self.spf = spf
         self.df.D.add(gd.entry(gd.RAW_ENTRY, "r", 0,
                                dict(type=gd.INT32, spf=spf)))
