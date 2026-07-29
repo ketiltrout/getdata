@@ -183,7 +183,6 @@ endif()
 set(DEFINE_GD_GETDATA_INT_VERSION "#define GD_GETDATA_INT_VERSION ${GETDATA_INT_VERSION}")
 
 # Platform-independent configuration checks
-include(CheckIncludeFile)
 include(CheckSymbolExists)
 include(CheckTypeSize)
 include(CheckFunctionExists)
