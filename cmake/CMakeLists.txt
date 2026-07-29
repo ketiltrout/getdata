@@ -98,8 +98,9 @@ find_program(UNZIP unzip)
 find_program(XZ xz)
 find_program(ZIP zip)
 
+include(CheckIncludeFile)
+
 if(BZIP2_FOUND)
-  include(CheckIncludeFile)
   set(CMAKE_REQUIRED_INCLUDES ${BZIP2_INCLUDE_DIRS})
   check_include_file(bzlib.h HAVE_BZLIB_H)
   unset(CMAKE_REQUIRED_INCLUDES)
