@@ -296,6 +296,10 @@ sample per line.
 .DD GD_UNENCODED
 Specifies that raw data files are not encoded, but written as simply binary data
 to disk.
+.DD GD_ZSTD_ENCODED
+Specifies that raw data files are compressed using the Zstandard algorithm.
+Unlike other compression encodings, writes occur in-place by appending
+independently compressed frames, allowing concurrent readers.
 .DD GD_ZZIP_ENCODED
 Specifies that raw data files are compressed using the DEFLATE algorithm.  All
 raw data files for a given fragment are collected together and stored in a PKZIP

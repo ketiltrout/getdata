@@ -158,7 +158,8 @@ static int _GD_SampIndDoOpen(int fdin, struct gd_raw_file_ *file,
 }
 
 int _GD_SampIndOpen(int fd, struct gd_raw_file_ *file,
-    gd_type_t data_type gd_unused_, int swap, unsigned int mode)
+    const char *enc_data gd_unused_, gd_type_t data_type gd_unused_, int swap,
+    unsigned int mode)
 {
   dtrace("%i, %p, <unused>, %i, 0x%X", fd, file, swap, mode);
 

@@ -216,6 +216,24 @@ struct encoding_t _GD_ef[GD_N_SUBENCODINGS] = {
 #undef GD_EF_PROVIDES
 
 
+#ifdef USE_ZSTD
+#define GD_EF_PROVIDES \
+  GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE | \
+  GD_EF_WRITE | GD_EF_SYNC | GD_EF_STRERR
+#define GD_INT_FUNCS \
+  &_GD_GenericName, &_GD_ZstdOpen, &_GD_ZstdClose, &_GD_ZstdSeek, \
+  &_GD_ZstdRead, &_GD_ZstdSize, &_GD_ZstdWrite, &_GD_ZstdSync, \
+  &_GD_GenericMove, &_GD_GenericUnlink, &_GD_ZstdStrerr
+#else
+#define GD_INT_FUNCS GD_EF_GENERIC_SET
+#define GD_EF_PROVIDES 0
+#endif
+  GD_EXT_ENCODING_GEN(GD_ZSTD_ENCODED, ".zst", GD_EF_ECOR | GD_EF_EDAT,
+      "Zstd", "zstd"),
+#undef GD_INT_FUNCS
+#undef GD_EF_PROVIDES
+
+
   { GD_ENC_UNSUPPORTED, NULL, 0, "", "", 0,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
   }
@@ -248,7 +266,8 @@ void _GD_InitialiseFramework(void)
     encoding == GD_GZIP_ENCODED || encoding == GD_BZIP2_ENCODED || \
     encoding == GD_TEXT_ENCODED || encoding == GD_LZMA_ENCODED || \
     encoding == GD_SIE_ENCODED || encoding == GD_ZZIP_ENCODED || \
-    encoding == GD_ZZSLIM_ENCODED || encoding == GD_FLAC_ENCODED))
+    encoding == GD_ZZSLIM_ENCODED || encoding == GD_FLAC_ENCODED || \
+    encoding == GD_ZSTD_ENCODED))
 
 #ifdef USE_MODULES
 static void *_GD_ResolveSymbol(lt_dlhandle lib, struct encoding_t *restrict enc,
@@ -659,7 +678,8 @@ int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase, int fragment,
       dreturn("%i", 1);
       return 1;
     } else if ((*enc->open)(D->fragment[fragment].dirfd, E->e->u.raw.file + 1,
-          E->EN(raw,data_type), swap, GD_FILE_WRITE | GD_FILE_TEMP))
+          (const char*)D->fragment[fragment].enc_data, E->EN(raw,data_type),
+          swap, GD_FILE_WRITE | GD_FILE_TEMP))
     {
       _GD_SetEncIOError(D, GD_E_IO_OPEN, E->e->u.raw.file + 1);
       dreturn("%i", 1);
@@ -684,7 +704,8 @@ int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase, int fragment,
       dreturn("%i", 1);
       return 1;
     } else if ((*enc->open)(D->fragment[fragment].dirfd, E->e->u.raw.file,
-          E->EN(raw,data_type), swap, mode))
+          (const char*)D->fragment[fragment].enc_data, E->EN(raw,data_type),
+          swap, mode))
     {
       /* In oop_write mode, it doesn't matter if the old file doesn't exist */
       if (!oop_write || errno != ENOENT) {

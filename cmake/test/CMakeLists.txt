@@ -19,6 +19,9 @@ endif()
 if(ZZIP_FOUND)
   add_definitions(-DTEST_ZZIP -DUSE_ZZIP)
 endif()
+if(ZSTD_FOUND)
+  add_definitions(-DTEST_ZSTD -DUSE_ZSTD)
+endif()
 
 set(tests_ignored
   # Helper files (not standalone tests - included by encoding tests)
@@ -89,6 +92,20 @@ if(NOT LIBLZMA_FOUND OR NOT XZ)
     lzma_xz_put lzma_xz_put_nframes lzma_xz_put_back lzma_xz_put_endian lzma_xz_put_get
     lzma_xz_put_offs lzma_xz_put_pad lzma_xz_seek lzma_xz_seek_far lzma_xz_sync
     lzma_xz_uint16 lzma_xz_uint32 lzma_xz_uint64 lzma_xz_uint8)
+endif()
+
+if(NOT ZSTD_FOUND OR NOT ZSTD)
+  list(APPEND tests_ignored
+    zstd_add zstd_big zstd_complex128 zstd_complex64 zstd_del zstd_enoent
+    zstd_float32
+    zstd_float64 zstd_get zstd_get_cont zstd_get_far zstd_get_get zstd_get_get2
+    zstd_int16 zstd_int32 zstd_int64 zstd_int8 zstd_move_from
+    zstd_move_to zstd_nframes zstd_put zstd_put_back zstd_put_endian zstd_put_get
+    zstd_put_nframes zstd_put_off zstd_put_offs zstd_put_pad zstd_put_sub
+    zstd_seek zstd_seek_far zstd_seek_put zstd_sync
+    zstd_uint16 zstd_uint32 zstd_uint64 zstd_uint8
+    zstd_get_straddle zstd_put_gap zstd_put_overwrite zstd_put_back_reopen
+    zstd_put_tailmove zstd_tail zstd_encdata zstd_encdata_flush zstd_rescan)
 endif()
 
 if(NOT ZZIP_FOUND OR NOT ZIP OR NOT UNZIP)

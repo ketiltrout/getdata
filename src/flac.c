@@ -247,8 +247,9 @@ OPEN_ERROR:
   return NULL;
 }
 
-int _GD_FlacOpen(int dirfd, struct gd_raw_file_* file, gd_type_t data_type,
-    int swap, unsigned int mode)
+int _GD_FlacOpen(int dirfd, struct gd_raw_file_* file,
+    const char *enc_data gd_unused_, gd_type_t data_type, int swap,
+    unsigned int mode)
 {
   dtrace("%i, %p, 0x%X, %i, 0x%X", dirfd, file, data_type, swap, mode);
 

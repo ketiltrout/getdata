@@ -85,7 +85,7 @@ field has multiple data files with different, supported file extensions which
 could legitimately be associated with it, the encoding scheme discovered by
 GetData is not well defined.
 
-In addition to raw (unencoded) data, GetData supports nine other encoding
+In addition to raw (unencoded) data, GetData supports ten other encoding
 schemes:
 .I text
 encoding,
@@ -96,10 +96,12 @@ encoding,
 .I gzip
 encoding,
 .I lzma
-encoding, 
+encoding,
 .I sie
 (sample-index encoding),
 .I slim
+encoding,
+.I zstd
 encoding,
 .I zzip
 encoding, and
@@ -124,6 +126,14 @@ writing to the temporary file to be finished and then the file moved into place
 before the read occurs, which may take some time to do.  Encodings which perform
 out-of-place writes are:
 .IR bzip2 ", " flac ", " gzip ", and " lzma .
+.PP
+The
+.I zstd
+encoding does
+.B not
+perform out-of-place writes.  Instead, it appends independently compressed
+frames, allowing concurrent readers to see data up to the last fully-written
+frame.
 
 .SS BZip2 Encoding
 
@@ -249,6 +259,71 @@ operations are supported by the Text Encoding.  The file extension of the
 Text Encoding is
 .BR .txt .
 
+.SS Zstd Encoding
+
+The Zstd Encoding compresses raw binary files using the Zstandard compression
+algorithm.  GetData's Zstd Encoding scheme is implemented through
+.IR libzstd ,
+the reference implementation written by Yann Collet at Facebook (now Meta).
+All operations are supported by the Zstd Encoding.  Unlike other compression
+encodings in GetData, writing occurs in-place by appending independently
+compressed frames.  Each frame records its decompressed size in the standard
+zstd frame header.  On open, frame headers are scanned to build an in-memory
+index for random-access reads; no decompression is performed during this
+scan, but its input/output cost is proportional to the size of the data file.
+When a field is opened for writing, anything following the last parseable
+frame (such as the remains of an interrupted write) is discarded.
+.PP
+Because each completed frame is self-contained, concurrent readers will see
+data up to the last fully-written frame while a writer is appending new data.
+Calling
+.BR gd_flush (3)
+closes the frame under construction, making the flushed data immediately
+visible to concurrent readers and bounding data lost in a crash to the
+unflushed frame; frequent flushing therefore produces frames smaller than the
+configured frame size, at some cost in compression ratio.
+.PP
+The uncompressed frame size and the compression level can be specified as an
+encoding parameter holding a comma-separated list of \fIkey\fB=\fIvalue\fR
+pairs, with keys
+.B size
+and
+.BR level :
+.RS
+.IP
+.B /ENCODING zstd size=4096,level=7
+.RE
+.PP
+sets the frame size to 4096 bytes and the compression level to 7.  Either
+pair may be omitted.  The default frame size is 131072 (128 KiB).  Smaller
+frame sizes reduce the latency before new data becomes visible to concurrent
+readers, at the cost of slightly reduced compression ratio and increased
+per-frame overhead (~18 bytes per frame).  The default compression level is
+1; zstd's full range is accepted, including zero (the zstd library default)
+and negative (faster) levels.  Neither parameter affects reading: existing
+frames of any size or level are read correctly regardless of these settings.
+A malformed parameter (an unrecognized key, a size other than a positive
+decimal integer no greater than 4294967295, or a level outside the range
+supported by the zstd library) causes all access to the affected fields to
+fail with GD_E_IO.
+.PP
+Forward writes (appending new data) are efficient.  Backward writes (modifying
+previously-written data) recompress the frames overlapping the write and
+relocate all later frames within the file; the input/output cost of a backward
+write is therefore proportional to the distance from the write to the end of
+the field, while memory use is proportional to the size of the write itself.
+Backward writes are not safe against concurrent readers: the
+rewrite moves all subsequent frames within the file, and a concurrent reader
+of the affected field may report errors or return stale data until it
+re-opens the dirfile.  Nor are backward writes safe against a crash: the
+rewrite modifies the affected frames and everything after them in place, so
+a rewrite interrupted by a crash or write error can lose previously-written
+data from the first affected frame to the end of the field.  (A crash during
+a forward write, by contrast, loses at most the frame under construction.)
+.PP
+The file extension of the Zstd Encoding is
+.BR .zst .
+
 .SS ZZip Encoding
 
 The ZZip Encoding reads compressed raw binary files using the DEFLATE algorithm
@@ -316,6 +391,7 @@ This manual page was written by D. V. Wiebe
 .BR flac (1),
 .BR gzip (1),
 .BR xz (1),
+.BR zstd (1),
 .BR zlib (3),
 .BR dirfile (5),
 .BR dirfile\-format (5)

@@ -40,7 +40,8 @@
  * open, idata >= 0 otherwise idata = -1.  Writes occur out-of-place. */
 
 int _GD_GzipOpen(int fd, struct gd_raw_file_* file,
-    gd_type_t data_type gd_unused_, int swap gd_unused_, unsigned int mode)
+    const char *enc_data gd_unused_, gd_type_t data_type gd_unused_,
+    int swap gd_unused_, unsigned int mode)
 {
   const char *gzmode = "w";
   dtrace("%i, %p, <unused>, <unused>, 0x%X", fd, file, mode);

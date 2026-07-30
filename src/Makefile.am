@@ -76,17 +76,27 @@ ZZSLIM_C=zzslim.c
 endif
 endif
 
+if USE_ZSTD
+if USE_MODULES
+LIBGETDATAZSTD_LA=libgetdatazstd.la
+else
+ZSTD_C=zstd.c
+endif
+endif
+
 MODULE_LIBS=libgetdata.la
 if USE_MODULES
 EXPORT_DYNAMIC=-export-dynamic
 DGETDATA_MODULEDIR=-DGETDATA_MODULEDIR="\"$(moduledir)\""
 else
 EXTERNAL_CPPFLAGS=$(SLIM_CPPFLAGS) $(GZIP_CPPFLAGS) $(BZIP2_CPPFLAGS) \
-									$(LZMA_CPPFLAGS) $(ZZIP_CPPFLAGS) $(FLAC_CPPFLAGS)
+									$(LZMA_CPPFLAGS) $(ZZIP_CPPFLAGS) $(FLAC_CPPFLAGS) \
+									$(ZSTD_CPPFLAGS)
 EXTERNAL_LDFLAGS=$(SLIM_LDFLAGS) $(GZIP_LDFLAGS) $(BZIP2_LDFLAGS) \
-								 $(LZMA_LDFLAGS) $(ZZIP_LDFLAGS) $(FLAC_LDFLAGS)
+								 $(LZMA_LDFLAGS) $(ZZIP_LDFLAGS) $(FLAC_LDFLAGS) \
+								 $(ZSTD_LDFLAGS)
 EXTERNAL_LIBS=$(SLIM_LIBS) $(GZIP_LIBS) $(BZIP2_LIBS) $(LZMA_LIBS) \
-							$(ZZIP_LIBS) $(FLAC_LIBS)
+							$(ZZIP_LIBS) $(FLAC_LIBS) $(ZSTD_LIBS)
 endif
 
 if INCLUDE_LEGACY_API
@@ -119,7 +129,7 @@ lib_LTLIBRARIES = libgetdata.la
 module_LTLIBRARIES = ${LIBGETDATABZIP2_LA} ${LIBGETDATAFLAC_LA} \
 										 ${LIBGETDATAGZIP_LA} ${LIBGETDATALZMA_LA} \
 										 ${LIBGETDATASLIM_LA} ${LIBGETDATAZZIP_LA} \
-										 ${LIBGETDATAZZSLIM_LA}
+										 ${LIBGETDATAZZSLIM_LA} ${LIBGETDATAZSTD_LA}
 libgetdata_la_SOURCES = add.c ascii.c ${BZIP2_C} close.c common.c compat.c \
 												constant.c ${DEBUG_C} del.c encoding.c endian.c \
 												entry.c errors.c field_list.c ${FLAC_C} flimits.c \
@@ -127,7 +137,7 @@ libgetdata_la_SOURCES = add.c ascii.c ${BZIP2_C} close.c common.c compat.c \
 												index.c include.c iopos.c ${LEGACY_C} ${LZMA_C} \
 												mod.c move.c name.c native.c nfields.c nframes.c \
 												open.c parse.c protect.c putdata.c raw.c sie.c \
-												${SLIM_C} spf.c string.c types.c ${ZZIP_C} ${ZZSLIM_C} \
+												${SLIM_C} spf.c string.c types.c ${ZSTD_C} ${ZZIP_C} ${ZZSLIM_C} \
 												${GETDATA_LEGACY_H} gd_extra_config.h internal.h
 libgetdata_la_LDFLAGS = $(EXPORT_DYNAMIC) -export-symbols-regex '^[^_]' \
 												-version-info \
@@ -176,6 +186,12 @@ libgetdatazzslim_la_LDFLAGS = $(SLIM_LDFLAGS) $(ZZIP_LDFLAGS) \
 														-release $(GETDATA_LIB_VERSION) -module
 libgetdatazzslim_la_LIBADD = $(SLIM_LIBS) $(ZZIP_LIBS) $(MODULE_LIBS)
 libgetdatazzslim_la_CPPFLAGS = $(AM_CPPFLAGS) $(SLIM_CPPFLAGS) $(ZZIP_CPPFLAGS)
+
+libgetdatazstd_la_SOURCES = zstd.c
+libgetdatazstd_la_LDFLAGS = $(ZSTD_LDFLAGS) -release $(GETDATA_LIB_VERSION) \
+														-module
+libgetdatazstd_la_LIBADD = $(ZSTD_LIBS) $(MODULE_LIBS)
+libgetdatazstd_la_CPPFLAGS = $(AM_CPPFLAGS) $(ZSTD_CPPFLAGS)
 
 # Handle MacOS >=10.11 embedding install paths in .so files
 if USE_INSTALL_NAME_TOOL

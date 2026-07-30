@@ -840,7 +840,8 @@ AC_CHECK_FUNCS([basename _chsize _chsize_s _commit dup2 fchmod _fdopen \
                 _fstat64 fstatat fstatat64 fsync ftello ftello64 ftruncate \
                 ftruncate64 getcwd _getcwd getdelim gmtime_r kill isnan _isnan \
                 lseek64 _lseeki64 lstat lstat64 _mkdir nan _open openat \
-                pcre_compile pipe _read readdir_r readlink regcomp \
+                pcre_compile pipe pread pread64 pwrite pwrite64 _read \
+                readdir_r readlink regcomp \
                 renameat _rmdir setrlimit snprintf _snprintf stat64 _stat64 \
                 _strtoi64 strtoll strtoq _strtoui64 strtoull strtouq symlink \
                 _unlink unlinkat _write])
@@ -1039,6 +1040,21 @@ GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip],
 GD_CHECK_ENCODING([lzma],[lzma],[lzma_auto_decoder],[lzma.h],[xz],[],[])
 GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h], [slimdata slim],
                   [unslim],[slimdopen slimdrawsize])
+dnl the compile test rejects libzstd too old for the zstd encoding: it needs
+dnl the stable advanced API (zstd >= 1.4.0, enforced by the ZSTD_compress2
+dnl link check) plus two format-fixed size macros from the static-linking-only
+dnl section of the header
+GD_CHECK_ENCODING([zstd],[zstd],[ZSTD_compress2],[zstd.h],[zstd],[unzstd],[],[[
+#define ZSTD_STATIC_LINKING_ONLY
+#include <zstd.h>
+int main(void)
+{
+  ZSTD_cParameter param = ZSTD_c_checksumFlag;
+  char buf[ZSTD_FRAMEHEADERSIZE_MAX + ZSTD_SKIPPABLEHEADERSIZE];
+  (void)param; (void)buf;
+  return 0;
+}
+]])
 GD_CHECK_ENCODING([zzip],[zzip],[zzip_open],[zzip/lib.h],[zip],[unzip],[])
 
 dnl zzslim hackery -- there's no easy way to check whether slim supports zzip

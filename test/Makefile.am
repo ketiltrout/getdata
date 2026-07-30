@@ -562,6 +562,19 @@ VERSION_TESTS=version_0 version_0_write version_1 version_1_write version_2 \
 VLIST_TESTS=vlist vlist_alias vlist_hidden vlist_invalid vlist_meta \
 						vlist_meta_hidden vlist_meta_invalid
 
+ZSTD_TESTS=zstd_add zstd_big zstd_complex64 zstd_complex128 zstd_del \
+					 zstd_enoent \
+					 zstd_float32 zstd_float64 zstd_get zstd_get_cont zstd_get_far \
+					 zstd_get_get zstd_get_get2 zstd_int8 zstd_int16 \
+					 zstd_int32 zstd_int64 zstd_move_from zstd_move_to zstd_nframes \
+					 zstd_put zstd_put_back zstd_put_endian zstd_put_get \
+					 zstd_put_nframes zstd_put_off zstd_put_offs zstd_put_pad \
+					 zstd_put_sub zstd_seek zstd_seek_far zstd_seek_put zstd_sync \
+					 zstd_uint8 zstd_uint16 zstd_uint32 zstd_uint64 \
+					 zstd_get_straddle zstd_put_gap zstd_put_overwrite \
+					 zstd_put_back_reopen zstd_put_tailmove zstd_tail zstd_encdata \
+					 zstd_encdata_flush zstd_rescan
+
 ZZIP_TESTS=zzip_data zzip_get zzip_get_get zzip_nframes zzip_seek zzip_seek_far
 
 ZZSLIM_TESTS=zzslim_get zzslim_nframes zzslim_seek zzslim_seek_far
@@ -583,7 +596,7 @@ TESTS=$(ADD_TESTS)      $(ALIAS_TESTS)    $(ALLOC_TESTS)    $(ALTER_TESTS)    \
 			$(SIE_TESTS)      $(SLIM_TESTS)     $(SPF_TESTS)      $(SVLIST_TESTS)   \
 			$(TABLE_TESTS)    $(TELL_TESTS)     $(TOK_TESTS)      $(TRUNC_TESTS)    \
 			$(UNCLUDE_TESTS)  $(VALID_TESTS)    $(VERSION_TESTS)  $(VLIST_TESTS)    \
-			$(ZZIP_TESTS)     $(ZZSLIM_TESTS)
+			$(ZSTD_TESTS)     $(ZZIP_TESTS)     $(ZZSLIM_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

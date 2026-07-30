@@ -124,7 +124,8 @@ static struct gd_lzmadata *_GD_LzmaDoOpen(int dirfd, struct gd_raw_file_* file,
 }
 
 int _GD_LzmaOpen(int dirfd, struct gd_raw_file_* file,
-    gd_type_t data_type gd_unused_, int swap gd_unused_, unsigned int mode)
+    const char *enc_data gd_unused_, gd_type_t data_type gd_unused_,
+    int swap gd_unused_, unsigned int mode)
 {
   dtrace("%i, %p, <unused>, <unused>, 0x%X", dirfd, file, mode);
 

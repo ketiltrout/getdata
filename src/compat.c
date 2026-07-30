@@ -152,6 +152,44 @@ int gd_UnlinkAt(const DIRFILE *D, int dirfd, const char *name,
 }
 #endif
 
+#if !defined HAVE_PREAD && !defined HAVE_PREAD64
+ssize_t gd_PRead(int fd, void *buf, size_t count, off64_t offset)
+{
+  ssize_t n;
+
+  dtrace("%i, %p, %" PRIuSIZE ", %" PRId64, fd, buf, count, (int64_t)offset);
+
+  if (lseek64(fd, offset, SEEK_SET) == -1) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  n = read(fd, buf, count);
+
+  dreturn("%" PRIdSIZE, n);
+  return n;
+}
+#endif
+
+#if !defined HAVE_PWRITE && !defined HAVE_PWRITE64
+ssize_t gd_PWrite(int fd, const void *buf, size_t count, off64_t offset)
+{
+  ssize_t n;
+
+  dtrace("%i, %p, %" PRIuSIZE ", %" PRId64, fd, buf, count, (int64_t)offset);
+
+  if (lseek64(fd, offset, SEEK_SET) == -1) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  n = write(fd, buf, count);
+
+  dreturn("%" PRIdSIZE, n);
+  return n;
+}
+#endif
+
 /* Non-threadsafe version of strerror_r */
 #ifndef HAVE_STRERROR_R
 int strerror_r(int errnum, char *buf, size_t buflen)

@@ -19,6 +19,7 @@ ENCODINGS = {
     "lzma":  pygetdata.LZMA_ENCODED,
     "flac":  pygetdata.FLAC_ENCODED,
     "zzip":  pygetdata.ZZIP_ENCODED,
+    "zstd":  pygetdata.ZSTD_ENCODED,
 }
 
 # Always-available built-in encodings (sanity check)

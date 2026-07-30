@@ -116,8 +116,8 @@ static struct gd_zzipdata *_GD_ZzipDoOpen(int dirfd, struct gd_raw_file_* file)
 }
 
 int _GD_ZzipOpen(int dirfd, struct gd_raw_file_* file,
-    gd_type_t data_type gd_unused_, int swap gd_unused_,
-    unsigned int mode gd_unused_)
+    const char *enc_data gd_unused_, gd_type_t data_type gd_unused_,
+    int swap gd_unused_, unsigned int mode gd_unused_)
 {
   dtrace("%i, %p, <unused>, <unused>, <unused>", dirfd, file);
 
